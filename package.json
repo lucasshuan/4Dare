@@ -10,7 +10,8 @@
     "format": "biome format --write",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "seed": "tsx --env-file=.env.local scripts/seed-supabase.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

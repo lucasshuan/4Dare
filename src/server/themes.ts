@@ -1,7 +1,6 @@
 import "server-only";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { Localized } from "@/game/types";
+import bankFile from "../../data/themes.json";
 import type { ThemeSource } from "./backend/types";
 
 const FALLBACK: Localized[] = [
@@ -14,19 +13,10 @@ const FALLBACK: Localized[] = [
   },
 ];
 
-let bank: Localized[] | null = null;
-
-/** data/themes.json, the built-in theme list. */
+/** data/themes.json, the built-in theme list (bundled, so it ships with the server). */
 export function themeBank(): Localized[] {
-  if (bank) return bank;
-  try {
-    const file = join(process.cwd(), "data", "themes.json");
-    const list = JSON.parse(readFileSync(file, "utf8")) as Localized[];
-    bank = list.length >= 3 ? list : FALLBACK;
-  } catch {
-    bank = FALLBACK;
-  }
-  return bank;
+  const list = bankFile as Localized[];
+  return list.length >= 3 ? list : FALLBACK;
 }
 
 function pickFromBank(avoid: Localized[]): Localized {
