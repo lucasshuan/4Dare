@@ -21,7 +21,7 @@ const iconHrefs = (page: Page) =>
     links.map((l) => l.getAttribute("href") ?? ""),
   );
 
-test("the tab title follows the page and blinks when it's your move", async ({
+test("the tab title follows the page and its clock; the icon calls you back", async ({
   browser,
 }) => {
   const host = await newPlayer(browser);
@@ -36,27 +36,29 @@ test("the tab title follows the page and blinks when it's your move", async ({
     "Who am I? Play online with friends · Ludodare",
   );
 
+  // alone there is no clock; once someone joins, it counts down in the title
   const code = await createRoom(host);
   await expect(host).toHaveTitle(`Lobby · ${code} · Ludodare`);
   await joinRoom(guest, code);
+  await expect(host).toHaveTitle(
+    new RegExp(`^\\d:\\d\\d · Lobby · ${code} · Ludodare$`),
+  );
 
   // the guest wanders off; the match starts and the theme vote waits on them
   await setAway(guest, true);
   await host.getByRole("button", { name: /start match/i }).click();
-  await expect(guest).toHaveTitle("❗ Vote for a theme!");
-  await expect(guest).toHaveTitle(`Theme vote · ${code} · Ludodare`);
+  await expect(guest).toHaveTitle(/^\d:\d\d · Vote for a theme! · Ludodare$/);
   await expect
     .poll(async () =>
       (await iconHrefs(guest)).every((h) => h.startsWith("data:")),
     )
     .toBe(true);
 
-  // back on the tab: the blinking stops and the usual icons come back
+  // back on the tab: the usual icons come back
   await setAway(guest, false);
-  await expect(guest).toHaveTitle(`Theme vote · ${code} · Ludodare`);
-  await guest.waitForTimeout(1500);
-  await expect(guest).toHaveTitle(`Theme vote · ${code} · Ludodare`);
-  expect((await iconHrefs(guest)).some((h) => h.startsWith("data:"))).toBe(
-    false,
-  );
+  await expect
+    .poll(async () =>
+      (await iconHrefs(guest)).some((h) => h.startsWith("data:")),
+    )
+    .toBe(false);
 });
