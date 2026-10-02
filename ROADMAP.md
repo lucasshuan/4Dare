@@ -25,6 +25,7 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 ## Fase 2 — Online com os amigos
 
 - [ ] Supabase: banco, tempo real, fotos, convidado sem login
+- [x] Supabase configurado num comando (`pnpm setup:supabase`): tabelas, convidados, Discord, Google, URLs, chaves
 - [ ] Login de verdade com Discord e Google
 - [ ] Deploy na Vercel com a integração do Supabase
 - [ ] Biblioteca de personagens no Supabase (`pnpm seed`)
