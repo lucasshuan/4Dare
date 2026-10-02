@@ -44,11 +44,12 @@
     "back": "Games",
     "whoAmI": {
       "name": "Who am I?",
-      "short": "Everyone picks a character for someone else. Work out yours with yes-or-no questions.",
       "players": "2–4 players",
       "play": "Play",
       "demoQuestion": "Am I an animal?"
-    }
+    },
+    "next": "Next games",
+    "previous": "Previous games"
   },
   "user": {
     "guest": "You're playing as a guest",

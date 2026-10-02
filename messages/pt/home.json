@@ -44,11 +44,12 @@
     "back": "Jogos",
     "whoAmI": {
       "name": "Quem sou eu?",
-      "short": "Cada um escolhe um personagem pro outro. Descubra o seu com perguntas de sim ou não.",
       "players": "2 a 4 jogadores",
       "play": "Jogar",
       "demoQuestion": "Eu sou um animal?"
-    }
+    },
+    "next": "Próximos jogos",
+    "previous": "Jogos anteriores"
   },
   "user": {
     "guest": "Você está jogando como convidado",
