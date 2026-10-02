@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { fireConfetti } from "@/components/ui/confetti";
+import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { ThemeTag } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
@@ -69,6 +70,7 @@ export function ResultScreen() {
   const tr = useTranslations("room");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
+  const withNames = useWithNames();
   const router = useRouter();
   const { view, me, code, playerById } = useRoomContext();
   const { run } = useAction();
@@ -130,7 +132,7 @@ export function ResultScreen() {
               ? t("nobody")
               : winner.isYou
                 ? t("youFirst")
-                : t("winner", { name: name(winner) })}
+                : withNames((n) => t("winner", { name: n(winner) }))}
           </motion.h1>
           {youLine ? <p className="text-ink-muted">{youLine}</p> : null}
           <div className="mt-3 flex flex-col items-start gap-3">
@@ -195,14 +197,13 @@ export function ResultScreen() {
                     {p.card?.name ?? "?"}
                   </h2>
                   <p className="line-clamp-2 px-1.5 font-medium text-[13px] text-ink-muted leading-[18px]">
-                    {[
-                      p.card?.origin,
-                      picker
-                        ? t("pickedBy", { name: name(picker, picker.isYou) })
-                        : null,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
+                    {p.card?.origin}
+                    {p.card?.origin && picker ? " · " : null}
+                    {picker
+                      ? withNames((n) =>
+                          t("pickedBy", { name: n(picker, picker.isYou) }),
+                        )
+                      : null}
                   </p>
                 </motion.article>
                 <motion.div
@@ -224,7 +225,7 @@ export function ResultScreen() {
                     name={p.name}
                     size={48}
                     ring={p.isYou ? "sky" : undefined}
-                    className="max-sm:hidden"
+                    className="max-sm:size-8"
                   />
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate font-bold text-[clamp(14px,1.6vw,18px)]">

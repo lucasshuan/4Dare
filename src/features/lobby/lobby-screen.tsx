@@ -20,6 +20,7 @@ import { type ReactNode, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitch } from "@/components/ui/language-switch";
+import { useWithNames } from "@/components/ui/player-name";
 import { Screen } from "@/components/ui/screen";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Timer } from "@/components/ui/timer";
@@ -71,6 +72,7 @@ const editable = ({
 export function LobbyScreen() {
   const t = useTranslations("lobby");
   const name = useDisplayName();
+  const withNames = useWithNames();
   const toast = useToast();
   const router = useRouter();
   const { view, me, offset, code } = useRoomContext();
@@ -88,7 +90,6 @@ export function LobbyScreen() {
   // Picking comes next: fetch the character index while people gather.
   usePrefetchCharacterIndex(useLocale() as Lang);
   const host = view.players.find((p) => p.isHost);
-  const hostName = host ? name(host) : "";
   const empty = Math.max(0, view.settings.seats - view.players.length);
   const others = view.players.filter((p) => !p.isHost);
   const [editing, setEditing] = useState(false);
@@ -125,14 +126,18 @@ export function LobbyScreen() {
               {/* after a match the room is not new any more */}
               {me.isHost
                 ? t(view.round > 0 ? "titleHostAgain" : "titleHost")
-                : t(view.round > 0 ? "titleGuestAgain" : "titleGuest", {
-                    name: hostName,
-                  })}
+                : withNames((n) =>
+                    t(view.round > 0 ? "titleGuestAgain" : "titleGuest", {
+                      name: host ? n(host) : "",
+                    }),
+                  )}
             </h1>
             <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
               {me.isHost
                 ? t(view.round > 0 ? "subtitleHostAgain" : "subtitleHost")
-                : t("subtitleGuest", { name: hostName })}
+                : withNames((n) =>
+                    t("subtitleGuest", { name: host ? n(host) : "" }),
+                  )}
             </p>
           </div>
 

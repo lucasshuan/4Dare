@@ -7,12 +7,12 @@ import { useState } from "react";
 import { AnswerChip, ResultChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { ChoiceGroup } from "@/components/ui/choice-group";
+import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import type { HistoryEntryView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease } from "@/lib/motion";
-import { useDisplayName } from "@/lib/names";
 
 /** The bar at the bottom of the action column; opens the history drawer. */
 export function HistoryPeek() {
@@ -68,7 +68,7 @@ function HistoryDrawer({
   onClose: () => void;
 }) {
   const t = useTranslations("turn.history");
-  const name = useDisplayName();
+  const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
   const [mine, setMine] = useState(true);
   const wide = useMedia("(min-width: 1024px)");
@@ -164,9 +164,11 @@ function HistoryDrawer({
                     </span>
                     <div className="flex min-w-0 flex-col items-start gap-1">
                       <span className="font-semibold text-[13px] text-ink-muted">
-                        {t(e.kind === "question" ? "question" : "guess", {
-                          name: by ? name(by, by.isYou) : "",
-                        })}
+                        {withNames((n) =>
+                          t(e.kind === "question" ? "question" : "guess", {
+                            name: by ? n(by, by.isYou) : "",
+                          }),
+                        )}
                       </span>
                       <p className="text-base">{summary(e)}</p>
                       {e.kind === "guess" ? (
@@ -204,7 +206,13 @@ function HistoryDrawer({
                                   key={a.byId}
                                   className="text-ink-muted text-sm"
                                 >
-                                  {p ? `${name(p, p.isYou)}: ` : ""}“{a.note}”
+                                  {p ? (
+                                    <>
+                                      <PlayerName player={p} isYou={p.isYou} />
+                                      {": "}
+                                    </>
+                                  ) : null}
+                                  “{a.note}”
                                 </p>
                               );
                             })

@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CharacterCard } from "@/components/ui/character-card";
 import { ImageDrop } from "@/components/ui/image-drop";
+import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
@@ -19,7 +20,6 @@ import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { dur, ease, riseIn } from "@/lib/motion";
-import { useDisplayName } from "@/lib/names";
 import {
   confirmPick,
   createCharacter,
@@ -52,7 +52,7 @@ export function PickScreen() {
   const t = useTranslations("room.pick");
   const tErrors = useTranslations("common.errors");
   const lang = useLocale() as Lang;
-  const name = useDisplayName();
+  const withNames = useWithNames();
   const { view, code, playerById } = useRoomContext();
   const pick = view.pick;
   const target = playerById(pick?.targetId);
@@ -99,7 +99,6 @@ export function PickScreen() {
   const results: CharacterDTO[] = instant ?? remote.data ?? [];
 
   if (!pick || !target) return null;
-  const targetName = name(target);
   const typedTheme = view.theme?.set === null;
   const waiting = view.players.filter((p) => !pick.confirmedIds.includes(p.id));
 
@@ -181,11 +180,11 @@ export function PickScreen() {
           <div className="flex flex-col gap-2">
             <h2 className="font-semibold text-xl">
               {pick.confirmed
-                ? t("doneTitle", { name: targetName })
-                : t("title", { name: targetName })}
+                ? withNames((n) => t("doneTitle", { name: n(target) }))
+                : withNames((n) => t("title", { name: n(target) }))}
             </h2>
             <p className="max-w-120 text-ink-muted">
-              {t("subtitle", { name: targetName })}
+              {withNames((n) => t("subtitle", { name: n(target) }))}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -212,9 +211,11 @@ export function PickScreen() {
               </span>
               {waiting.length ? (
                 <span className="font-medium text-[13px] text-ink-muted">
-                  {t("waitingFor", {
-                    names: waiting.map((p) => name(p, p.isYou)).join(", "),
-                  })}
+                  {withNames((n) =>
+                    t("waitingFor", {
+                      names: waiting.map((p) => n(p, p.isYou)).join(", "),
+                    }),
+                  )}
                 </span>
               ) : null}
             </div>
@@ -227,7 +228,7 @@ export function PickScreen() {
               <motion.div key="done" {...riseIn} className="max-w-90">
                 <CharacterCard
                   card={pick.character}
-                  label={t("cardLabel", { name: targetName })}
+                  label={withNames((n) => t("cardLabel", { name: n(target) }))}
                   layoutId="pick-card"
                 />
               </motion.div>
@@ -249,7 +250,9 @@ export function PickScreen() {
                   >
                     <CharacterCard
                       card={toCard(chosen)}
-                      label={t("cardLabel", { name: targetName })}
+                      label={withNames((n) =>
+                        t("cardLabel", { name: n(target) }),
+                      )}
                       layoutId="pick-card"
                     />
                   </motion.div>
@@ -369,7 +372,7 @@ export function PickScreen() {
                     htmlFor="pick-search"
                     className="font-semibold text-sm"
                   >
-                    {t("searchLabel", { name: targetName })}
+                    {withNames((n) => t("searchLabel", { name: n(target) }))}
                   </label>
                   {/* a theme the host typed has no past picks to draw from */}
                   {typedTheme ? null : (

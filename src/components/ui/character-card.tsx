@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import type { ReactNode } from "react";
 import type { CardView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { layoutSpring } from "@/lib/motion";
@@ -20,10 +21,10 @@ export function CharacterCard({
 }: {
   card: CardView | null;
   hidden?: boolean;
-  label: string;
+  label: ReactNode;
   /** Shown instead of the name when hidden (e.g. "Quem é você?"). */
   title?: string;
-  meta?: string | null;
+  meta?: ReactNode;
   tone?: "you" | "other" | "neutral";
   found?: boolean;
   layoutId?: string;

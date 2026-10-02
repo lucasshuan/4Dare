@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { fireConfetti } from "@/components/ui/confetti";
+import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
 import type { AnswerValue, CardView, RevealView } from "@/game/types";
@@ -238,7 +239,7 @@ function GuessReveal({
   reveal: Extract<RevealView, { kind: "guess" }>;
 }) {
   const t = useTranslations("turn.reveal");
-  const name = useDisplayName();
+  const withNames = useWithNames();
   const { playerById } = useRoomContext();
   const guesser = playerById(reveal.byId);
   const hit = reveal.result === "hit";
@@ -255,10 +256,12 @@ function GuessReveal({
   return (
     <div className="flex flex-col items-center gap-5 pb-2 text-center">
       <span className="font-medium text-[13px] text-ink-muted">
-        {t("guessed", {
-          n: reveal.n,
-          name: guesser ? name(guesser, guesser.isYou) : "",
-        })}
+        {withNames((n) =>
+          t("guessed", {
+            n: reveal.n,
+            name: guesser ? n(guesser, guesser.isYou) : "",
+          }),
+        )}
       </span>
       <motion.p
         initial={{ opacity: 0, scale: 0.85 }}

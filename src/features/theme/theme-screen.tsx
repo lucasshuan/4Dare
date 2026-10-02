@@ -8,10 +8,11 @@ import {
   useReducedMotion,
 } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { fireConfetti } from "@/components/ui/confetti";
+import { useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { GameFrame } from "@/features/room/game-header";
@@ -38,6 +39,7 @@ export function ThemeScreen() {
   const t = useTranslations("room.theming");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
+  const withNames = useWithNames();
   const { view, me, code } = useRoomContext();
   const { act, pending } = useRoomAction();
   const [text, setText] = useState("");
@@ -81,14 +83,15 @@ export function ThemeScreen() {
     if (theme && !pending) await act(() => chooseTheme(code, theme));
   };
 
-  const hostName = name(host, host.isYou);
   const heading =
     stage === "typing"
       ? { kicker: t("hostKicker"), title: t("title"), sub: t("subtitle") }
       : stage === "waiting"
         ? {
             kicker: t("kicker"),
-            title: t("waitingTitle", { name: hostName }),
+            title: withNames((n) =>
+              t("waitingTitle", { name: n(host, host.isYou) }),
+            ),
             sub: t("waitingSubtitle"),
           }
         : { kicker: t("kicker"), title: t("chosenTitle"), sub: null };
@@ -250,7 +253,7 @@ export function ThemeScreen() {
                   name={host.name}
                   size={28}
                 />
-                {t("chosenBy", { name: hostName })}
+                {t("chosenBy", { name: name(host, host.isYou) })}
               </motion.div>
             ) : null}
           </AnimatePresence>
@@ -276,7 +279,7 @@ function Heading({
 }: {
   stage: Stage;
   kicker: string;
-  title: string;
+  title: ReactNode;
   sub: string | null;
 }) {
   return (

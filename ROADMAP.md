@@ -120,3 +120,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 
 - [x] Creating a room starts with the game, as a tab with its picture and name
 - [x] The host can switch the room's game in the lobby (only one game so far)
+- [x] Every player name comes with their avatar beside it, even inside a sentence, on phones too

@@ -3,11 +3,12 @@
 import { Check } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useState } from "react";
+import { Fragment, type ReactNode, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CharacterCard } from "@/components/ui/character-card";
+import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { TextArea, TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
@@ -70,10 +71,23 @@ const TINY_ORDER: Record<AnswerValue, string> = {
   irrelevant: "sm:tiny:order-6",
 };
 
+/** Text parts joined by " · ", skipping the empty ones; null when none is left. */
+function joinDot(parts: ReactNode[]): ReactNode {
+  const kept = parts.filter(Boolean);
+  if (!kept.length) return null;
+  return kept.map((part, i) => (
+    // biome-ignore lint/suspicious/noArrayIndexKey: fixed parts of one line
+    <Fragment key={i}>
+      {i > 0 ? " · " : null}
+      {part}
+    </Fragment>
+  ));
+}
+
 /** Every step of a turn: asking, answering, guessing, validating, and waiting for others. */
 export function TurnScreen() {
   const t = useTranslations("turn");
-  const name = useDisplayName();
+  const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
   const mode = useMode();
   const turnPlayer = playerById(view.turn?.playerId) as PlayerView;
@@ -84,20 +98,18 @@ export function TurnScreen() {
   const focus = focusMine ? me : turnPlayer;
   if (!focus) return null;
   const picker = playerById(focus.pickedById);
+  const pickedBy = picker
+    ? withNames((n) => t("card.pickedBy", { name: n(picker) }))
+    : null;
   const meta = focus.isYou
-    ? picker
-      ? t("card.pickedBy", { name: name(picker) })
-      : t("card.pickedSecretly")
-    : [
+    ? (pickedBy ?? t("card.pickedSecretly"))
+    : joinDot([
         focus.card?.origin,
-        picker
-          ? picker.isYou
-            ? t("card.youPicked")
-            : t("card.pickedBy", { name: name(picker) })
-          : null,
-      ]
-        .filter(Boolean)
-        .join(" · ");
+        picker?.isYou ? t("card.youPicked") : pickedBy,
+      ]);
+  const label = focus.isYou
+    ? t("card.yours")
+    : withNames((n) => t("card.theirs", { name: n(focus) }));
 
   return (
     <GameFrame>
@@ -128,24 +140,16 @@ export function TurnScreen() {
                   card={focus.card}
                   hidden={focus.cardHidden}
                   tone={focus.isYou ? "you" : "other"}
-                  label={
-                    focus.isYou
-                      ? t("card.yours")
-                      : t("card.theirs", { name: name(focus) })
-                  }
+                  label={label}
                   title={t("card.whoAreYou")}
-                  meta={meta || null}
+                  meta={meta}
                   found={focus.discoveredAt !== null}
                 />
                 <FocusRow
                   focus={focus}
-                  label={
-                    focus.isYou
-                      ? t("card.yours")
-                      : t("card.theirs", { name: name(focus) })
-                  }
+                  label={label}
                   title={t("card.whoAreYou")}
-                  meta={meta || null}
+                  meta={meta}
                 />
               </motion.div>
             </AnimatePresence>
@@ -182,9 +186,9 @@ function FocusRow({
   meta,
 }: {
   focus: PlayerView;
-  label: string;
+  label: ReactNode;
   title: string;
-  meta: string | null;
+  meta: ReactNode;
 }) {
   return (
     <div className="flex items-center gap-3 rounded-lg bg-surface p-2 shadow-card lg:hidden">
@@ -238,7 +242,7 @@ function Step({ mode }: { mode: Mode }) {
   }
 }
 
-function Heading({ kicker, title }: { kicker?: string; title: string }) {
+function Heading({ kicker, title }: { kicker?: string; title: ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
       {kicker ? (
@@ -521,6 +525,7 @@ function Guess() {
 function Validate() {
   const t = useTranslations("turn.validate");
   const name = useDisplayName();
+  const withNames = useWithNames();
   const { view, code, playerById } = useRoomContext();
   const { act, pending } = useRoomAction();
   const guesser = playerById(view.turn?.playerId);
@@ -541,10 +546,18 @@ function Validate() {
           “{view.turn?.guess}”
         </p>
       </Bubble>
-      <Heading title={t("title", { name: guesser ? name(guesser) : "" })} />
+      <Heading
+        title={
+          guesser
+            ? withNames((n) => t("title", { name: n(guesser) }))
+            : t("title", { name: "" })
+        }
+      />
       <p className="max-w-[440px] text-ink-muted">
         {others.length
-          ? t("bodyMany", { names: others.map((p) => name(p)).join(", ") })
+          ? withNames((n) =>
+              t("bodyMany", { names: others.map((p) => n(p)).join(", ") }),
+            )
           : t("bodyOne")}
       </p>
       <div className="flex flex-wrap gap-3">
@@ -568,21 +581,24 @@ function Validate() {
 function Waiting({ mode }: { mode: Mode }) {
   const t = useTranslations("turn.wait");
   const name = useDisplayName();
+  const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
   const turnPlayer = playerById(view.turn?.playerId);
   const validator = playerById(view.turn?.validatorId);
   const who = turnPlayer ? name(turnPlayer, turnPlayer.isYou) : "";
-  const title =
-    mode === "waitAsk"
-      ? t("ask", { name: who })
+  const title = withNames((n) => {
+    const whoTag = turnPlayer ? n(turnPlayer, turnPlayer.isYou) : "";
+    return mode === "waitAsk"
+      ? t("ask", { name: whoTag })
       : mode === "waitAnswers"
         ? t("answers")
         : mode === "waitGuess"
-          ? t("guess", { name: who })
+          ? t("guess", { name: whoTag })
           : t("validate", {
-              name: validator ? name(validator) : "",
-              guesser: who,
+              name: validator ? n(validator) : "",
+              guesser: whoTag,
             });
+  });
   const pending = view.players.filter((p) => p.status === "answering");
   return (
     <div className="flex flex-col gap-5">
@@ -604,9 +620,11 @@ function Waiting({ mode }: { mode: Mode }) {
       ) : null}
       {mode === "waitAnswers" && pending.length ? (
         <p className="text-ink-muted">
-          {t("stillAnswering", {
-            names: pending.map((p) => name(p, p.id === me.id)).join(", "),
-          })}
+          {withNames((n) =>
+            t("stillAnswering", {
+              names: pending.map((p) => n(p, p.id === me.id)).join(", "),
+            }),
+          )}
         </p>
       ) : null}
       <motion.div

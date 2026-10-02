@@ -11,6 +11,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { fireConfetti } from "@/components/ui/confetti";
+import { useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { GameFrame } from "@/features/room/game-header";
@@ -24,7 +25,6 @@ import {
 import { cn } from "@/lib/cn";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
-import { useDisplayName } from "@/lib/names";
 import { voteTheme } from "@/server/actions";
 
 /** One colour per option, so a theme keeps its colour through the whole vote. */
@@ -63,7 +63,6 @@ function rouletteAt(v: VoteView, elapsed: number, spinMs: number) {
 export function VoteScreen() {
   const t = useTranslations("room.vote");
   const lang = useLocale() as Lang;
-  const name = useDisplayName();
   const still = useReducedMotion() ?? false;
   const { view, code, offset, playerById } = useRoomContext();
   const now = useServerClock(offset, 50);
@@ -156,7 +155,7 @@ export function VoteScreen() {
           stage={stage}
           voted={v.votes.length}
           total={v.total}
-          waiting={waiting.map((p) => name(p, p.isYou))}
+          waiting={waiting}
           hasVote={mine !== null}
         />
         <output aria-live="polite" className="sr-only">
@@ -452,10 +451,11 @@ function Footer({
   stage: Stage;
   voted: number;
   total: number;
-  waiting: string[];
+  waiting: PlayerView[];
   hasVote: boolean;
 }) {
   const t = useTranslations("room.vote");
+  const withNames = useWithNames();
   if (stage !== "voting") return <div className="min-h-12" />;
   return (
     <motion.div
@@ -488,7 +488,11 @@ function Footer({
       </span>
       <span className="font-medium text-[13px] text-ink-muted">
         {waiting.length
-          ? t("waitingFor", { names: waiting.join(", ") })
+          ? withNames((n) =>
+              t("waitingFor", {
+                names: waiting.map((p) => n(p, p.isYou)).join(", "),
+              }),
+            )
           : t("allVoted")}
         {hasVote && waiting.length ? ` · ${t("change")}` : ""}
       </span>

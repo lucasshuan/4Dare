@@ -35,7 +35,7 @@ export function PlayerStrip({ players }: { players: PlayerView[] }) {
             isGuest={p.isGuest}
             name={p.name}
             size={32}
-            className="max-sm:hidden"
+            className="max-sm:size-6"
           />
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="truncate font-semibold text-sm">
