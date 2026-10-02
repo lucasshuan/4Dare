@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+/* Tokens from the Dare design system. Light on :root, dark under [data-theme="dark"] (next-themes). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --canvas: #f3f5f9;
+  --surface: #ffffff;
+  --surface-sunken: #e8ecf3;
+  --line: #d3d9e4;
+  --line-strong: #7c879b;
+  --ink: #1e2433;
+  --ink-muted: #566075;
+  --on-ink: #ffffff;
+  --sky: #2b69c8;
+  --on-sky: #ffffff;
+  --sky-soft: #dce8fa;
+  --apricot: #cf7024;
+  --on-apricot: #2a1707;
+  --apricot-soft: #fce8d6;
+  --butter: #f6e3a1;
+  --on-butter: #3a2e05;
+  --butter-soft: #fbf3d3;
+  --yes: #0b7a75;
+  --on-yes: #ffffff;
+  --yes-soft: #d5efec;
+  --no: #c2412f;
+  --on-no: #ffffff;
+  --no-soft: #fadfd8;
+  --on-avatar: #1e2433;
+  --scrim: rgba(18, 22, 31, 0.45);
+  --shadow-card-value:
+    0 1px 2px rgba(30, 36, 51, 0.06), 0 10px 28px rgba(30, 36, 51, 0.08);
+  --shadow-pop-value:
+    0 2px 6px rgba(30, 36, 51, 0.08), 0 24px 56px rgba(30, 36, 51, 0.16);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --canvas: #12161f;
+  --surface: #1b212d;
+  --surface-sunken: #0c1017;
+  --line: #2c3445;
+  --line-strong: #7b879e;
+  --ink: #eef1f7;
+  --ink-muted: #a7b0c2;
+  --on-ink: #12161f;
+  --sky: #86b4f7;
+  --on-sky: #0f1b30;
+  --sky-soft: #1d3050;
+  --apricot: #f0a566;
+  --on-apricot: #2a1707;
+  --apricot-soft: #472b15;
+  --butter: #e3cb6e;
+  --on-butter: #2e2506;
+  --butter-soft: #3b3212;
+  --yes: #5ccfc6;
+  --on-yes: #06211f;
+  --yes-soft: #123b38;
+  --no: #f28b76;
+  --on-no: #2b0d07;
+  --no-soft: #4a1d14;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --shadow-card-value:
+    0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35);
+  --shadow-pop-value:
+    0 2px 6px rgba(0, 0, 0, 0.5), 0 24px 56px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-sunken: var(--surface-sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-on-ink: var(--on-ink);
+  --color-sky: var(--sky);
+  --color-on-sky: var(--on-sky);
+  --color-sky-soft: var(--sky-soft);
+  --color-apricot: var(--apricot);
+  --color-on-apricot: var(--on-apricot);
+  --color-apricot-soft: var(--apricot-soft);
+  --color-butter: var(--butter);
+  --color-on-butter: var(--on-butter);
+  --color-butter-soft: var(--butter-soft);
+  --color-yes: var(--yes);
+  --color-on-yes: var(--on-yes);
+  --color-yes-soft: var(--yes-soft);
+  --color-no: var(--no);
+  --color-on-no: var(--on-no);
+  --color-no-soft: var(--no-soft);
+  --color-on-avatar: var(--on-avatar);
+  --color-scrim: var(--scrim);
+
+  --font-display:
+    var(--font-bricolage), var(--font-zen-maru), system-ui, sans-serif;
+  --font-sans: var(--font-figtree), var(--font-zen-maru), system-ui, sans-serif;
+  --font-mono:
+    var(--font-dm-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  --shadow-card: var(--shadow-card-value);
+  --shadow-pop: var(--shadow-pop-value);
+
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-swap: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root {
+  /* Motion durations (seconds versions live in src/lib/motion.ts) */
+  --dur-fast: 140ms;
+  --dur-base: 260ms;
+  --dur-slow: 480ms;
+  --dur-reveal: 700ms;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  -webkit-font-smoothing: antialiased;
+  transition:
+    background-color var(--dur-base) var(--ease-soft),
+    color var(--dur-base) var(--ease-soft);
+}
+
+/* Keyboard focus: one ring everywhere. */
+:focus-visible {
+  outline: 3px solid var(--sky);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

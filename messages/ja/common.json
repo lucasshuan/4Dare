@@ -1,0 +1,57 @@
+{
+  "appName": "Dare",
+  "guestName": "ゲスト{number}",
+  "you": "あなた",
+  "youSuffix": "{name}（あなた）",
+  "languages": {
+    "en": "English",
+    "pt": "Português",
+    "ja": "日本語"
+  },
+  "languagesShort": {
+    "en": "EN",
+    "pt": "PT",
+    "ja": "日本語"
+  },
+  "language": "言語",
+  "theme": {
+    "label": "テーマ",
+    "light": "ライトテーマ",
+    "dark": "ダークテーマ"
+  },
+  "answers": {
+    "yes": "はい",
+    "probably_yes": "たぶんそう",
+    "unknown": "わからない",
+    "probably_no": "たぶん違う",
+    "no": "いいえ",
+    "irrelevant": "関係ない"
+  },
+  "guessResult": {
+    "hit": "正解",
+    "miss": "まだです"
+  },
+  "timeLeft": "残り時間：{time}",
+  "back": "戻る",
+  "close": "閉じる",
+  "loading": "読み込み中…",
+  "imagePlaceholder": "キャラクターの画像",
+  "errors": {
+    "not_found": "このルームはもうありません。",
+    "room_full": "ルームは満員です。",
+    "already_started": "ゲームはすでに始まっています。",
+    "not_member": "このルームに参加していません。",
+    "not_host": "ルームを作った人だけができます。",
+    "not_your_turn": "まだあなたの番ではありません。",
+    "wrong_phase": "今はできません。",
+    "invalid_input": "入力内容を確認してください。",
+    "need_two_players": "2人以上必要です。",
+    "already_done": "すでに完了しています。",
+    "conflict": "同時に操作がありました。もう一度お試しください。",
+    "unauthorized": "もう一度ログインしてください。",
+    "upload_failed": "画像を送信できませんでした。4MBまでのJPG、PNG、WebPを使ってください。",
+    "rate_limited": "操作が多すぎます。少し待ってください。",
+    "too_early": "少し待ってください。次のステップがもうすぐ始まります。",
+    "unknown": "問題が発生しました。もう一度お試しください。"
+  }
+}

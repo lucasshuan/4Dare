@@ -1,0 +1,57 @@
+{
+  "appName": "Dare",
+  "guestName": "Convidado {number}",
+  "you": "você",
+  "youSuffix": "{name} (você)",
+  "languages": {
+    "en": "English",
+    "pt": "Português",
+    "ja": "日本語"
+  },
+  "languagesShort": {
+    "en": "EN",
+    "pt": "PT",
+    "ja": "日本語"
+  },
+  "language": "Idioma",
+  "theme": {
+    "label": "Tema",
+    "light": "Tema claro",
+    "dark": "Tema escuro"
+  },
+  "answers": {
+    "yes": "Sim",
+    "probably_yes": "Provavelmente sim",
+    "unknown": "Não sei",
+    "probably_no": "Provavelmente não",
+    "no": "Não",
+    "irrelevant": "Irrelevante"
+  },
+  "guessResult": {
+    "hit": "Acertou",
+    "miss": "Ainda não"
+  },
+  "timeLeft": "Tempo restante: {time}",
+  "back": "Voltar",
+  "close": "Fechar",
+  "loading": "Carregando…",
+  "imagePlaceholder": "Imagem do personagem",
+  "errors": {
+    "not_found": "Essa sala não existe mais.",
+    "room_full": "A sala está cheia.",
+    "already_started": "A partida já começou.",
+    "not_member": "Você não está nessa sala.",
+    "not_host": "Só quem criou a sala pode fazer isso.",
+    "not_your_turn": "Ainda não é a sua vez.",
+    "wrong_phase": "Isso não vale nesta etapa.",
+    "invalid_input": "Confira o que você digitou.",
+    "need_two_players": "Precisa de 2 jogadores ou mais.",
+    "already_done": "Você já fez isso.",
+    "conflict": "Alguém jogou ao mesmo tempo. Tente de novo.",
+    "unauthorized": "Entre de novo para continuar.",
+    "upload_failed": "Não deu para enviar a imagem. Use JPG, PNG ou WebP de até 4 MB.",
+    "rate_limited": "Muitas tentativas. Espere um pouco.",
+    "too_early": "Calma, a próxima etapa já vai começar.",
+    "unknown": "Algo deu errado. Tente de novo."
+  }
+}

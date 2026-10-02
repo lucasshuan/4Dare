@@ -1,0 +1,57 @@
+{
+  "appName": "Dare",
+  "guestName": "Guest {number}",
+  "you": "you",
+  "youSuffix": "{name} (you)",
+  "languages": {
+    "en": "English",
+    "pt": "Português",
+    "ja": "日本語"
+  },
+  "languagesShort": {
+    "en": "EN",
+    "pt": "PT",
+    "ja": "日本語"
+  },
+  "language": "Language",
+  "theme": {
+    "label": "Theme",
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
+  "answers": {
+    "yes": "Yes",
+    "probably_yes": "Probably",
+    "unknown": "Don't know",
+    "probably_no": "Probably not",
+    "no": "No",
+    "irrelevant": "Doesn't matter"
+  },
+  "guessResult": {
+    "hit": "Got it",
+    "miss": "Not yet"
+  },
+  "timeLeft": "Time left: {time}",
+  "back": "Back",
+  "close": "Close",
+  "loading": "Loading…",
+  "imagePlaceholder": "Character picture",
+  "errors": {
+    "not_found": "That room is gone.",
+    "room_full": "The room is full.",
+    "already_started": "The match has already started.",
+    "not_member": "You are not in that room.",
+    "not_host": "Only the person who created the room can do that.",
+    "not_your_turn": "It is not your turn yet.",
+    "wrong_phase": "That does not apply at this step.",
+    "invalid_input": "Check what you typed.",
+    "need_two_players": "You need 2 or more players.",
+    "already_done": "You already did that.",
+    "conflict": "Someone played at the same time. Try again.",
+    "unauthorized": "Sign in again to continue.",
+    "upload_failed": "Could not upload the image. Use a JPG, PNG or WebP up to 4 MB.",
+    "rate_limited": "Too many tries. Wait a moment.",
+    "too_early": "Hold on, the next step is about to start.",
+    "unknown": "Something went wrong. Try again."
+  }
+}
