@@ -34,6 +34,15 @@ import { fetchClickstream } from "./clickstream";
 import { pickDescriptor } from "./descriptors";
 import { CACHE_DIR } from "./http";
 import {
+  ALLOW_QIDS,
+  DENY_QIDS,
+  DROP_ALIASES,
+  NAMES,
+  ORIGIN_RENAMES,
+  ORIGINS,
+  REMOVE_IDS,
+} from "./overrides";
+import {
   capitalize,
   cleanName,
   cleanWorkLabel,
@@ -119,11 +128,16 @@ const DENY = new Set([
   "Q56226", // Kim Jong Un
   "Q9458", // Muhammad
 ]);
-/** Caught by "dictator" but fine to play. */
-const ALLOW = new Set(["Q1048" /* Julius Caesar */]);
+for (const qid of Object.keys(DENY_QIDS)) DENY.add(qid);
+/** Caught by a keyword (e.g. "dictator") but fine to play. */
+const ALLOW = new Set([
+  "Q1048" /* Julius Caesar */,
+  ...Object.keys(ALLOW_QIDS),
+]);
 
 function exclusionReason(entity: Entity, info: Details): string | null {
   if (DENY.has(entity.qid)) return "denylist";
+  if (ALLOW.has(entity.qid)) return null;
   if (entity.kind === "fictional") {
     // A type ("vampire", "God in Judaism") rather than someone; species from a
     // franchise (Pikachu, Koopa Troopa, Chocobo) stay.
@@ -141,7 +155,7 @@ function exclusionReason(entity: Entity, info: Details): string | null {
     ...Object.values(info.occupationLabels).flat(),
   ].join(" | ");
   if (ADULT_OCCUPATION.test(text)) return "adult content";
-  if (!ALLOW.has(entity.qid) && UNSAFE_PERSON.test(text)) return "unsafe";
+  if (UNSAFE_PERSON.test(text)) return "unsafe";
   return null;
 }
 /** Groups, families and teams count as one character; these don't. */
@@ -473,6 +487,59 @@ function fictionalOffset(
   return high;
 }
 
+/** Kanji and kana a Japanese reader knows (JIS X 0208); Chinese-only forms fall outside. */
+const JIS = (() => {
+  const chars = new Set<string>();
+  const decoder = new TextDecoder("shift_jis");
+  for (let a = 0x81; a <= 0xfc; a++) {
+    if (a > 0x9f && a < 0xe0) continue;
+    for (let b = 0x40; b <= 0xfc; b++) {
+      if (b === 0x7f) continue;
+      const c = decoder.decode(new Uint8Array([a, b]));
+      if (c.length === 1 && c !== "�") chars.add(c);
+    }
+  }
+  return chars;
+})();
+const HAN = /\p{Script=Han}/u;
+/** Han characters a Japanese list shouldn't show (simplified Chinese, from Chinese works). */
+const notJapanese = (text: string) =>
+  [...text].some((c) => HAN.test(c) && !JIS.has(c));
+
+/** Applies the hand-reviewed removals, names, origins and aliases (overrides.ts). */
+function reviewed(candidates: Candidate[], lang: Lang): Candidate[] {
+  return candidates
+    .filter((candidate) => !REMOVE_IDS[candidate.id])
+    .filter(
+      (candidate) =>
+        lang !== "ja" || !!NAMES[candidate.id] || !notJapanese(candidate.name),
+    )
+    .map((candidate) => {
+      const name = NAMES[candidate.id];
+      const renamed =
+        name && name !== candidate.name
+          ? {
+              name,
+              aliases: buildAliases(name, [
+                candidate.name,
+                ...candidate.aliases,
+              ]),
+            }
+          : {};
+      const base = { ...candidate, ...renamed };
+      const dropped = new Set(DROP_ALIASES[candidate.id] ?? []);
+      let origin =
+        candidate.id in ORIGINS ? ORIGINS[candidate.id] : candidate.origin;
+      if (origin && ORIGIN_RENAMES[origin]) origin = ORIGIN_RENAMES[origin];
+      if (origin && lang === "ja" && notJapanese(origin)) origin = null;
+      return {
+        ...base,
+        aliases: base.aliases.filter((alias) => !dropped.has(alias)),
+        origin,
+      };
+    });
+}
+
 function selectEntries(candidates: Candidate[], max: number): Candidate[] {
   const sorted = [...candidates].sort(
     (a, b) => b.popularity - a.popularity || a.id.localeCompare(b.id),
@@ -730,7 +797,7 @@ async function main() {
   step("6/6 Write");
   await mkdir(OUT_DIR, { recursive: true });
   for (const lang of LANGS) {
-    const chosen = selectEntries(lists[lang], MAX_ENTRIES);
+    const chosen = selectEntries(reviewed(lists[lang], lang), MAX_ENTRIES);
     const output: SeedCharacter[] = chosen.map((candidate) => ({
       id: candidate.id,
       name: candidate.name,

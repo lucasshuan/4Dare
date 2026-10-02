@@ -35,9 +35,10 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 ## Fase 3 — Personagens e temas
 
 - [x] Gerador da biblioteca revisado: filtros de conteúdo, nomes em pt-br, memória
-- [ ] Biblioteca grande em cada idioma, com foto
+- [x] Biblioteca grande em cada idioma, com foto (8 mil por idioma, 91–98% com foto)
+- [x] Biblioteca revisada: sem criminosos, ditadores ou conteúdo adulto; nomes do Brasil e do Japão; origens e duplicatas corrigidas
 - [x] Biblioteca aceita grupos e espécies: duplas, famílias, equipes, bandas, Pikachu, Chocobo
-- [ ] Busca com autocomplete e foto
+- [x] Busca com autocomplete e foto
 - [x] Busca instantânea: índice do idioma baixado uma vez (cache), cada tecla responde na memória em menos de 1 ms, sem servidor
 - [x] Criar personagem com nome e foto própria (com recorte)
 - [x] Trocar a foto de qualquer personagem (vira a da biblioteca)
@@ -53,12 +54,13 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Cursor de mão em tudo que é clicável
 - [x] Código da sala sem botão: no 5º caractere já entra, ou diz por que não dá
 - [x] Tela inicial escolhe o jogo: cartões num carrossel, com prévia animada; "Quem sou eu?" é o primeiro
+- [x] Logo própria (balão em D com "?" e "are" colorido), ícone quadrado e favicon; logo no topo de toda tela, menos na inicial, na sala de espera e na partida
 - [x] Nenhuma tela rola no desktop: tudo cabe de 1024×640 a 1920×1080
-- [x] Usuário no canto superior esquerdo: avatar e nome; clicando, um popover diz se é convidado e oferece Discord e Google
+- [x] Usuário no canto superior direito, depois do tema: avatar e nome; clicando, um popover diz se é convidado e oferece Discord e Google
 - [x] Revelação para todos: as respostas (6 a 10 s, conforme o tamanho) e o palpite (2,5 a 3,5 s)
 - [x] Relógio da etapa seguinte parado durante a revelação, recarregando
 - [x] Confetti por alguns segundos no acerto
-- [x] Transições suaves e dinâmicas em todas as telas do jogo
+- [x] Transições suaves e dinâmicas em todas as telas, criar sala e erros da sala inclusos
 - [x] Ações respondem na hora: a resposta já traz a sala, sem segunda busca; "Estou pronto" muda no clique
 - [x] Histórico rolável em gaveta, na web e no celular: "Minhas jogadas" (padrão) ou "Todas"
 - [x] Pódio com os vencedores mais altos e cada jogador embaixo da sua carta; "Jogar de novo"
@@ -70,6 +72,7 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Conta Discord ou Google: escolhe nome, foto ou bichinho, e cor (sem Supabase, entra numa conta de teste)
 - [x] Salas públicas na tela do jogo: com vaga primeiro, "Ver mais" mostra as cheias e em partida
 - [x] Criar sala: pública ou privada, 2 a 4 vagas, segundos por etapa (padrão 120)
+- [x] Criar sala em `/who-am-i/new`, com a barra do topo e o "Voltar" acima do título
 - [x] Sala de espera: anfitrião edita a configuração e começa; os outros marcam "Estou pronto" (✓ verde, ✗ vermelho)
 - [x] Começa sozinha em 2 minutos ou assim que enche
 - [x] Partidas salvas por jogador: personagem, quem escolheu, como terminou e quanto tempo levou

@@ -3,10 +3,14 @@ export { normalizeName } from "../../src/game/match";
 
 /** Trim, collapse spaces and drop a trailing "(disambiguator)". */
 export function cleanName(value: string): string {
-  return value
-    .replace(/\s+/g, " ")
-    .replace(/\s*[(（][^()（）]*[)）]\s*$/u, "")
-    .trim();
+  return (
+    value
+      // zero-width spaces and joiners, byte-order marks (seen in vandalised labels)
+      .replace(/[​-‍⁠﻿]/g, "")
+      .replace(/\s+/g, " ")
+      .replace(/\s*[(（][^()（）]*[)）]\s*$/u, "")
+      .trim()
+  );
 }
 
 const UTM = /[?&]utm_[^&]*/g;
