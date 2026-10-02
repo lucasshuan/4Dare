@@ -32,11 +32,13 @@
     "label": "Pergunta de sim ou não sobre o seu personagem",
     "hintMany": "Todos os outros respondem, cada um com a sua opção.",
     "hintOne": "A resposta vem com uma de seis opções. Depois você pode tentar adivinhar.",
-    "send": "Enviar pergunta",
-    "giveUp": "Desistir e revelar",
-    "giveUpSure": "Desistir?",
-    "giveUpYes": "Sim, revelar",
-    "giveUpNo": "Continuar"
+    "send": "Enviar pergunta"
+  },
+  "giveUp": {
+    "button": "Desistir",
+    "sure": "Desistir? Sua carta é revelada e você para de jogar.",
+    "yes": "Sim, revelar",
+    "no": "Continuar"
   },
   "answer": {
     "kicker": "Jogada {n} · {name} pergunta",
@@ -72,12 +74,11 @@
     "stillAnswering": "Ainda respondendo: {names}"
   },
   "history": {
-    "last": "Última jogada",
-    "empty": "Nenhuma jogada ainda",
     "title": "Histórico",
     "close": "Fechar histórico",
     "mine": "Minhas jogadas",
     "all": "Todas",
+    "filter": "Quais jogadas",
     "mineCaption": "Suas perguntas e palpites: {shown} de {total} jogadas · a mais recente em cima",
     "allCaption": "{total} jogadas de todos · a mais recente em cima",
     "nothing": "Nada por aqui ainda.",

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { AnswerChip, ResultChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
@@ -14,44 +15,27 @@ import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease } from "@/lib/motion";
 
-/** The bar at the bottom of the action column; opens the history drawer. */
-export function HistoryPeek() {
+/** "History" in the match header, with how many plays so far; opens the history drawer. */
+export function HistoryButton() {
   const t = useTranslations("turn.history");
   const [open, setOpen] = useState(false);
-  const { view, me } = useRoomContext();
-  const last = view.history.at(-1);
+  const { view } = useRoomContext();
+  const count = view.history.length;
   return (
     <>
-      <button
-        type="button"
+      <Button
+        size="sm"
         onClick={() => setOpen(true)}
-        className="mt-auto flex min-h-16 w-full items-center gap-3 rounded-lg bg-surface px-4 py-3 text-left max-lg:sticky max-lg:bottom-3 max-lg:z-20 max-lg:shadow-pop"
+        className="h-10 max-sm:px-3"
       >
-        {last ? (
-          <span
-            className={cn(
-              "flex size-7 shrink-0 items-center justify-center rounded-pill font-mono text-[13px]",
-              last.byId === me.id ? "bg-sky-soft" : "bg-sunken",
-            )}
-          >
-            {last.n}
+        <PanelRightOpen strokeWidth={1.75} />
+        <span className="max-sm:sr-only">{t("title")}</span>
+        {count ? (
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-pill bg-sunken px-1.5 font-mono text-xs tabular-nums">
+            {count}
           </span>
         ) : null}
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="font-medium text-ink-muted text-xs">
-            {last ? t("last") : t("empty")}
-          </span>
-          {last ? (
-            <span className="truncate font-semibold text-sm">
-              {summary(last)}
-            </span>
-          ) : null}
-        </span>
-        <span className="flex shrink-0 items-center gap-2 font-semibold text-sm">
-          <PanelRightOpen className="size-5" strokeWidth={1.75} />
-          {t("title")}
-        </span>
-      </button>
+      </Button>
       <HistoryDrawer open={open} onClose={() => setOpen(false)} />
     </>
   );

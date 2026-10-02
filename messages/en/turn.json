@@ -32,11 +32,13 @@
     "label": "A yes-or-no question about your character",
     "hintMany": "Everyone else answers, each with their own choice.",
     "hintOne": "They answer with one of six options. Then you can guess.",
-    "send": "Send question",
-    "giveUp": "Give up and reveal",
-    "giveUpSure": "Give up?",
-    "giveUpYes": "Yes, reveal",
-    "giveUpNo": "Keep playing"
+    "send": "Send question"
+  },
+  "giveUp": {
+    "button": "Give up",
+    "sure": "Give up? Your card is revealed and you stop playing.",
+    "yes": "Yes, reveal",
+    "no": "Keep playing"
   },
   "answer": {
     "kicker": "Play {n} · {name} asks",
@@ -72,12 +74,11 @@
     "stillAnswering": "Still answering: {names}"
   },
   "history": {
-    "last": "Last play",
-    "empty": "No plays yet",
     "title": "History",
     "close": "Close history",
     "mine": "My plays",
     "all": "All",
+    "filter": "Which plays",
     "mineCaption": "Your questions and guesses: {shown} of {total} plays · newest first",
     "allCaption": "{total} plays from everyone · newest first",
     "nothing": "Nothing here yet.",

@@ -1,13 +1,14 @@
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANT: Record<ButtonVariant, string> = {
   primary: "border-ink bg-ink text-on-ink hover:-translate-y-px",
   secondary: "border-line-strong bg-surface text-ink hover:-translate-y-px",
   ghost: "border-transparent bg-transparent text-ink-muted hover:text-ink",
+  danger: "border-no bg-no text-on-no hover:-translate-y-px",
 };
 const SIZE: Record<ButtonSize, string> = {
   sm: "h-9 px-4 text-sm",

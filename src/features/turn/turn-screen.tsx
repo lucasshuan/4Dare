@@ -28,12 +28,12 @@ import { useDisplayName } from "@/lib/names";
 import {
   answerQuestion,
   askQuestion,
-  giveUp,
   passTurn,
   submitGuess,
   validateGuess,
 } from "@/server/actions";
-import { HistoryPeek } from "./history-panel";
+import { GiveUpButton } from "./give-up-button";
+import { HistoryButton } from "./history-panel";
 import { PlayerStrip } from "./player-strip";
 
 type Mode =
@@ -112,7 +112,14 @@ export function TurnScreen() {
     : withNames((n) => t("card.theirs", { name: n(focus) }));
 
   return (
-    <GameFrame>
+    <GameFrame
+      actions={
+        <>
+          <HistoryButton />
+          <GiveUpButton />
+        </>
+      }
+    >
       <div className="flex flex-col gap-6 short:gap-4">
         <PlayerStrip players={view.players} />
         <div className="flex flex-wrap items-stretch gap-5 lg:gap-12">
@@ -170,7 +177,6 @@ export function TurnScreen() {
                 <Step mode={mode} />
               </motion.div>
             </AnimatePresence>
-            <HistoryPeek />
           </section>
         </div>
       </div>
@@ -295,7 +301,6 @@ function Ask() {
   const { view, code } = useRoomContext();
   const { act, pending } = useRoomAction();
   const [text, setText] = useState("");
-  const [confirmGiveUp, setConfirmGiveUp] = useState(false);
   const others = view.players.filter((p) => !p.isYou && !p.away).length;
   return (
     <form
@@ -317,7 +322,7 @@ function Ask() {
         autoFocus
         onChange={(e) => setText(e.target.value)}
       />
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button
           type="submit"
           variant="primary"
@@ -325,33 +330,6 @@ function Ask() {
         >
           {t("send")}
         </Button>
-        {confirmGiveUp ? (
-          <span className="flex items-center gap-2">
-            <span className="font-medium text-ink-muted text-sm">
-              {t("giveUpSure")}
-            </span>
-            <Button
-              size="sm"
-              disabled={pending}
-              onClick={async () => {
-                await act(() => giveUp(code));
-              }}
-            >
-              {t("giveUpYes")}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setConfirmGiveUp(false)}
-            >
-              {t("giveUpNo")}
-            </Button>
-          </span>
-        ) : (
-          <Button variant="ghost" onClick={() => setConfirmGiveUp(true)}>
-            {t("giveUp")}
-          </Button>
-        )}
       </div>
     </form>
   );

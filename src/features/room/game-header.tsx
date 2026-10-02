@@ -8,8 +8,14 @@ import { useRoomContext } from "@/features/data/room-context";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 
-/** Header of the match screens: theme and the step clock. No logo during a match. */
-export function GameHeader({ hideTheme = false }: { hideTheme?: boolean }) {
+/** Header of the match screens: theme, the screen's buttons and the step clock. No logo during a match. */
+export function GameHeader({
+  hideTheme = false,
+  actions,
+}: {
+  hideTheme?: boolean;
+  actions?: ReactNode;
+}) {
   const t = useTranslations("room");
   const lang = useLocale() as Lang;
   const { view, offset } = useRoomContext();
@@ -26,12 +32,15 @@ export function GameHeader({ hideTheme = false }: { hideTheme?: boolean }) {
           />
         ) : null}
       </div>
-      <Timer
-        deadline={view.deadline}
-        stepStartsAt={view.stepStartsAt}
-        rechargeFrom={view.reveal?.startsAt ?? null}
-        offset={offset}
-      />
+      <div className="ml-auto flex items-center gap-2">
+        {actions}
+        <Timer
+          deadline={view.deadline}
+          stepStartsAt={view.stepStartsAt}
+          rechargeFrom={view.reveal?.startsAt ?? null}
+          offset={offset}
+        />
+      </div>
     </header>
   );
 }
@@ -40,14 +49,17 @@ export function GameHeader({ hideTheme = false }: { hideTheme?: boolean }) {
 export function GameFrame({
   children,
   hideTheme,
+  actions,
 }: {
   children: ReactNode;
   /** The vote screen keeps the winner a surprise until it is revealed. */
   hideTheme?: boolean;
+  /** Buttons left of the clock (the turn screen's history and give up). */
+  actions?: ReactNode;
 }) {
   return (
     <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-8 short:gap-4 short:pb-4 sm:px-8 sm:pt-6 sm:short:pt-4">
-      <GameHeader hideTheme={hideTheme} />
+      <GameHeader hideTheme={hideTheme} actions={actions} />
       <main className="mx-auto w-full max-w-[1120px] flex-1">{children}</main>
     </div>
   );

@@ -32,11 +32,13 @@
     "label": "自分のキャラクターについての、はい・いいえで答えられる質問",
     "hintMany": "他の全員がそれぞれ答えます。",
     "hintOne": "6つの選択肢で答えが返ってきます。そのあと予想できます。",
-    "send": "質問を送る",
-    "giveUp": "ギブアップして答えを見る",
-    "giveUpSure": "ギブアップしますか？",
-    "giveUpYes": "はい、見る",
-    "giveUpNo": "続ける"
+    "send": "質問を送る"
+  },
+  "giveUp": {
+    "button": "ギブアップ",
+    "sure": "ギブアップしますか？カードが明かされ、プレイを終えます。",
+    "yes": "はい、見る",
+    "no": "続ける"
   },
   "answer": {
     "kicker": "{n}手目 · {name}さんの質問",
@@ -72,12 +74,11 @@
     "stillAnswering": "回答中：{names}"
   },
   "history": {
-    "last": "最新の手",
-    "empty": "まだ手がありません",
     "title": "履歴",
     "close": "履歴を閉じる",
     "mine": "自分の手",
     "all": "すべて",
+    "filter": "表示する手",
     "mineCaption": "自分の質問と予想：{total}手中{shown}手 · 新しい順",
     "allCaption": "全員の{total}手 · 新しい順",
     "nothing": "まだ何もありません。",
