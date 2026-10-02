@@ -372,7 +372,7 @@ function Preview({
         />
         <div className="flex min-w-0 flex-col">
           <span className="truncate font-semibold">
-            {tc("guestName", { number: 27 })}
+            {display({ isGuest: true, name: null, guestNumber: 27 })}
           </span>
           <span className="font-medium text-[13px] text-ink-muted">
             {t("guestNote")}

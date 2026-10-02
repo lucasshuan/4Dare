@@ -22,7 +22,7 @@ export type Avatar =
   | { kind: "color"; color: string }
   | { kind: "image"; url: string; color: string };
 
-/** Who someone is. Guests have no name: the UI renders "Convidado 27" / "Guest 27" / "ゲスト27". */
+/** Who someone is. Guests have no name: the UI turns guestNumber into "WonderfulCat" / "GatoMaravilhoso" / "すてきなネコ" (see guest-names.ts). */
 export interface Identity {
   id: PlayerId;
   isGuest: boolean;

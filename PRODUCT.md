@@ -15,7 +15,7 @@ Cada etapa tem um tempo (padrão 120 s). Entre uma etapa e outra, todo mundo vê
 
 ## Quem joga
 
-- Convidado: nome e cor sorteados, sem cadastro.
+- Convidado: sem cadastro, ganha um nome sorteado tipo GatoCorajoso e uma cor.
 - Conta Discord ou Google: escolhe nome e avatar.
 
 ## Extras

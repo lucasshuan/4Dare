@@ -1,6 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
+import { randomGuestNumber } from "@/game/guest-names";
 import type { Avatar, Identity, Lang } from "@/game/types";
 import type { Me } from "@/server/contract";
 import { randomPastel } from "../pastel";
@@ -25,7 +26,7 @@ function newGuest(id: string): Profile {
     id,
     isGuest: true,
     name: null,
-    guestNumber: 10 + Math.floor(Math.random() * 90),
+    guestNumber: randomGuestNumber(),
     avatar: { kind: "color", color: randomPastel() },
     provider: null,
   };

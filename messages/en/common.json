@@ -1,6 +1,5 @@
 {
   "appName": "Dare",
-  "guestName": "Guest {number}",
   "you": "you",
   "youSuffix": "{name} (you)",
   "languages": {

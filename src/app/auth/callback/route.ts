@@ -1,3 +1,4 @@
+import { randomGuestNumber } from "@/game/guest-names";
 import { accountDefaults } from "@/server/backend/supabase/auth";
 import {
   serviceClient,
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
         await profiles.insert({
           id: data.user.id,
           is_guest: false,
-          guest_number: 10 + Math.floor(Math.random() * 90),
+          guest_number: randomGuestNumber(),
           avatar: { kind: "color", color: "#DCE8FA" },
           ...d,
         });

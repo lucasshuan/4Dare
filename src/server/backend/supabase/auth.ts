@@ -1,5 +1,6 @@
 import "server-only";
 import type { User } from "@supabase/supabase-js";
+import { randomGuestNumber } from "@/game/guest-names";
 import {
   type Avatar,
   GameError,
@@ -58,7 +59,7 @@ async function loadOrCreate(user: User): Promise<ProfileRow> {
   const row: ProfileRow = {
     id: user.id,
     is_guest: guest,
-    guest_number: 10 + Math.floor(Math.random() * 90),
+    guest_number: randomGuestNumber(),
     avatar: { kind: "color", color: randomPastel() },
     ...(guest
       ? { name: null, provider: null, provider_avatar_url: null }
