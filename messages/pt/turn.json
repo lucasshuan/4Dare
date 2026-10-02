@@ -76,11 +76,9 @@
   "history": {
     "title": "Histórico",
     "close": "Fechar histórico",
-    "mine": "Minhas jogadas",
-    "all": "Todas",
-    "filter": "Quais jogadas",
+    "filter": "De quem",
     "mineCaption": "Suas perguntas e palpites: {shown} de {total} jogadas · a mais recente em cima",
-    "allCaption": "{total} jogadas de todos · a mais recente em cima",
+    "playerCaption": "Perguntas e palpites de {name}: {shown} de {total} jogadas · a mais recente em cima",
     "nothing": "Nada por aqui ainda.",
     "question": "Pergunta · {name}",
     "guess": "Palpite · {name}"

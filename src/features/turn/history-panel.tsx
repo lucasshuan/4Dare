@@ -54,12 +54,16 @@ function HistoryDrawer({
   const t = useTranslations("turn.history");
   const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
-  const [mine, setMine] = useState(true);
+  // One tab per player, you first, like the player strip.
+  const players = [...view.players].sort(
+    (a, b) => Number(b.isYou) - Number(a.isYou),
+  );
+  const [whose, setWhose] = useState(me.id);
   const wide = useMedia("(min-width: 1024px)");
   const hidden = wide ? { x: "100%" } : { y: "100%" };
-  const entries = [...view.history]
-    .reverse()
-    .filter((e) => !mine || e.byId === me.id);
+  const playsOf = (id: string) => view.history.filter((e) => e.byId === id);
+  const entries = playsOf(whose).reverse();
+  const selected = playerById(whose);
   return (
     <AnimatePresence>
       {open ? (
@@ -103,31 +107,43 @@ function HistoryDrawer({
               </button>
             </div>
             <div className="flex flex-col gap-2 border-line border-b px-6 pb-4">
-              <ChoiceGroup label={t("filter")} className="self-start">
-                {[true, false].map((m) => (
+              <ChoiceGroup
+                label={t("filter")}
+                className="flex-wrap self-start rounded-[22px]"
+              >
+                {players.map((p) => (
                   <button
-                    key={String(m)}
+                    key={p.id}
                     type="button"
-                    aria-pressed={mine === m}
-                    onClick={() => setMine(m)}
+                    aria-pressed={whose === p.id}
+                    onClick={() => setWhose(p.id)}
                     className={cn(
-                      "h-9 rounded-pill px-4 font-semibold text-sm transition-colors",
-                      mine === m
+                      "flex h-9 items-center gap-1.5 rounded-pill px-3 font-semibold text-sm transition-colors",
+                      whose === p.id
                         ? "bg-surface text-ink shadow-card"
-                        : "text-ink-muted",
+                        : "text-ink-muted hover:text-ink",
                     )}
                   >
-                    {m ? t("mine") : t("all")}
+                    <PlayerName player={p} isYou={p.isYou} />
+                    <span className="text-xs tabular-nums opacity-60">
+                      {playsOf(p.id).length}
+                    </span>
                   </button>
                 ))}
               </ChoiceGroup>
               <span className="font-medium text-[13px] text-ink-muted">
-                {mine
+                {whose === me.id || !selected
                   ? t("mineCaption", {
                       shown: entries.length,
                       total: view.history.length,
                     })
-                  : t("allCaption", { total: view.history.length })}
+                  : withNames((n) =>
+                      t("playerCaption", {
+                        name: n(selected),
+                        shown: entries.length,
+                        total: view.history.length,
+                      }),
+                    )}
               </span>
             </div>
             <ol className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6 py-5">

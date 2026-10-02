@@ -76,11 +76,9 @@
   "history": {
     "title": "History",
     "close": "Close history",
-    "mine": "My plays",
-    "all": "All",
-    "filter": "Which plays",
+    "filter": "Whose plays",
     "mineCaption": "Your questions and guesses: {shown} of {total} plays · newest first",
-    "allCaption": "{total} plays from everyone · newest first",
+    "playerCaption": "{name}'s questions and guesses: {shown} of {total} plays · newest first",
     "nothing": "Nothing here yet.",
     "question": "Question · {name}",
     "guess": "Guess · {name}"

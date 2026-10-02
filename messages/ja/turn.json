@@ -76,11 +76,9 @@
   "history": {
     "title": "履歴",
     "close": "履歴を閉じる",
-    "mine": "自分の手",
-    "all": "すべて",
-    "filter": "表示する手",
+    "filter": "誰の手",
     "mineCaption": "自分の質問と予想：{total}手中{shown}手 · 新しい順",
-    "allCaption": "全員の{total}手 · 新しい順",
+    "playerCaption": "{name}さんの質問と予想：{total}手中{shown}手 · 新しい順",
     "nothing": "まだ何もありません。",
     "question": "質問 · {name}",
     "guess": "予想 · {name}"
