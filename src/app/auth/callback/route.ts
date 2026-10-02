@@ -1,6 +1,13 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { getBackend } from "@/server/backend";
 import { syncProfile } from "@/server/backend/supabase/auth";
 import { sessionClient } from "@/server/backend/supabase/clients";
+import {
+  MERGE_COOKIE,
+  openGuest,
+  sealGuest,
+} from "@/server/backend/supabase/guest-merge";
 
 /** Only same-site paths, so the callback can't be used to bounce people elsewhere. */
 function safeNext(raw: string | null) {
@@ -11,8 +18,9 @@ function safeNext(raw: string | null) {
 
 /**
  * Discord/Google send people back here. A guest's anonymous user was linked to
- * the account (same id, so they keep their seat); if that Discord/Google
- * account already belonged to someone, sign in to it instead.
+ * the account (same id, so they keep their seat and their matches); if that
+ * Discord/Google account already belonged to someone, sign in to it instead
+ * and move the guest's matches over.
  */
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -23,6 +31,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(to, 303);
   };
   const client = await sessionClient();
+  const jar = await cookies();
 
   const provider = url.searchParams.get("provider");
   const alreadyLinked =
@@ -31,6 +40,16 @@ export async function GET(request: Request) {
       url.searchParams.get("error_description") ?? "",
     );
   if (alreadyLinked && (provider === "discord" || provider === "google")) {
+    const { data: current } = await client.auth.getUser();
+    if (current.user?.is_anonymous) {
+      jar.set(MERGE_COOKIE, sealGuest(current.user.id), {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: url.protocol === "https:",
+        path: "/auth",
+        maxAge: 600,
+      });
+    }
     const redirectTo = new URL("/auth/callback", url.origin);
     redirectTo.searchParams.set("next", next);
     const { data, error } = await client.auth.signInWithOAuth({
@@ -51,6 +70,17 @@ export async function GET(request: Request) {
   } catch (e) {
     // The next /api/me call syncs the profile again.
     console.error("auth callback: profile sync failed", e);
+  }
+  const guestId = openGuest(jar.get(MERGE_COOKIE)?.value);
+  if (guestId) {
+    jar.delete({ name: MERGE_COOKIE, path: "/auth" });
+    if (guestId !== data.user.id) {
+      await getBackend()
+        .matches.reassign(guestId, data.user.id)
+        .catch((e: unknown) =>
+          console.error("auth callback: moving guest matches failed", e),
+        );
+    }
   }
   return back(false);
 }

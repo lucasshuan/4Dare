@@ -61,6 +61,8 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Criar sala: pública ou privada, 2 a 4 vagas, segundos por etapa (padrão 120)
 - [x] Sala de espera: anfitrião edita a configuração e começa; os outros marcam "Estou pronto" (✓ verde, ✗ vermelho)
 - [x] Começa sozinha em 2 minutos ou assim que enche
+- [x] Partidas salvas por jogador: personagem, quem escolheu, como terminou e quanto tempo levou
+- [x] Convidado não perde as partidas ao entrar com Discord ou Google (mesmo numa conta que já existia)
 
 ## Fase 6 — Acabamento ✅
 
