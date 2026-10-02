@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import type { RoomView } from "@/game/types";
+import { DEFAULT_SETTINGS, type RoomView } from "@/game/types";
 
 process.env.DARE_DATA_DIR = mkdtempSync(join(tmpdir(), "dare-test-"));
 
@@ -26,6 +26,12 @@ vi.mock("next/headers", () => ({
   },
 }));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "pt" }));
+
+/** Theme settings for createRoom: everyone votes, on every set. */
+const ROOM = {
+  themeMode: DEFAULT_SETTINGS.themeMode,
+  themeSets: DEFAULT_SETTINGS.themeSets,
+};
 
 /** The guest id inside a jar's signed guest cookie. */
 const uidOf = (jar: Map<string, string>) =>
@@ -85,7 +91,12 @@ describe("server, local mode", () => {
   it("plays a 3-player match through the actions", async () => {
     as("p1");
     const { code } = must(
-      await A.createRoom({ visibility: "private", seats: 3, stepSeconds: 60 }),
+      await A.createRoom({
+        ...ROOM,
+        visibility: "private",
+        seats: 3,
+        stepSeconds: 60,
+      }),
     );
     expect(code).toMatch(/^[2-9A-Z]{5}$/);
 
@@ -159,7 +170,12 @@ describe("server, local mode", () => {
   it("saves a finished match for every player, once", async () => {
     as("m1");
     const { code } = must(
-      await A.createRoom({ visibility: "private", seats: 2, stepSeconds: 60 }),
+      await A.createRoom({
+        ...ROOM,
+        visibility: "private",
+        seats: 2,
+        stepSeconds: 60,
+      }),
     );
     as("m2");
     must(await A.joinRoom(code));
@@ -202,6 +218,7 @@ describe("server, local mode", () => {
     as("q1");
     expect(
       await A.createRoom({
+        ...ROOM,
         visibility: "public",
         seats: 9 as 4,
         stepSeconds: 60,
@@ -210,6 +227,16 @@ describe("server, local mode", () => {
       ok: false,
       error: "invalid_input",
     });
+    for (const themeSets of [[], ["nope" as "games"]])
+      expect(
+        await A.createRoom({
+          ...ROOM,
+          visibility: "public",
+          seats: 4,
+          stepSeconds: 60,
+          themeSets,
+        }),
+      ).toEqual({ ok: false, error: "invalid_input" });
     expect(await A.joinRoom("../../etc")).toEqual({
       ok: false,
       error: "invalid_input",
@@ -296,7 +323,12 @@ describe("random pick by theme", () => {
   it("draws among the characters picked most for the theme, once there are enough", async () => {
     as("r1");
     const { code } = must(
-      await A.createRoom({ visibility: "private", seats: 2, stepSeconds: 60 }),
+      await A.createRoom({
+        ...ROOM,
+        visibility: "private",
+        seats: 2,
+        stepSeconds: 60,
+      }),
     );
     as("r2");
     must(await A.joinRoom(code));

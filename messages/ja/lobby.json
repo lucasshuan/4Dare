@@ -28,5 +28,11 @@
   "saveSettings": "保存",
   "cancel": "キャンセル",
   "settingsSaved": "設定を保存しました",
-  "mode": "クラシックモード"
+  "mode": "クラシックモード",
+  "themes": "テーマ",
+  "themeVote": "みんなで投票・{total}セット中{on}",
+  "themeVoteAll": "みんなで投票・全セット",
+  "themeHost": "ホストがテーマを書く",
+  "changeThemes": "変更",
+  "done": "完了"
 }

@@ -5,7 +5,7 @@ Ludodare is a collection of games to play with friends. For now there is one: **
 ## How to play
 
 1. Someone creates a room (public or private) and shares the link or the code.
-2. Everyone votes on one of three themes, like "Superheroes".
+2. Everyone votes on one of three themes, like "Superheroes", drawn from the theme sets the host turned on (movies, anime, sports...). Or the host just types the theme.
 3. Each player picks a character for another player. You see everyone's card but yours.
 4. On your turn, you ask a yes-or-no question. Everyone answers: Yes, Probably, Don't know, Probably not, No or Doesn't matter, with a comment if they want.
 5. Then you guess. The right name counts at once. If it's only close, whoever picked the character decides.

@@ -69,8 +69,9 @@ export function tallyPicks(
   into = new Map<string, Map<string, number>>(),
 ) {
   for (const m of records) {
-    // Records saved before themeId existed only have the theme itself.
-    const theme = m.themeId ?? (m.theme ? themeId(m.theme) : null);
+    // Records saved before themeId existed only have the theme itself; a typed one has no themeId at all.
+    const theme =
+      m.themeId ?? (m.theme && m.theme.set !== null ? themeId(m.theme) : null);
     if (!theme) continue;
     for (const p of m.players) {
       const key = p.autoPicked ? null : pickKey(p.characterId);

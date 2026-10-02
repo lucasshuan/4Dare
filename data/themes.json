@@ -2,1686 +2,2023 @@
   {
     "en": "Villains",
     "pt": "Vilões",
-    "ja": "悪役"
+    "ja": "悪役",
+    "set": "heroes"
   },
   {
     "en": "Robots",
     "pt": "Robôs",
-    "ja": "ロボット"
+    "ja": "ロボット",
+    "set": "scifi"
   },
   {
     "en": "Rich characters",
     "pt": "Personagens ricos",
-    "ja": "お金持ちのキャラクター"
+    "ja": "お金持ちのキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Criminals",
     "pt": "Criminosos",
-    "ja": "犯罪者"
+    "ja": "犯罪者",
+    "set": "warriors"
   },
   {
     "en": "Non-humans",
     "pt": "Personagens não humanos",
-    "ja": "人間じゃないキャラクター"
+    "ja": "人間じゃないキャラクター",
+    "set": "myths"
   },
   {
     "en": "Characters who betrayed someone",
     "pt": "Personagens que traíram alguém",
-    "ja": "誰かを裏切ったキャラクター"
+    "ja": "誰かを裏切ったキャラクター",
+    "set": "heroes"
   },
   {
     "en": "Characters with multiple versions",
     "pt": "Personagens com várias versões",
-    "ja": "複数のバージョンがあるキャラクター"
+    "ja": "複数のバージョンがあるキャラクター",
+    "set": "screen"
   },
   {
     "en": "Characters who use weapons",
     "pt": "Personagens que usam armas",
-    "ja": "武器を使うキャラクター"
+    "ja": "武器を使うキャラクター",
+    "set": "warriors"
   },
   {
     "en": "Actresses",
     "pt": "Atrizes",
-    "ja": "女優"
+    "ja": "女優",
+    "set": "celebs"
   },
   {
     "en": "Children's cartoon characters",
     "pt": "Personagens de desenho infantil",
-    "ja": "子ども向けアニメのキャラクター"
+    "ja": "子ども向けアニメのキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Superheroes",
     "pt": "Super-heróis",
-    "ja": "スーパーヒーロー"
+    "ja": "スーパーヒーロー",
+    "set": "heroes"
   },
   {
     "en": "Antiheroes",
     "pt": "Anti-heróis",
-    "ja": "ダークヒーロー"
+    "ja": "ダークヒーロー",
+    "set": "heroes"
   },
   {
     "en": "Sidekicks",
     "pt": "Fiéis escudeiros",
-    "ja": "主人公の相棒"
+    "ja": "主人公の相棒",
+    "set": "heroes"
   },
   {
     "en": "Main characters",
     "pt": "Protagonistas",
-    "ja": "主人公"
+    "ja": "主人公",
+    "set": "heroes"
   },
   {
     "en": "Mentors",
     "pt": "Mentores",
-    "ja": "師匠キャラ"
+    "ja": "師匠キャラ",
+    "set": "heroes"
   },
   {
     "en": "Chosen ones",
     "pt": "Escolhidos pelo destino",
-    "ja": "選ばれし者"
+    "ja": "選ばれし者",
+    "set": "heroes"
   },
   {
     "en": "Villains who became good",
     "pt": "Vilões que viraram do bem",
-    "ja": "敵から味方になったキャラクター"
+    "ja": "敵から味方になったキャラクター",
+    "set": "heroes"
   },
   {
     "en": "Female villains",
     "pt": "Vilãs",
-    "ja": "女性の悪役"
+    "ja": "女性の悪役",
+    "set": "heroes"
   },
   {
     "en": "Villains' henchmen",
     "pt": "Capangas de vilões",
-    "ja": "悪役の手下"
+    "ja": "悪役の手下",
+    "set": "heroes"
   },
   {
     "en": "Characters who want to rule the world",
     "pt": "Personagens que querem dominar o mundo",
-    "ja": "世界征服をたくらむキャラクター"
+    "ja": "世界征服をたくらむキャラクター",
+    "set": "heroes"
   },
   {
     "en": "Mad scientists",
     "pt": "Cientistas malucos",
-    "ja": "マッドサイエンティスト"
+    "ja": "マッドサイエンティスト",
+    "set": "heroes"
   },
   {
     "en": "Female superheroes",
     "pt": "Super-heroínas",
-    "ja": "女性のスーパーヒーロー"
+    "ja": "女性のスーパーヒーロー",
+    "set": "heroes"
   },
   {
     "en": "Heroes without superpowers",
     "pt": "Heróis sem superpoderes",
-    "ja": "特殊能力のないヒーロー"
+    "ja": "特殊能力のないヒーロー",
+    "set": "heroes"
   },
   {
     "en": "Comic relief characters",
     "pt": "Personagens cômicos",
-    "ja": "お笑い担当のキャラクター"
+    "ja": "お笑い担当のキャラクター",
+    "set": "heroes"
   },
   {
     "en": "Warrior women",
     "pt": "Mulheres guerreiras",
-    "ja": "女戦士"
+    "ja": "女戦士",
+    "set": "warriors"
   },
   {
     "en": "Bullies",
     "pt": "Valentões",
-    "ja": "いじめっ子キャラ"
+    "ja": "いじめっ子キャラ",
+    "set": "heroes"
   },
   {
     "en": "Mutants",
     "pt": "Mutantes",
-    "ja": "ミュータント"
+    "ja": "ミュータント",
+    "set": "powers"
   },
   {
     "en": "Cyborgs",
     "pt": "Ciborgues",
-    "ja": "サイボーグ"
+    "ja": "サイボーグ",
+    "set": "scifi"
   },
   {
     "en": "AI characters",
     "pt": "Inteligências artificiais",
-    "ja": "AIのキャラクター"
+    "ja": "AIのキャラクター",
+    "set": "scifi"
   },
   {
     "en": "Aliens",
     "pt": "Alienígenas",
-    "ja": "宇宙人"
+    "ja": "宇宙人",
+    "set": "scifi"
   },
   {
     "en": "Monsters",
     "pt": "Monstros",
-    "ja": "モンスター"
+    "ja": "モンスター",
+    "set": "myths"
   },
   {
     "en": "Vampires",
     "pt": "Vampiros",
-    "ja": "吸血鬼"
+    "ja": "吸血鬼",
+    "set": "myths"
   },
   {
     "en": "Ghosts",
     "pt": "Fantasmas",
-    "ja": "幽霊やおばけ"
+    "ja": "幽霊やおばけ",
+    "set": "myths"
   },
   {
     "en": "Zombies and undead",
     "pt": "Zumbis e mortos-vivos",
-    "ja": "ゾンビやアンデッド"
+    "ja": "ゾンビやアンデッド",
+    "set": "myths"
   },
   {
     "en": "Dragons",
     "pt": "Dragões",
-    "ja": "ドラゴン"
+    "ja": "ドラゴン",
+    "set": "myths"
   },
   {
     "en": "Witches",
     "pt": "Bruxas",
-    "ja": "魔女"
+    "ja": "魔女",
+    "set": "myths"
   },
   {
     "en": "Fairies",
     "pt": "Fadas",
-    "ja": "妖精"
+    "ja": "妖精",
+    "set": "myths"
   },
   {
     "en": "Elves",
     "pt": "Elfos",
-    "ja": "エルフ"
+    "ja": "エルフ",
+    "set": "myths"
   },
   {
     "en": "Angels",
     "pt": "Anjos",
-    "ja": "天使"
+    "ja": "天使",
+    "set": "myths"
   },
   {
     "en": "Demons",
     "pt": "Demônios",
-    "ja": "悪魔"
+    "ja": "悪魔",
+    "set": "myths"
   },
   {
     "en": "Gods",
     "pt": "Deuses",
-    "ja": "神様"
+    "ja": "神様",
+    "set": "myths"
   },
   {
     "en": "Goddesses",
     "pt": "Deusas",
-    "ja": "女神"
+    "ja": "女神",
+    "set": "myths"
   },
   {
     "en": "Greek mythology characters",
     "pt": "Personagens da mitologia grega",
-    "ja": "ギリシャ神話の登場人物"
+    "ja": "ギリシャ神話の登場人物",
+    "set": "myths"
   },
   {
     "en": "Legendary creatures",
     "pt": "Criaturas lendárias",
-    "ja": "伝説の生き物"
+    "ja": "伝説の生き物",
+    "set": "myths"
   },
   {
     "en": "Urban legends",
     "pt": "Lendas urbanas",
-    "ja": "都市伝説のキャラクター"
+    "ja": "都市伝説のキャラクター",
+    "set": "myths"
   },
   {
     "en": "Giant characters",
     "pt": "Personagens gigantes",
-    "ja": "巨大なキャラクター"
+    "ja": "巨大なキャラクター",
+    "set": "myths"
   },
   {
     "en": "Tiny characters",
     "pt": "Personagens minúsculos",
-    "ja": "とても小さいキャラクター"
+    "ja": "とても小さいキャラクター",
+    "set": "myths"
   },
   {
     "en": "Half-human characters",
     "pt": "Personagens meio humanos",
-    "ja": "半分だけ人間のキャラクター"
+    "ja": "半分だけ人間のキャラクター",
+    "set": "myths"
   },
   {
     "en": "Talking animals",
     "pt": "Animais falantes",
-    "ja": "しゃべる動物"
+    "ja": "しゃべる動物",
+    "set": "animals"
   },
   {
     "en": "Cats",
     "pt": "Gatos",
-    "ja": "猫のキャラクター"
+    "ja": "猫のキャラクター",
+    "set": "animals"
   },
   {
     "en": "Big cats",
     "pt": "Leões, tigres e outros felinos",
-    "ja": "ライオンやトラのキャラクター"
+    "ja": "ライオンやトラのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Dogs",
     "pt": "Cachorros",
-    "ja": "犬のキャラクター"
+    "ja": "犬のキャラクター",
+    "set": "animals"
   },
   {
     "en": "Mice and rats",
     "pt": "Ratos e camundongos",
-    "ja": "ネズミのキャラクター"
+    "ja": "ネズミのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Bears",
     "pt": "Ursos",
-    "ja": "クマのキャラクター"
+    "ja": "クマのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Birds",
     "pt": "Pássaros e outras aves",
-    "ja": "鳥のキャラクター"
+    "ja": "鳥のキャラクター",
+    "set": "animals"
   },
   {
     "en": "Penguins",
     "pt": "Pinguins",
-    "ja": "ペンギンのキャラクター"
+    "ja": "ペンギンのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Dinosaurs",
     "pt": "Dinossauros",
-    "ja": "恐竜"
+    "ja": "恐竜",
+    "set": "animals"
   },
   {
     "en": "Insects and spiders",
     "pt": "Insetos e aranhas",
-    "ja": "虫のキャラクター"
+    "ja": "虫のキャラクター",
+    "set": "animals"
   },
   {
     "en": "Rabbits",
     "pt": "Coelhos",
-    "ja": "ウサギのキャラクター"
+    "ja": "ウサギのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Horses and ponies",
     "pt": "Cavalos e pôneis",
-    "ja": "馬のキャラクター"
+    "ja": "馬のキャラクター",
+    "set": "animals"
   },
   {
     "en": "Pigs",
     "pt": "Porcos",
-    "ja": "ブタのキャラクター"
+    "ja": "ブタのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Elephants",
     "pt": "Elefantes",
-    "ja": "ゾウのキャラクター"
+    "ja": "ゾウのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Farm animals",
     "pt": "Animais da fazenda",
-    "ja": "牧場の動物"
+    "ja": "牧場の動物",
+    "set": "animals"
   },
   {
     "en": "Monkeys and apes",
     "pt": "Macacos",
-    "ja": "サルのキャラクター"
+    "ja": "サルのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Reptiles",
     "pt": "Répteis",
-    "ja": "爬虫類のキャラクター"
+    "ja": "爬虫類のキャラクター",
+    "set": "animals"
   },
   {
     "en": "Foxes",
     "pt": "Raposas",
-    "ja": "キツネのキャラクター"
+    "ja": "キツネのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Wolves",
     "pt": "Lobos",
-    "ja": "オオカミのキャラクター"
+    "ja": "オオカミのキャラクター",
+    "set": "animals"
   },
   {
     "en": "Famous real-life animals",
     "pt": "Animais famosos da vida real",
-    "ja": "実在した有名な動物"
+    "ja": "実在した有名な動物",
+    "set": "animals"
   },
   {
     "en": "Characters with an animal sidekick",
     "pt": "Personagens com um animal de estimação",
-    "ja": "ペットや相棒の動物がいるキャラクター"
+    "ja": "ペットや相棒の動物がいるキャラクター",
+    "set": "animals"
   },
   {
     "en": "Characters turned into animals",
     "pt": "Personagens transformados em animais",
-    "ja": "動物に変えられたキャラクター"
+    "ja": "動物に変えられたキャラクター",
+    "set": "animals"
   },
   {
     "en": "Mascots",
     "pt": "Mascotes",
-    "ja": "マスコットキャラクター"
+    "ja": "マスコットキャラクター",
+    "set": "animals"
   },
   {
     "en": "Characters who live in the sea",
     "pt": "Personagens que vivem no mar",
-    "ja": "海に住むキャラクター"
+    "ja": "海に住むキャラクター",
+    "set": "world"
   },
   {
     "en": "Characters who live in the jungle",
     "pt": "Personagens que vivem na selva",
-    "ja": "ジャングルに住むキャラクター"
+    "ja": "ジャングルに住むキャラクター",
+    "set": "world"
   },
   {
     "en": "Characters who live in the desert",
     "pt": "Personagens que vivem no deserto",
-    "ja": "砂漠に住むキャラクター"
+    "ja": "砂漠に住むキャラクター",
+    "set": "world"
   },
   {
     "en": "Characters who live on an island",
     "pt": "Personagens que vivem em uma ilha",
-    "ja": "島に住むキャラクター"
+    "ja": "島に住むキャラクター",
+    "set": "world"
   },
   {
     "en": "Characters who live in New York",
     "pt": "Personagens que moram em Nova York",
-    "ja": "ニューヨークに住むキャラクター"
+    "ja": "ニューヨークに住むキャラクター",
+    "set": "world"
   },
   {
     "en": "Ice and snow characters",
     "pt": "Personagens do gelo e da neve",
-    "ja": "雪や氷のキャラクター"
+    "ja": "雪や氷のキャラクター",
+    "set": "world"
   },
   {
     "en": "Disney characters",
     "pt": "Personagens da Disney",
-    "ja": "ディズニーのキャラクター"
+    "ja": "ディズニーのキャラクター",
+    "set": "screen"
   },
   {
     "en": "Pixar characters",
     "pt": "Personagens da Pixar",
-    "ja": "ピクサーのキャラクター"
+    "ja": "ピクサーのキャラクター",
+    "set": "screen"
   },
   {
     "en": "DreamWorks characters",
     "pt": "Personagens da DreamWorks",
-    "ja": "ドリームワークスのキャラクター"
+    "ja": "ドリームワークスのキャラクター",
+    "set": "screen"
   },
   {
     "en": "Marvel characters",
     "pt": "Personagens da Marvel",
-    "ja": "マーベルのキャラクター"
+    "ja": "マーベルのキャラクター",
+    "set": "screen"
   },
   {
     "en": "DC characters",
     "pt": "Personagens da DC",
-    "ja": "DCのキャラクター"
+    "ja": "DCのキャラクター",
+    "set": "screen"
   },
   {
     "en": "Star Wars characters",
     "pt": "Personagens de Star Wars",
-    "ja": "スター・ウォーズのキャラクター"
+    "ja": "スター・ウォーズのキャラクター",
+    "set": "scifi"
   },
   {
     "en": "Harry Potter characters",
     "pt": "Personagens de Harry Potter",
-    "ja": "ハリー・ポッターの登場人物"
+    "ja": "ハリー・ポッターの登場人物",
+    "set": "screen"
   },
   {
     "en": "The Lord of the Rings characters",
     "pt": "Personagens do Senhor dos Anéis",
-    "ja": "ロード・オブ・ザ・リングの登場人物"
+    "ja": "ロード・オブ・ザ・リングの登場人物",
+    "set": "screen"
   },
   {
     "en": "Pokémon",
     "pt": "Pokémon",
-    "ja": "ポケモン"
+    "ja": "ポケモン",
+    "set": "games"
   },
   {
     "en": "Nintendo characters",
     "pt": "Personagens da Nintendo",
-    "ja": "任天堂のキャラクター"
+    "ja": "任天堂のキャラクター",
+    "set": "games"
   },
   {
     "en": "Studio Ghibli characters",
     "pt": "Personagens do Studio Ghibli",
-    "ja": "ジブリのキャラクター"
+    "ja": "ジブリのキャラクター",
+    "set": "anime"
   },
   {
     "en": "Dragon Ball characters",
     "pt": "Personagens de Dragon Ball",
-    "ja": "ドラゴンボールのキャラクター"
+    "ja": "ドラゴンボールのキャラクター",
+    "set": "anime"
   },
   {
     "en": "One Piece characters",
     "pt": "Personagens de One Piece",
-    "ja": "ワンピースのキャラクター"
+    "ja": "ワンピースのキャラクター",
+    "set": "anime"
   },
   {
     "en": "Naruto characters",
     "pt": "Personagens de Naruto",
-    "ja": "NARUTOのキャラクター"
+    "ja": "NARUTOのキャラクター",
+    "set": "anime"
   },
   {
     "en": "Looney Tunes characters",
     "pt": "Personagens dos Looney Tunes",
-    "ja": "ルーニー・テューンズのキャラクター"
+    "ja": "ルーニー・テューンズのキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "The Simpsons characters",
     "pt": "Personagens dos Simpsons",
-    "ja": "シンプソンズのキャラクター"
+    "ja": "シンプソンズのキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Cartoon Network characters",
     "pt": "Personagens do Cartoon Network",
-    "ja": "カートゥーン ネットワークのキャラクター"
+    "ja": "カートゥーン ネットワークのキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Nickelodeon characters",
     "pt": "Personagens da Nickelodeon",
-    "ja": "ニコロデオンのキャラクター"
+    "ja": "ニコロデオンのキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Anime characters",
     "pt": "Personagens de anime",
-    "ja": "日本のアニメのキャラクター"
+    "ja": "日本のアニメのキャラクター",
+    "set": "anime"
   },
   {
     "en": "Shonen protagonists",
     "pt": "Protagonistas de shonen",
-    "ja": "少年漫画の主人公"
+    "ja": "少年漫画の主人公",
+    "set": "anime"
   },
   {
     "en": "Magical girls",
     "pt": "Garotas mágicas",
-    "ja": "魔法少女"
+    "ja": "魔法少女",
+    "set": "anime"
   },
   {
     "en": "Tokusatsu heroes",
     "pt": "Heróis de tokusatsu",
-    "ja": "特撮ヒーロー"
+    "ja": "特撮ヒーロー",
+    "set": "anime"
   },
   {
     "en": "Comic book characters",
     "pt": "Personagens de quadrinhos",
-    "ja": "アメコミのキャラクター"
+    "ja": "アメコミのキャラクター",
+    "set": "heroes"
   },
   {
     "en": "Manga characters",
     "pt": "Personagens de mangá",
-    "ja": "漫画のキャラクター"
+    "ja": "漫画のキャラクター",
+    "set": "anime"
   },
   {
     "en": "Video game characters",
     "pt": "Personagens de videogame",
-    "ja": "ゲームのキャラクター"
+    "ja": "ゲームのキャラクター",
+    "set": "games"
   },
   {
     "en": "Fighting game characters",
     "pt": "Personagens de jogos de luta",
-    "ja": "格闘ゲームのキャラクター"
+    "ja": "格闘ゲームのキャラクター",
+    "set": "games"
   },
   {
     "en": "Retro game characters",
     "pt": "Personagens de games antigos",
-    "ja": "レトロゲームのキャラクター"
+    "ja": "レトロゲームのキャラクター",
+    "set": "games"
   },
   {
     "en": "Horror movie characters",
     "pt": "Personagens de filmes de terror",
-    "ja": "ホラー映画のキャラクター"
+    "ja": "ホラー映画のキャラクター",
+    "set": "screen"
   },
   {
     "en": "Action movie heroes",
     "pt": "Heróis de filmes de ação",
-    "ja": "アクション映画のヒーロー"
+    "ja": "アクション映画のヒーロー",
+    "set": "screen"
   },
   {
     "en": "Sci-fi characters",
     "pt": "Personagens de ficção científica",
-    "ja": "SF作品のキャラクター"
+    "ja": "SF作品のキャラクター",
+    "set": "scifi"
   },
   {
     "en": "Fantasy characters",
     "pt": "Personagens de fantasia",
-    "ja": "ファンタジー作品のキャラクター"
+    "ja": "ファンタジー作品のキャラクター",
+    "set": "myths"
   },
   {
     "en": "Comedy movie characters",
     "pt": "Personagens de filmes de comédia",
-    "ja": "コメディ映画のキャラクター"
+    "ja": "コメディ映画のキャラクター",
+    "set": "screen"
   },
   {
     "en": "TV series characters",
     "pt": "Personagens de séries de TV",
-    "ja": "テレビドラマの登場人物"
+    "ja": "テレビドラマの登場人物",
+    "set": "screen"
   },
   {
     "en": "Animated movie characters",
     "pt": "Personagens de filmes de animação",
-    "ja": "アニメ映画のキャラクター"
+    "ja": "アニメ映画のキャラクター",
+    "set": "screen"
   },
   {
     "en": "Characters from old cartoons",
     "pt": "Personagens de desenhos antigos",
-    "ja": "昔のアニメのキャラクター"
+    "ja": "昔のアニメのキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Classic literature characters",
     "pt": "Personagens de clássicos da literatura",
-    "ja": "名作小説の登場人物"
+    "ja": "名作小説の登場人物",
+    "set": "books"
   },
   {
     "en": "Characters from children's books",
     "pt": "Personagens de livros infantis",
-    "ja": "絵本や児童書のキャラクター"
+    "ja": "絵本や児童書のキャラクター",
+    "set": "books"
   },
   {
     "en": "Fairy tale characters",
     "pt": "Personagens de contos de fadas",
-    "ja": "おとぎ話のキャラクター"
+    "ja": "おとぎ話のキャラクター",
+    "set": "books"
   },
   {
     "en": "Christmas characters",
     "pt": "Personagens de Natal",
-    "ja": "クリスマスのキャラクター"
+    "ja": "クリスマスのキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Puppet characters",
     "pt": "Bonecos e fantoches",
-    "ja": "人形やパペットのキャラクター"
+    "ja": "人形やパペットのキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Toy characters",
     "pt": "Personagens que são brinquedos",
-    "ja": "おもちゃのキャラクター"
+    "ja": "おもちゃのキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Talking objects",
     "pt": "Objetos que falam",
-    "ja": "しゃべる物や道具"
+    "ja": "しゃべる物や道具",
+    "set": "cartoons"
   },
   {
     "en": "Characters that are vehicles",
     "pt": "Personagens que são veículos",
-    "ja": "乗り物のキャラクター"
+    "ja": "乗り物のキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Characters that are food",
     "pt": "Personagens que são comida",
-    "ja": "食べ物のキャラクター"
+    "ja": "食べ物のキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Plant characters",
     "pt": "Personagens que são plantas",
-    "ja": "植物のキャラクター"
+    "ja": "植物のキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Characters who became memes",
     "pt": "Personagens que viraram meme",
-    "ja": "ミームになったキャラクター"
+    "ja": "ミームになったキャラクター",
+    "set": "celebs"
   },
   {
     "en": "Actors",
     "pt": "Atores",
-    "ja": "男性俳優"
+    "ja": "男性俳優",
+    "set": "celebs"
   },
   {
     "en": "Child actors",
     "pt": "Atores mirins",
-    "ja": "子役"
+    "ja": "子役",
+    "set": "celebs"
   },
   {
     "en": "Classic Hollywood stars",
     "pt": "Astros da velha Hollywood",
-    "ja": "往年のハリウッドスター"
+    "ja": "往年のハリウッドスター",
+    "set": "celebs"
   },
   {
     "en": "Female singers",
     "pt": "Cantoras",
-    "ja": "女性歌手"
+    "ja": "女性歌手",
+    "set": "music"
   },
   {
     "en": "Male singers",
     "pt": "Cantores",
-    "ja": "男性歌手"
+    "ja": "男性歌手",
+    "set": "music"
   },
   {
     "en": "Rappers",
     "pt": "Rappers",
-    "ja": "ラッパー"
+    "ja": "ラッパー",
+    "set": "music"
   },
   {
     "en": "Rock stars",
     "pt": "Astros do rock",
-    "ja": "ロックスター"
+    "ja": "ロックスター",
+    "set": "music"
   },
   {
     "en": "K-pop idols",
     "pt": "Idols de K-pop",
-    "ja": "K-POPアイドル"
+    "ja": "K-POPアイドル",
+    "set": "music"
   },
   {
     "en": "J-pop idols",
     "pt": "Idols de J-pop",
-    "ja": "日本のアイドル"
+    "ja": "日本のアイドル",
+    "set": "music"
   },
   {
     "en": "Band members",
     "pt": "Integrantes de bandas",
-    "ja": "バンドのメンバー"
+    "ja": "バンドのメンバー",
+    "set": "music"
   },
   {
     "en": "Guitarists",
     "pt": "Guitarristas",
-    "ja": "ギタリスト"
+    "ja": "ギタリスト",
+    "set": "music"
   },
   {
     "en": "Classical composers",
     "pt": "Compositores clássicos",
-    "ja": "クラシックの作曲家"
+    "ja": "クラシックの作曲家",
+    "set": "music"
   },
   {
     "en": "DJs",
     "pt": "DJs",
-    "ja": "DJ"
+    "ja": "DJ",
+    "set": "music"
   },
   {
     "en": "Comedians",
     "pt": "Comediantes",
-    "ja": "お笑い芸人"
+    "ja": "お笑い芸人",
+    "set": "celebs"
   },
   {
     "en": "Magicians and illusionists",
     "pt": "Mágicos e ilusionistas",
-    "ja": "マジシャン"
+    "ja": "マジシャン",
+    "set": "celebs"
   },
   {
     "en": "Movie directors",
     "pt": "Diretores de cinema",
-    "ja": "映画監督"
+    "ja": "映画監督",
+    "set": "celebs"
   },
   {
     "en": "Cartoonists",
     "pt": "Cartunistas",
-    "ja": "海外の漫画家"
+    "ja": "海外の漫画家",
+    "set": "books"
   },
   {
     "en": "Manga artists",
     "pt": "Mangakás",
-    "ja": "漫画家"
+    "ja": "漫画家",
+    "set": "anime"
   },
   {
     "en": "TV hosts",
     "pt": "Apresentadores de TV",
-    "ja": "テレビの司会者"
+    "ja": "テレビの司会者",
+    "set": "celebs"
   },
   {
     "en": "YouTubers and streamers",
     "pt": "YouTubers e streamers",
-    "ja": "YouTuberや配信者"
+    "ja": "YouTuberや配信者",
+    "set": "celebs"
   },
   {
     "en": "Models",
     "pt": "Modelos",
-    "ja": "モデル"
+    "ja": "モデル",
+    "set": "celebs"
   },
   {
     "en": "Fashion designers",
     "pt": "Estilistas",
-    "ja": "ファッションデザイナー"
+    "ja": "ファッションデザイナー",
+    "set": "celebs"
   },
   {
     "en": "Celebrities known by one name",
     "pt": "Famosos conhecidos por um nome só",
-    "ja": "名前ひとつで通じる有名人"
+    "ja": "名前ひとつで通じる有名人",
+    "set": "celebs"
   },
   {
     "en": "Real people with a biopic",
     "pt": "Pessoas que ganharam cinebiografia",
-    "ja": "伝記映画になった人物"
+    "ja": "伝記映画になった人物",
+    "set": "celebs"
   },
   {
     "en": "Soccer players",
     "pt": "Jogadores de futebol",
-    "ja": "サッカー選手"
+    "ja": "サッカー選手",
+    "set": "sports"
   },
   {
     "en": "Basketball players",
     "pt": "Jogadores de basquete",
-    "ja": "バスケットボール選手"
+    "ja": "バスケットボール選手",
+    "set": "sports"
   },
   {
     "en": "Tennis players",
     "pt": "Tenistas",
-    "ja": "テニス選手"
+    "ja": "テニス選手",
+    "set": "sports"
   },
   {
     "en": "Olympic athletes",
     "pt": "Atletas olímpicos",
-    "ja": "オリンピック選手"
+    "ja": "オリンピック選手",
+    "set": "sports"
   },
   {
     "en": "Boxers",
     "pt": "Boxeadores",
-    "ja": "ボクサー"
+    "ja": "ボクサー",
+    "set": "sports"
   },
   {
     "en": "Martial artists",
     "pt": "Lutadores de artes marciais",
-    "ja": "格闘家"
+    "ja": "格闘家",
+    "set": "sports"
   },
   {
     "en": "Pro wrestlers",
     "pt": "Lutadores de luta livre",
-    "ja": "プロレスラー"
+    "ja": "プロレスラー",
+    "set": "sports"
   },
   {
     "en": "Race car drivers",
     "pt": "Pilotos de corrida",
-    "ja": "レーサー"
+    "ja": "レーサー",
+    "set": "sports"
   },
   {
     "en": "Coaches and trainers",
     "pt": "Técnicos e treinadores",
-    "ja": "監督やコーチ"
+    "ja": "監督やコーチ",
+    "set": "sports"
   },
   {
     "en": "Fictional athletes",
     "pt": "Atletas fictícios",
-    "ja": "スポーツ漫画や映画のキャラクター"
+    "ja": "スポーツ漫画や映画のキャラクター",
+    "set": "sports"
   },
   {
     "en": "Historical figures",
     "pt": "Figuras históricas",
-    "ja": "歴史上の人物"
+    "ja": "歴史上の人物",
+    "set": "history"
   },
   {
     "en": "Ancient history figures",
     "pt": "Figuras da Antiguidade",
-    "ja": "古代の人物"
+    "ja": "古代の人物",
+    "set": "history"
   },
   {
     "en": "Women who made history",
     "pt": "Mulheres que fizeram história",
-    "ja": "歴史に名を残した女性"
+    "ja": "歴史に名を残した女性",
+    "set": "history"
   },
   {
     "en": "Kings",
     "pt": "Reis",
-    "ja": "王様"
+    "ja": "王様",
+    "set": "history"
   },
   {
     "en": "Queens",
     "pt": "Rainhas",
-    "ja": "女王"
+    "ja": "女王",
+    "set": "history"
   },
   {
     "en": "Princesses",
     "pt": "Princesas",
-    "ja": "お姫様"
+    "ja": "お姫様",
+    "set": "books"
   },
   {
     "en": "Princes",
     "pt": "Príncipes",
-    "ja": "王子様"
+    "ja": "王子様",
+    "set": "books"
   },
   {
     "en": "Presidents",
     "pt": "Presidentes",
-    "ja": "大統領"
+    "ja": "大統領",
+    "set": "history"
   },
   {
     "en": "Politicians",
     "pt": "Políticos",
-    "ja": "政治家"
+    "ja": "政治家",
+    "set": "history"
   },
   {
     "en": "Revolutionaries",
     "pt": "Revolucionários",
-    "ja": "革命家"
+    "ja": "革命家",
+    "set": "history"
   },
   {
     "en": "Military leaders",
     "pt": "Líderes militares",
-    "ja": "武将や軍人"
+    "ja": "武将や軍人",
+    "set": "history"
   },
   {
     "en": "Philosophers",
     "pt": "Filósofos",
-    "ja": "哲学者"
+    "ja": "哲学者",
+    "set": "history"
   },
   {
     "en": "Scientists",
     "pt": "Cientistas",
-    "ja": "科学者"
+    "ja": "科学者",
+    "set": "history"
   },
   {
     "en": "Inventors",
     "pt": "Inventores",
-    "ja": "発明家"
+    "ja": "発明家",
+    "set": "history"
   },
   {
     "en": "Writers",
     "pt": "Escritores",
-    "ja": "作家"
+    "ja": "作家",
+    "set": "books"
   },
   {
     "en": "Poets",
     "pt": "Poetas",
-    "ja": "詩人"
+    "ja": "詩人",
+    "set": "books"
   },
   {
     "en": "Painters",
     "pt": "Pintores",
-    "ja": "画家"
+    "ja": "画家",
+    "set": "history"
   },
   {
     "en": "Explorers and adventurers",
     "pt": "Exploradores e aventureiros",
-    "ja": "探検家や冒険家"
+    "ja": "探検家や冒険家",
+    "set": "history"
   },
   {
     "en": "Characters who went to space",
     "pt": "Personagens que foram ao espaço",
-    "ja": "宇宙に行ったキャラクター"
+    "ja": "宇宙に行ったキャラクター",
+    "set": "scifi"
   },
   {
     "en": "Business people",
     "pt": "Empresários",
-    "ja": "実業家"
+    "ja": "実業家",
+    "set": "history"
   },
   {
     "en": "Biblical characters",
     "pt": "Personagens bíblicos",
-    "ja": "聖書の登場人物"
+    "ja": "聖書の登場人物",
+    "set": "myths"
   },
   {
     "en": "Famous Americans",
     "pt": "Americanos famosos",
-    "ja": "有名なアメリカ人"
+    "ja": "有名なアメリカ人",
+    "set": "world"
   },
   {
     "en": "Famous Brazilians",
     "pt": "Brasileiros famosos",
-    "ja": "有名なブラジル人"
+    "ja": "有名なブラジル人",
+    "set": "world"
   },
   {
     "en": "Famous Japanese people",
     "pt": "Japoneses famosos",
-    "ja": "有名な日本人"
+    "ja": "有名な日本人",
+    "set": "world"
   },
   {
     "en": "Famous British people and characters",
     "pt": "Personagens e famosos britânicos",
-    "ja": "イギリスの有名人やキャラクター"
+    "ja": "イギリスの有名人やキャラクター",
+    "set": "world"
   },
   {
     "en": "Famous French people and characters",
     "pt": "Personagens e famosos franceses",
-    "ja": "フランスの有名人やキャラクター"
+    "ja": "フランスの有名人やキャラクター",
+    "set": "world"
   },
   {
     "en": "Famous Italian people and characters",
     "pt": "Personagens e famosos italianos",
-    "ja": "イタリアの有名人やキャラクター"
+    "ja": "イタリアの有名人やキャラクター",
+    "set": "world"
   },
   {
     "en": "Famous Spanish people and characters",
     "pt": "Personagens e famosos espanhóis",
-    "ja": "スペインの有名人やキャラクター"
+    "ja": "スペインの有名人やキャラクター",
+    "set": "world"
   },
   {
     "en": "Famous Mexican people and characters",
     "pt": "Personagens e famosos mexicanos",
-    "ja": "メキシコの有名人やキャラクター"
+    "ja": "メキシコの有名人やキャラクター",
+    "set": "world"
   },
   {
     "en": "Famous Chinese people and characters",
     "pt": "Personagens e famosos chineses",
-    "ja": "中国の有名人やキャラクター"
+    "ja": "中国の有名人やキャラクター",
+    "set": "world"
   },
   {
     "en": "Famous people from the 60s",
     "pt": "Famosos dos anos 60",
-    "ja": "60年代の有名人"
+    "ja": "60年代の有名人",
+    "set": "celebs"
   },
   {
     "en": "Famous people from the 70s",
     "pt": "Famosos dos anos 70",
-    "ja": "70年代の有名人"
+    "ja": "70年代の有名人",
+    "set": "celebs"
   },
   {
     "en": "Famous people from the 80s",
     "pt": "Famosos dos anos 80",
-    "ja": "80年代の有名人"
+    "ja": "80年代の有名人",
+    "set": "celebs"
   },
   {
     "en": "Famous people from the 90s",
     "pt": "Famosos dos anos 90",
-    "ja": "90年代の有名人"
+    "ja": "90年代の有名人",
+    "set": "celebs"
   },
   {
     "en": "Famous people from the 2000s",
     "pt": "Famosos dos anos 2000",
-    "ja": "2000年代の有名人"
+    "ja": "2000年代の有名人",
+    "set": "celebs"
   },
   {
     "en": "Characters who are bosses",
     "pt": "Personagens que são chefes",
-    "ja": "上司キャラ"
+    "ja": "上司キャラ",
+    "set": "jobs"
   },
   {
     "en": "Chefs and cooks",
     "pt": "Chefs e cozinheiros",
-    "ja": "料理人"
+    "ja": "料理人",
+    "set": "jobs"
   },
   {
     "en": "Doctors",
     "pt": "Médicos",
-    "ja": "医者"
+    "ja": "医者",
+    "set": "jobs"
   },
   {
     "en": "Teachers",
     "pt": "Professores",
-    "ja": "学校の先生"
+    "ja": "学校の先生",
+    "set": "jobs"
   },
   {
     "en": "Detectives",
     "pt": "Detetives",
-    "ja": "探偵"
+    "ja": "探偵",
+    "set": "jobs"
   },
   {
     "en": "Police officers",
     "pt": "Policiais",
-    "ja": "警察官"
+    "ja": "警察官",
+    "set": "jobs"
   },
   {
     "en": "Lawyers",
     "pt": "Advogados",
-    "ja": "弁護士"
+    "ja": "弁護士",
+    "set": "jobs"
   },
   {
     "en": "Journalists",
     "pt": "Jornalistas",
-    "ja": "記者"
+    "ja": "記者",
+    "set": "jobs"
   },
   {
     "en": "Office workers",
     "pt": "Funcionários de escritório",
-    "ja": "会社員"
+    "ja": "会社員",
+    "set": "jobs"
   },
   {
     "en": "Butlers",
     "pt": "Mordomos",
-    "ja": "執事"
+    "ja": "執事",
+    "set": "jobs"
   },
   {
     "en": "Maids",
     "pt": "Empregadas",
-    "ja": "メイド"
+    "ja": "メイド",
+    "set": "jobs"
   },
   {
     "en": "Spies",
     "pt": "Espiões",
-    "ja": "スパイ"
+    "ja": "スパイ",
+    "set": "jobs"
   },
   {
     "en": "Soldiers",
     "pt": "Soldados",
-    "ja": "兵士"
+    "ja": "兵士",
+    "set": "jobs"
   },
   {
     "en": "Pirates",
     "pt": "Piratas",
-    "ja": "海賊"
+    "ja": "海賊",
+    "set": "warriors"
   },
   {
     "en": "Ship captains",
     "pt": "Capitães de navio",
-    "ja": "船長"
+    "ja": "船長",
+    "set": "jobs"
   },
   {
     "en": "Starship captains",
     "pt": "Capitães de nave espacial",
-    "ja": "宇宙船の艦長"
+    "ja": "宇宙船の艦長",
+    "set": "scifi"
   },
   {
     "en": "Airplane pilots",
     "pt": "Pilotos de avião",
-    "ja": "飛行機のパイロット"
+    "ja": "飛行機のパイロット",
+    "set": "jobs"
   },
   {
     "en": "Spaceship pilots",
     "pt": "Pilotos de nave espacial",
-    "ja": "宇宙船のパイロット"
+    "ja": "宇宙船のパイロット",
+    "set": "scifi"
   },
   {
     "en": "Ninjas",
     "pt": "Ninjas",
-    "ja": "忍者"
+    "ja": "忍者",
+    "set": "warriors"
   },
   {
     "en": "Samurai",
     "pt": "Samurais",
-    "ja": "侍"
+    "ja": "侍",
+    "set": "warriors"
   },
   {
     "en": "Knights",
     "pt": "Cavaleiros",
-    "ja": "騎士"
+    "ja": "騎士",
+    "set": "warriors"
   },
   {
     "en": "Vikings",
     "pt": "Vikings",
-    "ja": "バイキング"
+    "ja": "バイキング",
+    "set": "warriors"
   },
   {
     "en": "Wild West characters",
     "pt": "Personagens do Velho Oeste",
-    "ja": "西部劇のキャラクター"
+    "ja": "西部劇のキャラクター",
+    "set": "warriors"
   },
   {
     "en": "Thieves",
     "pt": "Ladrões",
-    "ja": "泥棒"
+    "ja": "泥棒",
+    "set": "warriors"
   },
   {
     "en": "Assassins",
     "pt": "Assassinos de aluguel",
-    "ja": "殺し屋"
+    "ja": "殺し屋",
+    "set": "warriors"
   },
   {
     "en": "Hunters",
     "pt": "Caçadores",
-    "ja": "ハンター"
+    "ja": "ハンター",
+    "set": "warriors"
   },
   {
     "en": "Clowns",
     "pt": "Palhaços",
-    "ja": "ピエロ"
+    "ja": "ピエロ",
+    "set": "jobs"
   },
   {
     "en": "Archers",
     "pt": "Arqueiros",
-    "ja": "弓使い"
+    "ja": "弓使い",
+    "set": "warriors"
   },
   {
     "en": "Swordfighters",
     "pt": "Espadachins",
-    "ja": "剣士"
+    "ja": "剣士",
+    "set": "warriors"
   },
   {
     "en": "Baby characters",
     "pt": "Personagens bebês",
-    "ja": "赤ちゃんのキャラクター"
+    "ja": "赤ちゃんのキャラクター",
+    "set": "family"
   },
   {
     "en": "Child characters",
     "pt": "Personagens que são crianças",
-    "ja": "子どものキャラクター"
+    "ja": "子どものキャラクター",
+    "set": "family"
   },
   {
     "en": "High school students",
     "pt": "Estudantes do ensino médio",
-    "ja": "高校生のキャラクター"
+    "ja": "高校生のキャラクター",
+    "set": "family"
   },
   {
     "en": "Elderly characters",
     "pt": "Personagens idosos",
-    "ja": "おじいちゃん・おばあちゃんキャラ"
+    "ja": "おじいちゃん・おばあちゃんキャラ",
+    "set": "family"
   },
   {
     "en": "Characters over 100 years old",
     "pt": "Personagens com mais de 100 anos",
-    "ja": "100歳を超えるキャラクター"
+    "ja": "100歳を超えるキャラクター",
+    "set": "family"
   },
   {
     "en": "Famous moms",
     "pt": "Mamães famosas",
-    "ja": "お母さんキャラ"
+    "ja": "お母さんキャラ",
+    "set": "family"
   },
   {
     "en": "Famous dads",
     "pt": "Papais famosos",
-    "ja": "お父さんキャラ"
+    "ja": "お父さんキャラ",
+    "set": "family"
   },
   {
     "en": "Children of famous parents",
     "pt": "Filhos de pais famosos",
-    "ja": "親が有名なキャラクター"
+    "ja": "親が有名なキャラクター",
+    "set": "family"
   },
   {
     "en": "Characters with a famous sibling",
     "pt": "Personagens com um irmão famoso",
-    "ja": "兄弟や姉妹も有名なキャラクター"
+    "ja": "兄弟や姉妹も有名なキャラクター",
+    "set": "family"
   },
   {
     "en": "Twins",
     "pt": "Gêmeos",
-    "ja": "双子のキャラクター"
+    "ja": "双子のキャラクター",
+    "set": "family"
   },
   {
     "en": "Orphans",
     "pt": "Personagens órfãos",
-    "ja": "孤児のキャラクター"
+    "ja": "孤児のキャラクター",
+    "set": "family"
   },
   {
     "en": "Members of a famous family",
     "pt": "Membros de famílias famosas",
-    "ja": "有名な家族の一員"
+    "ja": "有名な家族の一員",
+    "set": "family"
   },
   {
     "en": "Members of a famous team",
     "pt": "Membros de equipes famosas",
-    "ja": "有名なチームやグループの一員"
+    "ja": "有名なチームやグループの一員",
+    "set": "family"
   },
   {
     "en": "Half of a famous duo",
     "pt": "Metade de uma dupla famosa",
-    "ja": "名コンビの片割れ"
+    "ja": "名コンビの片割れ",
+    "set": "family"
   },
   {
     "en": "Half of a famous couple",
     "pt": "Metade de um casal famoso",
-    "ja": "有名カップルの片割れ"
+    "ja": "有名カップルの片割れ",
+    "set": "family"
   },
   {
     "en": "Characters in a love triangle",
     "pt": "Personagens de triângulos amorosos",
-    "ja": "三角関係にあるキャラクター"
+    "ja": "三角関係にあるキャラクター",
+    "set": "family"
   },
   {
     "en": "Characters with a famous rival",
     "pt": "Personagens com um rival famoso",
-    "ja": "有名なライバルがいるキャラクター"
+    "ja": "有名なライバルがいるキャラクター",
+    "set": "heroes"
   },
   {
     "en": "Characters who can fly",
     "pt": "Personagens que voam",
-    "ja": "空を飛べるキャラクター"
+    "ja": "空を飛べるキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who transform",
     "pt": "Personagens que se transformam",
-    "ja": "変身するキャラクター"
+    "ja": "変身するキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who use magic",
     "pt": "Personagens que usam magia",
-    "ja": "魔法を使うキャラクター"
+    "ja": "魔法を使うキャラクター",
+    "set": "powers"
   },
   {
     "en": "Immortal characters",
     "pt": "Personagens imortais",
-    "ja": "不死身のキャラクター"
+    "ja": "不死身のキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters with mind powers",
     "pt": "Personagens com poderes mentais",
-    "ja": "超能力者"
+    "ja": "超能力者",
+    "set": "powers"
   },
   {
     "en": "Characters with fire powers",
     "pt": "Personagens que usam fogo",
-    "ja": "炎を使うキャラクター"
+    "ja": "炎を使うキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters with electric powers",
     "pt": "Personagens com poderes elétricos",
-    "ja": "電気を使うキャラクター"
+    "ja": "電気を使うキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who can turn invisible",
     "pt": "Personagens que ficam invisíveis",
-    "ja": "透明になれるキャラクター"
+    "ja": "透明になれるキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who can see the future",
     "pt": "Personagens que veem o futuro",
-    "ja": "未来が見えるキャラクター"
+    "ja": "未来が見えるキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who can talk to animals",
     "pt": "Personagens que falam com animais",
-    "ja": "動物と話せるキャラクター"
+    "ja": "動物と話せるキャラクター",
+    "set": "powers"
   },
   {
     "en": "Time travelers",
     "pt": "Viajantes do tempo",
-    "ja": "タイムトラベルしたキャラクター"
+    "ja": "タイムトラベルしたキャラクター",
+    "set": "scifi"
   },
   {
     "en": "Characters sent to another world",
     "pt": "Personagens levados a outro mundo",
-    "ja": "異世界に行ったキャラクター"
+    "ja": "異世界に行ったキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who came back from the dead",
     "pt": "Personagens que voltaram dos mortos",
-    "ja": "生き返ったキャラクター"
+    "ja": "生き返ったキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters with a secret identity",
     "pt": "Personagens com identidade secreta",
-    "ja": "正体を隠しているキャラクター"
+    "ja": "正体を隠しているキャラクター",
+    "set": "heroes"
   },
   {
     "en": "Characters with a magic item",
     "pt": "Personagens com um objeto mágico",
-    "ja": "魔法のアイテムを持つキャラクター"
+    "ja": "魔法のアイテムを持つキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who use gadgets",
     "pt": "Personagens cheios de engenhocas",
-    "ja": "秘密道具を使うキャラクター"
+    "ja": "秘密道具を使うキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters with a famous special move",
     "pt": "Personagens com golpe especial famoso",
-    "ja": "必殺技が有名なキャラクター"
+    "ja": "必殺技が有名なキャラクター",
+    "set": "powers"
   },
   {
     "en": "Cursed characters",
     "pt": "Personagens amaldiçoados",
-    "ja": "呪いをかけられたキャラクター"
+    "ja": "呪いをかけられたキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who lost their memory",
     "pt": "Personagens que perderam a memória",
-    "ja": "記憶を失ったキャラクター"
+    "ja": "記憶を失ったキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who got kidnapped",
     "pt": "Personagens que foram sequestrados",
-    "ja": "さらわれたことがあるキャラクター"
+    "ja": "さらわれたことがあるキャラクター",
+    "set": "powers"
   },
   {
     "en": "Super strong characters",
     "pt": "Personagens muito fortes",
-    "ja": "怪力のキャラクター"
+    "ja": "怪力のキャラクター",
+    "set": "powers"
   },
   {
     "en": "Super fast characters",
     "pt": "Personagens muito rápidos",
-    "ja": "スピード自慢のキャラクター"
+    "ja": "スピード自慢のキャラクター",
+    "set": "powers"
   },
   {
     "en": "Characters who wear glasses",
     "pt": "Personagens de óculos",
-    "ja": "メガネのキャラクター"
+    "ja": "メガネのキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters who wear sunglasses",
     "pt": "Personagens de óculos escuros",
-    "ja": "サングラスのキャラクター"
+    "ja": "サングラスのキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters who wear a hat",
     "pt": "Personagens de chapéu",
-    "ja": "帽子をかぶったキャラクター"
+    "ja": "帽子をかぶったキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters who wear a hood",
     "pt": "Personagens de capuz",
-    "ja": "フードをかぶったキャラクター"
+    "ja": "フードをかぶったキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters who wear a cape",
     "pt": "Personagens de capa",
-    "ja": "マントをつけたキャラクター"
+    "ja": "マントをつけたキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters who wear armor",
     "pt": "Personagens de armadura",
-    "ja": "鎧を着たキャラクター"
+    "ja": "鎧を着たキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters who wear a mask",
     "pt": "Personagens de máscara",
-    "ja": "仮面をつけたキャラクター"
+    "ja": "仮面をつけたキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters who wear a helmet",
     "pt": "Personagens de capacete",
-    "ja": "ヘルメットをかぶったキャラクター"
+    "ja": "ヘルメットをかぶったキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters who wear a suit",
     "pt": "Personagens de terno",
-    "ja": "スーツ姿のキャラクター"
+    "ja": "スーツ姿のキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters who dress in black",
     "pt": "Personagens que se vestem de preto",
-    "ja": "黒い服を着たキャラクター"
+    "ja": "黒い服を着たキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters with a beard",
     "pt": "Personagens de barba",
-    "ja": "あごヒゲのキャラクター"
+    "ja": "あごヒゲのキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters with a mustache",
     "pt": "Personagens de bigode",
-    "ja": "口ヒゲのキャラクター"
+    "ja": "口ヒゲのキャラクター",
+    "set": "looks"
   },
   {
     "en": "Bald characters",
     "pt": "Personagens carecas",
-    "ja": "ツルツル頭のキャラクター"
+    "ja": "ツルツル頭のキャラクター",
+    "set": "looks"
   },
   {
     "en": "Redheads",
     "pt": "Personagens ruivos",
-    "ja": "赤髪のキャラクター"
+    "ja": "赤髪のキャラクター",
+    "set": "looks"
   },
   {
     "en": "Blond characters",
     "pt": "Personagens loiros",
-    "ja": "金髪のキャラクター"
+    "ja": "金髪のキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters with an iconic hairstyle",
     "pt": "Personagens com penteado marcante",
-    "ja": "髪型が特徴的なキャラクター"
+    "ja": "髪型が特徴的なキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters with freckles",
     "pt": "Personagens sardentos",
-    "ja": "そばかすのあるキャラクター"
+    "ja": "そばかすのあるキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters with tattoos",
     "pt": "Personagens tatuados",
-    "ja": "タトゥーのあるキャラクター"
+    "ja": "タトゥーのあるキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters with a facial scar",
     "pt": "Personagens com cicatriz no rosto",
-    "ja": "顔に傷があるキャラクター"
+    "ja": "顔に傷があるキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters with a big nose",
     "pt": "Personagens narigudos",
-    "ja": "鼻が大きいキャラクター"
+    "ja": "鼻が大きいキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters with big ears",
     "pt": "Personagens orelhudos",
-    "ja": "耳が大きいキャラクター"
+    "ja": "耳が大きいキャラクター",
+    "set": "looks"
   },
   {
     "en": "One-eyed characters",
     "pt": "Personagens com um olho só",
-    "ja": "片目のキャラクター"
+    "ja": "片目のキャラクター",
+    "set": "looks"
   },
   {
     "en": "Round-shaped characters",
     "pt": "Personagens redondinhos",
-    "ja": "まんまるなキャラクター"
+    "ja": "まんまるなキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Cute characters",
     "pt": "Personagens fofos",
-    "ja": "かわいいキャラクター"
+    "ja": "かわいいキャラクター",
+    "set": "cartoons"
   },
   {
     "en": "Green characters",
     "pt": "Personagens verdes",
-    "ja": "緑色のキャラクター"
+    "ja": "緑色のキャラクター",
+    "set": "looks"
   },
   {
     "en": "Blue characters",
     "pt": "Personagens azuis",
-    "ja": "青いキャラクター"
+    "ja": "青いキャラクター",
+    "set": "looks"
   },
   {
     "en": "Red characters",
     "pt": "Personagens vermelhos",
-    "ja": "赤いキャラクター"
+    "ja": "赤いキャラクター",
+    "set": "looks"
   },
   {
     "en": "Yellow characters",
     "pt": "Personagens amarelos",
-    "ja": "黄色いキャラクター"
+    "ja": "黄色いキャラクター",
+    "set": "looks"
   },
   {
     "en": "Pink characters",
     "pt": "Personagens cor-de-rosa",
-    "ja": "ピンクのキャラクター"
+    "ja": "ピンクのキャラクター",
+    "set": "looks"
   },
   {
     "en": "Purple characters",
     "pt": "Personagens roxos",
-    "ja": "紫色のキャラクター"
+    "ja": "紫色のキャラクター",
+    "set": "looks"
   },
   {
     "en": "Orange characters",
     "pt": "Personagens laranja",
-    "ja": "オレンジ色のキャラクター"
+    "ja": "オレンジ色のキャラクター",
+    "set": "looks"
   },
   {
     "en": "Geniuses",
     "pt": "Gênios",
-    "ja": "天才"
+    "ja": "天才",
+    "set": "quirks"
   },
   {
     "en": "Clumsy characters",
     "pt": "Personagens desastrados",
-    "ja": "ドジなキャラクター"
+    "ja": "ドジなキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Grumpy or hot-tempered characters",
     "pt": "Personagens rabugentos ou esquentados",
-    "ja": "怒りっぽいキャラクター"
+    "ja": "怒りっぽいキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Gloomy characters",
     "pt": "Personagens pessimistas",
-    "ja": "ネガティブなキャラクター"
+    "ja": "ネガティブなキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Always cheerful characters",
     "pt": "Personagens sempre alegres",
-    "ja": "いつも明るいキャラクター"
+    "ja": "いつも明るいキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Lazy characters",
     "pt": "Personagens preguiçosos",
-    "ja": "怠け者のキャラクター"
+    "ja": "怠け者のキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Greedy characters",
     "pt": "Personagens gananciosos",
-    "ja": "欲張りなキャラクター"
+    "ja": "欲張りなキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Spoiled characters",
     "pt": "Personagens mimados",
-    "ja": "わがままなキャラクター"
+    "ja": "わがままなキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Arrogant characters",
     "pt": "Personagens arrogantes",
-    "ja": "プライドが高いキャラクター"
+    "ja": "プライドが高いキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters who love to eat",
     "pt": "Personagens comilões",
-    "ja": "食いしん坊キャラ"
+    "ja": "食いしん坊キャラ",
+    "set": "quirks"
   },
   {
     "en": "Characters who are poor",
     "pt": "Personagens pobres",
-    "ja": "貧乏なキャラクター"
+    "ja": "貧乏なキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Nerds",
     "pt": "Nerds",
-    "ja": "オタクキャラ"
+    "ja": "オタクキャラ",
+    "set": "quirks"
   },
   {
     "en": "Rebels",
     "pt": "Rebeldes",
-    "ja": "反逆者"
+    "ja": "反逆者",
+    "set": "quirks"
   },
   {
     "en": "Liars and tricksters",
     "pt": "Mentirosos e trapaceiros",
-    "ja": "嘘つきやペテン師"
+    "ja": "嘘つきやペテン師",
+    "set": "quirks"
   },
   {
     "en": "Scaredy-cats",
     "pt": "Personagens medrosos",
-    "ja": "怖がりなキャラクター"
+    "ja": "怖がりなキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters who never talk",
     "pt": "Personagens que não falam",
-    "ja": "しゃべらないキャラクター"
+    "ja": "しゃべらないキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters who sing",
     "pt": "Personagens que cantam",
-    "ja": "歌うキャラクター"
+    "ja": "歌うキャラクター",
+    "set": "music"
   },
   {
     "en": "Characters who dance",
     "pt": "Personagens que dançam",
-    "ja": "ダンスが得意なキャラクター"
+    "ja": "ダンスが得意なキャラクター",
+    "set": "music"
   },
   {
     "en": "Characters with a catchphrase",
     "pt": "Personagens com bordão",
-    "ja": "決めゼリフがあるキャラクター"
+    "ja": "決めゼリフがあるキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters with a famous theme song",
     "pt": "Personagens com música-tema famosa",
-    "ja": "テーマ曲が有名なキャラクター"
+    "ja": "テーマ曲が有名なキャラクター",
+    "set": "music"
   },
   {
     "en": "Characters with a famous favorite food",
     "pt": "Personagens com comida favorita famosa",
-    "ja": "好物が有名なキャラクター"
+    "ja": "好物が有名なキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters with a famous vehicle",
     "pt": "Personagens com um veículo famoso",
-    "ja": "愛車や愛機が有名なキャラクター"
+    "ja": "愛車や愛機が有名なキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters who ride motorcycles",
     "pt": "Personagens que andam de moto",
-    "ja": "バイクに乗るキャラクター"
+    "ja": "バイクに乗るキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters whose name is the title",
     "pt": "Personagens que dão nome à obra",
-    "ja": "名前が作品タイトルになっているキャラクター"
+    "ja": "名前が作品タイトルになっているキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters with a number in their name",
     "pt": "Personagens com número no nome",
-    "ja": "名前に数字が入っているキャラクター"
+    "ja": "名前に数字が入っているキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters with an animal in their name",
     "pt": "Personagens com nome de animal",
-    "ja": "名前に動物が入っているキャラクター"
+    "ja": "名前に動物が入っているキャラクター",
+    "set": "animals"
   },
   {
     "en": "Characters with a color in their name",
     "pt": "Personagens com cor no nome",
-    "ja": "名前に色が入っているキャラクター"
+    "ja": "名前に色が入っているキャラクター",
+    "set": "looks"
   },
   {
     "en": "Characters whose name ends in “man”",
     "pt": "Personagens com nome terminado em “man”",
-    "ja": "名前が「マン」で終わるキャラクター"
+    "ja": "名前が「マン」で終わるキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Characters with matching initials",
     "pt": "Personagens com iniciais iguais",
-    "ja": "イニシャルがそろっているキャラクター"
+    "ja": "イニシャルがそろっているキャラクター",
+    "set": "quirks"
   },
   {
     "en": "Famous duos",
     "pt": "Duplas famosas",
-    "ja": "有名なコンビ"
+    "ja": "有名なコンビ",
+    "set": "family"
   },
   {
     "en": "Famous trios",
     "pt": "Trios famosos",
-    "ja": "有名なトリオ"
+    "ja": "有名なトリオ",
+    "set": "family"
   },
   {
     "en": "Siblings who come as a set",
     "pt": "Irmãos que andam juntos",
-    "ja": "いつも一緒のきょうだい"
+    "ja": "いつも一緒のきょうだい",
+    "set": "family"
   },
   {
     "en": "Famous families",
     "pt": "Famílias famosas",
-    "ja": "有名な家族"
+    "ja": "有名な家族",
+    "set": "family"
   },
   {
     "en": "Famous couples",
     "pt": "Casais famosos",
-    "ja": "有名なカップル"
+    "ja": "有名なカップル",
+    "set": "family"
   },
   {
     "en": "Hero teams",
     "pt": "Equipes de heróis",
-    "ja": "ヒーローチーム"
+    "ja": "ヒーローチーム",
+    "set": "heroes"
   },
   {
     "en": "Villain gangs",
     "pt": "Gangues de vilões",
-    "ja": "悪の組織"
+    "ja": "悪の組織",
+    "set": "heroes"
   },
   {
     "en": "Groups of friends",
     "pt": "Turmas de amigos",
-    "ja": "仲良しグループ"
+    "ja": "仲良しグループ",
+    "set": "family"
   },
   {
     "en": "Hero and sidekick",
     "pt": "Herói e ajudante",
-    "ja": "ヒーローと相棒"
+    "ja": "ヒーローと相棒",
+    "set": "heroes"
   },
   {
     "en": "A character and their pet",
     "pt": "Personagem e seu bichinho",
-    "ja": "キャラクターとペット"
+    "ja": "キャラクターとペット",
+    "set": "animals"
   },
   {
     "en": "Creatures that come in crowds",
     "pt": "Criaturinhas que andam em bando",
-    "ja": "いつも大勢でいるキャラクター"
+    "ja": "いつも大勢でいるキャラクター",
+    "set": "myths"
   },
   {
     "en": "Video game species",
     "pt": "Espécies de videogame",
-    "ja": "ゲームに出てくる種族"
+    "ja": "ゲームに出てくる種族",
+    "set": "games"
   },
   {
     "en": "Fantasy races",
     "pt": "Raças de fantasia",
-    "ja": "ファンタジーの種族"
+    "ja": "ファンタジーの種族",
+    "set": "myths"
   },
   {
     "en": "Bands from cartoons and anime",
     "pt": "Bandas de desenho e anime",
-    "ja": "アニメのバンド"
+    "ja": "アニメのバンド",
+    "set": "music"
   },
   {
     "en": "Music duos",
     "pt": "Duplas da música",
-    "ja": "音楽デュオ"
+    "ja": "音楽デュオ",
+    "set": "music"
   },
   {
     "en": "Bands and music groups",
     "pt": "Bandas e grupos musicais",
-    "ja": "バンドや音楽グループ"
+    "ja": "バンドや音楽グループ",
+    "set": "music"
   },
   {
     "en": "Comedy groups",
     "pt": "Grupos de humor",
-    "ja": "お笑いグループ"
+    "ja": "お笑いグループ",
+    "set": "celebs"
   }
 ]

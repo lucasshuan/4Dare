@@ -8,19 +8,22 @@ import {
   validatorOf,
 } from "./helpers";
 import { isCloseMatch } from "./match";
+import { isThemeSet, THEME_SET_KEYS } from "./theme-sets";
 import {
   type AnswerEntry,
   type Character,
   type Ctx,
+  DEFAULT_SETTINGS,
   type ErrorCode,
   GameError,
   type GameEvent,
+  HOST_THEME_SECONDS,
   type Identity,
   LOBBY_SECONDS,
-  type Localized,
   MAX_GUESS,
   MAX_NOTE,
   MAX_QUESTION,
+  MAX_THEME,
   type Play,
   type PlayerId,
   REVEAL_TIMING,
@@ -28,7 +31,9 @@ import {
   type RoomState,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
+  THEME_IDEAS,
   THEME_OPTIONS,
+  type Theme,
   VOTE_SECONDS,
 } from "./types";
 
@@ -46,9 +51,18 @@ function mergeSettings(
   patch: Partial<RoomSettings>,
   seated: number,
 ): RoomSettings {
-  const allowed = new Set(["visibility", "seats", "stepSeconds", "mode"]);
+  const allowed = new Set([
+    "visibility",
+    "seats",
+    "stepSeconds",
+    "mode",
+    "themeMode",
+    "themeSets",
+  ]);
   if (Object.keys(patch).some((k) => !allowed.has(k))) fail("invalid_input");
-  const next = { ...base, ...patch };
+  // Rooms made before a setting existed get its default.
+  const next = { ...DEFAULT_SETTINGS, ...base, ...patch };
+  const sets: unknown = next.themeSets;
   const ok =
     (next.visibility === "public" || next.visibility === "private") &&
     [2, 3, 4].includes(next.seats) &&
@@ -56,9 +70,15 @@ function mergeSettings(
     Number.isInteger(next.stepSeconds) &&
     next.stepSeconds >= STEP_SECONDS_MIN &&
     next.stepSeconds <= STEP_SECONDS_MAX &&
-    next.mode === "classic";
+    next.mode === "classic" &&
+    (next.themeMode === "vote" || next.themeMode === "host") &&
+    Array.isArray(sets) &&
+    sets.length > 0 &&
+    sets.every(isThemeSet);
   if (!ok) fail("invalid_input");
-  return next;
+  // Each set once, in the order the screens show them.
+  const themeSets = THEME_SET_KEYS.filter((k) => next.themeSets.includes(k));
+  return { ...next, themeSets };
 }
 
 // --- clock -------------------------------------------------------------------
@@ -96,8 +116,25 @@ function shuffle<T>(items: T[], random: () => number): T[] {
   return a;
 }
 
+/** A new round needs a theme: the host types it, or everyone votes on `themes`. */
+function beginTheme(s: RoomState, themes: Theme[] | undefined, ctx: Ctx) {
+  if (s.settings.themeMode === "host") return beginTheming(s, themes, ctx);
+  beginVote(s, themes, ctx);
+}
+
+/** The host types the theme; `ideas` help them. If the clock runs out, everyone votes instead. */
+function beginTheming(s: RoomState, ideas: Theme[] | undefined, ctx: Ctx) {
+  s.ideas = (ideas ?? []).slice(0, THEME_IDEAS).map((t) => ({ ...t }));
+  s.vote = null;
+  s.theme = null;
+  s.reveal = null;
+  s.turnPlayerId = null;
+  s.phase = "theming";
+  startStep(s, ctx, HOST_THEME_SECONDS * 1000);
+}
+
 /** Puts THEME_OPTIONS themes to the vote; the match starts once it is over. */
-function beginVote(s: RoomState, themes: Localized[] | undefined, ctx: Ctx) {
+function beginVote(s: RoomState, themes: Theme[] | undefined, ctx: Ctx) {
   if (!themes || themes.length !== THEME_OPTIONS) fail("invalid_input");
   s.vote = {
     options: (themes ?? []).map((t) => ({ ...t })),
@@ -105,6 +142,7 @@ function beginVote(s: RoomState, themes: Localized[] | undefined, ctx: Ctx) {
     chosen: null,
     tied: [],
   };
+  s.ideas = [];
   s.theme = null;
   s.reveal = null;
   s.turnPlayerId = null;
@@ -125,7 +163,11 @@ function closeVote(s: RoomState, ctx: Ctx) {
   v.chosen = v.tied[Math.floor(ctx.random() * v.tied.length)];
   beginMatch(s, v.options[v.chosen], ctx);
   const t = REVEAL_TIMING;
-  const ms = t.theme + (v.tied.length > 1 ? t.themeTieSpin : 0);
+  revealTheme(s, t.theme + (v.tied.length > 1 ? t.themeTieSpin : 0), ctx);
+}
+
+/** Everyone looks at the theme for `ms`; picking starts right after. */
+function revealTheme(s: RoomState, ms: number, ctx: Ctx) {
   s.reveal = {
     kind: "theme",
     n: s.round,
@@ -133,6 +175,15 @@ function closeVote(s: RoomState, ctx: Ctx) {
     until: ctx.now + ms,
   };
   startStep(s, ctx, stepMs(s));
+}
+
+function setTheme(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
+  if (s.phase !== "theming") fail("wrong_phase");
+  requireSeated(s, playerId);
+  if (playerId !== s.hostId) fail("not_host");
+  const t = cleanText(text.replace(/\s+/g, " "), MAX_THEME);
+  beginMatch(s, { en: t, pt: t, ja: t, set: null }, ctx);
+  revealTheme(s, REVEAL_TIMING.theme, ctx);
 }
 
 const everyoneVoted = (s: RoomState) =>
@@ -148,9 +199,10 @@ function vote(s: RoomState, playerId: PlayerId, option: number, ctx: Ctx) {
   if (everyoneVoted(s)) closeVote(s, ctx);
 }
 
-function beginMatch(s: RoomState, theme: Localized, ctx: Ctx) {
+function beginMatch(s: RoomState, theme: Theme, ctx: Ctx) {
   s.round += 1;
   s.theme = theme;
+  s.ideas = [];
   s.plays = [];
   s.turnPlayerId = null;
   s.reveal = null;
@@ -289,6 +341,8 @@ function abandonTurn(s: RoomState, ctx: Ctx) {
   nextTurn(s, ctx);
 }
 
+/** Phases where leaving gives up the seat: no match is being played. */
+const BEFORE_MATCH = new Set(["lobby", "theming", "voting", "finished"]);
 const MATCH_PHASES = new Set([
   "picking",
   "asking",
@@ -330,6 +384,7 @@ export function createRoom(
     order: [],
     theme: null,
     vote: null,
+    ideas: [],
     assignments: {},
     turnPlayerId: null,
     plays: [],
@@ -393,10 +448,12 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       if (e.playerId !== s.hostId) fail("not_host");
       if (s.phase !== "lobby") fail("wrong_phase");
       if (s.players.length < 2) fail("need_two_players");
-      return beginVote(s, e.themes, ctx);
+      return beginTheme(s, e.themes, ctx);
     }
     case "VOTE":
       return vote(s, e.playerId, e.option, ctx);
+    case "SET_THEME":
+      return setTheme(s, e.playerId, e.text, ctx);
     case "PICK":
       return pick(s, e.playerId, e.character, ctx);
     case "ASK":
@@ -499,24 +556,26 @@ function handOverHost(s: RoomState) {
 function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   const p = requireSeated(s, id);
   if (s.phase === "closed") fail("wrong_phase");
-  if (s.phase === "lobby" || s.phase === "finished" || s.phase === "voting") {
+  if (BEFORE_MATCH.has(s.phase)) {
     s.players = s.players.filter((x) => x.id !== id);
     if (s.players.length === 0) {
       s.phase = "closed";
       stopClock(s);
       return;
     }
+    // Leaving while typing the theme hands the typing over with the room.
     handOverHost(s);
-    if (s.phase !== "voting") return;
+    if (s.phase !== "voting" && s.phase !== "theming") return;
     if (s.vote) delete s.vote.votes[id];
     // Nobody left to play with: back to the lobby to wait for others.
     if (s.players.length < 2) {
       s.phase = "lobby";
       s.vote = null;
+      s.ideas = [];
       startStep(s, ctx, LOBBY_SECONDS * 1000);
       return;
     }
-    if (everyoneVoted(s)) closeVote(s, ctx);
+    if (s.phase === "voting" && everyoneVoted(s)) closeVote(s, ctx);
     return;
   }
   // mid-match: keep the seat so the history still makes sense
@@ -622,19 +681,14 @@ function giveUp(s: RoomState, playerId: PlayerId, ctx: Ctx) {
   if (TURN_PHASES.has(s.phase) && !anyoneLeft) finish(s);
 }
 
-function rematch(
-  s: RoomState,
-  playerId: PlayerId,
-  themes: Localized[],
-  ctx: Ctx,
-) {
+function rematch(s: RoomState, playerId: PlayerId, themes: Theme[], ctx: Ctx) {
   requireSeated(s, playerId);
   if (playerId !== s.hostId) fail("not_host");
   if (s.phase !== "finished") fail("wrong_phase");
   s.players = s.players.filter(isPresent);
   handOverHost(s);
   if (s.players.length < 2) fail("need_two_players");
-  beginVote(s, themes, ctx);
+  beginTheme(s, themes, ctx);
 }
 
 function timeout(
@@ -649,8 +703,10 @@ function timeout(
         s.phase = "closed";
         return stopClock(s);
       }
-      return beginVote(s, e.themes, ctx);
+      return beginTheme(s, e.themes, ctx);
     }
+    case "theming":
+      return beginVote(s, e.themes, ctx);
     case "voting":
       return closeVote(s, ctx);
     case "picking": {

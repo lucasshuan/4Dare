@@ -34,16 +34,17 @@ export async function viewOf(page: Page, code: string): Promise<RoomView> {
   return res.json();
 }
 
-/** Every player votes; the first theme wins, then the result plays out before picking. */
+/** Every player votes at once (the vote is short); the first theme wins, then the result plays out before picking. */
 export async function voteAll(players: Page[], option = 0) {
-  for (const page of players) {
-    const themes = page
-      .getByRole("group", { name: /vote for the theme/i })
-      .getByRole("button");
-    await expect(themes).toHaveCount(3);
-    await themes.nth(option).click();
-    await expect(themes.nth(option)).toHaveAttribute("aria-pressed", "true");
-  }
+  await Promise.all(
+    players.map(async (page) => {
+      const themes = page
+        .getByRole("group", { name: /vote for the theme/i })
+        .getByRole("button");
+      await expect(themes).toHaveCount(3);
+      await themes.nth(option).click();
+    }),
+  );
   for (const page of players)
     await expect(
       page.getByRole("heading", { name: /the theme is/i }),

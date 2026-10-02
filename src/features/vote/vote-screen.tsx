@@ -14,6 +14,7 @@ import { fireConfetti } from "@/components/ui/confetti";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { GameFrame } from "@/features/room/game-header";
+import { type ThemeSet, themeSetEmoji } from "@/game/theme-sets";
 import {
   type Lang,
   type PlayerView,
@@ -132,6 +133,7 @@ export function VoteScreen() {
                   key={i}
                   index={i}
                   label={t("option", { n: i + 1 })}
+                  set={option.set}
                   theme={option[lang]}
                   voters={v.votes
                     .filter((x) => x.option === i)
@@ -226,6 +228,7 @@ function Heading({ stage, tie }: { stage: Stage; tie: boolean }) {
 function OptionCard({
   index,
   label,
+  set,
   theme,
   voters,
   total,
@@ -238,6 +241,7 @@ function OptionCard({
 }: {
   index: number;
   label: string;
+  set: ThemeSet | null;
   theme: string;
   voters: PlayerView[];
   total: number;
@@ -249,7 +253,9 @@ function OptionCard({
   onChoose: () => void;
 }) {
   const t = useTranslations("room.vote");
+  const tSets = useTranslations("common.themeSets");
   const tone = TONES[index % TONES.length];
+  const emoji = themeSetEmoji(set);
   const voting = stage === "voting";
   const winner = stage === "winner";
   const share = total ? voters.length / total : 0;
@@ -311,8 +317,21 @@ function OptionCard({
       </AnimatePresence>
 
       <span className="relative flex items-center justify-between gap-2">
-        <span className="font-semibold text-xs uppercase tracking-[0.08em] opacity-70">
-          {winner ? t("chosen") : label}
+        <span className="flex min-w-0 items-center gap-1.5 font-semibold text-xs uppercase tracking-[0.08em]">
+          {emoji ? (
+            <motion.span
+              aria-hidden
+              initial={{ scale: 0.4, rotate: -25 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ ...spring, delay: still ? 0 : 0.25 + index * 0.09 }}
+              className="text-base leading-none"
+            >
+              {emoji}
+            </motion.span>
+          ) : null}
+          <span className="truncate opacity-70">
+            {winner ? t("chosen") : set ? tSets(set) : label}
+          </span>
         </span>
         <AnimatePresence>
           {winner ? (

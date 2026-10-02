@@ -69,5 +69,22 @@
     "chosenByDraw": "A roleta decidiu.",
     "chosen": "Tema escolhido",
     "announce": "Tema escolhido: {theme}"
+  },
+  "theming": {
+    "kicker": "Tema",
+    "hostKicker": "Você decide",
+    "title": "Escolha o tema",
+    "subtitle": "Escreva qualquer tema. Depois, cada um escolhe um personagem que combine.",
+    "label": "Tema da partida",
+    "placeholder": "ex.: Piratas do espaço",
+    "submit": "Usar este tema",
+    "ideas": "Ideias",
+    "moreIdeas": "Outras ideias",
+    "fallback": "Se o tempo acabar, todo mundo vota.",
+    "waitingTitle": "{name} está escolhendo o tema",
+    "waitingSubtitle": "Prepare-se para escolher um personagem que combine. Se o tempo acabar, todo mundo vota.",
+    "chosenTitle": "O tema é…",
+    "chosenBy": "Escolhido por {name}",
+    "announce": "Tema escolhido: {theme}"
   }
 }

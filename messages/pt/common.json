@@ -87,5 +87,27 @@
     "art": "Arte",
     "business": "Negócios",
     "other": "Outros"
+  },
+  "themeSets": {
+    "screen": "Filmes e séries",
+    "cartoons": "Desenhos e brinquedos",
+    "anime": "Anime e mangá",
+    "games": "Videogames",
+    "books": "Livros e contos",
+    "heroes": "Heróis e vilões",
+    "powers": "Poderes e reviravoltas",
+    "myths": "Mitos e fantasia",
+    "scifi": "Ficção científica",
+    "warriors": "Guerreiros e foras da lei",
+    "animals": "Animais",
+    "music": "Música",
+    "celebs": "Famosos",
+    "sports": "Esportes",
+    "history": "História",
+    "world": "Pelo mundo",
+    "jobs": "Profissões",
+    "family": "Família e amigos",
+    "quirks": "Jeito e manias",
+    "looks": "Visual e cores"
   }
 }

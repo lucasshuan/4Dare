@@ -1,7 +1,7 @@
 // What we keep of a finished match, per player: who picked what for whom,
 // how it ended and how long it took. Not shown anywhere yet.
 import { themeId } from "./theme-id";
-import type { Lang, Localized, PlayerId, RoomState } from "./types";
+import type { Lang, PlayerId, RoomState, Theme } from "./types";
 
 export type PlayerResult = "discovered" | "gave_up" | "left" | "not_found";
 
@@ -32,8 +32,8 @@ export interface MatchRecord {
   id: string;
   roomCode: string;
   round: number;
-  theme: Localized | null;
-  /** themeId(theme): groups what players picked for the same theme. */
+  theme: Theme | null;
+  /** themeId(theme): groups what players picked for the same theme. Null for a theme the host typed. */
   themeId: string | null;
   startedAt: number;
   finishedAt: number;
@@ -80,7 +80,7 @@ export function matchRecord(s: RoomState, now: number): MatchRecord | null {
     roomCode: s.code,
     round: s.round,
     theme: s.theme,
-    themeId: s.theme ? themeId(s.theme) : null,
+    themeId: s.theme && s.theme.set !== null ? themeId(s.theme) : null,
     startedAt,
     finishedAt: now,
     players,

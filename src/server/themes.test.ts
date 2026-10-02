@@ -1,14 +1,20 @@
 import { describe, expect, it } from "vitest";
-import type { Localized } from "@/game/types";
+import { THEME_SET_KEYS } from "@/game/theme-sets";
+import type { Theme } from "@/game/types";
 import type { ThemeStore } from "./backend/types";
 import { themeBank, themes } from "./themes";
 
-const t = (en: string): Localized => ({ en, pt: en, ja: en });
+const t = (en: string, set: Theme["set"] = "heroes"): Theme => ({
+  en,
+  pt: en,
+  ja: en,
+  set,
+});
 const LIST = [t("Pirates"), t("Robots"), t("Wizards")];
 
-function store(list: () => Promise<Localized[]>) {
+function store(list: () => Promise<Theme[]>) {
   let reads = 0;
-  const added: Localized[] = [];
+  const added: Theme[] = [];
   const s: ThemeStore = {
     list: () => {
       reads++;
@@ -39,6 +45,39 @@ describe("themes", () => {
       const [first] = await source.draw([LIST[0], LIST[1]], 1);
       expect(first.en).toBe("Wizards");
     }
+  });
+
+  it("draws from the chosen sets, and from the others only when they run short", async () => {
+    const list = [
+      t("Pirates", "warriors"),
+      t("Ninjas", "warriors"),
+      t("Knights", "warriors"),
+      t("Robots", "scifi"),
+      t("Mario", "games"),
+    ];
+    const { s } = store(async () => list);
+    const source = themes(s);
+    for (let i = 0; i < 20; i++) {
+      const drawn = await source.draw([], 3, ["warriors"]);
+      expect(drawn.map((x) => x.set)).toEqual([
+        "warriors",
+        "warriors",
+        "warriors",
+      ]);
+      const short = await source.draw([], 3, ["scifi", "games"]);
+      expect(
+        short
+          .slice(0, 2)
+          .map((x) => x.en)
+          .sort(),
+      ).toEqual(["Mario", "Robots"]);
+      expect(short[2].set).toBe("warriors");
+    }
+  });
+
+  it("every bundled theme belongs to a known set, and every set has themes", () => {
+    const sets = new Set(themeBank().map((x) => x.set));
+    expect([...sets].sort()).toEqual([...THEME_SET_KEYS].sort());
   });
 
   it("falls back to the bundled list when the store fails", async () => {

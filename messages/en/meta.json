@@ -32,11 +32,13 @@
   },
   "tab": {
     "lobby": "Lobby",
+    "theming": "Choosing the theme",
     "voting": "Theme vote",
     "picking": "Picking characters",
     "playing": "In a match",
     "finished": "Results",
     "alert": {
+      "theming": "Choose the theme!",
       "voting": "Vote for a theme!",
       "picking": "Pick a character!",
       "asking": "Your turn!",

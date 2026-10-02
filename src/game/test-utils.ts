@@ -5,17 +5,22 @@ import {
   DEFAULT_SETTINGS,
   type GameEvent,
   type Identity,
-  type Localized,
   type RoomSettings,
   type RoomState,
+  type Theme,
 } from "./types";
 
-export const THEME: Localized = { en: "Villains", pt: "Vilões", ja: "悪役" };
+export const THEME: Theme = {
+  en: "Villains",
+  pt: "Vilões",
+  ja: "悪役",
+  set: "heroes",
+};
 /** What START puts to the vote; THEME comes first. */
-export const THEMES: Localized[] = [
+export const THEMES: Theme[] = [
   THEME,
-  { en: "Robots", pt: "Robôs", ja: "ロボット" },
-  { en: "Pirates", pt: "Piratas", ja: "海賊" },
+  { en: "Robots", pt: "Robôs", ja: "ロボット", set: "scifi" },
+  { en: "Pirates", pt: "Piratas", ja: "海賊", set: "warriors" },
 ];
 
 export const ident = (id: string, guestNumber = 10): Identity => ({

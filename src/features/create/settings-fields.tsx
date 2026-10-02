@@ -21,6 +21,7 @@ function Segmented<T extends string | number>({
   render,
   disabled,
   describedBy,
+  className,
 }: {
   label: string;
   options: readonly T[];
@@ -29,12 +30,13 @@ function Segmented<T extends string | number>({
   render: (v: T) => string;
   disabled?: (v: T) => boolean;
   describedBy?: string;
+  className?: string;
 }) {
   return (
     <ChoiceGroup
       label={label}
       describedBy={describedBy}
-      className="flex-wrap self-start"
+      className={cn("flex-wrap self-start", className)}
     >
       {options.map((o) => (
         <button
@@ -117,6 +119,7 @@ function SecondsStepper({
         </button>
         <span>{t("secondsUnit")}</span>
       </div>
+      {/* the stepper does it all; very short windows skip the shortcuts */}
       <Segmented
         label={t("seconds")}
         options={[60, 90, 120, 180, 300] as const}
@@ -124,12 +127,13 @@ function SecondsStepper({
         onChange={set}
         render={String}
         describedBy={hintId}
+        className="sm:tiny:hidden"
       />
     </div>
   );
 }
 
-/** Visibility, seats and seconds per step: used to create a room and to edit it in the lobby. Each label carries its hint in a tooltip. */
+/** Visibility, seats and seconds per step: used to create a room and to edit it in the lobby. Each label carries its hint in a tooltip. The theme settings are in theme-fields.tsx. */
 export function SettingsFields({
   value,
   onChange,
@@ -171,7 +175,7 @@ export function SettingsFields({
           describedBy={seatsHint}
         />
       </div>
-      <div className="md:col-span-2">
+      <div className="md:col-span-2 lg:col-span-1">
         <SecondsStepper
           value={value.stepSeconds}
           onChange={(stepSeconds) => onChange({ ...value, stepSeconds })}

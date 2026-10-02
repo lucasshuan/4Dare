@@ -4,9 +4,11 @@ import { char, Game, ident, THEMES } from "./test-utils";
 import {
   DEFAULT_SETTINGS,
   GameError,
+  HOST_THEME_SECONDS,
   LOBBY_SECONDS,
   REVEAL_TIMING,
   type RoomState,
+  STEP_SECONDS_MIN,
   VOTE_SECONDS,
 } from "./types";
 
@@ -41,6 +43,9 @@ describe("lobby", () => {
       { stepSeconds: 10 },
       { stepSeconds: 301 },
       { stepSeconds: 60.5 },
+      { themeMode: "anyone" },
+      { themeSets: [] },
+      { themeSets: ["games", "nope"] },
     ];
     for (const patch of bad) {
       expect(
@@ -65,6 +70,26 @@ describe("lobby", () => {
     expect(code(() => g.do({ type: "JOIN", player: ident("p3") }))).toBe(
       "room_full",
     );
+  });
+
+  it("keeps each theme set once, in the screens' order", () => {
+    const g = new Game(1, 1, { themeSets: ["music", "games", "music"] });
+    expect(g.state.settings.themeSets).toEqual(["games", "music"]);
+  });
+
+  it("rooms saved before the theme settings get the defaults when edited", () => {
+    const g = new Game(1);
+    const { themeMode: _, themeSets: __, ...old } = g.state.settings;
+    g.state = { ...g.state, settings: old as RoomState["settings"] };
+    g.do({
+      type: "UPDATE_SETTINGS",
+      playerId: "p1",
+      settings: { stepSeconds: STEP_SECONDS_MIN },
+    });
+    expect(g.state.settings).toMatchObject({
+      themeMode: "vote",
+      themeSets: DEFAULT_SETTINGS.themeSets,
+    });
   });
 
   it("joining twice refreshes the identity instead of failing", () => {
@@ -225,6 +250,82 @@ describe("the theme vote", () => {
     g.do({ type: "LEAVE", playerId: "p1" });
     expect(g.state.phase).toBe("voting");
     expect(g.state.hostId).toBe("p2");
+  });
+});
+
+describe("the host types the theme", () => {
+  const theming = (players: number) => {
+    const g = new Game(players, 1, { themeMode: "host" });
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    return g;
+  };
+
+  it("starts with the host typing, ideas at hand and a 30 s clock", () => {
+    const g = theming(3);
+    expect(g.state.phase).toBe("theming");
+    expect(g.state.vote).toBeNull();
+    expect(g.state.ideas).toEqual(THEMES);
+    expect(g.state.deadline).toBe(g.now + HOST_THEME_SECONDS * 1000);
+  });
+
+  it("only the host sets it; it is shown to everyone, then picking starts", () => {
+    const g = theming(2);
+    const set = (playerId: string, text: string) =>
+      g.do({ type: "SET_THEME", playerId, text });
+    expect(code(() => set("p2", "Pirates"))).toBe("not_host");
+    expect(code(() => set("p1", "   "))).toBe("invalid_input");
+    expect(code(() => set("p1", "x".repeat(51)))).toBe("invalid_input");
+    set("p1", "  Space   cowboys ");
+    expect(g.state.phase).toBe("picking");
+    expect(g.state.theme).toEqual({
+      en: "Space cowboys",
+      pt: "Space cowboys",
+      ja: "Space cowboys",
+      set: null,
+    });
+    expect(g.state.ideas).toEqual([]);
+    expect(g.state.reveal).toMatchObject({
+      kind: "theme",
+      until: g.now + REVEAL_TIMING.theme,
+    });
+    expect(g.state.stepStartsAt).toBe(g.state.reveal?.until);
+    expect(code(() => set("p1", "Again"))).toBe("wrong_phase");
+  });
+
+  it("when the host runs out of time, everyone votes instead", () => {
+    const g = theming(2);
+    expect(code(() => g.timeout())).toBe("invalid_input");
+    g.timeout({ themes: THEMES });
+    expect(g.state.phase).toBe("voting");
+    expect(g.state.vote?.options).toEqual(THEMES);
+    expect(g.state.deadline).toBe(g.now + VOTE_SECONDS * 1000);
+  });
+
+  it("a host who leaves hands the typing over; alone, back to the lobby", () => {
+    const g = theming(3);
+    g.do({ type: "LEAVE", playerId: "p1" });
+    expect(g.state.phase).toBe("theming");
+    expect(g.state.hostId).toBe("p2");
+    g.do({ type: "SET_THEME", playerId: "p2", text: "Pirates" });
+    expect(g.state.theme?.en).toBe("Pirates");
+
+    const pair = theming(2);
+    pair.do({ type: "LEAVE", playerId: "p2" });
+    expect(pair.state.phase).toBe("lobby");
+  });
+
+  it("the lobby clock and a rematch go to the host's typing too", () => {
+    const g = new Game(2, 1, { themeMode: "host" });
+    g.timeout({ themes: [] });
+    expect(g.state.phase).toBe("theming");
+    g.do({ type: "SET_THEME", playerId: "p1", text: "Pirates" });
+    g.skipReveal();
+    g.pickAll();
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    expect(g.state.phase).toBe("finished");
+    g.do({ type: "REMATCH", playerId: "p1", themes: THEMES });
+    expect(g.state.phase).toBe("theming");
   });
 });
 

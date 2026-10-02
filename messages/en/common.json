@@ -87,5 +87,27 @@
     "art": "Art",
     "business": "Business",
     "other": "Other"
+  },
+  "themeSets": {
+    "screen": "Movies & TV",
+    "cartoons": "Cartoons & toys",
+    "anime": "Anime & manga",
+    "games": "Video games",
+    "books": "Books & tales",
+    "heroes": "Heroes & villains",
+    "powers": "Powers & twists",
+    "myths": "Myths & fantasy",
+    "scifi": "Sci-fi",
+    "warriors": "Warriors & outlaws",
+    "animals": "Animals",
+    "music": "Music",
+    "celebs": "Celebrities",
+    "sports": "Sports",
+    "history": "History",
+    "world": "Around the world",
+    "jobs": "Jobs",
+    "family": "Family & friends",
+    "quirks": "Personality & quirks",
+    "looks": "Looks & colors"
   }
 }

@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { normalizeName } from "../src/game/match";
 import { themeId } from "../src/game/theme-id";
-import { LANGS, type Localized } from "../src/game/types";
+import { LANGS, type Theme } from "../src/game/types";
 import {
   entryAliases,
   type SeedCharacter,
@@ -63,12 +63,13 @@ async function existingCharacters(): Promise<Map<string, string | null>> {
 }
 
 async function seedThemes() {
-  const list = readData<Localized[]>("themes.json");
+  const list = readData<Theme[]>("themes.json");
   const rows = list.map((t) => ({
     id: themeId(t),
     en: t.en,
     pt: t.pt,
     ja: t.ja,
+    theme_set: t.set,
     source: "bank",
     active: true,
   }));

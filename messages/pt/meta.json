@@ -32,11 +32,13 @@
   },
   "tab": {
     "lobby": "Sala de espera",
+    "theming": "Escolhendo o tema",
     "voting": "Votação do tema",
     "picking": "Escolhendo personagens",
     "playing": "Em partida",
     "finished": "Resultado",
     "alert": {
+      "theming": "Escolha o tema!",
       "voting": "Vote num tema!",
       "picking": "Escolha um personagem!",
       "asking": "Sua vez!",

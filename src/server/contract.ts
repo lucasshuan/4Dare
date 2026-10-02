@@ -1,4 +1,5 @@
 // Shapes shared by server actions, route handlers and the UI.
+import type { ThemeSet } from "@/game/theme-sets";
 import type {
   Avatar,
   Character,
@@ -43,6 +44,8 @@ export interface CreateRoomInput {
   visibility: "public" | "private";
   seats: 2 | 3 | 4;
   stepSeconds: number;
+  themeMode: "vote" | "host";
+  themeSets: ThemeSet[];
 }
 
 /** The eight avatar colours an account can choose (design system `avatar-*`). */

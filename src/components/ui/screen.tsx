@@ -47,7 +47,16 @@ export function Wordmark() {
   );
 }
 
-export function ThemeTag({ label, theme }: { label: string; theme: string }) {
+export function ThemeTag({
+  label,
+  theme,
+  emoji,
+}: {
+  label: string;
+  theme: string;
+  /** The theme set's emoji. */
+  emoji?: string | null;
+}) {
   return (
     <span
       title={theme}
@@ -56,6 +65,7 @@ export function ThemeTag({ label, theme }: { label: string; theme: string }) {
       <span className="shrink-0 whitespace-nowrap font-medium max-sm:sr-only">
         {label}
       </span>
+      {emoji ? <span aria-hidden>{emoji}</span> : null}
       <span className="truncate">{theme}</span>
     </span>
   );

@@ -39,7 +39,7 @@ const match = (
   id: `m${Math.random()}`,
   roomCode: "ABCDE",
   round: 1,
-  theme: { en: theme, pt: theme, ja: theme },
+  theme: { en: theme, pt: theme, ja: theme, set: "heroes" },
   themeId: withId ? theme.toLowerCase() : null,
   startedAt: 0,
   finishedAt: 1,

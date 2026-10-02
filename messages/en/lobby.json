@@ -28,5 +28,11 @@
   "saveSettings": "Save",
   "cancel": "Cancel",
   "settingsSaved": "Settings saved",
-  "mode": "Classic mode"
+  "mode": "Classic mode",
+  "themes": "Themes",
+  "themeVote": "Everyone votes · {on} of {total} sets",
+  "themeVoteAll": "Everyone votes · every set",
+  "themeHost": "The host types the theme",
+  "changeThemes": "Change",
+  "done": "Done"
 }

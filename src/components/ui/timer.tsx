@@ -8,7 +8,7 @@ import { formatClock } from "@/lib/names";
 /**
  * The step clock. While a reveal is on screen (now < stepStartsAt) it recharges:
  * the bar refills and the digits count back up to the full step, landing exactly
- * when the step starts. Then it counts down, turning to the "no" colour in the last 20 s.
+ * when the step starts. Then it counts down, turning to the "no" colour near the end.
  */
 export function Timer({
   deadline,
@@ -41,7 +41,8 @@ export function Timer({
     fraction = total > 0 ? left / total : 0;
     shown = left / 1000;
   }
-  const low = !recharging && shown <= 20;
+  // The last 20 s, or the last third of a short step (a quick vote).
+  const low = !recharging && shown <= Math.min(20, total / 3000);
   return (
     <div
       role="timer"

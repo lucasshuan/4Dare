@@ -100,6 +100,7 @@ export function PickScreen() {
 
   if (!pick || !target) return null;
   const targetName = name(target);
+  const typedTheme = view.theme?.set === null;
   const waiting = view.players.filter((p) => !pick.confirmedIds.includes(p.id));
 
   const choose = (c: CharacterDTO, fromDice = false, flip = false) => {
@@ -370,18 +371,21 @@ export function PickScreen() {
                   >
                     {t("searchLabel", { name: targetName })}
                   </label>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={pending || noHistory}
-                    title={t("randomHint")}
-                    onClick={roll}
-                  >
-                    {dice}
-                    {t("random")}
-                  </Button>
+                  {/* a theme the host typed has no past picks to draw from */}
+                  {typedTheme ? null : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={pending || noHistory}
+                      title={t("randomHint")}
+                      onClick={roll}
+                    >
+                      {dice}
+                      {t("random")}
+                    </Button>
+                  )}
                 </div>
-                {noHistory ? (
+                {noHistory && !typedTheme ? (
                   <motion.p
                     {...riseIn}
                     className="font-medium text-[13px] text-ink-muted"

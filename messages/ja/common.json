@@ -87,5 +87,27 @@
     "art": "アート",
     "business": "ビジネス",
     "other": "その他"
+  },
+  "themeSets": {
+    "screen": "映画とドラマ",
+    "cartoons": "カートゥーンとおもちゃ",
+    "anime": "アニメと漫画",
+    "games": "ゲーム",
+    "books": "本と物語",
+    "heroes": "ヒーローと悪役",
+    "powers": "能力と運命",
+    "myths": "神話とファンタジー",
+    "scifi": "SF",
+    "warriors": "戦士とアウトロー",
+    "animals": "動物",
+    "music": "音楽",
+    "celebs": "有名人",
+    "sports": "スポーツ",
+    "history": "歴史",
+    "world": "世界各地",
+    "jobs": "職業",
+    "family": "家族と仲間",
+    "quirks": "性格とクセ",
+    "looks": "見た目と色"
   }
 }

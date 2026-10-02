@@ -5,6 +5,7 @@ import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { normalizeName } from "@/game/match";
 import { themeId } from "@/game/theme-id";
+import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
 import {
   ANSWERS,
   type AnswerValue,
@@ -19,6 +20,7 @@ import {
   MAX_NAME,
   MAX_NOTE,
   MAX_QUESTION,
+  MAX_THEME,
   type RoomSettings,
   type RoomView,
   STEP_SECONDS_MAX,
@@ -37,7 +39,7 @@ import {
   type Result,
 } from "./contract";
 import { allow } from "./rate-limit";
-import { dispatch, normalizeCode, openRoom } from "./rooms";
+import { dispatch, normalizeCode, openRoom, roundThemes } from "./rooms";
 import { drawPopular, PICKS_FETCHED, pickKey } from "./theme-picks";
 
 async function lang(): Promise<Lang> {
@@ -89,6 +91,11 @@ const createSchema = z.object({
   visibility: z.enum(["public", "private"]),
   seats: z.union([z.literal(2), z.literal(3), z.literal(4)]),
   stepSeconds: z.number().int().min(STEP_SECONDS_MIN).max(STEP_SECONDS_MAX),
+  themeMode: z.enum(["vote", "host"]),
+  themeSets: z
+    .array(z.enum(THEME_SET_KEYS as [ThemeSet, ...ThemeSet[]]))
+    .min(1)
+    .max(THEME_SET_KEYS.length),
 });
 
 export async function createRoom(
@@ -152,12 +159,27 @@ export async function setReady(
   );
 }
 
-/** Host only, 2+ players. Draws the themes everyone votes on. */
+/** Host only, 2+ players. Draws the themes everyone votes on (or the host's ideas, when they type the theme). */
 export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {
-    const themes = await getBackend().themes.draw([], THEME_OPTIONS);
+    const stored = await getBackend().rooms.get(roomCode(code));
+    const themes = stored ? await roundThemes(stored.state, []) : [];
     return act(code, (id) => ({ type: "START", playerId: id, themes }));
   });
+}
+
+/** Host only, while the room waits for them to type the theme. */
+export async function chooseTheme(
+  code: string,
+  theme: string,
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({
+      type: "SET_THEME",
+      playerId: id,
+      text: text(theme, MAX_THEME),
+    })),
+  );
 }
 
 /** Any player, while voting: `option` is the index of the theme. They may change it until everyone has voted. */
@@ -209,7 +231,9 @@ export async function randomPick(
     );
     if (!player || !mine) throw new GameError("not_member");
     if (mine.character) throw new GameError("already_done");
-    if (!state.theme) throw new GameError("not_enough_picks");
+    // A theme the host typed has no history to draw from.
+    if (!state.theme || state.theme.set === null)
+      throw new GameError("not_enough_picks");
     // Language-free keys: someone else's pick in another language is taken too.
     const taken = new Set(
       Object.values(state.assignments).flatMap((a) => {
@@ -355,11 +379,13 @@ export async function giveUp(code: string): Promise<Result<RoomView>> {
 export async function rematch(code: string): Promise<Result<RoomView>> {
   return run(async () => {
     const stored = await getBackend().rooms.get(roomCode(code));
-    const themes = await getBackend().themes.draw(
-      stored?.state.vote?.options ??
-        (stored?.state.theme ? [stored.state.theme] : []),
-      THEME_OPTIONS,
-    );
+    const themes = stored
+      ? await roundThemes(
+          stored.state,
+          stored.state.vote?.options ??
+            (stored.state.theme ? [stored.state.theme] : []),
+        )
+      : [];
     return act(code, (id) => ({ type: "REMATCH", playerId: id, themes }));
   });
 }

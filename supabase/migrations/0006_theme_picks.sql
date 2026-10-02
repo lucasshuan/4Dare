@@ -7,9 +7,11 @@ alter table public.matches add column if not exists theme_id text;
 alter table public.match_players add column if not exists auto_picked boolean not null default false;
 
 -- Matches saved before: the same slug themeId() makes from the English text.
+-- A theme the host typed ("set": null) never gets one.
 update public.matches
 set theme_id = trim(both '-' from regexp_replace(lower(normalize(theme->>'en', NFKD)), '[^a-z0-9]+', '-', 'g'))
-where theme_id is null and theme->>'en' is not null;
+where theme_id is null and theme->>'en' is not null
+  and jsonb_typeof(theme->'set') is distinct from 'null';
 
 create index if not exists matches_theme on public.matches (theme_id);
 

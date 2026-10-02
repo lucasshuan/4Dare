@@ -10,6 +10,7 @@ import { useRoom } from "@/features/data/use-room";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
 import { PickScreen } from "@/features/pick/pick-screen";
 import { ResultScreen } from "@/features/result/result-screen";
+import { ThemeScreen } from "@/features/theme/theme-screen";
 import { TurnScreen } from "@/features/turn/turn-screen";
 import { VoteScreen } from "@/features/vote/vote-screen";
 import type { ErrorCode, Phase, PlayerStatus } from "@/game/types";
@@ -59,16 +60,20 @@ function PhaseScreens() {
   const now = useServerClock(offset, 250);
   // A hit that ends the match keeps its reveal; the results wait until it is over.
   const revealing = view.reveal !== null && now < view.reveal.until;
-  // The vote screen stays up while it plays out the chosen theme.
+  // The theme stays on its screen (the vote's, or the host's) while it is shown to everyone.
   const phase =
     view.phase === "finished" && revealing
       ? "finished-wait"
       : view.reveal?.kind === "theme" && revealing
-        ? "voting"
+        ? view.vote
+          ? "voting"
+          : "theming"
         : view.phase;
   const screen =
     phase === "lobby" ? (
       <LobbyScreen />
+    ) : phase === "theming" ? (
+      <ThemeScreen />
     ) : phase === "voting" ? (
       <VoteScreen />
     ) : phase === "picking" ? (
@@ -144,6 +149,7 @@ function RoomProblem({ code }: { code: ErrorCode }) {
 
 const TAB_PHASE: Partial<Record<Phase, string>> = {
   lobby: "lobby",
+  theming: "theming",
   voting: "voting",
   picking: "picking",
   asking: "playing",
@@ -154,6 +160,7 @@ const TAB_PHASE: Partial<Record<Phase, string>> = {
 };
 /** Statuses that wait on this player: the tab calls them back when they're elsewhere. */
 const TAB_ALERT: Partial<Record<PlayerStatus, string>> = {
+  theming: "theming",
   voting: "voting",
   picking: "picking",
   asking: "asking",

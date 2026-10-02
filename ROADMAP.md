@@ -53,7 +53,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Themes where the "character" is a group: duos, trios, siblings, families, bands, species (Pikmin)
 - [x] Themes in the database: turn on and off without a deploy; the AI's ones are kept
 - [x] One theme, one idea: "Angels and demons", "Butlers and maids" and 13 others became two themes each; the AI no longer joins two groups
-- [x] Theme vote: before each match (and rematch) 3 themes show up and everyone votes, with avatars hopping between the cards; 20 s; most votes wins, a tie goes to a synced wheel, and the winner takes the stage before picking
+- [x] Theme vote: before each match (and rematch) 3 themes show up and everyone votes, with avatars hopping between the cards; 8 s; most votes wins, a tie goes to a synced wheel, and the winner takes the stage before picking
 
 ## Phase 4 — Looks like a finished game ✅
 
@@ -100,3 +100,16 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Share cards with a picture for Twitter, Facebook, Discord, WhatsApp and the like: home, "Who am I?" and a room invite with its code, in 3 languages
 - [x] Tab title per page and per step of the match; when it's your move and you're in another tab, the title and the icon blink (orange "!")
 - [x] Vercel Web Analytics and Speed Insights
+
+## Phase 8 — Themes your way ✅
+
+- [x] Themes split into 20 sets, each with its emoji (Movies & TV, Anime & manga, Sports...)
+- [x] Creating a room: pick the sets the vote draws from, all on by default, as cards
+- [x] Time per step next to seats on the web, so the settings make a grid
+- [x] The last room setup is remembered in the browser; the lobby edits it too
+- [x] Or the host types the theme: no sets, no vote, ideas at hand
+- [x] Everyone sees "the host is choosing the theme"; after 30 s it becomes a vote among every set
+- [x] No "Random" pick for a typed theme
+- [x] Quick vote: 8 s; then the theme stays on screen for everyone for 3 s
+- [x] The set's emoji on the vote cards and next to the theme at the top
+- [x] Smooth animations on all of it: cards, switch, typing, reveal

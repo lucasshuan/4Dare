@@ -4,6 +4,7 @@
 // Server actions and route handlers only talk to these interfaces (via getBackend()).
 
 import type { MatchRecord } from "@/game/record";
+import type { ThemeSet } from "@/game/theme-sets";
 import type {
   Character,
   Identity,
@@ -12,6 +13,7 @@ import type {
   PlayerId,
   PublicRoom,
   RoomState,
+  Theme,
 } from "@/game/types";
 import type { Me } from "../contract";
 import type { PickFeedback, PopularPick } from "../theme-picks";
@@ -64,16 +66,20 @@ export interface CharacterStore {
 /** Where the theme list lives: the bundled file locally, a table on Supabase. */
 export interface ThemeStore {
   /** Every theme that may be drawn. */
-  list(): Promise<Localized[]>;
+  list(): Promise<Theme[]>;
   /** Keeps a theme the AI invented; an existing one is left as it is. */
-  add(theme: Localized): Promise<void>;
+  add(theme: Theme): Promise<void>;
 }
 
 export interface ThemeSource {
-  /** `count` different themes in the three languages. Never throws: falls back to the built-in bank. */
-  draw(avoid: Localized[], count: number): Promise<Localized[]>;
+  /** `count` different themes in the three languages, from `sets` (every set when left out) while they have enough. Never throws: falls back to the built-in bank. */
+  draw(
+    avoid: Localized[],
+    count: number,
+    sets?: readonly ThemeSet[],
+  ): Promise<Theme[]>;
   /** Instant, no network: straight from the bank. */
-  drawFromBank(count: number): Localized[];
+  drawFromBank(count: number, sets?: readonly ThemeSet[]): Theme[];
 }
 
 export interface FileStore {

@@ -32,11 +32,13 @@
   },
   "tab": {
     "lobby": "待合室",
+    "theming": "テーマ決め",
     "voting": "テーマ投票",
     "picking": "キャラクター選び",
     "playing": "対戦中",
     "finished": "結果",
     "alert": {
+      "theming": "テーマを決めよう！",
       "voting": "テーマに投票しよう！",
       "picking": "キャラクターを選ぼう！",
       "asking": "あなたの番です！",

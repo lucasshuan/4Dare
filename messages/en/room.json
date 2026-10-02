@@ -69,5 +69,22 @@
     "chosenByDraw": "The wheel has spoken.",
     "chosen": "Chosen theme",
     "announce": "Chosen theme: {theme}"
+  },
+  "theming": {
+    "kicker": "Theme",
+    "hostKicker": "Your call",
+    "title": "Choose the theme",
+    "subtitle": "Write any theme. Then everyone picks a character that fits it.",
+    "label": "Theme of the match",
+    "placeholder": "e.g. Space pirates",
+    "submit": "Use this theme",
+    "ideas": "Ideas",
+    "moreIdeas": "Other ideas",
+    "fallback": "If time runs out, everyone votes instead.",
+    "waitingTitle": "{name} is choosing the theme",
+    "waitingSubtitle": "Get ready to pick a character that fits it. If time runs out, everyone votes instead.",
+    "chosenTitle": "The theme is…",
+    "chosenBy": "Chosen by {name}",
+    "announce": "Chosen theme: {theme}"
   }
 }

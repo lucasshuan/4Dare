@@ -10,7 +10,9 @@ import {
   type PlayerId,
   type RoomSettings,
   type RoomState,
+  THEME_IDEAS,
   THEME_OPTIONS,
+  type Theme,
 } from "@/game/types";
 import { getBackend } from "./backend";
 import { background } from "./background";
@@ -74,6 +76,23 @@ export async function dispatch(
   throw new GameError("conflict");
 }
 
+/**
+ * What a new round needs: ideas for a host who types the theme, or themes to
+ * vote on from the room's sets. `quick` skips the AI (a round the clock starts).
+ */
+export async function roundThemes(
+  state: RoomState,
+  avoid: Theme[],
+  quick = false,
+): Promise<Theme[]> {
+  const { themes } = getBackend();
+  const { themeMode, themeSets } = state.settings;
+  if (themeMode === "host") return themes.drawFromBank(THEME_IDEAS);
+  return quick
+    ? themes.drawFromBank(THEME_OPTIONS, themeSets)
+    : themes.draw(avoid, THEME_OPTIONS, themeSets);
+}
+
 /** Saves the finished match after the response is sent, so nobody waits for it. */
 function saveMatch(state: RoomState) {
   const record = matchRecord(state, Date.now());
@@ -132,8 +151,7 @@ async function fallbackCharacters(state: RoomState): Promise<Character[]> {
   return [...new Map(out.map((c) => [c.id, c])).values()];
 }
 
-/** Fires the TIMEOUTs that are due. Losing a race to another reader is fine. */
-/** Fires the clock timeouts that are due and returns the room as it is now (one read when nothing is due). */
+/** Fires the clock timeouts that are due and returns the room as it is now (one read when nothing is due). Losing a race to another reader is fine. */
 export async function applyDueTimeouts(code: string) {
   const { rooms, themes } = getBackend();
   let stored = await rooms.get(code);
@@ -143,6 +161,13 @@ export async function applyDueTimeouts(code: string) {
       stored = await dispatch(code, async (state) => {
         if (!isExpired(state, Date.now())) throw new GameError("wrong_phase");
         if (state.phase === "lobby") {
+          return {
+            type: "TIMEOUT",
+            themes: await roundThemes(state, [], true),
+          };
+        }
+        if (state.phase === "theming") {
+          // The host never typed it: everyone votes, on themes from every set.
           return {
             type: "TIMEOUT",
             themes: themes.drawFromBank(THEME_OPTIONS),

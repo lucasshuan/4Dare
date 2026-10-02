@@ -1,8 +1,14 @@
 // The whole game in types. Everything else (engine, server, UI) is written against this file.
+import { THEME_SET_KEYS, type ThemeSet } from "./theme-sets";
 
 export const LANGS = ["en", "pt", "ja"] as const;
 export type Lang = (typeof LANGS)[number];
 export type Localized = Record<Lang, string>;
+
+/** A theme in the three languages. `set` is its theme set; null when the host typed it in (the same text in every language). */
+export interface Theme extends Localized {
+  set: ThemeSet | null;
+}
 
 /** Always shown in this order. */
 export const ANSWERS = [
@@ -42,6 +48,10 @@ export interface RoomSettings {
   /** Seconds per step: 30..300, default 120. */
   stepSeconds: number;
   mode: "classic";
+  /** "vote": everyone votes on themes drawn from `themeSets`. "host": the host types the theme. */
+  themeMode: "vote" | "host";
+  /** The theme sets a vote draws from: at least one. */
+  themeSets: ThemeSet[];
 }
 
 export const DEFAULT_SETTINGS: RoomSettings = {
@@ -49,6 +59,8 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   seats: 4,
   stepSeconds: 120,
   mode: "classic",
+  themeMode: "vote",
+  themeSets: [...THEME_SET_KEYS],
 };
 export const STEP_SECONDS_MIN = 30;
 export const STEP_SECONDS_MAX = 300;
@@ -56,7 +68,12 @@ export const STEP_SECONDS_MAX = 300;
 export const LOBBY_SECONDS = 120;
 /** Themes offered in the vote before each match, and how long the vote lasts. */
 export const THEME_OPTIONS = 3;
-export const VOTE_SECONDS = 20;
+export const VOTE_SECONDS = 8;
+/** How long the host has to type the theme; then everyone votes instead, on themes from every set. */
+export const HOST_THEME_SECONDS = 30;
+/** Ideas shown to the host while they type the theme. */
+export const THEME_IDEAS = 12;
+export const MAX_THEME = 50;
 export const MAX_QUESTION = 140;
 export const MAX_NOTE = 200;
 export const MAX_GUESS = 80;
@@ -75,8 +92,8 @@ export const REVEAL_TIMING = {
   answersMax: 10000,
   guessMiss: 2500,
   guessHit: 3500,
-  /** The winning theme takes the stage; a tie first spins between the tied themes. */
-  theme: 3200,
+  /** The theme takes the stage before picking (after a vote, with a short spotlight on the winner first); a tie first spins between the tied themes. */
+  theme: 3000,
   themeTieSpin: 2000,
 } as const;
 
@@ -93,6 +110,8 @@ export interface Character {
 
 export type Phase =
   | "lobby"
+  /** The host types the theme (theme mode "host"). */
+  | "theming"
   /** Everyone votes for one of three themes. */
   | "voting"
   | "picking"
@@ -156,10 +175,9 @@ export interface Outcome {
   endedAt: number | null;
 }
 
-/** The moment everyone sees between two steps. The play itself (answers, result) lives in `plays`. */
 /** The vote that picks the theme of a match. */
 export interface ThemeVote {
-  options: Localized[];
+  options: Theme[];
   /** Option index by voter. Players may change their vote until everyone has voted. */
   votes: Record<PlayerId, number>;
   /** The winner, once the vote is over. */
@@ -168,6 +186,7 @@ export interface ThemeVote {
   tied: number[];
 }
 
+/** The moment everyone sees between two steps. The play itself (answers, result) lives in `plays`. */
 export interface Reveal {
   kind: "answers" | "guess" | "theme";
   /** Number of the jogada being revealed (the round, for a theme). */
@@ -185,9 +204,11 @@ export interface RoomState {
   players: RoomPlayer[];
   /** Turn order, set when the match starts. */
   order: PlayerId[];
-  theme: Localized | null;
-  /** The theme vote of the current round; kept after it closes, for the reveal. */
+  theme: Theme | null;
+  /** The theme vote of the current round; kept after it closes, for the reveal. Null when the host typed the theme. */
   vote: ThemeVote | null;
+  /** Ideas for the host while they type the theme. */
+  ideas: Theme[];
   assignments: Record<PlayerId, Assignment>;
   turnPlayerId: PlayerId | null;
   plays: Play[];
@@ -219,9 +240,11 @@ export type GameEvent =
   | { type: "UPDATE_IDENTITY"; player: Identity }
   /** A guest signed in: the account takes the guest's seat, history and all. */
   | { type: "SWAP_PLAYER"; from: PlayerId; player: Identity }
-  /** `themes`: the THEME_OPTIONS themes put to the vote. */
-  | { type: "START"; playerId: PlayerId; themes: Localized[] }
+  /** `themes`: the THEME_OPTIONS themes put to the vote, or ideas for a host who types the theme. */
+  | { type: "START"; playerId: PlayerId; themes: Theme[] }
   | { type: "VOTE"; playerId: PlayerId; option: number }
+  /** The host typed the theme. */
+  | { type: "SET_THEME"; playerId: PlayerId; text: string }
   | { type: "PICK"; playerId: PlayerId; character: Character }
   | { type: "ASK"; playerId: PlayerId; text: string }
   | {
@@ -234,14 +257,15 @@ export type GameEvent =
   | { type: "PASS"; playerId: PlayerId }
   | { type: "VALIDATE"; playerId: PlayerId; correct: boolean }
   | { type: "GIVE_UP"; playerId: PlayerId }
-  | { type: "REMATCH"; playerId: PlayerId; themes: Localized[] }
+  | { type: "REMATCH"; playerId: PlayerId; themes: Theme[] }
   /**
    * The step's clock ran out. The caller supplies what the engine cannot make up:
-   * themes to vote on (lobby auto-start) and popular characters (picking).
+   * themes to vote on or ideas (lobby auto-start, a host who never typed the theme)
+   * and popular characters (picking).
    */
   | {
       type: "TIMEOUT";
-      themes?: Localized[];
+      themes?: Theme[];
       fallbackCharacters?: Character[];
     };
 
@@ -291,6 +315,8 @@ export type PlayerStatus =
   | "host"
   | "ready"
   | "not_ready"
+  // the host typing the theme (the others wait)
+  | "theming"
   // voting
   | "voting"
   | "voted"
@@ -401,7 +427,7 @@ export type RevealView =
     };
 
 export interface VoteView {
-  options: Localized[];
+  options: Theme[];
   /** Votes are open: everyone sees who voted for what. */
   votes: { byId: PlayerId; option: number }[];
   yourVote: number | null;
@@ -429,7 +455,7 @@ export interface RoomView {
   youId: PlayerId;
   hostId: PlayerId;
   players: PlayerView[];
-  theme: Localized | null;
+  theme: Theme | null;
   deadline: number | null;
   /** When the current step's clock starts. Before that a reveal is on screen and the timer refills. */
   stepStartsAt: number | null;
@@ -439,6 +465,8 @@ export interface RoomView {
   serverNow: number;
   /** Present while voting and while the chosen theme is revealed. */
   vote: VoteView | null;
+  /** The host only, while they type the theme. */
+  ideas: Theme[] | null;
   /** Present while picking. */
   pick: PickView | null;
   /** Present from "asking" to "validating". */

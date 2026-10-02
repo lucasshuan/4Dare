@@ -69,5 +69,22 @@
     "chosenByDraw": "ルーレットで決まりました。",
     "chosen": "決定したテーマ",
     "announce": "決定したテーマ：{theme}"
+  },
+  "theming": {
+    "kicker": "テーマ",
+    "hostKicker": "あなたが決める",
+    "title": "テーマを決めよう",
+    "subtitle": "好きなテーマを書いてください。みんながそれに合うキャラクターを選びます。",
+    "label": "この試合のテーマ",
+    "placeholder": "例：宇宙の海賊",
+    "submit": "このテーマにする",
+    "ideas": "アイデア",
+    "moreIdeas": "ほかのアイデア",
+    "fallback": "時間切れになると、みんなの投票になります。",
+    "waitingTitle": "{name}さんがテーマを決めています",
+    "waitingSubtitle": "合うキャラクターを選ぶ準備をしよう。時間切れになると、みんなの投票になります。",
+    "chosenTitle": "テーマは…",
+    "chosenBy": "{name}さんが決めました",
+    "announce": "決定したテーマ：{theme}"
   }
 }

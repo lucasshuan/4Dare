@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { ThemeTag } from "@/components/ui/screen";
 import { Timer } from "@/components/ui/timer";
 import { useRoomContext } from "@/features/data/room-context";
+import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 
 /** Header of the match screens: theme and the step clock. No logo during a match. */
@@ -16,7 +17,13 @@ export function GameHeader({ hideTheme = false }: { hideTheme?: boolean }) {
     <header className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-4">
         {view.theme && !hideTheme ? (
-          <ThemeTag label={t("theme")} theme={view.theme[lang]} />
+          <ThemeTag
+            label={t("theme")}
+            theme={view.theme[lang]}
+            emoji={
+              view.theme.set === null ? "✍️" : themeSetEmoji(view.theme.set)
+            }
+          />
         ) : null}
       </div>
       <Timer

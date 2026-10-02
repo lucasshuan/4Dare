@@ -3,6 +3,7 @@
     "host": "Host",
     "ready": "Ready",
     "not_ready": "Not ready",
+    "theming": "Choosing the theme",
     "voting": "Voting",
     "voted": "Voted",
     "picking": "Picking",

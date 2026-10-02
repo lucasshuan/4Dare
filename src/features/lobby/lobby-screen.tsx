@@ -8,8 +8,10 @@ import {
   Globe,
   Link as LinkIcon,
   Lock,
+  PenLine,
   Play,
   UsersRound,
+  Vote,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -22,10 +24,13 @@ import { Screen } from "@/components/ui/screen";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Timer } from "@/components/ui/timer";
 import { useToast } from "@/components/ui/toast";
+import { saveSetup } from "@/features/create/last-setup";
 import { SettingsFields } from "@/features/create/settings-fields";
+import { missingSets, ThemeFieldsButton } from "@/features/create/theme-fields";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
+import { THEME_SET_KEYS } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -46,7 +51,15 @@ const editable = ({
   visibility,
   seats,
   stepSeconds,
-}: CreateRoomInput): CreateRoomInput => ({ visibility, seats, stepSeconds });
+  themeMode,
+  themeSets,
+}: CreateRoomInput): CreateRoomInput => ({
+  visibility,
+  seats,
+  stepSeconds,
+  themeMode,
+  themeSets,
+});
 
 export function LobbyScreen() {
   const t = useTranslations("lobby");
@@ -75,7 +88,8 @@ export function LobbyScreen() {
   const [draft, setDraft] = useState<CreateRoomInput>(() =>
     editable(view.settings),
   );
-  const { visibility, seats, stepSeconds } = view.settings;
+  const { visibility, seats, stepSeconds, themeMode, themeSets } =
+    view.settings;
 
   const copy = async (text: string, done: string) => {
     try {
@@ -247,6 +261,7 @@ export function LobbyScreen() {
                   const r = await act(() => updateSettings(code, draft));
                   if (r.ok) {
                     setEditing(false);
+                    saveSetup(draft);
                     toast(t("settingsSaved"));
                   }
                 }}
@@ -256,8 +271,16 @@ export function LobbyScreen() {
                   onChange={setDraft}
                   minSeats={view.players.length}
                 />
+                <ThemeFieldsButton
+                  value={draft}
+                  onChange={(v) => setDraft({ ...draft, ...v })}
+                />
                 <div className="flex gap-2">
-                  <Button type="submit" variant="primary" disabled={pending}>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={pending || missingSets(draft)}
+                  >
                     {t("saveSettings")}
                   </Button>
                   <Button variant="ghost" onClick={() => setEditing(false)}>
@@ -281,6 +304,16 @@ export function LobbyScreen() {
                       seconds: stepSeconds,
                       clock: formatClock(stepSeconds),
                     })}
+                  </Setting>
+                  <Setting icon={themeMode === "host" ? PenLine : Vote}>
+                    {themeMode === "host"
+                      ? t("themeHost")
+                      : themeSets.length === THEME_SET_KEYS.length
+                        ? t("themeVoteAll")
+                        : t("themeVote", {
+                            on: themeSets.length,
+                            total: THEME_SET_KEYS.length,
+                          })}
                   </Setting>
                   <Setting icon={Play}>{t("mode")}</Setting>
                 </ul>

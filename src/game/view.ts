@@ -11,6 +11,7 @@ import {
   type AnswerEntry,
   type CardView,
   type Character,
+  DEFAULT_SETTINGS,
   GameError,
   type HistoryEntryView,
   type Phase,
@@ -75,6 +76,7 @@ function statusOf(s: RoomState, p: RoomPlayer): PlayerStatus {
   const o = s.outcomes[p.id];
   if (s.phase === "lobby")
     return p.id === s.hostId ? "host" : p.ready ? "ready" : "not_ready";
+  if (s.phase === "theming") return p.id === s.hostId ? "theming" : "waiting";
   if (s.phase === "voting")
     return s.vote?.votes[p.id] !== undefined ? "voted" : "voting";
   if (s.phase === "picking") {
@@ -305,7 +307,8 @@ export function toView(
   return {
     code: s.code,
     phase: s.phase,
-    settings: s.settings,
+    // Rooms saved before a setting existed show its default.
+    settings: { ...DEFAULT_SETTINGS, ...s.settings },
     round: s.round,
     version,
     youId: viewerId,
@@ -317,6 +320,8 @@ export function toView(
     reveal: reveal(s, viewerId, now),
     serverNow: now,
     vote: voteView(s, viewerId, now),
+    ideas:
+      s.phase === "theming" && viewerId === s.hostId ? (s.ideas ?? []) : null,
     pick: pick(s, viewerId),
     turn: turn(s, viewerId),
     history: history(s),
@@ -328,6 +333,7 @@ export function toView(
 /** A match nobody has touched for this long is not shown as being played. */
 const PLAYING_FRESH_MS = 20 * 60_000;
 const PLAYING_PHASES = new Set([
+  "theming",
   "voting",
   "picking",
   "asking",
