@@ -60,13 +60,11 @@ export function ThemeTag({
   return (
     <span
       title={theme}
-      className="inline-flex min-w-0 max-w-full items-baseline gap-2 rounded-pill bg-butter px-4 py-1.5 font-semibold text-on-butter text-sm"
+      className="inline-flex min-w-0 max-w-full items-baseline gap-1.5 rounded-pill bg-butter px-4 py-1.5 text-on-butter text-sm"
     >
-      <span className="shrink-0 whitespace-nowrap font-medium max-sm:sr-only">
-        {label}
-      </span>
       {emoji ? <span aria-hidden>{emoji}</span> : null}
-      <span className="truncate">{theme}</span>
+      <span className="shrink-0 whitespace-nowrap max-sm:sr-only">{label}</span>
+      <span className="truncate font-bold">{theme}</span>
     </span>
   );
 }
