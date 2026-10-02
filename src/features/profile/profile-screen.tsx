@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Dices, Upload } from "lucide-react";
+import { Check, ChevronLeft, Dices, Upload } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
@@ -17,15 +17,17 @@ import { Screen } from "@/components/ui/screen";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
 import { useMe } from "@/features/data/use-me";
+import { HubActions } from "@/features/home/hub-actions";
 import { useAuthErrorToast } from "@/features/home/use-auth-error";
 import { useSignIn } from "@/features/home/use-sign-in";
 import { type Avatar as AvatarData, MAX_NAME } from "@/game/types";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import { signOut, updateProfile } from "@/server/actions";
+import { GAMES } from "@/lib/routes";
+import { updateProfile } from "@/server/actions";
 import { AVATAR_COLORS, type Me } from "@/server/contract";
 
 export function ProfileScreen() {
@@ -33,23 +35,23 @@ export function ProfileScreen() {
   const { me } = useMe();
   useAuthErrorToast();
   return (
-    <Screen
-      right={
+    <Screen right={<HubActions />}>
+      <div className="flex flex-col gap-4">
         <Link
-          href="/"
-          className="px-2 font-semibold text-ink-muted hover:text-ink"
+          href={GAMES}
+          className="-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink"
         >
+          <ChevronLeft className="size-4" strokeWidth={2} />
           {t("back")}
         </Link>
-      }
-    >
-      {!me ? (
-        <div className="h-60 max-w-[560px] animate-pulse rounded-xl bg-surface" />
-      ) : me.isGuest ? (
-        <GuestProfile />
-      ) : (
-        <AccountForm key={me.id} me={me} />
-      )}
+        {!me ? (
+          <div className="h-60 max-w-[560px] animate-pulse rounded-xl bg-surface" />
+        ) : me.isGuest ? (
+          <GuestProfile />
+        ) : (
+          <AccountForm key={me.id} me={me} />
+        )}
+      </div>
     </Screen>
   );
 }
@@ -90,8 +92,7 @@ function initialKind(me: Me): Kind {
 function AccountForm({ me }: { me: Me }) {
   const t = useTranslations("profile");
   const toast = useToast();
-  const router = useRouter();
-  const { setMe, refresh } = useMe();
+  const { setMe } = useMe();
   const { run, pending } = useAction();
   const [name, setName] = useState(me.name ?? "");
   const [kind, setKind] = useState<Kind>(initialKind(me));
@@ -279,53 +280,53 @@ function AccountForm({ me }: { me: Me }) {
           </AnimatePresence>
         </fieldset>
 
-        <fieldset className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0">
-          <legend className="mb-2 font-semibold text-sm">{t("color")}</legend>
-          <div className="flex flex-wrap gap-2.5">
-            {swatches.map((c, i) => (
-              <button
-                key={c}
-                type="button"
-                aria-pressed={c === color}
-                aria-label={t("colorN", { n: i + 1 })}
-                onClick={() => setColor(c)}
-                style={{ backgroundColor: c }}
-                className={cn(
-                  "flex size-[34px] items-center justify-center rounded-pill text-on-avatar shadow-[0_0_0_1px_var(--line)] transition-shadow duration-200",
-                  c === color &&
-                    "shadow-[0_0_0_2px_var(--canvas),0_0_0_4px_var(--sky)]",
-                )}
-              >
-                {c === color ? (
-                  <Check className="size-4" strokeWidth={2.25} />
-                ) : null}
-              </button>
-            ))}
-          </div>
-        </fieldset>
+        {/* a picture brings its own background; only a critter sits on a colour */}
+        <AnimatePresence initial={false}>
+          {kind === "critter" ? (
+            <motion.fieldset
+              key="color"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0"
+            >
+              <legend className="mb-2 font-semibold text-sm">
+                {t("color")}
+              </legend>
+              <div className="flex flex-wrap gap-2.5">
+                {swatches.map((c, i) => (
+                  <button
+                    key={c}
+                    type="button"
+                    aria-pressed={c === color}
+                    aria-label={t("colorN", { n: i + 1 })}
+                    onClick={() => setColor(c)}
+                    style={{ backgroundColor: c }}
+                    className={cn(
+                      "flex size-[34px] items-center justify-center rounded-pill text-on-avatar shadow-[0_0_0_1px_var(--line)] transition-shadow duration-200",
+                      c === color &&
+                        "shadow-[0_0_0_2px_var(--canvas),0_0_0_4px_var(--sky)]",
+                    )}
+                  >
+                    {c === color ? (
+                      <Check className="size-4" strokeWidth={2.25} />
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </motion.fieldset>
+          ) : null}
+        </AnimatePresence>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            type="submit"
-            variant="primary"
-            size="md"
-            disabled={pending || !canSave}
-          >
-            {t("save")}
-          </Button>
-          <Button
-            variant="ghost"
-            disabled={pending}
-            onClick={async () => {
-              if ((await run(() => signOut())).ok) {
-                await refresh();
-                router.push("/");
-              }
-            }}
-          >
-            {t("signOut")}
-          </Button>
-        </div>
+        <Button
+          type="submit"
+          variant="primary"
+          size="md"
+          disabled={pending || !canSave}
+          className="self-start"
+        >
+          {t("save")}
+        </Button>
       </motion.form>
 
       <Preview name={trimmed} avatar={preview} guestNumber={me.guestNumber} />
