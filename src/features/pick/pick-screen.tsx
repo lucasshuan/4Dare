@@ -120,10 +120,11 @@ export function PickScreen() {
             </span>
             <h1
               className={cn(
-                "text-balance font-display font-extrabold leading-none tracking-[-0.03em]",
+                "text-balance font-display font-extrabold tracking-[-0.03em]",
+                // after the size: tailwind-merge drops a leading-* that comes before a text-* size
                 (view.theme?.[lang].length ?? 0) > 14
-                  ? "text-[clamp(34px,4.6vw,60px)]"
-                  : "text-[clamp(48px,7vw,96px)]",
+                  ? "text-[clamp(34px,4.6vw,60px)] leading-none"
+                  : "text-[clamp(48px,7vw,96px)] leading-none",
               )}
             >
               {view.theme?.[lang]}

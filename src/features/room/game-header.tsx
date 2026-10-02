@@ -14,7 +14,7 @@ export function GameHeader() {
   const { view, offset } = useRoomContext();
   return (
     <header className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-3">
-      <div className="flex items-center gap-4">
+      <div className="flex min-w-0 items-center gap-4">
         <Wordmark />
         {view.theme ? (
           <ThemeTag label={t("theme")} theme={view.theme[lang]} />

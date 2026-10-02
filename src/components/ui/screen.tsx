@@ -40,7 +40,7 @@ export function Wordmark() {
   return (
     <Link
       href="/"
-      className="font-display font-extrabold text-[28px] leading-8 tracking-[-0.02em]"
+      className="shrink-0 font-display font-extrabold text-[28px] leading-8 tracking-[-0.02em]"
     >
       Dare
     </Link>
@@ -49,9 +49,14 @@ export function Wordmark() {
 
 export function ThemeTag({ label, theme }: { label: string; theme: string }) {
   return (
-    <span className="inline-flex items-baseline gap-2 rounded-pill bg-butter px-4 py-1.5 font-semibold text-on-butter text-sm">
-      <span className="font-medium">{label}</span>
-      <span>{theme}</span>
+    <span
+      title={theme}
+      className="inline-flex min-w-0 max-w-full items-baseline gap-2 rounded-pill bg-butter px-4 py-1.5 font-semibold text-on-butter text-sm"
+    >
+      <span className="shrink-0 whitespace-nowrap font-medium max-sm:sr-only">
+        {label}
+      </span>
+      <span className="truncate">{theme}</span>
     </span>
   );
 }

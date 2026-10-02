@@ -10,5 +10,11 @@
   "notFound": "Didn't discover",
   "pickedBy": "picked by {name}",
   "discoveredAt": "Discovered on play {n}",
-  "placeShort": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}"
+  "placeShort": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+  "youWon": "You found it on play {n}.",
+  "youFound": "You found it too, on play {n}.",
+  "youGaveUp": "You gave up this time.",
+  "youMissed": "You didn't find it this time.",
+  "againHint": "Same room, new theme.",
+  "youFirst": "You discovered first"
 }

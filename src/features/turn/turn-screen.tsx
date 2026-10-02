@@ -382,7 +382,7 @@ function Answer() {
         initial="hidden"
         animate="shown"
         variants={{ shown: { transition: { staggerChildren: 0.04 } } }}
-        className="grid max-w-[472px] grid-cols-2 gap-2"
+        className="grid grid-cols-2 gap-2"
       >
         {ANSWERS.map((a) => (
           <motion.div

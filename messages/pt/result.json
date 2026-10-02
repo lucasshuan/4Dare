@@ -10,5 +10,11 @@
   "notFound": "Não descobriu",
   "pickedBy": "escolhido por {name}",
   "discoveredAt": "Descobriu na {n}ª jogada",
-  "placeShort": "{place}º"
+  "placeShort": "{place}º",
+  "youWon": "Você descobriu na jogada {n}.",
+  "youFound": "Você também descobriu, na jogada {n}.",
+  "youGaveUp": "Você desistiu desta vez.",
+  "youMissed": "Você não descobriu desta vez.",
+  "againHint": "Mesma sala, tema novo.",
+  "youFirst": "Você descobriu primeiro"
 }
