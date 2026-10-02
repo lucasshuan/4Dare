@@ -142,6 +142,8 @@ export interface Outcome {
   /** 1 = first to discover. */
   place: number | null;
   gaveUp: boolean;
+  /** Epoch ms when the player discovered, gave up, left or timed out. */
+  endedAt: number | null;
 }
 
 /** The moment everyone sees between two steps. The play itself (answers, result) lives in `plays`. */
@@ -175,6 +177,8 @@ export interface RoomState {
   reveal: Reveal | null;
   /** Counts matches played in this room (rematches). */
   round: number;
+  /** Epoch ms when the first question of this match could be asked (picks done); null before. */
+  playStartedAt: number | null;
   createdAt: number;
   updatedAt: number;
 }

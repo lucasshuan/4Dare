@@ -4,10 +4,12 @@ import { themes } from "../themes";
 import { localAuth } from "./local/auth";
 import { localCharacters } from "./local/characters";
 import { localFiles } from "./local/files";
+import { localMatches } from "./local/matches";
 import { localRooms } from "./local/rooms";
 import { supabaseAuth } from "./supabase/auth";
 import { supabaseCharacters } from "./supabase/characters";
 import { supabaseFiles } from "./supabase/files";
+import { supabaseMatches } from "./supabase/matches";
 import { supabaseNotify } from "./supabase/notify";
 import { supabaseRooms } from "./supabase/rooms";
 import type { Backend } from "./types";
@@ -20,6 +22,7 @@ export function getBackend(): Backend {
   if (BACKEND === "supabase") {
     backend = {
       rooms: supabaseRooms(),
+      matches: supabaseMatches(),
       characters: supabaseCharacters(),
       themes: themes(),
       files: supabaseFiles(),
@@ -30,6 +33,7 @@ export function getBackend(): Backend {
   }
   backend = {
     rooms: localRooms(),
+    matches: localMatches(),
     characters: localCharacters(),
     themes: themes(),
     files: localFiles(),

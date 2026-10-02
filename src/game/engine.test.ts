@@ -296,7 +296,9 @@ describe("a turn", () => {
       discoveredAt: 2,
       place: 1,
       gaveUp: false,
+      endedAt: g.now,
     });
+    expect(s.playStartedAt).not.toBeNull();
     expect(s.reveal).toMatchObject({ kind: "guess", n: 2 });
     expect((s.reveal?.until ?? 0) - g.now).toBe(REVEAL_TIMING.guessHit);
     expect(s.phase).toBe("asking");

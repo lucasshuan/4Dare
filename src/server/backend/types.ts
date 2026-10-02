@@ -3,6 +3,7 @@
 //   supabase → Postgres, Storage, Realtime, Auth
 // Server actions and route handlers only talk to these interfaces (via getBackend()).
 
+import type { MatchRecord } from "@/game/record";
 import type {
   Character,
   Identity,
@@ -93,8 +94,17 @@ export interface Notifier {
   lobbyChanged(): Promise<void>;
 }
 
+/** Finished matches, kept per player (not shown anywhere yet). */
+export interface MatchStore {
+  /** Saves a finished match; saving the same match id again does nothing. */
+  record(match: MatchRecord): Promise<void>;
+  /** A guest signed in to an account that already existed: their matches move to it. */
+  reassign(fromUserId: string, toUserId: string): Promise<void>;
+}
+
 export interface Backend {
   rooms: RoomStore;
+  matches: MatchStore;
   characters: CharacterStore;
   themes: ThemeSource;
   files: FileStore;

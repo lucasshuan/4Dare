@@ -111,12 +111,24 @@ function beginMatch(s: RoomState, theme: Localized, ctx: Ctx) {
     s.assignments[s.order[(i + 1) % n]] = { pickerId: picker, character: null };
   });
   for (const p of s.players) {
-    s.outcomes[p.id] = { discoveredAt: null, place: null, gaveUp: false };
+    s.outcomes[p.id] = {
+      discoveredAt: null,
+      place: null,
+      gaveUp: false,
+      endedAt: null,
+    };
     p.strikes = 0;
     p.away = false;
   }
+  s.playStartedAt = null;
   s.phase = "picking";
   startStep(s, ctx, stepMs(s));
+}
+
+/** Out of the match without discovering: gave up, left or timed out (`away` tells which). */
+function endOutcome(s: RoomState, id: PlayerId, ctx: Ctx) {
+  s.outcomes[id].gaveUp = true;
+  s.outcomes[id].endedAt = ctx.now;
 }
 
 function finish(s: RoomState) {
@@ -193,7 +205,12 @@ function hit(s: RoomState, g: Guess, ctx: Ctx) {
   g.result = "hit";
   const place =
     Object.values(s.outcomes).filter((o) => o.discoveredAt !== null).length + 1;
-  s.outcomes[g.by] = { discoveredAt: g.n, place, gaveUp: false };
+  s.outcomes[g.by] = {
+    discoveredAt: g.n,
+    place,
+    gaveUp: false,
+    endedAt: ctx.now,
+  };
   const until = ctx.now + REVEAL_TIMING.guessHit;
   s.reveal = { kind: "guess", n: g.n, startsAt: ctx.now, until };
   nextTurn(s, ctx);
@@ -234,6 +251,7 @@ function cleanText(text: string, max: number) {
 }
 
 function startTurns(s: RoomState, ctx: Ctx) {
+  s.playStartedAt = ctx.now;
   goToTurn(s, ctx, s.order.at(-1) ?? null);
 }
 
@@ -265,6 +283,7 @@ export function createRoom(
     stepStartsAt: ctx.now,
     reveal: null,
     round: 0,
+    playStartedAt: null,
     createdAt: ctx.now,
     updatedAt: ctx.now,
   };
@@ -402,7 +421,7 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   }
   // mid-match: keep the seat so the history still makes sense
   p.away = true;
-  if (isActive(s, id)) s.outcomes[id].gaveUp = true;
+  if (isActive(s, id)) endOutcome(s, id, ctx);
   if (TURN_PHASES.has(s.phase) && s.turnPlayerId === id) {
     abandonTurn(s, ctx);
   } else if (s.phase === "answering") {
@@ -495,7 +514,7 @@ function giveUp(s: RoomState, playerId: PlayerId, ctx: Ctx) {
   if (!MATCH_PHASES.has(s.phase)) fail("wrong_phase");
   requireSeated(s, playerId);
   if (!isActive(s, playerId)) fail("already_done");
-  s.outcomes[playerId].gaveUp = true;
+  endOutcome(s, playerId, ctx);
   if (TURN_PHASES.has(s.phase) && s.turnPlayerId === playerId) {
     return abandonTurn(s, ctx);
   }
@@ -547,7 +566,7 @@ function timeout(
         p.strikes += 1;
         if (p.strikes >= 2) {
           p.away = true;
-          s.outcomes[p.id].gaveUp = true;
+          endOutcome(s, p.id, ctx);
         }
       }
       return nextTurn(s, ctx);

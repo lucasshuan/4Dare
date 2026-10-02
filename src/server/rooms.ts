@@ -1,5 +1,7 @@
 import "server-only";
+import { after } from "next/server";
 import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
+import { matchRecord } from "@/game/record";
 import {
   type Character,
   GameError,
@@ -58,6 +60,10 @@ export async function dispatch(
     const next = reduce(stored.state, event, ctx());
     if (await rooms.compareAndSwap(code, stored.version, next)) {
       void notify.roomChanged(code, stored.version + 1);
+      // Only the write that finished the match gets here, so it is saved once.
+      if (next.phase === "finished" && stored.state.phase !== "finished") {
+        saveMatch(next);
+      }
       if (next.phase === "lobby" || stored.state.phase === "lobby") {
         void notify.lobbyChanged();
       }
@@ -65,6 +71,24 @@ export async function dispatch(
     }
   }
   throw new GameError("conflict");
+}
+
+/** Saves the finished match after the response is sent, so nobody waits for it. */
+function saveMatch(state: RoomState) {
+  const record = matchRecord(state, Date.now());
+  if (!record) return;
+  const save = () =>
+    getBackend()
+      .matches.record(record)
+      .catch((error: unknown) =>
+        console.error(`saving match ${record.id} failed`, error),
+      );
+  try {
+    after(save);
+  } catch {
+    // Outside a request (tests, scripts): save right away.
+    void save();
+  }
 }
 
 // Used when the library cannot supply enough characters for a clock-filled pick.

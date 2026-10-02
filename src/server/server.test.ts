@@ -1,5 +1,5 @@
 // The server end to end, in local mode: actions + route handlers + engine, with fake cookies per player.
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
@@ -121,6 +121,47 @@ describe("server, local mode", () => {
       const mine = (await view(code)).body;
       const uid = jarFor(p).get("dare_uid") as string;
       expect(JSON.stringify(mine)).not.toContain(`Hero of ${uid}`);
+    }
+  });
+
+  it("saves a finished match for every player, once", async () => {
+    as("m1");
+    const { code } = must(
+      await A.createRoom({ visibility: "private", seats: 2, stepSeconds: 60 }),
+    );
+    as("m2");
+    must(await A.joinRoom(code));
+    as("m1");
+    must(await A.startGame(code));
+    for (const p of ["m1", "m2"]) {
+      as(p);
+      const v = (await view(code)).body;
+      const form = new FormData();
+      form.set("name", `Saved ${v.pick?.targetId}`);
+      form.set("lang", "pt");
+      must(await A.confirmPick(code, must(await A.createCharacter(form)).id));
+    }
+    for (const p of ["m1", "m2"]) {
+      as(p);
+      must(await A.giveUp(code));
+    }
+    as("m1");
+    expect((await view(code)).body.phase).toBe("finished");
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const lines = readFileSync(
+      join(process.env.DARE_DATA_DIR as string, "matches.jsonl"),
+      "utf8",
+    )
+      .split("\n")
+      .filter((line) => line.includes(code));
+    expect(lines).toHaveLength(1);
+    const record = JSON.parse(lines[0]);
+    expect(record.players).toHaveLength(2);
+    for (const p of record.players) {
+      expect(p).toMatchObject({ result: "gave_up", wasGuest: true });
+      expect(p.characterName).toMatch(/^Saved /);
+      expect(p.timeMs).toBeGreaterThanOrEqual(0);
     }
   });
 
