@@ -180,19 +180,34 @@
     "ja": "魔女"
   },
   {
-    "en": "Fairies and elves",
-    "pt": "Fadas e elfos",
-    "ja": "妖精やエルフ"
+    "en": "Fairies",
+    "pt": "Fadas",
+    "ja": "妖精"
   },
   {
-    "en": "Angels and demons",
-    "pt": "Anjos e demônios",
-    "ja": "天使や悪魔"
+    "en": "Elves",
+    "pt": "Elfos",
+    "ja": "エルフ"
   },
   {
-    "en": "Gods and goddesses",
-    "pt": "Deuses e deusas",
-    "ja": "神様や女神"
+    "en": "Angels",
+    "pt": "Anjos",
+    "ja": "天使"
+  },
+  {
+    "en": "Demons",
+    "pt": "Demônios",
+    "ja": "悪魔"
+  },
+  {
+    "en": "Gods",
+    "pt": "Deuses",
+    "ja": "神様"
+  },
+  {
+    "en": "Goddesses",
+    "pt": "Deusas",
+    "ja": "女神"
   },
   {
     "en": "Greek mythology characters",
@@ -310,9 +325,14 @@
     "ja": "爬虫類のキャラクター"
   },
   {
-    "en": "Foxes and wolves",
-    "pt": "Raposas e lobos",
-    "ja": "キツネやオオカミのキャラクター"
+    "en": "Foxes",
+    "pt": "Raposas",
+    "ja": "キツネのキャラクター"
+  },
+  {
+    "en": "Wolves",
+    "pt": "Lobos",
+    "ja": "オオカミのキャラクター"
   },
   {
     "en": "Famous real-life animals",
@@ -475,9 +495,14 @@
     "ja": "特撮ヒーロー"
   },
   {
-    "en": "Comic book and manga characters",
-    "pt": "Personagens de quadrinhos e mangá",
-    "ja": "漫画やコミックのキャラクター"
+    "en": "Comic book characters",
+    "pt": "Personagens de quadrinhos",
+    "ja": "アメコミのキャラクター"
+  },
+  {
+    "en": "Manga characters",
+    "pt": "Personagens de mangá",
+    "ja": "漫画のキャラクター"
   },
   {
     "en": "Video game characters",
@@ -625,9 +650,14 @@
     "ja": "ロックスター"
   },
   {
-    "en": "K-pop and J-pop idols",
-    "pt": "Idols de K-pop e J-pop",
-    "ja": "アイドル"
+    "en": "K-pop idols",
+    "pt": "Idols de K-pop",
+    "ja": "K-POPアイドル"
+  },
+  {
+    "en": "J-pop idols",
+    "pt": "Idols de J-pop",
+    "ja": "日本のアイドル"
   },
   {
     "en": "Band members",
@@ -665,8 +695,13 @@
     "ja": "映画監督"
   },
   {
-    "en": "Cartoonists and manga artists",
-    "pt": "Cartunistas e mangakás",
+    "en": "Cartoonists",
+    "pt": "Cartunistas",
+    "ja": "海外の漫画家"
+  },
+  {
+    "en": "Manga artists",
+    "pt": "Mangakás",
     "ja": "漫画家"
   },
   {
@@ -765,9 +800,14 @@
     "ja": "歴史に名を残した女性"
   },
   {
-    "en": "Kings and queens",
-    "pt": "Reis e rainhas",
-    "ja": "王様や女王"
+    "en": "Kings",
+    "pt": "Reis",
+    "ja": "王様"
+  },
+  {
+    "en": "Queens",
+    "pt": "Rainhas",
+    "ja": "女王"
   },
   {
     "en": "Princesses",
@@ -895,9 +935,14 @@
     "ja": "中国の有名人やキャラクター"
   },
   {
-    "en": "Famous people from the 60s or 70s",
-    "pt": "Famosos dos anos 60 ou 70",
-    "ja": "60〜70年代の有名人"
+    "en": "Famous people from the 60s",
+    "pt": "Famosos dos anos 60",
+    "ja": "60年代の有名人"
+  },
+  {
+    "en": "Famous people from the 70s",
+    "pt": "Famosos dos anos 70",
+    "ja": "70年代の有名人"
   },
   {
     "en": "Famous people from the 80s",
@@ -960,9 +1005,14 @@
     "ja": "会社員"
   },
   {
-    "en": "Butlers and maids",
-    "pt": "Mordomos e empregadas",
-    "ja": "執事やメイド"
+    "en": "Butlers",
+    "pt": "Mordomos",
+    "ja": "執事"
+  },
+  {
+    "en": "Maids",
+    "pt": "Empregadas",
+    "ja": "メイド"
   },
   {
     "en": "Spies",
@@ -981,18 +1031,33 @@
   },
   {
     "en": "Ship captains",
-    "pt": "Capitães de navio ou nave",
-    "ja": "船長や艦長"
+    "pt": "Capitães de navio",
+    "ja": "船長"
   },
   {
-    "en": "Airplane and spaceship pilots",
-    "pt": "Pilotos de avião ou nave",
-    "ja": "飛行機や宇宙船のパイロット"
+    "en": "Starship captains",
+    "pt": "Capitães de nave espacial",
+    "ja": "宇宙船の艦長"
   },
   {
-    "en": "Ninjas and samurai",
-    "pt": "Ninjas e samurais",
-    "ja": "忍者や侍"
+    "en": "Airplane pilots",
+    "pt": "Pilotos de avião",
+    "ja": "飛行機のパイロット"
+  },
+  {
+    "en": "Spaceship pilots",
+    "pt": "Pilotos de nave espacial",
+    "ja": "宇宙船のパイロット"
+  },
+  {
+    "en": "Ninjas",
+    "pt": "Ninjas",
+    "ja": "忍者"
+  },
+  {
+    "en": "Samurai",
+    "pt": "Samurais",
+    "ja": "侍"
   },
   {
     "en": "Knights",
@@ -1265,9 +1330,14 @@
     "ja": "鎧を着たキャラクター"
   },
   {
-    "en": "Characters who wear a mask or helmet",
-    "pt": "Personagens de máscara ou capacete",
-    "ja": "仮面やヘルメットをつけたキャラクター"
+    "en": "Characters who wear a mask",
+    "pt": "Personagens de máscara",
+    "ja": "仮面をつけたキャラクター"
+  },
+  {
+    "en": "Characters who wear a helmet",
+    "pt": "Personagens de capacete",
+    "ja": "ヘルメットをかぶったキャラクター"
   },
   {
     "en": "Characters who wear a suit",
@@ -1280,9 +1350,14 @@
     "ja": "黒い服を着たキャラクター"
   },
   {
-    "en": "Characters with a beard or mustache",
-    "pt": "Personagens de barba ou bigode",
-    "ja": "ヒゲのキャラクター"
+    "en": "Characters with a beard",
+    "pt": "Personagens de barba",
+    "ja": "あごヒゲのキャラクター"
+  },
+  {
+    "en": "Characters with a mustache",
+    "pt": "Personagens de bigode",
+    "ja": "口ヒゲのキャラクター"
   },
   {
     "en": "Bald characters",

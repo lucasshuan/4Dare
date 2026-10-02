@@ -45,9 +45,10 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Busca instantânea: índice do idioma baixado uma vez (cache), cada tecla responde na memória em menos de 1 ms, sem servidor
 - [x] Criar personagem com nome e foto própria (com recorte)
 - [x] Trocar a foto de qualquer personagem (vira a da biblioteca)
-- [x] Tema sorteado pela IA; sem chave, sai de 322 temas simples
+- [x] Tema sorteado pela IA; sem chave, sai de 337 temas simples
 - [x] Temas em que o "personagem" é um grupo: duplas, trios, irmãos, famílias, bandas, espécies (Pikmin)
 - [x] Temas no banco: liga e desliga sem deploy; os que a IA cria ficam guardados
+- [x] Um tema, uma ideia: "Anjos e demônios", "Mordomos e empregadas" e outros 13 viraram dois temas cada; a IA não junta mais dois grupos
 
 ## Fase 4 — Cara de jogo pronto ✅
 
