@@ -3,6 +3,7 @@
 
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
+import { normalizeName } from "@/game/match";
 import {
   ANSWERS,
   type AnswerValue,
@@ -301,6 +302,16 @@ export async function createCharacter(
     const imageUrl = image
       ? await files.put("characters", image.bytes, image.type)
       : null;
+    // same name (and origin, when given) as a library entry: reuse it instead of a duplicate
+    const same = (await characters.search(name, l, 10)).find(
+      (c) =>
+        normalizeName(c.name) === normalizeName(name) &&
+        (!origin || normalizeName(c.origin ?? "") === normalizeName(origin)),
+    );
+    if (same) {
+      if (!imageUrl) return toDTO(same);
+      return toDTO((await characters.setImage(same.id, imageUrl)) ?? same);
+    }
     const c = await characters.create({
       lang: l,
       name,

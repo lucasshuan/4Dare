@@ -160,6 +160,10 @@ describe("server, local mode", () => {
     expect(c.imageUrl).toMatch(
       /^\/api\/files\/characters\/[0-9a-f-]{36}\.png$/,
     );
+    // the same name again reuses the character instead of duplicating it
+    const again = new FormData();
+    again.set("name", "fake");
+    expect(must(await A.createCharacter(again)).id).toBe(c.id);
   });
 
   it("guests cannot edit a profile; the test account can", async () => {
