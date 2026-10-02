@@ -3,9 +3,8 @@
 import { Select } from "@base-ui/react/select";
 import { Check, ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useTransition } from "react";
 import { LANGS, type Lang } from "@/game/types";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { getPathname, usePathname } from "@/i18n/navigation";
 
 function Flag({ lang }: { lang: Lang }) {
   return (
@@ -24,17 +23,21 @@ function Flag({ lang }: { lang: Lang }) {
 export function LanguageSwitch() {
   const t = useTranslations("common");
   const locale = useLocale() as Lang;
-  const router = useRouter();
   const pathname = usePathname();
-  const [, start] = useTransition();
   const items = LANGS.map((l) => ({ value: l, label: t(`languages.${l}`) }));
   return (
     <Select.Root
       items={items}
       value={locale}
       onValueChange={(l) => {
-        if (l && l !== locale)
-          start(() => router.replace(pathname, { locale: l as Lang }));
+        if (!l || l === locale) return;
+        // A full load, not a client navigation: the whole app (its <html> included)
+        // lives under the locale, and re-rendering it on the client trips React
+        // over the theme script.
+        window.location.assign(
+          getPathname({ href: pathname, locale: l as Lang }) +
+            window.location.search,
+        );
       }}
     >
       <Select.Trigger
