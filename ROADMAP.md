@@ -1,54 +1,56 @@
 # Roadmap
 
-O que já tem e o que falta pro Dare ficar jogável. Vou marcando conforme termino (cada item marcado = commit feito).
+Cada fase termina com o jogo jogável. A próxima só melhora o que já funciona. Vou marcando conforme termino (item marcado = commit feito).
 
-## Feito
+## Fase 0 — Base ✅
 
 - [x] Design de todas as telas, design system e fluxo (BPMN)
-- [x] Projeto Next.js criado: inglês/português/japonês, tema claro/escuro, cores e fontes do design
-- [x] Regras do jogo escritas como tipos (sala, turno, revelação entre etapas, o que cada jogador pode ver)
-- [x] Padrão de commit definido
+- [x] Projeto Next.js: inglês/português/japonês, tema claro/escuro, cores e fontes do design
+- [x] Regras do jogo escritas como tipos (sala, turno, revelação, o que cada um pode ver)
+- [x] Padrão de commit
 
-## 1. Regras do jogo
+## Fase 1 — Dá pra jogar (no seu PC)
 
-- [ ] Motor: sala, escolha de personagem, turnos, respostas, palpite, validação, revelação, fim
-- [ ] Testes do motor (partidas de 2 e 4 jogadores, ninguém vê a própria carta)
+Roda com `pnpm dev`, sem configurar nada. Cada aba ou cada amigo na mesma rede é um jogador.
 
-## 2. Servidor
+- [ ] Motor do jogo com testes (2 a 4 jogadores, ninguém vê a própria carta)
+- [ ] Servidor local em memória
+- [ ] Criar sala, entrar pelo código ou link, começar
+- [ ] Escolher personagem digitando o nome
+- [ ] Turno: perguntar, todos respondem, palpite, validação por quem escolheu
+- [ ] Revelação simples entre etapas e relógio de cada etapa
+- [ ] Fim com a colocação de todo mundo
+- [ ] README curto: como rodar
 
-- [ ] Modo local: roda sem configurar nada (tudo em memória)
-- [ ] Ações: criar sala, entrar, pronto, começar, escolher, perguntar, responder, palpitar, validar, desistir, jogar de novo
-- [ ] Biblioteca de personagens: busca, criar personagem, trocar imagem
-- [ ] Tema sorteado pela IA, com banco de temas de reserva
-- [ ] Supabase: banco, login com Discord/Google, tempo real, imagens
+## Fase 2 — Online com os amigos
 
-## 3. Conteúdo
+- [ ] Supabase: banco, tempo real, convidado sem login
+- [ ] Deploy na Vercel (você cria o projeto no Supabase e cola as chaves)
+- [ ] Partida de 2 e de 4 jogadores testada de ponta a ponta
 
-- [ ] 300 temas em en/pt/ja
+## Fase 3 — Personagens de verdade
+
 - [ ] Biblioteca de personagens com imagem em en/pt/ja
+- [ ] Busca com autocomplete e foto
+- [ ] Criar personagem com imagem e trocar imagem
+- [ ] 300 temas em en/pt/ja, e tema sorteado pela IA
 
-## 4. Componentes
+## Fase 4 — Cara de jogo pronto
 
-- [ ] Básicos: botão, campo, avatar, carta, idioma, tema claro/escuro, código da sala
-- [ ] Relógio com animação de recarga e confetti
-- [ ] Gaveta de histórico (minhas jogadas / todas), revelação animada, pódio
-
-## 5. Telas
-
-- [ ] Início, perfil, criar sala
-- [ ] Sala de espera (anfitrião e convidado, "Estou pronto")
-- [ ] Escolha do personagem (busca, criar, trocar imagem)
-- [ ] Turno: perguntar, responder, adivinhar, validar, esperando
-- [ ] Revelação entre etapas (respostas e palpites, confetti no acerto)
-- [ ] Fim da partida com pódio e "jogar de novo"
+- [ ] Todas as telas iguais ao design, claro e escuro, nos 3 idiomas
+- [ ] Revelação bem animada, relógio recarregando, confetti no acerto
+- [ ] Histórico em gaveta (minhas jogadas / todas)
+- [ ] Pódio no fim e "jogar de novo"
+- [ ] Transições suaves entre todas as etapas
 - [ ] Celular
 
-## 6. Conferir
+## Fase 5 — Contas e salas
 
-- [ ] Partida completa com 2 e com 4 jogadores no navegador
-- [ ] Telas comparadas com o design, claro e escuro, nos 3 idiomas
+- [ ] Login com Discord e Google, perfil com nome e avatar
+- [ ] Salas públicas na tela inicial
+- [ ] Sala de espera com "Estou pronto" e configurações (vagas, segundos por etapa)
 
-## 7. Entregar
+## Fase 6 — Acabamento
 
-- [ ] PRODUCT.md, ARCHITECTURE.md e README.md (curtos)
-- [ ] Pronto pra Vercel (você só cria o projeto no Supabase e cola as chaves)
+- [ ] Testes automáticos de partida completa
+- [ ] PRODUCT.md e ARCHITECTURE.md (curtos)
