@@ -85,7 +85,8 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Create room: public or private, 2 to 4 seats, seconds per step (120 by default)
 - [x] Create room at `/new?game=who-am-i`, with the top bar and "Back" above the title
 - [x] Lobby: host edits the settings and starts; the others mark "I'm ready" (green ✓, red ✗)
-- [x] Starts on its own in 2 minutes or as soon as it's full
+- [x] Starts on its own in 2 minutes or as soon as it's full; the clock only runs with 2 players or more
+- [x] When the host leaves, whoever joined first takes the room, in the lobby or mid-match
 - [x] Matches saved per player: character, who picked it, how it ended and how long it took
 - [x] A guest keeps their matches when signing in with Discord or Google (even into an account that already existed), and their seat when signing in from a room
 
@@ -99,7 +100,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Name: Ludodare (the logo keeps "Dare")
 - [x] Search: title and description per page and language, canonical and hreflang links, sitemap, robots, JSON-LD, installable (manifest and icons)
 - [x] Share cards with a picture for Twitter, Facebook, Discord, WhatsApp and the like: home, "Who am I?" and a room invite with its code, in 3 languages
-- [x] Tab title per page and per step of the match; when it's your move and you're in another tab, the title and the icon blink (orange "!")
+- [x] Tab title per page and per step of the match; the step clock counts down in the title; when it's your move and you're in another tab, the icon turns into an orange "!", red in the final seconds
 - [x] Vercel Web Analytics and Speed Insights
 
 ## Phase 8 — Themes your way ✅
