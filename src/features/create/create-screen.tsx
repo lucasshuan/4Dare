@@ -34,7 +34,7 @@ export function CreateScreen() {
       }
     >
       <form
-        className="flex max-w-[560px] flex-col gap-6"
+        className="flex max-w-[760px] flex-col gap-6"
         onSubmit={async (e) => {
           e.preventDefault();
           const r = await run(() => createRoom(settings));
@@ -44,7 +44,9 @@ export function CreateScreen() {
         <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em]">
           {t("title")}
         </h1>
-        <SettingsFields value={settings} onChange={setSettings} />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-x-10">
+          <SettingsFields value={settings} onChange={setSettings} />
+        </div>
         <Button
           type="submit"
           variant="primary"

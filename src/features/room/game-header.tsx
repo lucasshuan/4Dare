@@ -33,7 +33,7 @@ export function GameHeader() {
 /** Page frame for the match screens. */
 export function GameFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-8 sm:px-8 sm:pt-6">
+    <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-8 short:gap-4 short:pb-4 sm:px-8 sm:pt-6 sm:short:pt-4">
       <GameHeader />
       <main className="mx-auto w-full max-w-[1120px] flex-1">{children}</main>
     </div>

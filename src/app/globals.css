@@ -2,6 +2,9 @@
 
 /* Tokens from the Dare design system. Light on :root, dark under [data-theme="dark"] (next-themes). */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* Short windows (laptops, small browser windows): tighter spacing so a screen fits without scrolling. */
+@custom-variant short (@media (max-height: 820px));
+@custom-variant tiny (@media (max-height: 700px));
 
 :root {
   --canvas: #f3f5f9;

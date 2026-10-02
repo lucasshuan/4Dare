@@ -70,7 +70,7 @@ export function AnswerChip({
   );
   const cls = cn(
     "inline-flex items-center gap-2 rounded-pill border-[1.5px] font-semibold text-ink transition-[transform,background-color,color] duration-150 ease-soft",
-    small ? "h-[26px] px-2.5 text-[13px]" : "h-12 px-4 text-base",
+    small ? "h-[26px] px-2.5 text-[13px]" : "h-12 px-4 text-base short:h-10",
     pressed ? look.pressed : look.chip,
     className,
   );

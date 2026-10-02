@@ -17,7 +17,7 @@ export function Screen({
   className?: string;
 }) {
   return (
-    <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-8 sm:gap-10 sm:px-8 sm:pt-6 sm:pb-12">
+    <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-8 sm:gap-10 sm:px-8 sm:pt-6 sm:pb-12 sm:short:gap-6 sm:short:pt-4 sm:short:pb-6">
       <header
         className={cn(
           "mx-auto flex w-full items-center justify-between gap-3",

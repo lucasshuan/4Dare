@@ -256,29 +256,38 @@ export function PickScreen() {
               <motion.form
                 key="create"
                 {...riseIn}
-                className="flex flex-col gap-4"
+                className="flex flex-col gap-4 short:gap-3"
                 onSubmit={(e) => {
                   e.preventDefault();
                   void create();
                 }}
               >
-                <h3 className="font-bold font-display text-3xl">
+                <h3 className="font-bold font-display text-3xl short:text-2xl">
                   {t("createTitle")}
                 </h3>
-                <TextField
-                  label={t("newName")}
-                  value={newName}
-                  max={60}
-                  onChange={(e) => setNewName(e.target.value)}
-                />
-                <TextField
-                  label={t("newOrigin")}
-                  value={origin}
-                  max={60}
-                  onChange={(e) => setOrigin(e.target.value)}
-                />
-                <span className="font-semibold text-sm">{t("newImage")}</span>
-                <ImageDrop onChange={setImage} />
+                {/* short windows: the picture sits beside the text fields, not under them */}
+                <div className="flex flex-col gap-4 short:gap-3 lg:short:grid lg:short:grid-cols-[minmax(0,1fr)_minmax(0,220px)] lg:short:items-start lg:short:gap-x-5">
+                  <div className="flex flex-col gap-4 short:gap-3">
+                    <TextField
+                      label={t("newName")}
+                      value={newName}
+                      max={60}
+                      onChange={(e) => setNewName(e.target.value)}
+                    />
+                    <TextField
+                      label={t("newOrigin")}
+                      value={origin}
+                      max={60}
+                      onChange={(e) => setOrigin(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="font-semibold text-sm">
+                      {t("newImage")}
+                    </span>
+                    <ImageDrop onChange={setImage} />
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-3">
                   <Button
                     type="submit"

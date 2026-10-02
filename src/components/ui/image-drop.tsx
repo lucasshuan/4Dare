@@ -79,16 +79,26 @@ export function ImageDrop({
   const size = shape === "portrait" ? { w: 640, h: 800 } : { w: 256, h: 256 };
 
   const accept = useCallback(
-    (file: File | null | undefined) => {
+    async (file: File | null | undefined) => {
       if (!file) return;
       if (!TYPES.includes(file.type)) return setError(t("wrongType"));
       if (file.size > MAX_BYTES) return setError(t("tooBig"));
+      const url = URL.createObjectURL(file);
+      // A file can say "image" and still not be one (or be broken): try it first.
+      try {
+        const img = new Image();
+        img.src = url;
+        await img.decode();
+      } catch {
+        URL.revokeObjectURL(url);
+        return setError(t("wrongType"));
+      }
       setError(null);
       setZoom(1);
       setCrop({ x: 0, y: 0 });
       setSrc((old) => {
         if (old) URL.revokeObjectURL(old);
-        return URL.createObjectURL(file);
+        return url;
       });
     },
     [t],
@@ -99,7 +109,7 @@ export function ImageDrop({
       const file = [...(e.clipboardData?.files ?? [])].find((f) =>
         f.type.startsWith("image/"),
       );
-      if (file) accept(file);
+      if (file) void accept(file);
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
@@ -111,10 +121,12 @@ export function ImageDrop({
   useEffect(() => {
     if (!onChange || !src || !area) return;
     const id = window.setTimeout(() => {
-      void cropToWebp(src, area, size.w, size.h).then(onChange);
+      cropToWebp(src, area, size.w, size.h)
+        .then(onChange)
+        .catch(() => setError(t("wrongType")));
     }, 250);
     return () => window.clearTimeout(id);
-  }, [onChange, src, area, size.w, size.h]);
+  }, [onChange, src, area, size.w, size.h, t]);
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
@@ -124,7 +136,10 @@ export function ImageDrop({
             <div
               className={cn(
                 "relative w-full max-w-[320px] overflow-hidden rounded-lg bg-ink",
-                shape === "portrait" ? "aspect-[4/5]" : "aspect-square",
+                shape === "portrait"
+                  ? // on short windows the crop area shrinks with the height
+                    "aspect-[4/5] short:max-w-[min(320px,calc((100dvh_-_420px)_*_0.8))]"
+                  : "aspect-square",
               )}
             >
               <Cropper
@@ -193,11 +208,13 @@ export function ImageDrop({
               onDrop={(e) => {
                 e.preventDefault();
                 setOver(false);
-                accept(e.dataTransfer.files[0]);
+                void accept(e.dataTransfer.files[0]);
               }}
               className={cn(
                 "flex w-full max-w-[220px] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] border-dashed p-4 text-center font-medium text-ink-muted text-sm transition-colors",
                 shape === "portrait" ? "aspect-[4/5]" : "aspect-square",
+                // short windows: a wide strip instead of a tall drop area
+                "short:aspect-auto short:max-w-[360px] short:flex-row short:flex-wrap short:gap-x-3 short:gap-y-0 short:py-4",
                 over
                   ? "border-sky border-solid bg-sky-soft text-ink"
                   : "border-line-strong bg-surface",
@@ -213,7 +230,7 @@ export function ImageDrop({
               type="file"
               accept={TYPES.join(",")}
               className="sr-only"
-              onChange={(e) => accept(e.target.files?.[0])}
+              onChange={(e) => void accept(e.target.files?.[0])}
             />
           </motion.div>
         )}

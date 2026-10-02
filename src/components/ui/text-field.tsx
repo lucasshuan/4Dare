@@ -34,7 +34,7 @@ export function TextField({
         id={id}
         value={value}
         maxLength={max}
-        className={cn(FIELD, "h-13")}
+        className={cn(FIELD, "h-13 short:h-11")}
         {...props}
       />
       <Hint
@@ -65,7 +65,10 @@ export function TextArea({
         value={value}
         maxLength={max}
         rows={2}
-        className={cn(FIELD, "min-h-19 resize-none py-3")}
+        className={cn(
+          FIELD,
+          "min-h-19 resize-none py-3 short:min-h-16 short:py-2 tiny:h-11 tiny:min-h-11",
+        )}
         {...props}
       />
       <Hint

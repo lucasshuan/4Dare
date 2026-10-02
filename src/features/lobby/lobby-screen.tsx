@@ -96,19 +96,19 @@ export function LobbyScreen() {
       }
     >
       <div className="flex flex-wrap items-start gap-10 lg:gap-16">
-        <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7">
+        <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
           <div className="flex flex-col gap-3">
-            <h1 className="max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance]">
+            <h1 className="max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]">
               {me.isHost ? t("titleHost") : t("titleGuest", { name: hostName })}
             </h1>
-            <p className="max-w-[480px] text-ink-muted text-lg">
+            <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
               {me.isHost
                 ? t("subtitleHost")
                 : t("subtitleGuest", { name: hostName })}
             </p>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 short:gap-3">
             <div className="flex gap-2">
               <span className="sr-only">
                 {t("codeLabel", { code: code.split("").join(" ") })}
@@ -118,7 +118,7 @@ export function LobbyScreen() {
                   // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
                   key={i}
                   aria-hidden="true"
-                  className="flex h-20 w-14 items-center justify-center rounded-md border border-line bg-surface font-medium font-mono text-[40px] sm:w-16"
+                  className="flex h-20 w-14 items-center justify-center rounded-md border border-line bg-surface font-medium font-mono text-[40px] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
                 >
                   {c}
                 </span>
@@ -138,7 +138,8 @@ export function LobbyScreen() {
                 {t("copyCode")}
               </Button>
             </div>
-            <span className="font-mono text-[13px] text-ink-muted">
+            {/* the link is one click away ("Copy link"), so very short windows skip it */}
+            <span className="font-mono text-[13px] text-ink-muted tiny:hidden">
               {typeof window === "undefined"
                 ? `/r/${code}`
                 : `${window.location.host}/r/${code}`}

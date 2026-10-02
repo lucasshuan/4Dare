@@ -61,6 +61,15 @@ function useMode(): Mode {
   }
 }
 
+const TINY_ORDER: Record<AnswerValue, string> = {
+  yes: "sm:tiny:order-1",
+  probably_yes: "sm:tiny:order-2",
+  unknown: "sm:tiny:order-3",
+  no: "sm:tiny:order-4",
+  probably_no: "sm:tiny:order-5",
+  irrelevant: "sm:tiny:order-6",
+};
+
 /** Every step of a turn: asking, answering, guessing, validating, and waiting for others. */
 export function TurnScreen() {
   const t = useTranslations("turn");
@@ -92,10 +101,11 @@ export function TurnScreen() {
 
   return (
     <GameFrame>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 short:gap-4">
         <PlayerStrip players={view.players} />
         <div className="flex flex-wrap items-stretch gap-5 lg:gap-12">
-          <div className="w-full lg:w-[368px] lg:flex-none">
+          {/* the card's width follows the window height, so the whole screen fits */}
+          <div className="w-full lg:w-[clamp(232px,calc((100dvh_-_330px)_*_0.66),368px)] lg:flex-none">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={focus.id}
@@ -140,7 +150,7 @@ export function TurnScreen() {
               </motion.div>
             </AnimatePresence>
           </div>
-          <section className="flex min-w-0 flex-[1_1_360px] flex-col gap-5">
+          <section className="flex min-w-0 flex-[1_1_360px] flex-col gap-5 short:gap-3">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${view.phase}-${view.turn?.n}-${mode}`}
@@ -151,7 +161,7 @@ export function TurnScreen() {
                   transition: { duration: dur.slow, ease: ease.soft },
                 }}
                 exit={{ opacity: 0, transition: { duration: dur.fast } }}
-                className="flex flex-col gap-5"
+                className="flex flex-col gap-5 short:gap-3"
               >
                 <Step mode={mode} />
               </motion.div>
@@ -256,8 +266,8 @@ function Bubble({
     <div
       className={
         you
-          ? "flex flex-col gap-2 rounded-lg bg-sky-soft p-5"
-          : "flex flex-col gap-2 rounded-lg bg-apricot-soft p-5"
+          ? "flex flex-col gap-2 rounded-lg bg-sky-soft p-5 short:p-4"
+          : "flex flex-col gap-2 rounded-lg bg-apricot-soft p-5 short:p-4"
       }
     >
       <div className="flex items-center gap-2 font-medium text-[13px]">
@@ -354,7 +364,7 @@ function Answer() {
   const total = view.players.filter((p) => p.id !== asker?.id).length;
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-4 short:gap-3"
       onSubmit={async (e) => {
         e.preventDefault();
         if (!value) return;
@@ -368,22 +378,27 @@ function Answer() {
           name: asker ? name(asker) : "",
         })}
       >
-        <p className="font-bold font-display text-2xl leading-[30px] [text-wrap:balance]">
+        <p className="font-bold font-display text-2xl leading-[30px] [text-wrap:balance] tiny:text-xl tiny:leading-7">
           {view.turn?.question}
         </p>
       </Bubble>
-      <span className="font-semibold text-sm">{t("yourAnswer")}</span>
+      {/* the group below is labelled anyway; on very short windows the visible label goes */}
+      <span className="font-semibold text-sm tiny:sr-only">
+        {t("yourAnswer")}
+      </span>
       <motion.div
         role="group"
         aria-label={t("yourAnswer")}
         initial="hidden"
         animate="shown"
         variants={{ shown: { transition: { staggerChildren: 0.04 } } }}
-        className="grid grid-cols-2 gap-2"
+        className="grid grid-cols-2 gap-2 sm:tiny:grid-cols-3"
       >
         {ANSWERS.map((a) => (
           <motion.div
             key={a}
+            // three columns on very short windows: the yes side, then the no side
+            className={TINY_ORDER[a]}
             variants={{
               hidden: { opacity: 0, y: 8 },
               shown: { opacity: 1, y: 0 },
@@ -405,7 +420,12 @@ function Answer() {
         onChange={(e) => setNote(e.target.value)}
       />
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" variant="primary" disabled={pending || !value}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={pending || !value}
+          className="tiny:h-11"
+        >
           {t("send")}
         </Button>
         <span className="font-medium text-[13px] text-ink-muted">

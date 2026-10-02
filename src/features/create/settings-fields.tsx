@@ -162,7 +162,7 @@ export function SettingsFields({
         />
         {hint("seatsHint")}
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 md:col-span-2">
         <SecondsStepper
           value={value.stepSeconds}
           onChange={(stepSeconds) => onChange({ ...value, stepSeconds })}
