@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy } from "lucide-react";
+import { ArrowLeft, Trophy } from "lucide-react";
 import { motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
@@ -11,14 +11,16 @@ import { Portrait } from "@/components/ui/portrait";
 import { ThemeTag } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
+import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang, PlayerView } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
-import { ease } from "@/lib/motion";
+import { useServerClock } from "@/lib/hooks/use-server-clock";
+import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { WHO_AM_I } from "@/lib/routes";
-import { leaveRoom, rematch } from "@/server/actions";
+import { backToLobby, leaveRoom } from "@/server/actions";
 
 const PLINTH = { 1: 136, 2: 96, 3: 60 } as Record<number, number>;
 
@@ -27,6 +29,38 @@ function podiumOrder(ranked: PlayerView[]) {
   if (ranked.length < 3) return ranked;
   const [first, second, third, ...rest] = ranked;
   return [second, first, third, ...rest];
+}
+
+/** The podium's clock: when it runs out, everyone is taken back to the lobby. */
+function LobbyCountdown() {
+  const t = useTranslations("result");
+  const { view, offset } = useRoomContext();
+  const now = useServerClock(offset, 250);
+  if (view.deadline === null || view.stepStartsAt === null) return null;
+  const total = view.deadline - view.stepStartsAt;
+  const left = Math.max(0, view.deadline - Math.max(now, view.stepStartsAt));
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        transition: { duration: dur.base, delay: 0.9, ease: ease.soft },
+      }}
+      role="timer"
+      className="flex w-full max-w-80 flex-col gap-2 rounded-md bg-surface px-4 py-3"
+    >
+      <span className="font-medium text-[13px] text-ink-muted tabular-nums">
+        {t("lobbyIn", { seconds: Math.ceil(left / 1000) })}
+      </span>
+      <span className="h-1.5 overflow-hidden rounded-pill bg-sunken">
+        <span
+          className="block h-full origin-left rounded-pill bg-ink transition-transform duration-300 ease-linear"
+          style={{ transform: `scaleX(${total > 0 ? left / total : 0})` }}
+        />
+      </span>
+    </motion.div>
+  );
 }
 
 /** End of the match: everyone on a podium, cards revealed, the winner highest. */
@@ -44,7 +78,6 @@ export function ResultScreen() {
       (a.place ?? 99) - (b.place ?? 99) || Number(a.gaveUp) - Number(b.gaveUp),
   );
   const winner = ranked.find((p) => p.place === 1);
-  const host = view.players.find((p) => p.isHost);
   const columns = podiumOrder(ranked);
   const you = view.players.find((p) => p.isYou);
   const youLine = !you
@@ -70,7 +103,13 @@ export function ResultScreen() {
     <div className="flex min-h-dvh flex-col gap-5 px-4 pt-4 sm:px-8 sm:pt-6">
       <header className="mx-auto flex w-full max-w-[1120px] items-center gap-4">
         {view.theme ? (
-          <ThemeTag label={tr("theme")} theme={view.theme[lang]} />
+          <ThemeTag
+            label={tr("theme")}
+            theme={view.theme[lang]}
+            emoji={
+              view.theme.set === null ? "✍️" : themeSetEmoji(view.theme.set)
+            }
+          />
         ) : null}
       </header>
       <div className="mx-auto grid w-full max-w-[1120px] flex-1 gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-12">
@@ -94,28 +133,19 @@ export function ResultScreen() {
                 : t("winner", { name: name(winner) })}
           </motion.h1>
           {youLine ? <p className="text-ink-muted">{youLine}</p> : null}
-          <div className="mt-3 flex flex-col items-start gap-2">
+          <div className="mt-3 flex flex-col items-start gap-3">
+            <LobbyCountdown />
             {me.isHost ? (
-              <>
-                <Button
-                  variant="primary"
-                  size="lg"
-                  disabled={pending}
-                  onClick={async () => {
-                    await act(() => rematch(code));
-                  }}
-                >
-                  {t("again")}
-                </Button>
-                <span className="font-medium text-[13px] text-ink-muted">
-                  {t("againHint")}
-                </span>
-              </>
-            ) : (
-              <span className="text-ink-muted">
-                {t("waitingHost", { name: host ? name(host) : "" })}
-              </span>
-            )}
+              <Button
+                variant="primary"
+                size="lg"
+                disabled={pending}
+                onClick={() => act(() => backToLobby(code))}
+              >
+                <ArrowLeft strokeWidth={2} />
+                {t("toLobby")}
+              </Button>
+            ) : null}
             <Button
               variant="ghost"
               className="-ml-6"

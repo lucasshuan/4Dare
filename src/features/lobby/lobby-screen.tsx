@@ -114,11 +114,16 @@ export function LobbyScreen() {
         <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
           <div className="flex flex-col gap-3">
             <h1 className="max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]">
-              {me.isHost ? t("titleHost") : t("titleGuest", { name: hostName })}
+              {/* after a match the room is not new any more */}
+              {me.isHost
+                ? t(view.round > 0 ? "titleHostAgain" : "titleHost")
+                : t(view.round > 0 ? "titleGuestAgain" : "titleGuest", {
+                    name: hostName,
+                  })}
             </h1>
             <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
               {me.isHost
-                ? t("subtitleHost")
+                ? t(view.round > 0 ? "subtitleHostAgain" : "subtitleHost")
                 : t("subtitleGuest", { name: hostName })}
             </p>
           </div>

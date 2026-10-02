@@ -2,8 +2,8 @@
   "kicker": "End of the match · {count} plays",
   "winner": "{name} discovered first",
   "nobody": "Nobody discovered this time",
-  "again": "Play again",
-  "waitingHost": "Waiting for {name} to start another one",
+  "toLobby": "Back to the lobby",
+  "lobbyIn": "Everyone goes back to the lobby in {seconds} s",
   "home": "Back to rooms",
   "place": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
   "gaveUp": "Gave up",
@@ -15,6 +15,5 @@
   "youFound": "You found it too, on play {n}.",
   "youGaveUp": "You gave up this time.",
   "youMissed": "You didn't find it this time.",
-  "againHint": "Same room, new theme.",
   "youFirst": "You discovered first"
 }

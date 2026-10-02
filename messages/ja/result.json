@@ -2,8 +2,8 @@
   "kicker": "ゲーム終了 · {count}手",
   "winner": "{name}さんが一番に正解",
   "nobody": "今回は誰も正解しませんでした",
-  "again": "もう一度遊ぶ",
-  "waitingHost": "{name}さんが次のゲームを始めるのを待っています",
+  "toLobby": "待合室に戻る",
+  "lobbyIn": "{seconds}秒後に全員が待合室に戻ります",
   "home": "ルーム一覧に戻る",
   "place": "{place}位",
   "gaveUp": "ギブアップ",
@@ -15,6 +15,5 @@
   "youFound": "あなたも{n}手目で当てました。",
   "youGaveUp": "今回はギブアップしました。",
   "youMissed": "今回は当てられませんでした。",
-  "againHint": "同じルームで、新しいテーマ。",
   "youFirst": "あなたが一番に当てました"
 }

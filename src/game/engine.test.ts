@@ -6,6 +6,7 @@ import {
   GameError,
   HOST_THEME_SECONDS,
   LOBBY_SECONDS,
+  RESULT_SECONDS,
   REVEAL_TIMING,
   type RoomState,
   STEP_SECONDS_MIN,
@@ -314,7 +315,7 @@ describe("the host types the theme", () => {
     expect(pair.state.phase).toBe("lobby");
   });
 
-  it("the lobby clock and a rematch go to the host's typing too", () => {
+  it("the lobby clock and the next match go to the host's typing too", () => {
     const g = new Game(2, 1, { themeMode: "host" });
     g.timeout({ themes: [] });
     expect(g.state.phase).toBe("theming");
@@ -324,7 +325,8 @@ describe("the host types the theme", () => {
     g.do({ type: "GIVE_UP", playerId: g.turn });
     g.do({ type: "GIVE_UP", playerId: g.turn });
     expect(g.state.phase).toBe("finished");
-    g.do({ type: "REMATCH", playerId: "p1", themes: THEMES });
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
     expect(g.state.phase).toBe("theming");
   });
 });
@@ -665,7 +667,7 @@ describe("leaving and giving up", () => {
     const g = started(2);
     g.do({ type: "LEAVE", playerId: g.state.order[1] });
     expect(g.state.phase).toBe("finished");
-    expect(g.state.deadline).toBeNull();
+    expect(g.state.deadline).toBe(g.now + RESULT_SECONDS * 1000);
   });
 });
 
@@ -689,7 +691,7 @@ describe("whole matches", () => {
     expect(s.reveal?.kind).toBe("guess");
   });
 
-  it("4 players play to the end, then the host plays again", () => {
+  it("4 players play to the end, go back to the lobby and play again", () => {
     const g = started(4);
     const s = playToEnd(g);
     expect(
@@ -697,10 +699,24 @@ describe("whole matches", () => {
         .map((o) => o.place)
         .sort(),
     ).toEqual([1, 2, 3, 4]);
-    expect(
-      code(() => g.do({ type: "REMATCH", playerId: "p2", themes: THEMES })),
-    ).toBe("not_host");
-    g.do({ type: "REMATCH", playerId: s.hostId, themes: THEMES });
+    // the podium waits for the last reveal, then its own clock
+    expect(s.stepStartsAt).toBe(s.reveal?.until);
+    expect(s.deadline).toBe((s.stepStartsAt ?? 0) + RESULT_SECONDS * 1000);
+    expect(code(() => g.do({ type: "BACK_TO_LOBBY", playerId: "p2" }))).toBe(
+      "not_host",
+    );
+    g.do({ type: "BACK_TO_LOBBY", playerId: s.hostId });
+    expect(g.state.phase).toBe("lobby");
+    expect(g.state.deadline).toBe(g.now + LOBBY_SECONDS * 1000);
+    expect(g.state.players.map((p) => p.ready)).toEqual([
+      true,
+      false,
+      false,
+      false,
+    ]);
+    expect(g.state.assignments).toEqual({});
+    expect(g.state.plays).toEqual([]);
+    g.do({ type: "START", playerId: s.hostId, themes: THEMES });
     expect(g.state.phase).toBe("voting");
     expect(g.state.reveal).toBeNull();
     g.voteAll(2);
@@ -709,6 +725,21 @@ describe("whole matches", () => {
     expect(g.state.round).toBe(2);
     expect(g.state.plays).toEqual([]);
     expect(g.state.reveal?.kind).toBe("theme");
+  });
+
+  it("without the host, the podium's clock takes everyone back; whoever left loses the seat", () => {
+    const g = started(3);
+    const leaver = g.state.order[0];
+    g.do({ type: "LEAVE", playerId: leaver });
+    for (const id of g.state.order)
+      if (id !== leaver && g.state.phase !== "finished")
+        g.do({ type: "GIVE_UP", playerId: id });
+    expect(g.state.phase).toBe("finished");
+    expect(code(() => g.do({ type: "TIMEOUT" }))).toBe("wrong_phase");
+    g.timeout();
+    expect(g.state.phase).toBe("lobby");
+    expect(g.state.players.map((p) => p.id)).not.toContain(leaver);
+    expect(g.state.players.some((p) => p.id === g.state.hostId)).toBe(true);
   });
 
   it("never mutates the state it was given", () => {

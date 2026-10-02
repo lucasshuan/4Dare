@@ -53,7 +53,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Themes where the "character" is a group: duos, trios, siblings, families, bands, species (Pikmin)
 - [x] Themes in the database: turn on and off without a deploy; the AI's ones are kept
 - [x] One theme, one idea: "Angels and demons", "Butlers and maids" and 13 others became two themes each; the AI no longer joins two groups
-- [x] Theme vote: before each match (and rematch) 3 themes show up and everyone votes, with avatars hopping between the cards; 8 s; most votes wins, a tie goes to a synced wheel, and the winner takes the stage before picking
+- [x] Theme vote: before each match 3 themes show up and everyone votes, with avatars hopping between the cards; 8 s; most votes wins, a tie goes to a synced wheel, and the winner takes the stage before picking
 
 ## Phase 4 — Looks like a finished game ✅
 
@@ -72,7 +72,8 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Smooth, lively transitions on every screen, room creation and room errors included
 - [x] Actions answer at once: the response already brings the room, no second fetch; "I'm ready" changes on click
 - [x] Scrollable history in a drawer, on web and phone: "My plays" (default) or "All"
-- [x] Podium with the winners higher and each player under their card; "Play again"
+- [x] Podium with the winners higher and each player under their card
+- [x] After 15 s on the podium everyone goes back to the lobby for another match; the host can go sooner
 - [x] Room settings hints as tooltips on the labels, with a small info badge
 - [x] Phones
 

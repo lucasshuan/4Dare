@@ -26,6 +26,7 @@ import {
   MAX_THEME,
   type Play,
   type PlayerId,
+  RESULT_SECONDS,
   REVEAL_TIMING,
   type RoomSettings,
   type RoomState,
@@ -237,10 +238,11 @@ function endOutcome(s: RoomState, id: PlayerId, ctx: Ctx) {
   s.outcomes[id].endedAt = ctx.now;
 }
 
-function finish(s: RoomState) {
+/** The podium; its clock (after the last reveal) takes everyone back to the lobby. */
+function finish(s: RoomState, ctx: Ctx) {
   s.phase = "finished";
   s.turnPlayerId = null;
-  stopClock(s);
+  startStep(s, ctx, RESULT_SECONDS * 1000);
 }
 
 const presentCount = (s: RoomState) => s.players.filter(isPresent).length;
@@ -262,9 +264,9 @@ function nextPlayerAfter(s: RoomState, from: PlayerId | null) {
 }
 
 function goToTurn(s: RoomState, ctx: Ctx, from: PlayerId | null) {
-  if (presentCount(s) < 2) return finish(s);
+  if (presentCount(s) < 2) return finish(s, ctx);
   const next = nextPlayerAfter(s, from);
-  if (!next) return finish(s);
+  if (!next) return finish(s, ctx);
   s.phase = "asking";
   s.turnPlayerId = next;
   startStep(s, ctx, stepMs(s));
@@ -477,8 +479,12 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     }
     case "GIVE_UP":
       return giveUp(s, e.playerId, ctx);
-    case "REMATCH":
-      return rematch(s, e.playerId, e.themes, ctx);
+    case "BACK_TO_LOBBY": {
+      requireSeated(s, e.playerId);
+      if (e.playerId !== s.hostId) fail("not_host");
+      if (s.phase !== "finished") fail("wrong_phase");
+      return backToLobby(s, ctx);
+    }
     case "TIMEOUT":
       return timeout(s, e, ctx);
   }
@@ -590,7 +596,7 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
       if (othersAnswered(s, q)) resolveQuestion(s, q, ctx);
     }
   }
-  if (MATCH_PHASES.has(s.phase) && presentCount(s) < 2) finish(s);
+  if (MATCH_PHASES.has(s.phase) && presentCount(s) < 2) finish(s, ctx);
 }
 
 function pick(
@@ -678,17 +684,36 @@ function giveUp(s: RoomState, playerId: PlayerId, ctx: Ctx) {
     return abandonTurn(s, ctx);
   }
   const anyoneLeft = s.players.some((p) => canPlay(s, p.id));
-  if (TURN_PHASES.has(s.phase) && !anyoneLeft) finish(s);
+  if (TURN_PHASES.has(s.phase) && !anyoneLeft) finish(s, ctx);
 }
 
-function rematch(s: RoomState, playerId: PlayerId, themes: Theme[], ctx: Ctx) {
-  requireSeated(s, playerId);
-  if (playerId !== s.hostId) fail("not_host");
-  if (s.phase !== "finished") fail("wrong_phase");
+/**
+ * From the podium to a fresh lobby: whoever left the match loses their seat,
+ * everyone but the host marks "ready" again, and the lobby clock restarts.
+ * The vote stays, so the next one avoids its themes.
+ */
+function backToLobby(s: RoomState, ctx: Ctx) {
   s.players = s.players.filter(isPresent);
+  if (s.players.length === 0) {
+    s.phase = "closed";
+    return stopClock(s);
+  }
   handOverHost(s);
-  if (s.players.length < 2) fail("need_two_players");
-  beginTheme(s, themes, ctx);
+  for (const p of s.players) {
+    p.ready = p.id === s.hostId;
+    p.strikes = 0;
+  }
+  s.phase = "lobby";
+  s.theme = null;
+  s.ideas = [];
+  s.order = [];
+  s.assignments = {};
+  s.outcomes = {};
+  s.plays = [];
+  s.turnPlayerId = null;
+  s.reveal = null;
+  s.playStartedAt = null;
+  startStep(s, ctx, LOBBY_SECONDS * 1000);
 }
 
 function timeout(
@@ -709,6 +734,8 @@ function timeout(
       return beginVote(s, e.themes, ctx);
     case "voting":
       return closeVote(s, ctx);
+    case "finished":
+      return backToLobby(s, ctx);
     case "picking": {
       const used = new Set(
         Object.values(s.assignments).flatMap((a) =>

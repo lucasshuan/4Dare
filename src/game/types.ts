@@ -66,6 +66,8 @@ export const STEP_SECONDS_MIN = 30;
 export const STEP_SECONDS_MAX = 300;
 /** The lobby always waits 2 minutes, whatever the step time is. */
 export const LOBBY_SECONDS = 120;
+/** The podium stays this long; then the room goes back to the lobby on its own (the host can go sooner). */
+export const RESULT_SECONDS = 15;
 /** Themes offered in the vote before each match, and how long the vote lasts. */
 export const THEME_OPTIONS = 3;
 export const VOTE_SECONDS = 8;
@@ -219,7 +221,7 @@ export interface RoomState {
   stepStartsAt: number | null;
   /** The latest reveal; only shown while it lasts. */
   reveal: Reveal | null;
-  /** Counts matches played in this room (rematches). */
+  /** Counts matches played in this room. */
   round: number;
   /** Epoch ms when the first question of this match could be asked (picks done); null before. */
   playStartedAt: number | null;
@@ -257,7 +259,8 @@ export type GameEvent =
   | { type: "PASS"; playerId: PlayerId }
   | { type: "VALIDATE"; playerId: PlayerId; correct: boolean }
   | { type: "GIVE_UP"; playerId: PlayerId }
-  | { type: "REMATCH"; playerId: PlayerId; themes: Theme[] }
+  /** Host only, from the podium: everyone goes back to the lobby for another match. */
+  | { type: "BACK_TO_LOBBY"; playerId: PlayerId }
   /**
    * The step's clock ran out. The caller supplies what the engine cannot make up:
    * themes to vote on or ideas (lobby auto-start, a host who never typed the theme)

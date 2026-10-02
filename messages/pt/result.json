@@ -2,8 +2,8 @@
   "kicker": "Fim da partida · {count} jogadas",
   "winner": "{name} descobriu primeiro",
   "nobody": "Ninguém descobriu desta vez",
-  "again": "Jogar de novo",
-  "waitingHost": "Esperando {name} começar outra",
+  "toLobby": "Voltar para a sala de espera",
+  "lobbyIn": "Todo mundo volta para a sala de espera em {seconds} s",
   "home": "Voltar às salas",
   "place": "{place}º lugar",
   "gaveUp": "Desistiu",
@@ -15,6 +15,5 @@
   "youFound": "Você também descobriu, na jogada {n}.",
   "youGaveUp": "Você desistiu desta vez.",
   "youMissed": "Você não descobriu desta vez.",
-  "againHint": "Mesma sala, tema novo.",
   "youFirst": "Você descobriu primeiro"
 }

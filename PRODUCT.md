@@ -9,7 +9,7 @@ Ludodare is a collection of games to play with friends. For now there is one: **
 3. Each player picks a character for another player. You see everyone's card but yours.
 4. On your turn, you ask a yes-or-no question. Everyone answers: Yes, Probably, Don't know, Probably not, No or Doesn't matter, with a comment if they want.
 5. Then you guess. The right name counts at once. If it's only close, whoever picked the character decides.
-6. First to find out wins. At the end there's a podium and "play again".
+6. First to find out wins. At the end there's a podium; a few seconds later everyone is back in the lobby for another one.
 
 Each step has a time limit (120 s by default). Between steps, everyone sees the answers.
 

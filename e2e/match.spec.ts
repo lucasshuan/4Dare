@@ -36,7 +36,14 @@ test("two players play a whole match", async ({ browser }) => {
     await expect(
       page.getByRole("heading", { name: /discovered first/i }),
     ).toBeVisible();
-  await expect(host.getByRole("button", { name: /play again/i })).toBeVisible();
+
+  // the host takes everyone back to the lobby for another match
+  await host.getByRole("button", { name: /back to the lobby/i }).click();
+  await expect(
+    host.getByRole("heading", { name: /another round/i }),
+  ).toBeVisible();
+  await expect(guest.getByRole("heading", { name: /back in/i })).toBeVisible();
+  await expect(guest.getByRole("button", { name: /i'm ready/i })).toBeVisible();
 });
 
 test("three players on phones, with a wrong guess checked by the picker", async ({
@@ -66,4 +73,12 @@ test("three players on phones, with a wrong guess checked by the picker", async 
   await expect(
     host.getByRole("heading", { name: /discovered first/i }),
   ).toBeVisible();
+
+  // nobody presses anything: the podium's clock takes everyone to the lobby
+  for (const page of players)
+    await expect(
+      page.getByRole("heading", { name: /another round|back in/i }),
+    ).toBeVisible({
+      timeout: 25_000,
+    });
 });

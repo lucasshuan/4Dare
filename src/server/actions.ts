@@ -159,11 +159,13 @@ export async function setReady(
   );
 }
 
-/** Host only, 2+ players. Draws the themes everyone votes on (or the host's ideas, when they type the theme). */
+/** Host only, 2+ players. Draws the themes everyone votes on (or the host's ideas, when they type the theme), avoiding the last vote's. */
 export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {
     const stored = await getBackend().rooms.get(roomCode(code));
-    const themes = stored ? await roundThemes(stored.state, []) : [];
+    const themes = stored
+      ? await roundThemes(stored.state, stored.state.vote?.options ?? [])
+      : [];
     return act(code, (id) => ({ type: "START", playerId: id, themes }));
   });
 }
@@ -375,19 +377,11 @@ export async function giveUp(code: string): Promise<Result<RoomView>> {
   return run(() => act(code, (id) => ({ type: "GIVE_UP", playerId: id })));
 }
 
-/** Host only, from the result screen: same room, new theme. */
-export async function rematch(code: string): Promise<Result<RoomView>> {
-  return run(async () => {
-    const stored = await getBackend().rooms.get(roomCode(code));
-    const themes = stored
-      ? await roundThemes(
-          stored.state,
-          stored.state.vote?.options ??
-            (stored.state.theme ? [stored.state.theme] : []),
-        )
-      : [];
-    return act(code, (id) => ({ type: "REMATCH", playerId: id, themes }));
-  });
+/** Host only, from the podium: everyone back to the lobby now, without waiting for the clock. */
+export async function backToLobby(code: string): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({ type: "BACK_TO_LOBBY", playerId: id })),
+  );
 }
 
 // --- character library --------------------------------------------------------
