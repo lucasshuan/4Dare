@@ -30,6 +30,7 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 
 ## Fase 3 — Personagens de verdade
 
+- [ ] Revisar o gerador da biblioteca de personagens (scripts/library)
 - [ ] Biblioteca de personagens com imagem em en/pt/ja
 - [ ] Busca com autocomplete e foto
 - [x] Criar personagem com imagem e trocar imagem
@@ -50,6 +51,8 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 - [x] Login com Discord e Google, perfil com nome e avatar (sem Supabase entra numa conta de teste)
 - [x] Salas públicas na tela inicial
 - [x] Sala de espera com "Estou pronto" e configurações (vagas, segundos por etapa)
+- [x] Nome de convidado sorteado: adjetivo + substantivo, 27 mil combinações (WonderfulCat, GatoMaravilhoso, すてきなネコ)
+- [ ] Avatares Critters do DiceBear: convidado ganha um sorteado, conta pode sortear outro
 
 ## Fase 6 — Acabamento
 
