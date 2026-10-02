@@ -25,7 +25,7 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 ## Fase 2 — Online com os amigos
 
 - [ ] Supabase: banco, tempo real, convidado sem login
-- [ ] Deploy na Vercel (você cria o projeto no Supabase e cola as chaves)
+- [ ] Deploy na Vercel com a integração do Supabase (as chaves entram sozinhas)
 - [ ] Partida de 2 e de 4 jogadores testada de ponta a ponta
 
 ## Fase 3 — Personagens de verdade

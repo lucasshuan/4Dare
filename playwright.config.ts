@@ -22,6 +22,7 @@ export default defineConfig({
       NEXT_DIST_DIR: ".next-e2e",
       DARE_DATA_DIR: ".data/e2e",
       NEXT_PUBLIC_SUPABASE_URL: "",
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
     },
   },

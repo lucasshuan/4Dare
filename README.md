@@ -24,4 +24,6 @@ Pra jogar com amigos na mesma rede: `pnpm build && pnpm start`, e eles abrem `ht
 
 ## Online
 
-Ainda não. Tá na fase 2 do [ROADMAP](ROADMAP.md).
+1. Na Vercel, importa o repo e adiciona a integração do Supabase. As chaves entram sozinhas.
+2. No Supabase, roda `supabase/migrations/0001_init.sql`. Em Auth, liga "anonymous sign-ins", "manual linking", Discord e Google, com redirect `https://SEU-DOMINIO/auth/callback`.
+3. `vercel env pull .env.local` e `pnpm seed` pra subir a biblioteca de personagens.
