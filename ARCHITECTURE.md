@@ -18,5 +18,5 @@ Next.js 16 + React 19 + Tailwind 4, tudo em TypeScript.
 - Relógio sem cron: quando alguém busca a sala, o servidor aplica os tempos que já venceram.
 - Tempo real: local busca a sala a cada 1 s. No Supabase chega um aviso pelo Realtime.
 - Partidas: quando uma termina, vira um registro por jogador (`src/game/record.ts`), salvo depois da resposta. Convidado no Supabase é usuário anônimo; ao vincular Discord/Google o id não muda, então as partidas continuam dele.
-- Tema: o Claude sorteia se tiver `ANTHROPIC_API_KEY`. Senão sai da lista de 306.
+- Tema: o Claude sorteia se tiver `ANTHROPIC_API_KEY`. Senão sai da lista de 322.
 - Testes: `vitest` no motor (inclui 300 partidas aleatórias) e `playwright` com partidas inteiras.

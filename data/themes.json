@@ -1500,11 +1500,6 @@
     "ja": "名前が作品タイトルになっているキャラクター"
   },
   {
-    "en": "Characters without a real name",
-    "pt": "Personagens sem nome de verdade",
-    "ja": "本名がわからないキャラクター"
-  },
-  {
     "en": "Characters with a number in their name",
     "pt": "Personagens com número no nome",
     "ja": "名前に数字が入っているキャラクター"
@@ -1528,5 +1523,90 @@
     "en": "Characters with matching initials",
     "pt": "Personagens com iniciais iguais",
     "ja": "イニシャルがそろっているキャラクター"
+  },
+  {
+    "en": "Famous duos",
+    "pt": "Duplas famosas",
+    "ja": "有名なコンビ"
+  },
+  {
+    "en": "Famous trios",
+    "pt": "Trios famosos",
+    "ja": "有名なトリオ"
+  },
+  {
+    "en": "Siblings who come as a set",
+    "pt": "Irmãos que andam juntos",
+    "ja": "いつも一緒のきょうだい"
+  },
+  {
+    "en": "Famous families",
+    "pt": "Famílias famosas",
+    "ja": "有名な家族"
+  },
+  {
+    "en": "Famous couples",
+    "pt": "Casais famosos",
+    "ja": "有名なカップル"
+  },
+  {
+    "en": "Hero teams",
+    "pt": "Equipes de heróis",
+    "ja": "ヒーローチーム"
+  },
+  {
+    "en": "Villain gangs",
+    "pt": "Gangues de vilões",
+    "ja": "悪の組織"
+  },
+  {
+    "en": "Groups of friends",
+    "pt": "Turmas de amigos",
+    "ja": "仲良しグループ"
+  },
+  {
+    "en": "Hero and sidekick",
+    "pt": "Herói e ajudante",
+    "ja": "ヒーローと相棒"
+  },
+  {
+    "en": "A character and their pet",
+    "pt": "Personagem e seu bichinho",
+    "ja": "キャラクターとペット"
+  },
+  {
+    "en": "Creatures that come in crowds",
+    "pt": "Criaturinhas que andam em bando",
+    "ja": "いつも大勢でいるキャラクター"
+  },
+  {
+    "en": "Video game species",
+    "pt": "Espécies de videogame",
+    "ja": "ゲームに出てくる種族"
+  },
+  {
+    "en": "Fantasy races",
+    "pt": "Raças de fantasia",
+    "ja": "ファンタジーの種族"
+  },
+  {
+    "en": "Bands from cartoons and anime",
+    "pt": "Bandas de desenho e anime",
+    "ja": "アニメのバンド"
+  },
+  {
+    "en": "Music duos",
+    "pt": "Duplas da música",
+    "ja": "音楽デュオ"
+  },
+  {
+    "en": "Bands and music groups",
+    "pt": "Bandas e grupos musicais",
+    "ja": "バンドや音楽グループ"
+  },
+  {
+    "en": "Comedy groups",
+    "pt": "Grupos de humor",
+    "ja": "お笑いグループ"
   }
 ]
