@@ -2,14 +2,20 @@
 
 import { useEffect } from "react";
 import { APP_NAME } from "@/config";
+import { formatClock, isLowClock } from "@/lib/names";
 
-/** The app icon in apricot with a "!" in the bubble: shown in turns with the usual icon. */
-const ALERT_ICON = `data:image/svg+xml,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><rect width="1000" height="1000" rx="200" fill="#CF7024"/><g transform="translate(217.6 100) scale(1.0152)"><path fill="#F6E3A1" d="M70 0H250A330 330 0 0 1 250 660H215L66 774Q12 812 4 750L0 700V70Q0 0 70 0Z"/><g fill="#CF7024" transform="rotate(-8 280 330)"><rect x="228" y="118" width="108" height="292" rx="54"/><circle cx="282" cy="492" r="60"/></g></g></svg>',
-)}`;
+/** The app icon with a "!" in the bubble, on a `fill` background. */
+const alertIcon = (fill: string) =>
+  `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><rect width="1000" height="1000" rx="200" fill="${fill}"/><g transform="translate(217.6 100) scale(1.0152)"><path fill="#F6E3A1" d="M70 0H250A330 330 0 0 1 250 660H215L66 774Q12 812 4 750L0 700V70Q0 0 70 0Z"/><g fill="${fill}" transform="rotate(-8 280 330)"><rect x="228" y="118" width="108" height="292" rx="54"/><circle cx="282" cy="492" r="60"/></g></g></svg>`,
+  )}`;
 
-/** How long each frame of the blink lasts (background tabs tick at most once a second anyway). */
-const BLINK_MS = 1000;
+/** Apricot while it's the player's move; red in the clock's final stretch. */
+const ALERT_ICON = alertIcon("#CF7024");
+const LOW_ICON = alertIcon("#C2412F");
+
+/** How often the title clock is redrawn (background tabs tick at most once a second anyway). */
+const TICK_MS = 250;
 
 const isAway = () => document.hidden || !document.hasFocus();
 
@@ -31,52 +37,59 @@ function swapIcons(href: string): () => void {
     });
 }
 
+export type TabClock = {
+  deadline: number | null;
+  stepStartsAt: number | null;
+  offset: number;
+};
+
 /**
- * Keeps the tab title at "<title> · Ludodare". With an `alert` and the tab in the
- * background (or the window out of focus), the title and the icon blink between the
- * alert and the usual ones until the player comes back.
+ * Keeps the tab title at "<clock> · <title> · Ludodare", the clock counting down
+ * while a step runs. With an `alert` (the player's move) the alert takes the title's
+ * place, and while the tab is in the background (or the window out of focus) the
+ * icon turns into the alert icon, red in the clock's final stretch.
  */
-export function useTabTitle(title: string, alert: string | null) {
-  const full = `${title} · ${APP_NAME}`;
-
+export function useTabTitle(
+  title: string,
+  alert: string | null,
+  { deadline, stepStartsAt, offset }: TabClock,
+) {
   useEffect(() => {
-    document.title = full;
-    if (!alert) return;
-
-    let timer: ReturnType<typeof setInterval> | null = null;
+    let icon: string | null = null;
     let undoIcon: (() => void) | null = null;
-    let on = false;
 
-    const frame = (show: boolean) => {
-      if (show || on) document.title = show ? `❗ ${alert}` : full;
-      on = show;
-      if (show && !undoIcon) undoIcon = swapIcons(ALERT_ICON);
-      if (!show && undoIcon) {
-        undoIcon();
-        undoIcon = null;
-      }
+    const setIcon = (href: string | null) => {
+      if (href === icon) return;
+      undoIcon?.();
+      undoIcon = href ? swapIcons(href) : null;
+      icon = href;
     };
-    const stop = () => {
-      if (timer) clearInterval(timer);
-      timer = null;
-      frame(false);
-    };
-    const sync = () => {
-      if (!isAway()) return stop();
-      if (timer) return;
-      frame(true);
-      timer = setInterval(() => frame(!on), BLINK_MS);
+    const tick = () => {
+      const now = Date.now() + offset;
+      // No clock while a reveal is on screen: the step hasn't started yet.
+      const running =
+        deadline !== null && stepStartsAt !== null && now >= stepStartsAt;
+      const left = running ? Math.max(0, deadline - now) / 1000 : null;
+      const low = running && isLowClock(left ?? 0, deadline - stepStartsAt);
+      const clock = left === null ? null : formatClock(left);
+      const next = [clock, alert ?? title, APP_NAME]
+        .filter(Boolean)
+        .join(" · ");
+      if (document.title !== next) document.title = next;
+      setIcon(alert && isAway() ? (low ? LOW_ICON : ALERT_ICON) : null);
     };
 
-    sync();
-    document.addEventListener("visibilitychange", sync);
-    window.addEventListener("focus", sync);
-    window.addEventListener("blur", sync);
+    tick();
+    const timer = setInterval(tick, TICK_MS);
+    document.addEventListener("visibilitychange", tick);
+    window.addEventListener("focus", tick);
+    window.addEventListener("blur", tick);
     return () => {
-      document.removeEventListener("visibilitychange", sync);
-      window.removeEventListener("focus", sync);
-      window.removeEventListener("blur", sync);
-      stop();
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", tick);
+      window.removeEventListener("focus", tick);
+      window.removeEventListener("blur", tick);
+      setIcon(null);
     };
-  }, [full, alert]);
+  }, [title, alert, deadline, stepStartsAt, offset]);
 }

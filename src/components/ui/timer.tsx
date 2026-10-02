@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
-import { formatClock } from "@/lib/names";
+import { formatClock, isLowClock } from "@/lib/names";
 
 /**
  * The step clock. While a reveal is on screen (now < stepStartsAt) it recharges:
@@ -41,8 +41,7 @@ export function Timer({
     fraction = total > 0 ? left / total : 0;
     shown = left / 1000;
   }
-  // The last 20 s, or the last third of a short step (a quick vote).
-  const low = !recharging && shown <= Math.min(20, total / 3000);
+  const low = !recharging && isLowClock(shown, total);
   return (
     <div
       role="timer"

@@ -29,3 +29,8 @@ export function formatClock(seconds: number) {
   const s = Math.max(0, Math.ceil(seconds));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
+
+/** The clock's final stretch: the last 20 s, or the last third of a short step (a quick vote). */
+export function isLowClock(secondsLeft: number, totalMs: number) {
+  return secondsLeft <= Math.min(20, totalMs / 3000);
+}

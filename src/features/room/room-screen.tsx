@@ -169,14 +169,15 @@ const TAB_ALERT: Partial<Record<PlayerStatus, string>> = {
   validating: "validating",
 };
 
-/** "Lobby · ABCDE · Ludodare"; blinks "Your turn!" while the player is in another tab. */
+/** "0:42 · Lobby · ABCDE · Ludodare", or "0:42 · Your turn! · Ludodare" on the player's move. */
 function useRoomTab() {
   const t = useTranslations("meta");
-  const { code, view, me } = useRoomContext();
+  const { code, view, me, offset } = useRoomContext();
   const phase = TAB_PHASE[view.phase];
   const alert = TAB_ALERT[me.status];
   useTabTitle(
     phase ? `${t(`tab.${phase}`)} · ${code}` : t("room.title", { code }),
     alert ? t(`tab.alert.${alert}`) : null,
+    { deadline: view.deadline, stepStartsAt: view.stepStartsAt, offset },
   );
 }

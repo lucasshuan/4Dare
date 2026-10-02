@@ -13,3 +13,16 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - the project is in development; matches in the database are test data; the database follows `/data`
 - migrations and seed are the agent's job: run them whenever needed, without asking
 - losing data is not a problem yet, but keep what you can
+
+
+## Commits
+
+Always the same pattern: Conventional Commits, in English.
+
+    type(scope): short imperative summary
+
+- type: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`, `perf`
+- scope (optional): `game`, `server`, `ui`, `app`, `data`, `i18n`
+- lowercase, no final period, at most 72 characters
+- a body only when the why is not obvious
+- one commit per coherent piece of work; never commit `.env` files or secrets
