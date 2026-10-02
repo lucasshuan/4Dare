@@ -14,7 +14,7 @@ import { TurnScreen } from "@/features/turn/turn-screen";
 import type { ErrorCode } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
-import { dur, ease } from "@/lib/motion";
+import { dur, ease, riseIn } from "@/lib/motion";
 import { WHO_AM_I } from "@/lib/routes";
 import { joinRoom } from "@/server/actions";
 import { RevealOverlay } from "./reveal-overlay";
@@ -96,11 +96,15 @@ function PhaseScreens() {
 
 function RoomLoading() {
   return (
-    <Screen>
-      <div className="flex flex-col gap-4 pt-10">
+    <Screen left={null}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: dur.base } }}
+        className="flex flex-col gap-4 pt-10"
+      >
         <div className="h-12 w-2/3 animate-pulse rounded-md bg-sunken" />
         <div className="h-6 w-1/2 animate-pulse rounded-md bg-sunken" />
-      </div>
+      </motion.div>
     </Screen>
   );
 }
@@ -110,7 +114,7 @@ function RoomProblem({ code }: { code: ErrorCode }) {
   const known = ["not_found", "room_full", "already_started"].includes(code);
   return (
     <Screen>
-      <div className="flex max-w-lg flex-col gap-6 pt-10">
+      <motion.div {...riseIn} className="flex max-w-lg flex-col gap-6 pt-10">
         <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em]">
           {t(`problem.${known ? code : "other"}.title`)}
         </h1>
@@ -123,7 +127,7 @@ function RoomProblem({ code }: { code: ErrorCode }) {
         >
           {t("goHome")}
         </Link>
-      </div>
+      </motion.div>
     </Screen>
   );
 }

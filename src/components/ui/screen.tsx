@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { Logo } from "./logo";
 
-/** Page shell: header row and a centred column. */
+/** Page shell: header row and a centred column. `left={null}` drops the wordmark. */
 export function Screen({
   left,
   right,
@@ -25,7 +26,7 @@ export function Screen({
         )}
       >
         <div className="flex min-w-0 items-center gap-4">
-          {left ?? <Wordmark />}
+          {left === undefined ? <Wordmark /> : left}
         </div>
         <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
           {right}
@@ -40,11 +41,8 @@ export function Screen({
 
 export function Wordmark() {
   return (
-    <Link
-      href="/"
-      className="shrink-0 font-display font-extrabold text-[28px] leading-8 tracking-[-0.02em]"
-    >
-      Dare
+    <Link href="/" className="group shrink-0 rounded-sm">
+      <Logo className="h-9 w-auto" />
     </Link>
   );
 }

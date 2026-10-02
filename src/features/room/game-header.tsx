@@ -2,12 +2,12 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { ThemeTag, Wordmark } from "@/components/ui/screen";
+import { ThemeTag } from "@/components/ui/screen";
 import { Timer } from "@/components/ui/timer";
 import { useRoomContext } from "@/features/data/room-context";
 import type { Lang } from "@/game/types";
 
-/** Header of the match screens: wordmark, theme and the step clock. */
+/** Header of the match screens: theme and the step clock. No logo during a match. */
 export function GameHeader() {
   const t = useTranslations("room");
   const lang = useLocale() as Lang;
@@ -15,7 +15,6 @@ export function GameHeader() {
   return (
     <header className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-4">
-        <Wordmark />
         {view.theme ? (
           <ThemeTag label={t("theme")} theme={view.theme[lang]} />
         ) : null}

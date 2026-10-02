@@ -3,69 +3,52 @@
 import { ArrowRight, Sparkles, UsersRound } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { LanguageSwitch } from "@/components/ui/language-switch";
 import { Screen } from "@/components/ui/screen";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Link } from "@/i18n/navigation";
 import { ease } from "@/lib/motion";
 import { WHO_AM_I } from "@/lib/routes";
 import { GamesCarousel } from "./games-carousel";
+import { HubActions } from "./hub-actions";
 import { useAuthErrorToast } from "./use-auth-error";
-import { UserMenu } from "./user-menu";
 import { WhoAmISnapshot } from "./who-am-i-snapshot";
 
 /**
  * Card width follows the window height, so the whole hub fits on screen
- * without a vertical scroll (about 340px on a 900px-tall window, less below).
+ * without a vertical scroll (340px from about a 730px-tall window up, less below).
  */
-const CARD = "w-[clamp(220px,calc((100dvh_-_540px)_*_1.6),340px)]";
+const CARD = "w-[clamp(220px,calc((100dvh_-_370px)_*_1.6),340px)]";
 
-/** The hub: who you are at the top left, then the games. Only one so far. */
+/** The hub: logo and who you are on top, then the games. Only one so far. */
 export function HomeScreen() {
   const t = useTranslations("home");
   useAuthErrorToast();
 
   return (
-    <Screen
-      left={<UserMenu />}
-      right={
-        <>
-          <LanguageSwitch />
-          <ThemeToggle />
-        </>
-      }
-    >
-      <div className="flex flex-col gap-8 sm:gap-10">
-        <motion.div
+    <Screen right={<HubActions />}>
+      <section className="flex flex-col gap-3">
+        <motion.h1
           initial={{ opacity: 0, y: 12 }}
           animate={{
             opacity: 1,
             y: 0,
             transition: { duration: 0.5, ease: ease.soft },
           }}
-          className="flex flex-col gap-2"
+          className="font-semibold text-xl"
         >
-          <h1 className="font-display font-extrabold text-[clamp(64px,9vw,104px)] leading-[0.9] tracking-[-0.03em]">
-            Dare
-          </h1>
-          <p className="text-ink-muted text-lg">{t("tagline")}</p>
-        </motion.div>
-
-        <section className="flex flex-col gap-3">
-          <h2 className="font-semibold text-xl">{t("games.title")}</h2>
-          <GamesCarousel>
-            <WhoAmICard />
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.35 } }}
-              className={`${CARD} flex h-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-line-strong border-dashed p-6 font-semibold text-ink-muted`}
-            >
-              <Sparkles className="size-5" strokeWidth={1.75} />
-              {t("games.soon")}
-            </motion.div>
-          </GamesCarousel>
-        </section>
-      </div>
+          {t("games.title")}
+        </motion.h1>
+        <GamesCarousel>
+          <WhoAmICard />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.35 } }}
+            className={`${CARD} flex h-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-line-strong border-dashed p-6 font-semibold text-ink-muted`}
+          >
+            <Sparkles className="size-5" strokeWidth={1.75} />
+            {t("games.soon")}
+          </motion.div>
+        </GamesCarousel>
+      </section>
     </Screen>
   );
 }

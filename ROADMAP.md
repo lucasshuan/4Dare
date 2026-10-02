@@ -54,7 +54,7 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Cursor de mão em tudo que é clicável
 - [x] Código da sala sem botão: no 5º caractere já entra, ou diz por que não dá
 - [x] Tela inicial escolhe o jogo: cartões num carrossel, com prévia animada; "Quem sou eu?" é o primeiro
-- [x] Logo própria (balão em D com "?" e "are" colorido), ícone quadrado e favicon; logo no topo de toda tela, menos na inicial, na sala de espera e na partida
+- [x] Logo própria (balão em D com "?" e "are" colorido), ícone quadrado e favicon; logo no topo de toda tela, menos na sala de espera e na partida; home só com os jogos
 - [x] Nenhuma tela rola no desktop: tudo cabe de 1024×640 a 1920×1080
 - [x] Usuário no canto superior direito, depois do tema: avatar e nome; clicando, um popover diz se é convidado e oferece Discord e Google
 - [x] Revelação para todos: as respostas (6 a 10 s, conforme o tamanho) e o palpite (2,5 a 3,5 s)

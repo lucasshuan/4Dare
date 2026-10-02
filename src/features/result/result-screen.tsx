@@ -8,7 +8,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { fireConfetti } from "@/components/ui/confetti";
 import { Portrait } from "@/components/ui/portrait";
-import { ThemeTag, Wordmark } from "@/components/ui/screen";
+import { ThemeTag } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import type { Lang, PlayerView } from "@/game/types";
@@ -69,7 +69,6 @@ export function ResultScreen() {
   return (
     <div className="flex min-h-dvh flex-col gap-5 px-4 pt-4 sm:px-8 sm:pt-6">
       <header className="mx-auto flex w-full max-w-[1120px] items-center gap-4">
-        <Wordmark />
         {view.theme ? (
           <ThemeTag label={tr("theme")} theme={view.theme[lang]} />
         ) : null}

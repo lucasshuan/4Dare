@@ -88,6 +88,7 @@ export function LobbyScreen() {
 
   return (
     <Screen
+      left={null}
       right={
         <>
           <LanguageSwitch />

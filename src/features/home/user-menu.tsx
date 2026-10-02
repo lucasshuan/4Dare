@@ -17,7 +17,7 @@ import { useDisplayName } from "@/lib/names";
 import { signOut } from "@/server/actions";
 import { useSignIn } from "./use-sign-in";
 
-/** Avatar and name at the top left; the popover says who you are and how to sign in or out. */
+/** Avatar and name at the top right; the popover says who you are and how to sign in or out. */
 export function UserMenu() {
   const t = useTranslations("home.user");
   const name = useDisplayName();
@@ -27,7 +27,9 @@ export function UserMenu() {
   const { run, pending: leaving } = useAction();
 
   if (!me)
-    return <span className="h-11 w-40 animate-pulse rounded-pill bg-sunken" />;
+    return (
+      <span className="h-11 w-16 animate-pulse rounded-pill bg-sunken sm:w-40" />
+    );
   return (
     <Popover.Root>
       <Popover.Trigger className="group inline-flex h-11 min-w-0 max-w-60 items-center gap-2.5 rounded-pill py-1 pr-3 pl-1 font-semibold transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken">
@@ -37,14 +39,15 @@ export function UserMenu() {
           name={me.name}
           size={36}
         />
-        <span className="min-w-0 truncate">{name(me)}</span>
+        {/* phones keep only the avatar, so the bar fits next to the language and theme */}
+        <span className="min-w-0 truncate max-sm:sr-only">{name(me)}</span>
         <ChevronDown
           className="size-4 shrink-0 text-ink-muted transition-transform duration-200 group-data-popup-open:rotate-180"
           strokeWidth={2}
         />
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner sideOffset={8} align="start" className="z-50">
+        <Popover.Positioner sideOffset={8} align="end" className="z-50">
           <Popover.Popup className="flex w-[min(340px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-4 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
             <div className="flex items-center gap-3">
               <Avatar avatar={me.avatar} isGuest={me.isGuest} name={me.name} />
