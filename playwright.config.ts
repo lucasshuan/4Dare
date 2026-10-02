@@ -7,12 +7,22 @@ export default defineConfig({
   timeout: 120_000,
   fullyParallel: false,
   workers: 1,
-  use: { baseURL: "http://localhost:3100", channel: "msedge", trace: "retain-on-failure" },
+  use: {
+    baseURL: "http://localhost:3100",
+    channel: "msedge",
+    trace: "retain-on-failure",
+  },
   webServer: {
     command: "pnpm exec next dev -p 3100",
     url: "http://localhost:3100/en",
     reuseExistingServer: true,
     timeout: 180_000,
-    env: { NEXT_PUBLIC_SUPABASE_URL: "", NEXT_PUBLIC_SUPABASE_ANON_KEY: "" },
+    // own build folder and data, so it can run next to `pnpm dev`
+    env: {
+      NEXT_DIST_DIR: ".next-e2e",
+      DARE_DATA_DIR: ".data/e2e",
+      NEXT_PUBLIC_SUPABASE_URL: "",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
+    },
   },
 });

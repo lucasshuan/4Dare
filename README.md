@@ -18,6 +18,7 @@ Pra jogar com amigos na mesma rede: `pnpm build && pnpm start`, e eles abrem `ht
 ## Comandos
 
 - `pnpm test`: testes
+- `pnpm test:e2e`: partidas inteiras no navegador (Edge)
 - `pnpm lint`: lint
 - `pnpm typecheck`: tipos
 
