@@ -49,6 +49,8 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Telas iguais ao design: imagens grandes, cores suaves, claro e escuro, 3 idiomas
 - [x] Bandeiras de verdade; idioma e tema só na tela inicial e na sala de espera
 - [x] Idioma num seletor (bandeira + nome)
+- [x] Cursor de mão em tudo que é clicável
+- [x] Código da sala sem botão: no 5º caractere já entra, ou diz por que não dá
 - [x] Tela inicial escolhe o jogo: cartão com prévia animada; "Quem sou eu?" é o primeiro
 - [x] Usuário no canto superior esquerdo: avatar e nome; clicando, um popover diz se é convidado e oferece Discord e Google
 - [x] Revelação para todos: as respostas (6 a 10 s, conforme o tamanho) e o palpite (2,5 a 3,5 s)

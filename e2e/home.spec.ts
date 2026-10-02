@@ -53,3 +53,20 @@ test("signing in from the user menu (test account) lets you pick a name", async 
   await menu.click();
   await expect(page.getByRole("link", { name: "Edit profile" })).toBeVisible();
 });
+
+test("typing a room code joins it, or says why not", async ({ browser }) => {
+  const host = await newPlayer(browser);
+  const visitor = await newPlayer(browser);
+  const code = await createRoom(host);
+  await visitor.goto("/en/who-am-i");
+  const box = visitor.getByLabel(/or join with a code/i);
+  await box.pressSequentially("ZZZZ2");
+  // (Next's route announcer is also an alert, so match the text)
+  await expect(visitor.getByText("No room with this code.")).toBeVisible();
+  await box.fill("");
+  await box.pressSequentially(code.toLowerCase());
+  await visitor.waitForURL(new RegExp(`/r/${code}$`));
+  await expect(
+    visitor.getByRole("button", { name: /i'm ready/i }),
+  ).toBeVisible();
+});

@@ -4,7 +4,6 @@
   "accountHint": "ログイン中。",
   "create": "ルームを作る",
   "joinLabel": "コードで参加",
-  "join": "参加",
   "createRoom": {
     "back": "戻る",
     "title": "ルームを作る",
@@ -59,5 +58,7 @@
     "editProfile": "プロフィールを編集",
     "signOut": "ログアウト",
     "testAccount": "Supabaseなしではテスト用アカウントに入ります。"
-  }
+  },
+  "codeNotFound": "このコードのルームはありません。",
+  "joining": "参加中…"
 }

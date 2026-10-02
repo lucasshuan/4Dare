@@ -4,7 +4,6 @@
   "accountHint": "Conta conectada.",
   "create": "Criar sala",
   "joinLabel": "Ou entre com um código",
-  "join": "Entrar",
   "createRoom": {
     "back": "Voltar",
     "title": "Criar sala",
@@ -59,5 +58,7 @@
     "editProfile": "Editar perfil",
     "signOut": "Sair",
     "testAccount": "Sem Supabase, isso entra numa conta de teste."
-  }
+  },
+  "codeNotFound": "Nenhuma sala com esse código.",
+  "joining": "Entrando…"
 }

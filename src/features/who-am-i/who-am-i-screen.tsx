@@ -3,25 +3,21 @@
 import { ChevronLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { Button, buttonClass } from "@/components/ui/button";
+import { buttonClass } from "@/components/ui/button";
 import { LanguageSwitch } from "@/components/ui/language-switch";
 import { Screen } from "@/components/ui/screen";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PublicRooms } from "@/features/home/public-rooms";
 import { useAuthErrorToast } from "@/features/home/use-auth-error";
 import { UserMenu } from "@/features/home/user-menu";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { ease } from "@/lib/motion";
 import { GAMES } from "@/lib/routes";
-
-const CODE_CHARS = /[^23456789ABCDEFGHJKMNPQRSTUVWXYZ]/g;
+import { JoinByCode } from "./join-by-code";
 
 /** "Who am I?": create a room, join one with a code, or pick a public one. */
 export function WhoAmIScreen() {
   const t = useTranslations("home");
-  const router = useRouter();
-  const [code, setCode] = useState("");
   useAuthErrorToast();
 
   return (
@@ -65,40 +61,7 @@ export function WhoAmIScreen() {
             >
               {t("create")}
             </Link>
-            <form
-              className="flex flex-col gap-2 max-sm:w-full"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (code.length === 5) router.push(`/r/${code}`);
-              }}
-            >
-              <label htmlFor="join-code" className="font-semibold text-sm">
-                {t("joinLabel")}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  id="join-code"
-                  value={code}
-                  inputMode="text"
-                  autoCapitalize="characters"
-                  autoComplete="off"
-                  spellCheck={false}
-                  placeholder="K7M2Q"
-                  onChange={(e) =>
-                    setCode(
-                      e.target.value
-                        .toUpperCase()
-                        .replace(CODE_CHARS, "")
-                        .slice(0, 5),
-                    )
-                  }
-                  className="h-14 w-40 min-w-0 rounded-md border-[1.5px] border-line-strong bg-surface px-4 font-medium font-mono text-2xl tracking-[0.2em] placeholder:text-line-strong max-sm:flex-1"
-                />
-                <Button type="submit" size="lg" disabled={code.length !== 5}>
-                  {t("join")}
-                </Button>
-              </div>
-            </form>
+            <JoinByCode />
           </div>
         </motion.section>
 
