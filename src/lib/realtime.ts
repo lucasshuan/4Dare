@@ -8,20 +8,23 @@ import { browserClient } from "./supabase-browser";
 
 type Unsubscribe = () => void;
 
-function listen(topic: string, onChange: () => void): Unsubscribe {
+type OnChange = (payload: { version?: number }) => void;
+
+function listen(topic: string, onChange: OnChange): Unsubscribe {
   if (BACKEND !== "supabase") return () => {};
   const supabase = browserClient();
   const channel = supabase
     .channel(topic)
-    .on("broadcast", { event: "changed" }, () => onChange())
+    .on("broadcast", { event: "changed" }, (message) =>
+      onChange((message.payload ?? {}) as { version?: number }),
+    )
     .subscribe();
   return () => {
     void supabase.removeChannel(channel);
   };
 }
 
-export const subscribeRoom = (code: string, onChange: () => void) =>
+export const subscribeRoom = (code: string, onChange: OnChange) =>
   listen(`room:${code}`, onChange);
 
-export const subscribeLobby = (onChange: () => void) =>
-  listen("lobby", onChange);
+export const subscribeLobby = (onChange: OnChange) => listen("lobby", onChange);

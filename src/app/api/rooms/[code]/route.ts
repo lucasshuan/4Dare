@@ -15,16 +15,18 @@ export async function GET(
       { error: "not_found" },
       { status: 404, headers: noStore },
     );
-  await applyDueTimeouts(code);
-  const { rooms, auth } = getBackend();
-  const stored = await rooms.get(code);
+  const { auth } = getBackend();
+  // The room read and the identity check don't depend on each other.
+  const [stored, me] = await Promise.all([
+    applyDueTimeouts(code),
+    auth.me("en"),
+  ]);
   if (!stored || stored.state.phase === "closed") {
     return Response.json(
       { error: "not_found" },
       { status: 404, headers: noStore },
     );
   }
-  const me = await auth.me("en");
   if (!stored.state.players.some((p) => p.id === me.id)) {
     return Response.json(
       { error: "not_member" },

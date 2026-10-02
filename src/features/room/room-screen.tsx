@@ -21,7 +21,7 @@ import { RevealOverlay } from "./reveal-overlay";
 
 /** /r/CODE: joins if needed, then shows the screen for the current phase. */
 export function RoomScreen({ code }: { code: string }) {
-  const { data, error, refresh } = useRoom(code);
+  const { data, error, refresh, apply } = useRoom(code);
   const [joinError, setJoinError] = useState<ErrorCode | null>(null);
   const triedJoin = useRef(false);
 
@@ -43,6 +43,7 @@ export function RoomScreen({ code }: { code: string }) {
       view={data.view}
       offset={data.offset}
       refresh={refresh}
+      apply={apply}
     >
       <PhaseScreens />
       <RevealOverlay />

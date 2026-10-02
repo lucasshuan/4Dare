@@ -51,7 +51,7 @@ export async function openRoom(host: Identity, settings: RoomSettings) {
 export async function dispatch(
   code: string,
   build: (state: RoomState) => GameEvent | Promise<GameEvent>,
-): Promise<RoomState> {
+): Promise<{ state: RoomState; version: number }> {
   const { rooms, notify } = getBackend();
   for (let attempt = 0; attempt < 5; attempt++) {
     const stored = await rooms.get(code);
@@ -67,7 +67,7 @@ export async function dispatch(
       if (next.phase === "lobby" || stored.state.phase === "lobby") {
         background(notify.lobbyChanged);
       }
-      return next;
+      return { state: next, version: stored.version + 1 };
     }
   }
   throw new GameError("conflict");
@@ -132,13 +132,14 @@ async function fallbackCharacters(state: RoomState): Promise<Character[]> {
 }
 
 /** Fires the TIMEOUTs that are due. Losing a race to another reader is fine. */
+/** Fires the clock timeouts that are due and returns the room as it is now (one read when nothing is due). */
 export async function applyDueTimeouts(code: string) {
   const { rooms, themes } = getBackend();
+  let stored = await rooms.get(code);
   for (let i = 0; i < 4; i++) {
-    const stored = await rooms.get(code);
-    if (!stored || !isExpired(stored.state, Date.now())) return;
+    if (!stored || !isExpired(stored.state, Date.now())) return stored;
     try {
-      await dispatch(code, async (state) => {
+      stored = await dispatch(code, async (state) => {
         if (!isExpired(state, Date.now())) throw new GameError("wrong_phase");
         if (state.phase === "lobby") {
           return { type: "TIMEOUT", theme: themes.drawFromBank() };
@@ -152,10 +153,12 @@ export async function applyDueTimeouts(code: string) {
         return { type: "TIMEOUT" };
       });
     } catch (e) {
-      if (e instanceof GameError && e.code === "wrong_phase") return;
+      if (e instanceof GameError && e.code === "wrong_phase")
+        return rooms.get(code);
       throw e;
     }
   }
+  return stored;
 }
 
 export async function loadRoom(code: string) {

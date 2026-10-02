@@ -19,9 +19,11 @@ import {
   MAX_NOTE,
   MAX_QUESTION,
   type RoomSettings,
+  type RoomView,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
 } from "@/game/types";
+import { toView } from "@/game/view";
 import { getBackend } from "./backend";
 import {
   AVATAR_COLORS,
@@ -67,10 +69,15 @@ function roomCode(raw: unknown) {
 }
 
 /** Sends one event for the caller to a room. */
-async function act(rawCode: string, build: (id: string) => GameEvent) {
+/** Applies the player's event and hands back the room as they now see it, so the screen updates without another request. */
+async function act(
+  rawCode: string,
+  build: (id: string) => GameEvent,
+): Promise<RoomView> {
   const code = roomCode(rawCode);
   const who = await me();
-  await dispatch(code, () => build(who.id));
+  const { state, version } = await dispatch(code, () => build(who.id));
+  return toView(state, version, who.id, Date.now());
 }
 
 // --- rooms ------------------------------------------------------------------
@@ -108,18 +115,20 @@ export async function joinRoom(
 }
 
 export async function leaveRoom(code: string): Promise<Result> {
-  return run(() => act(code, (id) => ({ type: "LEAVE", playerId: id })));
+  return run(async () => {
+    await act(code, (id) => ({ type: "LEAVE", playerId: id }));
+  });
 }
 
 /** Host only, lobby only. */
 export async function updateSettings(
   code: string,
   settings: Partial<RoomSettings>,
-): Promise<Result> {
+): Promise<Result<RoomView>> {
   return run(async () => {
     const parsed = createSchema.partial().strict().safeParse(settings);
     if (!parsed.success) bad();
-    await act(code, (id) => ({
+    return act(code, (id) => ({
       type: "UPDATE_SETTINGS",
       playerId: id,
       settings: parsed.data ?? {},
@@ -127,7 +136,10 @@ export async function updateSettings(
   });
 }
 
-export async function setReady(code: string, ready: boolean): Promise<Result> {
+export async function setReady(
+  code: string,
+  ready: boolean,
+): Promise<Result<RoomView>> {
   return run(() =>
     act(code, (id) => ({
       type: "SET_READY",
@@ -138,10 +150,10 @@ export async function setReady(code: string, ready: boolean): Promise<Result> {
 }
 
 /** Host only, 2+ players. Draws the theme and the picking ring. */
-export async function startGame(code: string): Promise<Result> {
+export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {
     const theme = await getBackend().themes.draw([]);
-    await act(code, (id) => ({ type: "START", playerId: id, theme }));
+    return act(code, (id) => ({ type: "START", playerId: id, theme }));
   });
 }
 
@@ -150,11 +162,11 @@ export async function startGame(code: string): Promise<Result> {
 export async function confirmPick(
   code: string,
   characterId: string,
-): Promise<Result> {
+): Promise<Result<RoomView>> {
   return run(async () => {
     if (typeof characterId !== "string" || characterId.length > 200) bad();
     const character = (await getBackend().characters.get(characterId)) ?? bad();
-    await act(code, (id) => ({ type: "PICK", playerId: id, character }));
+    return act(code, (id) => ({ type: "PICK", playerId: id, character }));
   });
 }
 
@@ -167,7 +179,7 @@ const text = (raw: unknown, max: number) => {
 export async function askQuestion(
   code: string,
   question: string,
-): Promise<Result> {
+): Promise<Result<RoomView>> {
   return run(() =>
     act(code, (id) => ({
       type: "ASK",
@@ -181,7 +193,7 @@ export async function answerQuestion(
   code: string,
   value: AnswerValue,
   note: string | null,
-): Promise<Result> {
+): Promise<Result<RoomView>> {
   return run(async () => {
     if (!ANSWERS.includes(value)) bad();
     const n =
@@ -191,7 +203,12 @@ export async function answerQuestion(
           ? note
           : bad();
     if (n && n.length > MAX_NOTE) bad();
-    await act(code, (id) => ({ type: "ANSWER", playerId: id, value, note: n }));
+    return act(code, (id) => ({
+      type: "ANSWER",
+      playerId: id,
+      value,
+      note: n,
+    }));
   });
 }
 
@@ -199,21 +216,17 @@ export async function answerQuestion(
 export async function submitGuess(
   code: string,
   guess: string,
-): Promise<Result<{ outcome: "hit" | "validating" }>> {
-  return run(async () => {
-    const who = await me();
-    const next = await dispatch(roomCode(code), () => ({
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({
       type: "GUESS",
-      playerId: who.id,
+      playerId: id,
       text: text(guess, MAX_GUESS),
-    }));
-    return {
-      outcome: next.phase === "validating" ? "validating" : "hit",
-    } as const;
-  });
+    })),
+  );
 }
 
-export async function passTurn(code: string): Promise<Result> {
+export async function passTurn(code: string): Promise<Result<RoomView>> {
   return run(() => act(code, (id) => ({ type: "PASS", playerId: id })));
 }
 
@@ -221,7 +234,7 @@ export async function passTurn(code: string): Promise<Result> {
 export async function validateGuess(
   code: string,
   correct: boolean,
-): Promise<Result> {
+): Promise<Result<RoomView>> {
   return run(() =>
     act(code, (id) => ({
       type: "VALIDATE",
@@ -231,18 +244,18 @@ export async function validateGuess(
   );
 }
 
-export async function giveUp(code: string): Promise<Result> {
+export async function giveUp(code: string): Promise<Result<RoomView>> {
   return run(() => act(code, (id) => ({ type: "GIVE_UP", playerId: id })));
 }
 
 /** Host only, from the result screen: same room, new theme. */
-export async function rematch(code: string): Promise<Result> {
+export async function rematch(code: string): Promise<Result<RoomView>> {
   return run(async () => {
     const stored = await getBackend().rooms.get(roomCode(code));
     const theme = await getBackend().themes.draw(
       stored?.state.theme ? [stored.state.theme] : [],
     );
-    await act(code, (id) => ({ type: "REMATCH", playerId: id, theme }));
+    return act(code, (id) => ({ type: "REMATCH", playerId: id, theme }));
   });
 }
 

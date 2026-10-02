@@ -62,7 +62,28 @@ export function useRoom(code: string) {
     [client, code],
   );
 
-  useEffect(() => subscribeRoom(code, () => void refresh()), [code, refresh]);
+  /** Shows a room an action returned, unless a newer one is already on screen. */
+  const apply = useCallback(
+    (view: RoomView) => {
+      client.setQueryData<RoomData>(roomKey(code), (current) =>
+        current && current.view.version >= view.version
+          ? current
+          : { view, offset: current?.offset ?? view.serverNow - Date.now() },
+      );
+    },
+    [client, code],
+  );
+
+  // A ping for a version we already have (usually our own action) needs no refetch.
+  useEffect(
+    () =>
+      subscribeRoom(code, ({ version }) => {
+        const current = client.getQueryData<RoomData>(roomKey(code));
+        if (version && current && current.view.version >= version) return;
+        void refresh();
+      }),
+    [client, code, refresh],
+  );
 
   // When the step's clock runs out the server applies the timeout on the next read.
   const deadline = query.data?.view.deadline ?? null;
@@ -86,5 +107,6 @@ export function useRoom(code: string) {
     error: error as RoomFetchError | null,
     isLoading: query.isPending,
     refresh,
+    apply,
   };
 }

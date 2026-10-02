@@ -10,6 +10,7 @@ import { fireConfetti } from "@/components/ui/confetti";
 import { Portrait } from "@/components/ui/portrait";
 import { ThemeTag, Wordmark } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
+import { useRoomAction } from "@/features/data/use-room-action";
 import type { Lang, PlayerView } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -35,8 +36,9 @@ export function ResultScreen() {
   const lang = useLocale() as Lang;
   const name = useDisplayName();
   const router = useRouter();
-  const { view, me, code, refresh, playerById } = useRoomContext();
-  const { run, pending } = useAction();
+  const { view, me, code, playerById } = useRoomContext();
+  const { run } = useAction();
+  const { act, pending } = useRoomAction();
   const ranked = [...view.players].sort(
     (a, b) =>
       (a.place ?? 99) - (b.place ?? 99) || Number(a.gaveUp) - Number(b.gaveUp),
@@ -101,7 +103,7 @@ export function ResultScreen() {
                   size="lg"
                   disabled={pending}
                   onClick={async () => {
-                    if ((await run(() => rematch(code))).ok) await refresh();
+                    await act(() => rematch(code));
                   }}
                 >
                   {t("again")}

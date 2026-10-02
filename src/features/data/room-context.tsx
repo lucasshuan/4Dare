@@ -8,8 +8,10 @@ export interface RoomContextValue {
   view: RoomView;
   /** serverNow − local clock. */
   offset: number;
-  /** Refetch the room now (call after an action succeeds). */
+  /** Refetch the room now. */
   refresh: () => Promise<void>;
+  /** Show a room view an action returned (see useRoomAction). */
+  apply: (view: RoomView) => void;
   /** The server's current time, estimated from the local clock. */
   serverTime: () => number;
   me: PlayerView;
@@ -23,12 +25,14 @@ export function RoomProvider({
   view,
   offset,
   refresh,
+  apply,
   children,
 }: {
   code: string;
   view: RoomView;
   offset: number;
   refresh: () => Promise<void>;
+  apply: (view: RoomView) => void;
   children: ReactNode;
 }) {
   const value = useMemo<RoomContextValue>(() => {
@@ -40,11 +44,12 @@ export function RoomProvider({
       view,
       offset,
       refresh,
+      apply,
       serverTime: () => Date.now() + offset,
       me,
       playerById: (id) => (id ? byId.get(id) : undefined),
     };
-  }, [code, view, offset, refresh]);
+  }, [code, view, offset, refresh, apply]);
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;
 }

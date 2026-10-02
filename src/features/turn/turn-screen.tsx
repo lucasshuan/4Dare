@@ -11,6 +11,7 @@ import { CharacterCard } from "@/components/ui/character-card";
 import { Portrait } from "@/components/ui/portrait";
 import { TextArea, TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
+import { useRoomAction } from "@/features/data/use-room-action";
 import { GameFrame } from "@/features/room/game-header";
 import {
   ANSWERS,
@@ -21,7 +22,6 @@ import {
   type PlayerView,
 } from "@/game/types";
 import { cn } from "@/lib/cn";
-import { useAction } from "@/lib/hooks/use-action";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import {
@@ -278,8 +278,8 @@ function Bubble({
 
 function Ask() {
   const t = useTranslations("turn.ask");
-  const { view, code, refresh } = useRoomContext();
-  const { run, pending } = useAction();
+  const { view, code } = useRoomContext();
+  const { act, pending } = useRoomAction();
   const [text, setText] = useState("");
   const [confirmGiveUp, setConfirmGiveUp] = useState(false);
   const others = view.players.filter((p) => !p.isYou && !p.away).length;
@@ -288,7 +288,7 @@ function Ask() {
       className="flex flex-col gap-5"
       onSubmit={async (e) => {
         e.preventDefault();
-        if ((await run(() => askQuestion(code, text))).ok) await refresh();
+        await act(() => askQuestion(code, text));
       }}
     >
       <Heading
@@ -320,7 +320,7 @@ function Ask() {
               size="sm"
               disabled={pending}
               onClick={async () => {
-                if ((await run(() => giveUp(code))).ok) await refresh();
+                await act(() => giveUp(code));
               }}
             >
               {t("giveUpYes")}
@@ -346,8 +346,8 @@ function Ask() {
 function Answer() {
   const t = useTranslations("turn.answer");
   const name = useDisplayName();
-  const { view, code, refresh, playerById } = useRoomContext();
-  const { run, pending } = useAction();
+  const { view, code, playerById } = useRoomContext();
+  const { act, pending } = useRoomAction();
   const [value, setValue] = useState<AnswerValue | null>(null);
   const [note, setNote] = useState("");
   const asker = playerById(view.turn?.playerId);
@@ -358,10 +358,7 @@ function Answer() {
       onSubmit={async (e) => {
         e.preventDefault();
         if (!value) return;
-        if (
-          (await run(() => answerQuestion(code, value, note.trim() || null))).ok
-        )
-          await refresh();
+        await act(() => answerQuestion(code, value, note.trim() || null));
       }}
     >
       <Bubble
@@ -454,15 +451,15 @@ function AnswersList({
 
 function Guess() {
   const t = useTranslations("turn.guess");
-  const { view, code, refresh } = useRoomContext();
-  const { run, pending } = useAction();
+  const { view, code } = useRoomContext();
+  const { act, pending } = useRoomAction();
   const [text, setText] = useState("");
   return (
     <form
       className="flex flex-col gap-5"
       onSubmit={async (e) => {
         e.preventDefault();
-        if ((await run(() => submitGuess(code, text))).ok) await refresh();
+        await act(() => submitGuess(code, text));
       }}
     >
       <Bubble you kicker={t("kicker", { n: view.turn?.n ?? 1 })}>
@@ -491,7 +488,7 @@ function Guess() {
         <Button
           disabled={pending}
           onClick={async () => {
-            if ((await run(() => passTurn(code))).ok) await refresh();
+            await act(() => passTurn(code));
           }}
         >
           {t("pass")}
@@ -504,12 +501,12 @@ function Guess() {
 function Validate() {
   const t = useTranslations("turn.validate");
   const name = useDisplayName();
-  const { view, code, refresh, playerById } = useRoomContext();
-  const { run, pending } = useAction();
+  const { view, code, playerById } = useRoomContext();
+  const { act, pending } = useRoomAction();
   const guesser = playerById(view.turn?.playerId);
   const others = view.players.filter((p) => !p.isYou && p.id !== guesser?.id);
   const decide = async (correct: boolean) => {
-    if ((await run(() => validateGuess(code, correct))).ok) await refresh();
+    await act(() => validateGuess(code, correct));
   };
   return (
     <div className="flex flex-col gap-5">

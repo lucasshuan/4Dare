@@ -12,6 +12,7 @@ import { ImageDrop } from "@/components/ui/image-drop";
 import { Portrait } from "@/components/ui/portrait";
 import { TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
+import { useRoomAction } from "@/features/data/use-room-action";
 import { GameFrame } from "@/features/room/game-header";
 import { searchItems, thumbUrl } from "@/game/character-search";
 import type { Lang } from "@/game/types";
@@ -49,10 +50,12 @@ export function PickScreen() {
   const t = useTranslations("room.pick");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
-  const { view, code, refresh, playerById } = useRoomContext();
+  const { view, code, playerById } = useRoomContext();
   const pick = view.pick;
   const target = playerById(pick?.targetId);
-  const { run, pending } = useAction();
+  const { run, pending: saving } = useAction();
+  const { act, pending: confirming } = useRoomAction();
+  const pending = saving || confirming;
   const [mode, setMode] = useState<Mode>("search");
   const [query, setQuery] = useState("");
   const [chosen, setChosen] = useState<CharacterDTO | null>(null);
@@ -94,8 +97,7 @@ export function PickScreen() {
     setMode("chosen");
   };
   const confirm = async () => {
-    if (chosen && (await run(() => confirmPick(code, chosen.id))).ok)
-      await refresh();
+    if (chosen) await act(() => confirmPick(code, chosen.id));
   };
   const create = async () => {
     const form = new FormData();
