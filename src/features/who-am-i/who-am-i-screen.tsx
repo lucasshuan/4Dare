@@ -20,7 +20,7 @@ export function WhoAmIScreen() {
   useAuthErrorToast();
 
   return (
-    <Screen right={<HubActions />}>
+    <Screen right={<HubActions />} banner={<WhoAmIBanner />}>
       <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,500px)_minmax(0,472px)] lg:justify-between">
         <motion.section
           initial={{ opacity: 0, y: 12 }}
@@ -38,7 +38,6 @@ export function WhoAmIScreen() {
             <ChevronLeft className="size-4" strokeWidth={2} />
             {t("games.back")}
           </Link>
-          <WhoAmIBanner />
           <h1 className="text-balance font-display font-extrabold text-[clamp(40px,5vw,60px)] leading-none tracking-[-0.025em]">
             {t("games.whoAmI.name")}
           </h1>
@@ -46,7 +45,7 @@ export function WhoAmIScreen() {
         </motion.section>
 
         {/* the public rooms, then creating one or joining by code */}
-        <div className="flex flex-col gap-6 lg:pt-9">
+        <div className="flex flex-col gap-6">
           <PublicRooms game="who-am-i" />
           <div className="flex flex-wrap items-end gap-x-6 gap-y-5">
             <Link

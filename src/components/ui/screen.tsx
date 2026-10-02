@@ -1,22 +1,65 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { type ReactNode, useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { Logo } from "./logo";
 
-/** Page shell: header row and a centred column. `left={null}` drops the wordmark. */
+/**
+ * Room a banner leaves at its top for the top bar, which floats over it.
+ * Keep in step with the bar's height below.
+ */
+export const UNDER_TOPBAR = "pt-[68px] sm:pt-[84px]";
+
+/**
+ * Page shell: header row and a centred column. `left={null}` drops the wordmark.
+ * With a `banner`, it runs full width under the top bar, which stays at the
+ * top as you scroll: see-through over the banner, frosted glass once there is
+ * something scrolling under it.
+ */
 export function Screen({
   left,
   right,
+  banner,
   children,
   wide,
   className,
 }: {
   left?: ReactNode;
   right?: ReactNode;
+  /** Full width, right under the top bar; it should start with UNDER_TOPBAR. */
+  banner?: ReactNode;
   children: ReactNode;
   wide?: boolean;
   className?: string;
 }) {
+  const bar = (
+    <>
+      <div className="flex min-w-0 items-center gap-4">
+        {left === undefined ? <Wordmark /> : left}
+      </div>
+      <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
+        {right}
+      </div>
+    </>
+  );
+  if (banner) {
+    return (
+      <div className="flex min-h-dvh flex-col">
+        <TopBar>{bar}</TopBar>
+        {/* the banner slides up under the bar */}
+        <div className="-mt-[68px] sm:-mt-[84px]">{banner}</div>
+        <main
+          className={cn(
+            "mx-auto w-full max-w-[1120px] flex-1 px-4 pt-6 pb-8 sm:px-8 sm:pt-8 sm:pb-12 sm:short:pb-6",
+            className,
+          )}
+        >
+          {children}
+        </main>
+      </div>
+    );
+  }
   return (
     <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-8 sm:gap-10 sm:px-8 sm:pt-6 sm:pb-12 sm:short:gap-6 sm:short:pt-4 sm:short:pb-6">
       <header
@@ -25,12 +68,7 @@ export function Screen({
           wide ? "max-w-[1120px]" : "max-w-[1120px]",
         )}
       >
-        <div className="flex min-w-0 items-center gap-4">
-          {left === undefined ? <Wordmark /> : left}
-        </div>
-        <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
-          {right}
-        </div>
+        {bar}
       </header>
       <main className={cn("mx-auto w-full max-w-[1120px] flex-1", className)}>
         {children}
@@ -39,10 +77,36 @@ export function Screen({
   );
 }
 
+/** The bar over a banner: sticky, clear at the top, frosted once the page scrolls under it. */
+function TopBar({ children }: { children: ReactNode }) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const check = () => setScrolled(window.scrollY > 4);
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    return () => window.removeEventListener("scroll", check);
+  }, []);
+  return (
+    <header
+      className={cn(
+        "sticky top-0 z-30 h-[68px] border-b px-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft sm:h-[84px] sm:px-8",
+        scrolled
+          ? "border-line/70 bg-canvas/70 backdrop-blur-xl backdrop-saturate-150"
+          : "border-transparent bg-transparent",
+      )}
+    >
+      <div className="mx-auto flex h-full w-full max-w-[1120px] items-center justify-between gap-3">
+        {children}
+      </div>
+    </header>
+  );
+}
+
 export function Wordmark() {
   return (
     <Link href="/" className="group shrink-0 rounded-sm">
-      <Logo className="h-9 w-auto" />
+      {/* smaller on phones, so it fits next to the language, theme and user menu */}
+      <Logo className="h-9 w-auto max-sm:h-7" />
     </Link>
   );
 }

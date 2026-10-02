@@ -40,17 +40,23 @@ const LOOK: Record<
   },
 };
 
-/** One of the six answers. Small = read-only badge for history and reveals. */
+/**
+ * One of the six answers. Small = read-only badge for history and reveals.
+ * `wrap` lets a long answer ("Provavelmente não") break onto a second line
+ * instead of overflowing a narrow spot.
+ */
 export function AnswerChip({
   value,
   small,
   pressed,
+  wrap,
   onClick,
   className,
 }: {
   value: AnswerValue;
   small?: boolean;
   pressed?: boolean;
+  wrap?: boolean;
   onClick?: () => void;
   className?: string;
 }) {
@@ -65,13 +71,14 @@ export function AnswerChip({
           pressed ? "bg-current" : look.dot,
         )}
       />
-      <span>{t(value)}</span>
+      <span className={wrap ? "text-balance" : undefined}>{t(value)}</span>
     </>
   );
   const cls = cn(
     "inline-flex items-center gap-2 rounded-pill border-[1.5px] font-semibold text-ink transition-[transform,background-color,color] duration-150 ease-soft",
     small ? "h-[26px] px-2.5 text-[13px]" : "h-12 px-4 text-base short:h-10",
     pressed ? look.pressed : look.chip,
+    wrap && "h-auto min-h-[26px] rounded-[13px] py-1 text-left leading-tight",
     className,
   );
   if (!onClick) return <span className={cls}>{body}</span>;

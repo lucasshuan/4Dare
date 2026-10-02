@@ -131,3 +131,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Room passwords: a private room is listed with a lock and asks newcomers for its password in a small dialog; only the host sees it, in the lobby
 - [x] Create room: name, who can join and the password on one row, seats and time per step below
 - [x] /rooms: every listed room, filtered by game, a search (room, host or code) and who can join, all kept in the link; the game page shows its open rooms with "See all" at the top right
+- [x] "Who am I?" banner full width under the top bar: five players around a table, answers that wrap in longer languages, a burst when you get it; the top bar stays put and turns to frosted glass as the page scrolls under it
