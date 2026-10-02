@@ -139,6 +139,20 @@ body {
     color var(--dur-base) var(--ease-soft);
 }
 
+/* Tailwind 4 gives buttons the default cursor; everything clickable gets the hand back. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="option"]:not([aria-disabled="true"]),
+  [role="combobox"],
+  summary,
+  label[for],
+  input[type="file"],
+  input[type="range"] {
+    cursor: pointer;
+  }
+}
+
 /* Keyboard focus: one ring everywhere. */
 :focus-visible {
   outline: 3px solid var(--sky);

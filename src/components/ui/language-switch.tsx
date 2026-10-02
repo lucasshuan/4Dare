@@ -63,7 +63,7 @@ export function LanguageSwitch() {
                   key={l}
                   value={l}
                   lang={l}
-                  className="flex cursor-default items-center gap-2.5 rounded-md py-2 pr-3 pl-2 font-semibold text-sm outline-none select-none data-highlighted:bg-sky-soft"
+                  className="flex items-center gap-2.5 rounded-md py-2 pr-3 pl-2 font-semibold text-sm outline-none select-none data-highlighted:bg-sky-soft"
                 >
                   <Flag lang={l} />
                   <Select.ItemText className="flex-1">
