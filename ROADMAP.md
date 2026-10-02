@@ -30,7 +30,7 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 
 ## Fase 3 — Personagens de verdade
 
-- [ ] Revisar o gerador da biblioteca de personagens (scripts/library)
+- [x] Revisar o gerador da biblioteca de personagens (scripts/library): filtros de conteúdo, pt-br, memória
 - [ ] Biblioteca de personagens com imagem em en/pt/ja
 - [ ] Busca com autocomplete e foto
 - [x] Criar personagem com imagem e trocar imagem
