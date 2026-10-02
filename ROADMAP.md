@@ -35,6 +35,7 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 
 - [x] Gerador da biblioteca revisado: filtros de conteúdo, nomes em pt-br, memória
 - [ ] Biblioteca grande em cada idioma, com foto
+- [x] Biblioteca aceita grupos e espécies: duplas, famílias, equipes, bandas, Pikachu, Chocobo
 - [ ] Busca com autocomplete e foto
 - [x] Busca instantânea: índice do idioma baixado uma vez (cache), cada tecla responde na memória em menos de 1 ms, sem servidor
 - [x] Criar personagem com nome e foto própria (com recorte)

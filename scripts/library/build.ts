@@ -125,8 +125,15 @@ const ALLOW = new Set(["Q1048" /* Julius Caesar */]);
 function exclusionReason(entity: Entity, info: Details): string | null {
   if (DENY.has(entity.qid)) return "denylist";
   if (entity.kind === "fictional") {
-    return info.classes.some((label) => GROUP_CLASS.test(label))
-      ? "group or organisation"
+    // A type ("vampire", "God in Judaism") rather than someone; species from a
+    // franchise (Pikachu, Koopa Troopa, Chocobo) stay.
+    if (
+      entity.isClass &&
+      !info.works.some((work) => FRANCHISE_PROPS.has(work.prop))
+    )
+      return "generic type";
+    return info.classes.some((label) => NOT_A_CHARACTER.test(label))
+      ? "not a character"
       : null;
   }
   const text = [
@@ -137,8 +144,32 @@ function exclusionReason(entity: Entity, info: Details): string | null {
   if (!ALLOW.has(entity.qid) && UNSAFE_PERSON.test(text)) return "unsafe";
   return null;
 }
-const GROUP_CLASS =
-  /(\b(organi[sz]ation|team|group|family|duo|trio|band|army|clan|tribe|dynasty|episode|couple)$)|^group of|^Wikimedia/i;
+/** Groups, families and teams count as one character; these don't. */
+const NOT_A_CHARACTER =
+  /\b(episode|army|military unit|dynasty|company|corporation|school|university|agency|government)$|^Wikimedia/i;
+/** Franchise, fictional universe, "present in work", "from narrative universe". */
+const FRANCHISE_PROPS = new Set(["P8345", "P1080", "P1441", "P4584"]);
+/** Real groups from the "group:" pools: band, duo, idol group, comedy group. */
+const isGroup = (entity: Entity) =>
+  [...entity.pools].some((pool) => pool.startsWith("group:"));
+const GROUP_LABELS: {
+  match: RegExp;
+  labels: Record<Lang, string>;
+}[] = [
+  {
+    match: /comedy|comic|humor|humou?r|お笑い|コント|漫才/i,
+    labels: { en: "comedy group", pt: "grupo de humor", ja: "お笑いグループ" },
+  },
+  {
+    match: /\bduo\b|\bdupla\b|デュオ|ユニット/i,
+    labels: { en: "music duo", pt: "dupla musical", ja: "音楽デュオ" },
+  },
+  {
+    match: /\bidol\b|アイドル|ídolos/i,
+    labels: { en: "idol group", pt: "grupo de ídolos", ja: "アイドルグループ" },
+  },
+];
+const BAND: Record<Lang, string> = { en: "band", pt: "banda", ja: "バンド" };
 const MYTHOLOGY =
   /mytholog|folklore|legend|religio|pantheon|olympian|æsir|aesir|vanir|bible|gods\b/i;
 const HANGUL = /[ᄀ-ᇿ㄰-㆏가-힯]/;
@@ -203,6 +234,14 @@ function humanOrigin(
   lang: Lang,
 ): string | null {
   if (!details) return null;
+  if (isGroup(entity)) {
+    const text = [
+      ...Object.values(details.descriptions),
+      entity.labels.en ?? "",
+    ].join(" | ");
+    const kind = GROUP_LABELS.find((group) => group.match.test(text));
+    return (kind?.labels ?? BAND)[lang];
+  }
   const descriptor = pickDescriptor(
     details.occupations,
     details.descriptions,
@@ -476,7 +515,11 @@ async function main() {
 
   step("1/6 Wikidata candidate pools");
   const pool = await collectPools();
-  const entities = [...pool.values()].filter((entity) => !entity.isClass);
+  // Fictional "classes" stay for now: species like Pikachu are classes on
+  // Wikidata. Generic types are dropped once their details are known.
+  const entities = [...pool.values()].filter(
+    (entity) => !entity.isClass || entity.kind === "fictional",
+  );
   console.log(
     `  ${entities.length} entities (${pool.size - entities.length} classes dropped)`,
   );

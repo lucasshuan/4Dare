@@ -67,7 +67,55 @@ const FICTIONAL: PoolSpec[] = [
     pattern: "?item wdt:P31/wdt:P279* wd:Q178885 ; wikibase:sitelinks ?sl .",
     min: 8,
   },
+  // A whole group can be the character: duos, families, teams (Avengers, Simpsons).
+  {
+    name: "group of fictional characters",
+    kind: "fictional",
+    pattern: "?item wdt:P31/wdt:P279* wd:Q14514600 ; wikibase:sitelinks ?sl .",
+    min: 8,
+  },
+  // Species from games and films (Chocobo, Ewok, Pikmin).
+  {
+    name: "fictional species",
+    kind: "fictional",
+    pattern: "?item wdt:P31/wdt:P279* wd:Q21192438 ; wikibase:sitelinks ?sl .",
+    min: 8,
+  },
 ];
+
+/** Real groups, picked as one "character": bands, duos, comedy troupes. Names start with "group:". */
+const GROUP_POOLS: PoolSpec[] = [
+  [
+    "group: musical",
+    "?item wdt:P31/wdt:P279* wd:Q215380 ; wikibase:sitelinks ?sl .",
+    40,
+  ],
+  [
+    "group: musical (Brazil)",
+    "?item wdt:P31/wdt:P279* wd:Q215380 ; wdt:P495 wd:Q155 ; wikibase:sitelinks ?sl .",
+    6,
+  ],
+  [
+    "group: musical (Japan)",
+    "?item wdt:P31/wdt:P279* wd:Q215380 ; wdt:P495 wd:Q17 ; wikibase:sitelinks ?sl .",
+    8,
+  ],
+  [
+    "group: musical (Portugal)",
+    "?item wdt:P31/wdt:P279* wd:Q215380 ; wdt:P495 wd:Q45 ; wikibase:sitelinks ?sl .",
+    8,
+  ],
+  [
+    "group: comedy",
+    "?item wdt:P31/wdt:P279* wd:Q18510489 ; wikibase:sitelinks ?sl .",
+    6,
+  ],
+].map(([name, pattern, min]) => ({
+  name: String(name),
+  kind: "human" as const,
+  pattern: String(pattern),
+  min: Number(min),
+}));
 
 /** Occupation groups and the sitelink count a person needs to be considered. */
 const OCCUPATION_MIN: Record<string, number> = {
@@ -295,7 +343,7 @@ async function hydrate(qids: string[]): Promise<Map<string, Core>> {
 }
 
 export function poolSpecs(): PoolSpec[] {
-  return [...FICTIONAL, ...occupationPools(), ...COUNTRY_POOLS];
+  return [...FICTIONAL, ...occupationPools(), ...COUNTRY_POOLS, ...GROUP_POOLS];
 }
 
 /** Every candidate item: pool scans first, then one hydration pass. */
