@@ -63,5 +63,27 @@
     "wrongType": "画像ファイルではありません。JPG、PNG、WebP、GIFを使ってください。",
     "tooBig": "8MBを超えています。小さい画像を選んでください。"
   },
-  "signInFailed": "ログインできませんでした。もう一度お試しください。"
+  "signInFailed": "ログインできませんでした。もう一度お試しください。",
+  "categories": {
+    "anime": "アニメ・漫画",
+    "games": "ゲーム",
+    "comics": "アメコミ",
+    "cartoons": "カートゥーン",
+    "film_tv": "映画・ドラマ",
+    "literature": "文学",
+    "mythology": "神話",
+    "religion": "宗教",
+    "folklore": "民話・伝説",
+    "sports": "スポーツ",
+    "music": "音楽",
+    "entertainment": "芸能",
+    "internet": "ネット",
+    "politics": "政治",
+    "royalty": "王室・皇室",
+    "history": "歴史",
+    "science": "科学",
+    "art": "アート",
+    "business": "ビジネス",
+    "other": "その他"
+  }
 }

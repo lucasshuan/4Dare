@@ -2,7 +2,9 @@
 // how readers reached each article (search engines, links, direct visits).
 // Summing the incoming clicks gives a close proxy for monthly pageviews, from
 // one bulk download per wiki and month instead of thousands of rate-limited
-// API calls. The median of the last three months keeps news spikes in check.
+// API calls. The median of six months spread over two years keeps news spikes
+// in check: a film or a World Cup can fill two or three months in a row
+// (Agamemnon went from 53k to 1.2M monthly clicks when The Odyssey came out).
 import { existsSync, readdirSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -14,15 +16,22 @@ import type { Lang } from "./types";
 const BASE = "https://dumps.wikimedia.org/other/clickstream/";
 /** Articles below this many monthly clicks are not kept in the cache. */
 const MIN_CLICKS = 30;
-const MONTHS = 3;
+const MONTHS = 6;
+/** Months between two samples: six samples cover twenty months. */
+const STEP = 4;
 /** A stalled download is abandoned after this long, then retried. */
 const DOWNLOAD_TIMEOUT = 45 * 60_000;
 const DOWNLOAD_ATTEMPTS = 3;
 
-/** The months to use: env override, else the newest cached, else the newest online. */
-async function pickMonths(lang: Lang): Promise<string[]> {
-  const fromEnv = process.env.LIBRARY_CLICKSTREAM_MONTHS;
-  if (fromEnv) return fromEnv.split(",").map((month) => month.trim());
+/** `month` ("2026-08") moved back by `count` months. */
+function monthsBefore(month: string, count: number): string {
+  const [year, number] = month.split("-").map(Number);
+  const total = year * 12 + number - 1 - count;
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}`;
+}
+
+/** The newest month with a dump for `lang`: the newest cached, else online. */
+async function newestMonth(lang: Lang): Promise<string> {
   const prefix = `clickstream-${lang}-`;
   const cached = existsSync(CACHE_DIR)
     ? readdirSync(CACHE_DIR)
@@ -30,26 +39,30 @@ async function pickMonths(lang: Lang): Promise<string[]> {
         .map((name) => name.slice(prefix.length, -".tsv".length))
         .filter((month) => /^\d{4}-\d{2}$/.test(month))
         .sort()
-        .reverse()
     : [];
-  if (cached.length >= MONTHS) return cached.slice(0, MONTHS);
+  if (cached.length > 0) return cached[cached.length - 1];
   const index = await request(BASE);
   const months = [...index.matchAll(/href="(\d{4}-\d{2})\/"/g)]
     .map((match) => match[1])
     .sort()
     .reverse();
-  const available: string[] = [];
-  for (const month of months.slice(0, MONTHS + 2)) {
+  for (const month of months.slice(0, 3)) {
     const listing = await request(`${BASE}${month}/`);
     if (listing.includes(`clickstream-${lang}wiki-${month}.tsv.gz`)) {
-      available.push(month);
-      if (available.length === MONTHS) break;
+      return month;
     }
   }
-  if (available.length === 0) {
-    throw new Error(`no clickstream dump found for ${lang}wiki`);
-  }
-  return available;
+  throw new Error(`no clickstream dump found for ${lang}wiki`);
+}
+
+/** The months to use: env override, else six spread back from the newest. */
+async function pickMonths(lang: Lang): Promise<string[]> {
+  const fromEnv = process.env.LIBRARY_CLICKSTREAM_MONTHS;
+  if (fromEnv) return fromEnv.split(",").map((month) => month.trim());
+  const newest = await newestMonth(lang);
+  return Array.from({ length: MONTHS }, (_, i) =>
+    monthsBefore(newest, i * STEP),
+  );
 }
 
 /** Stream the gzip dump and sum incoming clicks per article title. */
@@ -147,7 +160,7 @@ async function monthTotals(
 
 /**
  * Average daily clicks per article in `wanted` (titles with spaces): the
- * median of the last three monthly clickstream dumps, divided by 30.
+ * median of six monthly clickstream dumps spread over two years, divided by 30.
  */
 export async function fetchClickstream(
   lang: Lang,
@@ -161,7 +174,9 @@ export async function fetchClickstream(
   const daily = new Map<string, number>();
   for (const title of titles) {
     const values = maps.map((map) => map.get(title) ?? 0).sort((a, b) => a - b);
-    const median = values[Math.floor(values.length / 2)];
+    const half = Math.floor(values.length / 2);
+    const median =
+      values.length % 2 ? values[half] : (values[half - 1] + values[half]) / 2;
     if (median > 0) daily.set(title, median / 30);
   }
   console.log(

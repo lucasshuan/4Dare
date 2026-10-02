@@ -63,5 +63,27 @@
     "wrongType": "Esse arquivo não é uma imagem. Use JPG, PNG, WebP ou GIF.",
     "tooBig": "Essa imagem passa de 8 MB. Escolha uma menor."
   },
-  "signInFailed": "Não deu para entrar. Tente de novo."
+  "signInFailed": "Não deu para entrar. Tente de novo.",
+  "categories": {
+    "anime": "Anime e mangá",
+    "games": "Games",
+    "comics": "Quadrinhos",
+    "cartoons": "Desenhos",
+    "film_tv": "Filmes e TV",
+    "literature": "Livros",
+    "mythology": "Mitologia",
+    "religion": "Religião",
+    "folklore": "Folclore e lendas",
+    "sports": "Esportes",
+    "music": "Música",
+    "entertainment": "Famosos da TV",
+    "internet": "Internet",
+    "politics": "Política",
+    "royalty": "Realeza",
+    "history": "História",
+    "science": "Ciência",
+    "art": "Arte",
+    "business": "Negócios",
+    "other": "Outros"
+  }
 }

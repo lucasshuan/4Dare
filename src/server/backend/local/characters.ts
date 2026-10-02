@@ -4,7 +4,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { normalizeName } from "@/game/match";
 import { type Character, LANGS, type Lang } from "@/game/types";
-import type { SeedCharacter } from "../seed-format";
+import {
+  entryId,
+  libraryFor,
+  parseEntryId,
+  type SeedCharacter,
+  type SeedOrigin,
+} from "../seed-format";
 import type { CharacterStore } from "../types";
 import { processSingleton, readJson, writeJson } from "./disk";
 
@@ -15,35 +21,51 @@ interface Row extends Character {
 }
 
 const CREATED_FILE = "characters.json";
-/** Pictures players swapped on library characters: { id: url }. */
+/** Pictures players swapped on library characters: { "wd-Q302": url }, every language. */
 const IMAGES_FILE = "character-images.json";
 
 function toRow(c: Character, popularity: number): Row {
   return { ...c, popularity, keys: [c.name, ...c.aliases].map(normalizeName) };
 }
 
+function readData<T>(name: string, fallback: T): T {
+  try {
+    const file = join(process.cwd(), "data", name);
+    return JSON.parse(readFileSync(file, "utf8")) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+/** Swapped pictures by library id; older files keyed them per language ("pt-wd-Q302"). */
+function swappedImages(): Record<string, string> {
+  const images: Record<string, string> = {};
+  for (const [id, url] of Object.entries(
+    readJson<Record<string, string>>(IMAGES_FILE, {}),
+  ))
+    images[parseEntryId(id)?.id ?? id] = url;
+  return images;
+}
+
 function loadLibrary(): Map<string, Row> {
   const rows = new Map<string, Row>();
+  const characters = readData<SeedCharacter[]>("characters.json", []);
+  const origins = readData<SeedOrigin[]>("origins.json", []);
   for (const lang of LANGS) {
-    let seed: SeedCharacter[] = [];
-    try {
-      const file = join(process.cwd(), "data", "characters", `${lang}.json`);
-      seed = JSON.parse(readFileSync(file, "utf8")) as SeedCharacter[];
-    } catch {
-      seed = [];
-    }
-    for (const s of seed) {
-      const { popularity, ...rest } = s;
-      rows.set(s.id, toRow({ ...rest, lang }, popularity));
-    }
+    for (const { character, popularity } of libraryFor(
+      characters,
+      origins,
+      lang,
+    ))
+      rows.set(character.id, toRow(character, popularity));
   }
   for (const c of readJson<Row[]>(CREATED_FILE, []))
     rows.set(c.id, toRow(c, c.popularity));
-  for (const [id, url] of Object.entries(
-    readJson<Record<string, string>>(IMAGES_FILE, {}),
-  )) {
-    const r = rows.get(id);
-    if (r) r.imageUrl = url;
+  for (const [id, url] of Object.entries(swappedImages())) {
+    for (const lang of LANGS) {
+      const r = rows.get(entryId(lang, id));
+      if (r) r.imageUrl = url;
+    }
   }
   return rows;
 }
@@ -101,13 +123,18 @@ export function localCharacters(): CharacterStore {
     async setImage(id, imageUrl) {
       const r = rows.get(id);
       if (!r) return null;
-      r.imageUrl = imageUrl;
-      if (id.startsWith("u-")) saveCreated();
-      else
-        writeJson(IMAGES_FILE, {
-          ...readJson<Record<string, string>>(IMAGES_FILE, {}),
-          [id]: imageUrl,
-        });
+      const entry = parseEntryId(id);
+      if (!entry) {
+        r.imageUrl = imageUrl;
+        saveCreated();
+        return strip(r);
+      }
+      // One picture per character: every language gets it.
+      for (const lang of LANGS) {
+        const row = rows.get(entryId(lang, entry.id));
+        if (row) row.imageUrl = imageUrl;
+      }
+      writeJson(IMAGES_FILE, { ...swappedImages(), [entry.id]: imageUrl });
       return strip(r);
     },
     async extras(lang) {
@@ -115,9 +142,10 @@ export function localCharacters(): CharacterStore {
         .filter((r) => r.lang === lang && r.id.startsWith("u-"))
         .map(strip);
       const images = Object.fromEntries(
-        Object.entries(
-          readJson<Record<string, string>>(IMAGES_FILE, {}),
-        ).filter(([id]) => id.startsWith(`${lang}-`)),
+        Object.entries(swappedImages()).map(([id, url]) => [
+          entryId(lang, id),
+          url,
+        ]),
       );
       return { created, images };
     },

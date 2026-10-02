@@ -2,7 +2,10 @@
 // 2,000 most popular entries of each list, a safety sweep of the rest and a
 // review of what the filters excluded (each finding checked by a second
 // reviewer). Wikidata items are keyed by QID (all three lists); single entries
-// by their entry id ("pt-wd-Q302", "ja-al-1234").
+// by their entry id ("pt-wd-Q302", "ja-al-1234"); origins belong to the
+// character, so they are keyed by QID or AniList id in every list.
+import type { Category } from "../../src/game/categories";
+import type { Lang } from "./types";
 
 /** Items to leave out of every list, with the reason. */
 export const DENY_QIDS: Record<string, string> = {
@@ -288,394 +291,781 @@ export const NAMES: Record<string, string> = {
   "ja-wd-Q8069094": "銭形平次",
 };
 
-/** Corrected origins for single entries (null clears it). */
+/**
+ * Origins with no Wikidata work or descriptor behind them, translated by hand:
+ * "topic:" for works, traditions and franchises, "job:" for what a real
+ * person is known as ("job:<key>:f" is the feminine form).
+ */
+export const CUSTOM_ORIGINS: Record<
+  string,
+  { category: Category; labels: Record<Lang, string> }
+> = {
+  "topic:bible": {
+    category: "religion",
+    labels: { en: "Bible", pt: "Bíblia", ja: "聖書" },
+  },
+  "topic:christianity": {
+    category: "religion",
+    labels: { en: "Christianity", pt: "Cristianismo", ja: "キリスト教" },
+  },
+  "topic:buddhism": {
+    category: "religion",
+    labels: { en: "Buddhism", pt: "Budismo", ja: "仏教" },
+  },
+  "topic:ars-goetia": {
+    category: "religion",
+    labels: { en: "Ars Goetia", pt: "Ars Goetia", ja: "ゴエティア" },
+  },
+  "topic:greek-mythology": {
+    category: "mythology",
+    labels: {
+      en: "Greek mythology",
+      pt: "Mitologia grega",
+      ja: "ギリシア神話",
+    },
+  },
+  "topic:roman-mythology": {
+    category: "mythology",
+    labels: { en: "Roman mythology", pt: "Mitologia romana", ja: "ローマ神話" },
+  },
+  "topic:hindu-mythology": {
+    category: "mythology",
+    labels: { en: "Hindu mythology", pt: "Mitologia hindu", ja: "インド神話" },
+  },
+  "topic:chinese-mythology": {
+    category: "mythology",
+    labels: {
+      en: "Chinese mythology",
+      pt: "Mitologia chinesa",
+      ja: "中国神話",
+    },
+  },
+  "topic:arthurian-legend": {
+    category: "folklore",
+    labels: {
+      en: "Arthurian legend",
+      pt: "Lendas arturianas",
+      ja: "アーサー王伝説",
+    },
+  },
+  "topic:japanese-folklore": {
+    category: "folklore",
+    labels: {
+      en: "Japanese folklore",
+      pt: "Folclore japonês",
+      ja: "日本の妖怪",
+    },
+  },
+  "topic:east-asian-folklore": {
+    category: "folklore",
+    labels: {
+      en: "East Asian folklore",
+      pt: "Folclore do Leste Asiático",
+      ja: "東アジアの民間伝承",
+    },
+  },
+  "topic:european-folklore": {
+    category: "folklore",
+    labels: {
+      en: "European folklore",
+      pt: "Folclore europeu",
+      ja: "ヨーロッパの民間伝承",
+    },
+  },
+  "topic:himalayan-folklore": {
+    category: "folklore",
+    labels: {
+      en: "Himalayan folklore",
+      pt: "Folclore do Himalaia",
+      ja: "ヒマラヤの民間伝承",
+    },
+  },
+  "topic:west-african-folklore": {
+    category: "folklore",
+    labels: {
+      en: "West African folklore",
+      pt: "Folclore da África Ocidental",
+      ja: "西アフリカの民間伝承",
+    },
+  },
+  "topic:christmas": {
+    category: "folklore",
+    labels: { en: "Christmas", pt: "Natal", ja: "クリスマス" },
+  },
+  "topic:sinterklaas": {
+    category: "folklore",
+    labels: { en: "Sinterklaas", pt: "Sinterklaas", ja: "シンタクラース" },
+  },
+  "topic:commedia-dellarte": {
+    category: "art",
+    labels: {
+      en: "commedia dell'arte",
+      pt: "commedia dell'arte",
+      ja: "コメディア・デラルテ",
+    },
+  },
+  "topic:creepypasta": {
+    category: "internet",
+    labels: { en: "Creepypasta", pt: "Creepypasta", ja: "クリーピーパスタ" },
+  },
+  "topic:hololive": {
+    category: "internet",
+    labels: { en: "Hololive", pt: "Hololive", ja: "ホロライブ" },
+  },
+  "topic:vocaloid": {
+    category: "music",
+    labels: { en: "Vocaloid", pt: "Vocaloid", ja: "VOCALOID" },
+  },
+  "topic:utau": {
+    category: "music",
+    labels: { en: "UTAU", pt: "UTAU", ja: "UTAU" },
+  },
+  "topic:marvel": {
+    category: "comics",
+    labels: { en: "Marvel", pt: "Marvel", ja: "マーベル" },
+  },
+  "topic:x-men": {
+    category: "comics",
+    labels: { en: "X-Men", pt: "X-Men", ja: "X-MEN" },
+  },
+  "topic:fantastic-four": {
+    category: "comics",
+    labels: {
+      en: "Fantastic Four",
+      pt: "Quarteto Fantástico",
+      ja: "ファンタスティック・フォー",
+    },
+  },
+  "topic:captain-america": {
+    category: "comics",
+    labels: {
+      en: "Captain America",
+      pt: "Capitão América",
+      ja: "キャプテン・アメリカ",
+    },
+  },
+  "topic:image-comics": {
+    category: "comics",
+    labels: {
+      en: "Image Comics",
+      pt: "Image Comics",
+      ja: "イメージ・コミックス",
+    },
+  },
+  "topic:disney": {
+    category: "cartoons",
+    labels: { en: "Disney", pt: "Disney", ja: "ディズニー" },
+  },
+  "topic:hanna-barbera": {
+    category: "cartoons",
+    labels: {
+      en: "Hanna-Barbera",
+      pt: "Hanna-Barbera",
+      ja: "ハンナ・バーベラ",
+    },
+  },
+  "topic:james-bond": {
+    category: "film_tv",
+    labels: { en: "James Bond", pt: "007", ja: "007シリーズ" },
+  },
+  "topic:alien": {
+    category: "film_tv",
+    labels: { en: "Alien", pt: "Alien", ja: "エイリアンシリーズ" },
+  },
+  "topic:sherlock-holmes": {
+    category: "literature",
+    labels: {
+      en: "Sherlock Holmes",
+      pt: "Sherlock Holmes",
+      ja: "シャーロック・ホームズシリーズ",
+    },
+  },
+  "topic:arsene-lupin": {
+    category: "literature",
+    labels: {
+      en: "Arsène Lupin",
+      pt: "Arsène Lupin",
+      ja: "アルセーヌ・ルパンシリーズ",
+    },
+  },
+  "topic:jack-ryan": {
+    category: "literature",
+    labels: {
+      en: "Jack Ryan",
+      pt: "Jack Ryan",
+      ja: "ジャック・ライアンシリーズ",
+    },
+  },
+  "topic:tarzan": {
+    category: "literature",
+    labels: { en: "Tarzan of the Apes", pt: "Tarzan", ja: "類猿人ターザン" },
+  },
+  "topic:twilight": {
+    category: "literature",
+    labels: { en: "Twilight", pt: "Crepúsculo", ja: "トワイライト" },
+  },
+  "topic:fu-manchu": {
+    category: "literature",
+    labels: {
+      en: "Fu Manchu novels",
+      pt: "Romances de Fu Manchu",
+      ja: "フー・マンチューシリーズ",
+    },
+  },
+  "topic:pulp-magazines": {
+    category: "literature",
+    labels: {
+      en: "Pulp magazines",
+      pt: "Revistas pulp",
+      ja: "パルプ・マガジン",
+    },
+  },
+  "topic:zenigata-heiji": {
+    category: "literature",
+    labels: {
+      en: "Zenigata Heiji Torimonohikae",
+      pt: "Zenigata Heiji Torimonohikae",
+      ja: "銭形平次捕物控",
+    },
+  },
+  "topic:miffy": {
+    category: "literature",
+    labels: {
+      en: "Dick Bruna's picture books",
+      pt: "Livros de Dick Bruna",
+      ja: "ディック・ブルーナの絵本",
+    },
+  },
+  "topic:bleach": {
+    category: "anime",
+    labels: { en: "Bleach", pt: "Bleach", ja: "BLEACH" },
+  },
+  "topic:trigun": {
+    category: "anime",
+    labels: { en: "Trigun", pt: "Trigun", ja: "TRIGUN" },
+  },
+  "topic:frieren": {
+    category: "anime",
+    labels: {
+      en: "Frieren: Beyond Journey's End",
+      pt: "Frieren e a Jornada para o Além",
+      ja: "葬送のフリーレン",
+    },
+  },
+  "topic:spice-and-wolf": {
+    category: "anime",
+    labels: { en: "Spice and Wolf", pt: "Spice and Wolf", ja: "狼と香辛料" },
+  },
+  "topic:kurokos-basketball": {
+    category: "anime",
+    labels: {
+      en: "Kuroko's Basketball",
+      pt: "Kuroko no Basket",
+      ja: "黒子のバスケ",
+    },
+  },
+  "topic:mo-dao-zu-shi": {
+    category: "anime",
+    labels: { en: "Mo Dao Zu Shi", pt: "Mo Dao Zu Shi", ja: "魔道祖師" },
+  },
+  "topic:heaven-officials-blessing": {
+    category: "anime",
+    labels: {
+      en: "Heaven Official's Blessing",
+      pt: "Heaven Official's Blessing",
+      ja: "天官賜福",
+    },
+  },
+  "topic:lord-of-the-mysteries": {
+    category: "anime",
+    labels: {
+      en: "Lord of the Mysteries",
+      pt: "Lord of the Mysteries",
+      ja: "詭秘之主",
+    },
+  },
+  "topic:saiki-k": {
+    category: "anime",
+    labels: {
+      en: "The Disastrous Life of Saiki K.",
+      pt: "A Desastrosa Vida de Saiki K.",
+      ja: "斉木楠雄のΨ難",
+    },
+  },
+  "job:satirical-politician": {
+    category: "politics",
+    labels: {
+      en: "satirical politician",
+      pt: "político satírico",
+      ja: "風刺政治家",
+    },
+  },
+  "job:first-lady": {
+    category: "politics",
+    labels: { en: "First Lady", pt: "primeira-dama", ja: "ファーストレディ" },
+  },
+  "job:civil-rights-activist": {
+    category: "politics",
+    labels: {
+      en: "civil rights activist",
+      pt: "ativista dos direitos civis",
+      ja: "公民権運動家",
+    },
+  },
+  "job:revolutionary": {
+    category: "history",
+    labels: { en: "revolutionary", pt: "revolucionário", ja: "革命家" },
+  },
+  "job:swordsman": {
+    category: "history",
+    labels: { en: "swordsman", pt: "espadachim", ja: "剣豪" },
+  },
+  "job:bakumatsu-samurai": {
+    category: "history",
+    labels: {
+      en: "Bakumatsu samurai",
+      pt: "samurai do Bakumatsu",
+      ja: "幕末の志士",
+    },
+  },
+  "job:sengoku-princess": {
+    category: "history",
+    labels: {
+      en: "Sengoku-period princess",
+      pt: "princesa do período Sengoku",
+      ja: "戦国時代の姫",
+    },
+  },
+  "job:quilombola-warrior:f": {
+    category: "history",
+    labels: {
+      en: "quilombola warrior",
+      pt: "guerreira quilombola",
+      ja: "キロンボの女戦士",
+    },
+  },
+  "job:aviator:f": {
+    category: "history",
+    labels: { en: "aviator", pt: "aviadora", ja: "飛行士" },
+  },
+  "job:royal": {
+    category: "royalty",
+    labels: { en: "royal", pt: "membro da realeza", ja: "王族" },
+  },
+  "job:prince": {
+    category: "royalty",
+    labels: { en: "prince", pt: "príncipe", ja: "王子" },
+  },
+  "job:princess": {
+    category: "royalty",
+    labels: { en: "princess", pt: "princesa", ja: "王女" },
+  },
+  "job:queen-of-england": {
+    category: "royalty",
+    labels: {
+      en: "queen of England",
+      pt: "rainha da Inglaterra",
+      ja: "イングランド女王",
+    },
+  },
+  "job:queen-consort": {
+    category: "royalty",
+    labels: { en: "queen consort", pt: "rainha consorte", ja: "王妃" },
+  },
+  "job:roman-emperor": {
+    category: "royalty",
+    labels: { en: "Roman emperor", pt: "imperador romano", ja: "ローマ皇帝" },
+  },
+  "job:emperor": {
+    category: "royalty",
+    labels: { en: "emperor", pt: "imperador", ja: "皇帝" },
+  },
+  "job:emperor:f": {
+    category: "royalty",
+    labels: { en: "empress", pt: "imperatriz", ja: "皇帝" },
+  },
+  "job:empress-consort": {
+    category: "royalty",
+    labels: { en: "empress", pt: "imperatriz", ja: "皇后" },
+  },
+  "job:empress-emerita": {
+    category: "royalty",
+    labels: { en: "empress emerita", pt: "imperatriz emérita", ja: "上皇后" },
+  },
+  "job:japanese-imperial-family": {
+    category: "royalty",
+    labels: {
+      en: "Japanese imperial family",
+      pt: "família imperial japonesa",
+      ja: "皇族",
+    },
+  },
+  "job:pope": {
+    category: "religion",
+    labels: { en: "pope", pt: "papa", ja: "ローマ教皇" },
+  },
+  "job:nun": {
+    category: "religion",
+    labels: { en: "nun", pt: "religiosa", ja: "修道女" },
+  },
+  "job:monk": {
+    category: "religion",
+    labels: { en: "monk", pt: "monge", ja: "僧侶" },
+  },
+  "job:missionary": {
+    category: "religion",
+    labels: { en: "missionary", pt: "missionário", ja: "宣教師" },
+  },
+  "job:prophet": {
+    category: "religion",
+    labels: { en: "prophet", pt: "profeta", ja: "預言者" },
+  },
+  "job:mystic": {
+    category: "religion",
+    labels: { en: "mystic", pt: "místico", ja: "祈祷僧" },
+  },
+  "job:occultist": {
+    category: "religion",
+    labels: { en: "occultist", pt: "ocultista", ja: "オカルティスト" },
+  },
+  "job:psychoanalyst": {
+    category: "science",
+    labels: { en: "psychoanalyst", pt: "psicanalista", ja: "精神分析学者" },
+  },
+  "job:psychiatrist": {
+    category: "science",
+    labels: { en: "psychiatrist", pt: "psiquiatra", ja: "精神科医" },
+  },
+  "job:sociologist": {
+    category: "science",
+    labels: { en: "sociologist", pt: "sociólogo", ja: "社会学者" },
+  },
+  "job:nurse:f": {
+    category: "science",
+    labels: { en: "nurse", pt: "enfermeira", ja: "看護師" },
+  },
+  "job:football-executive": {
+    category: "sports",
+    labels: {
+      en: "football executive",
+      pt: "dirigente esportivo",
+      ja: "サッカー協会役員",
+    },
+  },
+  "job:football-referee": {
+    category: "sports",
+    labels: {
+      en: "football referee",
+      pt: "árbitro de futebol",
+      ja: "サッカー審判員",
+    },
+  },
+  "job:coach-and-journalist": {
+    category: "sports",
+    labels: {
+      en: "coach and journalist",
+      pt: "técnico e jornalista",
+      ja: "監督・ジャーナリスト",
+    },
+  },
+  "job:talent-manager": {
+    category: "business",
+    labels: {
+      en: "talent manager",
+      pt: "empresário musical",
+      ja: "タレントマネージャー",
+    },
+  },
+  "job:tenor": {
+    category: "music",
+    labels: { en: "tenor", pt: "tenor", ja: "テノール歌手" },
+  },
+  "job:noh-actor": {
+    category: "art",
+    labels: { en: "Noh actor", pt: "ator de nô", ja: "能楽師" },
+  },
+  "group:metal-dance-unit": {
+    category: "music",
+    labels: {
+      en: "metal dance unit",
+      pt: "grupo de metal e dança",
+      ja: "メタルダンスユニット",
+    },
+  },
+};
+
+/** Generated origins that mean nothing to players, swapped in every list. */
+export const ORIGIN_REPLACEMENTS: Record<string, string> = {
+  "wd:Q2246088": "topic:marvel", // Earth-616
+};
+
+/**
+ * Corrected origins, by QID or AniList entry ("al-90107"); null clears it.
+ * Values are origin ids: CUSTOM_ORIGINS, a descriptor ("job:actor",
+ * "job:actor:f") or one of the character's own Wikidata works ("wd:Q1079").
+ */
 export const ORIGINS: Record<string, string | null> = {
-  "pt-wd-Q477527": "Bíblia",
-  "ja-wd-Q51676": "聖書",
-  "ja-wd-Q2575060": "聖書",
-  "ja-wd-Q206238": "聖書",
-  "ja-wd-Q214617": "聖書",
-  "en-wd-Q302": "Bible",
-  "en-wd-Q9181": "Bible",
-  "en-wd-Q9077": "Bible",
-  "en-wd-Q289957": "Bible",
-  "en-wd-Q81422": "Bible",
-  "en-wd-Q133507": "Bible",
-  "en-wd-Q145746": "Bible",
-  "en-wd-Q671872": "Bible",
-  "en-wd-Q830183": "Bible",
-  "en-wd-Q51676": "Bible",
-  "en-wd-Q214617": "Bible",
-  "en-wd-Q41370": "Bible",
-  "en-wd-Q81018": "Bible",
-  "en-wd-Q128267": "Bible",
-  "en-wd-Q156290": "Bible",
-  "en-wd-Q213027": "Bible",
-  "en-wd-Q81989": "Bible",
-  "en-wd-Q275010": "Bible",
-  "en-wd-Q56951": "Bible",
-  "en-wd-Q721135": "Bible",
-  "en-wd-Q815594": "Bible",
-  "en-wd-Q209378": "Book of Enoch",
-  "en-wd-Q28730": "Bible",
-  "en-wd-Q107626": "Bible",
-  "en-wd-Q194808": "Bible",
-  "en-wd-Q188794": "Bible",
-  "en-wd-Q158825": "Bible",
-  "en-wd-Q6577515": "Bible",
-  "en-wd-Q45967": "Greek mythology",
-  "en-wd-Q1320718": "Greek mythology",
-  "en-wd-Q131203": "Greek mythology",
-  "en-wd-Q6612": "Greek mythology",
-  "en-wd-Q199647": "Greek mythology",
-  "en-wd-Q208588": "Greek mythology",
-  "en-wd-Q102561": "Greek mythology",
-  "en-wd-Q174353": "Greek mythology",
-  "en-wd-Q131651": "Greek mythology",
-  "en-wd-Q23168": "Greek mythology",
-  "en-wd-Q905162": "Aeneid",
-  "en-wd-Q215681": "Arthurian legend",
-  "en-wd-Q81109": "Arthurian legend",
-  "en-wd-Q47652": "Roman mythology",
-  "en-wd-Q5011": "Roman mythology",
-  "en-wd-Q193461": "Buddhism",
-  "en-wd-Q4653": "Sherlock Holmes",
-  "en-wd-Q188574": "Winnie-the-Pooh",
-  "en-wd-Q1381762": "Teenage Mutant Ninja Turtles",
-  "en-wd-Q315796": "Christmas folklore",
-  "en-wd-Q6567": "Godzilla",
-  "en-wd-Q183102": "Looney Tunes",
-  "en-wd-Q129628": "Himalayan folklore",
-  "en-wd-Q191626": "Sonic the Hedgehog",
-  "en-wd-Q329466": "A Nightmare on Elm Street",
-  "en-wd-Q2009573": "James Bond",
-  "en-wd-Q170241": "Tarzan of the Apes",
-  "en-wd-Q935079": "SpongeBob SquarePants",
-  "en-wd-Q1953422": "The Muppet Show",
-  "en-wd-Q692111": "Japanese folklore",
-  "en-wd-Q335140": "Japanese folklore",
-  "en-wd-Q216810": "King Kong",
-  "en-wd-Q1150106": "Hellboy",
-  "en-wd-Q17309": "commedia dell'arte",
-  "en-wd-Q461606": "Arsène Lupin",
-  "en-wd-Q1068314": "Jack Ryan",
-  "en-wd-Q7154377": "Breaking Bad",
-  "en-wd-Q5620660": "Breaking Bad",
-  "en-wd-Q76509760": "satirical politician",
-  "en-wd-Q43274": "monarch",
-  "en-wd-Q2599": "musician",
-  "en-wd-Q5809": "revolutionary",
-  "en-wd-Q762": "painter",
-  "en-wd-Q17714": "physicist",
-  "en-wd-Q8027": "civil rights activist",
-  "en-wd-Q5162259": "MMA fighter",
-  "en-wd-Q124138": "FIFA president",
-  "en-wd-Q174614": "football manager",
-  "en-wd-Q9215": "psychoanalyst",
-  "en-wd-Q80976": "royal",
-  "en-wd-Q79037": "Marvel",
-  "en-wd-Q30547": "nun",
-  "en-wd-Q989": "pope",
-  "en-wd-Q17293": "Dalai Lama",
-  "en-wd-Q7172014": "politician",
-  "en-wd-Q307": "astronomer",
-  "en-wd-Q3355": "aviator",
-  "en-wd-Q505476": "DJ",
-  "en-wd-Q41532": "psychiatrist",
-  "en-wd-Q43989": "mystic",
-  "en-wd-Q1413": "Roman emperor",
-  "en-wd-Q82674": "queen of England",
-  "en-wd-Q165421": "First Lady",
-  "en-wd-Q10479": "princess",
-  "en-wd-Q152239": "queen consort",
-  "en-wd-Q152316": "prince",
-  "en-wd-Q126513": "TV presenter",
-  "en-wd-Q483437": "football executive",
-  "en-wd-Q361297": "talent manager",
-  "en-wd-Q186350": "Christianity",
-  "en-wd-Q485953": "West African folklore",
-  "en-wd-Q206238": "Bible",
-  "en-wd-Q2575060": "Genesis",
-  "en-wd-Q126689": "Bible",
-  "en-wd-Q246154": "James Bond",
-  "en-wd-Q211414": "James Bond",
-  "en-wd-Q623553": "Looney Tunes",
-  "en-wd-Q949916": "Hanna-Barbera",
-  "en-wd-Q901323": "Scooby-Doo",
-  "en-wd-Q1647348": "The Texas Chain Saw Massacre",
-  "en-wd-Q844794": "Predator",
-  "en-wd-Q613241": "Kirby",
-  "en-wd-Q904189": "Sonic the Hedgehog",
-  "en-wd-Q376682": "Grand Theft Auto: San Andreas",
-  "en-wd-Q52401": "Shrek",
-  "en-wd-Q1357701": "Fu Manchu novels",
-  "en-wd-Q379828": "Greek mythology",
-  "en-wd-Q641632": "Chinese mythology",
-  "en-wd-Q622761": "East Asian folklore",
-  "en-wd-Q627323": "European folklore",
-  "en-wd-Q220453": "Sinterklaas",
-  "en-wd-Q5147714": "UTAU",
-  "en-wd-Q1076932": "Nancy Drew Mystery Stories",
-  "en-wd-Q104144455": "Frieren: Beyond Journey's End",
-  "en-wd-Q16578433": "Breaking Bad",
-  "en-wd-Q1419509": "Disney",
-  "en-wd-Q967116": "pulp magazines",
-  "en-wd-Q2712364": "Marvel Comics",
-  "pt-wd-Q302": "Bíblia",
-  "pt-wd-Q37085": "Bíblia",
-  "pt-wd-Q9077": "Bíblia",
-  "pt-wd-Q9181": "Bíblia",
-  "pt-wd-Q289957": "Bíblia",
-  "pt-wd-Q81422": "Bíblia",
-  "pt-wd-Q671872": "Bíblia",
-  "pt-wd-Q133507": "Bíblia",
-  "pt-wd-Q51676": "Bíblia",
-  "pt-wd-Q214617": "Bíblia",
-  "pt-wd-Q206238": "Bíblia",
-  "pt-wd-Q41370": "Bíblia",
-  "pt-wd-Q156290": "Bíblia",
-  "pt-wd-Q213027": "Bíblia",
-  "pt-wd-Q128267": "Bíblia",
-  "pt-wd-Q28730": "Bíblia",
-  "pt-wd-Q107626": "Bíblia",
-  "pt-wd-Q6577515": "Bíblia",
-  "pt-wd-Q194808": "Bíblia",
-  "pt-wd-Q665541": "Bíblia",
-  "pt-wd-Q1135632": "Bíblia",
-  "pt-wd-Q126689": "Bíblia",
-  "pt-wd-Q81989": "Bíblia",
-  "pt-wd-Q56951": "Bíblia",
-  "pt-wd-Q102561": "Mitologia grega",
-  "pt-wd-Q174353": "Mitologia grega",
-  "pt-wd-Q131651": "Mitologia grega",
-  "pt-wd-Q23168": "Mitologia grega",
-  "pt-wd-Q215681": "Lendas arturianas",
-  "pt-wd-Q45967": "Mitologia grega",
-  "pt-wd-Q1320718": "Mitologia grega",
-  "pt-wd-Q131203": "Mitologia grega",
-  "pt-wd-Q131090": "Mitologia grega",
-  "pt-wd-Q199647": "Mitologia grega",
-  "pt-wd-Q6612": "Mitologia grega",
-  "pt-wd-Q5011": "Mitologia romana",
-  "pt-wd-Q692111": "Folclore japonês",
-  "pt-wd-Q129628": "Folclore do Himalaia",
-  "pt-wd-Q315796": "Natal",
-  "pt-wd-Q4653": "Arthur Conan Doyle",
-  "pt-wd-Q283111": "Sherlock Holmes",
-  "pt-wd-Q461606": "Maurice Leblanc",
-  "pt-wd-Q329466": "A Hora do Pesadelo",
-  "pt-wd-Q191527": "Crepúsculo",
-  "pt-wd-Q4902053": "Enrolados",
-  "pt-wd-Q191626": "Sonic",
-  "pt-wd-Q7540067": "Creepypasta",
-  "pt-wd-Q2009573": "007",
-  "pt-wd-Q6550": "Disney",
-  "pt-wd-Q11937": "Disney",
-  "pt-wd-Q43274": "monarca",
-  "pt-wd-Q989": "papa",
-  "pt-wd-Q37278": "papa",
-  "pt-wd-Q30547": "religiosa",
-  "pt-wd-Q307": "astrônomo",
-  "pt-wd-Q80823": "rainha",
-  "pt-wd-Q36844": "cantora",
-  "pt-wd-Q5809": "revolucionário",
-  "pt-wd-Q124138": "dirigente esportivo",
-  "pt-wd-Q483437": "dirigente esportivo",
-  "pt-wd-Q207358": "dirigente esportivo",
-  "pt-wd-Q79983": "treinador de futebol",
-  "pt-wd-Q702233": "treinador de futebol",
-  "pt-wd-Q191634": "treinador de futebol",
-  "pt-wd-Q17714": "físico",
-  "pt-wd-Q41532": "psiquiatra",
-  "pt-wd-Q41421": "jogador de basquete",
-  "pt-wd-Q361297": "empresário musical",
-  "pt-wd-Q392": "cantor",
-  "pt-wd-Q839858": "Image Comics",
-  "pt-wd-Q194135": "Sonic the Hedgehog",
-  "pt-wd-Q1136987": "Sonic the Hedgehog",
-  "pt-wd-Q949916": "Hanna-Barbera",
-  "pt-wd-Q128335": "Mitologia hindu",
-  "pt-wd-Q715162": "Budismo",
-  "pt-wd-Q193461": "Budismo",
-  "pt-wd-Q308697": "Folclore europeu",
-  "pt-wd-Q320139": "Livro de Esdras",
-  "pt-wd-Q2575060": "Gênesis 19",
-  "pt-wd-Q186350": "Cristianismo",
-  "pt-wd-Q208588": "Mitologia grega",
-  "pt-wd-Q379828": "Mitologia grega",
-  "pt-wd-Q11947": "Mickey Mouse",
-  "pt-wd-Q403138": "Disney",
-  "pt-wd-Q5147714": "UTAU",
-  "pt-al-7373": "Spice and Wolf",
-  "pt-wd-Q554163": "Bleach",
-  "pt-wd-Q10263875": "guerreira quilombola",
-  "pt-wd-Q40933": "primeira-dama",
-  "pt-wd-Q165421": "primeira-dama",
-  "pt-wd-Q82674": "monarca",
-  "pt-wd-Q2600582": "técnico e jornalista",
-  "pt-wd-Q9387": "sociólogo",
-  "pt-wd-Q44980": "treinador de futebol",
-  "pt-wd-Q4462": "treinador de futebol",
-  "pt-wd-Q21226404": "treinador de futebol",
-  "pt-wd-Q83106": "treinador de futebol",
-  "pt-wd-Q40652": "treinador de futebol",
-  "pt-wd-Q3840425": "treinador de futebol",
-  "pt-wd-Q31575": "treinador de futebol",
-  "pt-wd-Q527550": "treinador de futebol",
-  "pt-wd-Q44473": "jogador de futebol americano",
-  "pt-wd-Q162819": "rainha consorte",
-  "pt-wd-Q57911283": "primeira-dama",
-  "pt-wd-Q105301361": "política",
-  "pt-wd-Q10479": "princesa",
-  "pt-wd-Q37615": "tenor",
-  "pt-wd-Q43989": "místico",
-  "pt-wd-Q152239": "rainha consorte",
-  "pt-wd-Q214369": "princesa",
-  "pt-wd-Q485885": "árbitro de futebol",
-  "pt-wd-Q10364348": "político",
-  "pt-wd-Q37103": "enfermeira",
-  "pt-wd-Q16975": "líder religioso",
-  "pt-wd-Q172684": "ocultista",
-  "pt-wd-Q17293": "líder religioso",
-  "pt-wd-Q35811": "profeta",
-  "ja-wd-Q302": "新約聖書",
-  "ja-wd-Q9077": "旧約聖書",
-  "ja-wd-Q37085": "旧約聖書",
-  "ja-wd-Q9181": "旧約聖書",
-  "ja-wd-Q830183": "旧約聖書",
-  "ja-wd-Q81422": "旧約聖書",
-  "ja-wd-Q289957": "旧約聖書",
-  "ja-wd-Q671872": "旧約聖書",
-  "ja-wd-Q81018": "新約聖書",
-  "ja-wd-Q41370": "旧約聖書",
-  "ja-wd-Q81989": "聖書",
-  "ja-wd-Q56951": "トビト記",
-  "ja-wd-Q209378": "エノク書",
-  "ja-wd-Q815594": "聖書",
-  "ja-wd-Q128267": "新約聖書",
-  "ja-wd-Q4653": "シャーロック・ホームズシリーズ",
-  "ja-wd-Q188574": "くまのプーさん",
-  "ja-wd-Q41410": "ギリシア神話",
-  "ja-wd-Q45967": "ギリシア神話",
-  "ja-wd-Q131090": "ギリシア神話",
-  "ja-wd-Q131203": "ギリシア神話",
-  "ja-wd-Q1320718": "ギリシア神話",
-  "ja-wd-Q199647": "ギリシア神話",
-  "ja-wd-Q174353": "ギリシア神話",
-  "ja-wd-Q102561": "ギリシア神話",
-  "ja-wd-Q161419": "ギリシア神話",
-  "ja-wd-Q215681": "アーサー王伝説",
-  "ja-wd-Q193461": "仏教",
-  "ja-wd-Q604687": "仏教",
-  "ja-wd-Q866315": "仏教",
-  "ja-wd-Q471696": "仏教",
-  "ja-wd-Q6567": "ゴジラシリーズ",
-  "ja-wd-Q552682": "VOCALOID",
-  "ja-wd-Q5147714": "UTAU",
-  "ja-al-7373": "狼と香辛料",
-  "ja-wd-Q315796": "クリスマス",
-  "ja-wd-Q461606": "アルセーヌ・ルパンシリーズ",
-  "ja-wd-Q335140": "日本の妖怪",
-  "ja-wd-Q4738985": "日本の妖怪",
-  "ja-wd-Q183102": "ルーニー・テューンズ",
-  "ja-wd-Q613241": "星のカービィ",
-  "ja-wd-Q209758": "エイリアンシリーズ",
-  "ja-wd-Q2434371": "TRIGUN",
-  "ja-wd-Q762": "画家",
-  "ja-wd-Q307": "天文学者",
-  "ja-wd-Q37103": "看護師",
-  "ja-wd-Q185152": "皇帝",
-  "ja-wd-Q5809": "革命家",
-  "ja-wd-Q124138": "FIFA会長",
-  "ja-wd-Q43274": "国王",
-  "ja-wd-Q8442": "政治家",
-  "ja-wd-Q230433": "皇后",
-  "ja-wd-Q743509": "皇族",
-  "ja-wd-Q844333": "皇族",
-  "ja-wd-Q311174": "皇族",
-  "ja-wd-Q193344": "剣豪",
-  "ja-wd-Q145746": "旧約聖書",
-  "ja-wd-Q133507": "旧約聖書",
-  "ja-wd-Q17714": "物理学者",
-  "ja-wd-Q9215": "精神分析学者",
-  "ja-wd-Q8027": "公民権運動家",
-  "ja-wd-Q378450": "幕末の志士",
-  "ja-wd-Q6612": "ギリシア神話",
-  "ja-wd-Q2359852": "ONE PIECE",
-  "ja-wd-Q7327": "宇宙飛行士",
-  "ja-wd-Q2009573": "007シリーズ",
-  "ja-wd-Q222227": "僧侶",
-  "ja-wd-Q152239": "英国王妃",
-  "ja-wd-Q9738": "皇帝",
-  "ja-wd-Q1044491": "BLEACH",
-  "ja-wd-Q87610": "上皇后",
-  "ja-wd-Q2379961": "皇族",
-  "ja-wd-Q635214": "戦国時代の姫",
-  "ja-wd-Q11190781": "メタルダンスユニット",
-  "ja-wd-Q30547": "修道女",
-  "ja-wd-Q161731": "チェブラーシカ",
-  "ja-wd-Q301804": "政治家",
-  "ja-wd-Q623553": "ルーニー・テューンズ",
-  "ja-wd-Q83106": "サッカー監督",
-  "ja-wd-Q702233": "サッカー監督",
-  "ja-wd-Q463933": "サッカー監督",
-  "ja-wd-Q21226404": "サッカー監督",
-  "ja-wd-Q131651": "ギリシア神話",
-  "ja-wd-Q10479": "英国王族",
-  "ja-wd-Q163900": "宣教師",
-  "ja-al-18769": "黒子のバスケ",
-  "ja-wd-Q43989": "祈祷僧",
-  "ja-wd-Q466462": "中国神話",
-  "ja-wd-Q868306": "仏教",
-  "ja-wd-Q662389": "遊☆戯☆王",
-  "ja-wd-Q329466": "エルム街の悪夢",
-  "ja-wd-Q122575981": "アイドルグループ",
-  "ja-wd-Q99470768": "ホロライブ",
-  "ja-wd-Q692111": "日本の民間伝承",
-  "ja-wd-Q213027": "創世記",
-  "ja-wd-Q150782": "オーストリア皇后",
-  "ja-wd-Q1152111": "皇族",
-  "ja-wd-Q486381": "皇族",
-  "ja-wd-Q232636": "皇族",
-  "ja-wd-Q230697": "皇后",
-  "ja-wd-Q448104": "皇族",
-  "ja-wd-Q280229": "皇族",
-  "ja-wd-Q505476": "DJ",
-  "ja-wd-Q169352": "能楽師",
-  "ja-wd-Q107626": "創世記",
-  "ja-wd-Q1068314": "ジャック・ライアンシリーズ",
-  "ja-wd-Q5011": "ローマ神話",
-  "ja-wd-Q1413": "ローマ皇帝",
-  "ja-wd-Q28730": "サムエル記",
-  "ja-wd-Q2639150": "X-MEN",
-  "ja-wd-Q2283843": "スパイダーマン",
-  "ja-wd-Q369197": "マーベル",
-  "ja-wd-Q907767": "マーベル",
-  "ja-wd-Q19095": "マーベル",
-  "ja-wd-Q840291": "X-MEN",
-  "ja-wd-Q578094": "スパイダーマン",
-  "ja-wd-Q1753322": "マーベル",
-  "ja-wd-Q584585": "ファンタスティック・フォー",
-  "ja-wd-Q838076": "X-MEN",
-  "ja-wd-Q28006858": "キャプテン・アメリカ",
-  "ja-wd-Q975100": "マーベル",
-  "ja-wd-Q1147326": "マーベル",
-  "pt-wd-Q145746": "Bíblia",
-  "ja-wd-Q1501505": "ディック・ブルーナの絵本",
-  "en-wd-Q2708078": "Game of Thrones",
-  "en-wd-Q80823": "queen of England",
-  "en-wd-Q2875978": "Ars Goetia",
-  "pt-wd-Q183102": "Looney Tunes",
-  "pt-wd-Q1077456": "Bob Esponja",
-  "pt-wd-Q1064404": "Bob Esponja",
-  "pt-wd-Q1953422": "Muppet Show",
-  "ja-al-192557": "詭秘之主",
-  "ja-al-127465": "魔道祖師",
-  "ja-al-127466": "魔道祖師",
-  "ja-al-149589": "天官賜福",
-  "ja-wd-Q8069094": "銭形平次捕物控",
-  "ja-wd-Q65042993": "文豪ストレイドッグス",
-  "pt-al-90107": "A Desastrosa Vida de Saiki K.",
+  // Bible
+  Q477527: "topic:bible", // Amram
+  Q51676: "topic:bible", // Aaron
+  Q2575060: "topic:bible", // Lot's wife
+  Q206238: "topic:bible", // Elisha
+  Q214617: "topic:bible", // Hagar
+  Q302: "topic:bible", // Jesus Christ
+  Q9181: "topic:bible", // Abraham
+  Q9077: "topic:bible", // Moses
+  Q289957: "topic:bible", // Jacob
+  Q81422: "topic:bible", // Noah
+  Q133507: "topic:bible", // Elijah
+  Q145746: "topic:bible", // Joseph
+  Q671872: "topic:bible", // Isaac
+  Q830183: "topic:bible", // Eve
+  Q41370: "topic:bible", // David
+  Q81018: "topic:bible", // Judas Iscariot
+  Q128267: "topic:bible", // Saint Joseph
+  Q156290: "topic:bible", // Methuselah
+  Q213027: "topic:bible", // Enoch
+  Q81989: "topic:bible", // Gabriel
+  Q275010: "topic:bible", // Moloch
+  Q56951: "topic:bible", // Raphael
+  Q721135: "topic:bible", // Azazel
+  Q815594: "topic:bible", // Belial
+  Q28730: "topic:bible", // Saul
+  Q107626: "topic:bible", // Seth
+  Q194808: "topic:bible", // Sarah
+  Q188794: "topic:bible", // Isaiah
+  Q158825: "topic:bible", // Jeremiah
+  Q6577515: "topic:bible", // Samuel
+  Q126689: "topic:bible", // Jehoshaphat
+  Q37085: "topic:bible", // Solomon
+  Q665541: "topic:bible", // Hosea
+  Q1135632: "topic:bible", // Rahab
+  Q320139: "topic:bible", // Zerubbabel
+  Q209378: "wd:Q220890", // Uriel: Book of Enoch
+  Q186350: "topic:christianity", // God the Father
+  Q2875978: "topic:ars-goetia", // Valac
+  // Buddhism
+  Q193461: "topic:buddhism", // Maitreya
+  Q715162: "topic:buddhism", // Guan Yin
+  Q604687: "topic:buddhism", // Kṣitigarbha
+  Q866315: "topic:buddhism", // Vaiśravaṇa
+  Q471696: "topic:buddhism", // Mañjuśrī
+  Q868306: "topic:buddhism", // Samantabhadra
+  // Mythology
+  Q45967: "topic:greek-mythology", // Persephone
+  Q1320718: "topic:greek-mythology", // Theseus
+  Q131203: "topic:greek-mythology", // Nyx
+  Q6612: "topic:greek-mythology", // Charon
+  Q199647: "topic:greek-mythology", // Thanatos
+  Q208588: "topic:greek-mythology", // Eurydice
+  Q102561: "topic:greek-mythology", // Sisyphus
+  Q174353: "topic:greek-mythology", // Orpheus
+  Q131651: "topic:greek-mythology", // Electra
+  Q23168: "topic:greek-mythology", // Minos
+  Q379828: "topic:greek-mythology", // Penthesilea
+  Q131090: "topic:greek-mythology", // Chaos
+  Q41410: "topic:greek-mythology", // Hades
+  Q161419: "topic:greek-mythology", // Oceanus
+  Q905162: "wd:Q60220", // Dido: Aeneid
+  Q47652: "topic:roman-mythology", // Venus
+  Q5011: "topic:roman-mythology", // Cupid
+  Q128335: "topic:hindu-mythology", // Indra
+  Q641632: "topic:chinese-mythology", // Nüwa
+  Q466462: "topic:chinese-mythology", // Chang'e
+  // Folklore
+  Q215681: "topic:arthurian-legend", // Lancelot
+  Q81109: "topic:arthurian-legend", // Mordred
+  Q315796: "topic:christmas", // Santa Claus
+  Q220453: "topic:sinterklaas", // Zwarte Piet
+  Q129628: "topic:himalayan-folklore", // Yeti
+  Q692111: "topic:japanese-folklore", // kitsune
+  Q335140: "topic:japanese-folklore", // kappa
+  Q4738985: "topic:japanese-folklore", // Amabie
+  Q622761: "topic:east-asian-folklore", // Moon rabbit
+  Q627323: "topic:european-folklore", // Sandman
+  Q308697: "topic:european-folklore", // goblin
+  Q485953: "topic:west-african-folklore", // Ananse
+  Q17309: "topic:commedia-dellarte", // Pierrot
+  Q7540067: "topic:creepypasta", // Slender Man
+  // Literature
+  Q4653: "topic:sherlock-holmes", // Sherlock Holmes
+  Q283111: "topic:sherlock-holmes", // Professor Moriarty
+  Q461606: "topic:arsene-lupin", // Arsène Lupin
+  Q1068314: "topic:jack-ryan", // Jack Ryan
+  Q170241: "topic:tarzan", // Tarzan
+  Q191527: "topic:twilight", // Edward Cullen
+  Q1357701: "topic:fu-manchu", // Fu Manchu
+  Q967116: "topic:pulp-magazines", // The Shadow
+  Q1076932: "wd:Q16155002", // Nancy Drew
+  Q188574: "wd:Q3766392", // Winnie the Pooh
+  Q8069094: "topic:zenigata-heiji", // Zenigata Heiji
+  Q1501505: "topic:miffy", // Miffy
+  // Film and TV
+  Q2009573: "topic:james-bond", // James Bond
+  Q246154: "topic:james-bond", // M
+  Q211414: "topic:james-bond", // Miss Moneypenny
+  Q7154377: "wd:Q1079", // Saul Goodman: Breaking Bad
+  Q5620660: "wd:Q1079", // Gus Fring
+  Q16578433: "wd:Q1079", // Mike Ehrmantraut
+  Q2708078: "wd:Q23572", // Daenerys Targaryen: Game of Thrones
+  Q329466: "wd:Q329434", // Freddy Krueger: A Nightmare on Elm Street
+  Q1647348: "wd:Q80981", // Leatherface: The Texas Chainsaw Massacre
+  Q844794: "wd:Q200804", // Predator
+  Q209758: "topic:alien", // Xenomorph
+  Q6567: "wd:Q860461", // Godzilla
+  Q216810: "wd:Q309048", // King Kong
+  Q1150106: "wd:Q461540", // Hellboy
+  Q1953422: "wd:Q2120540", // The Muppets: The Muppet Show
+  Q52401: "wd:Q483815", // Shrek
+  Q4902053: "wd:Q188439", // Rapunzel: Tangled
+  // Cartoons
+  Q183102: "wd:Q622435", // Bugs Bunny: Looney Tunes
+  Q623553: "wd:Q622435", // Tweety
+  Q949916: "topic:hanna-barbera", // Yogi Bear
+  Q901323: "wd:Q205683", // Scooby-Doo
+  Q935079: "wd:Q83279", // SpongeBob SquarePants
+  Q1077456: "wd:Q83279", // Patrick Star
+  Q1064404: "wd:Q83279", // Squidward Tentacles
+  Q1381762: "wd:Q158869", // Teenage Mutant Ninja Turtles
+  Q1419509: "topic:disney", // Oswald the Lucky Rabbit
+  Q6550: "topic:disney", // Donald Duck
+  Q11937: "topic:disney", // Scrooge McDuck
+  Q403138: "topic:disney", // Chip 'n' Dale
+  Q11947: "topic:disney", // Pete
+  Q161731: "wd:Q4508116", // Cheburashka
+  // Games
+  Q191626: "wd:Q1046812", // Sonic the Hedgehog
+  Q904189: "wd:Q1046812", // Knuckles the Echidna
+  Q194135: "wd:Q1046812", // Miles "Tails" Prower
+  Q1136987: "wd:Q1046812", // Shadow the Hedgehog
+  Q613241: "wd:Q2569953", // Kirby
+  Q376682: "wd:Q83265", // Carl Johnson: Grand Theft Auto: San Andreas
+  // Comics
+  Q79037: "topic:marvel", // Spider-Man
+  Q2712364: "topic:marvel", // Celestial
+  Q369197: "topic:marvel", // Black Widow
+  Q907767: "topic:marvel", // Doctor Strange
+  Q19095: "topic:marvel", // Hawkeye
+  Q1753322: "topic:marvel", // Kingpin
+  Q975100: "topic:marvel", // Nick Fury
+  Q1147326: "topic:marvel", // Loki
+  Q2283843: "wd:Q288296", // Mysterio: Spider-Man
+  Q578094: "wd:Q288296", // Doctor Octopus
+  Q2639150: "topic:x-men", // Gambit
+  Q840291: "topic:x-men", // Magneto
+  Q838076: "topic:x-men", // Professor X
+  Q584585: "topic:fantastic-four", // Human Torch
+  Q28006858: "topic:captain-america", // Bucky Barnes
+  Q839858: "topic:image-comics", // Spawn
+  // Anime, manga and their kin
+  Q2359852: "wd:Q28667972", // Boa Hancock: One Piece
+  Q662389: "wd:Q1044391", // Yugi Mutou: Yu-Gi-Oh!
+  Q65042993: "wd:Q17215635", // Atsushi Nakajima: Bungo Stray Dogs
+  Q554163: "topic:bleach", // Sousuke Aizen
+  Q1044491: "topic:bleach", // Uryū Ishida
+  Q2434371: "topic:trigun", // Vash the Stampede
+  Q104144455: "topic:frieren", // Frieren
+  "al-7373": "topic:spice-and-wolf",
+  "al-18769": "topic:kurokos-basketball",
+  "al-127465": "topic:mo-dao-zu-shi",
+  "al-127466": "topic:mo-dao-zu-shi",
+  "al-149589": "topic:heaven-officials-blessing",
+  "al-192557": "topic:lord-of-the-mysteries",
+  "al-90107": "topic:saiki-k",
+  Q5147714: "topic:utau", // Kasane Teto
+  Q552682: "topic:vocaloid", // Hatsune Miku
+  Q99470768: "topic:hololive", // Houshou Marine
+  // Real people
+  Q76509760: "job:satirical-politician", // Count Binface
+  Q43274: "job:monarch", // Charles III
+  Q82674: "job:queen-of-england", // Mary I
+  Q80823: "job:queen-consort", // Anne Boleyn
+  Q162819: "job:queen-consort", // Catherine of Aragon
+  Q152239: "job:queen-consort", // Queen Camilla
+  Q80976: "job:royal", // Prince Philip
+  Q152316: "job:prince", // Prince Harry
+  Q10479: "job:princess", // Catherine, Princess of Wales
+  Q214369: "job:princess", // Leonor, Princess of Asturias
+  Q1413: "job:roman-emperor", // Nero
+  Q185152: "job:emperor", // Puyi
+  Q9738: "job:emperor:f", // Wu Zetian
+  Q230433: "job:empress-consort", // Empress Masako
+  Q230697: "job:empress-consort", // Kōjun
+  Q150782: "job:empress-consort", // Empress Elisabeth of Austria
+  Q87610: "job:empress-emerita", // Empress Michiko
+  Q743509: "job:japanese-imperial-family", // Aiko, Princess Toshi
+  Q844333: "job:japanese-imperial-family", // Prince Hisahito
+  Q311174: "job:japanese-imperial-family", // Fumihito
+  Q2379961: "job:japanese-imperial-family", // Princess Akiko of Mikasa
+  Q1152111: "job:japanese-imperial-family", // Princess Kako
+  Q486381: "job:japanese-imperial-family", // Prince Tomohito of Mikasa
+  Q232636: "job:japanese-imperial-family", // Kiko
+  Q448104: "job:japanese-imperial-family", // Hisako, Princess Takamado
+  Q280229: "job:japanese-imperial-family", // Takahito, Prince Mikasa
+  Q165421: "job:first-lady", // Jacqueline Kennedy Onassis
+  Q40933: "job:first-lady", // Eva Perón
+  Q57911283: "job:first-lady", // Michelle Bolsonaro
+  Q8027: "job:civil-rights-activist", // Martin Luther King Jr.
+  Q5809: "job:revolutionary", // Che Guevara
+  Q7172014: "job:politician", // Pete Hegseth
+  Q10364348: "job:politician", // Ronaldo Caiado
+  Q8442: "job:politician", // Otto von Bismarck
+  Q301804: "job:politician", // Shigeru Yoshida
+  Q105301361: "job:politician:f", // Erika Hilton
+  Q30547: "job:nun", // Mother Teresa
+  Q989: "job:pope", // John Paul II
+  Q37278: "job:pope", // John Paul I
+  Q16975: "job:pope", // Paul VI
+  Q17293: "job:religious", // Tenzin Gyatso
+  Q222227: "job:monk", // Kūkai
+  Q163900: "job:missionary", // Francis Xavier
+  Q35811: "job:prophet", // Zoroaster
+  Q43989: "job:mystic", // Grigori Rasputin
+  Q172684: "job:occultist", // Aleister Crowley
+  Q9215: "job:psychoanalyst", // Sigmund Freud
+  Q41532: "job:psychiatrist", // Carl Jung
+  Q9387: "job:sociologist", // Max Weber
+  Q37103: "job:nurse:f", // Florence Nightingale
+  Q17714: "job:physicist", // Stephen Hawking
+  Q307: "job:astronomer", // Galileo Galilei
+  Q7327: "job:astronaut", // Yuri Gagarin
+  Q3355: "job:aviator:f", // Amelia Earhart
+  Q762: "job:painter", // Leonardo da Vinci
+  Q169352: "job:noh-actor", // Zeami Motokiyo
+  Q193344: "job:swordsman", // Miyamoto Musashi
+  Q378450: "job:bakumatsu-samurai", // Sakamoto Ryōma
+  Q635214: "job:sengoku-princess", // Oichi
+  Q10263875: "job:quilombola-warrior:f", // Dandara dos Palmares
+  Q2599: "job:musician", // Paul McCartney
+  Q392: "job:singer", // Bob Dylan
+  Q36844: "job:singer:f", // Rihanna
+  Q37615: "job:tenor", // Luciano Pavarotti
+  Q505476: "job:dj", // Avicii
+  Q361297: "job:talent-manager", // Joe Jackson
+  Q126513: "job:presenter", // Steve Irwin
+  Q11190781: "group:metal-dance-unit", // Babymetal
+  Q122575981: "group:idol", // NCT Wish
+  Q5162259: "job:mma", // Conor McGregor
+  Q41421: "job:basketball", // Michael Jordan
+  Q44473: "job:american-football", // O. J. Simpson
+  Q124138: "job:football-executive", // Gianni Infantino
+  Q483437: "job:football-executive", // Sepp Blatter
+  Q207358: "job:football-executive", // João Havelange
+  Q485885: "job:football-referee", // Pierluigi Collina
+  Q2600582: "job:coach-and-journalist", // João Saldanha
+  Q174614: "job:football-coach", // Carlo Ancelotti
+  Q79983: "job:football-coach", // José Mourinho
+  Q702233: "job:football-coach", // Thomas Tuchel
+  Q191634: "job:football-coach", // Luiz Felipe Scolari
+  Q44980: "job:football-coach", // Alex Ferguson
+  Q4462: "job:football-coach", // Joachim Löw
+  Q21226404: "job:football-coach", // Julian Nagelsmann
+  Q83106: "job:football-coach", // Jürgen Klopp
+  Q40652: "job:football-coach", // Tite
+  Q3840425: "job:football-coach", // Luis de la Fuente
+  Q31575: "job:football-coach", // Marcelo Bielsa
+  Q527550: "job:football-coach", // Jorge Jesus
+  Q463933: "job:football-coach", // Vahid Halilhodžić
 };
 
 /** Vandalism and mistakes among an entry's aliases. */
@@ -694,11 +1084,4 @@ export const DROP_ALIASES: Record<string, string[]> = {
   "ja-wd-Q22906680": ["Nagito Komaeda", "狛枝凪斗"],
   "en-wd-Q80823": ["Ana la mona"],
   "en-wd-Q2875978": ["aminnn", "Coolor"],
-};
-
-/** Origins that mean nothing to players, replaced in every list. */
-export const ORIGIN_RENAMES: Record<string, string> = {
-  "Terra-616": "Marvel",
-  "Earth-616": "Marvel",
-  アース616: "マーベル",
 };

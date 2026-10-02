@@ -15,7 +15,7 @@ const QUERY = `query ($page: Int) {
       favourites
       gender
       media(sort: POPULARITY_DESC, perPage: 4) {
-        nodes { isAdult title { romaji english native } }
+        nodes { id isAdult title { romaji english native } }
       }
     }
   }
@@ -33,6 +33,7 @@ interface ApiCharacter {
   gender: string | null;
   media: {
     nodes: {
+      id: number;
       isAdult: boolean | null;
       title: {
         romaji: string | null;
@@ -81,7 +82,8 @@ export async function fetchAniListCharacters(
       const nodes = character.media?.nodes ?? [];
       if (nodes.length > 0 && nodes.every((node) => node.isAdult)) continue;
       if (nodes.some((node) => node.isAdult) && nodes[0]?.isAdult) continue;
-      const media = nodes.find((node) => !node.isAdult)?.title ?? null;
+      const node = nodes.find((node) => !node.isAdult);
+      const media = node ? { id: node.id, ...node.title } : null;
       const image = character.image?.large ?? null;
       out.push({
         id: character.id,

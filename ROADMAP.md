@@ -38,6 +38,9 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Biblioteca grande em cada idioma, com foto (8 mil por idioma, 91–98% com foto)
 - [x] Biblioteca revisada: sem criminosos, ditadores ou conteúdo adulto; nomes do Brasil e do Japão; origens e duplicatas corrigidas
 - [x] Biblioteca aceita grupos e espécies: duplas, famílias, equipes, bandas, Pikachu, Chocobo
+- [x] Popularidade sem pico de notícia: mediana de 6 meses em 2 anos (o filme da Odisseia tinha posto Agamemnon no top 3)
+- [x] Um registro por personagem: nome, apelidos e popularidade em cada idioma
+- [x] Origem como chave traduzível (obra ou profissão) e categoria fixa (anime, esportes, mitologia...)
 - [x] Busca com autocomplete e foto
 - [x] Busca instantânea: índice do idioma baixado uma vez (cache), cada tecla responde na memória em menos de 1 ms, sem servidor
 - [x] Criar personagem com nome e foto própria (com recorte)

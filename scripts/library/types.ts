@@ -1,9 +1,13 @@
-export type { SeedCharacter } from "../../src/server/backend/seed-format";
+export type {
+  ByLang,
+  SeedCharacter,
+  SeedOrigin,
+} from "../../src/server/backend/seed-format";
+
+import type { ByLang } from "../../src/server/backend/seed-format";
 
 export const LANGS = ["en", "pt", "ja"] as const;
 export type Lang = (typeof LANGS)[number];
-
-export type ByLang<T> = Partial<Record<Lang, T>>;
 
 /** A Wikidata item that may end up in the library. */
 export interface Entity {
@@ -49,6 +53,7 @@ export interface AniListCharacter {
   favourites: number;
   gender: string | null;
   media: {
+    id: number;
     romaji: string | null;
     english: string | null;
     native: string | null;

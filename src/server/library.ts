@@ -1,22 +1,28 @@
 import "server-only";
 import { type SearchItem, toSearchItem } from "@/game/character-search";
 import type { Lang } from "@/game/types";
-import en from "../../data/characters/en.json";
-import ja from "../../data/characters/ja.json";
-import pt from "../../data/characters/pt.json";
+import characters from "../../data/characters.json";
+import origins from "../../data/origins.json";
 import { getBackend } from "./backend";
-import type { SeedCharacter } from "./backend/seed-format";
+import {
+  libraryFor,
+  type SeedCharacter,
+  type SeedOrigin,
+} from "./backend/seed-format";
 
 // The starter library is bundled with the server, so the search index is built
 // once per instance from memory, never from the database.
-const FILES = { en, pt, ja } as unknown as Record<Lang, SeedCharacter[]>;
 const library = new Map<Lang, SearchItem[]>();
 
 /** The library as search items, most popular first. */
 export function libraryItems(lang: Lang): SearchItem[] {
   let items = library.get(lang);
   if (!items) {
-    items = FILES[lang].map(toSearchItem);
+    items = libraryFor(
+      characters as unknown as SeedCharacter[],
+      origins as unknown as SeedOrigin[],
+      lang,
+    ).map(({ character }) => toSearchItem(character));
     library.set(lang, items);
   }
   return items;

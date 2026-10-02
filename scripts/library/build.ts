@@ -1,5 +1,8 @@
 /**
- * Builds the starter character library: data/characters/{en,pt,ja}.json.
+ * Builds the starter character library: data/characters.json (one entry per
+ * character, with its name, aliases and popularity in each language whose
+ * list holds it) and data/origins.json (the works and descriptors characters
+ * come from, translated).
  *
  *   pnpm exec tsx scripts/library/build.ts
  *
@@ -10,8 +13,9 @@
  *   deities, people by occupation and by country), labels, aliases, works,
  *   occupations.
  * - Wikipedia clickstream dumps (en/pt/ja): local popularity, as the median
- *   of the last three months of reader traffic per article (about 1.5 GB to
- *   download, mostly English; run with NODE_OPTIONS=--max-old-space-size=6144).
+ *   of six months of reader traffic per article spread over two years (about
+ *   3 GB to download, mostly English; run with
+ *   NODE_OPTIONS=--max-old-space-size=6144).
  * - Wikipedia and Commons APIs: the article lead image, or the Wikidata P18
  *   thumbnail, for the entries that make the cut.
  * - AniList GraphQL: anime/manga characters by favourites, native names.
@@ -25,20 +29,22 @@
  *
  * Env: LIBRARY_CACHE_DIR, LIBRARY_CONTACT, LIBRARY_MAX (entries per language,
  * default 8000), LIBRARY_ANILIST (characters to fetch, default and API
- * maximum 5000), LIBRARY_CLICKSTREAM_MONTHS (e.g. "2026-06,2026-07,2026-08").
+ * maximum 5000), LIBRARY_CLICKSTREAM_MONTHS (e.g. "2025-12,2026-04,2026-08").
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { Category } from "../../src/game/categories";
 import { fetchAniListCharacters } from "./anilist";
 import { fetchClickstream } from "./clickstream";
-import { pickDescriptor } from "./descriptors";
+import { DESCRIPTORS, type Descriptor, pickDescriptor } from "./descriptors";
 import { CACHE_DIR } from "./http";
 import {
   ALLOW_QIDS,
+  CUSTOM_ORIGINS,
   DENY_QIDS,
   DROP_ALIASES,
   NAMES,
-  ORIGIN_RENAMES,
+  ORIGIN_REPLACEMENTS,
   ORIGINS,
   REMOVE_IDS,
 } from "./overrides";
@@ -51,11 +57,14 @@ import {
 } from "./text";
 import {
   type AniListCharacter,
+  type ByLang,
   type Details,
   type Entity,
   LANGS,
   type Lang,
   type SeedCharacter,
+  type SeedOrigin,
+  type Work,
 } from "./types";
 import { collectPools, fetchDetails } from "./wikidata";
 import {
@@ -64,7 +73,7 @@ import {
   resolveCommonsFiles,
 } from "./wikipedia";
 
-const OUT_DIR = path.join(__dirname, "..", "..", "data", "characters");
+const OUT_DIR = path.join(__dirname, "..", "..", "data");
 const MAX_ENTRIES = Number(process.env.LIBRARY_MAX ?? 8000);
 const ANILIST_LIMIT = Number(process.env.LIBRARY_ANILIST ?? 5000);
 /**
@@ -73,6 +82,18 @@ const ANILIST_LIMIT = Number(process.env.LIBRARY_ANILIST ?? 5000);
  * calibrated per language to reach this share.
  */
 const FICTIONAL_SHARE = Number(process.env.LIBRARY_FICTIONAL_SHARE ?? 0.45);
+/**
+ * Gods, saints and legends get half the offset: students and the curious read
+ * their articles far more than players know them (Agamemnon outread Homer
+ * Simpson and, with the offset, Messi).
+ */
+const TRADITION = new Set<Category>(["mythology", "religion", "folklore"]);
+const offsetFor = (candidate: Candidate, offset: number) =>
+  candidate.kind !== "fictional"
+    ? 0
+    : TRADITION.has(candidate.profile.category)
+      ? offset / 2
+      : offset;
 /** At least this share of each list must have an image. */
 const MIN_IMAGE_SHARE = 0.88;
 const MAX_NAME = 60;
@@ -166,24 +187,32 @@ const FRANCHISE_PROPS = new Set(["P8345", "P1080", "P1441", "P4584"]);
 /** Real groups from the "group:" pools: band, duo, idol group, comedy group. */
 const isGroup = (entity: Entity) =>
   [...entity.pools].some((pool) => pool.startsWith("group:"));
-const GROUP_LABELS: {
-  match: RegExp;
-  labels: Record<Lang, string>;
-}[] = [
-  {
+/** Kinds of real groups, by origin id; the first that matches wins, else a band. */
+const GROUPS: Record<
+  string,
+  { match: RegExp; category: Category; labels: Record<Lang, string> }
+> = {
+  "group:comedy": {
     match: /comedy|comic|humor|humou?r|お笑い|コント|漫才/i,
+    category: "entertainment",
     labels: { en: "comedy group", pt: "grupo de humor", ja: "お笑いグループ" },
   },
-  {
+  "group:duo": {
     match: /\bduo\b|\bdupla\b|デュオ|ユニット/i,
+    category: "music",
     labels: { en: "music duo", pt: "dupla musical", ja: "音楽デュオ" },
   },
-  {
+  "group:idol": {
     match: /\bidol\b|アイドル|ídolos/i,
+    category: "music",
     labels: { en: "idol group", pt: "grupo de ídolos", ja: "アイドルグループ" },
   },
-];
-const BAND: Record<Lang, string> = { en: "band", pt: "banda", ja: "バンド" };
+  "group:band": {
+    match: /./,
+    category: "music",
+    labels: { en: "band", pt: "banda", ja: "バンド" },
+  },
+};
 const MYTHOLOGY =
   /mytholog|folklore|legend|religio|pantheon|olympian|æsir|aesir|vanir|bible|gods\b/i;
 const HANGUL = /[ᄀ-ᇿ㄰-㆏가-힯]/;
@@ -199,31 +228,99 @@ function validName(name: string | null | undefined): name is string {
 }
 
 // ---------------------------------------------------------------------------
-// Origins
+// Origins: one per character, shared by every language. An origin is an id
+// ("wd:Q8337", "job:actress") with its labels collected in `originLabels`,
+// written to data/origins.json, so the app (and the database) translate it.
 
 const WORK_ORDER = ["P8345", "P1080", "P361", "P1441", "P4584"];
 
+/** Labels of every origin handed out so far, by id. */
+const originLabels = new Map<string, ByLang<string>>();
+/** Origins with the same labels in every language are one origin. */
+const originBySignature = new Map<string, string>();
+/** Every Wikidata work seen, for origins picked by hand. */
+const worksById = new Map<string, Work>();
+const DESCRIPTOR_BY_KEY = new Map(DESCRIPTORS.map((d) => [d.key, d]));
+
+function registerOrigin(id: string, labels: ByLang<string>): string {
+  const replacement = ORIGIN_REPLACEMENTS[id];
+  if (replacement) return resolveOrigin(replacement);
+  const known = originLabels.get(id);
+  if (known) return id;
+  const signature = LANGS.map((lang) => normalizeName(labels[lang] ?? "")).join(
+    "|",
+  );
+  const same = originBySignature.get(signature);
+  if (same) return same;
+  originBySignature.set(signature, id);
+  originLabels.set(id, labels);
+  return id;
+}
+
+/** Labels of a work, cleaned; empty when no language has a usable one. */
+function workLabels(work: Work): ByLang<string> {
+  const labels: ByLang<string> = {};
+  for (const lang of LANGS) {
+    const label = work.labels[lang];
+    if (!label) continue;
+    const cleaned = cleanWorkLabel(label, lang);
+    if (!validName(cleaned) || (lang === "ja" && notJapanese(cleaned)))
+      continue;
+    labels[lang] = lang === "ja" ? cleaned : capitalize(cleaned);
+  }
+  return labels;
+}
+
+function descriptorOrigin(descriptor: Descriptor, female: boolean): string {
+  const gendered = LANGS.some(
+    (lang) => descriptor.labels[lang][0] !== descriptor.labels[lang][1],
+  );
+  const form = female && gendered ? 1 : 0;
+  return registerOrigin(
+    `job:${descriptor.key}${form ? ":f" : ""}`,
+    Object.fromEntries(
+      LANGS.map((lang) => [lang, descriptor.labels[lang][form]]),
+    ),
+  );
+}
+
+/** An origin id from overrides.ts, registered; throws on an unknown id. */
+function resolveOrigin(id: string): string {
+  const custom = CUSTOM_ORIGINS[id];
+  if (custom) return registerOrigin(id, custom.labels);
+  const group = GROUPS[id];
+  if (group) return registerOrigin(id, group.labels);
+  const job = /^job:([a-z0-9-]+)(:f)?$/.exec(id);
+  const descriptor = job && DESCRIPTOR_BY_KEY.get(job[1]);
+  if (descriptor) return descriptorOrigin(descriptor, !!job[2]);
+  const work = id.startsWith("wd:") && worksById.get(id.slice(3));
+  if (work) return registerOrigin(id, workLabels(work));
+  throw new Error(`unknown origin "${id}" in overrides.ts`);
+}
+
 function fictionalOrigin(
+  entity: Entity,
   details: Details | undefined,
-  lang: Lang,
-  name: string,
+  character: AniListCharacter | undefined,
 ): string | null {
-  if (!details) return null;
-  const nameKey = normalizeName(name);
+  // A work named after the character ("Sherlock Holmes") says nothing.
+  const names = new Set(
+    Object.values(entity.labels).map((label) => normalizeName(label ?? "")),
+  );
   for (const prop of WORK_ORDER) {
-    const works = details.works
+    const works = (details?.works ?? [])
       .filter((work) => work.prop === prop)
       .filter((work) => prop !== "P361" || MYTHOLOGY.test(work.labels.en ?? ""))
       .sort((a, b) => b.sitelinks - a.sitelinks);
     for (const work of works) {
-      const label = work.labels[lang];
-      if (!label) continue;
-      const cleaned = cleanWorkLabel(label, lang);
-      if (!validName(cleaned) || normalizeName(cleaned) === nameKey) continue;
-      return lang === "ja" ? cleaned : capitalize(cleaned);
+      const labels = workLabels(work);
+      const values = Object.values(labels);
+      if (values.length === 0) continue;
+      if (values.some((label) => names.has(normalizeName(label)))) continue;
+      return registerOrigin(`wd:${work.qid}`, labels);
     }
   }
-  return null;
+  return character ? aniListOrigin(character) : null;
 }
 
 function aniListTitle(character: AniListCharacter, lang: Lang): string | null {
@@ -242,10 +339,23 @@ function aniListTitle(character: AniListCharacter, lang: Lang): string | null {
   return english ?? romaji ?? null;
 }
 
+function aniListOrigin(character: AniListCharacter): string | null {
+  if (!character.media) return null;
+  const labels: ByLang<string> = {};
+  for (const lang of LANGS) {
+    const title = aniListTitle(character, lang);
+    const cleaned = title ? cleanName(title) : null;
+    if (!validName(cleaned) || (lang === "ja" && notJapanese(cleaned)))
+      continue;
+    labels[lang] = cleaned;
+  }
+  if (Object.keys(labels).length === 0) return null;
+  return registerOrigin(`al:${character.media.id}`, labels);
+}
+
 function humanOrigin(
   entity: Entity,
   details: Details | undefined,
-  lang: Lang,
 ): string | null {
   if (!details) return null;
   if (isGroup(entity)) {
@@ -253,19 +363,233 @@ function humanOrigin(
       ...Object.values(details.descriptions),
       entity.labels.en ?? "",
     ].join(" | ");
-    const kind = GROUP_LABELS.find((group) => group.match.test(text));
-    return (kind?.labels ?? BAND)[lang];
+    const [id, group] =
+      Object.entries(GROUPS).find(([, group]) => group.match.test(text)) ?? [];
+    return id && group ? registerOrigin(id, group.labels) : null;
   }
   const descriptor = pickDescriptor(
     details.occupations,
     details.descriptions,
-    lang,
+    "en",
   );
-  if (descriptor) return descriptor.labels[lang][entity.female ? 1 : 0];
+  if (descriptor) return descriptorOrigin(descriptor, entity.female);
+  // Wikidata's own occupation label. Labels line up with the occupations only
+  // in languages that have a label for each of them.
+  const { occupations, occupationLabels } = details;
+  const aligned = (lang: Lang) =>
+    occupationLabels[lang]?.length === occupations.length
+      ? occupationLabels[lang]
+      : undefined;
+  const fits = (label: string | undefined): label is string =>
+    !!label && label.length <= 40 && !ADULT_OCCUPATION.test(label);
+  for (let i = 0; i < occupations.length; i++) {
+    if (!fits(aligned("en")?.[i])) continue;
+    const labels: ByLang<string> = {};
+    for (const lang of LANGS) {
+      const label = aligned(lang)?.[i];
+      if (fits(label)) labels[lang] = label;
+    }
+    return registerOrigin(`wd:${occupations[i]}`, labels);
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Categories
+
+const JOB_CATEGORIES: Record<Category, string[]> = {
+  sports: [
+    "footballer",
+    "football-coach",
+    "basketball",
+    "tennis",
+    "racing",
+    "f1",
+    "boxer",
+    "mma",
+    "wrestler",
+    "sumo",
+    "baseball",
+    "american-football",
+    "hockey",
+    "golfer",
+    "figure-skater",
+    "swimmer",
+    "athletics",
+    "gymnast",
+    "judoka",
+    "cyclist",
+    "cricketer",
+    "volleyball",
+    "chess",
+    "skater",
+    "surfer",
+    "athlete",
+  ],
+  politics: ["politician", "diplomat", "activist"],
+  royalty: ["monarch"],
+  history: ["samurai", "military", "explorer"],
+  entertainment: [
+    "actor",
+    "voice-actor",
+    "comedian",
+    "tarento",
+    "presenter",
+    "model",
+    "dancer",
+    "journalist",
+  ],
+  internet: ["youtuber"],
+  music: [
+    "singer-songwriter",
+    "singer",
+    "rapper",
+    "idol",
+    "guitarist",
+    "pianist",
+    "musician",
+    "composer",
+    "dj",
+  ],
+  film_tv: ["director", "producer"],
+  art: [
+    "mangaka",
+    "animator",
+    "cartoonist",
+    "fashion",
+    "painter",
+    "sculptor",
+    "architect",
+    "photographer",
+  ],
+  literature: ["poet", "writer"],
+  science: [
+    "astronaut",
+    "inventor",
+    "physicist",
+    "mathematician",
+    "chemist",
+    "biologist",
+    "astronomer",
+    "scientist",
+    "physician",
+    "philosopher",
+  ],
+  business: ["business", "chef"],
+  religion: ["religious"],
+  anime: [],
+  games: [],
+  comics: [],
+  cartoons: [],
+  mythology: [],
+  folklore: [],
+  other: [],
+};
+const JOB_CATEGORY = new Map(
+  Object.entries(JOB_CATEGORIES).flatMap(([category, keys]) =>
+    keys.map((key) => [key, category as Category]),
+  ),
+);
+
+/**
+ * Fiction by its Wikidata classes: each class ("comics character", "Greek
+ * deity") votes for the first rule it matches. Film, TV and animation votes
+ * count half, since nearly every famous character gets adapted; ties go to
+ * the first category in FICTION_ORDER (where the character started).
+ */
+const FICTION_RULES: [Category, RegExp, number][] = [
+  [
+    "religion",
+    /biblical|\bbible\b|angel|Christian|Judaism|Islam|Bodhisattva|Buddh|\bsaint\b|prophet|Wisdom King|Ars Goetia/i,
+    1,
+  ],
+  [
+    "folklore",
+    /folklore|legend|yōkai|yokai|creature|cryptid|fairy|Arthurian/i,
+    1,
+  ],
+  [
+    "mythology",
+    /myth|deity|\bgods?\b|goddess|titan|\bDevi\b|\bDeva\b|kami\b|orisha|Mahabharata|Ramayana|Oceanid|Jötunn|Olympian|theonym|Iliad|Odyssey|Aeneid/i,
+    1,
+  ],
+  [
+    "anime",
+    /\b(anime|manga|light novel|Sailor Soldier|Soul Reaper|mobile suit)\b/i,
+    1,
+  ],
+  [
+    "games",
+    /video game|Mario franchise|Donkey Kong|Pokémon|game character/i,
+    1,
+  ],
+  [
+    "comics",
+    /comic|superhero|super-?villain|mutant|mutate|metahuman|Kryptonian|Asgardian|Marvel|\bDC\b/i,
+    1,
+  ],
+  ["cartoons", /cartoon|Looney Tunes|Disney|puppet|Muppet/i, 1],
+  ["cartoons", /animated|CGI/i, 0.5],
+  [
+    "literature",
+    /literary|novel|\bbook|Middle-earth|Harry Potter|Song of Ice|Gryffindor|Sherlock|Discworld|Narnia/i,
+    1,
+  ],
+  [
+    "film_tv",
+    /Star Wars|Star Trek|Doctor Who|Game of Thrones|sitcom|soap opera/i,
+    1,
+  ],
+  ["film_tv", /film|movie|television|\bTV\b|theatrical|musical/i, 0.5],
+  ["internet", /internet|meme|creepypasta|VTuber|YouTube/i, 1],
+];
+const FICTION_ORDER: Category[] = [
+  "religion",
+  "mythology",
+  "folklore",
+  "literature",
+  "comics",
+  "games",
+  "cartoons",
+  "anime",
+  "film_tv",
+  "internet",
+];
+
+/** The category the most labels vote for, or null when none matches. */
+function fictionCategory(labels: string[]): Category | null {
+  const votes = new Map<Category, number>();
+  for (const label of labels) {
+    const rule = FICTION_RULES.find(([, pattern]) => pattern.test(label));
+    if (rule) votes.set(rule[0], (votes.get(rule[0]) ?? 0) + rule[2]);
+  }
+  let best: Category | null = null;
+  for (const category of FICTION_ORDER) {
+    if ((votes.get(category) ?? 0) > (best ? (votes.get(best) ?? 0) : 0))
+      best = category;
+  }
+  return best;
+}
+
+function categoryOf(
+  kind: Entity["kind"],
+  details: Details | undefined,
+  character: AniListCharacter | undefined,
+  origin: string | null,
+): Category {
+  const custom = origin ? CUSTOM_ORIGINS[origin] : undefined;
+  if (custom) return custom.category;
+  if (kind === "human") {
+    if (origin && GROUPS[origin]) return GROUPS[origin].category;
+    const key = origin?.match(/^job:([a-z0-9-]+)/)?.[1];
+    return (key && JOB_CATEGORY.get(key)) || "other";
+  }
+  const label = origin ? (originLabels.get(origin)?.en ?? "") : "";
   return (
-    details.occupationLabels[lang]?.find(
-      (label) => label.length <= 40 && !ADULT_OCCUPATION.test(label),
-    ) ?? null
+    fictionCategory(details?.classes ?? []) ??
+    (character ? "anime" : null) ??
+    fictionCategory([label]) ??
+    "other"
   );
 }
 
@@ -427,9 +751,9 @@ async function fetchImages(
   return { pages, commons };
 }
 
+/** One picture per character, shared by every language. */
 function pickImage(
   entity: Entity,
-  lang: Lang,
   character: AniListCharacter | undefined,
   images: ImageSources,
 ): string | null {
@@ -437,23 +761,48 @@ function pickImage(
     const title = entity.titles[l];
     return title ? (images.pages[l].get(title)?.image ?? undefined) : undefined;
   };
-  const others = LANGS.filter((l) => l !== lang && l !== "en").map(page);
+  const pages = LANGS.map(page);
   const p18 = entity.p18 ? images.commons.get(entity.p18) : undefined;
   const order =
     entity.kind === "fictional"
-      ? [page("en"), character?.image ?? undefined, page(lang), ...others, p18]
-      : [p18, page(lang), page("en"), ...others];
+      ? [page("en"), character?.image ?? undefined, ...pages, p18]
+      : [p18, ...pages];
   return order.find(Boolean) ?? null;
 }
 
 // ---------------------------------------------------------------------------
 // Selection
 
-interface Candidate extends SeedCharacter {
+/** What a character is, whatever the language: worked out once. */
+interface Profile {
+  /** "wd-Q302" or "al-40". */
+  key: string;
+  kind: Entity["kind"];
+  category: Category;
+  origin: string | null;
+  imageUrl: string | null;
+  /** Labels in every language, for the languages whose list leaves it out. */
+  labels: ByLang<string>;
+}
+
+/** A character in one language's list. */
+interface Candidate {
+  /** Entry id in that list ("pt-wd-Q302"), as overrides.ts keys entries. */
+  id: string;
+  lang: Lang;
+  profile: Profile;
+  name: string;
+  /** Origin id, shared by every language (copied for the dedup key). */
+  origin: string | null;
+  imageUrl: string | null;
+  aliases: string[];
+  popularity: number;
   /** Score before the fictional offset; popularity is set from it at the end. */
   score: number;
   kind: Entity["kind"];
   source: "wd" | "al" | "wd+al";
+  /** Raw signals, for the debug lists. */
+  signals: { sitelinks: number; views: number; favourites: number };
 }
 
 /**
@@ -470,7 +819,7 @@ function fictionalOffset(
     const top = candidates
       .map((c) => ({
         fictional: c.kind === "fictional",
-        score: c.score + (c.kind === "fictional" ? offset : 0),
+        score: c.score + offsetFor(c, offset),
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, max);
@@ -506,7 +855,7 @@ const HAN = /\p{Script=Han}/u;
 const notJapanese = (text: string) =>
   [...text].some((c) => HAN.test(c) && !JIS.has(c));
 
-/** Applies the hand-reviewed removals, names, origins and aliases (overrides.ts). */
+/** Applies the hand-reviewed removals, names and aliases (overrides.ts). */
 function reviewed(candidates: Candidate[], lang: Lang): Candidate[] {
   return candidates
     .filter((candidate) => !REMOVE_IDS[candidate.id])
@@ -528,14 +877,9 @@ function reviewed(candidates: Candidate[], lang: Lang): Candidate[] {
           : {};
       const base = { ...candidate, ...renamed };
       const dropped = new Set(DROP_ALIASES[candidate.id] ?? []);
-      let origin =
-        candidate.id in ORIGINS ? ORIGINS[candidate.id] : candidate.origin;
-      if (origin && ORIGIN_RENAMES[origin]) origin = ORIGIN_RENAMES[origin];
-      if (origin && lang === "ja" && notJapanese(origin)) origin = null;
       return {
         ...base,
         aliases: base.aliases.filter((alias) => !dropped.has(alias)),
-        origin,
       };
     });
 }
@@ -708,9 +1052,73 @@ async function main() {
     );
   }
 
+  // Origin, category and picture belong to the character, not to a language.
+  for (const info of details.values()) {
+    for (const work of info.works) worksById.set(work.qid, work);
+  }
+  const pickOrigin = (key: string, generated: () => string | null) => {
+    if (!(key in ORIGINS)) return generated();
+    const id = ORIGINS[key];
+    return id ? resolveOrigin(id) : null;
+  };
+  const localName = (raw: string | null | undefined, lang: Lang) => {
+    if (!raw || (lang === "ja" && (HANGUL.test(raw) || notJapanese(raw))))
+      return undefined;
+    const name = cleanName(raw);
+    return validName(name) ? name : undefined;
+  };
+  const profiles = new Map<string, Profile>();
+  const wikidataProfile = (entity: Entity): Profile => {
+    const key = `wd-${entity.qid}`;
+    const known = profiles.get(key);
+    if (known) return known;
+    const info = details.get(entity.qid);
+    const character = matches.get(entity.qid);
+    const origin = pickOrigin(entity.qid, () =>
+      entity.kind === "human"
+        ? humanOrigin(entity, info)
+        : fictionalOrigin(entity, info, character),
+    );
+    const profile: Profile = {
+      key,
+      kind: entity.kind,
+      category: categoryOf(entity.kind, info, character, origin),
+      origin,
+      imageUrl: pickImage(entity, character, images),
+      labels: Object.fromEntries(
+        LANGS.map((lang) => [lang, localName(entity.labels[lang], lang)]),
+      ),
+    };
+    profiles.set(key, profile);
+    return profile;
+  };
+  const aniListProfile = (character: AniListCharacter): Profile => {
+    const key = `al-${character.id}`;
+    const known = profiles.get(key);
+    if (known) return known;
+    const origin = pickOrigin(key, () => aniListOrigin(character));
+    const latin =
+      character.full && LATIN_ONLY.test(character.full)
+        ? character.full
+        : undefined;
+    const profile: Profile = {
+      key,
+      kind: "fictional",
+      category: categoryOf("fictional", undefined, character, origin),
+      origin,
+      imageUrl: character.image,
+      labels: {
+        en: localName(latin, "en"),
+        pt: localName(latin, "pt"),
+        ja: localName(character.native, "ja"),
+      },
+    };
+    profiles.set(key, profile);
+    return profile;
+  };
+
   const lists = {} as Record<Lang, Candidate[]>;
   for (const lang of LANGS) {
-    const others = LANGS.filter((other) => other !== lang);
     const candidates: Candidate[] = [];
     // AniList characters already in the list through their Wikidata twin.
     const emitted = new Set<number>();
@@ -737,27 +1145,28 @@ async function main() {
           favouriteScore(character.favourites) + offsets[lang],
         );
       }
-      const origin =
-        entity.kind === "human"
-          ? humanOrigin(entity, info, lang)
-          : (fictionalOrigin(info, lang, name) ??
-            (character ? aniListTitle(character, lang) : null));
-      const cleanOrigin = origin ? cleanName(origin) : null;
+      const profile = wikidataProfile(entity);
       candidates.push({
-        id: `${lang}-wd-${entity.qid}`,
+        id: `${lang}-${profile.key}`,
+        lang,
+        profile,
         name,
-        origin: validName(cleanOrigin) ? cleanOrigin : null,
-        imageUrl: pickImage(entity, lang, character, images),
+        origin: profile.origin,
+        imageUrl: profile.imageUrl,
         aliases: buildAliases(name, [
           entity.labels[lang],
           ...(info?.aliases[lang] ?? []),
-          ...others.map((other) => entity.labels[other]),
           ...(character ? aniListNames(character, lang) : []),
         ]),
         popularity: 0,
         score,
         kind: entity.kind,
         source: character ? "wd+al" : "wd",
+        signals: {
+          sitelinks: entity.sitelinks,
+          views: Math.round(viewsOf(views, entity, lang)),
+          favourites: character?.favourites ?? 0,
+        },
       });
       if (character) emitted.add(character.id);
     }
@@ -770,24 +1179,26 @@ async function main() {
       if (lang !== "ja" && !LATIN_ONLY.test(raw)) continue;
       const name = cleanName(raw);
       if (!validName(name)) continue;
-      const origin = aniListTitle(character, lang);
-      const cleanOrigin = origin ? cleanName(origin) : null;
+      const profile = aniListProfile(character);
       candidates.push({
-        id: `${lang}-al-${character.id}`,
+        id: `${lang}-${profile.key}`,
+        lang,
+        profile,
         name,
-        origin: validName(cleanOrigin) ? cleanOrigin : null,
-        imageUrl: character.image,
+        origin: profile.origin,
+        imageUrl: profile.imageUrl,
         aliases: buildAliases(name, aniListNames(character, lang)),
         popularity: 0,
         score: favouriteScore(character.favourites) + offsets[lang],
         kind: "fictional",
         source: "al",
+        signals: { sitelinks: 0, views: 0, favourites: character.favourites },
       });
     }
     const offset = fictionalOffset(candidates, MAX_ENTRIES, FICTIONAL_SHARE);
     for (const candidate of candidates) {
       candidate.popularity = toPopularity(
-        candidate.score + (candidate.kind === "fictional" ? offset : 0),
+        candidate.score + offsetFor(candidate, offset),
       );
     }
     console.log(`  ${lang}: fictional offset ${offset.toFixed(1)}`);
@@ -795,18 +1206,31 @@ async function main() {
   }
 
   step("6/6 Write");
-  await mkdir(OUT_DIR, { recursive: true });
+  const entries = new Map<string, SeedCharacter>();
+  const chosenProfiles = new Map<string, Profile>();
   for (const lang of LANGS) {
     const chosen = selectEntries(reviewed(lists[lang], lang), MAX_ENTRIES);
-    const output: SeedCharacter[] = chosen.map((candidate) => ({
-      id: candidate.id,
-      name: candidate.name,
-      origin: candidate.origin,
-      imageUrl: candidate.imageUrl,
-      aliases: candidate.aliases,
-      popularity: candidate.popularity,
-    }));
-    await writeFile(path.join(OUT_DIR, `${lang}.json`), formatJson(output));
+    for (const candidate of chosen) {
+      const { profile } = candidate;
+      let entry = entries.get(profile.key);
+      if (!entry) {
+        entry = {
+          id: profile.key,
+          kind: profile.kind,
+          category: profile.category,
+          origin: profile.origin,
+          imageUrl: profile.imageUrl,
+          names: {},
+          aliases: {},
+          popularity: {},
+        };
+        entries.set(profile.key, entry);
+        chosenProfiles.set(profile.key, profile);
+      }
+      entry.names[lang] = candidate.name;
+      if (candidate.aliases.length > 0) entry.aliases[lang] = candidate.aliases;
+      entry.popularity[lang] = candidate.popularity;
+    }
     const withImage = chosen.filter((candidate) => candidate.imageUrl).length;
     const fictional = chosen.filter(
       (candidate) => candidate.kind === "fictional",
@@ -817,22 +1241,95 @@ async function main() {
     console.log(
       `  ${lang}: ${chosen.length} entries, ${((withImage / chosen.length) * 100).toFixed(1)}% with image, ${fictional} fictional (${fromAniList} via AniList)`,
     );
-    const debug = chosen.map((candidate, index) =>
-      [
+    const debug = chosen.map((candidate, index) => {
+      const labels = candidate.origin
+        ? originLabels.get(candidate.origin)
+        : undefined;
+      return [
         index + 1,
         candidate.popularity,
         candidate.kind,
         candidate.source,
+        candidate.profile.category,
         candidate.name,
-        candidate.origin ?? "",
+        labels?.[lang] ?? labels?.en ?? "",
         candidate.imageUrl ? "img" : "-",
-      ].join("\t"),
-    );
+        candidate.signals.sitelinks,
+        candidate.signals.views,
+        candidate.signals.favourites,
+        candidate.score.toFixed(1),
+      ].join("\t");
+    });
     await writeFile(
       path.join(CACHE_DIR, `debug-${lang}.tsv`),
       `${debug.join("\n")}\n`,
     );
+    // Every candidate with its raw signals, to tune the score without a rebuild.
+    const raw = lists[lang].map((candidate) =>
+      [
+        candidate.id,
+        candidate.kind,
+        candidate.source,
+        candidate.profile.category,
+        candidate.name,
+        candidate.signals.sitelinks,
+        candidate.signals.views,
+        candidate.signals.favourites,
+        candidate.imageUrl ? "img" : "-",
+      ].join("\t"),
+    );
+    await writeFile(
+      path.join(CACHE_DIR, `candidates-${lang}.tsv`),
+      `${raw.join("\n")}\n`,
+    );
   }
+  // Names in the languages whose list leaves the character out still help
+  // players who guess in another language. Every map in language order.
+  const byLang = <T>(values: ByLang<T>): ByLang<T> =>
+    Object.fromEntries(
+      LANGS.filter((lang) => values[lang] !== undefined).map((lang) => [
+        lang,
+        values[lang],
+      ]),
+    );
+  const best = (entry: SeedCharacter) =>
+    Math.max(...Object.values(entry.popularity));
+  const output = [...entries.values()]
+    .map((entry): SeedCharacter => {
+      const profile = chosenProfiles.get(entry.id) as Profile;
+      const names: ByLang<string> = {};
+      for (const lang of LANGS) {
+        names[lang] =
+          entry.names[lang] ??
+          NAMES[`${lang}-${entry.id}`] ??
+          profile.labels[lang];
+      }
+      return {
+        ...entry,
+        names: byLang(names),
+        aliases: byLang(entry.aliases),
+        popularity: byLang(entry.popularity),
+      };
+    })
+    .sort((a, b) => best(b) - best(a) || a.id.localeCompare(b.id));
+  const used = new Set<string>();
+  for (const entry of output) if (entry.origin) used.add(entry.origin);
+  const origins: SeedOrigin[] = [...used]
+    .map((id) => ({ id, labels: byLang(originLabels.get(id) ?? {}) }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+  await mkdir(OUT_DIR, { recursive: true });
+  await writeFile(path.join(OUT_DIR, "characters.json"), formatJson(output));
+  await writeFile(path.join(OUT_DIR, "origins.json"), formatJson(origins));
+  const categories = new Map<string, number>();
+  for (const entry of output) {
+    categories.set(entry.category, (categories.get(entry.category) ?? 0) + 1);
+  }
+  console.log(
+    `  ${output.length} characters, ${origins.length} origins; ${[...categories]
+      .sort((a, b) => b[1] - a[1])
+      .map(([category, count]) => `${count} ${category}`)
+      .join(", ")}`,
+  );
   console.log(`\ndone in ${Math.round((Date.now() - started) / 1000)}s`);
 }
 
