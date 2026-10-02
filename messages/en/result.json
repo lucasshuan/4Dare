@@ -4,7 +4,7 @@
   "nobody": "Nobody discovered this time",
   "again": "Play again",
   "waitingHost": "Waiting for {name} to start another one",
-  "home": "Back to start",
+  "home": "Back to rooms",
   "place": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
   "gaveUp": "Gave up",
   "notFound": "Didn't discover",

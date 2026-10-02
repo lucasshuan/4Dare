@@ -32,6 +32,32 @@
     "join": "Join",
     "joinRoom": "Join {name}'s room",
     "empty": "No public rooms right now. Create one and it shows up here.",
-    "note": "This list updates by itself. A room leaves it when it fills up or the match starts. The flag is the host's language."
+    "seeMore": "See more",
+    "seeLess": "See less",
+    "full": "Full",
+    "playing": "Playing",
+    "noOpen": "No room with a free seat right now. Create one and it shows up here."
+  },
+  "tagline": "Games to play with friends.",
+  "games": {
+    "title": "Pick a game",
+    "soon": "More games soon",
+    "back": "Games",
+    "whoAmI": {
+      "name": "Who am I?",
+      "short": "Everyone picks a character for someone else. Work out yours with yes-or-no questions.",
+      "players": "2–4 players",
+      "play": "Play",
+      "demoQuestion": "Am I an animal?"
+    }
+  },
+  "user": {
+    "guest": "You're playing as a guest",
+    "guestHint": "Sign in with Discord or Google to pick a name and avatar. Your matches come along.",
+    "connected": "Connected with {provider}",
+    "account": "Signed in",
+    "editProfile": "Edit profile",
+    "signOut": "Sign out",
+    "testAccount": "Without Supabase this enters a test account."
   }
 }

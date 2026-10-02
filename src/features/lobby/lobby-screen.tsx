@@ -31,6 +31,7 @@ import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
 import { formatClock, useDisplayName } from "@/lib/names";
+import { WHO_AM_I } from "@/lib/routes";
 import {
   leaveRoom,
   setReady,
@@ -78,7 +79,7 @@ export function LobbyScreen() {
     <Screen
       right={
         <>
-          <LanguageSwitch compact />
+          <LanguageSwitch />
           <ThemeToggle />
         </>
       }
@@ -325,7 +326,7 @@ export function LobbyScreen() {
             className="self-center"
             onClick={async () => {
               await run(() => leaveRoom(code));
-              router.push("/");
+              router.push(WHO_AM_I);
             }}
           >
             {t("leave")}

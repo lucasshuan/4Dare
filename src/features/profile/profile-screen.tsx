@@ -151,7 +151,7 @@ function AccountForm({ me }: { me: Me }) {
   };
 
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,560px)_minmax(0,380px)] lg:justify-between">
+    <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,560px)_minmax(0,380px)] lg:justify-between">
       <motion.form
         {...riseIn}
         className="flex flex-col gap-6"

@@ -7,6 +7,7 @@ import { Screen } from "@/components/ui/screen";
 import { DEFAULT_SETTINGS } from "@/game/types";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
+import { WHO_AM_I } from "@/lib/routes";
 import { createRoom } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
 import { SettingsFields } from "./settings-fields";
@@ -25,7 +26,7 @@ export function CreateScreen() {
     <Screen
       right={
         <Link
-          href="/"
+          href={WHO_AM_I}
           className="px-2 font-semibold text-ink-muted hover:text-ink"
         >
           {t("back")}

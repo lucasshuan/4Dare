@@ -15,6 +15,7 @@ import type { ErrorCode } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
+import { WHO_AM_I } from "@/lib/routes";
 import { joinRoom } from "@/server/actions";
 import { RevealOverlay } from "./reveal-overlay";
 
@@ -115,7 +116,10 @@ function RoomProblem({ code }: { code: ErrorCode }) {
         <p className="text-ink-muted text-lg">
           {t(`problem.${known ? code : "other"}.body`)}
         </p>
-        <Link href="/" className={buttonClass("primary", "lg", "self-start")}>
+        <Link
+          href={WHO_AM_I}
+          className={buttonClass("primary", "lg", "self-start")}
+        >
           {t("goHome")}
         </Link>
       </div>

@@ -16,6 +16,7 @@ import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
+import { WHO_AM_I } from "@/lib/routes";
 import { leaveRoom, rematch } from "@/server/actions";
 
 const PLINTH = { 1: 136, 2: 96, 3: 60 } as Record<number, number>;
@@ -119,7 +120,7 @@ export function ResultScreen() {
               className="-ml-6"
               onClick={async () => {
                 await run(() => leaveRoom(code));
-                router.push("/");
+                router.push(WHO_AM_I);
               }}
             >
               {t("home")}

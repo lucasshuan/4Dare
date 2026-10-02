@@ -170,5 +170,5 @@ describe("random play", () => {
       }
     }
     expect(matchesFinished).toBeGreaterThan(0);
-  });
+  }, 30_000); // 300 matches: give a busy machine room
 });

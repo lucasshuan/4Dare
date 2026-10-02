@@ -8,6 +8,7 @@ const SIZE = {
   28: "size-7 text-[13px]",
   32: "size-8 text-sm",
   44: "size-11 text-lg",
+  36: "size-9 text-[15px]",
   40: "size-10 text-base",
   48: "size-12 text-xl",
   64: "size-16 text-[26px]",

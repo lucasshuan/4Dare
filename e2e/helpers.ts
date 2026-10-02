@@ -52,7 +52,7 @@ async function nextAsker(players: Page[]) {
   for (let i = 0; i < 120; i++) {
     for (const page of players) {
       if (await button(page, /send question/i).isVisible()) return page;
-      if (await button(page, /back to start/i).isVisible()) return null;
+      if (await button(page, /back to rooms/i).isVisible()) return null;
     }
     await players[0].waitForTimeout(250);
   }

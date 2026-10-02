@@ -29,11 +29,14 @@ export function AuthButton({
   provider,
   onClick,
   disabled,
+  wide,
   className,
 }: {
   provider: Provider;
   onClick: () => void;
   disabled?: boolean;
+  /** Always the full label (the buttons are stacked, not side by side). */
+  wide?: boolean;
   className?: string;
 }) {
   const t = useTranslations("home");
@@ -47,8 +50,14 @@ export function AuthButton({
       className={buttonClass("secondary", "md", cn("px-5", className))}
     >
       <ProviderLogo provider={provider} />
-      <span className="max-sm:hidden">{label}</span>
-      <span className="sm:hidden">{PROVIDER_NAME[provider]}</span>
+      {wide ? (
+        <span>{label}</span>
+      ) : (
+        <>
+          <span className="max-sm:hidden">{label}</span>
+          <span className="sm:hidden">{PROVIDER_NAME[provider]}</span>
+        </>
+      )}
     </button>
   );
 }

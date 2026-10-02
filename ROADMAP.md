@@ -48,6 +48,9 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 
 - [x] Telas iguais ao design: imagens grandes, cores suaves, claro e escuro, 3 idiomas
 - [x] Bandeiras de verdade; idioma e tema só na tela inicial e na sala de espera
+- [x] Idioma num seletor (bandeira + nome)
+- [x] Tela inicial escolhe o jogo: cartão com prévia animada; "Quem sou eu?" é o primeiro
+- [x] Usuário no canto superior esquerdo: avatar e nome; clicando, um popover diz se é convidado e oferece Discord e Google
 - [x] Revelação para todos: as respostas (6 a 10 s, conforme o tamanho) e o palpite (2,5 a 3,5 s)
 - [x] Relógio da etapa seguinte parado durante a revelação, recarregando
 - [x] Confetti por alguns segundos no acerto
@@ -60,7 +63,7 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 
 - [x] Convidado: nome sorteado (GatoCorajoso, WonderfulCat, すてきなネコ; 27 mil combinações) e bichinho Critters
 - [x] Conta Discord ou Google: escolhe nome, foto ou bichinho, e cor (sem Supabase, entra numa conta de teste)
-- [x] Salas públicas na tela inicial
+- [x] Salas públicas na tela do jogo: com vaga primeiro, "Ver mais" mostra as cheias e em partida
 - [x] Criar sala: pública ou privada, 2 a 4 vagas, segundos por etapa (padrão 120)
 - [x] Sala de espera: anfitrião edita a configuração e começa; os outros marcam "Estou pronto" (✓ verde, ✗ vermelho)
 - [x] Começa sozinha em 2 minutos ou assim que enche

@@ -1,6 +1,6 @@
 # Produto
 
-"Quem sou eu?" online, pra 2 a 4 amigos.
+Dare é uma coleção de jogos pra jogar com amigos. Por enquanto tem um: **Quem sou eu?**, online, pra 2 a 4 pessoas.
 
 ## Como joga
 
