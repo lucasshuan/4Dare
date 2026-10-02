@@ -4,7 +4,10 @@ import { BACKEND, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/config";
 
 /**
  * Called by src/proxy.ts on every page request. Local mode: nothing to do.
- * Supabase mode: refresh the auth cookies on `response` before they expire.
+ * Supabase mode: refresh the auth cookies on `response` before they expire,
+ * and make a first-time visitor a guest right here. Otherwise the page's
+ * first parallel requests (who am I, join the room, ...) would each sign in
+ * anonymously, and one browser would sit in a room as two players.
  */
 export async function refreshSession(
   request: NextRequest,
@@ -24,6 +27,7 @@ export async function refreshSession(
       },
     },
   });
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims) await supabase.auth.signInAnonymously();
   return response;
 }

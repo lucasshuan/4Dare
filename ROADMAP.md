@@ -30,6 +30,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [ ] Real login with Discord and Google
 - [ ] Deploy on Vercel with the Supabase integration
 - [x] Character library on Supabase (`pnpm seed`)
+- [x] One browser, one guest: the first page creates the anonymous user, so a new visitor never takes two seats
 - [ ] 2- and 4-player match tested online
 
 ## Phase 3 — Characters and themes

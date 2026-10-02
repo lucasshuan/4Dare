@@ -17,6 +17,8 @@ test("two players play a whole match", async ({ browser }) => {
   await joinRoom(guest, code);
 
   await expect(host.getByRole("img", { name: /^ready$/i })).toBeVisible();
+  // one browser, one seat (a guest signing in twice used to take two)
+  expect((await viewOf(host, code)).players).toHaveLength(2);
   await host.getByRole("button", { name: /start match/i }).click();
   await voteAll([host, guest]);
   await pickAll([host, guest]);
@@ -49,6 +51,7 @@ test("three players on phones, with a wrong guess checked by the picker", async 
   const [host, ...guests] = players;
   const code = await createRoom(host);
   for (const page of guests) await joinRoom(page, code);
+  expect((await viewOf(host, code)).players).toHaveLength(3);
 
   await host.getByRole("button", { name: /start match/i }).click();
   await voteAll(players);
