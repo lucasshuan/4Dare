@@ -9,5 +9,6 @@
   "gaveUp": "Desistiu",
   "notFound": "Não descobriu",
   "pickedBy": "escolhido por {name}",
-  "discoveredAt": "Descobriu na {n}ª jogada"
+  "discoveredAt": "Descobriu na {n}ª jogada",
+  "placeShort": "{place}º"
 }

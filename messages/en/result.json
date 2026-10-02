@@ -9,5 +9,6 @@
   "gaveUp": "Gave up",
   "notFound": "Didn't discover",
   "pickedBy": "picked by {name}",
-  "discoveredAt": "Discovered on play {n}"
+  "discoveredAt": "Discovered on play {n}",
+  "placeShort": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}"
 }

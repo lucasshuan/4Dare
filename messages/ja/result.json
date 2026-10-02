@@ -9,5 +9,6 @@
   "gaveUp": "ギブアップ",
   "notFound": "正解ならず",
   "pickedBy": "{name}さんが選択",
-  "discoveredAt": "{n}手目で正解"
+  "discoveredAt": "{n}手目で正解",
+  "placeShort": "{place}位"
 }
