@@ -12,9 +12,10 @@ import { PickScreen } from "@/features/pick/pick-screen";
 import { ResultScreen } from "@/features/result/result-screen";
 import { TurnScreen } from "@/features/turn/turn-screen";
 import { VoteScreen } from "@/features/vote/vote-screen";
-import type { ErrorCode } from "@/game/types";
+import type { ErrorCode, Phase, PlayerStatus } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
+import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
 import { WHO_AM_I } from "@/lib/routes";
 import { joinRoom } from "@/server/actions";
@@ -54,6 +55,7 @@ export function RoomScreen({ code }: { code: string }) {
 
 function PhaseScreens() {
   const { view, offset } = useRoomContext();
+  useRoomTab();
   const now = useServerClock(offset, 250);
   // A hit that ends the match keeps its reveal; the results wait until it is over.
   const revealing = view.reveal !== null && now < view.reveal.until;
@@ -137,5 +139,37 @@ function RoomProblem({ code }: { code: ErrorCode }) {
         </Link>
       </motion.div>
     </Screen>
+  );
+}
+
+const TAB_PHASE: Partial<Record<Phase, string>> = {
+  lobby: "lobby",
+  voting: "voting",
+  picking: "picking",
+  asking: "playing",
+  answering: "playing",
+  guessing: "playing",
+  validating: "playing",
+  finished: "finished",
+};
+/** Statuses that wait on this player: the tab calls them back when they're elsewhere. */
+const TAB_ALERT: Partial<Record<PlayerStatus, string>> = {
+  voting: "voting",
+  picking: "picking",
+  asking: "asking",
+  answering: "answering",
+  guessing: "guessing",
+  validating: "validating",
+};
+
+/** "Lobby · ABCDE · Ludodare"; blinks "Your turn!" while the player is in another tab. */
+function useRoomTab() {
+  const t = useTranslations("meta");
+  const { code, view, me } = useRoomContext();
+  const phase = TAB_PHASE[view.phase];
+  const alert = TAB_ALERT[me.status];
+  useTabTitle(
+    phase ? `${t(`tab.${phase}`)} · ${code}` : t("room.title", { code }),
+    alert ? t(`tab.alert.${alert}`) : null,
   );
 }
