@@ -1,1 +1,13 @@
-{}
+{
+  "kicker": "Fim da partida · {count} jogadas",
+  "winner": "{name} descobriu primeiro",
+  "nobody": "Ninguém descobriu desta vez",
+  "again": "Jogar de novo",
+  "waitingHost": "Esperando {name} começar outra",
+  "home": "Voltar ao início",
+  "place": "{place}º lugar",
+  "gaveUp": "Desistiu",
+  "notFound": "Não descobriu",
+  "pickedBy": "escolhido por {name}",
+  "discoveredAt": "Descobriu na {n}ª jogada"
+}

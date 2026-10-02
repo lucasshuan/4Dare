@@ -1,1 +1,27 @@
-{}
+{
+  "titleHost": "Sala criada. Agora chame alguém.",
+  "subtitleHost": "Mande o link ou dite o código. Você começa a partida quando quiser, com 2 jogadores ou mais.",
+  "titleGuest": "Você está na sala de {name}.",
+  "subtitleGuest": "{name} começa a partida. Avise quando estiver pronto.",
+  "codeLabel": "Código da sala: {code}",
+  "linkCopied": "Link copiado",
+  "codeCopied": "Código copiado",
+  "copyLink": "Copiar link",
+  "copyCode": "Copiar código",
+  "players": "Jogadores · {count}/{seats}",
+  "host": "Anfitrião",
+  "ready": "Confirmou",
+  "notReady": "Ainda não confirmou",
+  "emptySeat": "Lugar vago",
+  "startsIn": "Começa sozinha em",
+  "public": "Pública: aparece na tela inicial",
+  "private": "Privada: só com link ou código",
+  "seats": "Até {seats} jogadores",
+  "stepSeconds": "{seconds} s por etapa",
+  "start": "Começar partida",
+  "startHint": "Se a sala encher, a partida começa na hora.",
+  "needTwo": "Precisa de pelo menos 2 jogadores.",
+  "readyDone": "Pronto",
+  "imReady": "Estou pronto",
+  "leave": "Sair da sala"
+}

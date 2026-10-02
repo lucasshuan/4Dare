@@ -1,1 +1,24 @@
-{}
+{
+  "pitch": "Everyone picks a character for someone else. You see their cards, never yours. Work out who you are with yes-or-no questions.",
+  "guestHint": "You're playing as a guest.",
+  "accountHint": "Signed in.",
+  "create": "Create a room",
+  "joinLabel": "Or join with a code",
+  "join": "Join",
+  "createRoom": {
+    "back": "Back",
+    "title": "Create a room",
+    "visibility": "Who can join",
+    "public": "Public",
+    "private": "Private",
+    "visibilityHint": "Public rooms show up on the home screen. Private ones only take people with the link or the code.",
+    "seats": "Seats",
+    "seatsHint": "The match can start with 2 players or more.",
+    "seconds": "Time per step",
+    "less": "10 seconds less",
+    "more": "10 seconds more",
+    "secondsUnit": "seconds",
+    "secondsHint": "Default: 120 seconds. Counts for every pick, question, answer, guess and check. From 30 to 300.",
+    "submit": "Create room"
+  }
+}

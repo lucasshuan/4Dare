@@ -22,7 +22,7 @@ export interface RoomData {
 }
 
 // Realtime pings make polling a safety net in Supabase mode; local mode has no pings.
-const POLL_MS = BACKEND === "local" ? 1500 : 10_000;
+const POLL_MS = BACKEND === "local" ? 1000 : 10_000;
 
 export const roomKey = (code: string) => ["room", code] as const;
 

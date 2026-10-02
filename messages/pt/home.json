@@ -1,1 +1,24 @@
-{}
+{
+  "pitch": "Cada jogador escolhe um personagem para outro. Todos veem as cartas dos outros, nunca a sua. Descubra quem você é com perguntas de sim ou não.",
+  "guestHint": "Você joga como convidado.",
+  "accountHint": "Conta conectada.",
+  "create": "Criar sala",
+  "joinLabel": "Ou entre com um código",
+  "join": "Entrar",
+  "createRoom": {
+    "back": "Voltar",
+    "title": "Criar sala",
+    "visibility": "Quem pode entrar",
+    "public": "Pública",
+    "private": "Privada",
+    "visibilityHint": "Pública aparece na tela inicial. Privada só entra quem tem o link ou o código.",
+    "seats": "Vagas",
+    "seatsHint": "A partida pode começar com 2 jogadores ou mais.",
+    "seconds": "Tempo por etapa",
+    "less": "Menos 10 segundos",
+    "more": "Mais 10 segundos",
+    "secondsUnit": "segundos",
+    "secondsHint": "Padrão: 120 segundos. Vale para cada escolha, pergunta, resposta, palpite e validação. De 30 a 300.",
+    "submit": "Criar sala"
+  }
+}

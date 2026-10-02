@@ -1,1 +1,27 @@
-{}
+{
+  "titleHost": "Room created. Now invite someone.",
+  "subtitleHost": "Send the link or read out the code. You start the match whenever you want, with 2 players or more.",
+  "titleGuest": "You're in {name}'s room.",
+  "subtitleGuest": "{name} starts the match. Let them know when you're ready.",
+  "codeLabel": "Room code: {code}",
+  "linkCopied": "Link copied",
+  "codeCopied": "Code copied",
+  "copyLink": "Copy link",
+  "copyCode": "Copy code",
+  "players": "Players · {count}/{seats}",
+  "host": "Host",
+  "ready": "Ready",
+  "notReady": "Not ready yet",
+  "emptySeat": "Empty seat",
+  "startsIn": "Starts by itself in",
+  "public": "Public: shown on the home screen",
+  "private": "Private: link or code only",
+  "seats": "Up to {seats} players",
+  "stepSeconds": "{seconds} s per step",
+  "start": "Start match",
+  "startHint": "If the room fills up, the match starts right away.",
+  "needTwo": "You need at least 2 players.",
+  "readyDone": "Ready",
+  "imReady": "I'm ready",
+  "leave": "Leave room"
+}

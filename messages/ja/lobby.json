@@ -1,1 +1,27 @@
-{}
+{
+  "titleHost": "ルームができました。友だちを呼びましょう。",
+  "subtitleHost": "リンクを送るかコードを伝えてください。2人以上いればいつでも始められます。",
+  "titleGuest": "{name}さんのルームにいます。",
+  "subtitleGuest": "{name}さんがゲームを始めます。準備ができたら知らせましょう。",
+  "codeLabel": "ルームコード：{code}",
+  "linkCopied": "リンクをコピーしました",
+  "codeCopied": "コードをコピーしました",
+  "copyLink": "リンクをコピー",
+  "copyCode": "コードをコピー",
+  "players": "プレイヤー · {count}/{seats}",
+  "host": "ホスト",
+  "ready": "準備OK",
+  "notReady": "まだ準備中",
+  "emptySeat": "空席",
+  "startsIn": "自動で始まるまで",
+  "public": "公開：トップ画面に表示",
+  "private": "非公開：リンクかコードのみ",
+  "seats": "最大{seats}人",
+  "stepSeconds": "1ステップ{seconds}秒",
+  "start": "ゲームを始める",
+  "startHint": "満員になるとすぐに始まります。",
+  "needTwo": "2人以上必要です。",
+  "readyDone": "準備OK",
+  "imReady": "準備できた",
+  "leave": "ルームを出る"
+}

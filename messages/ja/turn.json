@@ -1,1 +1,92 @@
-{}
+{
+  "status": {
+    "host": "ホスト",
+    "ready": "準備OK",
+    "not_ready": "準備中",
+    "picking": "選択中",
+    "picked": "選択済み",
+    "asking": "質問中",
+    "will_answer": "回答待ち",
+    "answering": "回答中",
+    "answered": "回答済み",
+    "guessing": "予想中",
+    "validating": "判定中",
+    "waiting": "待機中",
+    "discovered": "正解",
+    "gave_up": "ギブアップ"
+  },
+  "card": {
+    "pickedBy": "{name}さんが選択",
+    "pickedSecretly": "他のプレイヤーが選択",
+    "youPicked": "あなたが選択",
+    "yours": "あなたのキャラクター",
+    "theirs": "{name}さんのカード",
+    "whoAreYou": "あなたは誰？"
+  },
+  "ask": {
+    "kicker": "{n}手目",
+    "title": "あなたの質問の番です",
+    "label": "自分のキャラクターについての、はい・いいえで答えられる質問",
+    "hintMany": "他の全員がそれぞれ答えます。",
+    "hintOne": "6つの選択肢で答えが返ってきます。そのあと予想できます。",
+    "send": "質問を送る",
+    "giveUp": "ギブアップして答えを見る",
+    "giveUpSure": "ギブアップしますか？",
+    "giveUpYes": "はい、見る",
+    "giveUpNo": "続ける"
+  },
+  "answer": {
+    "kicker": "{n}手目 · {name}さんの質問",
+    "yourAnswer": "あなたの答え",
+    "note": "補足（任意）",
+    "send": "回答を送る",
+    "progress": "{total}人中{done}人が回答"
+  },
+  "guess": {
+    "kicker": "{n}手目 · あなたの質問",
+    "title": "自分が誰かわかりましたか？",
+    "label": "あなたの予想",
+    "hint": "名前が合っていればすぐ正解になります。迷う場合は、あなたのキャラクターを選んだ人が判定します。",
+    "send": "予想する",
+    "pass": "パス"
+  },
+  "validate": {
+    "kicker": "{n}手目 · {name}さんの予想",
+    "title": "{name}さんは正解？",
+    "bodyMany": "カードの名前と完全には一致しません。このキャラクターを選んだのはあなたなので、あなただけが判定します。{names}さんは待っています。",
+    "bodyOne": "カードの名前と完全には一致しません。このキャラクターを選んだのはあなたなので、あなたが判定します。",
+    "yes": "正解",
+    "no": "まだです"
+  },
+  "wait": {
+    "kicker": "{n}手目",
+    "ask": "{name}さんが質問を考えています…",
+    "answers": "回答を待っています",
+    "guess": "{name}さんが予想するか考えています…",
+    "validate": "{name}さんが{guesser}さんの予想を判定中",
+    "question": "{name}さんの質問",
+    "youAnswered": "あなたの答え：",
+    "stillAnswering": "回答中：{names}"
+  },
+  "history": {
+    "last": "最新の手",
+    "empty": "まだ手がありません",
+    "title": "履歴",
+    "close": "履歴を閉じる",
+    "mine": "自分の手",
+    "all": "すべて",
+    "mineCaption": "自分の質問と予想：{total}手中{shown}手 · 新しい順",
+    "allCaption": "全員の{total}手 · 新しい順",
+    "nothing": "まだ何もありません。",
+    "question": "質問 · {name}",
+    "guess": "予想 · {name}"
+  },
+  "reveal": {
+    "asked": "{n}手目 · {name}さんの質問",
+    "guessed": "{n}手目 · {name}さんの予想",
+    "hit": "正解",
+    "hitPlace": "正解 · {place}位",
+    "miss": "まだです",
+    "cardOf": "{name}さんのカード"
+  }
+}

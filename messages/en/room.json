@@ -1,1 +1,37 @@
-{}
+{
+  "theme": "Theme",
+  "goHome": "Back to start",
+  "problem": {
+    "not_found": {
+      "title": "This room is gone",
+      "body": "It closed, or the code is wrong. Check the code or create a new room."
+    },
+    "room_full": {
+      "title": "This room is full",
+      "body": "Every seat is taken. Ask for another room or create yours."
+    },
+    "already_started": {
+      "title": "This match already started",
+      "body": "You can join the next one in this room, or create your own."
+    },
+    "other": {
+      "title": "Something went wrong",
+      "body": "Try again in a moment."
+    }
+  },
+  "pick": {
+    "theme": "Theme of the match",
+    "title": "Pick a character for {name} to discover",
+    "doneTitle": "{name} will try to discover this one",
+    "subtitle": "{name} can't see your choice. Someone else is picking yours, in secret.",
+    "progress": "{done} of {total} picked",
+    "waitingFor": "Still picking: {names}",
+    "cardLabel": "{name} has to discover",
+    "confirm": "Confirm pick",
+    "change": "Pick another",
+    "searchLabel": "Character for {name}",
+    "searchPlaceholder": "Type a name",
+    "useTyped": "Use “{name}”",
+    "typeHint": "Type to search the library."
+  }
+}

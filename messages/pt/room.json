@@ -1,1 +1,37 @@
-{}
+{
+  "theme": "Tema",
+  "goHome": "Voltar ao início",
+  "problem": {
+    "not_found": {
+      "title": "Essa sala não existe mais",
+      "body": "Ela fechou ou o código está errado. Confira o código ou crie uma sala nova."
+    },
+    "room_full": {
+      "title": "A sala está cheia",
+      "body": "Todas as vagas estão ocupadas. Peça outra sala ou crie a sua."
+    },
+    "already_started": {
+      "title": "Essa partida já começou",
+      "body": "Você pode entrar na próxima nesta sala ou criar a sua."
+    },
+    "other": {
+      "title": "Algo deu errado",
+      "body": "Tente de novo daqui a pouco."
+    }
+  },
+  "pick": {
+    "theme": "Tema da partida",
+    "title": "Escolha um personagem para {name} descobrir",
+    "doneTitle": "{name} vai tentar descobrir este",
+    "subtitle": "{name} não vê a sua escolha. Outro jogador escolhe o seu, em segredo.",
+    "progress": "{done} de {total} já escolheram",
+    "waitingFor": "Ainda escolhendo: {names}",
+    "cardLabel": "{name} tem que descobrir",
+    "confirm": "Confirmar escolha",
+    "change": "Escolher outro",
+    "searchLabel": "Personagem para {name}",
+    "searchPlaceholder": "Digite um nome",
+    "useTyped": "Usar “{name}”",
+    "typeHint": "Digite para buscar na biblioteca."
+  }
+}

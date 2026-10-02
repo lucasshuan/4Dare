@@ -1,1 +1,92 @@
-{}
+{
+  "status": {
+    "host": "Host",
+    "ready": "Ready",
+    "not_ready": "Not ready",
+    "picking": "Picking",
+    "picked": "Picked",
+    "asking": "Asking",
+    "will_answer": "Will answer",
+    "answering": "Answering",
+    "answered": "Answered",
+    "guessing": "Guessing",
+    "validating": "Checking",
+    "waiting": "Waiting",
+    "discovered": "Discovered",
+    "gave_up": "Gave up"
+  },
+  "card": {
+    "pickedBy": "Picked by {name}",
+    "pickedSecretly": "Picked by another player",
+    "youPicked": "you picked",
+    "yours": "Your character",
+    "theirs": "{name}'s card",
+    "whoAreYou": "Who are you?"
+  },
+  "ask": {
+    "kicker": "Play {n}",
+    "title": "Your turn to ask",
+    "label": "A yes-or-no question about your character",
+    "hintMany": "Everyone else answers, each with their own choice.",
+    "hintOne": "They answer with one of six options. Then you can guess.",
+    "send": "Send question",
+    "giveUp": "Give up and reveal",
+    "giveUpSure": "Give up?",
+    "giveUpYes": "Yes, reveal",
+    "giveUpNo": "Keep playing"
+  },
+  "answer": {
+    "kicker": "Play {n} · {name} asks",
+    "yourAnswer": "Your answer",
+    "note": "Context (optional)",
+    "send": "Send answer",
+    "progress": "{done} of {total} answered"
+  },
+  "guess": {
+    "kicker": "Play {n} · You asked",
+    "title": "Do you know who you are?",
+    "label": "Your guess",
+    "hint": "If the name matches, it counts right away. If not, whoever picked your character decides.",
+    "send": "Take a guess",
+    "pass": "Pass"
+  },
+  "validate": {
+    "kicker": "Play {n} · {name}'s guess",
+    "title": "Did {name} get it?",
+    "bodyMany": "It's not exactly the card's name. You picked this character, so only you decide. {names} wait.",
+    "bodyOne": "It's not exactly the card's name. You picked this character, so you decide.",
+    "yes": "Yes, that's it",
+    "no": "Not yet"
+  },
+  "wait": {
+    "kicker": "Play {n}",
+    "ask": "{name} is thinking of a question…",
+    "answers": "Waiting for the answers",
+    "guess": "{name} is deciding whether to guess…",
+    "validate": "{name} is checking {guesser}'s guess",
+    "question": "{name} asked",
+    "youAnswered": "Your answer:",
+    "stillAnswering": "Still answering: {names}"
+  },
+  "history": {
+    "last": "Last play",
+    "empty": "No plays yet",
+    "title": "History",
+    "close": "Close history",
+    "mine": "My plays",
+    "all": "All",
+    "mineCaption": "Your questions and guesses: {shown} of {total} plays · newest first",
+    "allCaption": "{total} plays from everyone · newest first",
+    "nothing": "Nothing here yet.",
+    "question": "Question · {name}",
+    "guess": "Guess · {name}"
+  },
+  "reveal": {
+    "asked": "Play {n} · {name} asked",
+    "guessed": "Play {n} · {name}'s guess",
+    "hit": "Got it",
+    "hitPlace": "Got it · {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
+    "miss": "Not yet",
+    "cardOf": "{name}'s card"
+  }
+}

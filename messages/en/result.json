@@ -1,1 +1,13 @@
-{}
+{
+  "kicker": "End of the match · {count} plays",
+  "winner": "{name} discovered first",
+  "nobody": "Nobody discovered this time",
+  "again": "Play again",
+  "waitingHost": "Waiting for {name} to start another one",
+  "home": "Back to start",
+  "place": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
+  "gaveUp": "Gave up",
+  "notFound": "Didn't discover",
+  "pickedBy": "picked by {name}",
+  "discoveredAt": "Discovered on play {n}"
+}

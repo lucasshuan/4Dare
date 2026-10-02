@@ -11,15 +11,15 @@ Cada fase termina com o jogo jogável. A próxima só melhora o que já funciona
 
 ## Fase 1 — Dá pra jogar (no seu PC)
 
-Roda com `pnpm dev`, sem configurar nada. Cada aba ou cada amigo na mesma rede é um jogador.
+Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é um jogador; amigos na mesma rede também entram.
 
 - [x] Motor do jogo com testes (2 a 4 jogadores, ninguém vê a própria carta)
 - [x] Servidor local em memória
-- [ ] Criar sala, entrar pelo código ou link, começar
-- [ ] Escolher personagem digitando o nome
-- [ ] Turno: perguntar, todos respondem, palpite, validação por quem escolheu
-- [ ] Revelação simples entre etapas e relógio de cada etapa
-- [ ] Fim com a colocação de todo mundo
+- [x] Criar sala, entrar pelo código ou link, começar
+- [x] Escolher personagem digitando o nome
+- [x] Turno: perguntar, todos respondem, palpite, validação por quem escolheu
+- [x] Revelação simples entre etapas e relógio de cada etapa
+- [x] Fim com a colocação de todo mundo
 - [ ] README curto: como rodar
 
 ## Fase 2 — Online com os amigos
@@ -33,7 +33,8 @@ Roda com `pnpm dev`, sem configurar nada. Cada aba ou cada amigo na mesma rede �
 - [ ] Biblioteca de personagens com imagem em en/pt/ja
 - [ ] Busca com autocomplete e foto
 - [ ] Criar personagem com imagem e trocar imagem
-- [ ] 300 temas em en/pt/ja, e tema sorteado pela IA
+- [x] 300 temas em en/pt/ja
+- [ ] Tema sorteado pela IA
 
 ## Fase 4 — Cara de jogo pronto
 

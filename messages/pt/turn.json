@@ -1,1 +1,92 @@
-{}
+{
+  "status": {
+    "host": "Anfitrião",
+    "ready": "Pronto",
+    "not_ready": "Não está pronto",
+    "picking": "Escolhendo",
+    "picked": "Escolheu",
+    "asking": "Perguntando",
+    "will_answer": "Vai responder",
+    "answering": "Respondendo",
+    "answered": "Respondeu",
+    "guessing": "Adivinhando",
+    "validating": "Validando",
+    "waiting": "Esperando",
+    "discovered": "Descobriu",
+    "gave_up": "Desistiu"
+  },
+  "card": {
+    "pickedBy": "Escolhido por {name}",
+    "pickedSecretly": "Escolhido por outro jogador",
+    "youPicked": "você escolheu",
+    "yours": "Seu personagem",
+    "theirs": "Carta de {name}",
+    "whoAreYou": "Quem é você?"
+  },
+  "ask": {
+    "kicker": "Jogada {n}",
+    "title": "Sua vez de perguntar",
+    "label": "Pergunta de sim ou não sobre o seu personagem",
+    "hintMany": "Todos os outros respondem, cada um com a sua opção.",
+    "hintOne": "A resposta vem com uma de seis opções. Depois você pode tentar adivinhar.",
+    "send": "Enviar pergunta",
+    "giveUp": "Desistir e revelar",
+    "giveUpSure": "Desistir?",
+    "giveUpYes": "Sim, revelar",
+    "giveUpNo": "Continuar"
+  },
+  "answer": {
+    "kicker": "Jogada {n} · {name} pergunta",
+    "yourAnswer": "Sua resposta",
+    "note": "Contexto (opcional)",
+    "send": "Enviar resposta",
+    "progress": "{done} de {total} responderam"
+  },
+  "guess": {
+    "kicker": "Jogada {n} · Você perguntou",
+    "title": "Já sabe quem você é?",
+    "label": "Seu palpite",
+    "hint": "Se o nome bater, vale na hora. Se ficar na dúvida, decide quem escolheu o seu personagem.",
+    "send": "Tentar adivinhar",
+    "pass": "Passar a vez"
+  },
+  "validate": {
+    "kicker": "Jogada {n} · Palpite de {name}",
+    "title": "{name} acertou?",
+    "bodyMany": "Não é igual ao nome da carta. Você escolheu este personagem, então só você responde. {names} esperam.",
+    "bodyOne": "Não é igual ao nome da carta. Você escolheu este personagem, então a decisão é sua.",
+    "yes": "Sim, acertou",
+    "no": "Ainda não"
+  },
+  "wait": {
+    "kicker": "Jogada {n}",
+    "ask": "{name} está pensando na pergunta…",
+    "answers": "Esperando as respostas",
+    "guess": "{name} está pensando se arrisca um palpite…",
+    "validate": "{name} está conferindo o palpite de {guesser}",
+    "question": "{name} perguntou",
+    "youAnswered": "Sua resposta:",
+    "stillAnswering": "Ainda respondendo: {names}"
+  },
+  "history": {
+    "last": "Última jogada",
+    "empty": "Nenhuma jogada ainda",
+    "title": "Histórico",
+    "close": "Fechar histórico",
+    "mine": "Minhas jogadas",
+    "all": "Todas",
+    "mineCaption": "Suas perguntas e palpites: {shown} de {total} jogadas · a mais recente em cima",
+    "allCaption": "{total} jogadas de todos · a mais recente em cima",
+    "nothing": "Nada por aqui ainda.",
+    "question": "Pergunta · {name}",
+    "guess": "Palpite · {name}"
+  },
+  "reveal": {
+    "asked": "Jogada {n} · {name} perguntou",
+    "guessed": "Jogada {n} · Palpite de {name}",
+    "hit": "Acertou",
+    "hitPlace": "Acertou · {place}º lugar",
+    "miss": "Ainda não",
+    "cardOf": "Carta de {name}"
+  }
+}

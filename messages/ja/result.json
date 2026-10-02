@@ -1,1 +1,13 @@
-{}
+{
+  "kicker": "ゲーム終了 · {count}手",
+  "winner": "{name}さんが一番に正解",
+  "nobody": "今回は誰も正解しませんでした",
+  "again": "もう一度遊ぶ",
+  "waitingHost": "{name}さんが次のゲームを始めるのを待っています",
+  "home": "トップに戻る",
+  "place": "{place}位",
+  "gaveUp": "ギブアップ",
+  "notFound": "正解ならず",
+  "pickedBy": "{name}さんが選択",
+  "discoveredAt": "{n}手目で正解"
+}
