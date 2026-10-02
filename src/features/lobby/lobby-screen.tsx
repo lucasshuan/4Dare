@@ -247,14 +247,17 @@ export function LobbyScreen() {
         </section>
 
         <aside className="flex w-full flex-col gap-5 rounded-lg bg-surface p-6 lg:max-w-[416px] lg:flex-[1_1_360px]">
-          <div className="flex items-center justify-between gap-4">
-            <span className="font-semibold text-sm">{t("startsIn")}</span>
-            <Timer
-              deadline={view.deadline}
-              stepStartsAt={view.stepStartsAt}
-              offset={offset}
-            />
-          </div>
+          {/* Alone in the room there is no clock: it starts when someone joins. */}
+          {view.deadline !== null ? (
+            <div className="flex items-center justify-between gap-4">
+              <span className="font-semibold text-sm">{t("startsIn")}</span>
+              <Timer
+                deadline={view.deadline}
+                stepStartsAt={view.stepStartsAt}
+                offset={offset}
+              />
+            </div>
+          ) : null}
           <AnimatePresence mode="wait" initial={false}>
             {editing ? (
               <motion.form

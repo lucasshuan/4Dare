@@ -98,6 +98,12 @@ function stopClock(s: RoomState) {
   s.stepStartsAt = null;
 }
 
+/** The lobby clock (re)starts once there are two to play; alone, the room just waits. */
+function lobbyClock(s: RoomState, ctx: Ctx) {
+  if (s.players.length < 2) stopClock(s);
+  else startStep(s, ctx, LOBBY_SECONDS * 1000);
+}
+
 function guardStep(s: RoomState, ctx: Ctx) {
   if (s.stepStartsAt !== null && ctx.now < s.stepStartsAt) fail("too_early");
 }
@@ -391,8 +397,8 @@ export function createRoom(
     turnPlayerId: null,
     plays: [],
     outcomes: {},
-    deadline: ctx.now + LOBBY_SECONDS * 1000,
-    stepStartsAt: ctx.now,
+    deadline: null,
+    stepStartsAt: null,
     reveal: null,
     round: 0,
     playStartedAt: null,
@@ -547,12 +553,16 @@ function join(s: RoomState, player: Identity, ctx: Ctx) {
     strikes: 0,
     away: false,
   });
-  startStep(s, ctx, LOBBY_SECONDS * 1000);
+  lobbyClock(s, ctx);
 }
 
+/** When the host is gone (or away mid-match), the room goes to whoever joined first. */
 function handOverHost(s: RoomState) {
-  if (s.players.some((p) => p.id === s.hostId)) return;
-  const next = s.players.find(isPresent) ?? s.players[0];
+  const host = findPlayer(s, s.hostId);
+  if (host && isPresent(host)) return;
+  const next =
+    s.players.find((p) => isPresent(p) && p.id !== s.hostId) ??
+    (host ? null : s.players[0]);
   if (next) {
     s.hostId = next.id;
     next.ready = true;
@@ -571,6 +581,7 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
     }
     // Leaving while typing the theme hands the typing over with the room.
     handOverHost(s);
+    if (s.phase === "lobby" && s.players.length < 2) stopClock(s);
     if (s.phase !== "voting" && s.phase !== "theming") return;
     if (s.vote) delete s.vote.votes[id];
     // Nobody left to play with: back to the lobby to wait for others.
@@ -578,7 +589,7 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
       s.phase = "lobby";
       s.vote = null;
       s.ideas = [];
-      startStep(s, ctx, LOBBY_SECONDS * 1000);
+      lobbyClock(s, ctx);
       return;
     }
     if (s.phase === "voting" && everyoneVoted(s)) closeVote(s, ctx);
@@ -586,6 +597,7 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   }
   // mid-match: keep the seat so the history still makes sense
   p.away = true;
+  handOverHost(s);
   if (isActive(s, id)) endOutcome(s, id, ctx);
   if (TURN_PHASES.has(s.phase) && s.turnPlayerId === id) {
     abandonTurn(s, ctx);
@@ -713,7 +725,7 @@ function backToLobby(s: RoomState, ctx: Ctx) {
   s.turnPlayerId = null;
   s.reveal = null;
   s.playStartedAt = null;
-  startStep(s, ctx, LOBBY_SECONDS * 1000);
+  lobbyClock(s, ctx);
 }
 
 function timeout(
@@ -724,10 +736,7 @@ function timeout(
   if (!isExpired(s, ctx.now)) fail("wrong_phase");
   switch (s.phase) {
     case "lobby": {
-      if (s.players.length < 2) {
-        s.phase = "closed";
-        return stopClock(s);
-      }
+      if (s.players.length < 2) return stopClock(s);
       return beginTheme(s, e.themes, ctx);
     }
     case "theming":
@@ -757,6 +766,7 @@ function timeout(
         p.strikes += 1;
         if (p.strikes >= 2) {
           p.away = true;
+          handOverHost(s);
           endOutcome(s, p.id, ctx);
         }
       }

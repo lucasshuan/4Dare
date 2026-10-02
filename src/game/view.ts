@@ -14,6 +14,7 @@ import {
   DEFAULT_SETTINGS,
   GameError,
   type HistoryEntryView,
+  LOBBY_SECONDS,
   type Phase,
   type PickView,
   type PlayerId,
@@ -349,7 +350,9 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
   if (s.settings.visibility !== "public" || !host) return null;
   let status: PublicRoom["status"];
   if (s.phase === "lobby") {
-    if (s.deadline !== null && now >= s.deadline) return null;
+    // Alone the lobby has no clock: list it only for as long as the clock would run.
+    const until = s.deadline ?? s.updatedAt + LOBBY_SECONDS * 1000;
+    if (now >= until) return null;
     status = s.players.length < s.settings.seats ? "open" : "full";
   } else if (
     PLAYING_PHASES.has(s.phase) &&

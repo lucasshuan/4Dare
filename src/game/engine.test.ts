@@ -26,15 +26,18 @@ const code = (fn: () => unknown) => {
 const STEP = DEFAULT_SETTINGS.stepSeconds * 1000;
 
 describe("lobby", () => {
-  it("creates a room with the host seated and the lobby clock running", () => {
+  it("creates a room with the host seated and no clock until someone joins", () => {
     const g = new Game(1);
     const s = g.state;
     expect(s.phase).toBe("lobby");
     expect(s.players).toHaveLength(1);
     expect(s.players[0]).toMatchObject({ id: "p1", ready: true, away: false });
-    expect(s.deadline).toBe(g.now + LOBBY_SECONDS * 1000);
-    expect(s.stepStartsAt).toBe(g.now);
+    expect(s.deadline).toBeNull();
+    expect(s.stepStartsAt).toBeNull();
     expect(s.reveal).toBeNull();
+    g.do({ type: "JOIN", player: ident("p2") });
+    expect(g.state.deadline).toBe(g.now + LOBBY_SECONDS * 1000);
+    expect(g.state.stepStartsAt).toBe(g.now);
   });
 
   it("rejects invalid settings", () => {
@@ -103,8 +106,11 @@ describe("lobby", () => {
   it("hands the room to the next player when the host leaves, and closes when empty", () => {
     const g = new Game(2);
     g.do({ type: "LEAVE", playerId: "p1" });
+    expect(g.state.phase).toBe("lobby");
     expect(g.state.hostId).toBe("p2");
     expect(g.state.players[0].ready).toBe(true);
+    // alone again: the clock stops, so the room waits instead of closing
+    expect(g.state.deadline).toBeNull();
     g.do({ type: "LEAVE", playerId: "p2" });
     expect(g.state.phase).toBe("closed");
     expect(code(() => g.do({ type: "JOIN", player: ident("p9") }))).toBe(
@@ -147,7 +153,7 @@ describe("lobby", () => {
     );
   });
 
-  it("the lobby clock starts the match with 2+ players and closes it with one", () => {
+  it("the lobby clock starts the match with 2+ players", () => {
     const g = new Game(2);
     expect(code(() => g.do({ type: "TIMEOUT", themes: THEMES }))).toBe(
       "wrong_phase",
@@ -155,11 +161,13 @@ describe("lobby", () => {
     expect(code(() => g.timeout())).toBe("invalid_input");
     g.timeout({ themes: THEMES });
     expect(g.state.phase).toBe("voting");
+  });
 
-    const lonely = new Game(1);
-    lonely.timeout({ themes: THEMES });
-    expect(lonely.state.phase).toBe("closed");
-    expect(lonely.state.deadline).toBeNull();
+  it("the room goes to whoever joined first", () => {
+    const g = new Game(3);
+    g.do({ type: "LEAVE", playerId: "p1" });
+    expect(g.state.hostId).toBe("p2");
+    expect(g.state.deadline).not.toBeNull();
   });
 });
 
@@ -243,7 +251,7 @@ describe("the theme vote", () => {
     h.do({ type: "LEAVE", playerId: "p2" });
     expect(h.state.phase).toBe("lobby");
     expect(h.state.vote).toBeNull();
-    expect(h.state.deadline).toBe(h.now + LOBBY_SECONDS * 1000);
+    expect(h.state.deadline).toBeNull();
   });
 
   it("the host leaving hands the room over and the vote goes on", () => {
@@ -588,6 +596,13 @@ describe("the clock", () => {
     const p = g3.state.players.find((x) => x.id === lazy);
     expect(p?.away).toBe(true);
     expect(g3.state.outcomes[lazy].gaveUp).toBe(true);
+  });
+
+  it("a host who leaves mid-match hands the room to the next present player", () => {
+    const g = started(3);
+    g.do({ type: "LEAVE", playerId: "p1" });
+    expect(g.state.players.find((p) => p.id === "p1")?.away).toBe(true);
+    expect(g.state.hostId).toBe("p2");
   });
 
   it("isExpired follows the deadline", () => {
