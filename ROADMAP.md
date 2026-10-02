@@ -54,4 +54,4 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 ## Fase 6 — Acabamento
 
 - [x] Testes automáticos de partida completa
-- [ ] PRODUCT.md e ARCHITECTURE.md (curtos)
+- [x] PRODUCT.md e ARCHITECTURE.md (curtos)
