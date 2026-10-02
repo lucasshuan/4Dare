@@ -1,60 +1,66 @@
 # Roadmap
 
-Cada fase termina com o jogo jogável. A próxima só melhora o que já funciona. Vou marcando conforme termino (item marcado = commit feito).
+Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = feito e commitado.
 
 ## Fase 0 — Base ✅
 
-- [x] Design de todas as telas, design system e fluxo (BPMN)
-- [x] Projeto Next.js: inglês/português/japonês, tema claro/escuro, cores e fontes do design
-- [x] Regras do jogo escritas como tipos (sala, turno, revelação, o que cada um pode ver)
+- [x] Design das telas, design system e fluxo (BPMN)
+- [x] Next.js em inglês, português e japonês, tema claro e escuro
+- [x] Regras do jogo escritas como tipos
 - [x] Padrão de commit
 
-## Fase 1 — Dá pra jogar (no seu PC)
+## Fase 1 — Dá pra jogar (no seu PC) ✅
 
-Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é um jogador; amigos na mesma rede também entram.
-
-- [x] Motor do jogo com testes (2 a 4 jogadores, ninguém vê a própria carta)
-- [x] Servidor local em memória
-- [x] Criar sala, entrar pelo código ou link, começar
-- [x] Escolher personagem digitando o nome
-- [x] Turno: perguntar, todos respondem, palpite, validação por quem escolheu
-- [x] Revelação simples entre etapas e relógio de cada etapa
+- [x] Motor do jogo com testes: 2 a 4 jogadores, ninguém vê a própria carta
+- [x] Servidor local em memória (`pnpm dev`, sem configurar nada)
+- [x] Sala pública ou privada; entra por link ou código
+- [x] Cada um escolhe o personagem de outro jogador (em roda)
+- [x] Pergunta de sim ou não; todos os outros respondem: Sim, Provavelmente sim, Não sei, Provavelmente não, Não, Irrelevante, com comentário opcional
+- [x] Palpite: nome parecido vale na hora; senão, só quem escolheu decide
+- [x] Passar a vez e desistir
+- [x] Tempo por etapa; quem some não trava a partida
 - [x] Fim com a colocação de todo mundo
-- [x] README curto: como rodar
+- [x] README curto
 
 ## Fase 2 — Online com os amigos
 
-- [ ] Supabase: banco, tempo real, convidado sem login
-- [ ] Deploy na Vercel com a integração do Supabase (as chaves entram sozinhas)
-- [ ] Partida de 2 e de 4 jogadores testada de ponta a ponta
+- [ ] Supabase: banco, tempo real, fotos, convidado sem login
+- [ ] Login de verdade com Discord e Google
+- [ ] Deploy na Vercel com a integração do Supabase
+- [ ] Biblioteca de personagens no Supabase (`pnpm seed`)
+- [ ] Partida de 2 e de 4 jogadores testada online
 
-## Fase 3 — Personagens de verdade
+## Fase 3 — Personagens e temas
 
-- [x] Revisar o gerador da biblioteca de personagens (scripts/library): filtros de conteúdo, pt-br, memória
-- [ ] Biblioteca de personagens com imagem em en/pt/ja
+- [x] Gerador da biblioteca revisado: filtros de conteúdo, nomes em pt-br, memória
+- [ ] Biblioteca grande em cada idioma, com foto
 - [ ] Busca com autocomplete e foto
-- [x] Criar personagem com imagem e trocar imagem
-- [x] 300 temas em en/pt/ja
-- [x] Tema sorteado pela IA (precisa da chave ANTHROPIC_API_KEY; sem ela usa os 306 temas)
+- [x] Criar personagem com nome e foto própria (com recorte)
+- [x] Trocar a foto de qualquer personagem (vira a da biblioteca)
+- [x] Tema sorteado pela IA; sem chave, sai de 306 temas simples
 
-## Fase 4 — Cara de jogo pronto
+## Fase 4 — Cara de jogo pronto ✅
 
-- [x] Todas as telas iguais ao design, claro e escuro, nos 3 idiomas
-- [x] Revelação bem animada, relógio recarregando, confetti no acerto
-- [x] Histórico em gaveta (minhas jogadas / todas)
-- [x] Pódio no fim e "jogar de novo"
-- [x] Transições suaves entre todas as etapas
+- [x] Telas iguais ao design: imagens grandes, cores suaves, claro e escuro, 3 idiomas
+- [x] Bandeiras de verdade; idioma e tema só na tela inicial e na sala de espera
+- [x] Revelação para todos: as respostas (6 a 10 s, conforme o tamanho) e o palpite (2,5 a 3,5 s)
+- [x] Relógio da etapa seguinte parado durante a revelação, recarregando
+- [x] Confetti por alguns segundos no acerto
+- [x] Transições suaves e dinâmicas em todas as telas do jogo
+- [x] Histórico rolável em gaveta, na web e no celular: "Minhas jogadas" (padrão) ou "Todas"
+- [x] Pódio com os vencedores mais altos e cada jogador embaixo da sua carta; "Jogar de novo"
 - [x] Celular
 
-## Fase 5 — Contas e salas
+## Fase 5 — Contas e salas ✅
 
-- [x] Login com Discord e Google, perfil com nome e avatar (sem Supabase entra numa conta de teste)
+- [x] Convidado: nome sorteado (GatoCorajoso, WonderfulCat, すてきなネコ; 27 mil combinações) e bichinho Critters
+- [x] Conta Discord ou Google: escolhe nome, foto ou bichinho, e cor (sem Supabase, entra numa conta de teste)
 - [x] Salas públicas na tela inicial
-- [x] Sala de espera com "Estou pronto" e configurações (vagas, segundos por etapa)
-- [x] Nome de convidado sorteado: adjetivo + substantivo, 27 mil combinações (WonderfulCat, GatoMaravilhoso, すてきなネコ)
-- [x] Avatares Critters do DiceBear: convidado ganha um sorteado, conta pode sortear outro
+- [x] Criar sala: pública ou privada, 2 a 4 vagas, segundos por etapa (padrão 120)
+- [x] Sala de espera: anfitrião edita a configuração e começa; os outros marcam "Estou pronto" (✓ verde, ✗ vermelho)
+- [x] Começa sozinha em 2 minutos ou assim que enche
 
-## Fase 6 — Acabamento
+## Fase 6 — Acabamento ✅
 
-- [x] Testes automáticos de partida completa
-- [x] PRODUCT.md e ARCHITECTURE.md (curtos)
+- [x] Testes de partida completa no navegador
+- [x] PRODUCT.md e ARCHITECTURE.md curtos
