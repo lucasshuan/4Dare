@@ -40,7 +40,7 @@ export async function openRoom(host: Identity, settings: RoomSettings) {
   for (let attempt = 0; attempt < 10; attempt++) {
     const state = newRoomState(randomCode(), host, settings, ctx());
     if (await rooms.create(state)) {
-      if (settings.visibility === "public") background(notify.lobbyChanged);
+      background(notify.lobbyChanged);
       return state.code;
     }
   }

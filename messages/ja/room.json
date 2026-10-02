@@ -86,5 +86,12 @@
     "chosenTitle": "テーマは…",
     "chosenBy": "{name}さんが決めました",
     "announce": "決定したテーマ：{theme}"
+  },
+  "password": {
+    "title": "パスワード付きのルーム",
+    "body": "ホストから聞いたパスワードを入力してください。",
+    "label": "パスワード",
+    "enter": "参加する",
+    "back": "戻る"
   }
 }

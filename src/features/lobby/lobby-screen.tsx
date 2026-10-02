@@ -32,7 +32,7 @@ import {
 } from "@/features/create/game-field";
 import { saveSetup } from "@/features/create/last-setup";
 import {
-  RoomNameField,
+  missingPassword,
   SettingsFields,
 } from "@/features/create/settings-fields";
 import { missingSets, ThemeFieldsButton } from "@/features/create/theme-fields";
@@ -60,6 +60,7 @@ const editable = ({
   game,
   name,
   visibility,
+  password,
   seats,
   stepSeconds,
   themeMode,
@@ -68,6 +69,7 @@ const editable = ({
   game,
   name,
   visibility,
+  password,
   seats,
   stepSeconds,
   themeMode,
@@ -308,10 +310,6 @@ export function LobbyScreen() {
                   value={draft.game}
                   onChange={(next) => setDraft({ ...draft, game: next })}
                 />
-                <RoomNameField
-                  value={draft.name}
-                  onChange={(name) => setDraft({ ...draft, name })}
-                />
                 <SettingsFields
                   value={draft}
                   onChange={setDraft}
@@ -325,7 +323,9 @@ export function LobbyScreen() {
                   <Button
                     type="submit"
                     variant="primary"
-                    disabled={pending || missingSets(draft)}
+                    disabled={
+                      pending || missingSets(draft) || missingPassword(draft)
+                    }
                   >
                     {t("saveSettings")}
                   </Button>
@@ -349,6 +349,12 @@ export function LobbyScreen() {
                 <ul className="flex flex-col gap-3">
                   <Setting icon={visibility === "public" ? Globe : Lock}>
                     {t(visibility === "public" ? "public" : "private")}
+                    {/* the host shares the password; nobody else gets it */}
+                    {visibility === "private" && view.settings.password ? (
+                      <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
+                        {view.settings.password}
+                      </span>
+                    ) : null}
                   </Setting>
                   <Setting icon={UsersRound}>{t("seats", { seats })}</Setting>
                   <Setting icon={Clock}>

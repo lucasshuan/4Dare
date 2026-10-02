@@ -1,6 +1,7 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
@@ -9,6 +10,7 @@ import { TextField } from "@/components/ui/text-field";
 import {
   DEFAULT_SETTINGS,
   ROOM_NAME_MAX,
+  ROOM_PASSWORD_MAX,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
 } from "@/game/types";
@@ -135,7 +137,16 @@ function SecondsStepper({
   );
 }
 
-/** Visibility, seats and seconds per step: used to create a room and to edit it in the lobby. Each label carries its hint in a tooltip. The theme settings are in theme-fields.tsx. */
+/** True when the room is private but has no password yet: it can't be saved like that. */
+export const missingPassword = (v: CreateRoomInput) =>
+  v.visibility === "private" && !v.password.trim();
+
+/**
+ * Name, who can join (and the password of a private room) on one row, then
+ * seats and seconds per step: used to create a room and to edit it in the
+ * lobby. Each label carries its hint in a tooltip. The theme settings are in
+ * theme-fields.tsx.
+ */
 export function SettingsFields({
   value,
   onChange,
@@ -149,46 +160,77 @@ export function SettingsFields({
   const visibilityHint = useId();
   const seatsHint = useId();
   return (
-    <>
-      <div className="flex flex-col gap-2">
-        <HintLabel hint={t("visibilityHint")} hintId={visibilityHint}>
-          {t("visibility")}
-        </HintLabel>
-        <Segmented
-          label={t("visibility")}
-          options={["public", "private"] as const}
-          value={value.visibility}
-          onChange={(visibility) => onChange({ ...value, visibility })}
-          render={(v) => t(v)}
-          describedBy={visibilityHint}
+    <div className="flex flex-col gap-6 sm:tiny:gap-4">
+      <div className="flex flex-wrap items-start gap-x-8 gap-y-5">
+        <RoomNameField
+          value={value.name}
+          onChange={(name) => onChange({ ...value, name })}
         />
+        <div className="flex flex-col gap-2">
+          <HintLabel hint={t("visibilityHint")} hintId={visibilityHint}>
+            {t("visibility")}
+          </HintLabel>
+          <Segmented
+            label={t("visibility")}
+            options={["public", "private"] as const}
+            value={value.visibility}
+            onChange={(visibility) => onChange({ ...value, visibility })}
+            render={(v) => t(v)}
+            describedBy={visibilityHint}
+          />
+        </div>
+        <AnimatePresence initial={false}>
+          {value.visibility === "private" ? (
+            <motion.div
+              key="password"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -8, transition: { duration: 0.12 } }}
+              className="w-full max-w-60 sm:w-60"
+            >
+              <TextField
+                label={t("password")}
+                hint={t("passwordHint")}
+                placeholder={t("passwordPlaceholder")}
+                value={value.password}
+                max={ROOM_PASSWORD_MAX}
+                autoComplete="off"
+                spellCheck={false}
+                aria-invalid={missingPassword(value)}
+                onChange={(e) =>
+                  onChange({ ...value, password: e.target.value })
+                }
+              />
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
-      <div className="flex flex-col gap-2">
-        <HintLabel hint={t("seatsHint")} hintId={seatsHint}>
-          {t("seats")}
-        </HintLabel>
-        <Segmented
-          label={t("seats")}
-          options={[2, 3, 4] as const}
-          value={value.seats}
-          onChange={(seats) => onChange({ ...value, seats })}
-          render={String}
-          disabled={(n) => n < minSeats}
-          describedBy={seatsHint}
-        />
-      </div>
-      <div className="md:col-span-2 lg:col-span-1">
+      <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
+        <div className="flex flex-col gap-2">
+          <HintLabel hint={t("seatsHint")} hintId={seatsHint}>
+            {t("seats")}
+          </HintLabel>
+          <Segmented
+            label={t("seats")}
+            options={[2, 3, 4] as const}
+            value={value.seats}
+            onChange={(seats) => onChange({ ...value, seats })}
+            render={String}
+            disabled={(n) => n < minSeats}
+            describedBy={seatsHint}
+          />
+        </div>
         <SecondsStepper
           value={value.stepSeconds}
           onChange={(stepSeconds) => onChange({ ...value, stepSeconds })}
         />
       </div>
-    </>
+    </div>
   );
 }
 
 /** The room's name: optional, up to ROOM_NAME_MAX characters. */
-export function RoomNameField({
+function RoomNameField({
   value,
   onChange,
 }: {
@@ -204,7 +246,7 @@ export function RoomNameField({
       value={value}
       max={ROOM_NAME_MAX}
       onChange={(e) => onChange(e.target.value)}
-      className="max-w-sm"
+      className="w-full max-w-sm sm:w-72"
     />
   );
 }

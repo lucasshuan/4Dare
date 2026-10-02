@@ -28,6 +28,7 @@ export function useGameName() {
 const THUMB = {
   md: ["h-14 w-[89.6px]", "scale-[0.28]"],
   sm: ["h-10 w-16", "scale-[0.2]"],
+  xs: ["h-6 w-[38.4px]", "scale-[0.12]"],
 } as const;
 
 /** The game's card art, scaled down to a still thumbnail. */

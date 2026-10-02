@@ -23,6 +23,7 @@ import {
   MAX_QUESTION,
   MAX_THEME,
   ROOM_NAME_MAX,
+  ROOM_PASSWORD_MAX,
   type RoomSettings,
   type RoomView,
   STEP_SECONDS_MAX,
@@ -93,6 +94,7 @@ const createSchema = z.object({
   game: z.enum(GAME_KEYS),
   name: z.string().trim().max(ROOM_NAME_MAX),
   visibility: z.enum(["public", "private"]),
+  password: z.string().trim().max(ROOM_PASSWORD_MAX),
   seats: z.union([z.literal(2), z.literal(3), z.literal(4)]),
   stepSeconds: z.number().int().min(STEP_SECONDS_MIN).max(STEP_SECONDS_MAX),
   themeMode: z.enum(["vote", "host"]),
@@ -116,14 +118,24 @@ export async function createRoom(
   });
 }
 
-/** Idempotent: joining a room you are already in succeeds. */
+/** Idempotent: joining a room you are already in succeeds. A private room asks newcomers for `password`. */
 export async function joinRoom(
   rawCode: string,
+  password?: string,
 ): Promise<Result<{ code: string }>> {
   return run(async () => {
     const code = roomCode(rawCode);
     const who = await me();
-    await dispatch(code, () => ({ type: "JOIN", player: who }));
+    // Guessing a password takes one try per call: keep it slow.
+    if (password !== undefined && !allow(`join:${who.id}:${code}`, 10, 60_000))
+      throw new GameError("rate_limited");
+    const typed =
+      typeof password === "string" ? password.slice(0, 100) : undefined;
+    await dispatch(code, () => ({
+      type: "JOIN",
+      player: who,
+      password: typed,
+    }));
     return { code };
   });
 }

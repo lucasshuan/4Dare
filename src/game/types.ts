@@ -48,7 +48,13 @@ export interface RoomSettings {
   game: GameKey;
   /** The room's name, up to ROOM_NAME_MAX characters; empty shows "<host>'s room". */
   name: string;
+  /** Every room is listed; "private" asks for `password` before anyone new gets a seat. */
   visibility: "public" | "private";
+  /**
+   * The password of a private room, empty for a public one. Only the host's
+   * view carries it; everyone else gets "".
+   */
+  password: string;
   seats: 2 | 3 | 4;
   /** Seconds per step: 30..300, default 120. */
   stepSeconds: number;
@@ -63,6 +69,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   game: DEFAULT_GAME,
   name: "",
   visibility: "public",
+  password: "",
   seats: 4,
   stepSeconds: 120,
   mode: "classic",
@@ -70,6 +77,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   themeSets: [...THEME_SET_KEYS],
 };
 export const ROOM_NAME_MAX = 25;
+export const ROOM_PASSWORD_MAX = 20;
 export const STEP_SECONDS_MIN = 30;
 export const STEP_SECONDS_MAX = 300;
 /** The lobby always waits 2 minutes, whatever the step time is. */
@@ -248,7 +256,7 @@ export interface RoomState {
 }
 
 export type GameEvent =
-  | { type: "JOIN"; player: Identity }
+  | { type: "JOIN"; player: Identity; password?: string }
   | { type: "LEAVE"; playerId: PlayerId }
   | { type: "SET_READY"; playerId: PlayerId; ready: boolean }
   | {
@@ -315,6 +323,9 @@ export const ERROR_CODES = [
   "too_early",
   /** Too few characters were picked for this theme in past matches to draw one. */
   "not_enough_picks",
+  /** The room is private: a newcomer has to give its password. */
+  "password_required",
+  "wrong_password",
   "unknown",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
@@ -503,8 +514,11 @@ export interface RoomView {
 /** A waiting public room, as listed on the home screen. */
 export interface PublicRoom {
   code: string;
+  game: GameKey;
   /** Empty when the host left it unnamed. */
   name: string;
+  /** Private: joining asks for the password. */
+  locked: boolean;
   /** open: has a free seat; full: lobby with no seat left; playing: match under way. */
   status: "open" | "full" | "playing";
   host: Pick<Identity, "isGuest" | "name" | "guestNumber" | "avatar" | "lang">;

@@ -53,6 +53,8 @@
     "rate_limited": "Muitas tentativas. Espere um pouco.",
     "too_early": "Calma, a próxima etapa já vai começar.",
     "not_enough_picks": "Ainda sem partidas nesse tema.",
+    "password_required": "Essa sala pede uma senha.",
+    "wrong_password": "Senha errada.",
     "unknown": "Algo deu errado. Tente de novo."
   },
   "image": {

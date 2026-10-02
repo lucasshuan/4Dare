@@ -53,6 +53,8 @@
     "rate_limited": "Too many tries. Wait a moment.",
     "too_early": "Hold on, the next step is about to start.",
     "not_enough_picks": "No matches with this theme yet.",
+    "password_required": "This room asks for a password.",
+    "wrong_password": "Wrong password.",
     "unknown": "Something went wrong. Try again."
   },
   "image": {

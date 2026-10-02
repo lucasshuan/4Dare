@@ -46,5 +46,9 @@
       "guessing": "Dê seu palpite!",
       "validating": "Confira um palpite!"
     }
+  },
+  "rooms": {
+    "title": "Salas",
+    "description": "Todas as salas esperando jogadores no Ludodare: encontre por jogo, nome ou anfitrião, públicas ou com senha."
   }
 }

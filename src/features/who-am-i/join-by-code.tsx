@@ -32,6 +32,9 @@ export function JoinByCode() {
       const r = await joinRoom(value);
       if (latest.current !== value) return;
       if (r.ok) return router.push(`/r/${r.data.code}`);
+      // a private room: its page asks for the password
+      if (r.error === "password_required")
+        return router.push(`/r/${value.trim().toUpperCase()}`);
       setProblem(
         r.error === "not_found" ? t("codeNotFound") : te(r.error as ErrorCode),
       );

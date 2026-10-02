@@ -31,6 +31,7 @@ vi.mock("next-intl/server", () => ({ getLocale: async () => "pt" }));
 const ROOM = {
   game: DEFAULT_SETTINGS.game,
   name: "",
+  password: "",
   themeMode: DEFAULT_SETTINGS.themeMode,
   themeSets: DEFAULT_SETTINGS.themeSets,
 };
@@ -96,19 +97,36 @@ describe("server, local mode", () => {
       await A.createRoom({
         ...ROOM,
         visibility: "private",
+        password: " secret ",
         seats: 3,
         stepSeconds: 60,
       }),
     );
     expect(code).toMatch(/^[2-9A-Z]{5}$/);
+    // only the host sees the password
+    expect((await view(code)).body.settings.password).toBe("secret");
 
     as("p2");
     expect((await view(code)).status).toBe(403);
-    must(await A.joinRoom(code.toLowerCase()));
-    as("p3");
+    expect(await A.joinRoom(code)).toEqual({
+      ok: false,
+      error: "password_required",
+    });
+    expect(await A.joinRoom(code, "nope")).toEqual({
+      ok: false,
+      error: "wrong_password",
+    });
+    must(await A.joinRoom(code.toLowerCase(), "secret"));
+    // back in without the password: the seat is theirs
     must(await A.joinRoom(code));
+    expect((await view(code)).body.settings.password).toBe("");
+    as("p3");
+    must(await A.joinRoom(code, "secret"));
     as("p4");
-    expect(await A.joinRoom(code)).toEqual({ ok: false, error: "room_full" });
+    expect(await A.joinRoom(code, "secret")).toEqual({
+      ok: false,
+      error: "room_full",
+    });
 
     as("p2");
     expect(await A.startGame(code)).toEqual({ ok: false, error: "not_host" });
@@ -175,12 +193,13 @@ describe("server, local mode", () => {
       await A.createRoom({
         ...ROOM,
         visibility: "private",
+        password: "pw",
         seats: 2,
         stepSeconds: 60,
       }),
     );
     as("m2");
-    must(await A.joinRoom(code));
+    must(await A.joinRoom(code, "pw"));
     as("m1");
     must(await A.startGame(code));
     await voteAll(code, ["m1", "m2"]);
@@ -328,12 +347,13 @@ describe("random pick by theme", () => {
       await A.createRoom({
         ...ROOM,
         visibility: "private",
+        password: "pw",
         seats: 2,
         stepSeconds: 60,
       }),
     );
     as("r2");
-    must(await A.joinRoom(code));
+    must(await A.joinRoom(code, "pw"));
     as("r1");
     must(await A.startGame(code));
     await voteAll(code, ["r1", "r2"]);

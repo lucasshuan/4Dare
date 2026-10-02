@@ -6,16 +6,20 @@
   "joinLabel": "Ou entre com um código",
   "createRoom": {
     "game": "Jogo",
-    "gameHint": "O jogo desta sala. Mais jogos vêm aí, e o anfitrião pode trocar na sala de espera.",
+    "gameHint": "O jogo desta sala.",
     "roomName": "Nome da sala",
-    "roomNameHint": "Opcional. Aparece na sala de espera e na lista de salas públicas.",
+    "roomNameHint": "Opcional. Aparece na sala de espera e na lista de salas.",
     "roomNamePlaceholder": "Ex.: Turma do sábado",
     "back": "Voltar",
     "title": "Criar sala",
     "visibility": "Quem pode entrar",
     "public": "Pública",
     "private": "Privada",
-    "visibilityHint": "Pública aparece na tela inicial. Privada só entra quem tem o link ou o código.",
+    "visibilityHint": "Toda sala aparece na lista de salas. Pública: qualquer um entra. Privada: pede a senha para entrar.",
+    "password": "Senha",
+    "passwordHint": "Quem entrar precisa digitar.",
+    "passwordPlaceholder": "Ex.: pizza",
+    "needPassword": "Defina uma senha para a sala privada.",
     "seats": "Vagas",
     "seatsHint": "A partida pode começar com 2 jogadores ou mais.",
     "seconds": "Tempo por etapa",
@@ -41,18 +45,18 @@
   "editProfile": "Editar perfil",
   "testAccount": "Sem Supabase, isso entra numa conta de teste.",
   "rooms": {
-    "title": "Salas públicas",
+    "title": "Salas",
     "waiting": "{count, plural, one {# esperando jogadores} other {# esperando jogadores}}",
     "roomOf": "Sala de {name}",
     "meta": "{players}/{seats} jogadores · {seconds} s por etapa",
     "join": "Entrar",
     "joinRoom": "Entrar na sala de {name}",
-    "empty": "Nenhuma sala pública agora. Crie uma e ela aparece aqui.",
-    "seeMore": "Ver mais",
-    "seeLess": "Ver menos",
+    "empty": "Nenhuma sala agora. Crie uma e ela aparece aqui.",
     "full": "Cheia",
     "playing": "Em partida",
-    "noOpen": "Nenhuma sala com vaga agora. Crie uma e ela aparece aqui."
+    "noOpen": "Nenhuma sala com vaga agora. Crie uma e ela aparece aqui.",
+    "seeAll": "Ver todas",
+    "locked": "Tem senha"
   },
   "games": {
     "title": "Escolha um jogo",
@@ -83,5 +87,25 @@
     "testAccount": "Sem Supabase, isso entra numa conta de teste."
   },
   "codeNotFound": "Nenhuma sala com esse código.",
-  "joining": "Entrando…"
+  "joining": "Entrando…",
+  "roomsPage": {
+    "back": "Jogos",
+    "title": "Salas",
+    "count": "{count, plural, =0 {Nenhuma sala} one {# sala · {open} com vaga} other {# salas · {open} com vaga}}",
+    "create": "Criar sala",
+    "search": "Buscar",
+    "searchPlaceholder": "Busque por sala, anfitrião ou código",
+    "clearSearch": "Limpar busca",
+    "game": "Jogo",
+    "allGames": "Todos os jogos",
+    "access": "Quem pode entrar",
+    "accessOptions": {
+      "all": "Todas",
+      "public": "Públicas",
+      "private": "Com senha"
+    },
+    "empty": "Nenhuma sala agora. Crie uma e ela aparece aqui.",
+    "emptyFiltered": "Nenhuma sala com esses filtros.",
+    "clearFilters": "Limpar filtros"
+  }
 }

@@ -104,6 +104,27 @@ describe("lobby", () => {
     expect(g.state.players[1].name).toBe("Bia");
   });
 
+  it("a private room asks newcomers for its password", () => {
+    const g = new Game(1, 1, { visibility: "private", password: " pizza " });
+    expect(g.state.settings.password).toBe("pizza");
+    const join = (id: string, password?: string) =>
+      code(() => g.do({ type: "JOIN", player: ident(id), password }));
+    expect(join("p2")).toBe("password_required");
+    expect(join("p2", "pasta")).toBe("wrong_password");
+    expect(join("p2", "pizza ")).toBe("no error");
+    // back in without it: the seat is theirs
+    expect(join("p2")).toBe("no error");
+    const upd = (settings: object) =>
+      code(() => g.do({ type: "UPDATE_SETTINGS", playerId: "p1", settings }));
+    expect(upd({ password: "" })).toBe("invalid_input");
+    expect(upd({ password: "x".repeat(21) })).toBe("invalid_input");
+    // going public drops the password
+    expect(upd({ visibility: "public" })).toBe("no error");
+    expect(g.state.settings.password).toBe("");
+    expect(join("p3")).toBe("no error");
+    expect(upd({ visibility: "private" })).toBe("invalid_input");
+  });
+
   it("hands the room to the next player when the host leaves, and closes when empty", () => {
     const g = new Game(2);
     g.do({ type: "LEAVE", playerId: "p1" });
@@ -140,7 +161,7 @@ describe("lobby", () => {
     g.do({
       type: "UPDATE_SETTINGS",
       playerId: "p1",
-      settings: { stepSeconds: 60, visibility: "private" },
+      settings: { stepSeconds: 60, visibility: "private", password: "pw" },
     });
     expect(g.state.settings).toMatchObject({
       stepSeconds: 60,

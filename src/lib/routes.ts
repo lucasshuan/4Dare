@@ -10,3 +10,10 @@ export const GAME_PATHS: Record<GameKey, string> = { "who-am-i": WHO_AM_I };
 
 /** The create-room screen, set up for `game`. */
 export const newRoom = (game: GameKey) => `${NEW_ROOM}?game=${game}`;
+
+/** Every listed room; the filters live in the link. */
+export const ROOMS = "/rooms";
+
+/** The room list, filtered to `game` when given. */
+export const roomsOf = (game?: GameKey) =>
+  game ? `${ROOMS}?game=${game}` : ROOMS;

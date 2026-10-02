@@ -36,6 +36,7 @@ import {
   RESULT_SECONDS,
   REVEAL_TIMING,
   ROOM_NAME_MAX,
+  ROOM_PASSWORD_MAX,
   type RoomSettings,
   type RoomState,
   STEP_SECONDS_MAX,
@@ -64,6 +65,7 @@ function mergeSettings(
     "game",
     "name",
     "visibility",
+    "password",
     "seats",
     "stepSeconds",
     "mode",
@@ -75,11 +77,16 @@ function mergeSettings(
   const next = { ...DEFAULT_SETTINGS, ...base, ...patch };
   const sets: unknown = next.themeSets;
   const name: unknown = next.name;
+  const password: unknown = next.password;
   const ok =
     isGameKey(next.game) &&
     typeof name === "string" &&
     name.trim().length <= ROOM_NAME_MAX &&
     (next.visibility === "public" || next.visibility === "private") &&
+    typeof password === "string" &&
+    password.trim().length <= ROOM_PASSWORD_MAX &&
+    // a private room needs a password to ask for
+    (next.visibility === "public" || password.trim().length > 0) &&
     [2, 3, 4].includes(next.seats) &&
     next.seats >= seated &&
     Number.isInteger(next.stepSeconds) &&
@@ -93,7 +100,13 @@ function mergeSettings(
   if (!ok) fail("invalid_input");
   // Each set once, in the order the screens show them.
   const themeSets = THEME_SET_KEYS.filter((k) => next.themeSets.includes(k));
-  return { ...next, name: next.name.trim(), themeSets };
+  return {
+    ...next,
+    name: next.name.trim(),
+    // a public room keeps no password around
+    password: next.visibility === "private" ? next.password.trim() : "",
+    themeSets,
+  };
 }
 
 // --- clock -------------------------------------------------------------------
@@ -465,7 +478,7 @@ export function reduce(
 function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
   switch (e.type) {
     case "JOIN":
-      return join(s, e.player, ctx);
+      return join(s, e.player, e.password, ctx);
     case "LEAVE":
       return leave(s, e.playerId, ctx);
     case "SET_READY": {
@@ -575,7 +588,12 @@ function swapPlayer(s: RoomState, from: PlayerId, player: Identity) {
   }
 }
 
-function join(s: RoomState, player: Identity, ctx: Ctx) {
+function join(
+  s: RoomState,
+  player: Identity,
+  password: string | undefined,
+  ctx: Ctx,
+) {
   if (s.phase === "closed") fail("not_found");
   const seated = findPlayer(s, player.id);
   if (seated) {
@@ -584,6 +602,12 @@ function join(s: RoomState, player: Identity, ctx: Ctx) {
   }
   if (s.phase !== "lobby") fail("already_started");
   if (s.players.length >= s.settings.seats) fail("room_full");
+  // Only newcomers are asked: whoever already has a seat comes back freely.
+  const lock = s.settings.visibility === "private" ? s.settings.password : "";
+  if (lock) {
+    if (!password?.trim()) fail("password_required");
+    if (password?.trim() !== lock) fail("wrong_password");
+  }
   s.players.push({
     ...player,
     ready: false,

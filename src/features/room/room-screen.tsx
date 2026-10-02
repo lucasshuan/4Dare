@@ -14,18 +14,22 @@ import { ThemeScreen } from "@/features/theme/theme-screen";
 import { TurnScreen } from "@/features/turn/turn-screen";
 import { VoteScreen } from "@/features/vote/vote-screen";
 import type { ErrorCode, Phase, PlayerStatus } from "@/game/types";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
 import { WHO_AM_I } from "@/lib/routes";
 import { joinRoom } from "@/server/actions";
+import { PasswordDialog } from "./password-dialog";
 import { RevealOverlay } from "./reveal-overlay";
 
 /** /r/CODE: joins if needed, then shows the screen for the current phase. */
 export function RoomScreen({ code }: { code: string }) {
   const { data, error, refresh, apply } = useRoom(code);
+  const te = useTranslations("common.errors");
+  const router = useRouter();
   const [joinError, setJoinError] = useState<ErrorCode | null>(null);
+  const [askPassword, setAskPassword] = useState(false);
   const triedJoin = useRef(false);
 
   useEffect(() => {
@@ -33,12 +37,35 @@ export function RoomScreen({ code }: { code: string }) {
     triedJoin.current = true;
     void joinRoom(code).then((r) => {
       if (r.ok) void refresh();
+      else if (r.error === "password_required") setAskPassword(true);
       else setJoinError(r.error);
     });
   }, [error, code, refresh]);
 
   const problem = joinError ?? (error === "not_found" ? "not_found" : null);
   if (problem) return <RoomProblem code={problem} />;
+  if (askPassword)
+    return (
+      <>
+        <RoomLoading />
+        <PasswordDialog
+          onCancel={() => router.push(WHO_AM_I)}
+          onSubmit={async (password) => {
+            const r = await joinRoom(code, password);
+            if (r.ok) {
+              await refresh();
+              setAskPassword(false);
+              return null;
+            }
+            if (r.error === "wrong_password" || r.error === "rate_limited")
+              return te(r.error);
+            setAskPassword(false);
+            setJoinError(r.error);
+            return null;
+          }}
+        />
+      </>
+    );
   if (!data) return <RoomLoading />;
   return (
     <RoomProvider

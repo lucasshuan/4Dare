@@ -128,3 +128,6 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Ties: places go by turn round, so whoever comes later in the order still gets that round's turn and ties if they discover too (1st, 1st, 3rd); the reveal and the podium say it's a tie
 - [x] "Who am I?" page: smaller title under an animated banner (a round on a loop: ask, answers, guess, flip), with pointer parallax and a still frame for reduced motion; public rooms, then Create room and join by code
 - [x] Account page: the usual top bar, "Back to home" above the title, background colour only for a critter, signing out only from the user menu
+- [x] Room passwords: a private room is listed with a lock and asks newcomers for its password in a small dialog; only the host sees it, in the lobby
+- [x] Create room: name, who can join and the password on one row, seats and time per step below
+- [x] /rooms: every listed room, filtered by game, a search (room, host or code) and who can join, all kept in the link; the game page shows its open rooms with "See all" at the top right

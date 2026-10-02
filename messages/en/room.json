@@ -86,5 +86,12 @@
     "chosenTitle": "The theme is…",
     "chosenBy": "Chosen by {name}",
     "announce": "Chosen theme: {theme}"
+  },
+  "password": {
+    "title": "This room has a password",
+    "body": "Type the password the host gave you.",
+    "label": "Password",
+    "enter": "Join",
+    "back": "Go back"
   }
 }

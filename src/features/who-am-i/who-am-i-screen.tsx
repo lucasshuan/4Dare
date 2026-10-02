@@ -47,7 +47,7 @@ export function WhoAmIScreen() {
 
         {/* the public rooms, then creating one or joining by code */}
         <div className="flex flex-col gap-6 lg:pt-9">
-          <PublicRooms />
+          <PublicRooms game="who-am-i" />
           <div className="flex flex-wrap items-end gap-x-6 gap-y-5">
             <Link
               href={newRoom("who-am-i")}

@@ -6,16 +6,20 @@
   "joinLabel": "コードで参加",
   "createRoom": {
     "game": "ゲーム",
-    "gameHint": "このルームで遊ぶゲーム。ゲームは今後増えます。ホストは待合室でも変えられます。",
+    "gameHint": "このルームで遊ぶゲーム。",
     "roomName": "ルーム名",
-    "roomNameHint": "任意。待合室と公開ルームの一覧に表示されます。",
+    "roomNameHint": "任意。待合室とルーム一覧に表示されます。",
     "roomNamePlaceholder": "例：土曜の仲間",
     "back": "戻る",
     "title": "ルームを作る",
     "visibility": "参加できる人",
     "public": "公開",
     "private": "非公開",
-    "visibilityHint": "公開ルームはトップ画面に表示されます。非公開ルームはリンクかコードを知っている人だけが入れます。",
+    "visibilityHint": "ルームはすべてルーム一覧に表示されます。公開：だれでも参加できます。非公開：参加にパスワードが必要です。",
+    "password": "パスワード",
+    "passwordHint": "参加する人が入力します。",
+    "passwordPlaceholder": "例：pizza",
+    "needPassword": "非公開ルームのパスワードを決めてください。",
     "seats": "人数",
     "seatsHint": "2人以上でゲームを始められます。",
     "seconds": "1ステップの時間",
@@ -41,18 +45,18 @@
   "editProfile": "プロフィールを編集",
   "testAccount": "Supabaseなしではテスト用アカウントに入ります。",
   "rooms": {
-    "title": "公開ルーム",
+    "title": "ルーム",
     "waiting": "{count}部屋が募集中",
     "roomOf": "{name}さんのルーム",
     "meta": "{players}/{seats}人 · 1ステップ{seconds}秒",
     "join": "参加",
     "joinRoom": "{name}さんのルームに参加",
-    "empty": "いま公開ルームはありません。作るとここに表示されます。",
-    "seeMore": "もっと見る",
-    "seeLess": "閉じる",
+    "empty": "今はルームがありません。作るとここに表示されます。",
     "full": "満員",
     "playing": "対戦中",
-    "noOpen": "いま空きのあるルームはありません。作るとここに表示されます。"
+    "noOpen": "いま空きのあるルームはありません。作るとここに表示されます。",
+    "seeAll": "すべて見る",
+    "locked": "パスワードあり"
   },
   "games": {
     "title": "ゲームを選ぶ",
@@ -83,5 +87,25 @@
     "testAccount": "Supabaseなしではテスト用アカウントに入ります。"
   },
   "codeNotFound": "このコードのルームはありません。",
-  "joining": "参加中…"
+  "joining": "参加中…",
+  "roomsPage": {
+    "back": "ゲーム一覧",
+    "title": "ルーム",
+    "count": "{count, plural, =0 {ルームなし} other {#件 · 空きあり{open}件}}",
+    "create": "ルームを作る",
+    "search": "検索",
+    "searchPlaceholder": "ルーム名・ホスト・コードで検索",
+    "clearSearch": "検索をクリア",
+    "game": "ゲーム",
+    "allGames": "すべてのゲーム",
+    "access": "参加できる人",
+    "accessOptions": {
+      "all": "すべて",
+      "public": "公開",
+      "private": "パスワードあり"
+    },
+    "empty": "今はルームがありません。作るとここに表示されます。",
+    "emptyFiltered": "条件に合うルームがありません。",
+    "clearFilters": "条件をクリア"
+  }
 }

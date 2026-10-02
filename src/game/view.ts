@@ -1,4 +1,5 @@
 // What each player is allowed to see. This is the only place that decides secrecy.
+import { DEFAULT_GAME } from "./games";
 import {
   findPlayer,
   isPresent,
@@ -321,7 +322,12 @@ export function toView(
     code: s.code,
     phase: s.phase,
     // Rooms saved before a setting existed show its default.
-    settings: { ...DEFAULT_SETTINGS, ...s.settings },
+    // The password only goes to the host, who shares it.
+    settings: {
+      ...DEFAULT_SETTINGS,
+      ...s.settings,
+      password: viewerId === s.hostId ? (s.settings.password ?? "") : "",
+    },
     round: s.round,
     version,
     youId: viewerId,
@@ -355,11 +361,15 @@ const PLAYING_PHASES = new Set([
   "validating",
 ]);
 
-/** The home-screen summary, or null when the room should not be listed. */
+/**
+ * The room list's summary, or null when the room should not be listed. Private
+ * rooms are listed too, locked; older private rooms without a password stay hidden.
+ */
 export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
   const s = state;
   const host = findPlayer(s, s.hostId);
-  if (s.settings.visibility !== "public" || !host) return null;
+  const locked = s.settings.visibility === "private";
+  if (!host || (locked && !s.settings.password)) return null;
   let status: PublicRoom["status"];
   if (s.phase === "lobby") {
     // Alone the lobby has no clock: list it only for as long as the clock would run.
@@ -376,7 +386,9 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
   }
   return {
     code: s.code,
+    game: s.settings.game ?? DEFAULT_GAME,
     name: s.settings.name ?? "",
+    locked,
     status,
     host: {
       isGuest: host.isGuest,

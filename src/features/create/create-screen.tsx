@@ -16,7 +16,7 @@ import { createRoom } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
 import { GameField } from "./game-field";
 import { loadSetup, saveSetup } from "./last-setup";
-import { RoomNameField, SettingsFields } from "./settings-fields";
+import { missingPassword, SettingsFields } from "./settings-fields";
 import { missingSets, ThemeFields } from "./theme-fields";
 
 /** A new room for `game` (from /new?game=…); the game can still be switched here. */
@@ -28,6 +28,12 @@ export function CreateScreen({ game }: { game: GameKey }) {
   const [settings, setSettings] = useState<CreateRoomInput | null>(null);
   useEffect(() => setSettings({ ...loadSetup(), game }), [game]);
   const noSets = settings !== null && missingSets(settings);
+  const noPassword = settings !== null && missingPassword(settings);
+  const problem = noPassword
+    ? t("needPassword")
+    : noSets
+      ? t("needOneSet")
+      : null;
 
   return (
     <Screen right={<HubActions />}>
@@ -36,7 +42,7 @@ export function CreateScreen({ game }: { game: GameKey }) {
         className="flex max-w-[1040px] flex-col gap-6 sm:tiny:gap-4"
         onSubmit={async (e) => {
           e.preventDefault();
-          if (!settings || noSets) return;
+          if (!settings || problem) return;
           const r = await run(() => createRoom(settings));
           if (!r.ok) return;
           saveSetup(settings);
@@ -65,14 +71,9 @@ export function CreateScreen({ game }: { game: GameKey }) {
                 window.history.replaceState(null, "", `?game=${next}`);
               }}
             />
-            <RoomNameField
-              value={settings.name}
-              onChange={(name) => setSettings({ ...settings, name })}
-            />
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { duration: dur.base } }}
-              className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-x-10 lg:grid-cols-[auto_auto_1fr] lg:gap-x-12"
             >
               <SettingsFields value={settings} onChange={setSettings} />
             </motion.div>
@@ -89,17 +90,18 @@ export function CreateScreen({ game }: { game: GameKey }) {
                 type="submit"
                 variant="primary"
                 size="lg"
-                disabled={pending || noSets}
+                disabled={pending || !!problem}
               >
                 {t("submit")}
               </Button>
-              <AnimatePresence>
-                {noSets ? (
+              <AnimatePresence mode="wait">
+                {problem ? (
                   <motion.span
+                    key={problem}
                     {...riseIn}
                     className="font-medium text-[13px] text-no"
                   >
-                    {t("needOneSet")}
+                    {problem}
                   </motion.span>
                 ) : null}
               </AnimatePresence>

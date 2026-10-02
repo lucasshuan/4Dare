@@ -86,5 +86,12 @@
     "chosenTitle": "O tema é…",
     "chosenBy": "Escolhido por {name}",
     "announce": "Tema escolhido: {theme}"
+  },
+  "password": {
+    "title": "Essa sala tem senha",
+    "body": "Digite a senha que o anfitrião passou.",
+    "label": "Senha",
+    "enter": "Entrar",
+    "back": "Voltar"
   }
 }

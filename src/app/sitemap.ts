@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
-import { GAMES, WHO_AM_I } from "@/lib/routes";
+import { GAMES, ROOMS, WHO_AM_I } from "@/lib/routes";
 import { HREFLANG, localePath, SITE_URL } from "@/server/seo";
 
-/** The pages worth finding in a search: the games hub and each game, in every language. */
+/** The pages worth finding in a search: the games hub, each game and the room list, in every language. */
 const PAGES = [
   { path: GAMES, priority: 1 },
   { path: WHO_AM_I, priority: 0.9 },
+  { path: ROOMS, priority: 0.6 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

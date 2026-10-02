@@ -34,7 +34,7 @@ export interface RoomStore {
     expectedVersion: number,
     next: RoomState,
   ): Promise<boolean>;
-  /** Public rooms still waiting in the lobby, newest first. */
+  /** Rooms to list (public and private, see toPublicRoom), newest first. */
   listPublic(): Promise<PublicRoom[]>;
 }
 

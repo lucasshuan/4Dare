@@ -59,10 +59,9 @@ export function supabaseRooms(): RoomStore {
           "guessing",
           "validating",
         ])
-        .eq("visibility", "public")
         .gte("updated_at", new Date(Date.now() - 20 * 60_000).toISOString())
         .order("updated_at", { ascending: false })
-        .limit(50);
+        .limit(100);
       if (error) throw error;
       const now = Date.now();
       return (data ?? []).flatMap((r) => {

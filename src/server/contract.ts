@@ -45,6 +45,8 @@ export interface CreateRoomInput {
   game: GameKey;
   name: string;
   visibility: "public" | "private";
+  /** Required when private; ignored when public. */
+  password: string;
   seats: 2 | 3 | 4;
   stepSeconds: number;
   themeMode: "vote" | "host";

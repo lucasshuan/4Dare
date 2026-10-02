@@ -33,7 +33,7 @@ export function localRooms(): RoomStore {
       return list
         .sort((a, b) => b.at - a.at)
         .map((x) => x.room)
-        .slice(0, 50);
+        .slice(0, 100);
     },
   };
 }

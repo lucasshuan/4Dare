@@ -170,9 +170,9 @@ describe("what the view says", () => {
     g.do({
       type: "UPDATE_SETTINGS",
       playerId: "p1",
-      settings: { visibility: "private" },
+      settings: { visibility: "private", password: "pw" },
     });
-    expect(toPublicRoom(g.state, g.now)).toBeNull();
+    expect(toPublicRoom(g.state, g.now)?.locked).toBe(true);
     const h = new Game(2, 1, { seats: 2 });
     expect(toPublicRoom(h.state, h.now)?.status).toBe("full");
     h.start();
@@ -184,6 +184,24 @@ describe("what the view says", () => {
     expect(t.state.deadline).toBeNull();
     expect(toPublicRoom(t.state, t.now)?.status).toBe("open");
     expect(toPublicRoom(t.state, t.now + LOBBY_SECONDS * 1000)).toBeNull();
+  });
+
+  it("private rooms are listed locked, and only the host sees the password", () => {
+    const g = new Game(2);
+    g.do({
+      type: "UPDATE_SETTINGS",
+      playerId: "p1",
+      settings: { visibility: "private", password: "pizza" },
+    });
+    expect(toPublicRoom(g.state, g.now)).toMatchObject({
+      locked: true,
+      game: "who-am-i",
+    });
+    expect(toView(g.state, 1, "p1", g.now).settings.password).toBe("pizza");
+    expect(toView(g.state, 1, "p2", g.now).settings.password).toBe("");
+    // a private room from before passwords existed stays hidden
+    g.state.settings.password = "";
+    expect(toPublicRoom(g.state, g.now)).toBeNull();
   });
 });
 

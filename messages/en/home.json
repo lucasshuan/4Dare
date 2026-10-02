@@ -6,16 +6,20 @@
   "joinLabel": "Or join with a code",
   "createRoom": {
     "game": "Game",
-    "gameHint": "The game this room plays. More games are coming, and the host can switch it in the lobby.",
+    "gameHint": "The game this room plays.",
     "roomName": "Room name",
-    "roomNameHint": "Optional. Shown in the lobby and in the public rooms list.",
+    "roomNameHint": "Optional. Shown in the lobby and in the room list.",
     "roomNamePlaceholder": "e.g. Saturday crew",
     "back": "Back",
     "title": "Create a room",
     "visibility": "Who can join",
     "public": "Public",
     "private": "Private",
-    "visibilityHint": "Public rooms show up on the home screen. Private ones only take people with the link or the code.",
+    "visibilityHint": "Every room shows up in the room list. Public: anyone can join. Private: joining asks for the password.",
+    "password": "Password",
+    "passwordHint": "Whoever joins types it in.",
+    "passwordPlaceholder": "e.g. pizza",
+    "needPassword": "Set a password for the private room.",
     "seats": "Seats",
     "seatsHint": "The match can start with 2 players or more.",
     "seconds": "Time per step",
@@ -41,18 +45,18 @@
   "editProfile": "Edit profile",
   "testAccount": "Without Supabase this enters a test account.",
   "rooms": {
-    "title": "Public rooms",
+    "title": "Rooms",
     "waiting": "{count, plural, one {# waiting} other {# waiting}}",
     "roomOf": "{name}'s room",
     "meta": "{players}/{seats} players · {seconds} s per step",
     "join": "Join",
     "joinRoom": "Join {name}'s room",
-    "empty": "No public rooms right now. Create one and it shows up here.",
-    "seeMore": "See more",
-    "seeLess": "See less",
+    "empty": "No rooms right now. Create one and it shows up here.",
     "full": "Full",
     "playing": "Playing",
-    "noOpen": "No room with a free seat right now. Create one and it shows up here."
+    "noOpen": "No room with a free seat right now. Create one and it shows up here.",
+    "seeAll": "See all",
+    "locked": "Has a password"
   },
   "games": {
     "title": "Pick a game",
@@ -83,5 +87,25 @@
     "testAccount": "Without Supabase this enters a test account."
   },
   "codeNotFound": "No room with this code.",
-  "joining": "Joining…"
+  "joining": "Joining…",
+  "roomsPage": {
+    "back": "Games",
+    "title": "Rooms",
+    "count": "{count, plural, =0 {No rooms} one {# room · {open} with a free seat} other {# rooms · {open} with a free seat}}",
+    "create": "Create room",
+    "search": "Search",
+    "searchPlaceholder": "Search by room, host or code",
+    "clearSearch": "Clear search",
+    "game": "Game",
+    "allGames": "All games",
+    "access": "Who can join",
+    "accessOptions": {
+      "all": "All",
+      "public": "Public",
+      "private": "With password"
+    },
+    "empty": "No rooms right now. Create one and it shows up here.",
+    "emptyFiltered": "No room matches these filters.",
+    "clearFilters": "Clear filters"
+  }
 }
