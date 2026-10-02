@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-import { UPLOADS_DIR } from "@/server/backend/local/files";
+import { dataPath } from "@/server/backend/local/disk";
 
 const TYPES: Record<string, string> = {
   webp: "image/webp",
@@ -18,7 +17,9 @@ export async function GET(
   const match = SAFE.exec(rel);
   if (!match) return new Response("not found", { status: 404 });
   try {
-    const bytes = await readFile(join(UPLOADS_DIR, rel));
+    const bytes = await readFile(
+      /* turbopackIgnore: true */ dataPath("uploads", rel),
+    );
     return new Response(bytes, {
       headers: {
         "Content-Type": TYPES[match[2]],
