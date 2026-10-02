@@ -88,6 +88,7 @@
     "guessed": "Jogada {n} · Palpite de {name}",
     "hit": "Acertou",
     "hitPlace": "Acertou · {place}º lugar",
+    "hitTie": "Acertou · empate no {place}º lugar",
     "miss": "Ainda não",
     "cardOf": "Carta de {name}"
   }

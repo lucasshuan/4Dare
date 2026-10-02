@@ -217,6 +217,17 @@ function voteView(
   };
 }
 
+/** Someone else discovered in the same turn round and shares `id`'s place. */
+function isTied(s: RoomState, id: PlayerId) {
+  const place = s.outcomes[id]?.place;
+  return (
+    place != null &&
+    Object.entries(s.outcomes).some(
+      ([other, o]) => other !== id && o.place === place,
+    )
+  );
+}
+
 function reveal(
   s: RoomState,
   viewer: PlayerId,
@@ -255,6 +266,7 @@ function reveal(
       card: hidden ? null : toCard(s.assignments[play.by]?.character ?? null),
       place:
         play.result === "hit" ? (s.outcomes[play.by]?.place ?? null) : null,
+      tied: play.result === "hit" && isTied(s, play.by),
       startsAt: r.startsAt,
       until: r.until,
     };

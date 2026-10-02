@@ -1,6 +1,8 @@
 {
   "kicker": "ゲーム終了 · {count}手",
   "winner": "{name}さんが一番に正解",
+  "winnersTie": "引き分け！{names}が同時に一番に正解",
+  "youTie": "引き分け！あなたと{names}が同時に一番に正解",
   "nobody": "今回は誰も正解しませんでした",
   "toLobby": "待合室に戻る",
   "lobbyIn": "{seconds}秒後に全員が待合室に戻ります",

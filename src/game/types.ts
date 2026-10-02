@@ -178,8 +178,13 @@ export type Play =
 export interface Outcome {
   /** Number of the jogada that discovered the character. */
   discoveredAt: number | null;
-  /** 1 = first to discover. */
+  /**
+   * 1 = first to discover. Players who discover in the same turn round tie and
+   * share the place (1, 1, 3): the later ones in the order had no earlier turn.
+   */
   place: number | null;
+  /** The turn round of the discovery; absent in rooms saved before ties existed. */
+  round?: number | null;
   gaveUp: boolean;
   /** Epoch ms when the player discovered, gave up, left or timed out. */
   endedAt: number | null;
@@ -231,6 +236,11 @@ export interface RoomState {
   reveal: Reveal | null;
   /** Counts matches played in this room. */
   round: number;
+  /**
+   * Turn rounds of the current match: 1 while everyone takes their first turn,
+   * 2 for the second, and so on. Absent in rooms saved before ties existed.
+   */
+  turnRound?: number;
   /** Epoch ms when the first question of this match could be asked (picks done); null before. */
   playStartedAt: number | null;
   createdAt: number;
@@ -433,6 +443,8 @@ export type RevealView =
       card: CardView | null;
       /** Place reached with this hit (1 = first). */
       place: number | null;
+      /** Someone else discovered in the same turn round and shares the place. */
+      tied: boolean;
       startsAt: number;
       until: number;
     };

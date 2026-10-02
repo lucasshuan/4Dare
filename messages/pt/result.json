@@ -1,6 +1,8 @@
 {
   "kicker": "Fim da partida · {count} jogadas",
   "winner": "{name} descobriu primeiro",
+  "winnersTie": "Empate! {names} descobriram primeiro",
+  "youTie": "Empate! Você e {names} descobriram primeiro",
   "nobody": "Ninguém descobriu desta vez",
   "toLobby": "Voltar para a sala de espera",
   "lobbyIn": "Todo mundo volta para a sala de espera em {seconds} s",

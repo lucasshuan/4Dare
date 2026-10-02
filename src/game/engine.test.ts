@@ -12,6 +12,7 @@ import {
   STEP_SECONDS_MIN,
   VOTE_SECONDS,
 } from "./types";
+import { toView } from "./view";
 
 const code = (fn: () => unknown) => {
   try {
@@ -524,7 +525,7 @@ describe("a turn", () => {
     expect((r?.until ?? 0) - (r?.startsAt ?? 0)).toBe(REVEAL_TIMING.answersMax);
   });
 
-  it("a close guess is a hit with a reveal; places count up", () => {
+  it("a close guess is a hit with a reveal; the same turn round ties", () => {
     const g = started(3);
     const first = g.askAndAnswer();
     g.do({ type: "GUESS", playerId: first, text: `name ${first}` });
@@ -533,6 +534,7 @@ describe("a turn", () => {
     expect(s.outcomes[first]).toEqual({
       discoveredAt: 2,
       place: 1,
+      round: 1,
       gaveUp: false,
       endedAt: g.now,
     });
@@ -543,9 +545,49 @@ describe("a turn", () => {
     expect(s.turnPlayerId).not.toBe(first);
     expect(s.stepStartsAt).toBe(s.reveal?.until);
 
+    // the next player had no turn before the first one hit: same round, same place
     const second = g.askAndAnswer();
     g.do({ type: "GUESS", playerId: second, text: `Nane ${second}` }); // one typo
-    expect(g.state.outcomes[second].place).toBe(2);
+    expect(g.state.outcomes[second]).toMatchObject({ place: 1, round: 1 });
+    expect(g.state.reveal).toMatchObject({ kind: "guess" });
+    expect(toView(g.state, 1, second, g.now).reveal).toMatchObject({
+      place: 1,
+      tied: true,
+    });
+  });
+
+  it("a match saved before ties existed keeps counting places up", () => {
+    const g = started(3);
+    const [a, b] = g.state.order;
+    expect(g.askAndAnswer()).toBe(a);
+    g.do({ type: "GUESS", playerId: a, text: `name ${a}` });
+    // what an older save looks like: no turn rounds anywhere
+    delete g.state.turnRound;
+    for (const o of Object.values(g.state.outcomes)) delete o.round;
+    expect(g.askAndAnswer()).toBe(b);
+    g.do({ type: "GUESS", playerId: b, text: `name ${b}` });
+    expect(g.state.outcomes[b].place).toBe(2);
+  });
+
+  it("whoever already had their turn in that round does not tie", () => {
+    const g = started(3);
+    const [a, b, c] = g.state.order;
+    // a misses in round 1; b discovers in round 1
+    expect(g.askAndAnswer()).toBe(a);
+    g.do({ type: "PASS", playerId: a });
+    expect(g.askAndAnswer()).toBe(b);
+    g.do({ type: "GUESS", playerId: b, text: `name ${b}` });
+    expect(g.state.outcomes[b]).toMatchObject({ place: 1, round: 1 });
+    // c still had a round-1 turn, but passes; a and c then discover in round 2
+    expect(g.askAndAnswer()).toBe(c);
+    g.do({ type: "PASS", playerId: c });
+    expect(g.askAndAnswer()).toBe(a);
+    g.do({ type: "GUESS", playerId: a, text: `name ${a}` });
+    expect(g.state.outcomes[a]).toMatchObject({ place: 2, round: 2 });
+    expect(g.askAndAnswer()).toBe(c);
+    g.do({ type: "GUESS", playerId: c, text: `name ${c}` });
+    expect(g.state.outcomes[c]).toMatchObject({ place: 2, round: 2 });
+    expect(g.state.phase).toBe("finished");
   });
 
   it("a far guess goes to the player who picked that character", () => {
@@ -731,7 +773,8 @@ describe("whole matches", () => {
     const places = Object.values(s.outcomes)
       .map((o) => o.place)
       .sort();
-    expect(places).toEqual([1, 2]);
+    // both discover on their first turn: a tie
+    expect(places).toEqual([1, 1]);
     expect(s.reveal?.kind).toBe("guess");
   });
 
@@ -742,7 +785,7 @@ describe("whole matches", () => {
       Object.values(s.outcomes)
         .map((o) => o.place)
         .sort(),
-    ).toEqual([1, 2, 3, 4]);
+    ).toEqual([1, 1, 1, 1]);
     // the podium waits for the last reveal, then its own clock
     expect(s.stepStartsAt).toBe(s.reveal?.until);
     expect(s.deadline).toBe((s.stepStartsAt ?? 0) + RESULT_SECONDS * 1000);

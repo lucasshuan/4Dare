@@ -69,6 +69,7 @@ export function ResultScreen() {
   const t = useTranslations("result");
   const tr = useTranslations("room");
   const lang = useLocale() as Lang;
+  const listFormat = new Intl.ListFormat(lang, { type: "conjunction" });
   const name = useDisplayName();
   const withNames = useWithNames();
   const router = useRouter();
@@ -79,7 +80,9 @@ export function ResultScreen() {
     (a, b) =>
       (a.place ?? 99) - (b.place ?? 99) || Number(a.gaveUp) - Number(b.gaveUp),
   );
-  const winner = ranked.find((p) => p.place === 1);
+  // Everyone who discovered in the first winning turn round shares 1st place.
+  const winners = ranked.filter((p) => p.place === 1);
+  const winner = winners[0];
   const columns = podiumOrder(ranked);
   const you = view.players.find((p) => p.isYou);
   const youLine = !you
@@ -130,9 +133,23 @@ export function ResultScreen() {
           >
             {!winner
               ? t("nobody")
-              : winner.isYou
-                ? t("youFirst")
-                : withNames((n) => t("winner", { name: n(winner) }))}
+              : winners.length > 1
+                ? winners.some((p) => p.isYou)
+                  ? withNames((n) =>
+                      t("youTie", {
+                        names: listFormat.format(
+                          winners.filter((p) => !p.isYou).map((p) => n(p)),
+                        ),
+                      }),
+                    )
+                  : withNames((n) =>
+                      t("winnersTie", {
+                        names: listFormat.format(winners.map((p) => n(p))),
+                      }),
+                    )
+                : winner.isYou
+                  ? t("youFirst")
+                  : withNames((n) => t("winner", { name: n(winner) }))}
           </motion.h1>
           {youLine ? <p className="text-ink-muted">{youLine}</p> : null}
           <div className="mt-3 flex flex-col items-start gap-3">

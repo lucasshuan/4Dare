@@ -88,6 +88,7 @@
     "guessed": "{n}手目 · {name}さんの予想",
     "hit": "正解",
     "hitPlace": "正解 · {place}位",
+    "hitTie": "正解 · {place}位タイ",
     "miss": "まだです",
     "cardOf": "{name}さんのカード"
   }

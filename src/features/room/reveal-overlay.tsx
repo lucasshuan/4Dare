@@ -299,7 +299,9 @@ function GuessReveal({
             >
               {hit
                 ? reveal.place
-                  ? t("hitPlace", { place: reveal.place })
+                  ? t(reveal.tied ? "hitTie" : "hitPlace", {
+                      place: reveal.place,
+                    })
                   : t("hit")
                 : t("miss")}
             </motion.span>

@@ -241,6 +241,7 @@ function beginMatch(s: RoomState, theme: Theme, ctx: Ctx) {
     s.outcomes[p.id] = {
       discoveredAt: null,
       place: null,
+      round: null,
       gaveUp: false,
       endedAt: null,
     };
@@ -287,6 +288,10 @@ function goToTurn(s: RoomState, ctx: Ctx, from: PlayerId | null) {
   if (presentCount(s) < 2) return finish(s, ctx);
   const next = nextPlayerAfter(s, from);
   if (!next) return finish(s, ctx);
+  // Back at (or before) where the last turn was in the order: a new turn round.
+  const wrapped =
+    from === null || s.order.indexOf(next) <= s.order.indexOf(from);
+  if (wrapped) s.turnRound = (s.turnRound ?? 0) + 1;
   s.phase = "asking";
   s.turnPlayerId = next;
   startStep(s, ctx, stepMs(s));
@@ -329,13 +334,31 @@ function resolveQuestion(s: RoomState, q: Question, ctx: Ctx) {
   startStep(s, ctx, stepMs(s));
 }
 
+/**
+ * Place for a discovery in turn round `round`: one more than everyone who
+ * discovered in an earlier round. Discoveries in the same round tie (1, 1, 3),
+ * since whoever comes later in the order had no turn of that round yet.
+ */
+function placeIn(s: RoomState, round: number) {
+  const earlier = Object.values(s.outcomes).filter(
+    (o) => o.discoveredAt !== null && (o.round ?? 0) < round,
+  ).length;
+  return earlier + 1;
+}
+
 function hit(s: RoomState, g: Guess, ctx: Ctx) {
   g.result = "hit";
+  const round = s.turnRound;
+  // A match saved before ties existed has no rounds yet: places just count up.
   const place =
-    Object.values(s.outcomes).filter((o) => o.discoveredAt !== null).length + 1;
+    round === undefined
+      ? Object.values(s.outcomes).filter((o) => o.discoveredAt !== null)
+          .length + 1
+      : placeIn(s, round);
   s.outcomes[g.by] = {
     discoveredAt: g.n,
     place,
+    round: round ?? null,
     gaveUp: false,
     endedAt: ctx.now,
   };
@@ -382,6 +405,7 @@ function cleanText(text: string, max: number) {
 
 function startTurns(s: RoomState, ctx: Ctx) {
   s.playStartedAt = ctx.now;
+  s.turnRound = 0;
   goToTurn(s, ctx, s.order.at(-1) ?? null);
 }
 

@@ -88,6 +88,7 @@
     "guessed": "Play {n} · {name}'s guess",
     "hit": "Got it",
     "hitPlace": "Got it · {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
+    "hitTie": "Got it · tied for {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
     "miss": "Not yet",
     "cardOf": "{name}'s card"
   }
