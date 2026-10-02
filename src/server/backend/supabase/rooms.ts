@@ -50,8 +50,16 @@ export function supabaseRooms(): RoomStore {
     async listPublic() {
       const { data, error } = await db()
         .select("state")
-        .eq("phase", "lobby")
+        .in("phase", [
+          "lobby",
+          "picking",
+          "asking",
+          "answering",
+          "guessing",
+          "validating",
+        ])
         .eq("visibility", "public")
+        .gte("updated_at", new Date(Date.now() - 20 * 60_000).toISOString())
         .order("updated_at", { ascending: false })
         .limit(50);
       if (error) throw error;

@@ -160,9 +160,10 @@ describe("what the view says", () => {
     expect(h.map((e) => e.n)).toEqual([1]);
   });
 
-  it("public rooms are listed while there is a free seat", () => {
+  it("public rooms are listed as open, full or playing", () => {
     const g = new Game(2, 1, { seats: 3 });
     expect(toPublicRoom(g.state, g.now)).toMatchObject({
+      status: "open",
       players: 2,
       seats: 3,
     });
@@ -173,7 +174,11 @@ describe("what the view says", () => {
     });
     expect(toPublicRoom(g.state, g.now)).toBeNull();
     const h = new Game(2, 1, { seats: 2 });
-    expect(toPublicRoom(h.state, h.now)).toBeNull();
+    expect(toPublicRoom(h.state, h.now)?.status).toBe("full");
+    h.start();
+    expect(toPublicRoom(h.state, h.now)?.status).toBe("playing");
+    // a match left alone for long is not advertised
+    expect(toPublicRoom(h.state, h.now + 21 * 60_000)).toBeNull();
     const t = new Game(1);
     expect(toPublicRoom(t.state, t.state.deadline as number)).toBeNull();
   });

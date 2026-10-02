@@ -401,6 +401,8 @@ export interface RoomView {
 /** A waiting public room, as listed on the home screen. */
 export interface PublicRoom {
   code: string;
+  /** open: has a free seat; full: lobby with no seat left; playing: match under way. */
+  status: "open" | "full" | "playing";
   host: Pick<Identity, "isGuest" | "name" | "guestNumber" | "avatar" | "lang">;
   players: number;
   seats: number;

@@ -30,7 +30,10 @@ export function localRooms(): RoomStore {
         const room = toPublicRoom(state as RoomState, now);
         if (room) list.push({ at: state.createdAt, room });
       }
-      return list.sort((a, b) => b.at - a.at).map((x) => x.room);
+      return list
+        .sort((a, b) => b.at - a.at)
+        .map((x) => x.room)
+        .slice(0, 50);
     },
   };
 }

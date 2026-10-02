@@ -296,18 +296,36 @@ export function toView(
   };
 }
 
+/** A match nobody has touched for this long is not shown as being played. */
+const PLAYING_FRESH_MS = 20 * 60_000;
+const PLAYING_PHASES = new Set([
+  "picking",
+  "asking",
+  "answering",
+  "guessing",
+  "validating",
+]);
+
 /** The home-screen summary, or null when the room should not be listed. */
 export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
   const s = state;
   const host = findPlayer(s, s.hostId);
-  const open =
-    s.phase === "lobby" &&
-    s.settings.visibility === "public" &&
-    s.players.length < s.settings.seats &&
-    (s.deadline === null || now < s.deadline);
-  if (!open || !host) return null;
+  if (s.settings.visibility !== "public" || !host) return null;
+  let status: PublicRoom["status"];
+  if (s.phase === "lobby") {
+    if (s.deadline !== null && now >= s.deadline) return null;
+    status = s.players.length < s.settings.seats ? "open" : "full";
+  } else if (
+    PLAYING_PHASES.has(s.phase) &&
+    now - s.updatedAt < PLAYING_FRESH_MS
+  ) {
+    status = "playing";
+  } else {
+    return null;
+  }
   return {
     code: s.code,
+    status,
     host: {
       isGuest: host.isGuest,
       name: host.name,
