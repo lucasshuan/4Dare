@@ -176,7 +176,9 @@ function useRoomTab() {
   const phase = TAB_PHASE[view.phase];
   const alert = TAB_ALERT[me.status];
   useTabTitle(
-    phase ? `${t(`tab.${phase}`)} · ${code}` : t("room.title", { code }),
+    phase
+      ? `${t(`tab.${phase}`)} · ${view.settings.name || code}`
+      : t("room.title", { code }),
     alert ? t(`tab.alert.${alert}`) : null,
     { deadline: view.deadline, stepStartsAt: view.stepStartsAt, offset },
   );

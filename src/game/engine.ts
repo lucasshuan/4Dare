@@ -30,6 +30,7 @@ import {
   type PlayerId,
   RESULT_SECONDS,
   REVEAL_TIMING,
+  ROOM_NAME_MAX,
   type RoomSettings,
   type RoomState,
   STEP_SECONDS_MAX,
@@ -56,6 +57,7 @@ function mergeSettings(
 ): RoomSettings {
   const allowed = new Set([
     "game",
+    "name",
     "visibility",
     "seats",
     "stepSeconds",
@@ -67,8 +69,11 @@ function mergeSettings(
   // Rooms made before a setting existed get its default.
   const next = { ...DEFAULT_SETTINGS, ...base, ...patch };
   const sets: unknown = next.themeSets;
+  const name: unknown = next.name;
   const ok =
     isGameKey(next.game) &&
+    typeof name === "string" &&
+    name.trim().length <= ROOM_NAME_MAX &&
     (next.visibility === "public" || next.visibility === "private") &&
     [2, 3, 4].includes(next.seats) &&
     next.seats >= seated &&
@@ -83,7 +88,7 @@ function mergeSettings(
   if (!ok) fail("invalid_input");
   // Each set once, in the order the screens show them.
   const themeSets = THEME_SET_KEYS.filter((k) => next.themeSets.includes(k));
-  return { ...next, themeSets };
+  return { ...next, name: next.name.trim(), themeSets };
 }
 
 // --- clock -------------------------------------------------------------------

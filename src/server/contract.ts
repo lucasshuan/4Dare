@@ -43,6 +43,7 @@ export interface CharacterSearchResponse {
 
 export interface CreateRoomInput {
   game: GameKey;
+  name: string;
   visibility: "public" | "private";
   seats: 2 | 3 | 4;
   stepSeconds: number;

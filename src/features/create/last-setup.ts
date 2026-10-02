@@ -12,6 +12,7 @@ const KEY = "ludodare:who-am-i:setup";
 
 export const DEFAULT_SETUP: CreateRoomInput = {
   game: DEFAULT_GAME,
+  name: "",
   visibility: DEFAULT_SETTINGS.visibility,
   seats: DEFAULT_SETTINGS.seats,
   stepSeconds: DEFAULT_SETTINGS.stepSeconds,
@@ -22,7 +23,7 @@ export const DEFAULT_SETUP: CreateRoomInput = {
 const oneOf = <T>(value: unknown, options: readonly T[], fallback: T): T =>
   options.includes(value as T) ? (value as T) : fallback;
 
-/** The setup saved last, field by field; anything missing or odd falls back to the default. The game comes from the link, not from here. */
+/** The setup saved last, field by field; anything missing or odd falls back to the default. The game comes from the link, and each room gets its own name. */
 export function loadSetup(): CreateRoomInput {
   let saved: Record<string, unknown> = {};
   try {
@@ -35,6 +36,7 @@ export function loadSetup(): CreateRoomInput {
   const themeSets = THEME_SET_KEYS.filter((k) => !off.includes(k));
   return {
     game: d.game,
+    name: d.name,
     visibility: oneOf(saved.visibility, ["public", "private"], d.visibility),
     seats: oneOf(saved.seats, [2, 3, 4], d.seats),
     stepSeconds:
@@ -49,7 +51,12 @@ export function loadSetup(): CreateRoomInput {
   };
 }
 
-export function saveSetup({ game: _, themeSets, ...rest }: CreateRoomInput) {
+export function saveSetup({
+  game: _game,
+  name: _name,
+  themeSets,
+  ...rest
+}: CreateRoomInput) {
   const setsOff = THEME_SET_KEYS.filter((k) => !themeSets.includes(k));
   try {
     localStorage.setItem(KEY, JSON.stringify({ ...rest, setsOff }));

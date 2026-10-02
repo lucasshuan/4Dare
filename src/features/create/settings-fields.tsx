@@ -5,8 +5,10 @@ import { useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { HintLabel } from "@/components/ui/hint-label";
+import { TextField } from "@/components/ui/text-field";
 import {
   DEFAULT_SETTINGS,
+  ROOM_NAME_MAX,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
 } from "@/game/types";
@@ -182,5 +184,27 @@ export function SettingsFields({
         />
       </div>
     </>
+  );
+}
+
+/** The room's name: optional, up to ROOM_NAME_MAX characters. */
+export function RoomNameField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (name: string) => void;
+}) {
+  const t = useTranslations("home.createRoom");
+  return (
+    <TextField
+      label={t("roomName")}
+      hint={t("roomNameHint")}
+      placeholder={t("roomNamePlaceholder")}
+      value={value}
+      max={ROOM_NAME_MAX}
+      onChange={(e) => onChange(e.target.value)}
+      className="max-w-sm"
+    />
   );
 }

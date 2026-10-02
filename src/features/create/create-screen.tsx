@@ -16,7 +16,7 @@ import { createRoom } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
 import { GameField } from "./game-field";
 import { loadSetup, saveSetup } from "./last-setup";
-import { SettingsFields } from "./settings-fields";
+import { RoomNameField, SettingsFields } from "./settings-fields";
 import { missingSets, ThemeFields } from "./theme-fields";
 
 /** A new room for `game` (from /new?game=…); the game can still be switched here. */
@@ -64,6 +64,10 @@ export function CreateScreen({ game }: { game: GameKey }) {
                 // The link keeps the game, so a reload or a shared link opens it again.
                 window.history.replaceState(null, "", `?game=${next}`);
               }}
+            />
+            <RoomNameField
+              value={settings.name}
+              onChange={(name) => setSettings({ ...settings, name })}
             />
             <motion.div
               initial={{ opacity: 0 }}

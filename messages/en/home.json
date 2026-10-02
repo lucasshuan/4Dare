@@ -7,6 +7,9 @@
   "createRoom": {
     "game": "Game",
     "gameHint": "The game this room plays. More games are coming, and the host can switch it in the lobby.",
+    "roomName": "Room name",
+    "roomNameHint": "Optional. Shown in the lobby and in the public rooms list.",
+    "roomNamePlaceholder": "e.g. Saturday crew",
     "back": "Back",
     "title": "Create a room",
     "visibility": "Who can join",

@@ -126,7 +126,7 @@ function RoomRow({ room: r }: { room: PublicRoom }) {
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate font-semibold">
-          {t("roomOf", { name: host })}
+          {r.name || t("roomOf", { name: host })}
         </span>
         <span className="flex min-w-0 items-center gap-1.5 font-medium text-[13px] text-ink-muted">
           {/* biome-ignore lint/performance/noImgElement: tiny static svg flag */}

@@ -31,7 +31,10 @@ import {
   useGameName,
 } from "@/features/create/game-field";
 import { saveSetup } from "@/features/create/last-setup";
-import { SettingsFields } from "@/features/create/settings-fields";
+import {
+  RoomNameField,
+  SettingsFields,
+} from "@/features/create/settings-fields";
 import { missingSets, ThemeFieldsButton } from "@/features/create/theme-fields";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
@@ -55,6 +58,7 @@ import type { CreateRoomInput } from "@/server/contract";
 /** Only what the host can change (the server rejects anything else). */
 const editable = ({
   game,
+  name,
   visibility,
   seats,
   stepSeconds,
@@ -62,6 +66,7 @@ const editable = ({
   themeSets,
 }: CreateRoomInput): CreateRoomInput => ({
   game,
+  name,
   visibility,
   seats,
   stepSeconds,
@@ -96,8 +101,15 @@ export function LobbyScreen() {
   const [draft, setDraft] = useState<CreateRoomInput>(() =>
     editable(view.settings),
   );
-  const { game, visibility, seats, stepSeconds, themeMode, themeSets } =
-    view.settings;
+  const {
+    game,
+    name: roomName,
+    visibility,
+    seats,
+    stepSeconds,
+    themeMode,
+    themeSets,
+  } = view.settings;
   const gameName = useGameName();
 
   const copy = async (text: string, done: string) => {
@@ -122,6 +134,11 @@ export function LobbyScreen() {
       <div className="flex flex-wrap items-start gap-10 lg:gap-16">
         <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
           <div className="flex flex-col gap-3">
+            {roomName ? (
+              <span className="self-start rounded-pill bg-sunken px-3 py-1 font-semibold text-sm">
+                {roomName}
+              </span>
+            ) : null}
             <h1 className="max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]">
               {/* after a match the room is not new any more */}
               {me.isHost
@@ -290,6 +307,10 @@ export function LobbyScreen() {
                 <GameField
                   value={draft.game}
                   onChange={(next) => setDraft({ ...draft, game: next })}
+                />
+                <RoomNameField
+                  value={draft.name}
+                  onChange={(name) => setDraft({ ...draft, name })}
                 />
                 <SettingsFields
                   value={draft}

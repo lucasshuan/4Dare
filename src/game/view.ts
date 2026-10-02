@@ -364,6 +364,7 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
   }
   return {
     code: s.code,
+    name: s.settings.name ?? "",
     status,
     host: {
       isGuest: host.isGuest,

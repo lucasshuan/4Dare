@@ -123,3 +123,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Every player name comes with their avatar beside it, even inside a sentence, on phones too
 - [x] History and a red Give up button in the match header, left of the clock; give up asks first
 - [x] History drawer: one tab per player (with avatar and play count), you first
+- [x] Rooms can have a name (up to 25 characters), set when creating or in the lobby; shown in the lobby, the public rooms list and the tab title

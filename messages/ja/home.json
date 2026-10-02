@@ -7,6 +7,9 @@
   "createRoom": {
     "game": "ゲーム",
     "gameHint": "このルームで遊ぶゲーム。ゲームは今後増えます。ホストは待合室でも変えられます。",
+    "roomName": "ルーム名",
+    "roomNameHint": "任意。待合室と公開ルームの一覧に表示されます。",
+    "roomNamePlaceholder": "例：土曜の仲間",
     "back": "戻る",
     "title": "ルームを作る",
     "visibility": "参加できる人",

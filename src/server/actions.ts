@@ -22,6 +22,7 @@ import {
   MAX_NOTE,
   MAX_QUESTION,
   MAX_THEME,
+  ROOM_NAME_MAX,
   type RoomSettings,
   type RoomView,
   STEP_SECONDS_MAX,
@@ -90,6 +91,7 @@ async function act(
 
 const createSchema = z.object({
   game: z.enum(GAME_KEYS),
+  name: z.string().trim().max(ROOM_NAME_MAX),
   visibility: z.enum(["public", "private"]),
   seats: z.union([z.literal(2), z.literal(3), z.literal(4)]),
   stepSeconds: z.number().int().min(STEP_SECONDS_MIN).max(STEP_SECONDS_MAX),

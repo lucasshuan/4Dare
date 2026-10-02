@@ -46,6 +46,8 @@ export interface Identity {
 export interface RoomSettings {
   /** The game the room plays; the host can switch it in the lobby. */
   game: GameKey;
+  /** The room's name, up to ROOM_NAME_MAX characters; empty shows "<host>'s room". */
+  name: string;
   visibility: "public" | "private";
   seats: 2 | 3 | 4;
   /** Seconds per step: 30..300, default 120. */
@@ -59,6 +61,7 @@ export interface RoomSettings {
 
 export const DEFAULT_SETTINGS: RoomSettings = {
   game: DEFAULT_GAME,
+  name: "",
   visibility: "public",
   seats: 4,
   stepSeconds: 120,
@@ -66,6 +69,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   themeMode: "vote",
   themeSets: [...THEME_SET_KEYS],
 };
+export const ROOM_NAME_MAX = 25;
 export const STEP_SECONDS_MIN = 30;
 export const STEP_SECONDS_MAX = 300;
 /** The lobby always waits 2 minutes, whatever the step time is. */
@@ -487,6 +491,8 @@ export interface RoomView {
 /** A waiting public room, as listed on the home screen. */
 export interface PublicRoom {
   code: string;
+  /** Empty when the host left it unnamed. */
+  name: string;
   /** open: has a free seat; full: lobby with no seat left; playing: match under way. */
   status: "open" | "full" | "playing";
   host: Pick<Identity, "isGuest" | "name" | "guestNumber" | "avatar" | "lang">;

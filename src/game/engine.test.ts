@@ -127,6 +127,14 @@ describe("lobby", () => {
     expect(upd("p1", { stepSeconds: 29 })).toBe("invalid_input");
     expect(upd("p1", { color: "red" })).toBe("invalid_input");
     expect(upd("p1", { game: "chess" })).toBe("invalid_input");
+    expect(upd("p1", { name: "x".repeat(26) })).toBe("invalid_input");
+    expect(upd("p1", { name: 7 })).toBe("invalid_input");
+    g.do({
+      type: "UPDATE_SETTINGS",
+      playerId: "p1",
+      settings: { name: "  Saturday crew  " },
+    });
+    expect(g.state.settings.name).toBe("Saturday crew");
     expect(upd("p1", { game: "who-am-i" })).toBe("no error");
     g.do({
       type: "UPDATE_SETTINGS",

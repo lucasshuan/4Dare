@@ -7,6 +7,9 @@
   "createRoom": {
     "game": "Jogo",
     "gameHint": "O jogo desta sala. Mais jogos vêm aí, e o anfitrião pode trocar na sala de espera.",
+    "roomName": "Nome da sala",
+    "roomNameHint": "Opcional. Aparece na sala de espera e na lista de salas públicas.",
+    "roomNamePlaceholder": "Ex.: Turma do sábado",
     "back": "Voltar",
     "title": "Criar sala",
     "visibility": "Quem pode entrar",
