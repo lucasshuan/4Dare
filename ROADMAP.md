@@ -32,7 +32,7 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 
 - [ ] Biblioteca de personagens com imagem em en/pt/ja
 - [ ] Busca com autocomplete e foto
-- [ ] Criar personagem com imagem e trocar imagem
+- [x] Criar personagem com imagem e trocar imagem
 - [x] 300 temas em en/pt/ja
 - [x] Tema sorteado pela IA (precisa da chave ANTHROPIC_API_KEY; sem ela usa os 306 temas)
 

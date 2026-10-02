@@ -53,5 +53,15 @@
     "rate_limited": "Too many tries. Wait a moment.",
     "too_early": "Hold on, the next step is about to start.",
     "unknown": "Something went wrong. Try again."
+  },
+  "image": {
+    "choose": "Choose a picture",
+    "dropOrPaste": "or drag it here, or paste (Ctrl+V)",
+    "hint": "JPG, PNG, WebP or GIF up to 8 MB. Then adjust the crop.",
+    "zoom": "Zoom",
+    "use": "Use this picture",
+    "other": "Choose another",
+    "wrongType": "That file isn't a picture. Use JPG, PNG, WebP or GIF.",
+    "tooBig": "That picture is over 8 MB. Pick a smaller one."
   }
 }

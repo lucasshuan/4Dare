@@ -31,7 +31,16 @@
     "change": "Escolher outro",
     "searchLabel": "Personagem para {name}",
     "searchPlaceholder": "Digite um nome",
-    "useTyped": "Usar “{name}”",
-    "typeHint": "Digite para buscar na biblioteca."
+    "changeImage": "Trocar imagem",
+    "imageHint": "A imagem nova substitui a da biblioteca: quem escolher {name} depois já vê a sua.",
+    "changeImageTitle": "Nova imagem para {name}",
+    "back": "Voltar",
+    "createTitle": "Criar personagem",
+    "newName": "Nome",
+    "newOrigin": "De onde é (opcional)",
+    "newImage": "Imagem (opcional)",
+    "save": "Salvar e escolher",
+    "createNamed": "Criar “{name}” com a sua imagem",
+    "createNew": "Criar um personagem novo"
   }
 }

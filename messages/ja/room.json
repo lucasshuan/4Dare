@@ -31,7 +31,16 @@
     "change": "選び直す",
     "searchLabel": "{name}さんのキャラクター",
     "searchPlaceholder": "名前を入力",
-    "useTyped": "「{name}」を使う",
-    "typeHint": "入力するとライブラリを検索します。"
+    "changeImage": "画像を変える",
+    "imageHint": "新しい画像はライブラリの画像になります。あとで{name}を選んだ人にもあなたの画像が表示されます。",
+    "changeImageTitle": "{name}の新しい画像",
+    "back": "戻る",
+    "createTitle": "キャラクターを作る",
+    "newName": "名前",
+    "newOrigin": "作品名など（任意）",
+    "newImage": "画像（任意）",
+    "save": "保存して選ぶ",
+    "createNamed": "「{name}」を自分の画像で作る",
+    "createNew": "新しいキャラクターを作る"
   }
 }
