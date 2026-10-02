@@ -26,6 +26,7 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 
 - [ ] Supabase: banco, tempo real, fotos, convidado sem login
 - [x] Supabase configurado num comando (`pnpm setup:supabase`): tabelas, convidados, Discord, Google, URLs, chaves
+- [x] Servidor na mesma região do banco (São Paulo)
 - [ ] Login de verdade com Discord e Google
 - [ ] Deploy na Vercel com a integração do Supabase
 - [ ] Biblioteca de personagens no Supabase (`pnpm seed`)
@@ -57,6 +58,7 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Relógio da etapa seguinte parado durante a revelação, recarregando
 - [x] Confetti por alguns segundos no acerto
 - [x] Transições suaves e dinâmicas em todas as telas do jogo
+- [x] Ações respondem na hora: a resposta já traz a sala, sem segunda busca; "Estou pronto" muda no clique
 - [x] Histórico rolável em gaveta, na web e no celular: "Minhas jogadas" (padrão) ou "Todas"
 - [x] Pódio com os vencedores mais altos e cada jogador embaixo da sua carta; "Jogar de novo"
 - [x] Celular
