@@ -14,7 +14,7 @@ Cada fase termina com o jogo jogável. A próxima só melhora o que já funciona
 Roda com `pnpm dev`, sem configurar nada. Cada aba ou cada amigo na mesma rede é um jogador.
 
 - [x] Motor do jogo com testes (2 a 4 jogadores, ninguém vê a própria carta)
-- [ ] Servidor local em memória
+- [x] Servidor local em memória
 - [ ] Criar sala, entrar pelo código ou link, começar
 - [ ] Escolher personagem digitando o nome
 - [ ] Turno: perguntar, todos respondem, palpite, validação por quem escolheu

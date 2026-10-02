@@ -10,6 +10,8 @@ export const NAMESPACES = [
   "lobby",
   "game",
   "result",
+  "room",
+  "turn",
 ] as const;
 
 export default getRequestConfig(async ({ requestLocale }) => {

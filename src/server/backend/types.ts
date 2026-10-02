@@ -77,6 +77,8 @@ export interface AuthService {
     avatar?: Identity["avatar"];
   }): Promise<Me>;
   signOut(): Promise<void>;
+  /** Local mode only: turns the current guest into a fake account so the profile screen can be tried. */
+  enterTestAccount?(): Promise<Me>;
 }
 
 export interface Notifier {

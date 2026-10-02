@@ -1,0 +1,154 @@
+import "server-only";
+import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
+import {
+  type Character,
+  GameError,
+  type GameEvent,
+  type Identity,
+  type Lang,
+  type PlayerId,
+  type RoomSettings,
+  type RoomState,
+} from "@/game/types";
+import { getBackend } from "./backend";
+
+const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+export const CODE_PATTERN = /^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5}$/;
+
+export function normalizeCode(raw: string): string | null {
+  const code = raw.trim().toUpperCase();
+  return CODE_PATTERN.test(code) ? code : null;
+}
+
+function randomCode() {
+  let code = "";
+  for (let i = 0; i < 5; i++) {
+    code += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
+  }
+  return code;
+}
+
+const ctx = () => ({ now: Date.now(), random: Math.random });
+
+export async function openRoom(host: Identity, settings: RoomSettings) {
+  const { rooms, notify } = getBackend();
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const state = newRoomState(randomCode(), host, settings, ctx());
+    if (await rooms.create(state)) {
+      if (settings.visibility === "public") void notify.lobbyChanged();
+      return state.code;
+    }
+  }
+  throw new GameError("unknown");
+}
+
+/**
+ * Applies one event with optimistic concurrency: load, reduce, compare-and-swap,
+ * and on a lost race start over from the newer state.
+ */
+export async function dispatch(
+  code: string,
+  build: (state: RoomState) => GameEvent | Promise<GameEvent>,
+): Promise<RoomState> {
+  const { rooms, notify } = getBackend();
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const stored = await rooms.get(code);
+    if (!stored) throw new GameError("not_found");
+    const event = await build(stored.state);
+    const next = reduce(stored.state, event, ctx());
+    if (await rooms.compareAndSwap(code, stored.version, next)) {
+      void notify.roomChanged(code, stored.version + 1);
+      if (next.phase === "lobby" || stored.state.phase === "lobby") {
+        void notify.lobbyChanged();
+      }
+      return next;
+    }
+  }
+  throw new GameError("conflict");
+}
+
+// Used when the library cannot supply enough characters for a clock-filled pick.
+const EMERGENCY: Record<Lang, string[]> = {
+  en: [
+    "Mickey Mouse",
+    "Super Mario",
+    "Pikachu",
+    "Batman",
+    "Harry Potter",
+    "Darth Vader",
+  ],
+  pt: [
+    "Mickey Mouse",
+    "Super Mario",
+    "Pikachu",
+    "Batman",
+    "Harry Potter",
+    "Darth Vader",
+  ],
+  ja: [
+    "ミッキーマウス",
+    "マリオ",
+    "ピカチュウ",
+    "バットマン",
+    "ハリー・ポッター",
+    "ダース・ベイダー",
+  ],
+};
+
+async function fallbackCharacters(state: RoomState): Promise<Character[]> {
+  const { characters } = getBackend();
+  const owed = Object.values(state.assignments).filter((a) => !a.character);
+  const out: Character[] = [];
+  for (const a of owed) {
+    const picker = state.players.find((p) => p.id === a.pickerId);
+    const lang: Lang = picker?.lang ?? "en";
+    const found = await characters.randomPopular(lang, 4);
+    out.push(...found);
+    out.push(
+      ...EMERGENCY[lang].map((name, i) => ({
+        id: `emergency-${lang}-${i}`,
+        lang,
+        name,
+        origin: null,
+        imageUrl: null,
+        aliases: [],
+      })),
+    );
+  }
+  return [...new Map(out.map((c) => [c.id, c])).values()];
+}
+
+/** Fires the TIMEOUTs that are due. Losing a race to another reader is fine. */
+export async function applyDueTimeouts(code: string) {
+  const { rooms, themes } = getBackend();
+  for (let i = 0; i < 4; i++) {
+    const stored = await rooms.get(code);
+    if (!stored || !isExpired(stored.state, Date.now())) return;
+    try {
+      await dispatch(code, async (state) => {
+        if (!isExpired(state, Date.now())) throw new GameError("wrong_phase");
+        if (state.phase === "lobby") {
+          return { type: "TIMEOUT", theme: themes.drawFromBank() };
+        }
+        if (state.phase === "picking") {
+          return {
+            type: "TIMEOUT",
+            fallbackCharacters: await fallbackCharacters(state),
+          };
+        }
+        return { type: "TIMEOUT" };
+      });
+    } catch (e) {
+      if (e instanceof GameError && e.code === "wrong_phase") return;
+      throw e;
+    }
+  }
+}
+
+export async function loadRoom(code: string) {
+  return getBackend().rooms.get(code);
+}
+
+export function seated(state: RoomState, id: PlayerId) {
+  return state.players.some((p) => p.id === id);
+}
