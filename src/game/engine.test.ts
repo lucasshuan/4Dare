@@ -283,6 +283,12 @@ describe("picking", () => {
       .map((a) => a.character?.id)
       .sort();
     expect(ids).toEqual(["f1", "f2", "used"]);
+    // only the clock's picks are marked, so they don't count as popular choices
+    const auto = Object.values(g.state.assignments)
+      .filter((a) => a.auto)
+      .map((a) => a.character?.id)
+      .sort();
+    expect(auto).toEqual(["f1", "f2"]);
     expect(g.state.phase).toBe("asking");
   });
 });

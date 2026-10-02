@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Check, ImageIcon, Plus } from "lucide-react";
+import { Check, Dices, ImageIcon, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CharacterCard } from "@/components/ui/character-card";
@@ -23,9 +23,11 @@ import { useDisplayName } from "@/lib/names";
 import {
   confirmPick,
   createCharacter,
+  randomPick,
   replaceCharacterImage,
 } from "@/server/actions";
 import type { CharacterDTO, CharacterSearchResponse } from "@/server/contract";
+import { DrawFeedback } from "./draw-feedback";
 import { useCharacterIndex } from "./use-character-index";
 
 function useDebounced<T>(value: T, ms: number) {
@@ -48,6 +50,7 @@ type Mode = "search" | "chosen" | "create" | "image";
 
 export function PickScreen() {
   const t = useTranslations("room.pick");
+  const tErrors = useTranslations("common.errors");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
   const { view, code, playerById } = useRoomContext();
@@ -62,6 +65,13 @@ export function PickScreen() {
   const [newName, setNewName] = useState("");
   const [origin, setOrigin] = useState("");
   const [image, setImage] = useState<Blob | null>(null);
+  // The chosen character came from the dice; `flip` plays the card's entrance
+  // once per draw; `noHistory`: the theme has too few past picks to draw from.
+  const [drawn, setDrawn] = useState(false);
+  const [flip, setFlip] = useState(false);
+  const [rolls, setRolls] = useState(0);
+  const [noHistory, setNoHistory] = useState(false);
+  const rollId = useRef(0);
   // In-browser search: every keystroke is answered from memory. The deferred
   // value keeps typing smooth even if the list takes a frame to re-render.
   const index = useCharacterIndex(lang, !pick?.confirmed);
@@ -92,10 +102,31 @@ export function PickScreen() {
   const targetName = name(target);
   const waiting = view.players.filter((p) => !pick.confirmedIds.includes(p.id));
 
-  const choose = (c: CharacterDTO) => {
+  const choose = (c: CharacterDTO, fromDice = false, flip = false) => {
+    rollId.current++; // a roll still on its way no longer applies
     setChosen(c);
+    setDrawn(fromDice);
+    setFlip(flip);
     setMode("chosen");
   };
+  const roll = async () => {
+    const id = ++rollId.current;
+    setRolls((n) => n + 1);
+    const r = await run(() => randomPick(code, drawn ? chosen?.id : undefined));
+    if (id !== rollId.current) return;
+    if (r.ok) choose(r.data, true, true);
+    else if (r.error === "not_enough_picks") setNoHistory(true);
+  };
+  const dice = (
+    <motion.span
+      aria-hidden
+      className="inline-flex"
+      animate={{ rotate: rolls * 360 }}
+      transition={{ duration: dur.slow, ease: ease.soft }}
+    >
+      <Dices strokeWidth={1.75} />
+    </motion.span>
+  );
   const confirm = async () => {
     if (chosen) await act(() => confirmPick(code, chosen.id));
   };
@@ -114,7 +145,7 @@ export function PickScreen() {
     form.set("id", chosen.id);
     form.set("image", blob, "picture.webp");
     const r = await run(() => replaceCharacterImage(form));
-    if (r.ok) choose(r.data);
+    if (r.ok) choose(r.data, drawn);
   };
 
   return (
@@ -205,12 +236,31 @@ export function PickScreen() {
                 {...riseIn}
                 className="flex flex-col gap-4"
               >
-                <div className="max-w-90">
-                  <CharacterCard
-                    card={toCard(chosen)}
-                    label={t("cardLabel", { name: targetName })}
-                    layoutId="pick-card"
-                  />
+                <div className="relative max-w-90 perspective-[1000px]">
+                  <motion.div
+                    key={chosen.id}
+                    initial={
+                      flip ? { opacity: 0, rotateY: -80, scale: 0.94 } : false
+                    }
+                    animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+                    transition={{ duration: dur.reveal, ease: ease.soft }}
+                    onAnimationComplete={() => setFlip(false)}
+                  >
+                    <CharacterCard
+                      card={toCard(chosen)}
+                      label={t("cardLabel", { name: targetName })}
+                      layoutId="pick-card"
+                    />
+                  </motion.div>
+                  {drawn ? (
+                    <DrawFeedback
+                      key={`feedback-${chosen.id}`}
+                      code={code}
+                      characterId={chosen.id}
+                      show={!flip && !pending}
+                      onDislike={roll}
+                    />
+                  ) : null}
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Button
@@ -222,6 +272,12 @@ export function PickScreen() {
                     <Check strokeWidth={2} />
                     {t("confirm")}
                   </Button>
+                  {drawn ? (
+                    <Button disabled={pending} onClick={roll}>
+                      {dice}
+                      {t("randomAgain")}
+                    </Button>
+                  ) : null}
                   <Button disabled={pending} onClick={() => setMode("search")}>
                     {t("change")}
                   </Button>
@@ -307,9 +363,32 @@ export function PickScreen() {
                 {...riseIn}
                 className="flex flex-col gap-2"
               >
-                <label htmlFor="pick-search" className="font-semibold text-sm">
-                  {t("searchLabel", { name: targetName })}
-                </label>
+                <div className="flex items-end justify-between gap-3">
+                  <label
+                    htmlFor="pick-search"
+                    className="font-semibold text-sm"
+                  >
+                    {t("searchLabel", { name: targetName })}
+                  </label>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={pending || noHistory}
+                    title={t("randomHint")}
+                    onClick={roll}
+                  >
+                    {dice}
+                    {t("random")}
+                  </Button>
+                </div>
+                {noHistory ? (
+                  <motion.p
+                    {...riseIn}
+                    className="font-medium text-[13px] text-ink-muted"
+                  >
+                    {tErrors("not_enough_picks")}
+                  </motion.p>
+                ) : null}
                 <input
                   id="pick-search"
                   value={query}

@@ -14,6 +14,7 @@ import type {
   RoomState,
 } from "@/game/types";
 import type { Me } from "../contract";
+import type { PickFeedback, PopularPick } from "../theme-picks";
 
 export interface StoredRoom {
   state: RoomState;
@@ -47,6 +48,8 @@ export interface CharacterStore {
   /** Accent-, case- and kana-insensitive; best matches first, then most popular. */
   search(query: string, lang: Lang, limit: number): Promise<Character[]>;
   get(id: string): Promise<Character | null>;
+  /** The ones of `ids` (app ids) that exist in `lang`, in one read. */
+  getMany(ids: string[], lang: Lang): Promise<Character[]>;
   create(input: NewCharacter): Promise<Character>;
   setImage(id: string, imageUrl: string): Promise<Character | null>;
   /** Used when a player lets the clock run out while picking. */
@@ -108,6 +111,10 @@ export interface MatchStore {
   record(match: MatchRecord): Promise<void>;
   /** A guest signed in to an account that already existed: their matches move to it. */
   reassign(fromUserId: string, toUserId: string): Promise<void>;
+  /** Characters people picked (not the clock) in finished matches with this theme, most picked first. */
+  popularPicks(themeId: string, limit: number): Promise<PopularPick[]>;
+  /** Saves whether a player liked a character the random button drew; a new answer replaces theirs. */
+  rateDraw(feedback: PickFeedback): Promise<void>;
 }
 
 export interface Backend {

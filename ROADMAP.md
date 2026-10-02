@@ -42,6 +42,8 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Um registro por personagem: nome, apelidos e popularidade em cada idioma
 - [x] Origem como chave traduzível (obra ou profissão) e categoria fixa (anime, esportes, mitologia...)
 - [x] Busca com autocomplete e foto
+- [x] Botão "Sortear" na escolha: tira um dos personagens mais escolhidos naquele tema em partidas jogadas (o que o relógio escolheu não conta); funciona a partir de 1 partida salva, senão avisa curto
+- [x] "Curtiu o sorteado?" logo depois de sortear: 👎 sorteia outro e cada 👎 corta pela metade a chance dele naquele tema; 👍 soma como uma escolha
 - [x] Busca instantânea: índice do idioma baixado uma vez (cache), cada tecla responde na memória em menos de 1 ms, sem servidor
 - [x] Criar personagem com nome e foto própria (com recorte)
 - [x] Trocar a foto de qualquer personagem (vira a da biblioteca)

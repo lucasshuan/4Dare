@@ -38,6 +38,7 @@ describe("match record", () => {
       startedAt,
       finishedAt: g.now + 1,
       theme: { pt: "Vilões" },
+      themeId: "villains",
     });
     const by = (id: string) => record?.players.find((p) => p.userId === id);
     expect(by(first)).toMatchObject({
@@ -52,6 +53,7 @@ describe("match record", () => {
       pickedById: g.state.assignments[first].pickerId,
       wasGuest: false,
       lang: "pt",
+      autoPicked: false,
     });
     expect(by(second)).toMatchObject({ result: "gave_up", place: null });
     expect(by(second)?.timeMs).toBeGreaterThan(0);

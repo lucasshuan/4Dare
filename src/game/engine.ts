@@ -631,6 +631,7 @@ function timeout(
         if (a.character) continue;
         const c = pool.shift() ?? fail("invalid_input");
         a.character = { ...c, aliases: [...c.aliases] };
+        a.auto = true;
       }
       return startTurns(s, ctx);
     }

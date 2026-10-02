@@ -103,6 +103,12 @@ export function localCharacters(): CharacterStore {
       );
       return hits.slice(0, limit).map((h) => strip(h.row));
     },
+    async getMany(ids, lang) {
+      return ids.flatMap((id) => {
+        const r = rows.get(id);
+        return r && r.lang === lang ? [strip(r)] : [];
+      });
+    },
     async get(id) {
       const r = rows.get(id);
       return r ? strip(r) : null;

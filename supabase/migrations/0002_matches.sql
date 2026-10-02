@@ -36,47 +36,9 @@ create index if not exists match_players_user on public.match_players (user_id, 
 alter table public.matches enable row level security;
 alter table public.match_players enable row level security;
 
--- The match and its players in one statement; players only go in with a new match.
-create or replace function public.record_match(m jsonb)
-returns void
-language sql
-set search_path = public
-as $$
-  with saved as (
-    insert into public.matches (id, room_code, round, theme, started_at, finished_at)
-    values (
-      m->>'id',
-      m->>'roomCode',
-      (m->>'round')::integer,
-      m->'theme',
-      to_timestamp((m->>'startedAt')::bigint / 1000.0),
-      to_timestamp((m->>'finishedAt')::bigint / 1000.0)
-    )
-    on conflict (id) do nothing
-    returning id, finished_at
-  )
-  insert into public.match_players (
-    match_id, user_id, was_guest, lang, picked_by, character_id, character_name,
-    character_origin, result, place, discovered_at, questions, guesses, time_ms, finished_at
-  )
-  select
-    saved.id,
-    p->>'userId',
-    (p->>'wasGuest')::boolean,
-    p->>'lang',
-    p->>'pickedById',
-    p->>'characterId',
-    p->>'characterName',
-    p->>'characterOrigin',
-    p->>'result',
-    (p->>'place')::integer,
-    (p->>'discoveredAt')::integer,
-    (p->>'questions')::integer,
-    (p->>'guesses')::integer,
-    (p->>'timeMs')::integer,
-    saved.finished_at
-  from saved, jsonb_array_elements(m->'players') as p;
-$$;
+-- record_match (the match and its players in one statement) lives in
+-- 0006_theme_picks.sql, its newest shape: setup re-runs every migration, so it
+-- is defined once.
 
 -- A guest signed in to an account that already existed: their matches follow them.
 create or replace function public.reassign_matches(from_id text, to_id text)
@@ -93,5 +55,4 @@ as $$
     );
 $$;
 
-revoke execute on function public.record_match(jsonb) from public, anon, authenticated;
 revoke execute on function public.reassign_matches(text, text) from public, anon, authenticated;

@@ -284,3 +284,96 @@ describe("server, local mode", () => {
     });
   });
 });
+
+describe("random pick by theme", () => {
+  it("draws among the characters picked most for the theme, once there are enough", async () => {
+    as("r1");
+    const { code } = must(
+      await A.createRoom({ visibility: "private", seats: 2, stepSeconds: 60 }),
+    );
+    as("r2");
+    must(await A.joinRoom(code));
+    as("r1");
+    must(await A.startGame(code));
+    await voteAll(code, ["r1", "r2"]);
+    const theme = (await view(code)).body.theme;
+    if (!theme) throw new Error("no theme");
+
+    // a theme nobody played yet
+    expect(await A.randomPick(code)).toEqual({
+      ok: false,
+      error: "not_enough_picks",
+    });
+
+    // six characters picked in past matches with this theme, in any language
+    const { getBackend } = await import("./backend");
+    const { themeId } = await import("@/game/theme-id");
+    const library = (await import("../../data/characters.json"))
+      .default as unknown as { id: string; popularity: { pt?: number } }[];
+    const ids = library
+      .filter((c) => c.popularity.pt !== undefined)
+      .slice(0, 6)
+      .map((c) => c.id);
+    await getBackend().matches.record({
+      id: `seed-${code}`,
+      roomCode: "SEEDS",
+      round: 1,
+      theme,
+      themeId: themeId(theme),
+      startedAt: 0,
+      finishedAt: 1,
+      players: ids.map((id, i) => ({
+        userId: `seed-${i}`,
+        wasGuest: true,
+        lang: "en",
+        pickedById: null,
+        characterId: `${i % 2 ? "en" : "ja"}-${id}`,
+        characterName: id,
+        characterOrigin: null,
+        autoPicked: false,
+        result: "discovered",
+        place: 1,
+        discoveredAt: 1,
+        questions: 1,
+        guesses: 0,
+        timeMs: 1,
+      })),
+    });
+
+    const drawn = must(await A.randomPick(code));
+    expect(drawn.lang).toBe("pt");
+    expect(ids.map((id) => `pt-${id}`)).toContain(drawn.id);
+    // another press shows someone else
+    const again = must(await A.randomPick(code, drawn.id));
+    expect(again.id).not.toBe(drawn.id);
+
+    // a "no" is saved for this theme and lowers that character's chance
+    expect(await A.rateRandomPick(code, "pt-wd-Q999999999", false)).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    must(await A.rateRandomPick(code, drawn.id, false));
+    must(await A.rateRandomPick(code, again.id, true));
+    const scores = await getBackend().matches.popularPicks(themeId(theme), 100);
+    const key = (id: string) => id.slice(3);
+    expect(scores.find((p) => p.id === key(drawn.id))).toMatchObject({
+      dislikes: 1,
+      likes: 0,
+    });
+    expect(scores.find((p) => p.id === key(again.id))).toMatchObject({
+      likes: 1,
+    });
+    // answering again replaces the earlier answer
+    must(await A.rateRandomPick(code, drawn.id, true));
+    expect(
+      (await getBackend().matches.popularPicks(themeId(theme), 100)).find(
+        (p) => p.id === key(drawn.id),
+      ),
+    ).toMatchObject({ dislikes: 0, likes: 1 });
+    must(await A.confirmPick(code, again.id));
+    expect(await A.randomPick(code)).toEqual({
+      ok: false,
+      error: "already_done",
+    });
+  });
+});

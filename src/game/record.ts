@@ -1,5 +1,6 @@
 // What we keep of a finished match, per player: who picked what for whom,
 // how it ended and how long it took. Not shown anywhere yet.
+import { themeId } from "./theme-id";
 import type { Lang, Localized, PlayerId, RoomState } from "./types";
 
 export type PlayerResult = "discovered" | "gave_up" | "left" | "not_found";
@@ -13,6 +14,8 @@ export interface PlayerRecord {
   characterId: string | null;
   characterName: string | null;
   characterOrigin: string | null;
+  /** The clock picked the character, not a person: left out of what players pick for a theme. */
+  autoPicked: boolean;
   result: PlayerResult;
   /** 1 = first to discover. */
   place: number | null;
@@ -30,6 +33,8 @@ export interface MatchRecord {
   roomCode: string;
   round: number;
   theme: Localized | null;
+  /** themeId(theme): groups what players picked for the same theme. */
+  themeId: string | null;
   startedAt: number;
   finishedAt: number;
   players: PlayerRecord[];
@@ -61,6 +66,7 @@ export function matchRecord(s: RoomState, now: number): MatchRecord | null {
         characterId: a.character?.id ?? null,
         characterName: a.character?.name ?? null,
         characterOrigin: a.character?.origin ?? null,
+        autoPicked: !!a.auto,
         result,
         place: o?.place ?? null,
         discoveredAt: o?.discoveredAt ?? null,
@@ -74,6 +80,7 @@ export function matchRecord(s: RoomState, now: number): MatchRecord | null {
     roomCode: s.code,
     round: s.round,
     theme: s.theme,
+    themeId: s.theme ? themeId(s.theme) : null,
     startedAt,
     finishedAt: now,
     players,

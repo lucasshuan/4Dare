@@ -52,6 +52,7 @@
     "upload_failed": "Could not upload the image. Use a JPG, PNG or WebP up to 4 MB.",
     "rate_limited": "Too many tries. Wait a moment.",
     "too_early": "Hold on, the next step is about to start.",
+    "not_enough_picks": "No matches with this theme yet.",
     "unknown": "Something went wrong. Try again."
   },
   "image": {

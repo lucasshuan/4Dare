@@ -52,6 +52,7 @@
     "upload_failed": "Não deu para enviar a imagem. Use JPG, PNG ou WebP de até 4 MB.",
     "rate_limited": "Muitas tentativas. Espere um pouco.",
     "too_early": "Calma, a próxima etapa já vai começar.",
+    "not_enough_picks": "Ainda sem partidas nesse tema.",
     "unknown": "Algo deu errado. Tente de novo."
   },
   "image": {

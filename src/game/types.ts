@@ -117,6 +117,8 @@ export interface RoomPlayer extends Identity {
 export interface Assignment {
   pickerId: PlayerId;
   character: Character | null;
+  /** The clock picked it (the picker let the time run out). */
+  auto?: true;
 }
 
 export interface AnswerEntry {
@@ -264,6 +266,8 @@ export const ERROR_CODES = [
   "rate_limited",
   /** The step has not started yet: a reveal is still on screen. */
   "too_early",
+  /** Too few characters were picked for this theme in past matches to draw one. */
+  "not_enough_picks",
   "unknown",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

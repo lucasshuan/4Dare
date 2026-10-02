@@ -41,7 +41,15 @@
     "newImage": "画像（任意）",
     "save": "保存して選ぶ",
     "createNamed": "「{name}」を自分の画像で作る",
-    "createNew": "新しいキャラクターを作る"
+    "createNew": "新しいキャラクターを作る",
+    "random": "ランダム",
+    "randomAgain": "もう一度",
+    "randomHint": "このテーマでよく選ばれたキャラクターから1人を選びます",
+    "rateQuestion": "この結果はどう？",
+    "rateYes": "いいね",
+    "rateNo": "いまいち、もう一度",
+    "rateThanks": "ありがとう！",
+    "rateDismiss": "閉じる"
   },
   "vote": {
     "kicker": "テーマ投票",

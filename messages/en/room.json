@@ -41,7 +41,15 @@
     "newImage": "Picture (optional)",
     "save": "Save and pick",
     "createNamed": "Create “{name}” with your own picture",
-    "createNew": "Create a new character"
+    "createNew": "Create a new character",
+    "random": "Random",
+    "randomAgain": "Draw another",
+    "randomHint": "Draws one of the characters people picked most for this theme",
+    "rateQuestion": "Like this pick?",
+    "rateYes": "Yes",
+    "rateNo": "No, draw another",
+    "rateThanks": "Thanks!",
+    "rateDismiss": "Close"
   },
   "vote": {
     "kicker": "Theme vote",

@@ -4,6 +4,7 @@
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { normalizeName } from "@/game/match";
+import { themeId } from "@/game/theme-id";
 import {
   ANSWERS,
   type AnswerValue,
@@ -37,6 +38,7 @@ import {
 } from "./contract";
 import { allow } from "./rate-limit";
 import { dispatch, normalizeCode, openRoom } from "./rooms";
+import { drawPopular, PICKS_FETCHED, pickKey } from "./theme-picks";
 
 async function lang(): Promise<Lang> {
   try {
@@ -180,6 +182,94 @@ export async function confirmPick(
     if (typeof characterId !== "string" || characterId.length > 200) bad();
     const character = (await getBackend().characters.get(characterId)) ?? bad();
     return act(code, (id) => ({ type: "PICK", playerId: id, character }));
+  });
+}
+
+/**
+ * A character for the caller to pick, drawn among the ones players picked
+ * most in finished matches with this theme. Fails with "not_enough_picks"
+ * until the theme has enough history. `skip` is the one drawn last, so a
+ * second press shows someone else. The player still confirms it.
+ */
+export async function randomPick(
+  code: string,
+  skip?: string,
+): Promise<Result<CharacterDTO>> {
+  return run(async () => {
+    const who = await me();
+    if (!allow(`random:${who.id}`, 30, 60_000))
+      throw new GameError("rate_limited");
+    const { rooms, matches, characters } = getBackend();
+    const state = (await rooms.get(roomCode(code)))?.state;
+    if (!state) throw new GameError("not_found");
+    if (state.phase !== "picking") throw new GameError("wrong_phase");
+    const player = state.players.find((p) => p.id === who.id);
+    const mine = Object.values(state.assignments).find(
+      (a) => a.pickerId === who.id,
+    );
+    if (!player || !mine) throw new GameError("not_member");
+    if (mine.character) throw new GameError("already_done");
+    if (!state.theme) throw new GameError("not_enough_picks");
+    // Language-free keys: someone else's pick in another language is taken too.
+    const taken = new Set(
+      Object.values(state.assignments).flatMap((a) => {
+        const key = pickKey(a.character?.id ?? null);
+        return key ? [key] : [];
+      }),
+    );
+    const popular = await matches.popularPicks(
+      themeId(state.theme),
+      PICKS_FETCHED,
+    );
+    const c = await drawPopular(
+      popular,
+      player.lang,
+      taken,
+      typeof skip === "string" ? pickKey(skip) : null,
+      (ids) => characters.getMany(ids, player.lang),
+      Math.random,
+    );
+    if (!c) throw new GameError("not_enough_picks");
+    return toDTO(c);
+  });
+}
+
+/**
+ * The picker's verdict on a character the random button just drew: "no"
+ * makes it less likely to be drawn for this theme again, "yes" more.
+ */
+export async function rateRandomPick(
+  code: string,
+  characterId: string,
+  liked: boolean,
+): Promise<Result<null>> {
+  return run(async () => {
+    const who = await me();
+    if (!allow(`rate:${who.id}`, 30, 60_000))
+      throw new GameError("rate_limited");
+    const key =
+      typeof characterId === "string" && characterId.length <= 200
+        ? pickKey(characterId)
+        : null;
+    if (!key || typeof liked !== "boolean") bad();
+    const { rooms, matches } = getBackend();
+    const state = (await rooms.get(roomCode(code)))?.state;
+    if (!state) throw new GameError("not_found");
+    if (!state.players.some((p) => p.id === who.id))
+      throw new GameError("not_member");
+    if (state.phase !== "picking" || !state.theme)
+      throw new GameError("wrong_phase");
+    const theme = themeId(state.theme);
+    // Only characters the button can draw for this theme get a say.
+    const known = await matches.popularPicks(theme, PICKS_FETCHED);
+    if (!known.some((p) => p.id === key)) bad();
+    await matches.rateDraw({
+      themeId: theme,
+      characterId: key as string,
+      userId: who.id,
+      liked,
+    });
+    return null;
   });
 }
 

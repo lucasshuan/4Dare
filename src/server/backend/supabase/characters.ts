@@ -56,6 +56,17 @@ export function supabaseCharacters(): CharacterStore {
       return ((data ?? []) as Row[]).map(toCharacter);
     },
     get: entry,
+    async getMany(ids, lang) {
+      const keys = [...new Set(ids.map((id) => parseEntryId(id)?.id ?? id))];
+      if (keys.length === 0) return [];
+      const { data, error } = await db()
+        .from("character_entries")
+        .select(COLUMNS)
+        .eq("lang", lang)
+        .in("character_id", keys);
+      if (error) throw error;
+      return ((data ?? []) as Row[]).map(toCharacter);
+    },
     async create(input) {
       const id = `u-${randomUUID()}`;
       const made = await db().from("characters").insert({
