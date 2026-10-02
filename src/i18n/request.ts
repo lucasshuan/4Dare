@@ -12,10 +12,13 @@ export const NAMESPACES = [
   "result",
   "room",
   "turn",
+  "meta",
 ] as const;
 
-export default getRequestConfig(async ({ requestLocale }) => {
-  const requested = await requestLocale;
+// `locale` is set when a caller names it (share images, metadata). Then the request is
+// never read: even touching `requestLocale` reads headers, which fails at build time.
+export default getRequestConfig(async (params) => {
+  const requested = params.locale ?? (await params.requestLocale);
   const locale = hasLocale(routing.locales, requested)
     ? requested
     : routing.defaultLocale;

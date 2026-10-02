@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Bricolage_Grotesque,
   DM_Mono,
@@ -7,9 +7,11 @@ import {
 } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Providers } from "@/components/providers";
+import { APP_NAME } from "@/config";
 import { routing } from "@/i18n/routing";
+import { pageMetadata, SITE_URL } from "@/server/seo";
 import "../globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -28,10 +30,33 @@ const zenMaru = Zen_Maru_Gothic({
   preload: false,
 });
 
-export const metadata: Metadata = {
-  title: "Dare",
-  description: "A guessing game for 2 to 4 friends.",
-};
+export async function generateMetadata({
+  params,
+}: LayoutProps<"/[locale]">): Promise<Metadata> {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) return {};
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return {
+    metadataBase: new URL(SITE_URL),
+    applicationName: APP_NAME,
+    keywords: t("keywords").split(", "),
+    creator: APP_NAME,
+    publisher: APP_NAME,
+    category: "games",
+    formatDetection: { telephone: false, email: false, address: false },
+    appleWebApp: { title: APP_NAME, capable: true },
+    ...pageMetadata({
+      lang: locale,
+      path: "/",
+      title: { default: t("title"), template: `%s · ${APP_NAME}` },
+      description: t("description"),
+      shareTitle: t("title"),
+    }),
+  };
+}
+
+// Brand blue: the browser bar on phones and the stripe on Discord embeds.
+export const viewport: Viewport = { themeColor: "#2B69C8" };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

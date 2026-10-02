@@ -1,0 +1,48 @@
+{
+  "title": "Ludodare: guessing games to play with friends",
+  "description": "Free party games to play online with friends, right in the browser. Start with Who am I?: everyone picks a character for someone else, and you find out yours with yes-or-no questions.",
+  "keywords": "guessing game, who am I, who am I online, party game, game to play with friends, free online game, browser game, multiplayer, yes or no questions, heads up, sticky note game",
+  "tagline": "Guessing games to play with friends",
+  "chips": {
+    "free": "Free",
+    "players": "2–4 players",
+    "browser": "In the browser"
+  },
+  "imageAlt": "Ludodare: guessing games to play with friends",
+  "whoAmI": {
+    "title": "Who am I? Play online with friends",
+    "description": "Everyone picks a character for someone else. You see their cards, never yours. Find out who you are with yes-or-no questions. Free, 2 to 4 players, no sign-up.",
+    "pitch": "Everyone picks a character for someone else. Find out yours with yes-or-no questions.",
+    "imageAlt": "Who am I? on Ludodare: cards on the table and a yes-or-no question"
+  },
+  "newRoom": {
+    "title": "Create a room"
+  },
+  "profile": {
+    "title": "Your profile"
+  },
+  "room": {
+    "title": "Room {code}",
+    "inviteTitle": "Come play Who am I? with me",
+    "inviteDescription": "Room {code} on Ludodare. Everyone picks a character for someone else, and you find out yours with yes-or-no questions. Free, no sign-up.",
+    "invited": "You're invited!",
+    "join": "Join my room",
+    "code": "Room code",
+    "imageAlt": "Invite to room {code} on Ludodare"
+  },
+  "tab": {
+    "lobby": "Lobby",
+    "voting": "Theme vote",
+    "picking": "Picking characters",
+    "playing": "In a match",
+    "finished": "Results",
+    "alert": {
+      "voting": "Vote for a theme!",
+      "picking": "Pick a character!",
+      "asking": "Your turn!",
+      "answering": "Answer the question!",
+      "guessing": "Make your guess!",
+      "validating": "Check a guess!"
+    }
+  }
+}
