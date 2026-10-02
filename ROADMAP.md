@@ -20,7 +20,7 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 - [x] Turno: perguntar, todos respondem, palpite, validação por quem escolheu
 - [x] Revelação simples entre etapas e relógio de cada etapa
 - [x] Fim com a colocação de todo mundo
-- [ ] README curto: como rodar
+- [x] README curto: como rodar
 
 ## Fase 2 — Online com os amigos
 
