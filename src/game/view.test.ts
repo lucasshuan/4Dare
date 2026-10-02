@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isCloseMatch, normalizeName } from "./match";
-import { Game } from "./test-utils";
+import { Game, THEMES } from "./test-utils";
 import { GameError } from "./types";
 import { toPublicRoom, toView } from "./view";
 
@@ -208,5 +208,37 @@ describe("guess matching", () => {
     expect(isCloseMatch("Lord Vader", ["Darth Vader"])).toBe(false);
     expect(isCloseMatch("Coringa", ["Joker", "Coringa"])).toBe(true);
     expect(isCloseMatch("x".repeat(5000), ["Mario"])).toBe(false);
+  });
+});
+
+describe("the theme vote in the view", () => {
+  it("shows the options, open votes and statuses, then the result while it is revealed", () => {
+    const g = new Game(3);
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    g.do({ type: "VOTE", playerId: "p2", option: 2 });
+    const v = toView(g.state, 1, "p1", g.now);
+    expect(v.vote).toMatchObject({
+      options: THEMES,
+      votes: [{ byId: "p2", option: 2 }],
+      yourVote: null,
+      chosen: null,
+      total: 3,
+    });
+    expect(v.players.map((p) => p.status)).toEqual([
+      "voting",
+      "voted",
+      "voting",
+    ]);
+    expect(toPublicRoom(g.state, g.now)?.status).toBe("playing");
+
+    g.do({ type: "VOTE", playerId: "p1", option: 2 });
+    g.do({ type: "VOTE", playerId: "p3", option: 0 });
+    const shown = toView(g.state, 2, "p3", g.now);
+    expect(shown.phase).toBe("picking");
+    expect(shown.reveal?.kind).toBe("theme");
+    expect(shown.vote).toMatchObject({ chosen: 2, yourVote: 0 });
+    const later = toView(g.state, 2, "p3", (g.state.reveal?.until ?? 0) + 1);
+    expect(later.vote).toBeNull();
+    expect(later.reveal).toBeNull();
   });
 });

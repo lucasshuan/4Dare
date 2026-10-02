@@ -54,6 +54,9 @@ export const STEP_SECONDS_MIN = 30;
 export const STEP_SECONDS_MAX = 300;
 /** The lobby always waits 2 minutes, whatever the step time is. */
 export const LOBBY_SECONDS = 120;
+/** Themes offered in the vote before each match, and how long the vote lasts. */
+export const THEME_OPTIONS = 3;
+export const VOTE_SECONDS = 20;
 export const MAX_QUESTION = 140;
 export const MAX_NOTE = 200;
 export const MAX_GUESS = 80;
@@ -72,6 +75,9 @@ export const REVEAL_TIMING = {
   answersMax: 10000,
   guessMiss: 2500,
   guessHit: 3500,
+  /** The winning theme takes the stage; a tie first spins between the tied themes. */
+  theme: 3200,
+  themeTieSpin: 2000,
 } as const;
 
 /** One row of a language's character library. */
@@ -87,6 +93,8 @@ export interface Character {
 
 export type Phase =
   | "lobby"
+  /** Everyone votes for one of three themes. */
+  | "voting"
   | "picking"
   | "asking"
   | "answering"
@@ -147,9 +155,20 @@ export interface Outcome {
 }
 
 /** The moment everyone sees between two steps. The play itself (answers, result) lives in `plays`. */
+/** The vote that picks the theme of a match. */
+export interface ThemeVote {
+  options: Localized[];
+  /** Option index by voter. Players may change their vote until everyone has voted. */
+  votes: Record<PlayerId, number>;
+  /** The winner, once the vote is over. */
+  chosen: number | null;
+  /** Options that tied for the most votes; the draw picked `chosen` among them. */
+  tied: number[];
+}
+
 export interface Reveal {
-  kind: "answers" | "guess";
-  /** Number of the jogada being revealed. */
+  kind: "answers" | "guess" | "theme";
+  /** Number of the jogada being revealed (the round, for a theme). */
   n: number;
   startsAt: number;
   until: number;
@@ -165,6 +184,8 @@ export interface RoomState {
   /** Turn order, set when the match starts. */
   order: PlayerId[];
   theme: Localized | null;
+  /** The theme vote of the current round; kept after it closes, for the reveal. */
+  vote: ThemeVote | null;
   assignments: Record<PlayerId, Assignment>;
   turnPlayerId: PlayerId | null;
   plays: Play[];
@@ -194,7 +215,9 @@ export type GameEvent =
     }
   /** Name or avatar changed while sitting in the room. */
   | { type: "UPDATE_IDENTITY"; player: Identity }
-  | { type: "START"; playerId: PlayerId; theme: Localized }
+  /** `themes`: the THEME_OPTIONS themes put to the vote. */
+  | { type: "START"; playerId: PlayerId; themes: Localized[] }
+  | { type: "VOTE"; playerId: PlayerId; option: number }
   | { type: "PICK"; playerId: PlayerId; character: Character }
   | { type: "ASK"; playerId: PlayerId; text: string }
   | {
@@ -207,12 +230,16 @@ export type GameEvent =
   | { type: "PASS"; playerId: PlayerId }
   | { type: "VALIDATE"; playerId: PlayerId; correct: boolean }
   | { type: "GIVE_UP"; playerId: PlayerId }
-  | { type: "REMATCH"; playerId: PlayerId; theme: Localized }
+  | { type: "REMATCH"; playerId: PlayerId; themes: Localized[] }
   /**
    * The step's clock ran out. The caller supplies what the engine cannot make up:
-   * a theme (lobby auto-start) and popular characters (picking).
+   * themes to vote on (lobby auto-start) and popular characters (picking).
    */
-  | { type: "TIMEOUT"; theme?: Localized; fallbackCharacters?: Character[] };
+  | {
+      type: "TIMEOUT";
+      themes?: Localized[];
+      fallbackCharacters?: Character[];
+    };
 
 export interface Ctx {
   now: number;
@@ -258,6 +285,9 @@ export type PlayerStatus =
   | "host"
   | "ready"
   | "not_ready"
+  // voting
+  | "voting"
+  | "voted"
   // picking
   | "picking"
   | "picked"
@@ -339,6 +369,8 @@ export interface TurnView {
 }
 
 export type RevealView =
+  /** The theme vote is over; the vote screen plays it out (see VoteView). */
+  | { kind: "theme"; n: number; startsAt: number; until: number }
   | {
       kind: "answers";
       n: number;
@@ -361,6 +393,17 @@ export type RevealView =
       startsAt: number;
       until: number;
     };
+
+export interface VoteView {
+  options: Localized[];
+  /** Votes are open: everyone sees who voted for what. */
+  votes: { byId: PlayerId; option: number }[];
+  yourVote: number | null;
+  chosen: number | null;
+  tied: number[];
+  /** How many players vote. */
+  total: number;
+}
 
 export interface PickView {
   /** The player you are picking for. */
@@ -388,6 +431,8 @@ export interface RoomView {
   reveal: RevealView | null;
   /** Server clock when this view was built; use it to correct the countdown. */
   serverNow: number;
+  /** Present while voting and while the chosen theme is revealed. */
+  vote: VoteView | null;
   /** Present while picking. */
   pick: PickView | null;
   /** Present from "asking" to "validating". */

@@ -3,6 +3,8 @@
     "host": "Host",
     "ready": "Ready",
     "not_ready": "Not ready",
+    "voting": "Voting",
+    "voted": "Voted",
     "picking": "Picking",
     "picked": "Picked",
     "asking": "Asking",

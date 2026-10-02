@@ -22,6 +22,7 @@ import {
   type RoomView,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
+  THEME_OPTIONS,
 } from "@/game/types";
 import { toView } from "@/game/view";
 import { getBackend } from "./backend";
@@ -149,11 +150,23 @@ export async function setReady(
   );
 }
 
-/** Host only, 2+ players. Draws the theme and the picking ring. */
+/** Host only, 2+ players. Draws the themes everyone votes on. */
 export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {
-    const theme = await getBackend().themes.draw([]);
-    return act(code, (id) => ({ type: "START", playerId: id, theme }));
+    const themes = await getBackend().themes.draw([], THEME_OPTIONS);
+    return act(code, (id) => ({ type: "START", playerId: id, themes }));
+  });
+}
+
+/** Any player, while voting: `option` is the index of the theme. They may change it until everyone has voted. */
+export async function voteTheme(
+  code: string,
+  option: number,
+): Promise<Result<RoomView>> {
+  return run(() => {
+    if (!Number.isInteger(option) || option < 0 || option >= THEME_OPTIONS)
+      bad();
+    return act(code, (id) => ({ type: "VOTE", playerId: id, option }));
   });
 }
 
@@ -252,10 +265,12 @@ export async function giveUp(code: string): Promise<Result<RoomView>> {
 export async function rematch(code: string): Promise<Result<RoomView>> {
   return run(async () => {
     const stored = await getBackend().rooms.get(roomCode(code));
-    const theme = await getBackend().themes.draw(
-      stored?.state.theme ? [stored.state.theme] : [],
+    const themes = await getBackend().themes.draw(
+      stored?.state.vote?.options ??
+        (stored?.state.theme ? [stored.state.theme] : []),
+      THEME_OPTIONS,
     );
-    return act(code, (id) => ({ type: "REMATCH", playerId: id, theme }));
+    return act(code, (id) => ({ type: "REMATCH", playerId: id, themes }));
   });
 }
 

@@ -22,12 +22,12 @@ function store(list: () => Promise<Localized[]>) {
 }
 
 describe("themes", () => {
-  it("draws from the store's list, read once for many matches", async () => {
+  it("draws different themes from the store's list, read once for many matches", async () => {
     const { s, reads } = store(async () => LIST);
     const source = themes(s);
     for (let i = 0; i < 20; i++) {
-      const theme = await source.draw([]);
-      expect(LIST.map((x) => x.en)).toContain(theme.en);
+      const drawn = await source.draw([], 3);
+      expect(drawn.map((x) => x.en).sort()).toEqual(LIST.map((x) => x.en));
     }
     expect(reads()).toBe(1);
   });
@@ -36,8 +36,8 @@ describe("themes", () => {
     const { s } = store(async () => LIST);
     const source = themes(s);
     for (let i = 0; i < 20; i++) {
-      const theme = await source.draw([LIST[0], LIST[1]]);
-      expect(theme.en).toBe("Wizards");
+      const [first] = await source.draw([LIST[0], LIST[1]], 1);
+      expect(first.en).toBe("Wizards");
     }
   });
 
@@ -45,13 +45,17 @@ describe("themes", () => {
     const { s } = store(async () => {
       throw new Error("database down");
     });
-    const theme = await themes(s).draw([]);
-    expect(themeBank().map((x) => x.en)).toContain(theme.en);
+    const drawn = await themes(s).draw([], 3);
+    expect(drawn).toHaveLength(3);
+    for (const theme of drawn)
+      expect(themeBank().map((x) => x.en)).toContain(theme.en);
   });
 
   it("answers instantly from the bundled list before the first read", () => {
     const { s } = store(() => new Promise(() => {}));
-    const theme = themes(s).drawFromBank();
-    expect(themeBank().map((x) => x.en)).toContain(theme.en);
+    const drawn = themes(s).drawFromBank(3);
+    expect(new Set(drawn.map((x) => x.en)).size).toBe(3);
+    for (const theme of drawn)
+      expect(themeBank().map((x) => x.en)).toContain(theme.en);
   });
 });

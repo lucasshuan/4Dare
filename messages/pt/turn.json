@@ -3,6 +3,8 @@
     "host": "Anfitrião",
     "ready": "Pronto",
     "not_ready": "Não está pronto",
+    "voting": "Votando",
+    "voted": "Votou",
     "picking": "Escolhendo",
     "picked": "Escolheu",
     "asking": "Perguntando",

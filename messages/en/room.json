@@ -42,5 +42,24 @@
     "save": "Save and pick",
     "createNamed": "Create “{name}” with your own picture",
     "createNew": "Create a new character"
+  },
+  "vote": {
+    "kicker": "Theme vote",
+    "title": "Vote for the theme",
+    "subtitle": "The most voted theme wins. A tie goes to the wheel.",
+    "option": "Theme {n}",
+    "votes": "{count, plural, =0 {No votes} one {# vote} other {# votes}}",
+    "yourVote": "Your vote",
+    "progress": "{done} of {total} voted",
+    "waitingFor": "Still voting: {names}",
+    "allVoted": "Everyone voted!",
+    "change": "tap another theme to change your vote",
+    "tieTitle": "It's a tie!",
+    "tie": "Spinning the wheel between the tied themes…",
+    "chosenTitle": "The theme is…",
+    "chosenByVotes": "Chosen by the most votes.",
+    "chosenByDraw": "The wheel has spoken.",
+    "chosen": "Chosen theme",
+    "announce": "Chosen theme: {theme}"
   }
 }

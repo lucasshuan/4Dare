@@ -67,10 +67,10 @@ export interface ThemeStore {
 }
 
 export interface ThemeSource {
-  /** A fresh theme in the three languages. Never throws: falls back to the built-in bank. */
-  draw(avoid: Localized[]): Promise<Localized>;
+  /** `count` different themes in the three languages. Never throws: falls back to the built-in bank. */
+  draw(avoid: Localized[], count: number): Promise<Localized[]>;
   /** Instant, no network: straight from the bank. */
-  drawFromBank(): Localized;
+  drawFromBank(count: number): Localized[];
 }
 
 export interface FileStore {

@@ -42,5 +42,24 @@
     "save": "保存して選ぶ",
     "createNamed": "「{name}」を自分の画像で作る",
     "createNew": "新しいキャラクターを作る"
+  },
+  "vote": {
+    "kicker": "テーマ投票",
+    "title": "テーマに投票しよう",
+    "subtitle": "いちばん票の多いテーマに決定。同票ならルーレットで決めます。",
+    "option": "テーマ{n}",
+    "votes": "{count}票",
+    "yourVote": "あなたの票",
+    "progress": "{total}人中{done}人が投票",
+    "waitingFor": "投票中：{names}",
+    "allVoted": "全員投票しました！",
+    "change": "別のテーマを選ぶと投票を変えられます",
+    "tieTitle": "同票！",
+    "tie": "同票のテーマでルーレットを回しています…",
+    "chosenTitle": "テーマは…",
+    "chosenByVotes": "多数決で決まりました。",
+    "chosenByDraw": "ルーレットで決まりました。",
+    "chosen": "決定したテーマ",
+    "announce": "決定したテーマ：{theme}"
   }
 }

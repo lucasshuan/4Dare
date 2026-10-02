@@ -52,6 +52,7 @@ export function supabaseRooms(): RoomStore {
         .select("state")
         .in("phase", [
           "lobby",
+          "voting",
           "picking",
           "asking",
           "answering",

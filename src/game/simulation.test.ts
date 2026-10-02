@@ -1,7 +1,7 @@
 // Thousands of random matches: every step keeps the invariants and nobody ever sees their own card.
 import { describe, expect, it } from "vitest";
 import { isExpired, reduce } from "./engine";
-import { Game, rng, THEME } from "./test-utils";
+import { Game, rng, THEMES } from "./test-utils";
 import {
   ANSWERS,
   type Character,
@@ -30,10 +30,12 @@ function randomEvent(s: RoomState, r: () => number): GameEvent {
   if (roll < 0.15)
     return {
       type: "TIMEOUT",
-      theme: THEME,
+      themes: THEMES,
       fallbackCharacters: s.players.map((p) => secret(`fb-${p.id}`)),
     };
-  if (roll < 0.25) return { type: "START", playerId: who, theme: THEME };
+  if (roll < 0.22) return { type: "START", playerId: who, themes: THEMES };
+  if (roll < 0.25)
+    return { type: "VOTE", playerId: who, option: Math.floor(r() * 4) };
   if (roll < 0.35) {
     const target = Object.keys(s.assignments).find(
       (t) => s.assignments[t].pickerId === who,
@@ -58,7 +60,7 @@ function randomEvent(s: RoomState, r: () => number): GameEvent {
   if (roll < 0.85) return { type: "PASS", playerId: who };
   if (roll < 0.95)
     return { type: "VALIDATE", playerId: who, correct: r() < 0.5 };
-  return { type: "REMATCH", playerId: who, theme: THEME };
+  return { type: "REMATCH", playerId: who, themes: THEMES };
 }
 
 function checkInvariants(s: RoomState) {
@@ -107,7 +109,12 @@ function checkInvariants(s: RoomState) {
       expect(len).toBeGreaterThanOrEqual(t.answersMin);
       expect(len).toBeLessThanOrEqual(t.answersMax);
     } else {
-      expect([t.guessHit, t.guessMiss]).toContain(len);
+      expect([
+        t.guessHit,
+        t.guessMiss,
+        t.theme,
+        t.theme + t.themeTieSpin,
+      ]).toContain(len);
     }
   }
 }

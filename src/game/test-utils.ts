@@ -11,6 +11,12 @@ import {
 } from "./types";
 
 export const THEME: Localized = { en: "Villains", pt: "Vilões", ja: "悪役" };
+/** What START puts to the vote; THEME comes first. */
+export const THEMES: Localized[] = [
+  THEME,
+  { en: "Robots", pt: "Robôs", ja: "ロボット" },
+  { en: "Pirates", pt: "Piratas", ja: "海賊" },
+];
 
 export const ident = (id: string, guestNumber = 10): Identity => ({
   id,
@@ -86,12 +92,21 @@ export class Game {
     return this.do({ type: "TIMEOUT", ...extra });
   }
 
+  /** Starts the vote and has everyone vote for THEME, so the match begins. */
   start() {
-    return this.do({
-      type: "START",
-      playerId: this.state.hostId,
-      theme: THEME,
-    });
+    this.do({ type: "START", playerId: this.state.hostId, themes: THEMES });
+    this.voteAll(0);
+    this.skipReveal();
+    return this.state;
+  }
+
+  /** Everyone still in the vote picks `option`. */
+  voteAll(option: number) {
+    for (const p of this.state.players) {
+      if (this.state.phase !== "voting") break;
+      this.do({ type: "VOTE", playerId: p.id, option });
+    }
+    return this.state;
   }
 
   /** Everyone picks; the character for player X is "c-X" named "Name X". */

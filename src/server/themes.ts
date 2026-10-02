@@ -29,10 +29,29 @@ const same = (a: Localized, b: Localized) =>
 /** How long a server keeps the theme list before reading it again. */
 const LIST_TTL = 10 * 60_000;
 
-function pickFrom(all: Localized[], avoid: Localized[]): Localized {
-  const fresh = all.filter((t) => !avoid.some((a) => same(a, t)));
-  const pool = fresh.length ? fresh : all;
-  return pool[Math.floor(Math.random() * pool.length)];
+const shuffled = <T>(items: T[]) =>
+  items
+    .map((item) => ({ item, key: Math.random() }))
+    .sort((a, b) => a.key - b.key)
+    .map(({ item }) => item);
+
+/** `count` different themes, avoiding `avoid` while the list allows it. */
+function pickFrom(
+  all: Localized[],
+  avoid: Localized[],
+  count: number,
+): Localized[] {
+  const avoided = (t: Localized) => avoid.some((a) => same(a, t));
+  const ordered = [
+    ...shuffled(all.filter((t) => !avoided(t))),
+    ...shuffled(all.filter(avoided)),
+  ];
+  const out: Localized[] = [];
+  for (const t of ordered) {
+    if (out.length === count) break;
+    if (!out.some((o) => same(o, t))) out.push(t);
+  }
+  return out;
 }
 
 const ThemeSchema = z.object({
@@ -123,22 +142,24 @@ export function themes(store: ThemeStore): ThemeSource {
   };
 
   return {
-    drawFromBank: () => {
+    drawFromBank: (count) => {
       void refresh();
-      return pickFrom(current(), []);
+      return pickFrom(current(), [], count);
     },
-    async draw(avoid) {
+    async draw(avoid, count) {
       const list = await refresh();
-      // Half of the matches get an AI theme (when a key is set), so the list's best ones still show up.
-      if (Math.random() < 0.5) {
-        const fresh = await drawWithAI(avoid, list);
+      const picked = pickFrom(list, avoid, count);
+      // Half of the votes offer one AI theme (when a key is set), so the list's best ones still show up.
+      if (count > 0 && Math.random() < 0.5) {
+        const others = picked.slice(0, count - 1);
+        const fresh = await drawWithAI([...avoid, ...others], list);
         if (fresh) {
           cached = [...current(), fresh];
           background(() => store.add(fresh));
-          return fresh;
+          return shuffled([...others, fresh]);
         }
       }
-      return pickFrom(list, avoid);
+      return picked;
     },
   };
 }

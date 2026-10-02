@@ -28,6 +28,8 @@ import {
   type RoomState,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
+  THEME_OPTIONS,
+  VOTE_SECONDS,
 } from "./types";
 
 type Question = Extract<Play, { kind: "question" }>;
@@ -92,6 +94,58 @@ function shuffle<T>(items: T[], random: () => number): T[] {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+/** Puts THEME_OPTIONS themes to the vote; the match starts once it is over. */
+function beginVote(s: RoomState, themes: Localized[] | undefined, ctx: Ctx) {
+  if (!themes || themes.length !== THEME_OPTIONS) fail("invalid_input");
+  s.vote = {
+    options: (themes ?? []).map((t) => ({ ...t })),
+    votes: {},
+    chosen: null,
+    tied: [],
+  };
+  s.theme = null;
+  s.reveal = null;
+  s.turnPlayerId = null;
+  s.phase = "voting";
+  startStep(s, ctx, VOTE_SECONDS * 1000);
+}
+
+/** Most votes wins; a tie (or nobody voting) is drawn. Then the match starts behind the reveal. */
+function closeVote(s: RoomState, ctx: Ctx) {
+  const v = s.vote ?? fail("wrong_phase");
+  const counts = v.options.map(() => 0);
+  for (const p of s.players) {
+    const option = v.votes[p.id];
+    if (option !== undefined) counts[option] += 1;
+  }
+  const most = Math.max(...counts);
+  v.tied = counts.flatMap((n, i) => (n === most ? [i] : []));
+  v.chosen = v.tied[Math.floor(ctx.random() * v.tied.length)];
+  beginMatch(s, v.options[v.chosen], ctx);
+  const t = REVEAL_TIMING;
+  const ms = t.theme + (v.tied.length > 1 ? t.themeTieSpin : 0);
+  s.reveal = {
+    kind: "theme",
+    n: s.round,
+    startsAt: ctx.now,
+    until: ctx.now + ms,
+  };
+  startStep(s, ctx, stepMs(s));
+}
+
+const everyoneVoted = (s: RoomState) =>
+  s.players.every((p) => s.vote?.votes[p.id] !== undefined);
+
+function vote(s: RoomState, playerId: PlayerId, option: number, ctx: Ctx) {
+  if (s.phase !== "voting") fail("wrong_phase");
+  requireSeated(s, playerId);
+  const v = s.vote ?? fail("wrong_phase");
+  if (!Number.isInteger(option) || option < 0 || option >= v.options.length)
+    fail("invalid_input");
+  v.votes[playerId] = option;
+  if (everyoneVoted(s)) closeVote(s, ctx);
 }
 
 function beginMatch(s: RoomState, theme: Localized, ctx: Ctx) {
@@ -275,6 +329,7 @@ export function createRoom(
     ],
     order: [],
     theme: null,
+    vote: null,
     assignments: {},
     turnPlayerId: null,
     plays: [],
@@ -336,8 +391,10 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       if (e.playerId !== s.hostId) fail("not_host");
       if (s.phase !== "lobby") fail("wrong_phase");
       if (s.players.length < 2) fail("need_two_players");
-      return beginMatch(s, e.theme, ctx);
+      return beginVote(s, e.themes, ctx);
     }
+    case "VOTE":
+      return vote(s, e.playerId, e.option, ctx);
     case "PICK":
       return pick(s, e.playerId, e.character, ctx);
     case "ASK":
@@ -362,7 +419,7 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     case "GIVE_UP":
       return giveUp(s, e.playerId, ctx);
     case "REMATCH":
-      return rematch(s, e.playerId, e.theme, ctx);
+      return rematch(s, e.playerId, e.themes, ctx);
     case "TIMEOUT":
       return timeout(s, e, ctx);
   }
@@ -409,7 +466,7 @@ function handOverHost(s: RoomState) {
 function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   const p = requireSeated(s, id);
   if (s.phase === "closed") fail("wrong_phase");
-  if (s.phase === "lobby" || s.phase === "finished") {
+  if (s.phase === "lobby" || s.phase === "finished" || s.phase === "voting") {
     s.players = s.players.filter((x) => x.id !== id);
     if (s.players.length === 0) {
       s.phase = "closed";
@@ -417,6 +474,16 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
       return;
     }
     handOverHost(s);
+    if (s.phase !== "voting") return;
+    if (s.vote) delete s.vote.votes[id];
+    // Nobody left to play with: back to the lobby to wait for others.
+    if (s.players.length < 2) {
+      s.phase = "lobby";
+      s.vote = null;
+      startStep(s, ctx, LOBBY_SECONDS * 1000);
+      return;
+    }
+    if (everyoneVoted(s)) closeVote(s, ctx);
     return;
   }
   // mid-match: keep the seat so the history still makes sense
@@ -522,14 +589,19 @@ function giveUp(s: RoomState, playerId: PlayerId, ctx: Ctx) {
   if (TURN_PHASES.has(s.phase) && !anyoneLeft) finish(s);
 }
 
-function rematch(s: RoomState, playerId: PlayerId, theme: Localized, ctx: Ctx) {
+function rematch(
+  s: RoomState,
+  playerId: PlayerId,
+  themes: Localized[],
+  ctx: Ctx,
+) {
   requireSeated(s, playerId);
   if (playerId !== s.hostId) fail("not_host");
   if (s.phase !== "finished") fail("wrong_phase");
   s.players = s.players.filter(isPresent);
   handOverHost(s);
   if (s.players.length < 2) fail("need_two_players");
-  beginMatch(s, theme, ctx);
+  beginVote(s, themes, ctx);
 }
 
 function timeout(
@@ -544,8 +616,10 @@ function timeout(
         s.phase = "closed";
         return stopClock(s);
       }
-      return beginMatch(s, e.theme ?? fail("invalid_input"), ctx);
+      return beginVote(s, e.themes, ctx);
     }
+    case "voting":
+      return closeVote(s, ctx);
     case "picking": {
       const used = new Set(
         Object.values(s.assignments).flatMap((a) =>

@@ -3,6 +3,8 @@
     "host": "ホスト",
     "ready": "準備OK",
     "not_ready": "準備中",
+    "voting": "投票中",
+    "voted": "投票済み",
     "picking": "選択中",
     "picked": "選択済み",
     "asking": "質問中",

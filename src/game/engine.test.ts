@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createRoom, isExpired, reduce } from "./engine";
-import { char, Game, ident, THEME } from "./test-utils";
+import { char, Game, ident, THEMES } from "./test-utils";
 import {
   DEFAULT_SETTINGS,
   GameError,
   LOBBY_SECONDS,
   REVEAL_TIMING,
   type RoomState,
+  VOTE_SECONDS,
 } from "./types";
 
 const code = (fn: () => unknown) => {
@@ -111,7 +112,7 @@ describe("lobby", () => {
     g.do({ type: "SET_READY", playerId: "p2", ready: true });
     expect(g.state.players[1].ready).toBe(true);
     expect(
-      code(() => g.do({ type: "START", playerId: "p2", theme: THEME })),
+      code(() => g.do({ type: "START", playerId: "p2", themes: THEMES })),
     ).toBe("not_host");
     g.start();
     expect(g.state.phase).toBe("picking");
@@ -122,17 +123,108 @@ describe("lobby", () => {
 
   it("the lobby clock starts the match with 2+ players and closes it with one", () => {
     const g = new Game(2);
-    expect(code(() => g.do({ type: "TIMEOUT", theme: THEME }))).toBe(
+    expect(code(() => g.do({ type: "TIMEOUT", themes: THEMES }))).toBe(
       "wrong_phase",
     );
     expect(code(() => g.timeout())).toBe("invalid_input");
-    g.timeout({ theme: THEME });
-    expect(g.state.phase).toBe("picking");
+    g.timeout({ themes: THEMES });
+    expect(g.state.phase).toBe("voting");
 
     const lonely = new Game(1);
-    lonely.timeout({ theme: THEME });
+    lonely.timeout({ themes: THEMES });
     expect(lonely.state.phase).toBe("closed");
     expect(lonely.state.deadline).toBeNull();
+  });
+});
+
+describe("the theme vote", () => {
+  const voting = (players: number, seed = 1) => {
+    const g = new Game(players, seed);
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    return g;
+  };
+  const vote = (g: Game, playerId: string, option: number) =>
+    g.do({ type: "VOTE", playerId, option });
+
+  it("starts with three themes and a short clock; needs exactly three", () => {
+    const g = new Game(2);
+    expect(
+      code(() =>
+        g.do({ type: "START", playerId: "p1", themes: THEMES.slice(0, 2) }),
+      ),
+    ).toBe("invalid_input");
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    expect(g.state.phase).toBe("voting");
+    expect(g.state.theme).toBeNull();
+    expect(g.state.vote?.options).toEqual(THEMES);
+    expect(g.state.deadline).toBe(g.now + VOTE_SECONDS * 1000);
+  });
+
+  it("the most voted theme wins once everyone voted; votes can change until then", () => {
+    const g = voting(3);
+    vote(g, "p1", 2);
+    vote(g, "p1", 1);
+    vote(g, "p2", 1);
+    expect(g.state.phase).toBe("voting");
+    expect(code(() => vote(g, "p3", 3))).toBe("invalid_input");
+    expect(code(() => vote(g, "ghost", 0))).toBe("not_member");
+    vote(g, "p3", 0);
+    expect(g.state.phase).toBe("picking");
+    expect(g.state.theme).toEqual(THEMES[1]);
+    expect(g.state.vote).toMatchObject({ chosen: 1, tied: [1] });
+    expect(g.state.reveal).toMatchObject({
+      kind: "theme",
+      until: g.now + REVEAL_TIMING.theme,
+    });
+    // the picking clock waits for the reveal
+    expect(g.state.stepStartsAt).toBe(g.state.reveal?.until);
+    expect(code(() => vote(g, "p3", 1))).toBe("wrong_phase");
+  });
+
+  it("a tie is drawn among the tied themes, with a longer reveal", () => {
+    const g = voting(2);
+    vote(g, "p1", 0);
+    vote(g, "p2", 2);
+    expect(g.state.vote?.tied).toEqual([0, 2]);
+    expect([0, 2]).toContain(g.state.vote?.chosen);
+    expect(g.state.reveal?.until).toBe(
+      g.now + REVEAL_TIMING.theme + REVEAL_TIMING.themeTieSpin,
+    );
+  });
+
+  it("when the clock runs out, the votes so far decide; no votes is a draw of all three", () => {
+    const g = voting(3);
+    vote(g, "p2", 2);
+    g.timeout();
+    expect(g.state.theme).toEqual(THEMES[2]);
+
+    const quiet = voting(2, 7);
+    quiet.timeout();
+    expect(quiet.state.phase).toBe("picking");
+    expect(quiet.state.vote?.tied).toEqual([0, 1, 2]);
+  });
+
+  it("someone leaving drops their vote; alone, the room goes back to the lobby", () => {
+    const g = voting(3);
+    vote(g, "p1", 0);
+    vote(g, "p2", 1);
+    g.do({ type: "LEAVE", playerId: "p3" });
+    expect(g.state.phase).toBe("picking");
+    expect(g.state.players.map((p) => p.id)).toEqual(["p1", "p2"]);
+
+    const h = voting(2);
+    vote(h, "p2", 1);
+    h.do({ type: "LEAVE", playerId: "p2" });
+    expect(h.state.phase).toBe("lobby");
+    expect(h.state.vote).toBeNull();
+    expect(h.state.deadline).toBe(h.now + LOBBY_SECONDS * 1000);
+  });
+
+  it("the host leaving hands the room over and the vote goes on", () => {
+    const g = voting(3);
+    g.do({ type: "LEAVE", playerId: "p1" });
+    expect(g.state.phase).toBe("voting");
+    expect(g.state.hostId).toBe("p2");
   });
 });
 
@@ -457,13 +549,17 @@ describe("whole matches", () => {
         .sort(),
     ).toEqual([1, 2, 3, 4]);
     expect(
-      code(() => g.do({ type: "REMATCH", playerId: "p2", theme: THEME })),
+      code(() => g.do({ type: "REMATCH", playerId: "p2", themes: THEMES })),
     ).toBe("not_host");
-    g.do({ type: "REMATCH", playerId: s.hostId, theme: THEME });
+    g.do({ type: "REMATCH", playerId: s.hostId, themes: THEMES });
+    expect(g.state.phase).toBe("voting");
+    expect(g.state.reveal).toBeNull();
+    g.voteAll(2);
     expect(g.state.phase).toBe("picking");
+    expect(g.state.theme?.en).toBe("Pirates");
     expect(g.state.round).toBe(2);
     expect(g.state.plays).toEqual([]);
-    expect(g.state.reveal).toBeNull();
+    expect(g.state.reveal?.kind).toBe("theme");
   });
 
   it("never mutates the state it was given", () => {

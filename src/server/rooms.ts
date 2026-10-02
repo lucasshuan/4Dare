@@ -10,6 +10,7 @@ import {
   type PlayerId,
   type RoomSettings,
   type RoomState,
+  THEME_OPTIONS,
 } from "@/game/types";
 import { getBackend } from "./backend";
 import { background } from "./background";
@@ -142,7 +143,10 @@ export async function applyDueTimeouts(code: string) {
       stored = await dispatch(code, async (state) => {
         if (!isExpired(state, Date.now())) throw new GameError("wrong_phase");
         if (state.phase === "lobby") {
-          return { type: "TIMEOUT", theme: themes.drawFromBank() };
+          return {
+            type: "TIMEOUT",
+            themes: themes.drawFromBank(THEME_OPTIONS),
+          };
         }
         if (state.phase === "picking") {
           return {

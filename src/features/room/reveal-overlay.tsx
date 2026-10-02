@@ -18,7 +18,8 @@ import { useDisplayName } from "@/lib/names";
 export function RevealOverlay() {
   const { view, offset } = useRoomContext();
   const now = useServerClock(offset, 100);
-  const r = view.reveal;
+  // The theme vote plays its own result out on the vote screen.
+  const r = view.reveal?.kind === "theme" ? null : view.reveal;
   const active = r !== null && now < r.until;
   return (
     <AnimatePresence>

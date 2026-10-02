@@ -35,7 +35,27 @@ type Actions = typeof import("./actions");
 let A: Actions;
 let roomRoute: typeof import("@/app/api/rooms/[code]/route");
 
+/** Moves the clock past a reveal (the theme's, here). */
+const skip = (ms: number) => vi.setSystemTime(Date.now() + ms);
+
+/** Everyone votes for the first theme, then the theme reveal plays out. */
+async function voteAll(code: string, players: string[]) {
+  for (const p of players) {
+    as(p);
+    expect((await view(code)).body.phase).toBe("voting");
+    must(await A.voteTheme(code, 0));
+  }
+  as(players[0]);
+  const v = (await view(code)).body;
+  expect(v.phase).toBe("picking");
+  expect(v.reveal?.kind).toBe("theme");
+  expect(v.vote?.chosen).toBe(0);
+  expect(v.theme).toEqual(v.vote?.options[0]);
+  skip(6000);
+}
+
 beforeAll(async () => {
+  vi.useFakeTimers({ toFake: ["Date"], shouldAdvanceTime: true });
   A = await import("./actions");
   roomRoute = await import("@/app/api/rooms/[code]/route");
 });
@@ -72,6 +92,11 @@ describe("server, local mode", () => {
     expect(await A.startGame(code)).toEqual({ ok: false, error: "not_host" });
     as("p1");
     must(await A.startGame(code));
+    expect(await A.voteTheme(code, 3)).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    await voteAll(code, ["p1", "p2", "p3"]);
 
     // everyone creates a character for their target and picks it
     for (const p of ["p1", "p2", "p3"]) {
@@ -133,6 +158,7 @@ describe("server, local mode", () => {
     must(await A.joinRoom(code));
     as("m1");
     must(await A.startGame(code));
+    await voteAll(code, ["m1", "m2"]);
     for (const p of ["m1", "m2"]) {
       as(p);
       const v = (await view(code)).body;

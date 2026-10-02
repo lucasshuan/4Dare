@@ -11,6 +11,7 @@ import { LobbyScreen } from "@/features/lobby/lobby-screen";
 import { PickScreen } from "@/features/pick/pick-screen";
 import { ResultScreen } from "@/features/result/result-screen";
 import { TurnScreen } from "@/features/turn/turn-screen";
+import { VoteScreen } from "@/features/vote/vote-screen";
 import type { ErrorCode } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
@@ -56,11 +57,18 @@ function PhaseScreens() {
   const now = useServerClock(offset, 250);
   // A hit that ends the match keeps its reveal; the results wait until it is over.
   const revealing = view.reveal !== null && now < view.reveal.until;
+  // The vote screen stays up while it plays out the chosen theme.
   const phase =
-    view.phase === "finished" && revealing ? "finished-wait" : view.phase;
+    view.phase === "finished" && revealing
+      ? "finished-wait"
+      : view.reveal?.kind === "theme" && revealing
+        ? "voting"
+        : view.phase;
   const screen =
     phase === "lobby" ? (
       <LobbyScreen />
+    ) : phase === "voting" ? (
+      <VoteScreen />
     ) : phase === "picking" ? (
       <PickScreen />
     ) : phase === "finished" ? (

@@ -24,6 +24,7 @@ import {
   type RoomState,
   type RoomView,
   type TurnView,
+  type VoteView,
 } from "./types";
 
 const TURN: Phase[] = ["asking", "answering", "guessing", "validating"];
@@ -74,6 +75,8 @@ function statusOf(s: RoomState, p: RoomPlayer): PlayerStatus {
   const o = s.outcomes[p.id];
   if (s.phase === "lobby")
     return p.id === s.hostId ? "host" : p.ready ? "ready" : "not_ready";
+  if (s.phase === "voting")
+    return s.vote?.votes[p.id] !== undefined ? "voted" : "voting";
   if (s.phase === "picking") {
     const done = Object.values(s.assignments).some(
       (a) => a.pickerId === p.id && a.character,
@@ -189,6 +192,28 @@ function pick(s: RoomState, viewer: PlayerId): PickView | null {
   };
 }
 
+/** The theme vote, while it runs and while its result is on screen. */
+function voteView(
+  s: RoomState,
+  viewer: PlayerId,
+  now: number,
+): VoteView | null {
+  const v = s.vote;
+  const revealing = s.reveal?.kind === "theme" && now < s.reveal.until;
+  if (!v || (s.phase !== "voting" && !revealing)) return null;
+  const seated = new Set(s.players.map((p) => p.id));
+  return {
+    options: v.options,
+    votes: Object.entries(v.votes)
+      .filter(([id]) => seated.has(id))
+      .map(([byId, option]) => ({ byId, option })),
+    yourVote: v.votes[viewer] ?? null,
+    chosen: v.chosen,
+    tied: v.tied,
+    total: s.players.length,
+  };
+}
+
 function reveal(
   s: RoomState,
   viewer: PlayerId,
@@ -196,6 +221,9 @@ function reveal(
 ): RevealView | null {
   const r = s.reveal;
   if (!r || now >= r.until) return null;
+  if (r.kind === "theme") {
+    return { kind: "theme", n: r.n, startsAt: r.startsAt, until: r.until };
+  }
   const play = s.plays.find((p) => p.n === r.n);
   if (!play) return null;
   if (r.kind === "answers" && play.kind === "question") {
@@ -288,6 +316,7 @@ export function toView(
     stepStartsAt: s.stepStartsAt,
     reveal: reveal(s, viewerId, now),
     serverNow: now,
+    vote: voteView(s, viewerId, now),
     pick: pick(s, viewerId),
     turn: turn(s, viewerId),
     history: history(s),
@@ -299,6 +328,7 @@ export function toView(
 /** A match nobody has touched for this long is not shown as being played. */
 const PLAYING_FRESH_MS = 20 * 60_000;
 const PLAYING_PHASES = new Set([
+  "voting",
   "picking",
   "asking",
   "answering",

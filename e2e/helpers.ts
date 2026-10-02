@@ -34,6 +34,20 @@ export async function viewOf(page: Page, code: string): Promise<RoomView> {
   return res.json();
 }
 
+/** Every player votes; the first theme wins, then the result plays out before picking. */
+export async function voteAll(players: Page[], option = 0) {
+  for (const page of players) {
+    const themes = page
+      .getByRole("group", { name: /vote for the theme/i })
+      .getByRole("button");
+    await expect(themes).toHaveCount(3);
+    await themes.nth(option).click();
+    await expect(themes.nth(option)).toHaveAttribute("aria-pressed", "true");
+  }
+  for (const page of players)
+    await expect(page.getByRole("heading", { name: /the theme is/i })).toBeVisible();
+}
+
 /** Every player creates a new character named "Hero <n>" for their target and confirms it. */
 export async function pickAll(players: Page[]) {
   for (const [i, page] of players.entries()) {

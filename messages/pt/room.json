@@ -42,5 +42,24 @@
     "save": "Salvar e escolher",
     "createNamed": "Criar “{name}” com a sua imagem",
     "createNew": "Criar um personagem novo"
+  },
+  "vote": {
+    "kicker": "Votação do tema",
+    "title": "Vote no tema",
+    "subtitle": "O tema mais votado vence. Empate vai pra roleta.",
+    "option": "Tema {n}",
+    "votes": "{count, plural, =0 {Nenhum voto} one {# voto} other {# votos}}",
+    "yourVote": "Seu voto",
+    "progress": "{done} de {total} votaram",
+    "waitingFor": "Ainda votando: {names}",
+    "allVoted": "Todo mundo votou!",
+    "change": "clique em outro tema pra mudar o voto",
+    "tieTitle": "Deu empate!",
+    "tie": "Girando a roleta entre os temas empatados…",
+    "chosenTitle": "O tema é…",
+    "chosenByVotes": "Escolhido pela maioria.",
+    "chosenByDraw": "A roleta decidiu.",
+    "chosen": "Tema escolhido",
+    "announce": "Tema escolhido: {theme}"
   }
 }

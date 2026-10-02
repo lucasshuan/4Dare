@@ -5,6 +5,7 @@ import {
   newPlayer,
   pickAll,
   playToEnd,
+  voteAll,
   viewOf,
 } from "./helpers";
 
@@ -17,6 +18,7 @@ test("two players play a whole match", async ({ browser }) => {
 
   await expect(host.getByRole("img", { name: /^ready$/i })).toBeVisible();
   await host.getByRole("button", { name: /start match/i }).click();
+  await voteAll([host, guest]);
   await pickAll([host, guest]);
 
   // nobody sees their own card
@@ -49,6 +51,7 @@ test("three players on phones, with a wrong guess checked by the picker", async 
   for (const page of guests) await joinRoom(page, code);
 
   await host.getByRole("button", { name: /start match/i }).click();
+  await voteAll(players);
   await pickAll(players);
   await playToEnd(players, code, { missFirst: true });
 

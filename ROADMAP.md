@@ -49,6 +49,7 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Temas em que o "personagem" é um grupo: duplas, trios, irmãos, famílias, bandas, espécies (Pikmin)
 - [x] Temas no banco: liga e desliga sem deploy; os que a IA cria ficam guardados
 - [x] Um tema, uma ideia: "Anjos e demônios", "Mordomos e empregadas" e outros 13 viraram dois temas cada; a IA não junta mais dois grupos
+- [x] Votação do tema: antes de cada partida (e da revanche) aparecem 3 temas e todo mundo vota, com os avatares pulando entre as cartas; 20 s; o mais votado vence, empate vai pra roleta sincronizada, e o vencedor ganha o palco antes da escolha
 
 ## Fase 4 — Cara de jogo pronto ✅
 
