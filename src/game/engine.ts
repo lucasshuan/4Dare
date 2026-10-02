@@ -1,33 +1,569 @@
 // The rules. Pure functions: same input, same output; no clock, no randomness, no I/O of their own.
-// CONTRACT: these signatures are fixed; the bodies are the engine's job.
-import type {
-  Ctx,
-  GameEvent,
-  Identity,
-  RoomSettings,
-  RoomState,
+import {
+  findPlayer,
+  isActive,
+  isPresent,
+  openQuestion,
+  pendingGuess,
+  validatorOf,
+} from "./helpers";
+import { isCloseMatch } from "./match";
+import {
+  type AnswerEntry,
+  type Character,
+  type Ctx,
+  type ErrorCode,
+  GameError,
+  type GameEvent,
+  type Identity,
+  LOBBY_SECONDS,
+  type Localized,
+  MAX_GUESS,
+  MAX_NOTE,
+  MAX_QUESTION,
+  type Play,
+  type PlayerId,
+  REVEAL_TIMING,
+  type RoomSettings,
+  type RoomState,
+  STEP_SECONDS_MAX,
+  STEP_SECONDS_MIN,
 } from "./types";
+
+type Question = Extract<Play, { kind: "question" }>;
+type Guess = Extract<Play, { kind: "guess" }>;
+
+const fail = (code: ErrorCode): never => {
+  throw new GameError(code);
+};
+
+// --- settings ----------------------------------------------------------------
+
+function mergeSettings(
+  base: RoomSettings,
+  patch: Partial<RoomSettings>,
+  seated: number,
+): RoomSettings {
+  const allowed = new Set(["visibility", "seats", "stepSeconds", "mode"]);
+  if (Object.keys(patch).some((k) => !allowed.has(k))) fail("invalid_input");
+  const next = { ...base, ...patch };
+  const ok =
+    (next.visibility === "public" || next.visibility === "private") &&
+    [2, 3, 4].includes(next.seats) &&
+    next.seats >= seated &&
+    Number.isInteger(next.stepSeconds) &&
+    next.stepSeconds >= STEP_SECONDS_MIN &&
+    next.stepSeconds <= STEP_SECONDS_MAX &&
+    next.mode === "classic";
+  if (!ok) fail("invalid_input");
+  return next;
+}
+
+// --- clock -------------------------------------------------------------------
+
+/** Starts a step; it never begins before a reveal on screen is over. */
+function startStep(s: RoomState, ctx: Ctx, ms: number) {
+  const start = Math.max(ctx.now, s.reveal?.until ?? 0);
+  s.stepStartsAt = start;
+  s.deadline = start + ms;
+}
+
+const stepMs = (s: RoomState) => s.settings.stepSeconds * 1000;
+
+function stopClock(s: RoomState) {
+  s.deadline = null;
+  s.stepStartsAt = null;
+}
+
+function guardStep(s: RoomState, ctx: Ctx) {
+  if (s.stepStartsAt !== null && ctx.now < s.stepStartsAt) fail("too_early");
+}
+
+// --- shared steps --------------------------------------------------------------
+
+function requireSeated(s: RoomState, id: PlayerId) {
+  return findPlayer(s, id) ?? fail("not_member");
+}
+
+function shuffle<T>(items: T[], random: () => number): T[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function beginMatch(s: RoomState, theme: Localized, ctx: Ctx) {
+  s.round += 1;
+  s.theme = theme;
+  s.plays = [];
+  s.turnPlayerId = null;
+  s.reveal = null;
+  s.order = shuffle(
+    s.players.map((p) => p.id),
+    ctx.random,
+  );
+  s.assignments = {};
+  s.outcomes = {};
+  const n = s.order.length;
+  s.order.forEach((picker, i) => {
+    s.assignments[s.order[(i + 1) % n]] = { pickerId: picker, character: null };
+  });
+  for (const p of s.players) {
+    s.outcomes[p.id] = { discoveredAt: null, place: null, gaveUp: false };
+    p.strikes = 0;
+    p.away = false;
+  }
+  s.phase = "picking";
+  startStep(s, ctx, stepMs(s));
+}
+
+function finish(s: RoomState) {
+  s.phase = "finished";
+  s.turnPlayerId = null;
+  stopClock(s);
+}
+
+const presentCount = (s: RoomState) => s.players.filter(isPresent).length;
+
+function canPlay(s: RoomState, id: PlayerId) {
+  const p = findPlayer(s, id);
+  return !!p && isPresent(p) && isActive(s, id);
+}
+
+/** The next active, present player after `from` in turn order (wrapping, `from` itself last). */
+function nextPlayerAfter(s: RoomState, from: PlayerId | null) {
+  const order = s.order;
+  const start = from ? order.indexOf(from) : -1;
+  for (let k = 1; k <= order.length; k++) {
+    const id = order[(start + k + order.length) % order.length];
+    if (canPlay(s, id)) return id;
+  }
+  return null;
+}
+
+function goToTurn(s: RoomState, ctx: Ctx, from: PlayerId | null) {
+  if (presentCount(s) < 2) return finish(s);
+  const next = nextPlayerAfter(s, from);
+  if (!next) return finish(s);
+  s.phase = "asking";
+  s.turnPlayerId = next;
+  startStep(s, ctx, stepMs(s));
+}
+
+const nextTurn = (s: RoomState, ctx: Ctx) => goToTurn(s, ctx, s.turnPlayerId);
+
+function answersRevealMs(q: Question) {
+  const t = REVEAL_TIMING;
+  const notes = q.answers.reduce((sum, a) => sum + (a.note?.length ?? 0), 0);
+  const raw =
+    t.answersBase + t.perAnswer * q.answers.length + t.perNoteChar * notes;
+  return Math.min(t.answersMax, Math.max(t.answersMin, raw));
+}
+
+function othersAnswered(s: RoomState, q: Question) {
+  return s.players.every(
+    (p) => p.id === q.by || q.answers.some((a) => a.by === p.id),
+  );
+}
+
+function fillMissingAnswers(s: RoomState, q: Question, onlyAway: boolean) {
+  for (const p of s.players) {
+    if (p.id === q.by || q.answers.some((a) => a.by === p.id)) continue;
+    if (onlyAway && !p.away) continue;
+    q.answers.push({ by: p.id, value: "unknown", note: null });
+  }
+}
+
+function resolveQuestion(s: RoomState, q: Question, ctx: Ctx) {
+  q.open = false;
+  const ms = answersRevealMs(q);
+  s.reveal = {
+    kind: "answers",
+    n: q.n,
+    startsAt: ctx.now,
+    until: ctx.now + ms,
+  };
+  s.phase = "guessing";
+  startStep(s, ctx, stepMs(s));
+}
+
+function hit(s: RoomState, g: Guess, ctx: Ctx) {
+  g.result = "hit";
+  const place =
+    Object.values(s.outcomes).filter((o) => o.discoveredAt !== null).length + 1;
+  s.outcomes[g.by] = { discoveredAt: g.n, place, gaveUp: false };
+  const until = ctx.now + REVEAL_TIMING.guessHit;
+  s.reveal = { kind: "guess", n: g.n, startsAt: ctx.now, until };
+  nextTurn(s, ctx);
+}
+
+function miss(s: RoomState, g: Guess, ctx: Ctx) {
+  g.result = "miss";
+  const until = ctx.now + REVEAL_TIMING.guessMiss;
+  s.reveal = { kind: "guess", n: g.n, startsAt: ctx.now, until };
+  nextTurn(s, ctx);
+}
+
+/** The turn player gives up or leaves: close whatever they had open, without a reveal. */
+function abandonTurn(s: RoomState, ctx: Ctx) {
+  const q = openQuestion(s);
+  if (q && q.by === s.turnPlayerId) {
+    fillMissingAnswers(s, q, false);
+    q.open = false;
+  }
+  const g = pendingGuess(s);
+  if (g && g.by === s.turnPlayerId) g.result = "miss";
+  nextTurn(s, ctx);
+}
+
+const MATCH_PHASES = new Set([
+  "picking",
+  "asking",
+  "answering",
+  "guessing",
+  "validating",
+]);
+const TURN_PHASES = new Set(["asking", "answering", "guessing", "validating"]);
+
+function cleanText(text: string, max: number) {
+  const t = text.trim();
+  if (!t || t.length > max) fail("invalid_input");
+  return t;
+}
+
+function startTurns(s: RoomState, ctx: Ctx) {
+  goToTurn(s, ctx, s.order.at(-1) ?? null);
+}
+
+// --- public API ------------------------------------------------------------------
 
 /** A brand-new room in the lobby, with the host seated. */
 export function createRoom(
-  _code: string,
-  _host: Identity,
-  _settings: RoomSettings,
-  _ctx: Ctx,
+  code: string,
+  host: Identity,
+  settings: RoomSettings,
+  ctx: Ctx,
 ): RoomState {
-  throw new Error("not implemented");
+  const valid = mergeSettings(settings, {}, 1);
+  return {
+    code,
+    hostId: host.id,
+    settings: valid,
+    phase: "lobby",
+    players: [
+      { ...host, ready: true, joinedAt: ctx.now, strikes: 0, away: false },
+    ],
+    order: [],
+    theme: null,
+    assignments: {},
+    turnPlayerId: null,
+    plays: [],
+    outcomes: {},
+    deadline: ctx.now + LOBBY_SECONDS * 1000,
+    stepStartsAt: ctx.now,
+    reveal: null,
+    round: 0,
+    createdAt: ctx.now,
+    updatedAt: ctx.now,
+  };
+}
+
+/** True when the current step's clock has run out and a TIMEOUT event is due. */
+export function isExpired(state: RoomState, now: number): boolean {
+  return state.deadline !== null && now >= state.deadline;
 }
 
 /** Applies one event. Returns a new state; throws GameError when the event is not allowed. */
 export function reduce(
-  _state: RoomState,
-  _event: GameEvent,
-  _ctx: Ctx,
+  state: RoomState,
+  event: GameEvent,
+  ctx: Ctx,
 ): RoomState {
-  throw new Error("not implemented");
+  const s = structuredClone(state);
+  apply(s, event, ctx);
+  s.updatedAt = ctx.now;
+  return s;
 }
 
-/** True when the current step's clock has run out and a TIMEOUT event is due. */
-export function isExpired(_state: RoomState, _now: number): boolean {
-  throw new Error("not implemented");
+function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
+  switch (e.type) {
+    case "JOIN":
+      return join(s, e.player, ctx);
+    case "LEAVE":
+      return leave(s, e.playerId, ctx);
+    case "SET_READY": {
+      if (s.phase !== "lobby") fail("wrong_phase");
+      const p = requireSeated(s, e.playerId);
+      if (p.id === s.hostId) fail("invalid_input");
+      p.ready = e.ready;
+      return;
+    }
+    case "UPDATE_SETTINGS": {
+      requireSeated(s, e.playerId);
+      if (e.playerId !== s.hostId) fail("not_host");
+      if (s.phase !== "lobby") fail("wrong_phase");
+      s.settings = mergeSettings(s.settings, e.settings, s.players.length);
+      return;
+    }
+    case "UPDATE_IDENTITY": {
+      const p = requireSeated(s, e.player.id);
+      Object.assign(p, identityFields(e.player));
+      return;
+    }
+    case "START": {
+      requireSeated(s, e.playerId);
+      if (e.playerId !== s.hostId) fail("not_host");
+      if (s.phase !== "lobby") fail("wrong_phase");
+      if (s.players.length < 2) fail("need_two_players");
+      return beginMatch(s, e.theme, ctx);
+    }
+    case "PICK":
+      return pick(s, e.playerId, e.character, ctx);
+    case "ASK":
+      return ask(s, e.playerId, e.text, ctx);
+    case "ANSWER":
+      return answer(s, e.playerId, e.value, e.note, ctx);
+    case "GUESS":
+      return guess(s, e.playerId, e.text, ctx);
+    case "PASS": {
+      if (s.phase !== "guessing") fail("wrong_phase");
+      guardStep(s, ctx);
+      if (e.playerId !== s.turnPlayerId) fail("not_your_turn");
+      return nextTurn(s, ctx);
+    }
+    case "VALIDATE": {
+      if (s.phase !== "validating") fail("wrong_phase");
+      guardStep(s, ctx);
+      const g = pendingGuess(s) ?? fail("wrong_phase");
+      if (e.playerId !== validatorOf(s, g.by)) fail("not_your_turn");
+      return e.correct ? hit(s, g, ctx) : miss(s, g, ctx);
+    }
+    case "GIVE_UP":
+      return giveUp(s, e.playerId, ctx);
+    case "REMATCH":
+      return rematch(s, e.playerId, e.theme, ctx);
+    case "TIMEOUT":
+      return timeout(s, e, ctx);
+  }
+}
+
+function identityFields(p: Identity) {
+  return {
+    name: p.name,
+    isGuest: p.isGuest,
+    guestNumber: p.guestNumber,
+    avatar: p.avatar,
+    lang: p.lang,
+  };
+}
+
+function join(s: RoomState, player: Identity, ctx: Ctx) {
+  if (s.phase === "closed") fail("not_found");
+  const seated = findPlayer(s, player.id);
+  if (seated) {
+    Object.assign(seated, identityFields(player));
+    return;
+  }
+  if (s.phase !== "lobby") fail("already_started");
+  if (s.players.length >= s.settings.seats) fail("room_full");
+  s.players.push({
+    ...player,
+    ready: false,
+    joinedAt: ctx.now,
+    strikes: 0,
+    away: false,
+  });
+  startStep(s, ctx, LOBBY_SECONDS * 1000);
+}
+
+function handOverHost(s: RoomState) {
+  if (s.players.some((p) => p.id === s.hostId)) return;
+  const next = s.players.find(isPresent) ?? s.players[0];
+  if (next) {
+    s.hostId = next.id;
+    next.ready = true;
+  }
+}
+
+function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
+  const p = requireSeated(s, id);
+  if (s.phase === "closed") fail("wrong_phase");
+  if (s.phase === "lobby" || s.phase === "finished") {
+    s.players = s.players.filter((x) => x.id !== id);
+    if (s.players.length === 0) {
+      s.phase = "closed";
+      stopClock(s);
+      return;
+    }
+    handOverHost(s);
+    return;
+  }
+  // mid-match: keep the seat so the history still makes sense
+  p.away = true;
+  if (isActive(s, id)) s.outcomes[id].gaveUp = true;
+  if (TURN_PHASES.has(s.phase) && s.turnPlayerId === id) {
+    abandonTurn(s, ctx);
+  } else if (s.phase === "answering") {
+    const q = openQuestion(s);
+    if (q) {
+      fillMissingAnswers(s, q, true);
+      if (othersAnswered(s, q)) resolveQuestion(s, q, ctx);
+    }
+  }
+  if (MATCH_PHASES.has(s.phase) && presentCount(s) < 2) finish(s);
+}
+
+function pick(
+  s: RoomState,
+  playerId: PlayerId,
+  character: Character,
+  ctx: Ctx,
+) {
+  if (s.phase !== "picking") fail("wrong_phase");
+  const target = Object.keys(s.assignments).find(
+    (t) => s.assignments[t].pickerId === playerId,
+  );
+  if (!target) return fail("not_member");
+  const a = s.assignments[target];
+  if (a.character) fail("already_done");
+  a.character = { ...character, aliases: [...character.aliases] };
+  if (Object.values(s.assignments).every((x) => x.character))
+    startTurns(s, ctx);
+}
+
+function ask(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
+  if (s.phase !== "asking") fail("wrong_phase");
+  guardStep(s, ctx);
+  if (playerId !== s.turnPlayerId) fail("not_your_turn");
+  const q: Question = {
+    n: s.plays.length + 1,
+    kind: "question",
+    by: playerId,
+    text: cleanText(text, MAX_QUESTION),
+    answers: [],
+    open: true,
+  };
+  s.plays.push(q);
+  const asker = findPlayer(s, playerId);
+  if (asker) asker.strikes = 0;
+  fillMissingAnswers(s, q, true);
+  if (othersAnswered(s, q)) return resolveQuestion(s, q, ctx);
+  s.phase = "answering";
+  startStep(s, ctx, stepMs(s));
+}
+
+function answer(
+  s: RoomState,
+  playerId: PlayerId,
+  value: AnswerEntry["value"],
+  note: string | null,
+  ctx: Ctx,
+) {
+  if (s.phase !== "answering") fail("wrong_phase");
+  guardStep(s, ctx);
+  requireSeated(s, playerId);
+  const q = openQuestion(s) ?? fail("wrong_phase");
+  if (playerId === q.by) fail("not_your_turn");
+  if (q.answers.some((a) => a.by === playerId)) fail("already_done");
+  const n = note?.trim() ?? "";
+  if (n.length > MAX_NOTE) fail("invalid_input");
+  q.answers.push({ by: playerId, value, note: n || null });
+  if (othersAnswered(s, q)) resolveQuestion(s, q, ctx);
+}
+
+function guess(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
+  if (s.phase !== "guessing") fail("wrong_phase");
+  guardStep(s, ctx);
+  if (playerId !== s.turnPlayerId) fail("not_your_turn");
+  const g: Guess = {
+    n: s.plays.length + 1,
+    kind: "guess",
+    by: playerId,
+    text: cleanText(text, MAX_GUESS),
+    result: "pending",
+  };
+  s.plays.push(g);
+  const c = s.assignments[playerId]?.character;
+  if (c && isCloseMatch(g.text, [c.name, ...c.aliases])) return hit(s, g, ctx);
+  s.phase = "validating";
+  startStep(s, ctx, stepMs(s));
+}
+
+function giveUp(s: RoomState, playerId: PlayerId, ctx: Ctx) {
+  if (!MATCH_PHASES.has(s.phase)) fail("wrong_phase");
+  requireSeated(s, playerId);
+  if (!isActive(s, playerId)) fail("already_done");
+  s.outcomes[playerId].gaveUp = true;
+  if (TURN_PHASES.has(s.phase) && s.turnPlayerId === playerId) {
+    return abandonTurn(s, ctx);
+  }
+  const anyoneLeft = s.players.some((p) => canPlay(s, p.id));
+  if (TURN_PHASES.has(s.phase) && !anyoneLeft) finish(s);
+}
+
+function rematch(s: RoomState, playerId: PlayerId, theme: Localized, ctx: Ctx) {
+  requireSeated(s, playerId);
+  if (playerId !== s.hostId) fail("not_host");
+  if (s.phase !== "finished") fail("wrong_phase");
+  s.players = s.players.filter(isPresent);
+  handOverHost(s);
+  if (s.players.length < 2) fail("need_two_players");
+  beginMatch(s, theme, ctx);
+}
+
+function timeout(
+  s: RoomState,
+  e: Extract<GameEvent, { type: "TIMEOUT" }>,
+  ctx: Ctx,
+) {
+  if (!isExpired(s, ctx.now)) fail("wrong_phase");
+  switch (s.phase) {
+    case "lobby": {
+      if (s.players.length < 2) {
+        s.phase = "closed";
+        return stopClock(s);
+      }
+      return beginMatch(s, e.theme ?? fail("invalid_input"), ctx);
+    }
+    case "picking": {
+      const used = new Set(
+        Object.values(s.assignments).flatMap((a) =>
+          a.character ? [a.character.id] : [],
+        ),
+      );
+      const pool = (e.fallbackCharacters ?? []).filter((c) => !used.has(c.id));
+      for (const a of Object.values(s.assignments)) {
+        if (a.character) continue;
+        const c = pool.shift() ?? fail("invalid_input");
+        a.character = { ...c, aliases: [...c.aliases] };
+      }
+      return startTurns(s, ctx);
+    }
+    case "asking": {
+      const p = s.turnPlayerId ? findPlayer(s, s.turnPlayerId) : undefined;
+      if (p) {
+        p.strikes += 1;
+        if (p.strikes >= 2) {
+          p.away = true;
+          s.outcomes[p.id].gaveUp = true;
+        }
+      }
+      return nextTurn(s, ctx);
+    }
+    case "answering": {
+      const q = openQuestion(s) ?? fail("wrong_phase");
+      fillMissingAnswers(s, q, false);
+      return resolveQuestion(s, q, ctx);
+    }
+    case "guessing":
+      return nextTurn(s, ctx);
+    case "validating": {
+      const g = pendingGuess(s) ?? fail("wrong_phase");
+      return miss(s, g, ctx);
+    }
+    default:
+      return fail("wrong_phase");
+  }
 }
