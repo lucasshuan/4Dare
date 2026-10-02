@@ -62,7 +62,13 @@
       "name": "Quem sou eu?",
       "players": "2 a 4 jogadores",
       "play": "Jogar",
-      "demoQuestion": "Eu sou um animal?"
+      "demoQuestion": "Eu sou um animal?",
+      "banner": {
+        "q1": "Eu sou um animal?",
+        "q2": "Eu tenho bigodes?",
+        "guess": "Eu sou um gato?",
+        "hit": "Acertou!"
+      }
     },
     "next": "Próximos jogos",
     "previous": "Jogos anteriores"

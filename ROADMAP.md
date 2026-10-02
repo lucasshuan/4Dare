@@ -126,3 +126,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Rooms can have a name (up to 25 characters), set when creating or in the lobby; shown in the lobby, the public rooms list and the tab title
 - [x] The question field ends with a fixed "?" ("？" in Japanese) that cannot be deleted; the server adds one if missing
 - [x] Ties: places go by turn round, so whoever comes later in the order still gets that round's turn and ties if they discover too (1st, 1st, 3rd); the reveal and the podium say it's a tie
+- [x] "Who am I?" page: smaller title under an animated banner (a round on a loop: ask, answers, guess, flip), with pointer parallax and a still frame for reduced motion; public rooms, then Create room and join by code

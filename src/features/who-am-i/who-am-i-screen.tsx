@@ -12,6 +12,7 @@ import { Link } from "@/i18n/navigation";
 import { ease } from "@/lib/motion";
 import { GAMES, newRoom } from "@/lib/routes";
 import { JoinByCode } from "./join-by-code";
+import { WhoAmIBanner } from "./who-am-i-banner";
 
 /** "Who am I?": create a room, join one with a code, or pick a public one. */
 export function WhoAmIScreen() {
@@ -28,23 +29,26 @@ export function WhoAmIScreen() {
             y: 0,
             transition: { duration: 0.5, ease: ease.soft },
           }}
-          className="flex flex-col gap-8"
+          className="flex flex-col gap-4"
         >
-          <div className="flex flex-col gap-4">
-            <Link
-              href={GAMES}
-              className="-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink"
-            >
-              <ChevronLeft className="size-4" strokeWidth={2} />
-              {t("games.back")}
-            </Link>
-            <h1 className="text-balance font-display font-extrabold text-[clamp(56px,8vw,96px)] leading-[0.95] tracking-[-0.03em]">
-              {t("games.whoAmI.name")}
-            </h1>
-            <p className="text-ink-muted text-lg">{t("pitch")}</p>
-          </div>
+          <Link
+            href={GAMES}
+            className="-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink"
+          >
+            <ChevronLeft className="size-4" strokeWidth={2} />
+            {t("games.back")}
+          </Link>
+          <WhoAmIBanner />
+          <h1 className="text-balance font-display font-extrabold text-[clamp(40px,5vw,60px)] leading-none tracking-[-0.025em]">
+            {t("games.whoAmI.name")}
+          </h1>
+          <p className="text-ink-muted text-lg">{t("pitch")}</p>
+        </motion.section>
 
-          <div className="flex flex-wrap items-end gap-x-8 gap-y-5">
+        {/* the public rooms, then creating one or joining by code */}
+        <div className="flex flex-col gap-6 lg:pt-9">
+          <PublicRooms />
+          <div className="flex flex-wrap items-end gap-x-6 gap-y-5">
             <Link
               href={newRoom("who-am-i")}
               className={buttonClass("primary", "lg", "max-sm:w-full")}
@@ -53,9 +57,7 @@ export function WhoAmIScreen() {
             </Link>
             <JoinByCode />
           </div>
-        </motion.section>
-
-        <PublicRooms />
+        </div>
       </div>
     </Screen>
   );

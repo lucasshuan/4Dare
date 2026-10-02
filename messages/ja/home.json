@@ -62,7 +62,13 @@
       "name": "わたしはだれ？",
       "players": "2〜4人",
       "play": "遊ぶ",
-      "demoQuestion": "わたしは動物？"
+      "demoQuestion": "わたしは動物？",
+      "banner": {
+        "q1": "わたしは動物？",
+        "q2": "ひげがある？",
+        "guess": "わたしは猫？",
+        "hit": "正解！"
+      }
     },
     "next": "次のゲーム",
     "previous": "前のゲーム"

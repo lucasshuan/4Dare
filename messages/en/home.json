@@ -62,7 +62,13 @@
       "name": "Who am I?",
       "players": "2–4 players",
       "play": "Play",
-      "demoQuestion": "Am I an animal?"
+      "demoQuestion": "Am I an animal?",
+      "banner": {
+        "q1": "Am I an animal?",
+        "q2": "Do I have whiskers?",
+        "guess": "Am I a cat?",
+        "hit": "Got it!"
+      }
     },
     "next": "Next games",
     "previous": "Previous games"
