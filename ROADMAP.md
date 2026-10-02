@@ -39,11 +39,11 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 ## Fase 4 — Cara de jogo pronto
 
 - [ ] Todas as telas iguais ao design, claro e escuro, nos 3 idiomas
-- [ ] Revelação bem animada, relógio recarregando, confetti no acerto
-- [ ] Histórico em gaveta (minhas jogadas / todas)
-- [ ] Pódio no fim e "jogar de novo"
-- [ ] Transições suaves entre todas as etapas
-- [ ] Celular
+- [x] Revelação bem animada, relógio recarregando, confetti no acerto
+- [x] Histórico em gaveta (minhas jogadas / todas)
+- [x] Pódio no fim e "jogar de novo"
+- [x] Transições suaves entre todas as etapas
+- [x] Celular
 
 ## Fase 5 — Contas e salas
 

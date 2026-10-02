@@ -118,7 +118,14 @@ export function PickScreen() {
             <span className="font-semibold text-sm uppercase tracking-[0.06em]">
               {t("theme")}
             </span>
-            <h1 className="text-balance font-display font-extrabold text-[clamp(48px,7vw,96px)] leading-none tracking-[-0.03em]">
+            <h1
+              className={cn(
+                "text-balance font-display font-extrabold leading-none tracking-[-0.03em]",
+                (view.theme?.[lang].length ?? 0) > 14
+                  ? "text-[clamp(34px,4.6vw,60px)]"
+                  : "text-[clamp(48px,7vw,96px)]",
+              )}
+            >
               {view.theme?.[lang]}
             </h1>
           </motion.div>

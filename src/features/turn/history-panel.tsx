@@ -10,6 +10,7 @@ import { ChoiceGroup } from "@/components/ui/choice-group";
 import { useRoomContext } from "@/features/data/room-context";
 import type { HistoryEntryView } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 
@@ -24,7 +25,7 @@ export function HistoryPeek() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-auto flex min-h-16 w-full items-center gap-3 rounded-lg bg-surface px-4 py-3 text-left"
+        className="mt-auto flex min-h-16 w-full items-center gap-3 rounded-lg bg-surface px-4 py-3 text-left max-lg:sticky max-lg:bottom-3 max-lg:z-20 max-lg:shadow-pop"
       >
         {last ? (
           <span
@@ -70,6 +71,8 @@ function HistoryDrawer({
   const name = useDisplayName();
   const { view, me, playerById } = useRoomContext();
   const [mine, setMine] = useState(true);
+  const wide = useMedia("(min-width: 1024px)");
+  const hidden = wide ? { x: "100%" } : { y: "100%" };
   const entries = [...view.history]
     .reverse()
     .filter((e) => !mine || e.byId === me.id);
@@ -90,17 +93,18 @@ function HistoryDrawer({
             role="dialog"
             aria-modal="true"
             aria-label={t("title")}
-            initial={{ x: "100%" }}
+            initial={hidden}
             animate={{
               x: 0,
+              y: 0,
               transition: { duration: dur.slow, ease: ease.soft },
             }}
             exit={{
-              x: "100%",
+              ...hidden,
               transition: { duration: dur.base, ease: ease.soft },
             }}
             onKeyDown={(e) => e.key === "Escape" && onClose()}
-            className="absolute inset-y-0 right-0 flex w-full max-w-[440px] flex-col rounded-l-xl bg-surface shadow-pop"
+            className="absolute flex w-full flex-col bg-surface shadow-pop max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[85dvh] max-lg:rounded-t-xl lg:inset-y-0 lg:right-0 lg:max-w-110 lg:rounded-l-xl"
           >
             <div className="flex items-center justify-between gap-4 px-6 pt-5 pb-3">
               <h2 className="font-bold font-display text-3xl">{t("title")}</h2>

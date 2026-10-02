@@ -8,6 +8,7 @@ import { AnswerChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CharacterCard } from "@/components/ui/character-card";
+import { Portrait } from "@/components/ui/portrait";
 import { TextArea, TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
 import { GameFrame } from "@/features/room/game-header";
@@ -19,6 +20,7 @@ import {
   MAX_QUESTION,
   type PlayerView,
 } from "@/game/types";
+import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
@@ -92,22 +94,51 @@ export function TurnScreen() {
     <GameFrame>
       <div className="flex flex-col gap-6">
         <PlayerStrip players={view.players} />
-        <div className="flex flex-wrap items-stretch gap-8 lg:gap-12">
-          <div className="w-full max-w-[368px] max-lg:mx-auto max-lg:max-w-[300px] lg:flex-none">
-            <CharacterCard
-              layoutId={`card-${focus.id}`}
-              card={focus.card}
-              hidden={focus.cardHidden}
-              tone={focus.isYou ? "you" : "other"}
-              label={
-                focus.isYou
-                  ? t("card.yours")
-                  : t("card.theirs", { name: name(focus) })
-              }
-              title={t("card.whoAreYou")}
-              meta={meta || null}
-              found={focus.discoveredAt !== null}
-            />
+        <div className="flex flex-wrap items-stretch gap-5 lg:gap-12">
+          <div className="w-full lg:w-[368px] lg:flex-none">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={focus.id}
+                initial={{ opacity: 0, rotateY: -12, y: 10 }}
+                animate={{
+                  opacity: 1,
+                  rotateY: 0,
+                  y: 0,
+                  transition: { duration: dur.slow, ease: ease.soft },
+                }}
+                exit={{
+                  opacity: 0,
+                  rotateY: 12,
+                  transition: { duration: dur.base, ease: ease.soft },
+                }}
+                className="perspective-[1200px]"
+              >
+                <CharacterCard
+                  className="max-lg:hidden"
+                  card={focus.card}
+                  hidden={focus.cardHidden}
+                  tone={focus.isYou ? "you" : "other"}
+                  label={
+                    focus.isYou
+                      ? t("card.yours")
+                      : t("card.theirs", { name: name(focus) })
+                  }
+                  title={t("card.whoAreYou")}
+                  meta={meta || null}
+                  found={focus.discoveredAt !== null}
+                />
+                <FocusRow
+                  focus={focus}
+                  label={
+                    focus.isYou
+                      ? t("card.yours")
+                      : t("card.theirs", { name: name(focus) })
+                  }
+                  title={t("card.whoAreYou")}
+                  meta={meta || null}
+                />
+              </motion.div>
+            </AnimatePresence>
           </div>
           <section className="flex min-w-0 flex-[1_1_360px] flex-col gap-5">
             <AnimatePresence mode="wait">
@@ -130,6 +161,55 @@ export function TurnScreen() {
         </div>
       </div>
     </GameFrame>
+  );
+}
+
+/** Phones: the focus card as one compact row, so the action stays on screen. */
+function FocusRow({
+  focus,
+  label,
+  title,
+  meta,
+}: {
+  focus: PlayerView;
+  label: string;
+  title: string;
+  meta: string | null;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg bg-surface p-2 shadow-card lg:hidden">
+      <span className="w-20 shrink-0">
+        {focus.cardHidden ? (
+          <span className="flex aspect-4/5 items-center justify-center rounded-md bg-sky-soft font-display font-extrabold text-5xl text-sky">
+            ?
+          </span>
+        ) : (
+          <Portrait
+            src={focus.card?.imageUrl ?? null}
+            tone={focus.isYou ? "you" : "other"}
+            className="rounded-md"
+          />
+        )}
+      </span>
+      <span className="flex min-w-0 flex-col gap-1">
+        <span
+          className={cn(
+            "self-start rounded-pill px-2.5 py-0.5 font-semibold text-xs",
+            focus.isYou ? "bg-sky-soft" : "bg-apricot-soft",
+          )}
+        >
+          {label}
+        </span>
+        <span className="truncate font-bold font-display text-xl">
+          {focus.cardHidden ? title : focus.card?.name}
+        </span>
+        {meta ? (
+          <span className="truncate font-medium text-[13px] text-ink-muted">
+            {meta}
+          </span>
+        ) : null}
+      </span>
+    </div>
   );
 }
 
