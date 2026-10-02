@@ -20,12 +20,14 @@ export function Screen({
     <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-8 sm:gap-10 sm:px-8 sm:pt-6 sm:pb-12">
       <header
         className={cn(
-          "mx-auto flex w-full flex-wrap items-center justify-between gap-3",
+          "mx-auto flex w-full items-center justify-between gap-3",
           wide ? "max-w-[1120px]" : "max-w-[1120px]",
         )}
       >
-        <div className="flex items-center gap-4">{left ?? <Wordmark />}</div>
-        <div className="flex flex-wrap items-center justify-end gap-3">
+        <div className="flex min-w-0 items-center gap-4">
+          {left ?? <Wordmark />}
+        </div>
+        <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
           {right}
         </div>
       </header>
