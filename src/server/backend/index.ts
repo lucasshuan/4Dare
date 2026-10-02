@@ -6,12 +6,14 @@ import { localCharacters } from "./local/characters";
 import { localFiles } from "./local/files";
 import { localMatches } from "./local/matches";
 import { localRooms } from "./local/rooms";
+import { localThemes } from "./local/themes";
 import { supabaseAuth } from "./supabase/auth";
 import { supabaseCharacters } from "./supabase/characters";
 import { supabaseFiles } from "./supabase/files";
 import { supabaseMatches } from "./supabase/matches";
 import { supabaseNotify } from "./supabase/notify";
 import { supabaseRooms } from "./supabase/rooms";
+import { supabaseThemes } from "./supabase/themes";
 import type { Backend } from "./types";
 
 let backend: Backend | null = null;
@@ -24,7 +26,7 @@ export function getBackend(): Backend {
       rooms: supabaseRooms(),
       matches: supabaseMatches(),
       characters: supabaseCharacters(),
-      themes: themes(),
+      themes: themes(supabaseThemes()),
       files: supabaseFiles(),
       auth: supabaseAuth(),
       notify: supabaseNotify(),
@@ -35,7 +37,7 @@ export function getBackend(): Backend {
     rooms: localRooms(),
     matches: localMatches(),
     characters: localCharacters(),
-    themes: themes(),
+    themes: themes(localThemes()),
     files: localFiles(),
     auth: localAuth(),
     notify: { roomChanged: async () => {}, lobbyChanged: async () => {} },

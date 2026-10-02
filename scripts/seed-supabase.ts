@@ -1,12 +1,16 @@
-// Loads the starter character library (data/characters/*.json) into Supabase.
+// Loads the starter character library (data/characters/*.json) and the theme
+// list (data/themes.json) into Supabase.
 // Run: pnpm seed   (needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY in .env.local; `vercel env pull .env.local` brings both)
 // Safe to rerun after rebuilding the library: entries the new files dropped are
 // deleted, and pictures players swapped in (stored in Supabase) are kept.
-// Characters players created (ids "u-...") are never touched.
+// Characters players created (ids "u-...") are never touched. Themes removed from
+// the file are turned off (active = false); the AI's themes are left alone.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { normalizeName } from "../src/game/match";
+import { themeId } from "../src/game/theme-id";
+import type { Localized } from "../src/game/types";
 import type { SeedCharacter } from "../src/server/backend/seed-format";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -36,8 +40,36 @@ async function existingRows(lang: string): Promise<Map<string, string | null>> {
   }
 }
 
+async function seedThemes() {
+  const file = join(process.cwd(), "data", "themes.json");
+  const list = JSON.parse(readFileSync(file, "utf8")) as Localized[];
+  const rows = list.map((t) => ({
+    id: themeId(t),
+    en: t.en,
+    pt: t.pt,
+    ja: t.ja,
+    source: "bank",
+    active: true,
+  }));
+  const { error } = await db.from("themes").upsert(rows);
+  if (error) throw error;
+  const ids = rows.map((row) => `"${row.id}"`).join(",");
+  const off = await db
+    .from("themes")
+    .update({ active: false })
+    .eq("source", "bank")
+    .eq("active", true)
+    .not("id", "in", `(${ids})`)
+    .select("id");
+  if (off.error) throw off.error;
+  console.log(
+    `themes: ${rows.length} from the file, ${off.data.length} turned off`,
+  );
+}
+
 // CommonJS under tsx: no top-level await.
 async function seed() {
+  await seedThemes();
   for (const lang of ["en", "pt", "ja"] as const) {
     const file = join(process.cwd(), "data", "characters", `${lang}.json`);
     const list = JSON.parse(readFileSync(file, "utf8")) as SeedCharacter[];

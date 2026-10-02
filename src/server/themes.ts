@@ -4,7 +4,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import type { Localized } from "@/game/types";
 import bankFile from "../../data/themes.json";
-import type { ThemeSource } from "./backend/types";
+import type { ThemeSource, ThemeStore } from "./backend/types";
 
 const FALLBACK: Localized[] = [
   { en: "Villains", pt: "Vilões", ja: "悪役" },
@@ -25,8 +25,10 @@ export function themeBank(): Localized[] {
 const same = (a: Localized, b: Localized) =>
   a.en.toLowerCase() === b.en.toLowerCase();
 
-function pickFromBank(avoid: Localized[]): Localized {
-  const all = themeBank();
+/** How long a server keeps the theme list before reading it again. */
+const LIST_TTL = 10 * 60_000;
+
+function pickFrom(all: Localized[], avoid: Localized[]): Localized {
   const fresh = all.filter((t) => !avoid.some((a) => same(a, t)));
   const pool = fresh.length ? fresh : all;
   return pool[Math.floor(Math.random() * pool.length)];
@@ -45,12 +47,13 @@ Answer with one theme in English, Brazilian Portuguese and Japanese: the same id
 let client: Anthropic | null = null;
 
 /** One fresh theme from Claude, or null on any problem (the caller falls back to the bank). */
-async function drawWithAI(avoid: Localized[]): Promise<Localized | null> {
+async function drawWithAI(
+  avoid: Localized[],
+  known: Localized[],
+): Promise<Localized | null> {
   if (!process.env.ANTHROPIC_API_KEY) return null;
   client ??= new Anthropic({ maxRetries: 0, timeout: 6000 });
-  const examples = [...themeBank()]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 30);
+  const examples = [...known].sort(() => Math.random() - 0.5).slice(0, 30);
   const user = [
     "Examples of the style:",
     ...examples.map((t) => `- ${t.en}`),
@@ -72,7 +75,7 @@ async function drawWithAI(avoid: Localized[]): Promise<Localized | null> {
     const ok = [t.en, t.pt, t.ja].every(
       (v) => v.trim().length > 0 && v.trim().length <= 40,
     );
-    if (!ok || avoid.some((a) => same(a, t))) return null;
+    if (!ok || [...avoid, ...known].some((a) => same(a, t))) return null;
     return { en: t.en.trim(), pt: t.pt.trim(), ja: t.ja.trim() };
   } catch (e) {
     console.warn(
@@ -83,16 +86,65 @@ async function drawWithAI(avoid: Localized[]): Promise<Localized | null> {
   }
 }
 
-export function themes(): ThemeSource {
+/**
+ * Draws themes from the store's list, read at most every ten minutes per
+ * server (never once per match). Until the first read, or if the store
+ * fails, the bundled list is used.
+ */
+export function themes(store: ThemeStore): ThemeSource {
+  let cached: Localized[] | null = null;
+  let readAt = 0;
+  let reading: Promise<Localized[]> | null = null;
+
+  const current = () => (cached?.length ? cached : themeBank());
+  const refresh = (): Promise<Localized[]> => {
+    if (cached && Date.now() - readAt < LIST_TTL)
+      return Promise.resolve(cached);
+    reading ??= store
+      .list()
+      .then((list) => {
+        if (list.length >= 3) cached = list;
+        readAt = Date.now();
+        return current();
+      })
+      .catch((e: unknown) => {
+        console.warn(
+          "[themes] could not read the list, using the bundled one:",
+          e instanceof Error ? e.message : e,
+        );
+        readAt = Date.now();
+        return current();
+      })
+      .finally(() => {
+        reading = null;
+      });
+    return reading;
+  };
+
   return {
-    drawFromBank: () => pickFromBank([]),
+    drawFromBank: () => {
+      void refresh();
+      return pickFrom(current(), []);
+    },
     async draw(avoid) {
-      // Half of the matches get an AI theme (when a key is set), so the bank's best ones still show up.
+      const list = await refresh();
+      // Half of the matches get an AI theme (when a key is set), so the list's best ones still show up.
       if (Math.random() < 0.5) {
-        const fresh = await drawWithAI(avoid);
-        if (fresh) return fresh;
+        const fresh = await drawWithAI(avoid, list);
+        if (fresh) {
+          cached = [...current(), fresh];
+          void store
+            .add(fresh)
+            .catch((e: unknown) =>
+              console.warn(
+                "[themes] could not keep the AI theme:",
+                e instanceof Error ? e.message : e,
+              ),
+            );
+          return fresh;
+        }
       }
-      return pickFromBank(avoid);
+      return pickFrom(list, avoid);
     },
   };
 }

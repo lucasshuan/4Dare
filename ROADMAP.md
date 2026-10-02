@@ -42,6 +42,7 @@ Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = fe
 - [x] Trocar a foto de qualquer personagem (vira a da biblioteca)
 - [x] Tema sorteado pela IA; sem chave, sai de 322 temas simples
 - [x] Temas em que o "personagem" é um grupo: duplas, trios, irmãos, famílias, bandas, espécies (Pikmin)
+- [x] Temas no banco: liga e desliga sem deploy; os que a IA cria ficam guardados
 
 ## Fase 4 — Cara de jogo pronto ✅
 

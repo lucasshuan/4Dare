@@ -58,6 +58,14 @@ export interface CharacterStore {
   }>;
 }
 
+/** Where the theme list lives: the bundled file locally, a table on Supabase. */
+export interface ThemeStore {
+  /** Every theme that may be drawn. */
+  list(): Promise<Localized[]>;
+  /** Keeps a theme the AI invented; an existing one is left as it is. */
+  add(theme: Localized): Promise<void>;
+}
+
 export interface ThemeSource {
   /** A fresh theme in the three languages. Never throws: falls back to the built-in bank. */
   draw(avoid: Localized[]): Promise<Localized>;
