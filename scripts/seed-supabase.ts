@@ -36,40 +36,48 @@ async function existingRows(lang: string): Promise<Map<string, string | null>> {
   }
 }
 
-for (const lang of ["en", "pt", "ja"] as const) {
-  const file = join(process.cwd(), "data", "characters", `${lang}.json`);
-  const list = JSON.parse(readFileSync(file, "utf8")) as SeedCharacter[];
-  const existing = await existingRows(lang);
-  const rows = list.map((c) => {
-    const current = existing.get(c.id);
-    return {
-      id: c.id,
-      lang,
-      name: c.name,
-      norm: normalizeName(c.name),
-      origin: c.origin,
-      image_url: current?.startsWith(SWAPPED) ? current : c.imageUrl,
-      aliases: c.aliases,
-      alias_norms: c.aliases.map(normalizeName).filter(Boolean),
-      popularity: c.popularity,
-    };
-  });
-  for (let i = 0; i < rows.length; i += 500) {
-    const { error } = await db
-      .from("characters")
-      .upsert(rows.slice(i, i + 500));
-    if (error) throw error;
+// CommonJS under tsx: no top-level await.
+async function seed() {
+  for (const lang of ["en", "pt", "ja"] as const) {
+    const file = join(process.cwd(), "data", "characters", `${lang}.json`);
+    const list = JSON.parse(readFileSync(file, "utf8")) as SeedCharacter[];
+    const existing = await existingRows(lang);
+    const rows = list.map((c) => {
+      const current = existing.get(c.id);
+      return {
+        id: c.id,
+        lang,
+        name: c.name,
+        norm: normalizeName(c.name),
+        origin: c.origin,
+        image_url: current?.startsWith(SWAPPED) ? current : c.imageUrl,
+        aliases: c.aliases,
+        alias_norms: c.aliases.map(normalizeName).filter(Boolean),
+        popularity: c.popularity,
+      };
+    });
+    for (let i = 0; i < rows.length; i += 500) {
+      const { error } = await db
+        .from("characters")
+        .upsert(rows.slice(i, i + 500));
+      if (error) throw error;
+    }
+    const keep = new Set(rows.map((row) => row.id));
+    const stale = [...existing.keys()].filter((id) => !keep.has(id));
+    for (let i = 0; i < stale.length; i += 200) {
+      const { error } = await db
+        .from("characters")
+        .delete()
+        .in("id", stale.slice(i, i + 200));
+      if (error) throw error;
+    }
+    console.log(
+      `${lang}: ${rows.length} characters, ${stale.length} old ones removed`,
+    );
   }
-  const keep = new Set(rows.map((row) => row.id));
-  const stale = [...existing.keys()].filter((id) => !keep.has(id));
-  for (let i = 0; i < stale.length; i += 200) {
-    const { error } = await db
-      .from("characters")
-      .delete()
-      .in("id", stale.slice(i, i + 200));
-    if (error) throw error;
-  }
-  console.log(
-    `${lang}: ${rows.length} characters, ${stale.length} old ones removed`,
-  );
 }
+
+seed().catch((error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
+});
