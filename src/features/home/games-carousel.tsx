@@ -20,10 +20,13 @@ export function GamesCarousel({ children }: { children: ReactNode }) {
   const t = useTranslations("home.games");
   const track = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ start: true, end: true });
+  // Only a row wider than the screen scrolls: a scrolling box clips the cards' shadows.
+  const [overflowing, setOverflowing] = useState(false);
 
   const measure = useCallback(() => {
     const el = track.current;
     if (!el) return;
+    setOverflowing(el.scrollWidth > el.clientWidth + 4);
     setEdges({
       start: el.scrollLeft <= 4,
       end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 4,
@@ -72,8 +75,13 @@ export function GamesCarousel({ children }: { children: ReactNode }) {
       <div
         ref={track}
         onScroll={measure}
-        // the padding leaves room for the lift and shadow of a hovered card
-        className="-mx-4 -mt-4 -mb-12 flex snap-x snap-mandatory scroll-px-4 gap-5 overflow-x-auto scroll-smooth px-4 pt-4 pb-12 sm:-mx-8 sm:scroll-px-8 sm:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        // when it scrolls, the padding leaves room for the cards' lift and shadow
+        className={cn(
+          "-mx-4 -mt-4 -mb-12 flex gap-5 px-4 pt-4 pb-12 sm:-mx-8 sm:px-8",
+          overflowing
+            ? "snap-x snap-mandatory scroll-px-4 overflow-x-auto scroll-smooth sm:scroll-px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            : "overflow-visible",
+        )}
       >
         {Children.map(children, (child) => (
           <div className="shrink-0 snap-start">{child}</div>
