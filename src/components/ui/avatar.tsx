@@ -8,6 +8,7 @@ const SIZE = {
   32: "size-8 text-sm",
   44: "size-11 text-lg",
   48: "size-12 text-xl",
+  64: "size-16 text-[26px]",
 } as const;
 
 /** Initial on a pastel, a picture, or (guests) a person icon on a pastel. */

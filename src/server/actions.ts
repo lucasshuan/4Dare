@@ -360,6 +360,8 @@ export async function updateProfile(form: FormData): Promise<Result<Me>> {
         url: await files.put("avatars", image.bytes, image.type),
         color: color as string,
       };
+    } else if (kind === "keep" && current.avatar.kind === "image") {
+      avatar = { ...current.avatar, color: color as string };
     } else if (kind !== "color") {
       bad();
     }
@@ -372,10 +374,13 @@ export async function signOut(): Promise<Result> {
 }
 
 /** Local mode only: flips the current guest into a fake account so the profile screen can be used without Supabase. */
-export async function enterTestAccount(): Promise<Result<Me>> {
+export async function enterTestAccount(
+  provider: "discord" | "google" = "discord",
+): Promise<Result<Me>> {
   return run(async () => {
     const auth = getBackend().auth;
     if (!auth.enterTestAccount) throw new GameError("unauthorized");
-    return auth.enterTestAccount();
+    if (provider !== "discord" && provider !== "google") bad();
+    return auth.enterTestAccount(provider);
   });
 }

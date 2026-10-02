@@ -1,6 +1,6 @@
 {
   "pitch": "Cada jogador escolhe um personagem para outro. Todos veem as cartas dos outros, nunca a sua. Descubra quem você é com perguntas de sim ou não.",
-  "guestHint": "Você joga como convidado.",
+  "guestHint": "Você joga como convidado. Entre para escolher nome e avatar.",
   "accountHint": "Conta conectada.",
   "create": "Criar sala",
   "joinLabel": "Ou entre com um código",
@@ -20,5 +20,18 @@
     "secondsUnit": "segundos",
     "secondsHint": "Padrão: 120 segundos. Vale para cada escolha, pergunta, resposta, palpite e validação. De 30 a 300.",
     "submit": "Criar sala"
+  },
+  "signIn": "Entrar com {provider}",
+  "editProfile": "Editar perfil",
+  "testAccount": "Sem Supabase, isso entra numa conta de teste.",
+  "rooms": {
+    "title": "Salas públicas",
+    "waiting": "{count, plural, one {# esperando jogadores} other {# esperando jogadores}}",
+    "roomOf": "Sala de {name}",
+    "meta": "{players}/{seats} jogadores · {seconds} s por etapa",
+    "join": "Entrar",
+    "joinRoom": "Entrar na sala de {name}",
+    "empty": "Nenhuma sala pública agora. Crie uma e ela aparece aqui.",
+    "note": "A lista atualiza sozinha. Uma sala some daqui quando enche ou quando a partida começa. A bandeira é o idioma de quem criou."
   }
 }

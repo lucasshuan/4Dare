@@ -1,6 +1,6 @@
 {
   "pitch": "Everyone picks a character for someone else. You see their cards, never yours. Work out who you are with yes-or-no questions.",
-  "guestHint": "You're playing as a guest.",
+  "guestHint": "You're playing as a guest. Sign in to pick a name and avatar.",
   "accountHint": "Signed in.",
   "create": "Create a room",
   "joinLabel": "Or join with a code",
@@ -20,5 +20,18 @@
     "secondsUnit": "seconds",
     "secondsHint": "Default: 120 seconds. Counts for every pick, question, answer, guess and check. From 30 to 300.",
     "submit": "Create room"
+  },
+  "signIn": "Sign in with {provider}",
+  "editProfile": "Edit profile",
+  "testAccount": "Without Supabase this enters a test account.",
+  "rooms": {
+    "title": "Public rooms",
+    "waiting": "{count, plural, one {# waiting} other {# waiting}}",
+    "roomOf": "{name}'s room",
+    "meta": "{players}/{seats} players · {seconds} s per step",
+    "join": "Join",
+    "joinRoom": "Join {name}'s room",
+    "empty": "No public rooms right now. Create one and it shows up here.",
+    "note": "This list updates by itself. A room leaves it when it fills up or the match starts. The flag is the host's language."
   }
 }

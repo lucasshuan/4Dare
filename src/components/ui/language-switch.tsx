@@ -22,7 +22,7 @@ export function LanguageSwitch({ compact }: { compact?: boolean }) {
           type="button"
           lang={l}
           aria-pressed={l === locale}
-          aria-label={compact ? t(`languages.${l}`) : undefined}
+          aria-label={t(`languages.${l}`)}
           onClick={() => start(() => router.replace(pathname, { locale: l }))}
           className={cn(
             "inline-flex h-9 items-center gap-2 rounded-pill pr-3.5 pl-2 font-semibold text-sm transition-[background-color,color,box-shadow] duration-200 ease-soft",
@@ -39,9 +39,14 @@ export function LanguageSwitch({ compact }: { compact?: boolean }) {
             height={20}
             className="size-5 rounded-pill shadow-[0_0_0_1px_var(--line)]"
           />
-          <span>
-            {compact ? t(`languagesShort.${l}`) : t(`languages.${l}`)}
-          </span>
+          {compact ? (
+            <span>{t(`languagesShort.${l}`)}</span>
+          ) : (
+            <>
+              <span className="max-sm:hidden">{t(`languages.${l}`)}</span>
+              <span className="sm:hidden">{t(`languagesShort.${l}`)}</span>
+            </>
+          )}
         </button>
       ))}
     </ChoiceGroup>

@@ -78,7 +78,7 @@ export interface AuthService {
   }): Promise<Me>;
   signOut(): Promise<void>;
   /** Local mode only: turns the current guest into a fake account so the profile screen can be tried. */
-  enterTestAccount?(): Promise<Me>;
+  enterTestAccount?(provider: "discord" | "google"): Promise<Me>;
 }
 
 export interface Notifier {

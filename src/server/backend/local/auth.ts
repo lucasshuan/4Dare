@@ -32,7 +32,9 @@ function newGuest(id: string): Profile {
 }
 
 /** Guests are identified by a cookie; there is no real sign-in in local mode. */
-export function localAuth(): AuthService & { enterTestAccount(): Promise<Me> } {
+export function localAuth(): AuthService & {
+  enterTestAccount(provider: "discord" | "google"): Promise<Me>;
+} {
   const profiles = processSingleton(
     "profiles",
     () =>
@@ -100,11 +102,11 @@ export function localAuth(): AuthService & { enterTestAccount(): Promise<Me> } {
       const jar = await cookies();
       jar.delete(UID_COOKIE);
     },
-    async enterTestAccount() {
+    async enterTestAccount(provider) {
       const p = await current();
       p.isGuest = false;
-      p.name = p.name ?? "Jean";
-      p.provider = "discord";
+      p.name = p.name ?? `Tester ${p.guestNumber}`;
+      p.provider = provider;
       save();
       return toMe(p);
     },

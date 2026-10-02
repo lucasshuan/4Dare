@@ -1,1 +1,24 @@
-{}
+{
+  "back": "トップに戻る",
+  "title": "アカウント",
+  "connected": "{provider}と連携中",
+  "testAccount": "テスト用アカウント（ローカルモード）",
+  "name": "名前",
+  "nameHint": "16文字まで。ほかのプレイヤーにはこう表示されます。",
+  "avatar": "アバター",
+  "providerPhoto": "{provider}の写真",
+  "upload": "画像をアップロード",
+  "colorOnly": "色だけ",
+  "color": "背景色",
+  "colorN": "色{n}",
+  "save": "保存",
+  "saved": "プロフィールを保存しました",
+  "signOut": "ログアウト",
+  "preview": "ほかの人からの見え方",
+  "account": "アカウント",
+  "asking": "質問中",
+  "guestNote": "アカウントなし：名前と色はランダム",
+  "guestRule": "ゲストは名前やアバターを選べません。",
+  "guestTitle": "ログインしてプロフィールを作ろう",
+  "guestText": "DiscordかGoogleのアカウントで、名前とアバターを選べます。ログインしなくてもゲストとして遊べます。"
+}
