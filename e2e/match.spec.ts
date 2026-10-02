@@ -5,8 +5,8 @@ import {
   newPlayer,
   pickAll,
   playToEnd,
-  voteAll,
   viewOf,
+  voteAll,
 } from "./helpers";
 
 test("two players play a whole match", async ({ browser }) => {

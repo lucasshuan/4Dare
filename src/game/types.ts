@@ -217,6 +217,8 @@ export type GameEvent =
     }
   /** Name or avatar changed while sitting in the room. */
   | { type: "UPDATE_IDENTITY"; player: Identity }
+  /** A guest signed in: the account takes the guest's seat, history and all. */
+  | { type: "SWAP_PLAYER"; from: PlayerId; player: Identity }
   /** `themes`: the THEME_OPTIONS themes put to the vote. */
   | { type: "START"; playerId: PlayerId; themes: Localized[] }
   | { type: "VOTE"; playerId: PlayerId; option: number }

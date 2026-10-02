@@ -1,13 +1,11 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { LANGS, type Lang } from "@/game/types";
+import { GUEST_COOKIE, openGuest } from "@/server/auth/guest";
 import { getBackend } from "@/server/backend";
 import { syncProfile } from "@/server/backend/supabase/auth";
 import { sessionClient } from "@/server/backend/supabase/clients";
-import {
-  MERGE_COOKIE,
-  openGuest,
-  sealGuest,
-} from "@/server/backend/supabase/guest-merge";
+import { dispatch } from "@/server/rooms";
 
 /** Only same-site paths, so the callback can't be used to bounce people elsewhere. */
 function safeNext(raw: string | null) {
@@ -17,10 +15,9 @@ function safeNext(raw: string | null) {
 }
 
 /**
- * Discord/Google send people back here. A guest's anonymous user was linked to
- * the account (same id, so they keep their seat and their matches); if that
- * Discord/Google account already belonged to someone, sign in to it instead
- * and move the guest's matches over.
+ * Discord/Google send people back here. The guest they were (a cookie, never
+ * a database row) hands over to the account: its matches move to it, and if
+ * they signed in from a room, the account takes the guest's seat.
  */
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -30,57 +27,47 @@ export async function GET(request: Request) {
     if (failed) to.searchParams.set("auth_error", "1");
     return NextResponse.redirect(to, 303);
   };
-  const client = await sessionClient();
-  const jar = await cookies();
-
-  const provider = url.searchParams.get("provider");
-  const alreadyLinked =
-    url.searchParams.get("error_code") === "identity_already_exists" ||
-    /already (linked|exists)/i.test(
-      url.searchParams.get("error_description") ?? "",
-    );
-  if (alreadyLinked && (provider === "discord" || provider === "google")) {
-    const { data: current } = await client.auth.getUser();
-    if (current.user?.is_anonymous) {
-      jar.set(MERGE_COOKIE, sealGuest(current.user.id), {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: url.protocol === "https:",
-        path: "/auth",
-        maxAge: 600,
-      });
-    }
-    const redirectTo = new URL("/auth/callback", url.origin);
-    redirectTo.searchParams.set("next", next);
-    const { data, error } = await client.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: redirectTo.toString() },
-    });
-    return !error && data.url
-      ? NextResponse.redirect(data.url, 303)
-      : back(true);
-  }
-
   const code = url.searchParams.get("code");
   if (!code) return back(true);
+  const client = await sessionClient();
   const { data, error } = await client.auth.exchangeCodeForSession(code);
   if (error || !data.user) return back(true);
+
+  const guest = openGuest((await cookies()).get(GUEST_COOKIE)?.value);
+  let profile: Awaited<ReturnType<typeof syncProfile>> | null = null;
   try {
-    await syncProfile(data.user);
+    profile = await syncProfile(data.user, guest);
   } catch (e) {
     // The next /api/me call syncs the profile again.
     console.error("auth callback: profile sync failed", e);
   }
-  const guestId = openGuest(jar.get(MERGE_COOKIE)?.value);
-  if (guestId) {
-    jar.delete({ name: MERGE_COOKIE, path: "/auth" });
-    if (guestId !== data.user.id) {
-      await getBackend()
-        .matches.reassign(guestId, data.user.id)
-        .catch((e: unknown) =>
-          console.error("auth callback: moving guest matches failed", e),
-        );
-    }
+  if (!guest || guest.id === data.user.id) return back(false);
+
+  await getBackend()
+    .matches.reassign(guest.id, data.user.id)
+    .catch((e: unknown) =>
+      console.error("auth callback: moving guest matches failed", e),
+    );
+  const room = /^\/(?:(en|pt|ja)\/)?r\/([A-Z0-9]{5})\/?$/.exec(next);
+  if (room && profile) {
+    const lang = (LANGS as readonly string[]).includes(room[1] ?? "")
+      ? (room[1] as Lang)
+      : "en";
+    const account = profile;
+    await dispatch(room[2], () => ({
+      type: "SWAP_PLAYER",
+      from: guest.id,
+      player: {
+        id: account.id,
+        isGuest: false,
+        name: account.name,
+        guestNumber: account.guest_number,
+        avatar: account.avatar,
+        lang,
+      },
+    })).catch(() => {
+      // Not seated there (or the room is gone): nothing to hand over.
+    });
   }
   return back(false);
 }

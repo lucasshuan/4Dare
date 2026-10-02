@@ -15,9 +15,8 @@ export class SignInUnavailable extends Error {
 export const authMode = (): "local" | "supabase" => BACKEND;
 
 /**
- * Starts the Discord/Google sign-in. A guest's anonymous user is linked to the account,
- * so they keep their seat. If that account already belongs to someone, Supabase says so
- * on the way back and /auth/callback signs in to it instead (hence `provider` in the URL).
+ * Starts the Discord/Google sign-in. On the way back, /auth/callback hands the
+ * guest's matches (and their seat, when signing in from a room) to the account.
  */
 export async function signInWith(
   provider: Provider,
@@ -25,17 +24,8 @@ export async function signInWith(
 ): Promise<void> {
   if (BACKEND !== "supabase") throw new SignInUnavailable();
   const supabase = browserClient();
-  const params = new URLSearchParams({ next: nextPath, provider });
+  const params = new URLSearchParams({ next: nextPath });
   const redirectTo = `${window.location.origin}/auth/callback?${params}`;
-  const { data } = await supabase.auth.getUser();
-  if (data.user?.is_anonymous) {
-    const linked = await supabase.auth.linkIdentity({
-      provider,
-      options: { redirectTo },
-    });
-    // Fails right away only when manual linking is off: then a plain sign-in.
-    if (!linked.error) return;
-  }
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: { redirectTo },

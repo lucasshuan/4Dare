@@ -1,5 +1,5 @@
 // One command to get the Supabase project ready, instead of clicking through the dashboard:
-// tables (supabase/migrations), anonymous guests, account linking, Discord and Google,
+// tables (supabase/migrations), anonymous users off (guests are a cookie), Discord and Google,
 // redirect URLs, and the keys the app needs written to .env.local.
 //
 //   pnpm setup:supabase
@@ -79,7 +79,7 @@ async function setup() {
     console.log(`
 No SUPABASE_ACCESS_TOKEN, so the auth settings were left as they are. Add one
 (supabase.com/dashboard/account/tokens) and run this again, or in the dashboard:
-  Authentication > Sign In / Providers: allow anonymous sign-ins, allow manual
+  Authentication > Sign In / Providers: turn off anonymous sign-ins and manual
     linking, turn on Discord and Google with their client id and secret
   Authentication > URL Configuration: site URL ${siteUrl}; redirect URLs
     ${siteUrl}/** and http://localhost:3000/**
@@ -87,7 +87,7 @@ Discord and Google redirect URL: https://${ref}.supabase.co/auth/v1/callback`);
     return;
   }
 
-  // 2. Auth: guests are anonymous users that link Discord/Google later.
+  // 2. Auth: accounts only (Discord, Google). Guests are a signed cookie, never a Supabase user.
   const current = await api<{ uri_allow_list?: string | null }>("/config/auth");
   const allow = new Set(
     (current.uri_allow_list ?? "")
@@ -111,8 +111,8 @@ Discord and Google redirect URL: https://${ref}.supabase.co/auth/v1/callback`);
     body: JSON.stringify({
       site_url: siteUrl,
       uri_allow_list: [...allow].join(","),
-      external_anonymous_users_enabled: true,
-      security_manual_linking_enabled: true,
+      external_anonymous_users_enabled: false,
+      security_manual_linking_enabled: false,
       ...providers,
     }),
   });
@@ -120,7 +120,7 @@ Discord and Google redirect URL: https://${ref}.supabase.co/auth/v1/callback`);
     (p) => providers[`external_${p}_enabled`],
   );
   console.log(
-    `auth: anonymous guests and account linking on; site ${siteUrl}; providers: ${enabled.join(", ") || "none yet (set the client ids)"}`,
+    `auth: anonymous users off (guests live in a cookie); site ${siteUrl}; providers: ${enabled.join(", ") || "none yet (set the client ids)"}`,
   );
 
   // 3. Keys the app reads, written to .env.local when missing.

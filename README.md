@@ -28,5 +28,5 @@ To play with friends on the same network: `pnpm build && pnpm start`, and they o
 2. Discord: at discord.com/developers, New Application → OAuth2 → Redirect `https://YOUR-PROJECT.supabase.co/auth/v1/callback`.
 3. Google: at console.cloud.google.com, Credentials → OAuth client ID (Web application) → the same redirect.
 4. `vercel env pull .env.local` (or paste the integration's variables) and add a token from supabase.com/dashboard/account/tokens, the Discord and Google ID and secret, and your domain.
-5. `pnpm setup:supabase`: creates the tables, turns on guests, Discord and Google, sets the URLs, and puts the keys in `.env.local`.
+5. `pnpm setup:supabase`: creates the tables, turns on Discord and Google (guests need nothing), sets the URLs, and puts the keys in `.env.local`.
 6. `pnpm seed` to load the character library.

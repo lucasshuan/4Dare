@@ -1,115 +1,92 @@
 import "server-only";
-import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
-import { randomGuestNumber } from "@/game/guest-names";
 import type { Avatar, Identity, Lang } from "@/game/types";
 import type { Me } from "@/server/contract";
-import { randomAvatar } from "../pastel";
+import { ensureGuest, type Guest } from "../../auth/guest";
 import type { AuthService } from "../types";
 import { processSingleton, readJson, writeJson } from "./disk";
 
-export const UID_COOKIE = "dare_uid";
-const PROFILES_FILE = "profiles.json";
-const UUID = /^[0-9a-f-]{36}$/;
+/** Fake accounts made with "enter test account", keyed by the guest's id. */
+const ACCOUNTS_FILE = "test-accounts.json";
 
-interface Profile {
-  id: string;
-  isGuest: boolean;
+interface TestAccount {
   name: string | null;
-  guestNumber: number;
   avatar: Avatar;
-  provider: Me["provider"];
+  provider: NonNullable<Me["provider"]>;
 }
 
-function newGuest(id: string): Profile {
-  return {
-    id,
-    isGuest: true,
-    name: null,
-    guestNumber: randomGuestNumber(),
-    avatar: randomAvatar(),
-    provider: null,
-  };
-}
-
-/** Guests are identified by a cookie; there is no real sign-in in local mode. */
+/**
+ * Local mode: guests are the signed cookie (see auth/guest.ts), like online.
+ * There is no real sign-in; "enter test account" turns the guest into a fake
+ * Discord/Google account (same id) so the profile screen can be tried.
+ */
 export function localAuth(): AuthService & {
   enterTestAccount(provider: "discord" | "google"): Promise<Me>;
 } {
-  const profiles = processSingleton(
-    "profiles",
+  const accounts = processSingleton(
+    "test-accounts",
     () =>
-      new Map<string, Profile>(
-        Object.entries(readJson<Record<string, Profile>>(PROFILES_FILE, {})),
+      new Map<string, TestAccount>(
+        Object.entries(
+          readJson<Record<string, TestAccount>>(ACCOUNTS_FILE, {}),
+        ),
       ),
   );
-  const save = () => writeJson(PROFILES_FILE, Object.fromEntries(profiles));
+  const save = () => writeJson(ACCOUNTS_FILE, Object.fromEntries(accounts));
+  const guest = async () => ensureGuest(await cookies());
 
-  async function current(): Promise<Profile> {
-    const jar = await cookies();
-    let id = jar.get(UID_COOKIE)?.value;
-    if (!id || !UUID.test(id)) {
-      id = randomUUID();
-      jar.set(UID_COOKIE, id, {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 365,
-      });
-    }
-    let p = profiles.get(id);
-    if (!p) {
-      p = newGuest(id);
-      profiles.set(id, p);
-      save();
-    }
-    return p;
-  }
-
-  const toMe = (p: Profile): Me => ({
-    id: p.id,
-    isGuest: p.isGuest,
-    name: p.name,
-    guestNumber: p.guestNumber,
-    avatar: p.avatar,
-    provider: p.provider,
-    providerAvatarUrl: null,
-    authMode: "local",
-  });
+  const toMe = (g: Guest): Me => {
+    const a = accounts.get(g.id);
+    return {
+      id: g.id,
+      isGuest: !a,
+      name: a?.name ?? null,
+      guestNumber: g.guestNumber,
+      avatar: a?.avatar ?? g.avatar,
+      provider: a?.provider ?? null,
+      providerAvatarUrl: null,
+      authMode: "local",
+    };
+  };
 
   return {
     async me(_lang: Lang) {
-      return toMe(await current());
+      return toMe(await guest());
     },
     async identity(lang: Lang): Promise<Identity> {
-      const p = await current();
+      const me = toMe(await guest());
       return {
-        id: p.id,
-        isGuest: p.isGuest,
-        name: p.name,
-        guestNumber: p.guestNumber,
-        avatar: p.avatar,
+        id: me.id,
+        isGuest: me.isGuest,
+        name: me.name,
+        guestNumber: me.guestNumber,
+        avatar: me.avatar,
         lang,
       };
     },
     async updateProfile(patch) {
-      const p = await current();
-      if (patch.name !== undefined) p.name = patch.name;
-      if (patch.avatar !== undefined) p.avatar = patch.avatar;
+      const g = await guest();
+      const a = accounts.get(g.id);
+      if (!a) throw new Error("only accounts have a profile");
+      if (patch.name !== undefined) a.name = patch.name;
+      if (patch.avatar !== undefined) a.avatar = patch.avatar;
       save();
-      return toMe(p);
+      return toMe(g);
     },
     async signOut() {
-      const jar = await cookies();
-      jar.delete(UID_COOKIE);
+      const g = await guest();
+      accounts.delete(g.id);
+      save();
     },
     async enterTestAccount(provider) {
-      const p = await current();
-      p.isGuest = false;
-      p.name = p.name ?? `Tester ${p.guestNumber % 100}`;
-      p.provider = provider;
+      const g = await guest();
+      accounts.set(g.id, {
+        name: accounts.get(g.id)?.name ?? `Tester ${g.guestNumber % 100}`,
+        avatar: g.avatar,
+        provider,
+      });
       save();
-      return toMe(p);
+      return toMe(g);
     },
   };
 }

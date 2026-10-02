@@ -386,6 +386,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       Object.assign(p, identityFields(e.player));
       return;
     }
+    case "SWAP_PLAYER":
+      return swapPlayer(s, e.from, e.player);
     case "START": {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
@@ -433,6 +435,37 @@ function identityFields(p: Identity) {
     avatar: p.avatar,
     lang: p.lang,
   };
+}
+
+/** Every trace of `from` in the room becomes `player.id`: seat, host, turn order, picks, plays, outcome, vote. */
+function swapPlayer(s: RoomState, from: PlayerId, player: Identity) {
+  if (s.phase === "closed") fail("not_found");
+  const seat = requireSeated(s, from);
+  const to = player.id;
+  if (to === from) return;
+  if (findPlayer(s, to)) fail("already_done");
+  Object.assign(seat, identityFields(player), { id: to });
+  const swap = (id: PlayerId) => (id === from ? to : id);
+  s.hostId = swap(s.hostId);
+  s.order = s.order.map(swap);
+  if (s.turnPlayerId) s.turnPlayerId = swap(s.turnPlayerId);
+  const assignments: RoomState["assignments"] = {};
+  for (const [owner, a] of Object.entries(s.assignments))
+    assignments[swap(owner)] = { ...a, pickerId: swap(a.pickerId) };
+  s.assignments = assignments;
+  if (from in s.outcomes) {
+    s.outcomes[to] = s.outcomes[from];
+    delete s.outcomes[from];
+  }
+  for (const play of s.plays) {
+    play.by = swap(play.by);
+    if (play.kind === "question")
+      for (const a of play.answers) a.by = swap(a.by);
+  }
+  if (s.vote && from in s.vote.votes) {
+    s.vote.votes[to] = s.vote.votes[from];
+    delete s.vote.votes[from];
+  }
 }
 
 function join(s: RoomState, player: Identity, ctx: Ctx) {

@@ -45,7 +45,9 @@ export async function voteAll(players: Page[], option = 0) {
     await expect(themes.nth(option)).toHaveAttribute("aria-pressed", "true");
   }
   for (const page of players)
-    await expect(page.getByRole("heading", { name: /the theme is/i })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /the theme is/i }),
+    ).toBeVisible();
 }
 
 /** Every player creates a new character named "Hero <n>" for their target and confirms it. */

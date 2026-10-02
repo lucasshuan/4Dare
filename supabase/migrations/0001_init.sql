@@ -15,10 +15,9 @@ create table if not exists public.rooms (
 create index if not exists rooms_public_lobby on public.rooms (updated_at desc)
   where phase = 'lobby' and visibility = 'public';
 
--- Who someone is: guests (anonymous users) and accounts (Discord / Google).
+-- Accounts (Discord / Google). Guests are a signed cookie and never get a row.
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
-  is_guest boolean not null default true,
   name text,
   guest_number integer not null,
   avatar jsonb not null,

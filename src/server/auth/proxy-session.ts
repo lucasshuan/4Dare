@@ -1,18 +1,34 @@
 import { createServerClient } from "@supabase/ssr";
 import type { NextRequest, NextResponse } from "next/server";
 import { BACKEND, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/config";
+import {
+  GUEST_COOKIE,
+  guestCookieOptions,
+  newGuest,
+  openGuest,
+  sealGuest,
+} from "./guest";
 
 /**
- * Called by src/proxy.ts on every page request. Local mode: nothing to do.
- * Supabase mode: refresh the auth cookies on `response` before they expire,
- * and make a first-time visitor a guest right here. Otherwise the page's
- * first parallel requests (who am I, join the room, ...) would each sign in
- * anonymously, and one browser would sit in a room as two players.
+ * Called by src/proxy.ts on every page request. Gives a first-time visitor
+ * their guest cookie here, before the page's first parallel requests (who am
+ * I, join the room, ...) could each make a different guest. No database
+ * involved. Supabase mode also refreshes an account's auth cookies before
+ * they expire.
  */
 export async function refreshSession(
   request: NextRequest,
   response: NextResponse,
 ): Promise<NextResponse> {
+  if (!openGuest(request.cookies.get(GUEST_COOKIE)?.value)) {
+    const value = sealGuest(newGuest());
+    request.cookies.set(GUEST_COOKIE, value);
+    response.cookies.set(
+      GUEST_COOKIE,
+      value,
+      guestCookieOptions(request.nextUrl.protocol === "https:"),
+    );
+  }
   if (BACKEND !== "supabase") return response;
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     cookies: {
@@ -27,7 +43,6 @@ export async function refreshSession(
       },
     },
   });
-  const { data } = await supabase.auth.getClaims();
-  if (!data?.claims) await supabase.auth.signInAnonymously();
+  await supabase.auth.getClaims();
   return response;
 }

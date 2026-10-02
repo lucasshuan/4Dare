@@ -494,6 +494,48 @@ describe("the clock", () => {
   });
 });
 
+describe("a guest signing in", () => {
+  it("the account takes over the guest's seat, picks, plays and turn", () => {
+    const g = new Game(3);
+    g.start();
+    g.pickAll();
+    const asker = g.askAndAnswer();
+    const account = { ...ident("acc"), isGuest: false, name: "Ana" };
+    const pickedFor = Object.keys(g.state.assignments).find(
+      (t) => g.state.assignments[t].pickerId === asker,
+    ) as string;
+    g.do({ type: "SWAP_PLAYER", from: asker, player: account });
+    const s = g.state;
+    const ids = s.players.map((p) => p.id);
+    expect(ids).toContain("acc");
+    expect(ids).not.toContain(asker);
+    expect(s.players.find((p) => p.id === "acc")?.name).toBe("Ana");
+    expect(s.order).toContain("acc");
+    expect(s.turnPlayerId).toBe("acc");
+    expect(s.assignments.acc).toBeDefined();
+    expect(s.assignments[pickedFor].pickerId).toBe("acc");
+    expect(s.outcomes.acc).toBeDefined();
+    expect(s.plays.every((p) => p.by !== asker)).toBe(true);
+    expect(JSON.stringify(s)).not.toContain(`"${asker}"`);
+  });
+
+  it("refuses when the account already sits there, or the guest doesn't", () => {
+    const g = new Game(2);
+    expect(
+      code(() =>
+        g.do({ type: "SWAP_PLAYER", from: "p1", player: ident("p2") }),
+      ),
+    ).toBe("already_done");
+    expect(
+      code(() =>
+        g.do({ type: "SWAP_PLAYER", from: "ghost", player: ident("acc") }),
+      ),
+    ).toBe("not_member");
+    g.do({ type: "SWAP_PLAYER", from: "p1", player: ident("acc") });
+    expect(g.state.hostId).toBe("acc");
+  });
+});
+
 describe("leaving and giving up", () => {
   it("giving up on your turn moves on; twice is refused", () => {
     const g = started(3);

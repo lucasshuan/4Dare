@@ -27,6 +27,15 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "pt" }));
 
+/** The guest id inside a jar's signed guest cookie. */
+const uidOf = (jar: Map<string, string>) =>
+  JSON.parse(
+    Buffer.from(
+      (jar.get("dare_guest") ?? "").split(".")[0],
+      "base64url",
+    ).toString("utf8"),
+  ).id as string;
+
 const as = (name: string) => {
   caller = name;
 };
@@ -115,9 +124,7 @@ describe("server, local mode", () => {
     expect(v.phase).toBe("asking");
     const turnId = v.turn?.playerId as string;
     const nameOf = (id: string) =>
-      [...jars.entries()].find(
-        ([, j]) => j.get("dare_uid") === id,
-      )?.[0] as string;
+      [...jars.entries()].find(([, j]) => uidOf(j) === id)?.[0] as string;
     const turnName = nameOf(turnId);
 
     as(turnName);
@@ -144,7 +151,7 @@ describe("server, local mode", () => {
     for (const p of ["p1", "p2", "p3"]) {
       as(p);
       const mine = (await view(code)).body;
-      const uid = jarFor(p).get("dare_uid") as string;
+      const uid = uidOf(jarFor(p));
       expect(JSON.stringify(mine)).not.toContain(`Hero of ${uid}`);
     }
   });
