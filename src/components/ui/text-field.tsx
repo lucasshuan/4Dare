@@ -20,27 +20,62 @@ export function TextField({
   label,
   hint,
   max,
+  suffix,
+  suffixHidden = false,
   className,
   value,
   ...props
-}: Common & Omit<InputHTMLAttributes<HTMLInputElement>, "className">) {
+}: Common & {
+  /** Fixed text at the end of the field (e.g. "?"): shown, counted in `max`, never deleted. */
+  suffix?: string;
+  /** Hide the suffix for now, e.g. while the typed text already ends with it. */
+  suffixHidden?: boolean;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, "className">) {
   const id = useId();
+  const typed = typeof value === "string" ? value.length : 0;
+  const extra = suffix?.length ?? 0;
+  const input = (
+    <input
+      id={id}
+      value={value}
+      maxLength={max === undefined ? undefined : max - extra}
+      className={
+        suffix
+          ? "h-full min-w-0 flex-1 bg-transparent placeholder:text-ink-muted focus-visible:outline-none!"
+          : cn(FIELD, "h-13 short:h-11")
+      }
+      {...props}
+    />
+  );
   return (
     <div className={cn("flex min-w-0 flex-col gap-2", className)}>
       <label htmlFor={id} className="font-semibold text-sm">
         {label}
       </label>
-      <input
-        id={id}
-        value={value}
-        maxLength={max}
-        className={cn(FIELD, "h-13 short:h-11")}
-        {...props}
-      />
+      {suffix ? (
+        // The box is a label too, so a click on the suffix still focuses the field.
+        <label
+          htmlFor={id}
+          className={cn(
+            FIELD,
+            "flex h-13 cursor-text items-center gap-1 focus-within:border-sky focus-within:outline-[3px] focus-within:outline-sky focus-within:outline-offset-2 focus-within:outline-solid short:h-11",
+          )}
+        >
+          {input}
+          <span
+            aria-hidden="true"
+            className="shrink-0 select-none font-bold font-display text-ink-muted text-lg"
+          >
+            {suffixHidden ? null : suffix}
+          </span>
+        </label>
+      ) : (
+        input
+      )}
       <Hint
         hint={hint}
         max={max}
-        length={typeof value === "string" ? value.length : 0}
+        length={typed && !suffixHidden ? typed + extra : typed}
       />
     </div>
   );

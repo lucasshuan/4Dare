@@ -438,6 +438,25 @@ describe("a turn", () => {
     ).toBe("invalid_input");
   });
 
+  it("a question always ends with a question mark", () => {
+    const g = started(2);
+    expect(
+      code(() => g.do({ type: "ASK", playerId: g.turn, text: " ?？ " })),
+    ).toBe("invalid_input");
+    // one short of the limit still has room for the mark; at the limit it does not
+    expect(
+      code(() =>
+        g.do({ type: "ASK", playerId: g.turn, text: "x".repeat(140) }),
+      ),
+    ).toBe("invalid_input");
+    g.do({ type: "ASK", playerId: g.turn, text: "Am I real" });
+    expect(g.state.plays.at(-1)).toMatchObject({ text: "Am I real?" });
+
+    const h = started(2);
+    h.do({ type: "ASK", playerId: h.turn, text: "人間ですか？" });
+    expect(h.state.plays.at(-1)).toMatchObject({ text: "人間ですか？" });
+  });
+
   it("everyone else answers, then a reveal holds the next step's clock", () => {
     const g = started(4);
     const asker = g.turn;

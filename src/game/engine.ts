@@ -10,6 +10,11 @@ import {
   validatorOf,
 } from "./helpers";
 import { isCloseMatch } from "./match";
+import {
+  endsWithQuestionMark,
+  withoutQuestionMark,
+  withQuestionMark,
+} from "./question";
 import { isThemeSet, THEME_SET_KEYS } from "./theme-sets";
 import {
   type AnswerEntry,
@@ -642,11 +647,16 @@ function ask(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
   if (s.phase !== "asking") fail("wrong_phase");
   guardStep(s, ctx);
   if (playerId !== s.turnPlayerId) fail("not_your_turn");
+  const typed = cleanText(text, MAX_QUESTION);
+  // Nothing but question marks is no question.
+  if (!withoutQuestionMark(typed).trim()) fail("invalid_input");
   const q: Question = {
     n: s.plays.length + 1,
     kind: "question",
     by: playerId,
-    text: cleanText(text, MAX_QUESTION),
+    text: endsWithQuestionMark(typed)
+      ? typed
+      : cleanText(withQuestionMark(typed, "?"), MAX_QUESTION),
     answers: [],
     open: true,
   };

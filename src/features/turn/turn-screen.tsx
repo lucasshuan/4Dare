@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
@@ -15,8 +15,15 @@ import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { GameFrame } from "@/features/room/game-header";
 import {
+  endsWithQuestionMark,
+  questionMark,
+  withoutQuestionMark,
+  withQuestionMark,
+} from "@/game/question";
+import {
   ANSWERS,
   type AnswerValue,
+  type Lang,
   MAX_GUESS,
   MAX_NOTE,
   MAX_QUESTION,
@@ -298,16 +305,20 @@ function Bubble({
 
 function Ask() {
   const t = useTranslations("turn.ask");
+  const mark = questionMark(useLocale() as Lang);
   const { view, code } = useRoomContext();
   const { act, pending } = useRoomAction();
+  // As typed. The field shows the final mark as a suffix, hidden only while the
+  // text already ends with one; leaving the field or sending swaps it for the suffix.
   const [text, setText] = useState("");
+  const typedMark = endsWithQuestionMark(text.trimEnd());
   const others = view.players.filter((p) => !p.isYou && !p.away).length;
   return (
     <form
       className="flex flex-col gap-5"
       onSubmit={async (e) => {
         e.preventDefault();
-        await act(() => askQuestion(code, text));
+        await act(() => askQuestion(code, withQuestionMark(text, mark)));
       }}
     >
       <Heading
@@ -319,14 +330,17 @@ function Ask() {
         hint={others > 1 ? t("hintMany") : t("hintOne")}
         value={text}
         max={MAX_QUESTION}
+        suffix={mark}
+        suffixHidden={typedMark}
         autoFocus
         onChange={(e) => setText(e.target.value)}
+        onBlur={() => setText((t) => withoutQuestionMark(t.trimEnd()))}
       />
       <div className="flex flex-wrap items-center gap-3">
         <Button
           type="submit"
           variant="primary"
-          disabled={pending || !text.trim()}
+          disabled={pending || !withoutQuestionMark(text.trim()).trim()}
         >
           {t("send")}
         </Button>
