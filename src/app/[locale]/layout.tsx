@@ -1,3 +1,5 @@
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
 import {
   Bricolage_Grotesque,
@@ -80,6 +82,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
+        {/* Vercel Web Analytics and Speed Insights; they only send data on Vercel. */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

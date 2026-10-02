@@ -99,3 +99,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Search: title and description per page and language, canonical and hreflang links, sitemap, robots, JSON-LD, installable (manifest and icons)
 - [x] Share cards with a picture for Twitter, Facebook, Discord, WhatsApp and the like: home, "Who am I?" and a room invite with its code, in 3 languages
 - [x] Tab title per page and per step of the match; when it's your move and you're in another tab, the title and the icon blink (orange "!")
+- [x] Vercel Web Analytics and Speed Insights
