@@ -8,7 +8,6 @@
   "avatar": "Avatar",
   "providerPhoto": "Foto do {provider}",
   "upload": "Enviar imagem",
-  "colorOnly": "Só uma cor",
   "color": "Cor de fundo",
   "colorN": "Cor {n}",
   "save": "Salvar",
@@ -17,8 +16,10 @@
   "preview": "Como os outros veem você",
   "account": "Conta",
   "asking": "Perguntando",
-  "guestNote": "Sem conta: nome e cor sorteados",
+  "guestNote": "Sem conta: nome e bichinho sorteados",
   "guestRule": "Convidados não escolhem nome nem avatar.",
   "guestTitle": "Entre para ter um perfil",
-  "guestText": "Com uma conta do Discord ou do Google você escolhe seu nome e seu avatar. É opcional: dá pra jogar como convidado."
+  "guestText": "Com uma conta do Discord ou do Google você escolhe seu nome e seu avatar. É opcional: dá pra jogar como convidado.",
+  "critter": "Bichinho",
+  "shuffle": "Sortear outro bichinho"
 }

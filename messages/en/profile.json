@@ -8,7 +8,6 @@
   "avatar": "Avatar",
   "providerPhoto": "{provider} picture",
   "upload": "Upload a picture",
-  "colorOnly": "Just a colour",
   "color": "Background colour",
   "colorN": "Colour {n}",
   "save": "Save",
@@ -17,8 +16,10 @@
   "preview": "How others see you",
   "account": "Account",
   "asking": "Asking",
-  "guestNote": "No account: random name and colour",
+  "guestNote": "No account: random name and critter",
   "guestRule": "Guests don't choose a name or avatar.",
   "guestTitle": "Sign in to get a profile",
-  "guestText": "With a Discord or Google account you choose your name and avatar. It's optional: you can play as a guest."
+  "guestText": "With a Discord or Google account you choose your name and avatar. It's optional: you can play as a guest.",
+  "critter": "Critter",
+  "shuffle": "Shuffle critter"
 }

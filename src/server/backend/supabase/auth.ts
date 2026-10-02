@@ -9,7 +9,7 @@ import {
   MAX_NAME,
 } from "@/game/types";
 import type { Me } from "@/server/contract";
-import { randomPastel } from "../pastel";
+import { randomAvatar } from "../pastel";
 import type { AuthService } from "../types";
 import { serviceClient, sessionClient } from "./clients";
 
@@ -60,7 +60,7 @@ async function loadOrCreate(user: User): Promise<ProfileRow> {
     id: user.id,
     is_guest: guest,
     guest_number: randomGuestNumber(),
-    avatar: { kind: "color", color: randomPastel() },
+    avatar: randomAvatar(),
     ...(guest
       ? { name: null, provider: null, provider_avatar_url: null }
       : accountDefaults(user)),

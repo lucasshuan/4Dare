@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { randomGuestNumber } from "@/game/guest-names";
 import type { Avatar, Identity, Lang } from "@/game/types";
 import type { Me } from "@/server/contract";
-import { randomPastel } from "../pastel";
+import { randomAvatar } from "../pastel";
 import type { AuthService } from "../types";
 import { processSingleton, readJson, writeJson } from "./disk";
 
@@ -27,7 +27,7 @@ function newGuest(id: string): Profile {
     isGuest: true,
     name: null,
     guestNumber: randomGuestNumber(),
-    avatar: { kind: "color", color: randomPastel() },
+    avatar: randomAvatar(),
     provider: null,
   };
 }
@@ -106,7 +106,7 @@ export function localAuth(): AuthService & {
     async enterTestAccount(provider) {
       const p = await current();
       p.isGuest = false;
-      p.name = p.name ?? `Tester ${p.guestNumber}`;
+      p.name = p.name ?? `Tester ${p.guestNumber % 100}`;
       p.provider = provider;
       save();
       return toMe(p);

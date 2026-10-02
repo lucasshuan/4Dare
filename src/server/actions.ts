@@ -7,6 +7,7 @@ import { normalizeName } from "@/game/match";
 import {
   ANSWERS,
   type AnswerValue,
+  CRITTER_SEED,
   DEFAULT_SETTINGS,
   GameError,
   type GameEvent,
@@ -343,7 +344,7 @@ export async function replaceCharacterImage(
 
 // --- identity -----------------------------------------------------------------
 
-/** FormData: name, color, avatar ("color" | "provider" | "upload"), image (File when avatar = upload). Accounts only. */
+/** FormData: name, color, avatar ("critter" | "color" | "provider" | "upload" | "keep"), seed (critter), image (upload). Accounts only. */
 export async function updateProfile(form: FormData): Promise<Result<Me>> {
   return run(async () => {
     const { auth, files } = getBackend();
@@ -351,9 +352,11 @@ export async function updateProfile(form: FormData): Promise<Result<Me>> {
     if (current.isGuest) throw new GameError("unauthorized");
     const name = text(form.get("name"), MAX_NAME);
     const color = form.get("color");
+    // one of the palette, or the random pastel the guest started with
     if (
       typeof color !== "string" ||
-      !(AVATAR_COLORS as readonly string[]).includes(color)
+      (!(AVATAR_COLORS as readonly string[]).includes(color) &&
+        color !== current.avatar.color)
     )
       bad();
     const kind = form.get("avatar");
@@ -369,6 +372,14 @@ export async function updateProfile(form: FormData): Promise<Result<Me>> {
       avatar = {
         kind: "image",
         url: await files.put("avatars", image.bytes, image.type),
+        color: color as string,
+      };
+    } else if (kind === "critter") {
+      const seed = form.get("seed");
+      if (typeof seed !== "string" || !CRITTER_SEED.test(seed)) bad();
+      avatar = {
+        kind: "critter",
+        seed: seed as string,
         color: color as string,
       };
     } else if (kind === "keep" && current.avatar.kind === "image") {

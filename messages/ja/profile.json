@@ -8,7 +8,6 @@
   "avatar": "アバター",
   "providerPhoto": "{provider}の写真",
   "upload": "画像をアップロード",
-  "colorOnly": "色だけ",
   "color": "背景色",
   "colorN": "色{n}",
   "save": "保存",
@@ -17,8 +16,10 @@
   "preview": "ほかの人からの見え方",
   "account": "アカウント",
   "asking": "質問中",
-  "guestNote": "アカウントなし：名前と色はランダム",
+  "guestNote": "アカウントなし：名前とモンスターはランダム",
   "guestRule": "ゲストは名前やアバターを選べません。",
   "guestTitle": "ログインしてプロフィールを作ろう",
-  "guestText": "DiscordかGoogleのアカウントで、名前とアバターを選べます。ログインしなくてもゲストとして遊べます。"
+  "guestText": "DiscordかGoogleのアカウントで、名前とアバターを選べます。ログインしなくてもゲストとして遊べます。",
+  "critter": "モンスター",
+  "shuffle": "別のモンスターにする"
 }

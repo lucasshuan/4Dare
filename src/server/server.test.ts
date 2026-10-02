@@ -184,4 +184,36 @@ describe("server, local mode", () => {
       avatar: { kind: "color", color: "#DCE8FA" },
     });
   });
+
+  it("guests start with a critter; accounts can pick another one", async () => {
+    as("r2");
+    const guest = must(await A.enterTestAccount());
+    expect(guest.avatar).toMatchObject({ kind: "critter" });
+    const form = new FormData();
+    form.set("name", "Bia");
+    form.set("color", "#F4C7D9");
+    form.set("avatar", "critter");
+    form.set("seed", "<svg>");
+    expect(await A.updateProfile(form)).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    form.set("seed", "k3x9q");
+    form.set("color", "#123456");
+    expect(await A.updateProfile(form)).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    // the random pastel the guest started with is kept if they don't pick one
+    form.set("color", guest.avatar.color);
+    expect(must(await A.updateProfile(form)).avatar.color).toBe(
+      guest.avatar.color,
+    );
+    form.set("color", "#F4C7D9");
+    expect(must(await A.updateProfile(form)).avatar).toEqual({
+      kind: "critter",
+      seed: "k3x9q",
+      color: "#F4C7D9",
+    });
+  });
 });

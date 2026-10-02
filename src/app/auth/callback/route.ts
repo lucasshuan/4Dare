@@ -1,4 +1,5 @@
 import { randomGuestNumber } from "@/game/guest-names";
+import { randomAvatar } from "@/server/backend/pastel";
 import { accountDefaults } from "@/server/backend/supabase/auth";
 import {
   serviceClient,
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
           id: data.user.id,
           is_guest: false,
           guest_number: randomGuestNumber(),
-          avatar: { kind: "color", color: "#DCE8FA" },
+          avatar: randomAvatar(),
           ...d,
         });
       } else if (existing.is_guest) {

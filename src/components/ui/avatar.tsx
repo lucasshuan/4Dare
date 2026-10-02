@@ -1,17 +1,19 @@
 import { UserRound } from "lucide-react";
 import type { Avatar as AvatarData } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { critterUri } from "./critter";
 
 const SIZE = {
   20: "size-5 text-[11px]",
   28: "size-7 text-[13px]",
   32: "size-8 text-sm",
   44: "size-11 text-lg",
+  40: "size-10 text-base",
   48: "size-12 text-xl",
   64: "size-16 text-[26px]",
 } as const;
 
-/** Initial on a pastel, a picture, or (guests) a person icon on a pastel. */
+/** A critter on a pastel, a picture, or (older avatars) an initial / person icon on a pastel. */
 export function Avatar({
   avatar,
   isGuest,
@@ -41,7 +43,14 @@ export function Avatar({
         className,
       )}
     >
-      {avatar.kind === "image" ? (
+      {avatar.kind === "critter" ? (
+        // biome-ignore lint/performance/noImgElement: generated svg data uri
+        <img
+          src={critterUri(avatar.seed, avatar.color)}
+          alt=""
+          className="size-full"
+        />
+      ) : avatar.kind === "image" ? (
         // biome-ignore lint/performance/noImgElement: remote avatar pictures
         <img src={avatar.url} alt="" className="size-full object-cover" />
       ) : isGuest || !name ? (

@@ -1,4 +1,16 @@
-// Guests get a random soft colour behind their avatar.
+import { randomBytes } from "node:crypto";
+import type { Avatar } from "@/game/types";
+
+// Everyone starts with a random DiceBear critter on a random soft colour.
+
+/** A random critter on a random pastel. */
+export function randomAvatar(): Avatar {
+  return {
+    kind: "critter",
+    seed: randomBytes(5).toString("hex"),
+    color: randomPastel(),
+  };
+}
 
 /** A soft pastel: random hue, fixed saturation and lightness. */
 export function randomPastel(): string {

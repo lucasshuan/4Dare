@@ -52,7 +52,7 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 - [x] Salas públicas na tela inicial
 - [x] Sala de espera com "Estou pronto" e configurações (vagas, segundos por etapa)
 - [x] Nome de convidado sorteado: adjetivo + substantivo, 27 mil combinações (WonderfulCat, GatoMaravilhoso, すてきなネコ)
-- [ ] Avatares Critters do DiceBear: convidado ganha um sorteado, conta pode sortear outro
+- [x] Avatares Critters do DiceBear: convidado ganha um sorteado, conta pode sortear outro
 
 ## Fase 6 — Acabamento
 

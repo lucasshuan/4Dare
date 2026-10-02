@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Upload } from "lucide-react";
+import { Check, Dices, Upload } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/auth-button";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { randomCritterSeed } from "@/components/ui/critter";
 import { ImageDrop } from "@/components/ui/image-drop";
 import { Screen } from "@/components/ui/screen";
 import { TextField } from "@/components/ui/text-field";
@@ -76,14 +77,14 @@ function GuestProfile() {
   );
 }
 
-type Kind = "provider" | "upload" | "color";
+type Kind = "provider" | "upload" | "critter";
 
 function initialKind(me: Me): Kind {
-  if (me.avatar.kind !== "image") return "color";
+  if (me.avatar.kind !== "image") return "critter";
   return me.avatar.url === me.providerAvatarUrl ? "provider" : "upload";
 }
 
-/** Name, avatar (provider picture, an upload or just a colour) and background colour. */
+/** Name, avatar (provider picture, an upload or a critter) and background colour. */
 function AccountForm({ me }: { me: Me }) {
   const t = useTranslations("profile");
   const toast = useToast();
@@ -93,6 +94,9 @@ function AccountForm({ me }: { me: Me }) {
   const [name, setName] = useState(me.name ?? "");
   const [kind, setKind] = useState<Kind>(initialKind(me));
   const [color, setColor] = useState(me.avatar.color);
+  const [seed, setSeed] = useState(() =>
+    me.avatar.kind === "critter" ? me.avatar.seed : randomCritterSeed(),
+  );
   const [blob, setBlob] = useState<Blob | null>(null);
   const blobUrl = useMemo(
     () => (blob ? URL.createObjectURL(blob) : null),
@@ -113,8 +117,14 @@ function AccountForm({ me }: { me: Me }) {
       ? { kind: "image", url: me.providerAvatarUrl, color }
       : kind === "upload" && uploadUrl
         ? { kind: "image", url: uploadUrl, color }
-        : { kind: "color", color };
+        : { kind: "critter", seed, color };
   const trimmed = name.trim();
+  // the random pastel a guest started with stays available next to the palette
+  const swatches: readonly string[] = (
+    AVATAR_COLORS as readonly string[]
+  ).includes(me.avatar.color)
+    ? AVATAR_COLORS
+    : [me.avatar.color, ...AVATAR_COLORS];
   const canSave = trimmed.length > 0 && (kind !== "upload" || !!uploadUrl);
 
   const save = async () => {
@@ -124,6 +134,9 @@ function AccountForm({ me }: { me: Me }) {
     if (kind === "upload" && blob) {
       form.set("avatar", "upload");
       form.set("image", blob, "avatar.webp");
+    } else if (kind === "critter") {
+      form.set("avatar", "critter");
+      form.set("seed", seed);
     } else {
       form.set("avatar", kind === "upload" ? "keep" : kind);
     }
@@ -211,18 +224,40 @@ function AccountForm({ me }: { me: Me }) {
               )}
             </Tile>
             <Tile
-              pressed={kind === "color"}
-              onClick={() => setKind("color")}
-              label={t("colorOnly")}
+              pressed={kind === "critter"}
+              onClick={() => setKind("critter")}
+              label={t("critter")}
             >
-              <Avatar
-                avatar={{ kind: "color", color }}
-                isGuest={false}
-                name={trimmed || "?"}
-                size={64}
-              />
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={seed}
+                  initial={{ opacity: 0, scale: 0.6, rotate: -12 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.6, rotate: 12 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 22 }}
+                  className="flex"
+                >
+                  <Avatar
+                    avatar={{ kind: "critter", seed, color }}
+                    isGuest={false}
+                    name={trimmed}
+                    size={64}
+                  />
+                </motion.span>
+              </AnimatePresence>
             </Tile>
           </div>
+          <Button
+            size="sm"
+            className="mt-1 self-start"
+            onClick={() => {
+              setKind("critter");
+              setSeed(randomCritterSeed());
+            }}
+          >
+            <Dices strokeWidth={1.75} />
+            {t("shuffle")}
+          </Button>
           <AnimatePresence initial={false}>
             {kind === "upload" ? (
               <motion.div
@@ -245,7 +280,7 @@ function AccountForm({ me }: { me: Me }) {
         <fieldset className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0">
           <legend className="mb-2 font-semibold text-sm">{t("color")}</legend>
           <div className="flex flex-wrap gap-2.5">
-            {AVATAR_COLORS.map((c, i) => (
+            {swatches.map((c, i) => (
               <button
                 key={c}
                 type="button"
@@ -366,7 +401,7 @@ function Preview({
       <hr className="border-line" />
       <div className="flex items-center gap-3">
         <Avatar
-          avatar={{ kind: "color", color: "#BFE3EA" }}
+          avatar={{ kind: "critter", seed: "27", color: "#BFE3EA" }}
           isGuest
           name={null}
         />

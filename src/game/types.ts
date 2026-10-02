@@ -17,10 +17,14 @@ export type AnswerValue = (typeof ANSWERS)[number];
 
 export type PlayerId = string;
 
-/** `color` is always set: it is the fallback behind an image and the whole avatar for guests. */
+/** `color` is always set: the pastel behind a critter or an image. `color` alone is the older look (initial or person icon). */
 export type Avatar =
+  | { kind: "critter"; seed: string; color: string }
   | { kind: "color"; color: string }
   | { kind: "image"; url: string; color: string };
+
+/** Seeds for DiceBear critters: short, URL-safe. */
+export const CRITTER_SEED = /^[a-z0-9]{1,16}$/;
 
 /** Who someone is. Guests have no name: the UI turns guestNumber into "WonderfulCat" / "GatoMaravilhoso" / "すてきなネコ" (see guest-names.ts). */
 export interface Identity {
