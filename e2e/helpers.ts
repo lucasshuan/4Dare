@@ -16,7 +16,7 @@ export async function newPlayer(browser: Browser, phone = false) {
 const button = (page: Page, name: RegExp) => page.getByRole("button", { name });
 
 export async function createRoom(host: Page) {
-  await host.goto("/en/new");
+  await host.goto("/en/who-am-i/new");
   await button(host, /^create room$/i).click();
   await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
   return host.url().split("/").pop() as string;
@@ -80,7 +80,7 @@ export async function playToEnd(
       const send = button(page, /send answer/i);
       // players who are out of the match have nothing to answer
       const asked = await send
-        .waitFor({ timeout: 5000 })
+        .waitFor({ timeout: 15_000 })
         .then(() => true)
         .catch(() => false);
       if (!asked) continue;
