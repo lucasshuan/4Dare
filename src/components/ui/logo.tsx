@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 
-// The Dare logo, drawn from Bricolage Grotesque ExtraBold: a speech bubble shaped
-// like a D with a question mark inside, then "are" in three colours, each letter
+// The Ludodare logo, which reads "Dare", drawn from Bricolage Grotesque ExtraBold:
+// a speech bubble shaped like a D with a question mark inside, then "are" in three colours, each letter
 // a little tilted. Brand blue and butter stay the same in both themes; the
 // letters follow the theme. Static copies live in public/brand.
 
@@ -42,7 +42,7 @@ export function Logo({ className }: { className?: string }) {
     <svg
       viewBox="-4 -4 2086 796"
       role="img"
-      aria-label="Dare"
+      aria-label="Ludodare"
       className={cn("overflow-visible", className)}
     >
       <Mark />

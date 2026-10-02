@@ -11,4 +11,4 @@ export const SUPABASE_PUBLISHABLE_KEY =
 export const BACKEND: "supabase" | "local" =
   SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY ? "supabase" : "local";
 
-export const APP_NAME = "Dare";
+export const APP_NAME = "Ludodare";
