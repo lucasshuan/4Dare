@@ -34,7 +34,7 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 - [ ] Busca com autocomplete e foto
 - [ ] Criar personagem com imagem e trocar imagem
 - [x] 300 temas em en/pt/ja
-- [ ] Tema sorteado pela IA
+- [x] Tema sorteado pela IA (precisa da chave ANTHROPIC_API_KEY; sem ela usa os 306 temas)
 
 ## Fase 4 — Cara de jogo pronto
 

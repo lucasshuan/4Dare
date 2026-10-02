@@ -236,7 +236,10 @@ export async function giveUp(code: string): Promise<Result> {
 /** Host only, from the result screen: same room, new theme. */
 export async function rematch(code: string): Promise<Result> {
   return run(async () => {
-    const theme = await getBackend().themes.draw([]);
+    const stored = await getBackend().rooms.get(roomCode(code));
+    const theme = await getBackend().themes.draw(
+      stored?.state.theme ? [stored.state.theme] : [],
+    );
     await act(code, (id) => ({ type: "REMATCH", playerId: id, theme }));
   });
 }
