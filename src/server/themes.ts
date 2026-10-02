@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { Localized } from "@/game/types";
 import bankFile from "../../data/themes.json";
 import type { ThemeSource, ThemeStore } from "./backend/types";
+import { background } from "./background";
 
 const FALLBACK: Localized[] = [
   { en: "Villains", pt: "Vilões", ja: "悪役" },
@@ -133,14 +134,7 @@ export function themes(store: ThemeStore): ThemeSource {
         const fresh = await drawWithAI(avoid, list);
         if (fresh) {
           cached = [...current(), fresh];
-          void store
-            .add(fresh)
-            .catch((e: unknown) =>
-              console.warn(
-                "[themes] could not keep the AI theme:",
-                e instanceof Error ? e.message : e,
-              ),
-            );
+          background(() => store.add(fresh));
           return fresh;
         }
       }

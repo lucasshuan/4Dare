@@ -1,5 +1,4 @@
 import "server-only";
-import { after } from "next/server";
 import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
 import { matchRecord } from "@/game/record";
 import {
@@ -13,6 +12,7 @@ import {
   type RoomState,
 } from "@/game/types";
 import { getBackend } from "./backend";
+import { background } from "./background";
 
 const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 export const CODE_PATTERN = /^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5}$/;
@@ -37,7 +37,7 @@ export async function openRoom(host: Identity, settings: RoomSettings) {
   for (let attempt = 0; attempt < 10; attempt++) {
     const state = newRoomState(randomCode(), host, settings, ctx());
     if (await rooms.create(state)) {
-      if (settings.visibility === "public") void notify.lobbyChanged();
+      if (settings.visibility === "public") background(notify.lobbyChanged);
       return state.code;
     }
   }
@@ -59,13 +59,13 @@ export async function dispatch(
     const event = await build(stored.state);
     const next = reduce(stored.state, event, ctx());
     if (await rooms.compareAndSwap(code, stored.version, next)) {
-      void notify.roomChanged(code, stored.version + 1);
+      background(() => notify.roomChanged(code, stored.version + 1));
       // Only the write that finished the match gets here, so it is saved once.
       if (next.phase === "finished" && stored.state.phase !== "finished") {
         saveMatch(next);
       }
       if (next.phase === "lobby" || stored.state.phase === "lobby") {
-        void notify.lobbyChanged();
+        background(notify.lobbyChanged);
       }
       return next;
     }
@@ -77,18 +77,7 @@ export async function dispatch(
 function saveMatch(state: RoomState) {
   const record = matchRecord(state, Date.now());
   if (!record) return;
-  const save = () =>
-    getBackend()
-      .matches.record(record)
-      .catch((error: unknown) =>
-        console.error(`saving match ${record.id} failed`, error),
-      );
-  try {
-    after(save);
-  } catch {
-    // Outside a request (tests, scripts): save right away.
-    void save();
-  }
+  background(() => getBackend().matches.record(record));
 }
 
 // Used when the library cannot supply enough characters for a clock-filled pick.
