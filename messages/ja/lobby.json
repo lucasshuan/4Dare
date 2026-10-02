@@ -17,11 +17,16 @@
   "public": "公開：トップ画面に表示",
   "private": "非公開：リンクかコードのみ",
   "seats": "最大{seats}人",
-  "stepSeconds": "1ステップ{seconds}秒",
+  "stepSeconds": "1ステップ{seconds}秒（{clock}）",
   "start": "ゲームを始める",
-  "startHint": "満員になるとすぐに始まります。",
+  "startHint": "{others}人中{ready}人が準備OK。このまま始めてもOK。満員になるとすぐに始まります。",
   "needTwo": "2人以上必要です。",
   "readyDone": "準備OK",
   "imReady": "準備できた",
-  "leave": "ルームを出る"
+  "leave": "ルームを出る",
+  "editSettings": "設定を変更",
+  "saveSettings": "保存",
+  "cancel": "キャンセル",
+  "settingsSaved": "設定を保存しました",
+  "mode": "クラシックモード"
 }

@@ -17,11 +17,16 @@
   "public": "Pública: aparece na tela inicial",
   "private": "Privada: só com link ou código",
   "seats": "Até {seats} jogadores",
-  "stepSeconds": "{seconds} s por etapa",
+  "stepSeconds": "{seconds} s por etapa ({clock})",
   "start": "Começar partida",
-  "startHint": "Se a sala encher, a partida começa na hora.",
+  "startHint": "{others, plural, one {{ready} de 1 confirmou.} other {{ready} de # confirmaram.}} Você pode começar mesmo assim; se a sala encher, começa na hora.",
   "needTwo": "Precisa de pelo menos 2 jogadores.",
   "readyDone": "Pronto",
   "imReady": "Estou pronto",
-  "leave": "Sair da sala"
+  "leave": "Sair da sala",
+  "editSettings": "Editar configuração",
+  "saveSettings": "Salvar",
+  "cancel": "Cancelar",
+  "settingsSaved": "Configuração salva",
+  "mode": "Modo clássico"
 }

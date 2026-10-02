@@ -17,11 +17,16 @@
   "public": "Public: shown on the home screen",
   "private": "Private: link or code only",
   "seats": "Up to {seats} players",
-  "stepSeconds": "{seconds} s per step",
+  "stepSeconds": "{seconds} s per step ({clock})",
   "start": "Start match",
-  "startHint": "If the room fills up, the match starts right away.",
+  "startHint": "{others, plural, one {{ready} of 1 is ready.} other {{ready} of # are ready.}} You can start anyway; if the room fills up, it starts right away.",
   "needTwo": "You need at least 2 players.",
   "readyDone": "Ready",
   "imReady": "I'm ready",
-  "leave": "Leave room"
+  "leave": "Leave room",
+  "editSettings": "Edit settings",
+  "saveSettings": "Save",
+  "cancel": "Cancel",
+  "settingsSaved": "Settings saved",
+  "mode": "Classic mode"
 }

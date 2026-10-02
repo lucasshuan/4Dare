@@ -1,8 +1,20 @@
 "use client";
 
-import { Check, Copy, Crown, Link as LinkIcon, X } from "lucide-react";
+import {
+  Check,
+  Clock,
+  Copy,
+  Crown,
+  Globe,
+  Link as LinkIcon,
+  Lock,
+  Play,
+  UsersRound,
+  X,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { type ReactNode, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitch } from "@/components/ui/language-switch";
@@ -10,13 +22,27 @@ import { Screen } from "@/components/ui/screen";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Timer } from "@/components/ui/timer";
 import { useToast } from "@/components/ui/toast";
+import { SettingsFields } from "@/features/create/settings-fields";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
-import { useDisplayName } from "@/lib/names";
-import { leaveRoom, setReady, startGame } from "@/server/actions";
+import { formatClock, useDisplayName } from "@/lib/names";
+import {
+  leaveRoom,
+  setReady,
+  startGame,
+  updateSettings,
+} from "@/server/actions";
+import type { CreateRoomInput } from "@/server/contract";
+
+/** Only what the host can change (the server rejects anything else). */
+const editable = ({
+  visibility,
+  seats,
+  stepSeconds,
+}: CreateRoomInput): CreateRoomInput => ({ visibility, seats, stepSeconds });
 
 export function LobbyScreen() {
   const t = useTranslations("lobby");
@@ -28,6 +54,12 @@ export function LobbyScreen() {
   const host = view.players.find((p) => p.isHost);
   const hostName = host ? name(host) : "";
   const empty = Math.max(0, view.settings.seats - view.players.length);
+  const others = view.players.filter((p) => !p.isHost);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<CreateRoomInput>(() =>
+    editable(view.settings),
+  );
+  const { visibility, seats, stepSeconds } = view.settings;
 
   const copy = async (text: string, done: string) => {
     try {
@@ -90,6 +122,11 @@ export function LobbyScreen() {
                 {t("copyCode")}
               </Button>
             </div>
+            <span className="font-mono text-[13px] text-ink-muted">
+              {typeof window === "undefined"
+                ? `/r/${code}`
+                : `${window.location.host}/r/${code}`}
+            </span>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -176,13 +213,71 @@ export function LobbyScreen() {
               offset={offset}
             />
           </div>
-          <ul className="flex flex-col gap-2">
-            <li>
-              {t(view.settings.visibility === "public" ? "public" : "private")}
-            </li>
-            <li>{t("seats", { seats: view.settings.seats })}</li>
-            <li>{t("stepSeconds", { seconds: view.settings.stepSeconds })}</li>
-          </ul>
+          <AnimatePresence mode="wait" initial={false}>
+            {editing ? (
+              <motion.form
+                key="edit"
+                {...riseIn}
+                className="flex flex-col gap-5"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const r = await run(() => updateSettings(code, draft));
+                  if (r.ok) {
+                    await refresh();
+                    setEditing(false);
+                    toast(t("settingsSaved"));
+                  }
+                }}
+              >
+                <SettingsFields
+                  value={draft}
+                  onChange={setDraft}
+                  minSeats={view.players.length}
+                  hints={false}
+                />
+                <div className="flex gap-2">
+                  <Button type="submit" variant="primary" disabled={pending}>
+                    {t("saveSettings")}
+                  </Button>
+                  <Button variant="ghost" onClick={() => setEditing(false)}>
+                    {t("cancel")}
+                  </Button>
+                </div>
+              </motion.form>
+            ) : (
+              <motion.div
+                key="view"
+                {...riseIn}
+                className="flex flex-col gap-4"
+              >
+                <ul className="flex flex-col gap-3">
+                  <Setting icon={visibility === "public" ? Globe : Lock}>
+                    {t(visibility === "public" ? "public" : "private")}
+                  </Setting>
+                  <Setting icon={UsersRound}>{t("seats", { seats })}</Setting>
+                  <Setting icon={Clock}>
+                    {t("stepSeconds", {
+                      seconds: stepSeconds,
+                      clock: formatClock(stepSeconds),
+                    })}
+                  </Setting>
+                  <Setting icon={Play}>{t("mode")}</Setting>
+                </ul>
+                {me.isHost ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDraft(editable(view.settings));
+                      setEditing(true);
+                    }}
+                    className="self-start font-semibold text-sky text-sm underline underline-offset-2"
+                  >
+                    {t("editSettings")}
+                  </button>
+                ) : null}
+              </motion.div>
+            )}
+          </AnimatePresence>
           {me.isHost ? (
             <>
               <Button
@@ -197,7 +292,12 @@ export function LobbyScreen() {
                 {t("start")}
               </Button>
               <p className="text-center font-medium text-[13px] text-ink-muted">
-                {view.canStart ? t("startHint") : t("needTwo")}
+                {view.canStart
+                  ? t("startHint", {
+                      ready: others.filter((p) => p.ready).length,
+                      others: others.length,
+                    })
+                  : t("needTwo")}
               </p>
             </>
           ) : (
@@ -229,5 +329,20 @@ export function LobbyScreen() {
         </aside>
       </div>
     </Screen>
+  );
+}
+
+function Setting({
+  icon: Icon,
+  children,
+}: {
+  icon: typeof Globe;
+  children: ReactNode;
+}) {
+  return (
+    <li className="flex items-center gap-3">
+      <Icon className="size-5 shrink-0 text-ink-muted" strokeWidth={1.75} />
+      <span>{children}</span>
+    </li>
   );
 }

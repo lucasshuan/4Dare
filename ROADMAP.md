@@ -47,9 +47,9 @@ Roda com `pnpm dev`, sem configurar nada. Cada navegador (ou janela anônima) é
 
 ## Fase 5 — Contas e salas
 
-- [ ] Login com Discord e Google, perfil com nome e avatar
-- [ ] Salas públicas na tela inicial
-- [ ] Sala de espera com "Estou pronto" e configurações (vagas, segundos por etapa)
+- [x] Login com Discord e Google, perfil com nome e avatar (sem Supabase entra numa conta de teste)
+- [x] Salas públicas na tela inicial
+- [x] Sala de espera com "Estou pronto" e configurações (vagas, segundos por etapa)
 
 ## Fase 6 — Acabamento
 
