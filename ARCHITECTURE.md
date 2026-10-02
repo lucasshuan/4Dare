@@ -1,24 +1,24 @@
-# Arquitetura
+# Architecture
 
-Next.js 16 + React 19 + Tailwind 4, tudo em TypeScript.
+Next.js 16 + React 19 + Tailwind 4, all TypeScript.
 
-## Pastas
+## Folders
 
-- `src/game`: as regras, puras. `reduce(sala, evento)` devolve a sala nova. `toView` esconde o que cada um não pode ver (tipo a própria carta).
-- `src/server`: as ações do jogador (server actions). Cada uma carrega a sala, aplica o evento e salva só se ninguém mexeu antes; se mexeu, tenta de novo.
-- `src/server/backend`: onde as coisas ficam. `local` = memória + pasta `.data`. `supabase` = Postgres, Realtime e Storage. Tem chave do Supabase? Usa Supabase. Senão, local.
-- `src/app`: páginas e API. `/api/rooms/[code]` devolve a sala como você pode vê-la.
-- `src/features`: as telas (início, sala de espera, escolha, turno, fim).
-- `src/components/ui`: botões, cartas, relógio e afins.
-- `messages/<idioma>`: os textos.
-- `data`: temas e personagens.
+- `src/game`: the rules, pure. `reduce(room, event)` returns the new room. `toView` hides what each player can't see (like their own card).
+- `src/server`: player actions (server actions). Each one loads the room, applies the event and saves only if nobody changed it first; if someone did, it tries again.
+- `src/server/backend`: where things live. `local` = memory + the `.data` folder. `supabase` = Postgres, Realtime and Storage. Supabase key set? Supabase. Otherwise local.
+- `src/app`: pages and API. `/api/rooms/[code]` returns the room as you may see it.
+- `src/features`: the screens (home, lobby, vote, pick, turn, end).
+- `src/components/ui`: buttons, cards, clock and such.
+- `messages/<lang>`: the texts.
+- `data`: themes and characters.
 
-## Detalhes
+## Details
 
-- Relógio sem cron: quando alguém busca a sala, o servidor aplica os tempos que já venceram.
-- Tempo real: local busca a sala a cada 1 s. No Supabase chega um aviso pelo Realtime.
-- Partidas: quando uma termina, vira um registro por jogador (`src/game/record.ts`), salvo depois da resposta. Convidado no Supabase é usuário anônimo; ao vincular Discord/Google o id não muda, então as partidas continuam dele.
-- Tema: a partida começa pela fase `voting`: 3 temas, 20 s, voto aberto (dá pra trocar até todo mundo votar); empate é sorteado no servidor e a roleta da tela usa o relógio do servidor, então todo mundo vê o mesmo giro. Em metade das votações um dos 3 é criado pelo Claude se tiver `ANTHROPIC_API_KEY`; o resto sai da lista (337 em `data/themes.json`). No Supabase a lista fica na tabela `themes` (`pnpm seed` sobe), lida a cada 10 min; `active = false` desliga um tema.
-- Personagens: `data/characters.json` tem um registro por personagem, com nome, apelidos e popularidade em cada idioma; `origin` é uma chave (`wd:Q8337` = Harry Potter, `job:actress`) traduzida em `data/origins.json`; `category` é uma lista fixa (anime, esportes, mitologia...) traduzida em `messages/*/common.json`. No Supabase viram `characters`, `character_names`, `origins` e `origin_labels`. Gerados por `scripts/library/build.ts`; popularidade = mediana de 6 meses de leitura na Wikipedia espalhados em 2 anos, pra pico de filme ou Copa não distorcer.
-- Sortear personagem: cada partida salva o tema (`themeId`) e o que cada um escolheu; o botão sorteia entre os 20 mais escolhidos naquele tema, com peso pela contagem, fora os já escolhidos na partida e os que o relógio escolheu. Basta 1 disponível no idioma. Depois de sortear, o jogador diz se curtiu: o peso é (escolhas + curtidas) × 0,5 por 👎. Local conta em memória a partir de `.data/matches.jsonl` e `.data/pick-feedback.json`; Supabase usa `theme_pick_scores` sobre `popular_picks` e `pick_feedback` (migrations 0006 e 0007).
-- Testes: `vitest` no motor (inclui 300 partidas aleatórias) e `playwright` com partidas inteiras.
+- Clock without cron: when someone fetches the room, the server applies the timeouts already due.
+- Realtime: local fetches the room every 1 s. On Supabase a ping arrives through Realtime.
+- Matches: when one ends, it becomes one record per player (`src/game/record.ts`), saved after the response. A guest on Supabase is an anonymous user; linking Discord/Google keeps the id, so the matches stay theirs.
+- Theme: a match starts with the `voting` phase: 3 themes, 20 s, open vote (players can change it until everyone voted); a tie is drawn on the server and the wheel on screen follows the server clock, so everyone sees the same spin. In half the votes one of the 3 is made by Claude when `ANTHROPIC_API_KEY` is set; the rest come from the list (337 in `data/themes.json`). On Supabase the list is the `themes` table (`pnpm seed` loads it), read every 10 min; `active = false` turns a theme off.
+- Characters: `data/characters.json` has one entry per character, with name, aliases and popularity per language; `origin` is a key (`wd:Q8337` = Harry Potter, `job:actress`) translated in `data/origins.json`; `category` is a fixed list (anime, sports, mythology...) translated in `messages/*/common.json`. On Supabase they become `characters`, `character_names`, `origins` and `origin_labels`. Built by `scripts/library/build.ts`; popularity = median of 6 months of Wikipedia reads spread over 2 years, so a film or a World Cup doesn't skew it.
+- Random pick: each match saves its theme (`themeId`) and what everyone picked; the button draws among the 20 most picked for that theme, weighted by count, leaving out the ones already picked in the match and the ones the clock picked. One available in the language is enough. After a draw the player says if they liked it: the weight is (picks + likes) × 0.5 per 👎, for that theme only. Local counts in memory from `.data/matches.jsonl` and `.data/pick-feedback.json`; Supabase uses `theme_pick_scores` over `popular_picks` and `pick_feedback` (migrations 0006 and 0007).
+- Tests: `vitest` on the engine (including 300 random matches) and `playwright` with whole matches.

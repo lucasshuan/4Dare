@@ -7,3 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Database
+
+- the project is in development; matches in the database are test data; the database follows `/data`
+- migrations and seed are the agent's job: run them whenever needed, without asking
+- losing data is not a problem yet, but keep what you can

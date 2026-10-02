@@ -1,91 +1,92 @@
 # Roadmap
 
-Cada fase termina com o jogo jogável; a próxima só melhora. Item marcado = feito e commitado.
+Each phase ends with the game playable; the next one only improves it. Ticked item = done and committed.
 
-## Fase 0 — Base ✅
+## Phase 0 — Base ✅
 
-- [x] Design das telas, design system e fluxo (BPMN)
-- [x] Next.js em inglês, português e japonês, tema claro e escuro
-- [x] Regras do jogo escritas como tipos
-- [x] Padrão de commit
+- [x] Screen design, design system and flow (BPMN)
+- [x] Next.js in English, Portuguese and Japanese, light and dark theme
+- [x] Game rules written as types
+- [x] Commit convention
 
-## Fase 1 — Dá pra jogar (no seu PC) ✅
+## Phase 1 — Playable (on your PC) ✅
 
-- [x] Motor do jogo com testes: 2 a 4 jogadores, ninguém vê a própria carta
-- [x] Servidor local em memória (`pnpm dev`, sem configurar nada)
-- [x] Sala pública ou privada; entra por link ou código
-- [x] Cada um escolhe o personagem de outro jogador (em roda)
-- [x] Pergunta de sim ou não; todos os outros respondem: Sim, Provavelmente sim, Não sei, Provavelmente não, Não, Irrelevante, com comentário opcional
-- [x] Palpite: nome parecido vale na hora; senão, só quem escolheu decide
-- [x] Passar a vez e desistir
-- [x] Tempo por etapa; quem some não trava a partida
-- [x] Fim com a colocação de todo mundo
-- [x] README curto
+- [x] Game engine with tests: 2 to 4 players, nobody sees their own card
+- [x] Local in-memory server (`pnpm dev`, nothing to set up)
+- [x] Public or private room; join by link or code
+- [x] Everyone picks another player's character (in a ring)
+- [x] Yes-or-no question; everyone else answers: Yes, Probably, Don't know, Probably not, No, Doesn't matter, with an optional comment
+- [x] Guess: a close name counts at once; otherwise only the picker decides
+- [x] Pass the turn and give up
+- [x] Time per step; whoever disappears doesn't stall the match
+- [x] End with everyone's place
+- [x] Short README
 
-## Fase 2 — Online com os amigos
+## Phase 2 — Online with friends
 
-- [ ] Supabase: banco, tempo real, fotos, convidado sem login
-- [x] Supabase configurado num comando (`pnpm setup:supabase`): tabelas, convidados, Discord, Google, URLs, chaves
-- [x] Servidor na mesma região do banco (São Paulo)
-- [ ] Login de verdade com Discord e Google
-- [ ] Deploy na Vercel com a integração do Supabase
-- [ ] Biblioteca de personagens no Supabase (`pnpm seed`)
-- [ ] Partida de 2 e de 4 jogadores testada online
+- [ ] Supabase: database, realtime, pictures, guests without login
+- [x] Supabase set up in one command (`pnpm setup:supabase`): tables, guests, Discord, Google, URLs, keys
+- [x] Server in the same region as the database (São Paulo)
+- [ ] Real login with Discord and Google
+- [ ] Deploy on Vercel with the Supabase integration
+- [x] Character library on Supabase (`pnpm seed`)
+- [ ] 2- and 4-player match tested online
 
-## Fase 3 — Personagens e temas
+## Phase 3 — Characters and themes
 
-- [x] Gerador da biblioteca revisado: filtros de conteúdo, nomes em pt-br, memória
-- [x] Biblioteca grande em cada idioma, com foto (8 mil por idioma, 91–98% com foto)
-- [x] Biblioteca revisada: sem criminosos, ditadores ou conteúdo adulto; nomes do Brasil e do Japão; origens e duplicatas corrigidas
-- [x] Biblioteca aceita grupos e espécies: duplas, famílias, equipes, bandas, Pikachu, Chocobo
-- [x] Popularidade sem pico de notícia: mediana de 6 meses em 2 anos (o filme da Odisseia tinha posto Agamemnon no top 3)
-- [x] Um registro por personagem: nome, apelidos e popularidade em cada idioma
-- [x] Origem como chave traduzível (obra ou profissão) e categoria fixa (anime, esportes, mitologia...)
-- [x] Busca com autocomplete e foto
-- [x] Botão "Sortear" na escolha: tira um dos personagens mais escolhidos naquele tema em partidas jogadas (o que o relógio escolheu não conta); funciona a partir de 1 partida salva, senão avisa curto
-- [x] "Curtiu o sorteado?" logo depois de sortear: 👎 sorteia outro e cada 👎 corta pela metade a chance dele naquele tema; 👍 soma como uma escolha
-- [x] Busca instantânea: índice do idioma baixado uma vez (cache), cada tecla responde na memória em menos de 1 ms, sem servidor
-- [x] Criar personagem com nome e foto própria (com recorte)
-- [x] Trocar a foto de qualquer personagem (vira a da biblioteca)
-- [x] Tema sorteado pela IA; sem chave, sai de 337 temas simples
-- [x] Temas em que o "personagem" é um grupo: duplas, trios, irmãos, famílias, bandas, espécies (Pikmin)
-- [x] Temas no banco: liga e desliga sem deploy; os que a IA cria ficam guardados
-- [x] Um tema, uma ideia: "Anjos e demônios", "Mordomos e empregadas" e outros 13 viraram dois temas cada; a IA não junta mais dois grupos
-- [x] Votação do tema: antes de cada partida (e da revanche) aparecem 3 temas e todo mundo vota, com os avatares pulando entre as cartas; 20 s; o mais votado vence, empate vai pra roleta sincronizada, e o vencedor ganha o palco antes da escolha
+- [x] Reviewed library builder: content filters, pt-BR names, cache
+- [x] Large library in each language, with pictures (8k per language, 91–98% with a picture)
+- [x] Reviewed library: no criminals, dictators or adult content; Brazilian and Japanese names; origins and duplicates fixed
+- [x] Library takes groups and species: duos, families, teams, bands, Pikachu, Chocobo
+- [x] Popularity without news spikes: median of 6 months over 2 years (the Odyssey film had put Agamemnon in the top 3)
+- [x] One entry per character: name, aliases and popularity in each language
+- [x] Origin as a translatable key (work or job) and a fixed category (anime, sports, mythology...)
+- [x] Search with autocomplete and pictures
+- [x] "Random" button on the pick screen: draws one of the characters picked most for that theme in played matches (the clock's picks don't count); works from 1 saved match, otherwise a short notice
+- [x] "Like this pick?" right after a draw: 👎 draws another and each 👎 halves its chance for that theme; 👍 counts as one more pick
+- [x] Instant search: the language's index downloaded once (cached), each key answered from memory in under 1 ms, no server
+- [x] Create a character with a name and your own picture (with cropping)
+- [x] Change any character's picture (it becomes the library's)
+- [x] Theme drawn by the AI; without a key, from 337 simple themes
+- [x] Themes where the "character" is a group: duos, trios, siblings, families, bands, species (Pikmin)
+- [x] Themes in the database: turn on and off without a deploy; the AI's ones are kept
+- [x] One theme, one idea: "Angels and demons", "Butlers and maids" and 13 others became two themes each; the AI no longer joins two groups
+- [x] Theme vote: before each match (and rematch) 3 themes show up and everyone votes, with avatars hopping between the cards; 20 s; most votes wins, a tie goes to a synced wheel, and the winner takes the stage before picking
 
-## Fase 4 — Cara de jogo pronto ✅
+## Phase 4 — Looks like a finished game ✅
 
-- [x] Telas iguais ao design: imagens grandes, cores suaves, claro e escuro, 3 idiomas
-- [x] Bandeiras de verdade; idioma e tema só na tela inicial e na sala de espera
-- [x] Idioma num seletor (bandeira + nome)
-- [x] Cursor de mão em tudo que é clicável
-- [x] Código da sala sem botão: no 5º caractere já entra, ou diz por que não dá
-- [x] Tela inicial escolhe o jogo: cartões num carrossel, com prévia animada; "Quem sou eu?" é o primeiro
-- [x] Logo própria (balão em D com "?" e "are" colorido), ícone quadrado e favicon; logo no topo de toda tela, menos na sala de espera e na partida; home só com os jogos
-- [x] Nenhuma tela rola no desktop: tudo cabe de 1024×640 a 1920×1080
-- [x] Usuário no canto superior direito, depois do tema: avatar e nome; clicando, um popover diz se é convidado e oferece Discord e Google
-- [x] Revelação para todos: as respostas (6 a 10 s, conforme o tamanho) e o palpite (2,5 a 3,5 s)
-- [x] Relógio da etapa seguinte parado durante a revelação, recarregando
-- [x] Confetti por alguns segundos no acerto
-- [x] Transições suaves e dinâmicas em todas as telas, criar sala e erros da sala inclusos
-- [x] Ações respondem na hora: a resposta já traz a sala, sem segunda busca; "Estou pronto" muda no clique
-- [x] Histórico rolável em gaveta, na web e no celular: "Minhas jogadas" (padrão) ou "Todas"
-- [x] Pódio com os vencedores mais altos e cada jogador embaixo da sua carta; "Jogar de novo"
-- [x] Celular
+- [x] Screens match the design: big images, soft colors, light and dark, 3 languages
+- [x] Real flags; language and theme only on the home screen and in the lobby
+- [x] Language in a select (flag + name)
+- [x] Pointer cursor on everything clickable
+- [x] Room code without a button: joins at the 5th character, or says why it can't
+- [x] Home screen picks the game: cards in a carousel, with an animated preview; "Who am I?" comes first
+- [x] Own logo (D-shaped bubble with "?" and a colored "are"), square icon and favicon; logo on top of every screen except the lobby and the match; home only with the games
+- [x] No screen scrolls on desktop: everything fits from 1024×640 to 1920×1080
+- [x] User at the top right, after the theme: avatar and name; a click opens a popover saying if you're a guest and offering Discord and Google
+- [x] Reveal for everyone: the answers (6 to 10 s, by length) and the guess (2.5 to 3.5 s)
+- [x] Next step's clock paused during the reveal, recharging
+- [x] Confetti for a few seconds on a hit
+- [x] Smooth, lively transitions on every screen, room creation and room errors included
+- [x] Actions answer at once: the response already brings the room, no second fetch; "I'm ready" changes on click
+- [x] Scrollable history in a drawer, on web and phone: "My plays" (default) or "All"
+- [x] Podium with the winners higher and each player under their card; "Play again"
+- [x] Room settings hints as tooltips on the labels, with a small info badge
+- [x] Phones
 
-## Fase 5 — Contas e salas ✅
+## Phase 5 — Accounts and rooms ✅
 
-- [x] Convidado: nome sorteado (GatoCorajoso, WonderfulCat, すてきなネコ; 27 mil combinações) e bichinho Critters
-- [x] Conta Discord ou Google: escolhe nome, foto ou bichinho, e cor (sem Supabase, entra numa conta de teste)
-- [x] Salas públicas na tela do jogo: com vaga primeiro, "Ver mais" mostra as cheias e em partida
-- [x] Criar sala: pública ou privada, 2 a 4 vagas, segundos por etapa (padrão 120)
-- [x] Criar sala em `/who-am-i/new`, com a barra do topo e o "Voltar" acima do título
-- [x] Sala de espera: anfitrião edita a configuração e começa; os outros marcam "Estou pronto" (✓ verde, ✗ vermelho)
-- [x] Começa sozinha em 2 minutos ou assim que enche
-- [x] Partidas salvas por jogador: personagem, quem escolheu, como terminou e quanto tempo levou
-- [x] Convidado não perde as partidas ao entrar com Discord ou Google (mesmo numa conta que já existia)
+- [x] Guest: random name (GatoCorajoso, WonderfulCat, すてきなネコ; 27k combinations) and a Critters avatar
+- [x] Discord or Google account: picks name, picture or critter, and color (without Supabase, signs into a test account)
+- [x] Public rooms on the game screen: open seats first, "See more" shows full ones and ones in a match
+- [x] Create room: public or private, 2 to 4 seats, seconds per step (120 by default)
+- [x] Create room at `/who-am-i/new`, with the top bar and "Back" above the title
+- [x] Lobby: host edits the settings and starts; the others mark "I'm ready" (green ✓, red ✗)
+- [x] Starts on its own in 2 minutes or as soon as it's full
+- [x] Matches saved per player: character, who picked it, how it ended and how long it took
+- [x] A guest keeps their matches when signing in with Discord or Google (even into an account that already existed)
 
-## Fase 6 — Acabamento ✅
+## Phase 6 — Finishing ✅
 
-- [x] Testes de partida completa no navegador
-- [x] PRODUCT.md e ARCHITECTURE.md curtos
+- [x] Whole-match tests in the browser
+- [x] Short PRODUCT.md and ARCHITECTURE.md

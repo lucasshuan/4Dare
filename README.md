@@ -1,32 +1,32 @@
 # Dare
 
-Jogo de adivinhação pra 2 a 4 amigos. Cada um escolhe um personagem pra outro. Você vê a carta de todo mundo, menos a sua, e descobre quem é com perguntas de sim ou não.
+A guessing game for 2 to 4 friends. Everyone picks a character for someone else. You see everyone's card but yours, and find out who you are with yes-or-no questions.
 
-## Rodar
+## Run
 
 ```
 pnpm install
 pnpm dev
 ```
 
-Abre http://localhost:3000. Não precisa configurar nada: sem chaves, tudo fica em memória.
+Open http://localhost:3000. Nothing to set up: without keys, everything lives in memory.
 
-Pra testar sozinho, abre outro navegador ou uma janela anônima. Cada um vira um jogador.
+To test alone, open another browser or a private window. Each one is a player.
 
-Pra jogar com amigos na mesma rede: `pnpm build && pnpm start`, e eles abrem `http://SEU-IP:3000`.
+To play with friends on the same network: `pnpm build && pnpm start`, and they open `http://YOUR-IP:3000`.
 
-## Comandos
+## Commands
 
-- `pnpm test`: testes
-- `pnpm test:e2e`: partidas inteiras no navegador (Edge)
+- `pnpm test`: tests
+- `pnpm test:e2e`: whole matches in the browser (Edge)
 - `pnpm lint`: lint
-- `pnpm typecheck`: tipos
+- `pnpm typecheck`: types
 
 ## Online
 
-1. Na Vercel, importa o repo e adiciona a integração do Supabase. As chaves entram sozinhas.
-2. Discord: em discord.com/developers, New Application → OAuth2 → Redirect `https://SEU-PROJETO.supabase.co/auth/v1/callback`.
-3. Google: em console.cloud.google.com, Credenciais → ID do cliente OAuth (Aplicativo da Web) → o mesmo redirect.
-4. `vercel env pull .env.local` (ou cola as variáveis da integração) e completa com um token de supabase.com/dashboard/account/tokens, ID e segredo do Discord e do Google, e o seu domínio.
-5. `pnpm setup:supabase`: cria as tabelas, liga convidados, Discord e Google, as URLs, e põe as chaves no `.env.local`.
-6. `pnpm seed` pra subir a biblioteca de personagens.
+1. On Vercel, import the repo and add the Supabase integration. The keys come in on their own.
+2. Discord: at discord.com/developers, New Application → OAuth2 → Redirect `https://YOUR-PROJECT.supabase.co/auth/v1/callback`.
+3. Google: at console.cloud.google.com, Credentials → OAuth client ID (Web application) → the same redirect.
+4. `vercel env pull .env.local` (or paste the integration's variables) and add a token from supabase.com/dashboard/account/tokens, the Discord and Google ID and secret, and your domain.
+5. `pnpm setup:supabase`: creates the tables, turns on guests, Discord and Google, sets the URLs, and puts the keys in `.env.local`.
+6. `pnpm seed` to load the character library.
