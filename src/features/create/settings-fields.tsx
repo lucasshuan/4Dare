@@ -4,6 +4,7 @@ import { Minus, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
+import { HintLabel } from "@/components/ui/hint-label";
 import {
   DEFAULT_SETTINGS,
   STEP_SECONDS_MAX,
@@ -19,6 +20,7 @@ function Segmented<T extends string | number>({
   onChange,
   render,
   disabled,
+  describedBy,
 }: {
   label: string;
   options: readonly T[];
@@ -26,9 +28,14 @@ function Segmented<T extends string | number>({
   onChange: (v: T) => void;
   render: (v: T) => string;
   disabled?: (v: T) => boolean;
+  describedBy?: string;
 }) {
   return (
-    <ChoiceGroup label={label} className="flex-wrap self-start">
+    <ChoiceGroup
+      label={label}
+      describedBy={describedBy}
+      className="flex-wrap self-start"
+    >
       {options.map((o) => (
         <button
           key={String(o)}
@@ -67,7 +74,7 @@ function SecondsStepper({
   onChange: (n: number) => void;
 }) {
   const t = useTranslations("home.createRoom");
-  const id = useId();
+  const hintId = useId();
   const [draft, setDraft] = useState(String(value));
   useEffect(() => setDraft(String(value)), [value]);
   const set = (n: number) => {
@@ -77,9 +84,9 @@ function SecondsStepper({
   };
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="font-semibold text-sm">
+      <HintLabel hint={t("secondsHint")} hintId={hintId}>
         {t("seconds")}
-      </label>
+      </HintLabel>
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -90,7 +97,8 @@ function SecondsStepper({
           <Minus className="size-5" strokeWidth={1.75} />
         </button>
         <input
-          id={id}
+          aria-label={t("seconds")}
+          aria-describedby={hintId}
           inputMode="numeric"
           value={draft}
           onChange={(e) =>
@@ -115,43 +123,44 @@ function SecondsStepper({
         value={value as 60}
         onChange={set}
         render={String}
+        describedBy={hintId}
       />
     </div>
   );
 }
 
-/** Visibility, seats and seconds per step: used to create a room and to edit it in the lobby. */
+/** Visibility, seats and seconds per step: used to create a room and to edit it in the lobby. Each label carries its hint in a tooltip. */
 export function SettingsFields({
   value,
   onChange,
   minSeats = 1,
-  hints = true,
 }: {
   value: CreateRoomInput;
   onChange: (v: CreateRoomInput) => void;
   minSeats?: number;
-  hints?: boolean;
 }) {
   const t = useTranslations("home.createRoom");
-  const hint = (key: "visibilityHint" | "seatsHint" | "secondsHint") =>
-    hints ? (
-      <span className="font-medium text-[13px] text-ink-muted">{t(key)}</span>
-    ) : null;
+  const visibilityHint = useId();
+  const seatsHint = useId();
   return (
     <>
       <div className="flex flex-col gap-2">
-        <span className="font-semibold text-sm">{t("visibility")}</span>
+        <HintLabel hint={t("visibilityHint")} hintId={visibilityHint}>
+          {t("visibility")}
+        </HintLabel>
         <Segmented
           label={t("visibility")}
           options={["public", "private"] as const}
           value={value.visibility}
           onChange={(visibility) => onChange({ ...value, visibility })}
           render={(v) => t(v)}
+          describedBy={visibilityHint}
         />
-        {hint("visibilityHint")}
       </div>
       <div className="flex flex-col gap-2">
-        <span className="font-semibold text-sm">{t("seats")}</span>
+        <HintLabel hint={t("seatsHint")} hintId={seatsHint}>
+          {t("seats")}
+        </HintLabel>
         <Segmented
           label={t("seats")}
           options={[2, 3, 4] as const}
@@ -159,15 +168,14 @@ export function SettingsFields({
           onChange={(seats) => onChange({ ...value, seats })}
           render={String}
           disabled={(n) => n < minSeats}
+          describedBy={seatsHint}
         />
-        {hint("seatsHint")}
       </div>
-      <div className="flex flex-col gap-2 md:col-span-2">
+      <div className="md:col-span-2">
         <SecondsStepper
           value={value.stepSeconds}
           onChange={(stepSeconds) => onChange({ ...value, stepSeconds })}
         />
-        {hint("secondsHint")}
       </div>
     </>
   );

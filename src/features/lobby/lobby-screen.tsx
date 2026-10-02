@@ -255,7 +255,6 @@ export function LobbyScreen() {
                   value={draft}
                   onChange={setDraft}
                   minSeats={view.players.length}
-                  hints={false}
                 />
                 <div className="flex gap-2">
                   <Button type="submit" variant="primary" disabled={pending}>
