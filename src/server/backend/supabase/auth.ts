@@ -1,17 +1,12 @@
 import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { randomGuestNumber } from "@/game/guest-names";
-import {
-  type Avatar,
-  GameError,
-  type Identity,
-  type Lang,
-  MAX_NAME,
-} from "@/game/types";
+import { type Avatar, GameError, type Identity, type Lang } from "@/game/types";
 import type { Me } from "@/server/contract";
 import { randomAvatar } from "../pastel";
 import type { AuthService } from "../types";
 import { serviceClient, sessionClient } from "./clients";
+import { accountDefaults, isAccount } from "./identity";
 
 interface ProfileRow {
   id: string;
@@ -25,45 +20,44 @@ interface ProfileRow {
 
 const profiles = () => serviceClient().from("profiles");
 
-function providerOf(user: User): Me["provider"] {
-  const p = user.app_metadata?.provider;
-  return p === "discord" || p === "google" ? p : null;
-}
-
-/** What the provider tells us about the person, for a fresh account profile. */
-export function accountDefaults(user: User) {
-  const meta = user.user_metadata ?? {};
-  const raw = String(
-    meta.full_name ??
-      meta.name ??
-      meta.user_name ??
-      meta.preferred_username ??
-      "",
-  ).trim();
-  return {
-    name: raw.slice(0, MAX_NAME) || null,
-    provider: providerOf(user),
-    provider_avatar_url:
-      typeof meta.avatar_url === "string" ? meta.avatar_url : null,
-  };
-}
-
-async function loadOrCreate(user: User): Promise<ProfileRow> {
+/**
+ * The user's profile, created on first sight. A guest who linked Discord or
+ * Google becomes an account here: name and picture from the provider, the
+ * guest's critter and seats kept (same user id).
+ */
+export async function syncProfile(user: User): Promise<ProfileRow> {
   const { data, error } = await profiles()
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
   if (error) throw error;
-  if (data) return data as ProfileRow;
-  const guest = user.is_anonymous !== false && !providerOf(user);
+  const account = isAccount(user);
+  const current = data as ProfileRow | null;
+  if (current && (!current.is_guest || !account)) return current;
+  const defaults = accountDefaults(user);
+  if (current) {
+    const upgraded = await profiles()
+      .update({
+        is_guest: false,
+        name: current.name ?? defaults.name,
+        provider: defaults.provider,
+        provider_avatar_url: defaults.provider_avatar_url,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id)
+      .select("*")
+      .single();
+    if (upgraded.error) throw upgraded.error;
+    return upgraded.data as ProfileRow;
+  }
   const row: ProfileRow = {
     id: user.id,
-    is_guest: guest,
+    is_guest: !account,
     guest_number: randomGuestNumber(),
     avatar: randomAvatar(),
-    ...(guest
-      ? { name: null, provider: null, provider_avatar_url: null }
-      : accountDefaults(user)),
+    ...(account
+      ? defaults
+      : { name: null, provider: null, provider_avatar_url: null }),
   };
   const insert = await profiles().upsert(row).select("*").single();
   if (insert.error) throw insert.error;
@@ -94,10 +88,10 @@ export function supabaseAuth(): AuthService {
 
   return {
     async me(_lang) {
-      return toMe(await loadOrCreate(await currentUser()));
+      return toMe(await syncProfile(await currentUser()));
     },
     async identity(lang: Lang): Promise<Identity> {
-      const p = await loadOrCreate(await currentUser());
+      const p = await syncProfile(await currentUser());
       return {
         id: p.id,
         isGuest: p.is_guest,

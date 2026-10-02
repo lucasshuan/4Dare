@@ -62,5 +62,6 @@
     "other": "Choose another",
     "wrongType": "That file isn't a picture. Use JPG, PNG, WebP or GIF.",
     "tooBig": "That picture is over 8 MB. Pick a smaller one."
-  }
+  },
+  "signInFailed": "Couldn't sign you in. Try again."
 }

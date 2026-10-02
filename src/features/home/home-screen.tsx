@@ -12,6 +12,7 @@ import { useMe } from "@/features/data/use-me";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useDisplayName } from "@/lib/names";
 import { PublicRooms } from "./public-rooms";
+import { useAuthErrorToast } from "./use-auth-error";
 import { useSignIn } from "./use-sign-in";
 
 const CODE_CHARS = /[^23456789ABCDEFGHJKMNPQRSTUVWXYZ]/g;
@@ -20,6 +21,7 @@ export function HomeScreen() {
   const t = useTranslations("home");
   const router = useRouter();
   const [code, setCode] = useState("");
+  useAuthErrorToast();
 
   return (
     <Screen

@@ -17,6 +17,7 @@ import { Screen } from "@/components/ui/screen";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
 import { useMe } from "@/features/data/use-me";
+import { useAuthErrorToast } from "@/features/home/use-auth-error";
 import { useSignIn } from "@/features/home/use-sign-in";
 import { type Avatar as AvatarData, MAX_NAME } from "@/game/types";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -30,6 +31,7 @@ import { AVATAR_COLORS, type Me } from "@/server/contract";
 export function ProfileScreen() {
   const t = useTranslations("profile");
   const { me } = useMe();
+  useAuthErrorToast();
   return (
     <Screen
       right={

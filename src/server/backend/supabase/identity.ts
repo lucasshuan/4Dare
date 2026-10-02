@@ -1,0 +1,60 @@
+import type { User } from "@supabase/supabase-js";
+import { MAX_NAME } from "@/game/types";
+import type { Me } from "@/server/contract";
+
+type Provider = NonNullable<Me["provider"]>;
+
+const isProvider = (value: unknown): value is Provider =>
+  value === "discord" || value === "google";
+
+/** The Discord/Google identity of a user, also when a guest linked it later. */
+function oauthIdentity(user: User) {
+  return user.identities?.find((identity) => isProvider(identity.provider));
+}
+
+/**
+ * Discord or Google, if the user has one. A guest who links an account keeps
+ * `app_metadata.provider = "anonymous"`, so identities are checked first.
+ */
+export function providerOf(user: User): Me["provider"] {
+  const fromIdentity = oauthIdentity(user)?.provider;
+  if (isProvider(fromIdentity)) return fromIdentity;
+  const listed: unknown[] = [
+    user.app_metadata?.provider,
+    ...(user.app_metadata?.providers ?? []),
+  ];
+  return listed.find(isProvider) ?? null;
+}
+
+/** A Discord/Google user who is no longer an anonymous guest. */
+export const isAccount = (user: User) =>
+  user.is_anonymous !== true && providerOf(user) !== null;
+
+/** What the provider tells us about the person: display name and picture. */
+export function accountDefaults(user: User) {
+  const meta: Record<string, unknown> = {
+    ...(user.user_metadata ?? {}),
+    ...(oauthIdentity(user)?.identity_data ?? {}),
+  };
+  const claims = (meta.custom_claims ?? {}) as Record<string, unknown>;
+  // Discord: global_name is the display name, full_name the @username.
+  const raw = [
+    claims.global_name,
+    meta.full_name,
+    meta.name,
+    meta.user_name,
+    meta.preferred_username,
+  ].find((value) => typeof value === "string" && value.trim());
+  const name = String(raw ?? "")
+    .replace(/#\d+$/, "")
+    .trim()
+    .slice(0, MAX_NAME);
+  const picture = [meta.avatar_url, meta.picture].find(
+    (value) => typeof value === "string" && value.startsWith("https://"),
+  );
+  return {
+    name: name || null,
+    provider: providerOf(user),
+    provider_avatar_url: (picture as string | undefined) ?? null,
+  };
+}
