@@ -50,6 +50,11 @@ export interface CharacterStore {
   setImage(id: string, imageUrl: string): Promise<Character | null>;
   /** Used when a player lets the clock run out while picking. */
   randomPopular(lang: Lang, count: number): Promise<Character[]>;
+  /** What changed since the library files were built: characters players created, pictures they swapped (id -> url). */
+  extras(lang: Lang): Promise<{
+    created: Character[];
+    images: Record<string, string>;
+  }>;
 }
 
 export interface ThemeSource {

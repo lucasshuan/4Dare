@@ -110,6 +110,17 @@ export function localCharacters(): CharacterStore {
         });
       return strip(r);
     },
+    async extras(lang) {
+      const created = [...rows.values()]
+        .filter((r) => r.lang === lang && r.id.startsWith("u-"))
+        .map(strip);
+      const images = Object.fromEntries(
+        Object.entries(
+          readJson<Record<string, string>>(IMAGES_FILE, {}),
+        ).filter(([id]) => id.startsWith(`${lang}-`)),
+      );
+      return { created, images };
+    },
     async randomPopular(lang: Lang, count) {
       const pool = [...rows.values()]
         .filter((r) => r.lang === lang)

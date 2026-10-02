@@ -1,5 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { SUPABASE_URL } from "@/config";
 import { normalizeName } from "@/game/match";
 import type { Character, Lang } from "@/game/types";
 import type { CharacterStore } from "../types";
@@ -76,6 +77,25 @@ export function supabaseCharacters(): CharacterStore {
         .maybeSingle();
       if (error) throw error;
       return data ? toCharacter(data as Row) : null;
+    },
+    async extras(lang) {
+      // Player uploads live in Storage; library pictures point elsewhere.
+      const uploaded = `${SUPABASE_URL}/storage/v1/object/public/*`;
+      const { data, error } = await db()
+        .from("characters")
+        .select(COLUMNS)
+        .eq("lang", lang)
+        .or(`id.like.u-*,image_url.like.${uploaded}`)
+        .order("created_at", { ascending: true })
+        .limit(5000);
+      if (error) throw error;
+      const created: Character[] = [];
+      const images: Record<string, string> = {};
+      for (const row of (data ?? []) as Row[]) {
+        if (row.id.startsWith("u-")) created.push(toCharacter(row));
+        else if (row.image_url) images[row.id] = row.image_url;
+      }
+      return { created, images };
     },
     async randomPopular(lang, count) {
       const { data, error } = await db()

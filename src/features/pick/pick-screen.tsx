@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, ImageIcon, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CharacterCard } from "@/components/ui/character-card";
@@ -13,6 +13,7 @@ import { Portrait } from "@/components/ui/portrait";
 import { TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
 import { GameFrame } from "@/features/room/game-header";
+import { searchItems, thumbUrl } from "@/game/character-search";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
@@ -24,6 +25,7 @@ import {
   replaceCharacterImage,
 } from "@/server/actions";
 import type { CharacterDTO, CharacterSearchResponse } from "@/server/contract";
+import { useCharacterIndex } from "./use-character-index";
 
 function useDebounced<T>(value: T, ms: number) {
   const [v, setV] = useState(value);
@@ -57,9 +59,20 @@ export function PickScreen() {
   const [newName, setNewName] = useState("");
   const [origin, setOrigin] = useState("");
   const [image, setImage] = useState<Blob | null>(null);
+  // In-browser search: every keystroke is answered from memory. The deferred
+  // value keeps typing smooth even if the list takes a frame to re-render.
+  const index = useCharacterIndex(lang, !pick?.confirmed);
+  const typed = useDeferredValue(query);
+  const instant = useMemo(
+    () =>
+      index.data
+        ? searchItems(index.data, typed, 6).map((r) => ({ ...r, lang }))
+        : null,
+    [index.data, typed, lang],
+  );
+  // Until the index arrives (slow connection), ask the server instead.
   const q = useDebounced(query.trim(), 150);
-
-  const search = useQuery({
+  const remote = useQuery({
     queryKey: ["characters", lang, q],
     queryFn: async () => {
       const res = await fetch(
@@ -67,9 +80,10 @@ export function PickScreen() {
       );
       return ((await res.json()) as CharacterSearchResponse).results;
     },
-    enabled: !pick?.confirmed,
+    enabled: !pick?.confirmed && !index.data,
     staleTime: 60_000,
   });
+  const results: CharacterDTO[] = instant ?? remote.data ?? [];
 
   if (!pick || !target) return null;
   const targetName = name(target);
@@ -296,7 +310,7 @@ export function PickScreen() {
                 />
                 <ul className="mt-2 flex flex-col gap-0.5 rounded-lg bg-surface p-2 shadow-pop">
                   <AnimatePresence initial={false}>
-                    {(search.data ?? []).map((c) => (
+                    {results.map((c) => (
                       <motion.li
                         key={c.id}
                         layout
@@ -310,7 +324,7 @@ export function PickScreen() {
                           className="flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-sky-soft focus-visible:bg-sky-soft"
                         >
                           <Portrait
-                            src={c.imageUrl}
+                            src={thumbUrl(c.imageUrl, 96)}
                             className="w-12 shrink-0 rounded-sm"
                           />
                           <span className="flex min-w-0 flex-col">
@@ -329,8 +343,7 @@ export function PickScreen() {
                   </AnimatePresence>
                   <li
                     className={cn(
-                      (search.data?.length ?? 0) > 0 &&
-                        "mt-1 border-line border-t pt-1",
+                      results.length > 0 && "mt-1 border-line border-t pt-1",
                     )}
                   >
                     <button

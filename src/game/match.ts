@@ -2,29 +2,28 @@
 
 const ARTICLES = new Set(["the", "a", "an", "o", "os", "as", "um", "uma"]);
 
-const inRange = (c: string, from: number, to: number) => {
-  const code = c.charCodeAt(0);
-  return code >= from && code <= to;
-};
+// Built from code points so the source stays readable (no invisible combining marks).
+const range = (from: number, to: number) =>
+  new RegExp(`[${String.fromCharCode(from)}-${String.fromCharCode(to)}]`, "g");
+/** Latin combining accents only: NFD also splits Japanese voiced marks (が → か + ゙), which stay. */
+const LATIN_ACCENTS = range(0x300, 0x36f);
+/** Katakana ァ..ヶ (U+30A1–30F6), folded onto hiragana 0x60 below. */
+const KATAKANA = range(0x30a1, 0x30f6);
+const NOT_WORD = /[^\p{L}\p{N}]/gu;
+const toHiragana = (c: string) => String.fromCharCode(c.charCodeAt(0) - 0x60);
 
 /** Lowercase, no accents, no punctuation or spaces, katakana folded to hiragana, no leading article. */
 export function normalizeName(text: string): string {
-  // Only Latin combining accents (U+0300–036F) go: NFD also splits Japanese voiced marks (が → か + ゙).
-  const noAccents = [...text.normalize("NFKC").toLowerCase().normalize("NFD")]
-    .filter((c) => !inRange(c, 0x300, 0x36f))
-    .join("")
-    .normalize("NFC");
-  // Katakana ァ..ヶ (U+30A1–30F6) map onto hiragana 0x60 below.
-  const hiragana = [...noAccents]
-    .map((c) =>
-      inRange(c, 0x30a1, 0x30f6)
-        ? String.fromCharCode(c.charCodeAt(0) - 0x60)
-        : c,
-    )
-    .join("");
-  const words = hiragana.trim().split(/\s+/);
+  const folded = text
+    .normalize("NFKC")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(LATIN_ACCENTS, "")
+    .normalize("NFC")
+    .replace(KATAKANA, toHiragana);
+  const words = folded.trim().split(/\s+/);
   if (words.length > 1 && ARTICLES.has(words[0])) words.shift();
-  return words.join("").replace(/[^\p{L}\p{N}]/gu, "");
+  return words.join("").replace(NOT_WORD, "");
 }
 
 function editDistance(a: string, b: string, max: number): number {

@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,8 @@ import { Timer } from "@/components/ui/timer";
 import { useToast } from "@/components/ui/toast";
 import { SettingsFields } from "@/features/create/settings-fields";
 import { useRoomContext } from "@/features/data/room-context";
+import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
+import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
@@ -51,6 +53,8 @@ export function LobbyScreen() {
   const router = useRouter();
   const { view, me, offset, refresh, code } = useRoomContext();
   const { run, pending } = useAction();
+  // Picking comes next: fetch the character index while people gather.
+  usePrefetchCharacterIndex(useLocale() as Lang);
   const host = view.players.find((p) => p.isHost);
   const hostName = host ? name(host) : "";
   const empty = Math.max(0, view.settings.seats - view.players.length);
