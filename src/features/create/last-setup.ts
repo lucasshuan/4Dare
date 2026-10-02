@@ -1,4 +1,5 @@
 // The last room setup, so the next room starts the same way. Kept in this browser only.
+import { DEFAULT_GAME } from "@/game/games";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import {
   DEFAULT_SETTINGS,
@@ -10,6 +11,7 @@ import type { CreateRoomInput } from "@/server/contract";
 const KEY = "ludodare:who-am-i:setup";
 
 export const DEFAULT_SETUP: CreateRoomInput = {
+  game: DEFAULT_GAME,
   visibility: DEFAULT_SETTINGS.visibility,
   seats: DEFAULT_SETTINGS.seats,
   stepSeconds: DEFAULT_SETTINGS.stepSeconds,
@@ -20,7 +22,7 @@ export const DEFAULT_SETUP: CreateRoomInput = {
 const oneOf = <T>(value: unknown, options: readonly T[], fallback: T): T =>
   options.includes(value as T) ? (value as T) : fallback;
 
-/** The setup saved last, field by field; anything missing or odd falls back to the default. */
+/** The setup saved last, field by field; anything missing or odd falls back to the default. The game comes from the link, not from here. */
 export function loadSetup(): CreateRoomInput {
   let saved: Record<string, unknown> = {};
   try {
@@ -32,6 +34,7 @@ export function loadSetup(): CreateRoomInput {
   const off = Array.isArray(saved.setsOff) ? saved.setsOff : [];
   const themeSets = THEME_SET_KEYS.filter((k) => !off.includes(k));
   return {
+    game: d.game,
     visibility: oneOf(saved.visibility, ["public", "private"], d.visibility),
     seats: oneOf(saved.seats, [2, 3, 4], d.seats),
     stepSeconds:
@@ -46,7 +49,7 @@ export function loadSetup(): CreateRoomInput {
   };
 }
 
-export function saveSetup({ themeSets, ...rest }: CreateRoomInput) {
+export function saveSetup({ game: _, themeSets, ...rest }: CreateRoomInput) {
   const setsOff = THEME_SET_KEYS.filter((k) => !themeSets.includes(k));
   try {
     localStorage.setItem(KEY, JSON.stringify({ ...rest, setsOff }));

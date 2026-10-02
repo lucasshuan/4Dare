@@ -10,7 +10,7 @@ import { PublicRooms } from "@/features/home/public-rooms";
 import { useAuthErrorToast } from "@/features/home/use-auth-error";
 import { Link } from "@/i18n/navigation";
 import { ease } from "@/lib/motion";
-import { GAMES, NEW_ROOM } from "@/lib/routes";
+import { GAMES, newRoom } from "@/lib/routes";
 import { JoinByCode } from "./join-by-code";
 
 /** "Who am I?": create a room, join one with a code, or pick a public one. */
@@ -46,7 +46,7 @@ export function WhoAmIScreen() {
 
           <div className="flex flex-wrap items-end gap-x-8 gap-y-5">
             <Link
-              href={NEW_ROOM}
+              href={newRoom("who-am-i")}
               className={buttonClass("primary", "lg", "max-sm:w-full")}
             >
               {t("create")}

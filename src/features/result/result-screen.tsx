@@ -19,7 +19,7 @@ import { useAction } from "@/lib/hooks/use-action";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import { WHO_AM_I } from "@/lib/routes";
+import { GAME_PATHS } from "@/lib/routes";
 import { backToLobby, leaveRoom } from "@/server/actions";
 
 const PLINTH = { 1: 136, 2: 96, 3: 60 } as Record<number, number>;
@@ -151,7 +151,7 @@ export function ResultScreen() {
               className="-ml-6"
               onClick={async () => {
                 await run(() => leaveRoom(code));
-                router.push(WHO_AM_I);
+                router.push(GAME_PATHS[view.settings.game]);
               }}
             >
               {t("home")}

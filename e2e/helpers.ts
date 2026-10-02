@@ -16,7 +16,7 @@ export async function newPlayer(browser: Browser, phone = false) {
 const button = (page: Page, name: RegExp) => page.getByRole("button", { name });
 
 export async function createRoom(host: Page) {
-  await host.goto("/en/who-am-i/new");
+  await host.goto("/en/new?game=who-am-i");
   await button(host, /^create room$/i).click();
   await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
   return host.url().split("/").pop() as string;

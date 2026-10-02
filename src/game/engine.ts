@@ -1,4 +1,6 @@
 // The rules. Pure functions: same input, same output; no clock, no randomness, no I/O of their own.
+
+import { isGameKey } from "./games";
 import {
   findPlayer,
   isActive,
@@ -53,6 +55,7 @@ function mergeSettings(
   seated: number,
 ): RoomSettings {
   const allowed = new Set([
+    "game",
     "visibility",
     "seats",
     "stepSeconds",
@@ -65,6 +68,7 @@ function mergeSettings(
   const next = { ...DEFAULT_SETTINGS, ...base, ...patch };
   const sets: unknown = next.themeSets;
   const ok =
+    isGameKey(next.game) &&
     (next.visibility === "public" || next.visibility === "private") &&
     [2, 3, 4].includes(next.seats) &&
     next.seats >= seated &&

@@ -27,8 +27,9 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "pt" }));
 
-/** Theme settings for createRoom: everyone votes, on every set. */
+/** Game and theme settings for createRoom: who-am-i, everyone votes, on every set. */
 const ROOM = {
+  game: DEFAULT_SETTINGS.game,
   themeMode: DEFAULT_SETTINGS.themeMode,
   themeSets: DEFAULT_SETTINGS.themeSets,
 };

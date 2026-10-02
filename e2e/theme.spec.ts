@@ -6,7 +6,7 @@ test("the host types the theme, and the next room starts the same way", async ({
 }) => {
   const host = await newPlayer(browser);
   const guest = await newPlayer(browser);
-  await host.goto("/en/who-am-i/new");
+  await host.goto("/en/new?game=who-am-i");
   await host.getByRole("button", { name: /i type it/i }).click();
   await host.getByRole("button", { name: /^create room$/i }).click();
   await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
@@ -35,7 +35,7 @@ test("the host types the theme, and the next room starts the same way", async ({
   });
   await expect(guest.getByRole("button", { name: /^random$/i })).toHaveCount(0);
 
-  await host.goto("/en/who-am-i/new");
+  await host.goto("/en/new?game=who-am-i");
   await expect(
     host.getByRole("button", { name: /i type it/i }),
   ).toHaveAttribute("aria-pressed", "true");
@@ -46,7 +46,7 @@ test("the vote only offers themes from the sets turned on", async ({
 }) => {
   const host = await newPlayer(browser);
   const guest = await newPlayer(browser);
-  await host.goto("/en/who-am-i/new");
+  await host.goto("/en/new?game=who-am-i");
   await host.getByRole("button", { name: /turn all off/i }).click();
   const create = host.getByRole("button", { name: /^create room$/i });
   await expect(create).toBeDisabled();

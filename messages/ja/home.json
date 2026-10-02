@@ -5,6 +5,8 @@
   "create": "ルームを作る",
   "joinLabel": "コードで参加",
   "createRoom": {
+    "game": "ゲーム",
+    "gameHint": "このルームで遊ぶゲーム。ゲームは今後増えます。ホストは待合室でも変えられます。",
     "back": "戻る",
     "title": "ルームを作る",
     "visibility": "参加できる人",

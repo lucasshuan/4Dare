@@ -5,6 +5,8 @@
   "create": "Criar sala",
   "joinLabel": "Ou entre com um código",
   "createRoom": {
+    "game": "Jogo",
+    "gameHint": "O jogo desta sala. Mais jogos vêm aí, e o anfitrião pode trocar na sala de espera.",
     "back": "Voltar",
     "title": "Criar sala",
     "visibility": "Quem pode entrar",

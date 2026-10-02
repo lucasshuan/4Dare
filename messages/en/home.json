@@ -5,6 +5,8 @@
   "create": "Create a room",
   "joinLabel": "Or join with a code",
   "createRoom": {
+    "game": "Game",
+    "gameHint": "The game this room plays. More games are coming, and the host can switch it in the lobby.",
     "back": "Back",
     "title": "Create a room",
     "visibility": "Who can join",

@@ -1,4 +1,5 @@
 // The whole game in types. Everything else (engine, server, UI) is written against this file.
+import { DEFAULT_GAME, type GameKey } from "./games";
 import { THEME_SET_KEYS, type ThemeSet } from "./theme-sets";
 
 export const LANGS = ["en", "pt", "ja"] as const;
@@ -43,6 +44,8 @@ export interface Identity {
 }
 
 export interface RoomSettings {
+  /** The game the room plays; the host can switch it in the lobby. */
+  game: GameKey;
   visibility: "public" | "private";
   seats: 2 | 3 | 4;
   /** Seconds per step: 30..300, default 120. */
@@ -55,6 +58,7 @@ export interface RoomSettings {
 }
 
 export const DEFAULT_SETTINGS: RoomSettings = {
+  game: DEFAULT_GAME,
   visibility: "public",
   seats: 4,
   stepSeconds: 120,

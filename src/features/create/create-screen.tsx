@@ -7,23 +7,26 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { HubActions } from "@/features/home/hub-actions";
+import type { GameKey } from "@/game/games";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
 import { dur, ease, riseIn } from "@/lib/motion";
-import { WHO_AM_I } from "@/lib/routes";
+import { GAME_PATHS } from "@/lib/routes";
 import { createRoom } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
+import { GameField } from "./game-field";
 import { loadSetup, saveSetup } from "./last-setup";
 import { SettingsFields } from "./settings-fields";
 import { missingSets, ThemeFields } from "./theme-fields";
 
-export function CreateScreen() {
+/** A new room for `game` (from /new?game=…); the game can still be switched here. */
+export function CreateScreen({ game }: { game: GameKey }) {
   const t = useTranslations("home.createRoom");
   const router = useRouter();
   const { run, pending } = useAction();
   // The last setup lives in this browser, so it is read after the first render.
   const [settings, setSettings] = useState<CreateRoomInput | null>(null);
-  useEffect(() => setSettings(loadSetup()), []);
+  useEffect(() => setSettings({ ...loadSetup(), game }), [game]);
   const noSets = settings !== null && missingSets(settings);
 
   return (
@@ -42,7 +45,7 @@ export function CreateScreen() {
       >
         <div className="flex flex-col gap-4 sm:tiny:gap-2">
           <Link
-            href={WHO_AM_I}
+            href={GAME_PATHS[settings?.game ?? game]}
             className="-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink"
           >
             <ChevronLeft className="size-4" strokeWidth={2} />
@@ -54,6 +57,14 @@ export function CreateScreen() {
         </div>
         {settings ? (
           <LayoutGroup>
+            <GameField
+              value={settings.game}
+              onChange={(next) => {
+                setSettings({ ...settings, game: next });
+                // The link keeps the game, so a reload or a shared link opens it again.
+                window.history.replaceState(null, "", `?game=${next}`);
+              }}
+            />
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { duration: dur.base } }}

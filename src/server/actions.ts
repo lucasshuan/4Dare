@@ -3,6 +3,7 @@
 
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
+import { GAME_KEYS } from "@/game/games";
 import { normalizeName } from "@/game/match";
 import { themeId } from "@/game/theme-id";
 import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
@@ -88,6 +89,7 @@ async function act(
 // --- rooms ------------------------------------------------------------------
 
 const createSchema = z.object({
+  game: z.enum(GAME_KEYS),
   visibility: z.enum(["public", "private"]),
   seats: z.union([z.literal(2), z.literal(3), z.literal(4)]),
   stepSeconds: z.number().int().min(STEP_SECONDS_MIN).max(STEP_SECONDS_MAX),

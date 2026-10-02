@@ -1,4 +1,5 @@
 // Shapes shared by server actions, route handlers and the UI.
+import type { GameKey } from "@/game/games";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
   Avatar,
@@ -41,6 +42,7 @@ export interface CharacterSearchResponse {
 }
 
 export interface CreateRoomInput {
+  game: GameKey;
   visibility: "public" | "private";
   seats: 2 | 3 | 4;
   stepSeconds: number;

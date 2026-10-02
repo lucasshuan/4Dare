@@ -24,6 +24,11 @@ import { Screen } from "@/components/ui/screen";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Timer } from "@/components/ui/timer";
 import { useToast } from "@/components/ui/toast";
+import {
+  GameField,
+  GameThumb,
+  useGameName,
+} from "@/features/create/game-field";
 import { saveSetup } from "@/features/create/last-setup";
 import { SettingsFields } from "@/features/create/settings-fields";
 import { missingSets, ThemeFieldsButton } from "@/features/create/theme-fields";
@@ -37,7 +42,7 @@ import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
 import { formatClock, useDisplayName } from "@/lib/names";
-import { WHO_AM_I } from "@/lib/routes";
+import { GAME_PATHS } from "@/lib/routes";
 import {
   leaveRoom,
   setReady,
@@ -48,12 +53,14 @@ import type { CreateRoomInput } from "@/server/contract";
 
 /** Only what the host can change (the server rejects anything else). */
 const editable = ({
+  game,
   visibility,
   seats,
   stepSeconds,
   themeMode,
   themeSets,
 }: CreateRoomInput): CreateRoomInput => ({
+  game,
   visibility,
   seats,
   stepSeconds,
@@ -88,8 +95,9 @@ export function LobbyScreen() {
   const [draft, setDraft] = useState<CreateRoomInput>(() =>
     editable(view.settings),
   );
-  const { visibility, seats, stepSeconds, themeMode, themeSets } =
+  const { game, visibility, seats, stepSeconds, themeMode, themeSets } =
     view.settings;
+  const gameName = useGameName();
 
   const copy = async (text: string, done: string) => {
     try {
@@ -274,6 +282,10 @@ export function LobbyScreen() {
                   }
                 }}
               >
+                <GameField
+                  value={draft.game}
+                  onChange={(next) => setDraft({ ...draft, game: next })}
+                />
                 <SettingsFields
                   value={draft}
                   onChange={setDraft}
@@ -302,6 +314,12 @@ export function LobbyScreen() {
                 {...riseIn}
                 className="flex flex-col gap-4"
               >
+                <div className="flex items-center gap-3">
+                  <GameThumb game={game} size="sm" />
+                  <span className="font-bold font-display text-lg">
+                    {gameName(game)}
+                  </span>
+                </div>
                 <ul className="flex flex-col gap-3">
                   <Setting icon={visibility === "public" ? Globe : Lock}>
                     {t(visibility === "public" ? "public" : "private")}
@@ -378,7 +396,7 @@ export function LobbyScreen() {
             className="self-center"
             onClick={async () => {
               await leaving.run(() => leaveRoom(code));
-              router.push(WHO_AM_I);
+              router.push(GAME_PATHS[game]);
             }}
           >
             {t("leave")}

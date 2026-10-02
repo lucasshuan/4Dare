@@ -51,11 +51,19 @@ function MiniCard({
 
 /**
  * The "Who am I?" card art: everyone else's cards on the table, yours a "?"
- * that flips over, a question and its answer popping up. Still for reduced motion.
+ * that flips over, a question and its answer popping up. Still for reduced motion,
+ * or with `still` (a small thumbnail).
  */
-export function WhoAmISnapshot({ className }: { className?: string }) {
+export function WhoAmISnapshot({
+  className,
+  still: forceStill = false,
+}: {
+  className?: string;
+  still?: boolean;
+}) {
   const t = useTranslations("home.games.whoAmI");
-  const still = useReducedMotion() ?? false;
+  const reduced = useReducedMotion() ?? false;
+  const still = forceStill || reduced;
 
   return (
     <div

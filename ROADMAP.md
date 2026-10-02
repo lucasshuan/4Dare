@@ -83,7 +83,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Discord or Google account: picks name, picture or critter, and color (without Supabase, signs into a test account)
 - [x] Public rooms on the game screen: open seats first, "See more" shows full ones and ones in a match
 - [x] Create room: public or private, 2 to 4 seats, seconds per step (120 by default)
-- [x] Create room at `/who-am-i/new`, with the top bar and "Back" above the title
+- [x] Create room at `/new?game=who-am-i`, with the top bar and "Back" above the title
 - [x] Lobby: host edits the settings and starts; the others mark "I'm ready" (green ✓, red ✗)
 - [x] Starts on its own in 2 minutes or as soon as it's full
 - [x] Matches saved per player: character, who picked it, how it ended and how long it took
@@ -114,3 +114,8 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Quick vote: 8 s; then the theme stays on screen for everyone for 3 s
 - [x] The set's emoji on the vote cards and next to the theme at the top
 - [x] Smooth animations on all of it: cards, switch, typing, reveal
+
+## Phase 9 — Ready for more games
+
+- [x] Creating a room starts with the game, as a tab with its picture and name
+- [x] The host can switch the room's game in the lobby (only one game so far)
