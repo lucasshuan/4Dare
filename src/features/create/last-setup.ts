@@ -24,7 +24,7 @@ export const DEFAULT_SETUP: CreateRoomInput = {
 const oneOf = <T>(value: unknown, options: readonly T[], fallback: T): T =>
   options.includes(value as T) ? (value as T) : fallback;
 
-/** The setup saved last, field by field; anything missing or odd falls back to the default. The game comes from the link, and each room gets its own name and password (never stored here). */
+/** The setup saved last, field by field; anything missing or odd falls back to the default. The game comes from the link; each room gets its own name and password, and starts with 4 seats (none of these stored here). */
 export function loadSetup(): CreateRoomInput {
   let saved: Record<string, unknown> = {};
   try {
@@ -40,7 +40,7 @@ export function loadSetup(): CreateRoomInput {
     name: d.name,
     password: d.password,
     visibility: oneOf(saved.visibility, ["public", "private"], d.visibility),
-    seats: oneOf(saved.seats, [2, 3, 4], d.seats),
+    seats: d.seats,
     stepSeconds:
       typeof seconds === "number" &&
       Number.isInteger(seconds) &&
@@ -57,6 +57,7 @@ export function saveSetup({
   game: _game,
   name: _name,
   password: _password,
+  seats: _seats,
   themeSets,
   ...rest
 }: CreateRoomInput) {

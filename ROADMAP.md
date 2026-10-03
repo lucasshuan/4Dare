@@ -139,3 +139,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Theme vote lasts 13 s (was 11 s)
 - [x] Pictures: any type the browser opens (JFIF, AVIF...), pasted or dragged from a web page, always sent as cropped even when saved at once; card pictures load ahead for everyone
 - [x] "Create room" goes straight into a new room named after you ("Bob123's room", "Sala de Bob123"); the other settings live only in the lobby's "Edit settings"; the room name is required, with nothing under the field
+- [x] A new room always starts with 4 seats; the lobby can lower it for that room
