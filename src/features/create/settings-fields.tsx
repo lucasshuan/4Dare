@@ -191,7 +191,6 @@ export function SettingsFields({
             >
               <TextField
                 label={t("password")}
-                hint={t("passwordHint")}
                 placeholder={t("passwordPlaceholder")}
                 value={value.password}
                 max={ROOM_PASSWORD_MAX}

@@ -19,7 +19,6 @@
     "private": "Privada",
     "visibilityHint": "Toda sala aparece na lista de salas. Pública: qualquer um entra. Privada: pede a senha para entrar.",
     "password": "Senha",
-    "passwordHint": "Quem entrar precisa digitar.",
     "passwordPlaceholder": "Ex.: pizza",
     "needPassword": "Defina uma senha para a sala privada.",
     "needName": "Dê um nome para a sala.",
@@ -57,8 +56,7 @@
     "setExamples": "Por exemplo",
     "needOneSet": "Ligue pelo menos um conjunto.",
     "hostNoteTitle": "Você escreve o tema",
-    "hostNote": "Quando a partida começar, você escreve o tema que quiser, com umas ideias à mão. Se passarem 30 s, todo mundo vota.",
-    "hostNoteRandom": "Tema escrito não tem o botão “Sortear”."
+    "hostNote": "Quando a partida começar, você escreve o tema que quiser, com umas ideias à mão. Se passarem 30 s, todo mundo vota."
   },
   "signIn": "Entrar com {provider}",
   "editProfile": "Editar perfil",

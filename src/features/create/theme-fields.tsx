@@ -114,15 +114,15 @@ function Examples({ set }: { set: ThemeSet }) {
  */
 function ExamplesTooltip({ handle }: { handle: SetTooltip }) {
   return (
-    <Tooltip.Root handle={handle}>
+    <Tooltip.Root handle={handle} disableHoverablePopup>
       {({ payload }) => (
         <Tooltip.Portal>
           <Tooltip.Positioner
             side="top"
             sideOffset={8}
-            className="z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] duration-300 ease-soft data-instant:transition-none motion-reduce:transition-none"
+            className="pointer-events-none z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) select-none transition-[top,left,right,bottom,transform] duration-300 ease-soft data-instant:transition-none motion-reduce:transition-none"
           >
-            <Tooltip.Popup className="relative h-(--popup-height,auto) w-(--popup-width,auto) max-w-[min(260px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface shadow-pop outline-none transition-[width,height,opacity,scale] duration-300 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0 data-instant:transition-none motion-reduce:transition-none">
+            <Tooltip.Popup className="relative h-(--popup-height,auto) w-66 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-md bg-surface shadow-pop outline-none transition-[height,opacity,scale] duration-300 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0 data-instant:transition-none motion-reduce:transition-none">
               <Tooltip.Viewport className="relative size-full overflow-clip px-3 py-2.5 **:data-current:transition-[translate,opacity] **:data-current:duration-300 **:data-current:ease-soft **:data-previous:transition-[translate,opacity] **:data-previous:duration-200 **:data-previous:ease-soft **:data-current:data-starting-style:opacity-0 **:data-previous:data-ending-style:opacity-0 data-[activation-direction~=right]:**:data-current:data-starting-style:translate-x-3 data-[activation-direction~=left]:**:data-current:data-starting-style:-translate-x-3 data-[activation-direction~=right]:**:data-previous:data-ending-style:-translate-x-3 data-[activation-direction~=left]:**:data-previous:data-ending-style:translate-x-3 data-instant:**:transition-none motion-reduce:**:transition-none">
                 {payload ? <Examples set={payload} /> : null}
               </Tooltip.Viewport>
@@ -291,7 +291,6 @@ function HostNote() {
       <div className="flex flex-col gap-1">
         <span className="font-semibold">{t("hostNoteTitle")}</span>
         <p className="text-ink-muted text-sm">{t("hostNote")}</p>
-        <p className="text-ink-muted text-sm">{t("hostNoteRandom")}</p>
       </div>
     </div>
   );

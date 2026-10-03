@@ -19,7 +19,6 @@
     "private": "Private",
     "visibilityHint": "Every room shows up in the room list. Public: anyone can join. Private: joining asks for the password.",
     "password": "Password",
-    "passwordHint": "Whoever joins types it in.",
     "passwordPlaceholder": "e.g. pizza",
     "needPassword": "Set a password for the private room.",
     "needName": "Give the room a name.",
@@ -57,8 +56,7 @@
     "setExamples": "For example",
     "needOneSet": "Turn on at least one set.",
     "hostNoteTitle": "You type the theme",
-    "hostNote": "When the match starts, you write any theme you like, with a few ideas at hand. If 30 s go by, everyone votes instead.",
-    "hostNoteRandom": "Typed themes have no “Random” button."
+    "hostNote": "When the match starts, you write any theme you like, with a few ideas at hand. If 30 s go by, everyone votes instead."
   },
   "signIn": "Sign in with {provider}",
   "editProfile": "Edit profile",
