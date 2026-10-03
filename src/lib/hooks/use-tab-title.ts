@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import { APP_NAME } from "@/config";
 import { formatClock, isLowClock } from "@/lib/names";
 
-/** The app icon with a "!" in the bubble, on a `fill` background. */
+/** The app icon with a "!" in the 4 bubble, on a `fill` background. */
 const alertIcon = (fill: string) =>
   `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><rect width="1000" height="1000" rx="200" fill="${fill}"/><g transform="translate(217.6 100) scale(1.0152)"><path fill="#F6E3A1" d="M70 0H250A330 330 0 0 1 250 660H215L66 774Q12 812 4 750L0 700V70Q0 0 70 0Z"/><g fill="${fill}" transform="rotate(-8 280 330)"><rect x="228" y="118" width="108" height="292" rx="54"/><circle cx="282" cy="492" r="60"/></g></g></svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><rect width="1000" height="1000" rx="200" fill="${fill}"/><g transform="translate(174.0 170.0) scale(0.7952)"><path fill="#F6E3A1" d="M525 0L640 0Q700 0 700 60L700 489Q700 505 716 505L776 505Q820 505 820 549L820 611Q820 655 776 655L716 655Q700 655 688 665L511 809Q485 830 493 797L521 671Q525 655 509 655L70 655Q0 655 0 585L0 545Q0 465 61 414Q254 254 427 46Q465 0 525 0Z"/><g fill="${fill}" transform="rotate(-10 515 395)"><rect x="461" y="195" width="108" height="272" rx="54"/><circle cx="515" cy="545" r="58"/></g></g></svg>`,
   )}`;
 
 /** Apricot while it's the player's move; red in the clock's final stretch. */
@@ -44,7 +44,7 @@ export type TabClock = {
 };
 
 /**
- * Keeps the tab title at "<clock> · <title> · Ludodare", the clock counting down
+ * Keeps the tab title at "<clock> · <title> · 4Dare", the clock counting down
  * while a step runs. With an `alert` (the player's move) the alert takes the title's
  * place, and while the tab is in the background (or the window out of focus) the
  * icon turns into the alert icon, red in the clock's final stretch.

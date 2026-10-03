@@ -8,7 +8,7 @@ import {
 } from "@/game/types";
 import type { CreateRoomInput } from "@/server/contract";
 
-const KEY = "ludodare:who-am-i:setup";
+const KEY = "4dare:who-am-i:setup";
 
 export const DEFAULT_SETUP: CreateRoomInput = {
   game: DEFAULT_GAME,

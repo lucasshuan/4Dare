@@ -196,7 +196,7 @@ const TAB_ALERT: Partial<Record<PlayerStatus, string>> = {
   validating: "validating",
 };
 
-/** "0:42 · Lobby · ABCDE · Ludodare", or "0:42 · Your turn! · Ludodare" on the player's move. */
+/** "0:42 · Lobby · ABCDE · 4Dare", or "0:42 · Your turn! · 4Dare" on the player's move. */
 function useRoomTab() {
   const t = useTranslations("meta");
   const { code, view, me, offset } = useRoomContext();

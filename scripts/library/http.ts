@@ -15,7 +15,7 @@ import path from "node:path";
 const CONTACT = process.env.LIBRARY_CONTACT?.trim();
 
 export const USER_AGENT = `DareCharacterLibrary/1.0 (${
-  CONTACT ?? "starter character list builder for the Dare party game"
+  CONTACT ?? "starter character list builder for the 4Dare party game"
 }) node`;
 
 export const CACHE_DIR =

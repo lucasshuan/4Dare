@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { APP_NAME } from "@/config";
 
-// Lets phones add Ludodare to the home screen like an app.
+// Lets phones add 4Dare to the home screen like an app.
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: APP_NAME,

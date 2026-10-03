@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Tokens from the Ludodare design system. Light on :root, dark under [data-theme="dark"] (next-themes). */
+/* Tokens from the 4Dare design system. Light on :root, dark under [data-theme="dark"] (next-themes). */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 /* Short windows (laptops, small browser windows): tighter spacing so a screen fits without scrolling. */
 @custom-variant short (@media (max-height: 820px));

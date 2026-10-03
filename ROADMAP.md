@@ -63,7 +63,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Pointer cursor on everything clickable
 - [x] Room code without a button: joins at the 5th character, or says why it can't
 - [x] Home screen picks the game: cards in a carousel, with an animated preview; "Who am I?" comes first
-- [x] Own logo (D-shaped bubble with "?" and a colored "are"), square icon and favicon; logo on top of every screen except the lobby and the match; home only with the games
+- [x] Own logo, square icon and favicon; logo on top of every screen except the lobby and the match; home only with the games
 - [x] No screen scrolls on desktop: everything fits from 1024×640 to 1920×1080
 - [x] User at the top right, after the theme: avatar and name; a click opens a popover saying if you're a guest and offering Discord and Google
 - [x] Reveal for everyone: the answers (6 to 10 s, by length) and the guess (2.5 to 3.5 s)
@@ -97,7 +97,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 
 ## Phase 7 — Easy to find and share ✅
 
-- [x] Name: Ludodare (the logo keeps "Dare")
+- [x] Name: 4Dare (was Dare, then Ludodare)
 - [x] Search: title and description per page and language, canonical and hreflang links, sitemap, robots, JSON-LD, installable (manifest and icons)
 - [x] Share cards with a picture for Twitter, Facebook, Discord, WhatsApp and the like: home, "Who am I?" and a room invite with its code, in 3 languages
 - [x] Tab title per page and per step of the match; the step clock counts down in the title; when it's your move and you're in another tab, the icon turns into an orange "!", red in the final seconds
@@ -131,4 +131,5 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Room passwords: a private room is listed with a lock and asks newcomers for its password in a small dialog; only the host sees it, in the lobby
 - [x] Create room: name, who can join and the password on one row, seats and time per step below
 - [x] /rooms: every listed room, filtered by game, a search (room, host or code) and who can join, all kept in the link; the game page shows its open rooms with "See all" at the top right
+- [x] New name 4Dare and a new logo: the 4 is a speech bubble with the "?" inside (its leg is the tail), "Dare" in four colours; icons, favicon and the tab "!" follow
 - [x] "Who am I?" banner full width under the top bar: five players around a table, answers that wrap in longer languages, a burst when you get it; the top bar stays put and turns to frosted glass as the page scrolls under it

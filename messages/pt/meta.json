@@ -1,5 +1,5 @@
 {
-  "title": "Ludodare: jogos de adivinhação para jogar com amigos",
+  "title": "4Dare: jogos de adivinhação para jogar com amigos",
   "description": "Jogos grátis para jogar online com os amigos, direto no navegador. Comece pelo Quem sou eu?: cada um escolhe um personagem para outro jogador, e você descobre o seu com perguntas de sim ou não.",
   "keywords": "jogo de adivinhação, quem sou eu, quem sou eu online, jogo do papel na testa, jogo para jogar com amigos, jogo online grátis, jogo de navegador, multiplayer, perguntas de sim ou não, jogo de festa",
   "tagline": "Jogos de adivinhação para jogar com amigos",
@@ -8,12 +8,12 @@
     "players": "2 a 4 jogadores",
     "browser": "No navegador"
   },
-  "imageAlt": "Ludodare: jogos de adivinhação para jogar com amigos",
+  "imageAlt": "4Dare: jogos de adivinhação para jogar com amigos",
   "whoAmI": {
     "title": "Quem sou eu? Jogue online com os amigos",
     "description": "Cada um escolhe um personagem para outro jogador. Você vê as cartas dos outros, nunca a sua. Descubra quem você é com perguntas de sim ou não. Grátis, 2 a 4 jogadores, sem cadastro.",
     "pitch": "Cada um escolhe um personagem para outro. Descubra o seu com perguntas de sim ou não.",
-    "imageAlt": "Quem sou eu? no Ludodare: cartas na mesa e uma pergunta de sim ou não"
+    "imageAlt": "Quem sou eu? no 4Dare: cartas na mesa e uma pergunta de sim ou não"
   },
   "newRoom": {
     "title": "Criar sala"
@@ -24,11 +24,11 @@
   "room": {
     "title": "Sala {code}",
     "inviteTitle": "Bora jogar Quem sou eu? comigo",
-    "inviteDescription": "Sala {code} no Ludodare. Cada um escolhe um personagem para outro, e você descobre o seu com perguntas de sim ou não. Grátis, sem cadastro.",
+    "inviteDescription": "Sala {code} no 4Dare. Cada um escolhe um personagem para outro, e você descobre o seu com perguntas de sim ou não. Grátis, sem cadastro.",
     "invited": "Você foi convidado!",
     "join": "Entre na minha sala",
     "code": "Código da sala",
-    "imageAlt": "Convite para a sala {code} no Ludodare"
+    "imageAlt": "Convite para a sala {code} no 4Dare"
   },
   "tab": {
     "lobby": "Sala de espera",
@@ -49,6 +49,6 @@
   },
   "rooms": {
     "title": "Salas",
-    "description": "Todas as salas esperando jogadores no Ludodare: encontre por jogo, nome ou anfitrião, públicas ou com senha."
+    "description": "Todas as salas esperando jogadores no 4Dare: encontre por jogo, nome ou anfitrião, públicas ou com senha."
   }
 }

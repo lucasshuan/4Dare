@@ -52,10 +52,10 @@ export function pageMetadata({
 }: {
   lang: Lang;
   path: string;
-  /** The tab title; the layout adds " · Ludodare". */
+  /** The tab title; the layout adds " · 4Dare". */
   title: Metadata["title"];
   description: string;
-  /** The title in embeds; by default the tab title with " · Ludodare". */
+  /** The title in embeds; by default the tab title with " · 4Dare". */
   shareTitle?: Metadata["title"];
   /** Rooms and the profile stay out of search results, but still embed. */
   index?: boolean;

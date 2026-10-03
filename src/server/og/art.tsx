@@ -36,8 +36,8 @@ const brand = (file: string) =>
   `data:image/svg+xml;base64,${readFileSync(join(process.cwd(), "public/brand", file)).toString("base64")}`;
 const LOGO = brand("logo.svg");
 const ICON = brand("icon.svg");
-/** logo.svg's viewBox is 2086×796. */
-const LOGO_RATIO = 2086 / 796;
+/** logo.svg's viewBox is 2880×838. */
+const LOGO_RATIO = 2880 / 838;
 
 const critter = (seed: string, color: string) =>
   `data:image/svg+xml;base64,${Buffer.from(
