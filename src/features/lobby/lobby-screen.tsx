@@ -4,7 +4,6 @@ import {
   Check,
   ChevronLeft,
   Clock,
-  Copy,
   Crown,
   DoorOpen,
   Globe,
@@ -192,7 +191,8 @@ export function LobbyScreen() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-4 short:gap-3">
+          {/* desktop: "Copy link" right of the code; phones: under it */}
+          <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:items-center">
             <div className="flex gap-2">
               <span className="sr-only">
                 {t("codeLabel", { code: code.split("").join(" ") })}
@@ -208,26 +208,14 @@ export function LobbyScreen() {
                 </span>
               ))}
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={() =>
-                  copy(`${window.location.origin}/r/${code}`, t("linkCopied"))
-                }
-              >
-                <LinkIcon strokeWidth={1.75} />
-                {t("copyLink")}
-              </Button>
-              <Button onClick={() => copy(code, t("codeCopied"))}>
-                <Copy strokeWidth={1.75} />
-                {t("copyCode")}
-              </Button>
-            </div>
-            {/* the link is one click away ("Copy link"), so very short windows skip it */}
-            <span className="font-mono text-[13px] text-ink-muted tiny:hidden">
-              {typeof window === "undefined"
-                ? `/r/${code}`
-                : `${window.location.host}/r/${code}`}
-            </span>
+            <Button
+              onClick={() =>
+                copy(`${window.location.origin}/r/${code}`, t("linkCopied"))
+              }
+            >
+              <LinkIcon strokeWidth={1.75} />
+              {t("copyLink")}
+            </Button>
           </div>
 
           <div className="flex flex-col gap-4">
