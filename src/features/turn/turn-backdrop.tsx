@@ -68,7 +68,7 @@ export function TurnBackdrop({ seat }: { seat: number | null }) {
   return createPortal(
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      className="pointer-events-none fixed inset-0 -z-10 select-none overflow-hidden"
     >
       <AnimatePresence initial={false}>
         {seat === null ? null : (
