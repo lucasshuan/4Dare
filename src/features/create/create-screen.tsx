@@ -1,9 +1,10 @@
 "use client";
 
-import { ChevronLeft, LoaderCircle } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { PageLoader } from "@/components/ui/loader";
 import { Screen } from "@/components/ui/screen";
 import { MatchLockPage } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
@@ -51,21 +52,21 @@ export function CreateScreen({ game }: { game: GameKey }) {
 
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
-      <motion.div {...riseIn}>
-        {isLoading ? null : match ? (
+      {match ? (
+        <motion.div {...riseIn}>
           <MatchLockPage match={match} />
-        ) : failed ? (
+        </motion.div>
+      ) : failed ? (
+        <motion.div {...riseIn}>
           <Link href={GAME_PATHS[game]} className={backClass}>
             <ChevronLeft className="size-4" strokeWidth={2} />
             {t("createRoom.back")}
           </Link>
-        ) : (
-          <output className="flex items-center gap-3 font-semibold text-ink-muted text-lg">
-            <LoaderCircle className="size-5 animate-spin" strokeWidth={2} />
-            {t("createRoom.creating")}
-          </output>
-        )}
-      </motion.div>
+        </motion.div>
+      ) : (
+        // also while it checks for a match going on: one loader, start to end
+        <PageLoader label={t("createRoom.creating")} />
+      )}
     </Screen>
   );
 }

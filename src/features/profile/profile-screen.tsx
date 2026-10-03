@@ -13,6 +13,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { randomCritterSeed } from "@/components/ui/critter";
 import { ImageDrop, type ImageDropHandle } from "@/components/ui/image-drop";
+import { PageLoader } from "@/components/ui/loader";
 import { Screen } from "@/components/ui/screen";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
@@ -32,6 +33,7 @@ import { AVATAR_COLORS, type Me } from "@/server/contract";
 
 export function ProfileScreen() {
   const t = useTranslations("profile");
+  const tc = useTranslations("common");
   const { me } = useMe();
   useAuthErrorToast();
   return (
@@ -45,7 +47,7 @@ export function ProfileScreen() {
           {t("back")}
         </Link>
         {!me ? (
-          <div className="h-60 max-w-[560px] animate-pulse rounded-xl bg-surface" />
+          <PageLoader label={tc("loading")} />
         ) : me.isGuest ? (
           <GuestProfile />
         ) : (

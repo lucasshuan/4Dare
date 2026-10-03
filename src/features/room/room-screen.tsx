@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
+import { PageLoader } from "@/components/ui/loader";
 import { Screen } from "@/components/ui/screen";
 import { MatchLockPage } from "@/features/current-match/match-lock";
 import { RoomProvider, useRoomContext } from "@/features/data/room-context";
@@ -207,16 +208,10 @@ function PhaseScreens() {
 }
 
 function RoomLoading() {
+  const t = useTranslations("room");
   return (
     <Screen left={null}>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { duration: dur.base } }}
-        className="flex flex-col gap-4 pt-10"
-      >
-        <div className="h-12 w-2/3 animate-pulse rounded-md bg-sunken" />
-        <div className="h-6 w-1/2 animate-pulse rounded-md bg-sunken" />
-      </motion.div>
+      <PageLoader label={t("loading")} />
     </Screen>
   );
 }
@@ -226,13 +221,18 @@ function RoomLoading() {
  * out. Once out (or once that match ends), the page loads again and joins.
  */
 function InMatchElsewhere() {
+  const tc = useTranslations("common");
   const { match, isLoading } = useCurrentMatch();
   useEffect(() => {
     if (!isLoading && !match) window.location.reload();
   }, [isLoading, match]);
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
-      {match ? <MatchLockPage match={match} /> : null}
+      {match ? (
+        <MatchLockPage match={match} />
+      ) : (
+        <PageLoader label={tc("loading")} />
+      )}
     </Screen>
   );
 }
