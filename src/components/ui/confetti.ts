@@ -10,42 +10,26 @@ function palette(): string[] {
     .filter(Boolean);
 }
 
-/** A few seconds of confetti: two side cannons and a burst from the top. Skipped for reduced motion. */
-export function fireConfetti(durationMs = 2600) {
+/**
+ * A burst of confetti from the top middle of the screen. "big" (a hit, the podium)
+ * follows it with a smaller second burst. Skipped for reduced motion.
+ */
+export function fireConfetti(size: "small" | "big" = "small") {
   if (typeof window === "undefined") return;
-  const colors = palette();
   const base = {
-    colors,
+    colors: palette(),
     disableForReducedMotion: true,
     zIndex: 60,
-    ticks: 220,
+    ticks: 200,
+    spread: 80,
+    startVelocity: 32,
+    scalar: 0.9,
+    origin: { x: 0.5, y: 0.3 },
   } as const;
-  confetti({
-    ...base,
-    particleCount: 90,
-    spread: 100,
-    startVelocity: 42,
-    origin: { x: 0.5, y: 0.25 },
-  });
-  const end = Date.now() + durationMs;
-  const tick = () => {
-    confetti({
-      ...base,
-      particleCount: 4,
-      angle: 60,
-      spread: 55,
-      startVelocity: 55,
-      origin: { x: 0, y: 0.7 },
-    });
-    confetti({
-      ...base,
-      particleCount: 4,
-      angle: 120,
-      spread: 55,
-      startVelocity: 55,
-      origin: { x: 1, y: 0.7 },
-    });
-    if (Date.now() < end) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
+  confetti({ ...base, particleCount: size === "big" ? 60 : 30 });
+  if (size === "big")
+    window.setTimeout(
+      () => confetti({ ...base, particleCount: 30, spread: 110 }),
+      250,
+    );
 }

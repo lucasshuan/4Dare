@@ -102,7 +102,7 @@ export function ResultScreen() {
   useEffect(() => {
     if (!winner) return;
     const id = window.setTimeout(() => {
-      fireConfetti(2000);
+      fireConfetti("big");
       playSound("complete");
     }, 1200);
     return () => window.clearTimeout(id);

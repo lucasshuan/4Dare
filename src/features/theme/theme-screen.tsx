@@ -58,7 +58,7 @@ export function ThemeScreen() {
   useEffect(() => {
     if (stage !== "reveal" || celebrated.current) return;
     celebrated.current = true;
-    fireConfetti(600);
+    fireConfetti();
   }, [stage]);
 
   const ideas = view.ideas ?? [];

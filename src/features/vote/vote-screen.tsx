@@ -90,7 +90,7 @@ export function VoteScreen() {
   useEffect(() => {
     if (stage !== "winner" || celebrated.current) return;
     celebrated.current = true;
-    fireConfetti(600);
+    fireConfetti();
   }, [stage]);
 
   if (!v) return null;

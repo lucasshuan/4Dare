@@ -291,7 +291,7 @@ function GuessReveal({
   useEffect(() => {
     const id = window.setTimeout(() => {
       setShown(true);
-      if (hit) fireConfetti(2400);
+      if (hit) fireConfetti("big");
     }, 800);
     return () => window.clearTimeout(id);
   }, [hit]);
