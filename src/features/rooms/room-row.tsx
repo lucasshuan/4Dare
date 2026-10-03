@@ -64,7 +64,8 @@ export function RoomRow({
       exit={{ opacity: 0, x: -12, transition: { duration: 0.2 } }}
       className={cn(
         "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 rounded-lg bg-sunken p-3",
-        showGame && "md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)_auto] md:p-4",
+        // wide: fixed game and status columns, so the games line up right beside the button
+        showGame && "md:grid-cols-[minmax(0,1fr)_13rem_8rem] md:p-4",
         r.status !== "open" && "opacity-70",
         className,
       )}
