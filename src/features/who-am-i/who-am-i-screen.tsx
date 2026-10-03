@@ -3,7 +3,6 @@
 import { ChevronLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
@@ -14,6 +13,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { GAMES, newRoom } from "@/lib/routes";
+import { CreateRoomCta } from "./create-room-cta";
 import { JoinByCode } from "./join-by-code";
 import { WhoAmIBanner } from "./who-am-i-banner";
 
@@ -60,12 +60,9 @@ export function WhoAmIScreen() {
               match && "pointer-events-none select-none opacity-35 grayscale",
             )}
           >
-            <Link
-              href={newRoom("who-am-i")}
-              className={buttonClass("primary", "lg", "max-sm:w-full")}
-            >
+            <CreateRoomCta href={newRoom("who-am-i")} className="max-sm:w-full">
               {t("create")}
-            </Link>
+            </CreateRoomCta>
             <JoinByCode />
           </div>
         </motion.section>

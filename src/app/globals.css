@@ -126,6 +126,40 @@
   --ease-swap: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
+/* "Create room": the seat colours drift across it and a shine sweeps by now and then. */
+@theme {
+  --animate-seats-drift: seats-drift 6s linear infinite;
+  --animate-shine: shine 4.5s var(--ease-swap) infinite;
+
+  @keyframes seats-drift {
+    to {
+      background-position: 200% 0;
+    }
+  }
+  @keyframes shine {
+    0%,
+    60% {
+      transform: translateX(-150%) skewX(-20deg);
+    }
+    100% {
+      transform: translateX(400%) skewX(-20deg);
+    }
+  }
+}
+
+/* The four seat colours (the logo's), one tile ending where it starts so the drift loops. */
+@utility bg-seats {
+  background-image: linear-gradient(
+    90deg in oklch,
+    var(--seat-1),
+    var(--seat-4),
+    var(--seat-2) 50%,
+    var(--seat-3) 64%,
+    var(--seat-1)
+  );
+  background-size: 200% 100%;
+}
+
 :root {
   /* Motion durations (seconds versions live in src/lib/motion.ts) */
   --dur-fast: 140ms;
