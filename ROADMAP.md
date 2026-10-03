@@ -22,19 +22,19 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] End with everyone's place
 - [x] Short README
 
-## Phase 2 — Online with friends
+## Phase 2 — Online with friends ✅
 
-- [ ] Supabase: database, realtime, pictures, guests without login
+- [x] Supabase: database, realtime, pictures, guests without login
 - [x] Supabase set up in one command (`pnpm setup:supabase`): tables, guests, Discord, Google, URLs, keys
 - [x] Server in the same region as the database (São Paulo)
-- [ ] Real login with Discord and Google
-- [ ] Deploy on Vercel with the Supabase integration
+- [x] Real login with Discord and Google
+- [x] Deploy on Vercel with the Supabase integration
 - [x] Character library on Supabase (`pnpm seed`)
 - [x] One browser, one guest: the first page creates the guest cookie, so a new visitor never takes two seats
 - [x] Guests never touch the database: a signed cookie, no user, profile or session rows; only Discord/Google accounts are stored
-- [ ] 2- and 4-player match tested online
+- [x] 2- and 4-player match tested online
 
-## Phase 3 — Characters and themes
+## Phase 3 — Characters and themes ✅
 
 - [x] Reviewed library builder: content filters, pt-BR names, cache
 - [x] Large library in each language, with pictures (8k per language, 91–98% with a picture)
@@ -117,7 +117,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] The set's emoji on the vote cards and next to the theme at the top
 - [x] Smooth animations on all of it: cards, switch, typing, reveal
 
-## Phase 9 — Ready for more games
+## Phase 9 — Ready for more games ✅
 
 - [x] Creating a room starts with the game, as a tab with its picture and name
 - [x] The host can switch the room's game in the lobby (only one game so far)
