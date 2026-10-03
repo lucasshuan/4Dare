@@ -28,16 +28,16 @@ export function UserMenu() {
 
   if (!me)
     return (
-      <span className="h-11 w-16 animate-pulse rounded-pill bg-sunken sm:w-40" />
+      <span className="h-10 w-16 animate-pulse rounded-pill bg-sunken sm:w-40" />
     );
   return (
     <Popover.Root>
-      <Popover.Trigger className="group inline-flex h-11 min-w-0 max-w-60 items-center gap-2.5 rounded-pill py-1 pr-3 pl-1 font-semibold transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken">
+      <Popover.Trigger className="group inline-flex h-10 min-w-0 max-w-60 items-center gap-2.5 rounded-pill py-1 pr-3 pl-1 font-semibold transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken">
         <Avatar
           avatar={me.avatar}
           isGuest={me.isGuest}
           name={me.name}
-          size={36}
+          size={32}
         />
         {/* phones keep only the avatar, so the bar fits next to the language and theme */}
         <span className="min-w-0 truncate max-sm:sr-only">{name(me)}</span>

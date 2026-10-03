@@ -25,7 +25,7 @@ export function ThemeToggle() {
       aria-pressed={current === value}
       onClick={() => setTheme(value)}
       className={cn(
-        "inline-flex size-9 items-center justify-center rounded-pill transition-[background-color,color,box-shadow] duration-200 ease-soft",
+        "inline-flex size-8 items-center justify-center rounded-pill transition-[background-color,color,box-shadow] duration-200 ease-soft",
         current === value
           ? "bg-ink text-on-ink shadow-card dark:bg-surface dark:text-ink"
           : "text-ink-muted hover:text-ink",

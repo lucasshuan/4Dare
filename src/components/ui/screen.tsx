@@ -9,7 +9,7 @@ import { Logo } from "./logo";
  * Room a banner leaves at its top for the top bar, which floats over it.
  * Keep in step with the bar's height below.
  */
-export const UNDER_TOPBAR = "pt-[76px] sm:pt-[92px] sm:short:pt-[76px]";
+export const UNDER_TOPBAR = "pt-[72px] sm:pt-[88px] sm:short:pt-[72px]";
 
 /**
  * Page shell: header row and a centred column. `left={null}` drops the wordmark.
@@ -35,7 +35,7 @@ export function Screen({
 }) {
   const bar = (
     <>
-      <div className="flex min-w-0 items-center gap-4">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-4">
         {left === undefined ? <Wordmark /> : left}
       </div>
       <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
@@ -48,7 +48,7 @@ export function Screen({
       <div className="flex min-h-dvh flex-col">
         <TopBar>{bar}</TopBar>
         {/* the banner slides up under the bar */}
-        <div className="-mt-[76px] sm:-mt-[92px] sm:short:-mt-[76px]">
+        <div className="-mt-[72px] sm:-mt-[88px] sm:short:-mt-[72px]">
           {banner}
         </div>
         <main
@@ -95,7 +95,7 @@ function TopBar({ children }: { children: ReactNode }) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 h-[76px] border-b px-4 pt-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft sm:h-[92px] sm:px-8 sm:pt-6 sm:short:h-[76px] sm:short:pt-4",
+        "sticky top-0 z-30 h-[72px] border-b px-4 pt-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft sm:h-[88px] sm:px-8 sm:pt-6 sm:short:h-[72px] sm:short:pt-4",
         scrolled
           ? "border-line/70 bg-canvas/70 backdrop-blur-xl backdrop-saturate-150"
           : "border-transparent bg-transparent",
@@ -112,7 +112,7 @@ export function Wordmark() {
   return (
     <Link href="/" className="group min-w-0 rounded-sm">
       {/* smaller on phones, and shrinks further so it never runs under the language, theme and user menu */}
-      <Logo className="h-9 w-auto max-sm:h-7" />
+      <Logo className="h-8 w-auto max-sm:h-7" />
     </Link>
   );
 }
