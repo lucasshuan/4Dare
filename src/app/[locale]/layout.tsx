@@ -82,9 +82,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
-        {/* Vercel Web Analytics and Speed Insights; they only send data on Vercel. */}
+        {/* Vercel Web Analytics and Speed Insights (half the visits: enough data, half the cost); they only send data on Vercel. */}
         <Analytics />
-        <SpeedInsights />
+        <SpeedInsights sampleRate={0.5} />
       </body>
     </html>
   );
