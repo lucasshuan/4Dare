@@ -15,7 +15,12 @@ export function Providers({ children }: { children: ReactNode }) {
   );
   return (
     <QueryClientProvider client={client}>
-      <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
+      {/* light unless the person picked dark; the system setting is not followed */}
+      <ThemeProvider
+        attribute="data-theme"
+        defaultTheme="light"
+        enableSystem={false}
+      >
         {/* "user" = follow prefers-reduced-motion: transforms are skipped, fades stay */}
         <MotionConfig reducedMotion="user">
           <ToastProvider>{children}</ToastProvider>
