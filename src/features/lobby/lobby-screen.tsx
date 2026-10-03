@@ -80,6 +80,7 @@ const editable = ({
 export function LobbyScreen() {
   const t = useTranslations("lobby");
   const tCreate = useTranslations("home.createRoom");
+  const tRooms = useTranslations("home.rooms");
   const name = useDisplayName();
   const withNames = useWithNames();
   const toast = useToast();
@@ -128,6 +129,9 @@ export function LobbyScreen() {
     }
   };
 
+  // a room without a name goes by its host's, like in the room list
+  const title =
+    roomName || (host ? tRooms("roomOf", { name: name(host) }) : "");
   // after a match the room is not new any more
   const greeting = me.isHost
     ? t(view.round > 0 ? "titleHostAgain" : "titleHost")
@@ -178,20 +182,14 @@ export function LobbyScreen() {
       <div className="flex flex-wrap items-start gap-10 lg:gap-16">
         <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
           <div className="flex flex-col gap-3">
-            {/* a named room leads with its name; the greeting drops to a line under it */}
-            {roomName ? (
-              <h1 className={cn(titleClass, "wrap-break-word")}>{roomName}</h1>
-            ) : null}
+            {/* the room leads with its name; the greeting drops to a line under it */}
+            <h1 className={cn(titleClass, "wrap-break-word")}>{title}</h1>
             {/* the QR code sits right of the greeting and the description (not on phones) */}
             <div className="flex items-center gap-6">
               <div className="flex min-w-0 flex-1 flex-col gap-3">
-                {roomName ? (
-                  <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
-                    {greeting}
-                  </p>
-                ) : (
-                  <h1 className={titleClass}>{greeting}</h1>
-                )}
+                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
+                  {greeting}
+                </p>
                 <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
                   {me.isHost
                     ? t(view.round > 0 ? "subtitleHostAgain" : "subtitleHost")
