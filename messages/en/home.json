@@ -54,6 +54,7 @@
     "setsOn": "{on} of {total} sets",
     "allOn": "Turn all on",
     "allOff": "Turn all off",
+    "setExamples": "For example",
     "needOneSet": "Turn on at least one set.",
     "hostNoteTitle": "You type the theme",
     "hostNote": "When the match starts, you write any theme you like, with a few ideas at hand. If 30 s go by, everyone votes instead.",

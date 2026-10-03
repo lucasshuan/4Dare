@@ -107,6 +107,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 
 - [x] Themes split into 20 sets, each with its emoji (Movies & TV, Anime & manga, Sports...)
 - [x] Creating a room: pick the sets the vote draws from, all on by default, as cards
+- [x] Hovering a set card shows a few example themes from it
 - [x] Time per step next to seats on the web, so the settings make a grid
 - [x] The last room setup is remembered in the browser; the lobby edits it too
 - [x] Or the host types the theme: no sets, no vote, ideas at hand

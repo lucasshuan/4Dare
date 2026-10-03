@@ -1,17 +1,21 @@
 "use client";
 
+import { Tooltip } from "@base-ui/react/tooltip";
 import { Check, PenLine, UsersRound } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useTranslations } from "next-intl";
-import { useId } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useId, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { HintLabel } from "@/components/ui/hint-label";
+import { THEME_SET_EXAMPLES } from "@/game/theme-set-examples";
 import { THEME_SET_KEYS, THEME_SETS, type ThemeSet } from "@/game/theme-sets";
+import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
 import type { CreateRoomInput } from "@/server/contract";
 
 type ThemeSettings = Pick<CreateRoomInput, "themeMode" | "themeSets">;
+type SetTooltip = Tooltip.Handle<ThemeSet>;
 
 const spring = { type: "spring", stiffness: 420, damping: 32 } as const;
 /** Pastel tile behind each set's emoji, shifted every row so columns don't repeat. */
@@ -77,27 +81,94 @@ function ModeSwitch({
   );
 }
 
+/** A few themes from the set, one per line. */
+function Examples({ set }: { set: ThemeSet }) {
+  const t = useTranslations("home.createRoom");
+  const lang = useLocale() as Lang;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="font-semibold text-[11px] text-ink-muted uppercase tracking-[0.08em]">
+        {t("setExamples")}
+      </span>
+      <ul className="flex flex-col gap-1">
+        {THEME_SET_EXAMPLES[set].map((example) => (
+          <li
+            key={example.en}
+            className="flex items-baseline gap-2 font-semibold text-[13px] text-ink leading-4"
+          >
+            <span
+              aria-hidden
+              className="size-1.5 shrink-0 rounded-full bg-ink-muted/50"
+            />
+            {example[lang]}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * One tooltip for the whole grid: it glides from card to card and swaps its
+ * examples as the pointer moves.
+ */
+function ExamplesTooltip({ handle }: { handle: SetTooltip }) {
+  return (
+    <Tooltip.Root handle={handle}>
+      {({ payload }) => (
+        <Tooltip.Portal>
+          <Tooltip.Positioner
+            side="top"
+            sideOffset={8}
+            className="z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] duration-300 ease-soft data-instant:transition-none motion-reduce:transition-none"
+          >
+            <Tooltip.Popup className="relative h-(--popup-height,auto) w-(--popup-width,auto) max-w-[min(260px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface shadow-pop outline-none transition-[width,height,opacity,scale] duration-300 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0 data-instant:transition-none motion-reduce:transition-none">
+              <Tooltip.Viewport className="relative size-full overflow-clip px-3 py-2.5 **:data-current:transition-[translate,opacity] **:data-current:duration-300 **:data-current:ease-soft **:data-previous:transition-[translate,opacity] **:data-previous:duration-200 **:data-previous:ease-soft **:data-current:data-starting-style:opacity-0 **:data-previous:data-ending-style:opacity-0 data-[activation-direction~=right]:**:data-current:data-starting-style:translate-x-3 data-[activation-direction~=left]:**:data-current:data-starting-style:-translate-x-3 data-[activation-direction~=right]:**:data-previous:data-ending-style:-translate-x-3 data-[activation-direction~=left]:**:data-previous:data-ending-style:translate-x-3 data-instant:**:transition-none motion-reduce:**:transition-none">
+                {payload ? <Examples set={payload} /> : null}
+              </Tooltip.Viewport>
+            </Tooltip.Popup>
+          </Tooltip.Positioner>
+        </Tooltip.Portal>
+      )}
+    </Tooltip.Root>
+  );
+}
+
 function SetCard({
   index,
   set,
   on,
   onToggle,
+  tooltip,
 }: {
   index: number;
   set: (typeof THEME_SETS)[number];
   on: boolean;
   onToggle: () => void;
+  tooltip: SetTooltip;
 }) {
   const tSets = useTranslations("common.themeSets");
+  const t = useTranslations("home.createRoom");
+  const lang = useLocale() as Lang;
   const still = useReducedMotion() ?? false;
+  const examplesId = useId();
   return (
-    <motion.button
+    <Tooltip.Trigger
+      handle={tooltip}
+      payload={set.key}
+      delay={350}
+      closeOnClick={false}
       type="button"
       aria-pressed={on}
+      aria-describedby={examplesId}
       onClick={onToggle}
-      whileHover={still ? undefined : { y: -2 }}
-      whileTap={{ scale: 0.96 }}
-      transition={spring}
+      render={
+        <motion.button
+          whileHover={still ? undefined : { y: -2 }}
+          whileTap={{ scale: 0.96 }}
+          transition={spring}
+        />
+      }
       className={cn(
         "flex h-12 w-full items-center gap-2.5 rounded-md border-[1.5px] py-1.5 pr-2.5 pl-1.5 text-left transition-[background-color,border-color,color,box-shadow] duration-200 ease-soft",
         on
@@ -145,7 +216,11 @@ function SetCard({
           ) : null}
         </AnimatePresence>
       </span>
-    </motion.button>
+      {/* the tooltip is for the eyes only; screen readers get the examples here */}
+      <span id={examplesId} hidden>
+        {`${t("setExamples")}: ${THEME_SET_EXAMPLES[set.key].map((e) => e[lang]).join(", ")}`}
+      </span>
+    </Tooltip.Trigger>
   );
 }
 
@@ -163,34 +238,39 @@ function SetGrid({
         ? value.filter((k) => k !== key)
         : THEME_SET_KEYS.filter((k) => k === key || value.includes(k)),
     );
+  const [tooltip] = useState(() => Tooltip.createHandle<ThemeSet>());
   return (
-    <motion.ul
-      initial="hidden"
-      animate="shown"
-      variants={{ shown: { transition: { staggerChildren: 0.018 } } }}
-      className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
-    >
-      {THEME_SETS.map((set, i) => (
-        <motion.li
-          key={set.key}
-          variants={{
-            hidden: { opacity: 0, y: 10 },
-            shown: {
-              opacity: 1,
-              y: 0,
-              transition: { duration: dur.base, ease: ease.soft },
-            },
-          }}
-        >
-          <SetCard
-            index={i}
-            set={set}
-            on={value.includes(set.key)}
-            onToggle={() => toggle(set.key)}
-          />
-        </motion.li>
-      ))}
-    </motion.ul>
+    <>
+      <motion.ul
+        initial="hidden"
+        animate="shown"
+        variants={{ shown: { transition: { staggerChildren: 0.018 } } }}
+        className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+      >
+        {THEME_SETS.map((set, i) => (
+          <motion.li
+            key={set.key}
+            variants={{
+              hidden: { opacity: 0, y: 10 },
+              shown: {
+                opacity: 1,
+                y: 0,
+                transition: { duration: dur.base, ease: ease.soft },
+              },
+            }}
+          >
+            <SetCard
+              index={i}
+              set={set}
+              on={value.includes(set.key)}
+              onToggle={() => toggle(set.key)}
+              tooltip={tooltip}
+            />
+          </motion.li>
+        ))}
+      </motion.ul>
+      <ExamplesTooltip handle={tooltip} />
+    </>
   );
 }
 
