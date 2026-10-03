@@ -126,12 +126,12 @@
   --ease-swap: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-/* "Create room": the seat colours drift across it and a shine sweeps by now and then. */
+/* "Create room": lighter and deeper blues drift across it and a shine sweeps by now and then. */
 @theme {
-  --animate-seats-drift: seats-drift 6s linear infinite;
+  --animate-drift: drift 6s linear infinite;
   --animate-shine: shine 4.5s var(--ease-swap) infinite;
 
-  @keyframes seats-drift {
+  @keyframes drift {
     to {
       background-position: 200% 0;
     }
@@ -147,15 +147,15 @@
   }
 }
 
-/* The four seat colours (the logo's), one tile ending where it starts so the drift loops. */
-@utility bg-seats {
+/* Shades of sky, one tile ending where it starts so the drift loops. */
+@utility bg-sky-shades {
   background-image: linear-gradient(
     90deg in oklch,
-    var(--seat-1),
-    var(--seat-4),
-    var(--seat-2) 50%,
-    var(--seat-3) 64%,
-    var(--seat-1)
+    var(--sky),
+    color-mix(in oklch, var(--sky), white 22%),
+    var(--sky),
+    color-mix(in oklch, var(--sky), black 14%),
+    var(--sky)
   );
   background-size: 200% 100%;
 }
