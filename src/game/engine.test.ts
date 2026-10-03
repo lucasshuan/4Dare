@@ -479,7 +479,7 @@ describe("a turn", () => {
     expect(h.state.plays.at(-1)).toMatchObject({ text: "人間ですか？" });
   });
 
-  it("everyone else answers, then a reveal holds the next step's clock", () => {
+  it("everyone else answers, then the next step starts under the reveal", () => {
     const g = started(4);
     const asker = g.turn;
     g.do({ type: "ASK", playerId: asker, text: "Is it human?" });
@@ -513,12 +513,9 @@ describe("a turn", () => {
       3 * REVEAL_TIMING.perAnswer +
       4 * REVEAL_TIMING.perNoteChar;
     expect(s.reveal?.until).toBe(g.now + ms);
-    expect(s.stepStartsAt).toBe(g.now + ms);
-    expect(s.deadline).toBe(g.now + ms + STEP);
-    expect(code(() => g.do({ type: "PASS", playerId: asker }))).toBe(
-      "too_early",
-    );
-    g.now = s.stepStartsAt as number;
+    // no pause: the clock runs while the reveal is up, and the player can act
+    expect(s.stepStartsAt).toBe(g.now);
+    expect(s.deadline).toBe(g.now + STEP);
     g.do({ type: "PASS", playerId: asker });
     expect(g.state.phase).toBe("asking");
   });
@@ -564,7 +561,7 @@ describe("a turn", () => {
     expect((s.reveal?.until ?? 0) - g.now).toBe(REVEAL_TIMING.guessHit);
     expect(s.phase).toBe("asking");
     expect(s.turnPlayerId).not.toBe(first);
-    expect(s.stepStartsAt).toBe(s.reveal?.until);
+    expect(s.stepStartsAt).toBe(g.now);
 
     // the next player had no turn before the first one hit: same round, same place
     const second = g.askAndAnswer();

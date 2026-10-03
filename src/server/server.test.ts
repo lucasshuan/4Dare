@@ -176,7 +176,6 @@ describe("server, local mode", () => {
     v = (await view(code)).body;
     expect(v.phase).toBe("guessing");
     expect(v.reveal?.kind).toBe("answers");
-    expect(await A.passTurn(code)).toEqual({ ok: false, error: "too_early" });
 
     // nobody's own character name ever reaches their browser
     for (const p of ["p1", "p2", "p3"]) {

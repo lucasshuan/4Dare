@@ -111,9 +111,14 @@ function mergeSettings(
 
 // --- clock -------------------------------------------------------------------
 
-/** Starts a step; it never begins before a reveal on screen is over. */
+/**
+ * Starts a step. Turn steps start at once, under the answers or guess reveal
+ * (players close it when they like); the rest wait for the reveal on screen
+ * (the theme before picking, the last guess before the podium).
+ */
 function startStep(s: RoomState, ctx: Ctx, ms: number) {
-  const start = Math.max(ctx.now, s.reveal?.until ?? 0);
+  const waits = s.reveal?.kind === "theme" || !TURN_PHASES.has(s.phase);
+  const start = Math.max(ctx.now, waits ? (s.reveal?.until ?? 0) : 0);
   s.stepStartsAt = start;
   s.deadline = start + ms;
 }

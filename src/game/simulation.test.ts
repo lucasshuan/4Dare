@@ -83,7 +83,8 @@ function checkInvariants(s: RoomState) {
     expect((s.deadline ?? 0) - (s.stepStartsAt ?? 0)).toBe(
       s.settings.stepSeconds * 1000,
     );
-    if (s.reveal)
+    // turn steps start under an answers or guess reveal; only the theme holds the clock
+    if (s.reveal?.kind === "theme")
       expect(s.stepStartsAt ?? 0).toBeGreaterThanOrEqual(s.reveal.until);
   }
   if (

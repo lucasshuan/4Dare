@@ -34,6 +34,7 @@
   "timeLeft": "残り時間：{time}",
   "back": "戻る",
   "close": "閉じる",
+  "revealHint": "どこかをクリックするか、キーを押すと閉じます",
   "loading": "読み込み中…",
   "imagePlaceholder": "キャラクターの画像",
   "errors": {

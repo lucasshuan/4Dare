@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -15,20 +16,51 @@ import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 
-/** What just happened, shown to everyone between two steps, while the next step's clock refills. */
+/** Keys that never close the reveal on their own. */
+const MODIFIERS = new Set(["Shift", "Control", "Alt", "Meta", "CapsLock"]);
+/** Where a typed key lands once the reveal is gone: the step's text field. */
+const FIELD =
+  "main textarea:not([disabled]), main input:not([type]):not([disabled]), main input[type=text]:not([disabled])";
+
+/**
+ * What just happened, shown to everyone while the next step already runs.
+ * It closes by itself, or earlier with its button, a click outside it, or any
+ * key; a typed letter goes on into the step's text field.
+ */
 export function RevealOverlay() {
+  const t = useTranslations("common");
   const { view, offset } = useRoomContext();
   const now = useServerClock(offset, 100);
   // The theme vote plays its own result out on the vote screen.
   const r = view.reveal?.kind === "theme" ? null : view.reveal;
-  const active = r !== null && now < r.until;
+  const id = r ? `${r.kind}-${r.n}` : null;
+  const [closed, setClosed] = useState<string | null>(null);
+  const active = r !== null && now < r.until && closed !== id;
+  useEffect(() => {
+    if (!active || !id) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (MODIFIERS.has(e.key)) return;
+      setClosed(id);
+      // Nothing focused: the letter goes to the step's field, as if the reveal were never there.
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const focused = document.activeElement;
+        if (!focused || focused === document.body)
+          document.querySelector<HTMLElement>(FIELD)?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [active, id]);
   return (
     <AnimatePresence>
       {active && r ? (
         <motion.div
-          key={`${r.kind}-${r.n}`}
+          key={id}
           role="status"
           aria-live="polite"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setClosed(id);
+          }}
           initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
           animate={{
             opacity: 1,
@@ -58,11 +90,22 @@ export function RevealOverlay() {
             }}
             className="relative max-h-[calc(100dvh-2rem)] w-full max-w-160 overflow-y-auto rounded-xl bg-surface p-6 shadow-pop sm:p-8"
           >
+            <button
+              type="button"
+              aria-label={t("close")}
+              onClick={() => setClosed(id)}
+              className="absolute top-3 right-3 z-10 flex size-9 items-center justify-center rounded-pill text-ink-muted transition-colors duration-150 hover:bg-sunken hover:text-ink"
+            >
+              <X className="size-5" strokeWidth={2} />
+            </button>
             {r.kind === "answers" ? (
               <AnswersReveal reveal={r} />
             ) : (
               <GuessReveal reveal={r} />
             )}
+            <p className="mt-4 text-center font-medium text-[13px] text-ink-muted max-sm:hidden">
+              {t("revealHint")}
+            </p>
             <Progress startsAt={r.startsAt} until={r.until} now={now} />
           </motion.div>
         </motion.div>
