@@ -12,6 +12,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { buttonClass } from "@/components/ui/button";
 import { useMe } from "@/features/data/use-me";
 import { Link, useRouter } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { useDisplayName } from "@/lib/names";
 import { signOut } from "@/server/actions";
@@ -32,15 +33,28 @@ export function UserMenu() {
     );
   return (
     <Popover.Root>
-      <Popover.Trigger className="group inline-flex h-10 min-w-0 max-w-60 items-center gap-2.5 rounded-pill py-1 pr-3 pl-1 font-semibold transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken">
+      {/* a guest's trigger looks unfinished on purpose: dashed outline, faded avatar, muted name and a "Guest" tag */}
+      <Popover.Trigger
+        className={cn(
+          "group inline-flex h-10 min-w-0 max-w-60 items-center gap-2.5 rounded-pill py-1 pr-3 pl-1 font-semibold transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken",
+          me.isGuest &&
+            "max-w-72 border-[1.5px] border-line-strong border-dashed text-ink-muted",
+        )}
+      >
         <Avatar
           avatar={me.avatar}
           isGuest={me.isGuest}
           name={me.name}
           size={32}
+          className={cn(me.isGuest && "opacity-60 grayscale")}
         />
         {/* phones keep only the avatar, so the bar fits next to the language and theme */}
         <span className="min-w-0 truncate max-sm:sr-only">{name(me)}</span>
+        {me.isGuest ? (
+          <span className="shrink-0 rounded-pill bg-line px-2 py-0.5 font-bold text-[11px] text-ink-muted uppercase tracking-wide">
+            {t("guestBadge")}
+          </span>
+        ) : null}
         <ChevronDown
           className="size-4 shrink-0 text-ink-muted transition-transform duration-200 group-data-popup-open:rotate-180"
           strokeWidth={2}

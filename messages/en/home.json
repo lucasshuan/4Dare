@@ -82,6 +82,7 @@
   },
   "user": {
     "guest": "You're playing as a guest",
+    "guestBadge": "Guest",
     "guestHint": "Sign in with Discord or Google to pick a name and avatar. Your matches come along.",
     "connected": "Connected with {provider}",
     "account": "Signed in",

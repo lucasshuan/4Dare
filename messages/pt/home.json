@@ -82,6 +82,7 @@
   },
   "user": {
     "guest": "Você está jogando como convidado",
+    "guestBadge": "Convidado",
     "guestHint": "Entre com Discord ou Google pra escolher nome e avatar. Suas partidas vêm junto.",
     "connected": "Conectado com {provider}",
     "account": "Conta conectada",
