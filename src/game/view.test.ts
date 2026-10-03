@@ -186,6 +186,18 @@ describe("what the view says", () => {
     expect(toPublicRoom(t.state, t.now + LOBBY_SECONDS * 1000)).toBeNull();
   });
 
+  it("a lobby whose every page closed leaves the list at once, and a reload brings it back", () => {
+    const g = new Game(2, 1, { seats: 3 });
+    g.do({ type: "GONE", playerId: "p1" });
+    // one page still open: still listed
+    expect(toPublicRoom(g.state, g.now)?.status).toBe("open");
+    g.do({ type: "GONE", playerId: "p2" });
+    // no grace to wait out
+    expect(toPublicRoom(g.state, g.now)).toBeNull();
+    g.do({ type: "BACK", playerId: "p2" });
+    expect(toPublicRoom(g.state, g.now)?.status).toBe("open");
+  });
+
   it("private rooms are listed locked, and only the host sees the password", () => {
     const g = new Game(2);
     g.do({

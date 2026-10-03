@@ -393,6 +393,9 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
   if (abandoned(s, now)) return null;
   let status: PublicRoom["status"];
   if (s.phase === "lobby") {
+    // Every page in the lobby closed: off the list at once. The seats wait out
+    // GONE_GRACE_MS for a reload, but nobody should find the room meanwhile.
+    if (s.players.every((p) => p.goneAt != null)) return null;
     // Alone the lobby has no clock: list it only for as long as the clock would run.
     const until = s.deadline ?? s.updatedAt + LOBBY_SECONDS * 1000;
     if (now >= until) return null;
