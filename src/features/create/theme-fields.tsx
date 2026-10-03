@@ -162,7 +162,7 @@ function SetCard({
     <Tooltip.Trigger
       handle={tooltip}
       payload={set.key}
-      delay={350}
+      delay={0}
       closeOnClick={false}
       type="button"
       aria-pressed={on}
