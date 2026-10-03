@@ -10,9 +10,16 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Database
 
-- the project is in development; matches in the database are test data; the database follows `/data`
-- migrations and seed are the agent's job: run them whenever needed, without asking
-- losing data is not a problem yet, but keep what you can
+- Supabase is the source of truth; `data/*.json` is an old snapshot the app, the build and the tests must not read (ROADMAP_BUILD.md removes the last uses)
+- the character library (`characters`, `character_names`, `origins`, `origin_labels` and its pictures in storage) was fed by hand: never reset, truncate or bulk-delete it, and back it up before any migration that touches it
+- never run `pnpm seed`: it rewrites the library from `data/` and deletes what the files lack
+- everything else (rooms, matches, themes, profiles, pick stats) may be lost, but keep what you can
+- migrations are the agent's job: run them whenever needed, without asking
+
+## AI
+
+- no AI calls in the app or the build: no generated text, no API cost at runtime
+- AI is fine in separate scripts (devDependencies) run by hand
 
 
 ## Commits
