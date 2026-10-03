@@ -18,6 +18,8 @@
   --sky: #2b69c8;
   --on-sky: #ffffff;
   --sky-soft: #dce8fa;
+  /* the lip under a "key" button; follows --sky in both themes */
+  --sky-deep: color-mix(in oklch, var(--sky), black 32%);
   --apricot: #cf7024;
   --on-apricot: #2a1707;
   --apricot-soft: #fce8d6;
@@ -126,20 +128,24 @@
   --ease-swap: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-/* "Create room": the cards behind it peek over its top now and then (each card sets --x). */
+/* "Create room": a key with a thick lip that gives a little squash-and-stretch bounce now and then. */
 @theme {
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --animate-peek: peek 5s var(--ease-spring) infinite;
+  --animate-boing: boing 4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 
-  @keyframes peek {
+  @keyframes boing {
     0%,
-    66%,
+    78%,
     100% {
-      translate: var(--x) 0;
+      scale: 1 1;
     }
-    76%,
-    88% {
-      translate: var(--x) -22px;
+    84% {
+      scale: 1.05 0.9;
+    }
+    90% {
+      scale: 0.97 1.05;
+    }
+    95% {
+      scale: 1.01 0.99;
     }
   }
 }

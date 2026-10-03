@@ -56,7 +56,7 @@ export function WhoAmIScreen() {
           <div
             inert={match ? true : undefined}
             className={cn(
-              "mt-4 flex flex-wrap items-end gap-x-6 gap-y-5 transition-opacity duration-500 ease-soft",
+              "mt-2 flex flex-wrap items-end gap-x-6 gap-y-5 transition-opacity duration-500 ease-soft",
               match && "pointer-events-none select-none opacity-35 grayscale",
             )}
           >
