@@ -9,7 +9,7 @@ import { Logo } from "./logo";
  * Room a banner leaves at its top for the top bar, which floats over it.
  * Keep in step with the bar's height below.
  */
-export const UNDER_TOPBAR = "pt-[72px] sm:pt-[88px] sm:short:pt-[72px]";
+export const UNDER_TOPBAR = "pt-[60px] sm:pt-[72px] sm:short:pt-[60px]";
 
 /**
  * Page shell: header row and a centred column. `left={null}` drops the wordmark.

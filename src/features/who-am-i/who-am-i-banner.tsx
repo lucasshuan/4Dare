@@ -155,7 +155,7 @@ function HeldCard({
   return (
     <div
       className={cn(
-        "flex flex-col gap-[1.6cqh] rounded-[14%/11%] bg-surface p-[7%] shadow-card",
+        "flex flex-col gap-[2.1cqh] rounded-[14%/11%] bg-surface p-[7%] shadow-card",
         fill && "h-full",
       )}
     >
@@ -164,7 +164,7 @@ function HeldCard({
         color={color}
         className={cn("rounded-[12%]", fill ? "min-h-0 flex-1" : "aspect-4/5")}
       />
-      <span className="mx-[6%] h-[1.6cqh] w-2/3 shrink-0 rounded-pill bg-line" />
+      <span className="mx-[6%] h-[2.1cqh] w-2/3 shrink-0 rounded-pill bg-line" />
     </div>
   );
 }
@@ -286,13 +286,13 @@ export function WhoAmIBanner() {
 
       <motion.div
         style={{ x: frontX, y: frontY }}
-        className="relative mx-auto h-[clamp(230px,min(30vw,38vh),320px)] w-full max-w-[1040px] [container-type:size]"
+        className="relative mx-auto h-[clamp(180px,min(22vw,27vh),230px)] max-sm:h-[210px] w-full max-w-[1040px] [container-type:size]"
       >
         {/* the table everyone sits around */}
         <span className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-surface/45" />
 
         {/* the question, then the guess, then "Got it!" in its place */}
-        <div className="absolute inset-x-0 top-[6%] flex justify-center px-4">
+        <div className="absolute inset-x-0 top-[1%] flex justify-center px-4">
           <AnimatePresence mode="wait">
             {s.hit ? (
               <motion.div
@@ -327,12 +327,12 @@ export function WhoAmIBanner() {
             <div
               key={p.seat}
               className={cn(
-                "-translate-x-1/2 absolute bottom-[4%] flex flex-col items-center",
+                "-translate-x-1/2 absolute bottom-[3%] flex flex-col items-center",
                 p.place,
               )}
             >
               {/* grows upwards and wraps when long: it never pushes the card */}
-              <div className="-translate-x-1/2 absolute bottom-full left-1/2 mb-[2cqh] flex w-max max-w-[min(9.5rem,15cqw)] justify-center max-sm:max-w-[26cqw]">
+              <div className="-translate-x-1/2 absolute bottom-full left-1/2 mb-[2.6cqh] flex w-max max-w-[min(9.5rem,15cqw)] justify-center max-sm:max-w-[26cqw]">
                 <AnimatePresence>
                   {answer ? (
                     <motion.span key={`${s.ask}-${answer}`} {...pop}>
@@ -342,7 +342,7 @@ export function WhoAmIBanner() {
                 </AnimatePresence>
               </div>
               <motion.div
-                className="w-[25cqh]"
+                className="w-[33cqh]"
                 style={{ rotate: p.tilt }}
                 {...floating(i * 0.7)}
               >
@@ -351,12 +351,12 @@ export function WhoAmIBanner() {
               <motion.span
                 animate={s.hit && !reduced ? { y: [0, -8, 0] } : { y: 0 }}
                 transition={{ duration: 0.45, delay: 0.15 + i * 0.08 }}
-                className="-mt-[3cqh] block"
+                className="-mt-[4cqh] block"
               >
                 <Critter
                   seed={p.seed}
                   color={p.color}
-                  className="size-[13cqh] rounded-pill shadow-[0_0_0_3px_var(--sky-soft)]"
+                  className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--sky-soft)]"
                 />
               </motion.span>
             </div>
@@ -364,9 +364,9 @@ export function WhoAmIBanner() {
         })}
 
         {/* you: the "?" card, which flips when you get it */}
-        <div className="-translate-x-1/2 absolute bottom-[4%] left-1/2 flex flex-col items-center">
+        <div className="-translate-x-1/2 absolute bottom-[3%] left-1/2 flex flex-col items-center">
           <motion.div
-            className="relative w-[29cqh] sm:w-[30cqh]"
+            className="relative w-[38.5cqh] sm:w-[39.5cqh]"
             {...floating(0.4)}
           >
             <div className="perspective-[800px]">
@@ -375,7 +375,7 @@ export function WhoAmIBanner() {
                 animate={{ rotateY: s.hit ? 180 : 0 }}
                 transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-surface font-display font-extrabold text-[18cqh] text-sky shadow-pop backface-hidden">
+                <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-surface font-display font-extrabold text-[23.5cqh] text-sky shadow-pop backface-hidden">
                   <motion.span
                     animate={
                       reduced || s.ask !== "guess" || s.hit
@@ -399,7 +399,7 @@ export function WhoAmIBanner() {
                       // biome-ignore lint/suspicious/noArrayIndexKey: a fixed burst
                       key={i}
                       className={cn(
-                        "absolute top-1/2 left-1/2 size-[2.4cqh] rounded-pill",
+                        "absolute top-1/2 left-1/2 size-[3.2cqh] rounded-pill",
                         b.color,
                       )}
                       initial={{ x: 0, y: 0, opacity: 1, scale: 0.4 }}
@@ -423,7 +423,7 @@ export function WhoAmIBanner() {
           <Critter
             seed={YOU.seed}
             color={YOU.color}
-            className="-mt-[3cqh] size-[13cqh] rounded-pill shadow-[0_0_0_3px_var(--sky-soft),0_0_0_6px_var(--sky)]"
+            className="-mt-[4cqh] size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--sky-soft),0_0_0_6px_var(--sky)]"
           />
         </div>
       </motion.div>
