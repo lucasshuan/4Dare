@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { type Access, RoomsScreen } from "@/features/rooms/rooms-screen";
 import { isGameKey } from "@/game/games";
-import type { Lang } from "@/game/types";
+import { LANGS, type Lang } from "@/game/types";
 import { ROOMS } from "@/lib/routes";
 import { pageMetadata } from "@/server/seo";
 
@@ -22,7 +22,14 @@ export async function generateMetadata({
 const one = (v: string | string[] | undefined) =>
   typeof v === "string" ? v : undefined;
 
-/** /rooms?game=who-am-i&q=crew&access=private: every listed room; each filter is optional. */
+/** The `lang` param: "all", or languages separated by commas; anything else is the viewer's. */
+function parseLangs(raw: string | undefined, locale: Lang) {
+  if (raw === "all") return null;
+  const picked = LANGS.filter((l) => raw?.split(",").includes(l));
+  return picked.length ? picked : [locale];
+}
+
+/** /rooms?game=who-am-i&q=crew&access=private&lang=pt,ja: every listed room; each filter is optional. */
 export default async function Rooms({
   params,
   searchParams,
@@ -41,6 +48,7 @@ export default async function Rooms({
           access === "public" || access === "private"
             ? (access as Access)
             : "all",
+        langs: parseLangs(one(sp.lang), locale as Lang),
       }}
     />
   );

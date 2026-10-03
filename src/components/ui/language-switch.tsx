@@ -5,8 +5,10 @@ import { Check, ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { LANGS, type Lang } from "@/game/types";
 import { getPathname, usePathname } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
 
-function Flag({ lang }: { lang: Lang }) {
+/** A round flag for a language; `size-5` unless `className` says otherwise. */
+export function Flag({ lang, className }: { lang: Lang; className?: string }) {
   return (
     // biome-ignore lint/performance/noImgElement: tiny static svg flags
     <img
@@ -14,7 +16,10 @@ function Flag({ lang }: { lang: Lang }) {
       alt=""
       width={20}
       height={20}
-      className="size-5 shrink-0 rounded-pill shadow-[0_0_0_1px_var(--line)]"
+      className={cn(
+        "size-5 shrink-0 rounded-pill shadow-[0_0_0_1px_var(--line)]",
+        className,
+      )}
     />
   );
 }

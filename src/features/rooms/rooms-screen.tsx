@@ -6,15 +6,17 @@ import {
   ChevronDown,
   ChevronLeft,
   Globe,
+  Languages,
   Layers,
   Lock,
   Search,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
+import { Flag } from "@/components/ui/language-switch";
 import { Screen } from "@/components/ui/screen";
 import { GameThumb, useGameName } from "@/features/create/game-field";
 import { MatchGate } from "@/features/current-match/match-lock";
@@ -22,6 +24,7 @@ import { useCurrentMatch } from "@/features/data/use-current-match";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { DEFAULT_GAME, GAME_KEYS, type GameKey } from "@/game/games";
+import { LANGS, type Lang } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { ease, riseIn } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
@@ -36,6 +39,8 @@ export interface RoomFilters {
   /** The room's name as listed ("<host>'s room" when it has none); empty: no search. */
   q: string;
   access: Access;
+  /** The host's languages to show; null: every language. By default only the viewer's. */
+  langs: Lang[] | null;
 }
 
 /** Case- and accent-insensitive, so "joao" finds "João". */
@@ -46,19 +51,22 @@ const fold = (s: string) =>
     .toLowerCase()
     .trim();
 
-/** The filters as the link carries them: only what differs from "everything". */
-function toSearch({ game, q, access }: RoomFilters) {
+/** The filters as the link carries them: only what differs from the defaults. */
+function toSearch({ game, q, access, langs }: RoomFilters, locale: Lang) {
   const params = new URLSearchParams();
   if (game) params.set("game", game);
   if (q.trim()) params.set("q", q.trim());
   if (access !== "all") params.set("access", access);
+  if (!langs) params.set("lang", "all");
+  else if (langs.join() !== locale) params.set("lang", langs.join());
   const s = params.toString();
   return s ? `?${s}` : "";
 }
 
-/** /rooms: every listed room, filtered by game, a search and who can join. The filters live in the link. */
+/** /rooms: every listed room, filtered by game, a search, language and who can join. The filters live in the link. */
 export function RoomsScreen({ initial }: { initial: RoomFilters }) {
   const t = useTranslations("home.roomsPage");
+  const locale = useLocale() as Lang;
   const tr = useTranslations("home.rooms");
   const name = useDisplayName();
   const { rooms, isLoading } = usePublicRooms();
@@ -69,9 +77,9 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
 
   // A reload or a shared link opens the same filters.
   useEffect(() => {
-    const next = `${window.location.pathname}${toSearch(filters)}`;
+    const next = `${window.location.pathname}${toSearch(filters, locale)}`;
     window.history.replaceState(null, "", next);
-  }, [filters]);
+  }, [filters, locale]);
 
   const shown = useMemo(() => {
     const q = fold(filters.q);
@@ -81,6 +89,7 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
           (!filters.game || r.game === filters.game) &&
           (filters.access === "all" ||
             (filters.access === "private") === r.locked) &&
+          (!filters.langs || filters.langs.includes(r.host.lang)) &&
           (!q ||
             fold(r.name || tr("roomOf", { name: name(r.host) })).includes(q)),
       ),
@@ -90,7 +99,8 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
   const filtered = !!(
     filters.game ||
     filters.q.trim() ||
-    filters.access !== "all"
+    filters.access !== "all" ||
+    filters.langs
   );
 
   return (
@@ -167,7 +177,9 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
                 {filtered ? (
                   <button
                     type="button"
-                    onClick={() => set({ game: null, q: "", access: "all" })}
+                    onClick={() =>
+                      set({ game: null, q: "", access: "all", langs: null })
+                    }
                     className={buttonClass("secondary", "sm")}
                   >
                     {t("clearFilters")}
@@ -188,8 +200,9 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
   );
 }
 
-/** "all" stands for every game in the game select. */
+/** "all" stands for every game in the game select, and every language in the language one. */
 const ALL_GAMES = "all";
+const ALL_LANGS = "all";
 
 function Filters({
   filters,
@@ -257,6 +270,7 @@ function Filters({
           })),
         ]}
       />
+      <LangSelect value={filters.langs} onChange={(langs) => set({ langs })} />
       <FilterSelect
         label={t("access")}
         value={filters.access}
@@ -282,6 +296,14 @@ function Filters({
     </motion.div>
   );
 }
+
+/** The filter selects' parts, alike in every one. */
+const TRIGGER =
+  "flex h-13 min-w-0 flex-1 items-center gap-2.5 rounded-pill border-[1.5px] border-line-strong bg-canvas px-4 text-left max-sm:px-3.5 font-semibold text-sm transition-[border-color,box-shadow] duration-200 ease-soft hover:border-ink-muted data-popup-open:border-sky md:w-52 md:flex-none";
+const POPUP =
+  "min-w-[var(--anchor-width)] origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0";
+const ITEM =
+  "flex items-center gap-2.5 rounded-md py-2 pr-3 pl-2.5 font-semibold text-sm outline-none select-none data-highlighted:bg-sky-soft";
 
 interface FilterOption {
   value: string;
@@ -310,10 +332,7 @@ function FilterSelect({
         if (v) onChange(v);
       }}
     >
-      <Select.Trigger
-        aria-label={label}
-        className="flex h-13 min-w-0 flex-1 items-center gap-2.5 rounded-pill border-[1.5px] border-line-strong bg-canvas px-4 text-left max-sm:px-3.5 font-semibold text-sm transition-[border-color,box-shadow] duration-200 ease-soft hover:border-ink-muted data-popup-open:border-sky md:w-52 md:flex-none"
-      >
+      <Select.Trigger aria-label={label} className={TRIGGER}>
         <span className="flex shrink-0 text-ink-muted max-sm:hidden">
           {current.icon}
         </span>
@@ -331,15 +350,96 @@ function FilterSelect({
           alignItemWithTrigger={false}
           className="z-50 outline-none"
         >
-          <Select.Popup className="min-w-[var(--anchor-width)] origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+          <Select.Popup className={POPUP}>
             <Select.List>
               {options.map((o) => (
-                <Select.Item
-                  key={o.value}
-                  value={o.value}
-                  className="flex items-center gap-2.5 rounded-md py-2 pr-3 pl-2.5 font-semibold text-sm outline-none select-none data-highlighted:bg-sky-soft"
-                >
+                <Select.Item key={o.value} value={o.value} className={ITEM}>
                   <span className="flex shrink-0 text-ink-muted">{o.icon}</span>
+                  <Select.ItemText className="flex-1 whitespace-nowrap">
+                    {o.label}
+                  </Select.ItemText>
+                  <Select.ItemIndicator className="text-sky">
+                    <Check className="size-4" strokeWidth={2.25} />
+                  </Select.ItemIndicator>
+                </Select.Item>
+              ))}
+            </Select.List>
+          </Select.Popup>
+        </Select.Positioner>
+      </Select.Portal>
+    </Select.Root>
+  );
+}
+
+/**
+ * The host's languages, several at once. "All languages" clears the picks;
+ * dropping the last pick, or picking every language, comes back to it.
+ */
+function LangSelect({
+  value,
+  onChange,
+}: {
+  value: Lang[] | null;
+  onChange: (langs: Lang[] | null) => void;
+}) {
+  const t = useTranslations("home.roomsPage");
+  const tc = useTranslations("common");
+  const items = [
+    { value: ALL_LANGS, label: t("allLangs") },
+    ...LANGS.map((l) => ({ value: l, label: tc(`languages.${l}`) })),
+  ];
+  const picked: string[] = value ?? [ALL_LANGS];
+  return (
+    <Select.Root
+      multiple
+      items={items}
+      value={picked}
+      onValueChange={(next) => {
+        const langs = LANGS.filter((l) => next.includes(l));
+        const all =
+          (next.includes(ALL_LANGS) && !picked.includes(ALL_LANGS)) ||
+          langs.length === 0 ||
+          langs.length === LANGS.length;
+        onChange(all ? null : langs);
+      }}
+    >
+      <Select.Trigger aria-label={t("lang")} className={TRIGGER}>
+        <span className="flex shrink-0 text-ink-muted max-sm:hidden">
+          {value?.length === 1 ? (
+            <Flag lang={value[0]} className="size-4" />
+          ) : (
+            <Languages className="size-4" strokeWidth={1.75} />
+          )}
+        </span>
+        <Select.Value className="min-w-0 flex-1 truncate">
+          {() =>
+            value
+              ? value.map((l) => tc(`languages.${l}`)).join(", ")
+              : t("allLangs")
+          }
+        </Select.Value>
+        <Select.Icon className="text-ink-muted">
+          <ChevronDown className="size-4" strokeWidth={2} />
+        </Select.Icon>
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Positioner
+          sideOffset={6}
+          align="end"
+          alignItemWithTrigger={false}
+          className="z-50 outline-none"
+        >
+          <Select.Popup className={POPUP}>
+            <Select.List>
+              {items.map((o) => (
+                <Select.Item key={o.value} value={o.value} className={ITEM}>
+                  <span className="flex shrink-0 text-ink-muted">
+                    {o.value === ALL_LANGS ? (
+                      <Languages className="size-4" strokeWidth={1.75} />
+                    ) : (
+                      <Flag lang={o.value as Lang} className="size-4" />
+                    )}
+                  </span>
                   <Select.ItemText className="flex-1 whitespace-nowrap">
                     {o.label}
                   </Select.ItemText>

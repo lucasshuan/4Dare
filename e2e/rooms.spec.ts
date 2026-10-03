@@ -73,3 +73,33 @@ test("one room at a time: a second tab's room takes the seat, and the first tab 
   await expect(moved(tab)).toBeVisible();
   expect((await viewOf(me, first)).players).toHaveLength(2);
 });
+
+test("rooms are filtered by the host's language: yours by default, more on request", async ({
+  browser,
+}) => {
+  const english = await newPlayer(browser);
+  const enRoom = await createRoom(english);
+  const brazilian = await newPlayer(browser);
+  await brazilian.goto("/pt/new?game=who-am-i");
+  await brazilian.waitForURL(/\/r\/[A-Z0-9]{5}$/);
+  const ptRoom = brazilian.url().split("/").pop() as string;
+
+  const viewer = await newPlayer(browser);
+  await viewer.goto("/en/rooms");
+  const row = (code: string) => viewer.locator(`a[href$="/r/${code}"]`);
+  await expect(row(enRoom)).toBeVisible();
+  await expect(row(ptRoom)).toHaveCount(0);
+
+  await viewer.getByRole("combobox", { name: "Room language" }).click();
+  await viewer.getByRole("option", { name: "Português" }).click();
+  await viewer.keyboard.press("Escape");
+  await expect(viewer).toHaveURL(/lang=en%2Cpt$/);
+  await expect(row(ptRoom)).toBeVisible();
+  await expect(row(enRoom)).toBeVisible();
+
+  // a full room says so with an icon too
+  await viewer.getByRole("combobox", { name: "Room language" }).click();
+  await viewer.getByRole("option", { name: "All languages" }).click();
+  await viewer.keyboard.press("Escape");
+  await expect(viewer).toHaveURL(/lang=all$/);
+});

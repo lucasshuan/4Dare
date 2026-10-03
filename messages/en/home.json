@@ -119,6 +119,8 @@
     "clearSearch": "Clear search",
     "game": "Game",
     "allGames": "All games",
+    "lang": "Room language",
+    "allLangs": "All languages",
     "access": "Who can join",
     "accessOptions": {
       "all": "All rooms",

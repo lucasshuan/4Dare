@@ -119,6 +119,8 @@
     "clearSearch": "Limpar busca",
     "game": "Jogo",
     "allGames": "Todos os jogos",
+    "lang": "Idioma da sala",
+    "allLangs": "Todos os idiomas",
     "access": "Quem pode entrar",
     "accessOptions": {
       "all": "Todas as salas",
