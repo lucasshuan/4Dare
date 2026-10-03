@@ -20,10 +20,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LanguageSwitch } from "@/components/ui/language-switch";
 import { useWithNames } from "@/components/ui/player-name";
 import { Screen } from "@/components/ui/screen";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Timer } from "@/components/ui/timer";
 import { useToast } from "@/components/ui/toast";
 import { GameThumb, useGameName } from "@/features/create/game-field";
@@ -31,6 +29,7 @@ import { saveSetup } from "@/features/create/last-setup";
 import { backClass, RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
+import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
@@ -47,6 +46,9 @@ import {
   updateSettings,
 } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
+
+const titleClass =
+  "max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]";
 
 /** Only what the host can change (the server rejects anything else). */
 const editable = ({
@@ -117,17 +119,19 @@ export function LobbyScreen() {
     }
   };
 
-  const right = (
-    <>
-      <LanguageSwitch />
-      <ThemeToggle />
-    </>
-  );
+  // after a match the room is not new any more
+  const greeting = me.isHost
+    ? t(view.round > 0 ? "titleHostAgain" : "titleHost")
+    : withNames((n) =>
+        t(view.round > 0 ? "titleGuestAgain" : "titleGuest", {
+          name: host ? n(host) : "",
+        }),
+      );
 
   // The host edits the room on the same screen that creates one.
   if (editing) {
     return (
-      <Screen left={null} right={right}>
+      <Screen left={<HubBrand />} right={<HubActions />}>
         <motion.div {...riseIn}>
           <RoomSetup
             back={
@@ -161,25 +165,23 @@ export function LobbyScreen() {
   }
 
   return (
-    <Screen left={null} right={right}>
+    <Screen left={<HubBrand />} right={<HubActions />}>
       <div className="flex flex-wrap items-start gap-10 lg:gap-16">
         <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
           <div className="flex flex-col gap-3">
+            {/* a named room leads with its name; the greeting drops to a line under it */}
             {roomName ? (
-              <span className="self-start rounded-pill bg-sunken px-3 py-1 font-semibold text-sm">
-                {roomName}
-              </span>
-            ) : null}
-            <h1 className="max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]">
-              {/* after a match the room is not new any more */}
-              {me.isHost
-                ? t(view.round > 0 ? "titleHostAgain" : "titleHost")
-                : withNames((n) =>
-                    t(view.round > 0 ? "titleGuestAgain" : "titleGuest", {
-                      name: host ? n(host) : "",
-                    }),
-                  )}
-            </h1>
+              <>
+                <h1 className={cn(titleClass, "wrap-break-word")}>
+                  {roomName}
+                </h1>
+                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
+                  {greeting}
+                </p>
+              </>
+            ) : (
+              <h1 className={titleClass}>{greeting}</h1>
+            )}
             <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
               {me.isHost
                 ? t(view.round > 0 ? "subtitleHostAgain" : "subtitleHost")
