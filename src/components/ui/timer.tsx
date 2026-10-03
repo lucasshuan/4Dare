@@ -4,11 +4,13 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { formatClock, isLowClock } from "@/lib/names";
+import { useLoopSound } from "@/lib/sound";
 
 /**
  * The step clock. While a reveal is on screen (now < stepStartsAt) it recharges:
  * the bar refills and the digits count back up to the full step, landing exactly
- * when the step starts. Then it counts down, turning to the "no" colour near the end.
+ * when the step starts. Then it counts down, turning to the "no" colour near the end;
+ * with `tick`, a clock ticks in a loop from then until it runs out.
  */
 export function Timer({
   deadline,
@@ -16,6 +18,7 @@ export function Timer({
   rechargeFrom,
   offset,
   compact,
+  tick,
 }: {
   deadline: number | null;
   stepStartsAt: number | null;
@@ -23,9 +26,19 @@ export function Timer({
   rechargeFrom?: number | null;
   offset: number;
   compact?: boolean;
+  tick?: boolean;
 }) {
   const t = useTranslations("common");
   const now = useServerClock(offset, 100);
+  useLoopSound(
+    "tick",
+    !!tick &&
+      deadline !== null &&
+      stepStartsAt !== null &&
+      now >= stepStartsAt &&
+      now < deadline &&
+      isLowClock((deadline - now) / 1000, deadline - stepStartsAt),
+  );
   if (deadline === null || stepStartsAt === null) return null;
   const total = deadline - stepStartsAt;
   const recharging = now < stepStartsAt;

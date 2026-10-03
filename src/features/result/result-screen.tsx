@@ -21,6 +21,7 @@ import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
+import { playSound } from "@/lib/sound";
 import { backToLobby, leaveRoom } from "@/server/actions";
 
 const PLINTH = { 1: 136, 2: 96, 3: 60 } as Record<number, number>;
@@ -100,7 +101,10 @@ export function ResultScreen() {
 
   useEffect(() => {
     if (!winner) return;
-    const id = window.setTimeout(() => fireConfetti(2000), 1200);
+    const id = window.setTimeout(() => {
+      fireConfetti(2000);
+      playSound("complete");
+    }, 1200);
     return () => window.clearTimeout(id);
   }, [winner]);
 

@@ -22,6 +22,7 @@ import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
 import { WHO_AM_I } from "@/lib/routes";
+import { playSound } from "@/lib/sound";
 import { joinRoom } from "@/server/actions";
 import { PasswordDialog } from "./password-dialog";
 import { RevealOverlay } from "./reveal-overlay";
@@ -101,9 +102,22 @@ export function RoomScreen({ code }: { code: string }) {
   );
 }
 
+const TURN_STEPS: Phase[] = ["asking", "answering", "guessing", "validating"];
+
+/** A pop on every step change of a turn: question sent, answered, guess sent, guess answered. */
+function useStepSound(phase: Phase) {
+  const last = useRef(phase);
+  useEffect(() => {
+    if (phase !== last.current && TURN_STEPS.includes(last.current))
+      playSound("step");
+    last.current = phase;
+  }, [phase]);
+}
+
 function PhaseScreens() {
   const { view, offset } = useRoomContext();
   useRoomTab();
+  useStepSound(view.phase);
   const now = useServerClock(offset, 250);
   // A hit that ends the match keeps its reveal; the results wait until it is over.
   const revealing = view.reveal !== null && now < view.reveal.until;
