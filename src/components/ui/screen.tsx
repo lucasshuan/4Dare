@@ -9,7 +9,7 @@ import { Logo } from "./logo";
  * Room a banner leaves at its top for the top bar, which floats over it.
  * Keep in step with the bar's height below.
  */
-export const UNDER_TOPBAR = "pt-[68px] sm:pt-[84px]";
+export const UNDER_TOPBAR = "pt-[76px] sm:pt-[92px] sm:short:pt-[76px]";
 
 /**
  * Page shell: header row and a centred column. `left={null}` drops the wordmark.
@@ -48,7 +48,9 @@ export function Screen({
       <div className="flex min-h-dvh flex-col">
         <TopBar>{bar}</TopBar>
         {/* the banner slides up under the bar */}
-        <div className="-mt-[68px] sm:-mt-[84px]">{banner}</div>
+        <div className="-mt-[76px] sm:-mt-[92px] sm:short:-mt-[76px]">
+          {banner}
+        </div>
         <main
           className={cn(
             "mx-auto w-full max-w-[1120px] flex-1 px-4 pt-6 pb-8 sm:px-8 sm:pt-8 sm:pb-12 sm:short:pb-6",
@@ -77,7 +79,11 @@ export function Screen({
   );
 }
 
-/** The bar over a banner: sticky, clear at the top, frosted once the page scrolls under it. */
+/**
+ * The bar over a banner: sticky, clear at the top, frosted once the page
+ * scrolls under it. Its top padding matches the plain header's, so the bar
+ * sits at the same height on every page; the bottom mirrors it.
+ */
 function TopBar({ children }: { children: ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -89,13 +95,13 @@ function TopBar({ children }: { children: ReactNode }) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 h-[68px] border-b px-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft sm:h-[84px] sm:px-8",
+        "sticky top-0 z-30 h-[76px] border-b px-4 pt-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft sm:h-[92px] sm:px-8 sm:pt-6 sm:short:h-[76px] sm:short:pt-4",
         scrolled
           ? "border-line/70 bg-canvas/70 backdrop-blur-xl backdrop-saturate-150"
           : "border-transparent bg-transparent",
       )}
     >
-      <div className="mx-auto flex h-full w-full max-w-[1120px] items-center justify-between gap-3">
+      <div className="mx-auto flex w-full max-w-[1120px] items-center justify-between gap-3">
         {children}
       </div>
     </header>
