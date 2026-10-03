@@ -104,8 +104,8 @@ function TopBar({ children }: { children: ReactNode }) {
 
 export function Wordmark() {
   return (
-    <Link href="/" className="group shrink-0 rounded-sm">
-      {/* smaller on phones, so it fits next to the language, theme and user menu */}
+    <Link href="/" className="group min-w-0 rounded-sm">
+      {/* smaller on phones, and shrinks further so it never runs under the language, theme and user menu */}
       <Logo className="h-9 w-auto max-sm:h-7" />
     </Link>
   );
