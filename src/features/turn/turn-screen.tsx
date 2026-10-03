@@ -21,7 +21,6 @@ import {
   withQuestionMark,
 } from "@/game/question";
 import {
-  ANSWERS,
   type AnswerValue,
   type Lang,
   MAX_GUESS,
@@ -76,14 +75,18 @@ function useMode(): Mode {
   }
 }
 
-const TINY_ORDER: Record<AnswerValue, string> = {
-  yes: "sm:tiny:order-1",
-  probably_yes: "sm:tiny:order-2",
-  unknown: "sm:tiny:order-3",
-  no: "sm:tiny:order-4",
-  probably_no: "sm:tiny:order-5",
-  irrelevant: "sm:tiny:order-6",
-};
+/**
+ * The answers by colour: yes, no, then the grey ones. Phones get one colour
+ * per row; wider screens one per column (the grid fills column by column).
+ */
+const ANSWER_GRID: AnswerValue[] = [
+  "yes",
+  "probably_yes",
+  "no",
+  "probably_no",
+  "unknown",
+  "irrelevant",
+];
 
 /** Text parts joined by " · ", skipping the empty ones; null when none is left. */
 function joinDot(parts: ReactNode[]): ReactNode {
@@ -401,13 +404,11 @@ function Answer() {
         initial="hidden"
         animate="shown"
         variants={{ shown: { transition: { staggerChildren: 0.04 } } }}
-        className="grid grid-cols-2 gap-2 sm:tiny:grid-cols-3"
+        className="grid grid-cols-2 gap-2 sm:grid-flow-col sm:grid-cols-3 sm:grid-rows-2"
       >
-        {ANSWERS.map((a) => (
+        {ANSWER_GRID.map((a) => (
           <motion.div
             key={a}
-            // three columns on very short windows: the yes side, then the no side
-            className={TINY_ORDER[a]}
             variants={{
               hidden: { opacity: 0, y: 8 },
               shown: { opacity: 1, y: 0 },
@@ -417,7 +418,8 @@ function Answer() {
               value={a}
               pressed={value === a}
               onClick={() => setValue(a)}
-              className="w-full"
+              // phones: a little smaller, so "Probably yes" stays on one line
+              className="w-full whitespace-nowrap max-sm:gap-1.5 max-sm:px-3 max-sm:text-sm max-[380px]:px-2.5 max-[380px]:text-[13px]"
             />
           </motion.div>
         ))}
