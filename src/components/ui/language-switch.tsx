@@ -19,7 +19,10 @@ function Flag({ lang }: { lang: Lang }) {
   );
 }
 
-/** A select with flags and language names; keeps you on the same page. Only on home and lobby. */
+/**
+ * A select with flags and language names; keeps you on the same page. Only on
+ * home and lobby. White in the light theme, like the theme toggle next to it.
+ */
 export function LanguageSwitch() {
   const t = useTranslations("common");
   const locale = useLocale() as Lang;
@@ -42,7 +45,7 @@ export function LanguageSwitch() {
     >
       <Select.Trigger
         aria-label={t("language")}
-        className="inline-flex h-11 items-center gap-2 rounded-pill bg-sunken pr-3 pl-2.5 font-semibold text-sm transition-colors duration-200 ease-soft hover:bg-line data-popup-open:bg-line"
+        className="inline-flex h-11 items-center gap-2 rounded-pill bg-surface pr-3 pl-2.5 font-semibold text-sm transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line"
       >
         <Flag lang={locale} />
         <Select.Value className="max-sm:sr-only">

@@ -7,7 +7,11 @@ import { useEffect, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { cn } from "@/lib/cn";
 
-/** Light / dark. Only on home and lobby, next to the language switch. */
+/**
+ * Light / dark. Only on home and lobby, next to the language switch. In the
+ * light theme the track is white and the chosen option dark, so it stands out
+ * on tinted pages too, as it does in the dark theme.
+ */
 export function ThemeToggle() {
   const t = useTranslations("common.theme");
   const { resolvedTheme, setTheme } = useTheme();
@@ -23,7 +27,7 @@ export function ThemeToggle() {
       className={cn(
         "inline-flex size-9 items-center justify-center rounded-pill transition-[background-color,color,box-shadow] duration-200 ease-soft",
         current === value
-          ? "bg-surface text-ink shadow-card"
+          ? "bg-ink text-on-ink shadow-card dark:bg-surface dark:text-ink"
           : "text-ink-muted hover:text-ink",
       )}
     >
@@ -31,7 +35,7 @@ export function ThemeToggle() {
     </button>
   );
   return (
-    <ChoiceGroup label={t("label")}>
+    <ChoiceGroup label={t("label")} className="bg-surface dark:bg-sunken">
       {item("light", Sun)}
       {item("dark", Moon)}
     </ChoiceGroup>
