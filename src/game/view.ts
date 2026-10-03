@@ -17,7 +17,7 @@ import {
   DEFAULT_SETTINGS,
   GameError,
   type HistoryEntryView,
-  LOBBY_SECONDS,
+  LOBBY_LISTED_MS,
   type Phase,
   type PickView,
   type PlayerId,
@@ -396,9 +396,7 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
     // Every page in the lobby closed: off the list at once. The seats wait out
     // GONE_GRACE_MS for a reload, but nobody should find the room meanwhile.
     if (s.players.every((p) => p.goneAt != null)) return null;
-    // Alone the lobby has no clock: list it only for as long as the clock would run.
-    const until = s.deadline ?? s.updatedAt + LOBBY_SECONDS * 1000;
-    if (now >= until) return null;
+    if (now - s.updatedAt >= LOBBY_LISTED_MS) return null;
     status = s.players.length < s.settings.seats ? "open" : "full";
   } else if (
     PLAYING_PHASES.has(s.phase) &&

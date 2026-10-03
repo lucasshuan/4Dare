@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
 import { RoomQr } from "@/components/ui/room-qr";
 import { Screen } from "@/components/ui/screen";
-import { Timer } from "@/components/ui/timer";
 import { useToast } from "@/components/ui/toast";
 import { GameThumb, useGameName } from "@/features/create/game-field";
 import { saveSetup } from "@/features/create/last-setup";
@@ -46,6 +45,7 @@ import {
   updateSettings,
 } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
+import { StartDialog } from "./start-dialog";
 
 const titleClass =
   "max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]";
@@ -84,7 +84,7 @@ export function LobbyScreen() {
   const withNames = useWithNames();
   const toast = useToast();
   const router = useRouter();
-  const { view, me, offset, code } = useRoomContext();
+  const { view, me, code } = useRoomContext();
   const { act, pending } = useRoomAction();
   const leaving = useAction();
   // "I'm ready" flips at once; the server confirms in the background.
@@ -101,6 +101,10 @@ export function LobbyScreen() {
   const host = view.players.find((p) => p.isHost);
   const empty = Math.max(0, view.settings.seats - view.players.length);
   const others = view.players.filter((p) => !p.isHost);
+  const waiting = others.filter((p) => !p.ready);
+  // asks first only when someone has not confirmed yet
+  const [confirming, setConfirming] = useState(false);
+  const start = () => act(() => startGame(code));
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<CreateRoomInput>(() =>
     editable(view.settings),
@@ -308,17 +312,6 @@ export function LobbyScreen() {
         </section>
 
         <aside className="flex w-full flex-col gap-5 rounded-lg bg-surface p-6 lg:max-w-[416px] lg:flex-[1_1_360px]">
-          {/* Alone in the room there is no clock: it starts when someone joins. */}
-          {view.deadline !== null ? (
-            <div className="flex items-center justify-between gap-4">
-              <span className="font-semibold text-sm">{t("startsIn")}</span>
-              <Timer
-                deadline={view.deadline}
-                stepStartsAt={view.stepStartsAt}
-                offset={offset}
-              />
-            </div>
-          ) : null}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <GameThumb game={game} size="sm" />
@@ -385,10 +378,17 @@ export function LobbyScreen() {
                 size="lg"
                 className="w-full"
                 disabled={!view.canStart || pending}
-                onClick={() => act(() => startGame(code))}
+                onClick={() => (waiting.length ? setConfirming(true) : start())}
               >
                 {t("start")}
               </Button>
+              <StartDialog
+                open={confirming && view.canStart}
+                onClose={() => setConfirming(false)}
+                waiting={waiting}
+                pending={pending}
+                onStart={start}
+              />
               <p className="text-center font-medium text-[13px] text-ink-muted">
                 {view.canStart
                   ? t("startHint", {

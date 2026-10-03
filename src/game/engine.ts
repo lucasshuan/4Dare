@@ -31,7 +31,6 @@ import {
   type GameEvent,
   HOST_THEME_SECONDS,
   type Identity,
-  LOBBY_SECONDS,
   MAX_GUESS,
   MAX_NOTE,
   MAX_QUESTION,
@@ -157,12 +156,6 @@ function cutAnswerClock(s: RoomState, ctx: Ctx) {
   const cut = stepMs(s, "answerSeconds") * ANSWER_CUT;
   const floor = ctx.now + ANSWER_CUT_FLOOR_MS;
   s.deadline = Math.min(s.deadline, Math.max(s.deadline - cut, floor));
-}
-
-/** The lobby clock (re)starts once there are two to play; alone, the room just waits. */
-function lobbyClock(s: RoomState, ctx: Ctx) {
-  if (s.players.length < 2) stopClock(s);
-  else startStep(s, ctx, LOBBY_SECONDS * 1000);
 }
 
 function guardStep(s: RoomState, ctx: Ctx) {
@@ -602,7 +595,7 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
       if (s.phase !== "finished") fail("wrong_phase");
-      return backToLobby(s, ctx);
+      return backToLobby(s);
     }
     case "TIMEOUT":
       return timeout(s, e, ctx);
@@ -677,7 +670,6 @@ function join(
     strikes: 0,
     away: false,
   });
-  lobbyClock(s, ctx);
 }
 
 /** When the host is gone (or away mid-match), the room goes to whoever joined first. */
@@ -713,7 +705,7 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
       s.phase = "lobby";
       s.vote = null;
       s.ideas = [];
-      lobbyClock(s, ctx);
+      stopClock(s);
       return;
     }
     if (s.phase === "voting" && everyoneVoted(s)) closeVote(s, ctx);
@@ -834,7 +826,7 @@ function giveUp(s: RoomState, playerId: PlayerId, ctx: Ctx) {
  * everyone but the host marks "ready" again, and the lobby clock restarts.
  * The vote stays, so the next one avoids its themes.
  */
-function backToLobby(s: RoomState, ctx: Ctx) {
+function backToLobby(s: RoomState) {
   s.players = s.players.filter(isPresent);
   if (s.players.length === 0) {
     s.phase = "closed";
@@ -855,7 +847,7 @@ function backToLobby(s: RoomState, ctx: Ctx) {
   s.turnPlayerId = null;
   s.reveal = null;
   s.playStartedAt = null;
-  lobbyClock(s, ctx);
+  stopClock(s);
 }
 
 function timeout(
@@ -865,16 +857,15 @@ function timeout(
 ) {
   if (!isExpired(s, ctx.now)) fail("wrong_phase");
   switch (s.phase) {
-    case "lobby": {
-      if (s.players.length < 2) return stopClock(s);
-      return beginTheme(s, e.themes, ctx);
-    }
+    // only a room saved while lobbies still had a clock gets here
+    case "lobby":
+      return stopClock(s);
     case "theming":
       return beginVote(s, e.themes, ctx);
     case "voting":
       return closeVote(s, ctx);
     case "finished":
-      return backToLobby(s, ctx);
+      return backToLobby(s);
     case "picking": {
       const used = new Set(
         Object.values(s.assignments).flatMap((a) =>

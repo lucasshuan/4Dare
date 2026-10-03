@@ -5,6 +5,7 @@ import {
   newPlayer,
   pickAll,
   playToEnd,
+  startMatch,
   viewOf,
   voteAll,
 } from "./helpers";
@@ -19,7 +20,7 @@ test("two players play a whole match", async ({ browser }) => {
   await expect(host.getByRole("img", { name: /^ready$/i })).toBeVisible();
   // one browser, one seat (a guest signing in twice used to take two)
   expect((await viewOf(host, code)).players).toHaveLength(2);
-  await host.getByRole("button", { name: /start match/i }).click();
+  await startMatch(host);
   await voteAll([host, guest]);
   await pickAll([host, guest]);
 
@@ -39,10 +40,9 @@ test("two players play a whole match", async ({ browser }) => {
 
   // the host takes everyone back to the lobby for another match
   await host.getByRole("button", { name: /back to the lobby/i }).click();
-  await expect(
-    host.getByRole("heading", { name: /another round/i }),
-  ).toBeVisible();
-  await expect(guest.getByRole("heading", { name: /back in/i })).toBeVisible();
+  // a named room leads with its name; the greeting is the line under it
+  await expect(host.getByText(/another round/i)).toBeVisible();
+  await expect(guest.getByText(/back in/i)).toBeVisible();
   await expect(guest.getByRole("button", { name: /i'm ready/i })).toBeVisible();
 });
 
@@ -60,7 +60,7 @@ test("three players on phones, with a wrong guess checked by the picker", async 
   for (const page of guests) await joinRoom(page, code);
   expect((await viewOf(host, code)).players).toHaveLength(3);
 
-  await host.getByRole("button", { name: /start match/i }).click();
+  await startMatch(host);
   await voteAll(players);
   await pickAll(players);
   await playToEnd(players, code, { missFirst: true });
@@ -76,9 +76,7 @@ test("three players on phones, with a wrong guess checked by the picker", async 
 
   // nobody presses anything: the podium's clock takes everyone to the lobby
   for (const page of players)
-    await expect(
-      page.getByRole("heading", { name: /another round|back in/i }),
-    ).toBeVisible({
+    await expect(page.getByText(/another round|back in/i)).toBeVisible({
       timeout: 25_000,
     });
 });

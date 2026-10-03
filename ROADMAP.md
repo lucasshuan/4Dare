@@ -85,7 +85,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Create room: public or private, 2 to 4 seats, seconds per step (120 by default)
 - [x] Create room at `/new?game=who-am-i`: opens the room right away and goes into it
 - [x] Lobby: host edits the settings and starts; the others mark "I'm ready" (green ✓, red ✗)
-- [x] Starts on its own in 2 minutes or as soon as it's full; the clock only runs with 2 players or more
+- [x] ~~Starts on its own in 2 minutes~~: replaced, the host always starts (see below)
 - [x] When the host leaves, whoever joined first takes the room, in the lobby or mid-match
 - [x] Matches saved per player: character, who picked it, how it ended and how long it took
 - [x] A guest keeps their matches when signing in with Discord or Google (even into an account that already existed), and their seat when signing in from a room
@@ -147,3 +147,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] "Who am I?" banner about 100 px shorter: the question sits right under the top bar and right over the cards, which keep their size
 - [x] One loader for the whole site: a hand of "?" cards shuffling, centred in the window with what is going on under it (creating a room, opening it, the profile, a match elsewhere)
 - [x] Guests draw a new name and critter from the user menu (dice beside the name); it shows at once in every room they sit in, and an account's profile change does too; a room named after its host keeps its name
+- [x] The lobby has no clock: only the host starts the match. Starting while someone is not ready asks first, listing who is missing, live (it turns into "Everyone is ready!" if they confirm meanwhile)

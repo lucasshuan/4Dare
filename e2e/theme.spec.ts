@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { createRoom, editSettings, joinRoom, newPlayer } from "./helpers";
+import {
+  createRoom,
+  editSettings,
+  joinRoom,
+  newPlayer,
+  startMatch,
+} from "./helpers";
 
 test("the host types the theme, and the next room starts the same way", async ({
   browser,
@@ -16,7 +22,7 @@ test("the host types the theme, and the next room starts the same way", async ({
   const code = await createRoom(host);
   await expect(host.getByText(/the host types the theme/i)).toBeVisible();
   await joinRoom(guest, code);
-  await host.getByRole("button", { name: /start match/i }).click();
+  await startMatch(host);
 
   await expect(
     guest.getByRole("heading", { name: /is choosing the theme/i }),
@@ -52,7 +58,7 @@ test("the vote only offers themes from the sets turned on", async ({
     await host.getByRole("button", { name: /^sports$/i }).click();
   });
   await joinRoom(guest, code);
-  await host.getByRole("button", { name: /start match/i }).click();
+  await startMatch(host);
 
   const themes = guest
     .getByRole("group", { name: /vote for the theme/i })

@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { createRoom, joinRoom, newPlayer } from "./helpers";
+import { createRoom, joinRoom, newPlayer, startMatch } from "./helpers";
 
 /** Pretends the player switched to another tab (or came back) and tells the page. */
 async function setAway(page: Page, away: boolean) {
@@ -32,17 +32,16 @@ test("the tab title follows the page and its clock; the icon calls you back", as
   await host.goto("/en/who-am-i");
   await expect(host).toHaveTitle("Who am I? Play online with friends · 4Dare");
 
-  // alone there is no clock; once someone joins, it counts down in the title
+  // the lobby has no clock, alone or not: no countdown in the title
   const code = await createRoom(host);
-  await expect(host).toHaveTitle(`Lobby · ${code} · 4Dare`);
+  // a room is named after its host, and the title says so
+  await expect(host).toHaveTitle(/^Lobby · .+'s room · 4Dare$/);
   await joinRoom(guest, code);
-  await expect(host).toHaveTitle(
-    new RegExp(`^\\d:\\d\\d · Lobby · ${code} · 4Dare$`),
-  );
+  await expect(host).toHaveTitle(/^Lobby · .+'s room · 4Dare$/);
 
   // the guest wanders off; the match starts and the theme vote waits on them
   await setAway(guest, true);
-  await host.getByRole("button", { name: /start match/i }).click();
+  await startMatch(host);
   await expect(guest).toHaveTitle(/^\d:\d\d · Vote for a theme! · 4Dare$/);
   await expect
     .poll(async () =>

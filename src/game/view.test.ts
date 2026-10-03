@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isCloseMatch, normalizeName } from "./match";
 import { Game, THEMES } from "./test-utils";
-import { GameError, LOBBY_SECONDS } from "./types";
+import { GameError, LOBBY_LISTED_MS } from "./types";
 import { toPublicRoom, toView } from "./view";
 
 function started(n: number, seed = 3) {
@@ -179,11 +179,11 @@ describe("what the view says", () => {
     expect(toPublicRoom(h.state, h.now)?.status).toBe("playing");
     // a match left alone for long is not advertised
     expect(toPublicRoom(h.state, h.now + 21 * 60_000)).toBeNull();
-    // alone, the lobby has no clock and drops off the list after a while
-    const t = new Game(1);
+    // a lobby nobody changes for long drops off the list (its pages may have died)
+    const t = new Game(2, 1, { seats: 3 });
     expect(t.state.deadline).toBeNull();
-    expect(toPublicRoom(t.state, t.now)?.status).toBe("open");
-    expect(toPublicRoom(t.state, t.now + LOBBY_SECONDS * 1000)).toBeNull();
+    expect(toPublicRoom(t.state, t.now + 5 * 60_000)?.status).toBe("open");
+    expect(toPublicRoom(t.state, t.now + LOBBY_LISTED_MS)).toBeNull();
   });
 
   it("a lobby whose every page closed leaves the list at once, and a reload brings it back", () => {

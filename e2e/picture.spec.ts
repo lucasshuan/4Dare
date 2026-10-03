@@ -1,5 +1,12 @@
 import { expect, type Page, test } from "@playwright/test";
-import { createRoom, joinRoom, newPlayer, viewOf, voteAll } from "./helpers";
+import {
+  createRoom,
+  joinRoom,
+  newPlayer,
+  startMatch,
+  viewOf,
+  voteAll,
+} from "./helpers";
 
 /** A small picture drawn in the page, as the bytes of `type`. */
 async function drawPicture(page: Page, type: string) {
@@ -38,7 +45,7 @@ test("a picture pasted or picked right before saving goes with the character", a
   const guest = await newPlayer(browser);
   const code = await createRoom(host);
   await joinRoom(guest, code);
-  await host.getByRole("button", { name: /start match/i }).click();
+  await startMatch(host);
   await voteAll([host, guest]);
 
   // pasted (as copied from a web page), then saved at once

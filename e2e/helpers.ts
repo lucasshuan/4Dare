@@ -35,6 +35,15 @@ export async function joinRoom(page: Page, code: string) {
   await button(page, /i'm ready/i).click();
 }
 
+/**
+ * The host starts once the lobby shows everyone ready, so the "start
+ * anyway?" question never comes up.
+ */
+export async function startMatch(host: Page) {
+  await expect(host.getByText(/^(\d+) of \1 (is|are) ready\.$/)).toBeVisible();
+  await button(host, /start match/i).click();
+}
+
 /** The room as this player is allowed to see it (same API the UI uses). */
 export async function viewOf(page: Page, code: string): Promise<RoomView> {
   const res = await page.request.get(`/api/rooms/${code}`);

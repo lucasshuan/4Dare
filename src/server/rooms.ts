@@ -180,12 +180,6 @@ export async function applyDueTimeouts(code: string) {
     try {
       stored = await dispatch(code, async (state) => {
         if (!isExpired(state, Date.now())) throw new GameError("wrong_phase");
-        if (state.phase === "lobby") {
-          return {
-            type: "TIMEOUT",
-            themes: await roundThemes(state, [], true),
-          };
-        }
         if (state.phase === "theming") {
           // The host never typed it: everyone votes, on themes from every set.
           return {

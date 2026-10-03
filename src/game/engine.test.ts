@@ -8,7 +8,6 @@ import {
   GameError,
   GONE_GRACE_MS,
   HOST_THEME_SECONDS,
-  LOBBY_SECONDS,
   PICK_SECONDS,
   RESULT_SECONDS,
   REVEAL_TIMING,
@@ -32,7 +31,7 @@ const ASK = DEFAULT_SETTINGS.askSeconds * 1000;
 const GUESS = DEFAULT_SETTINGS.guessSeconds * 1000;
 
 describe("lobby", () => {
-  it("creates a room with the host seated and no clock until someone joins", () => {
+  it("creates a room with the host seated and no clock, even once others join", () => {
     const g = new Game(1);
     const s = g.state;
     expect(s.phase).toBe("lobby");
@@ -42,8 +41,8 @@ describe("lobby", () => {
     expect(s.stepStartsAt).toBeNull();
     expect(s.reveal).toBeNull();
     g.do({ type: "JOIN", player: ident("p2") });
-    expect(g.state.deadline).toBe(g.now + LOBBY_SECONDS * 1000);
-    expect(g.state.stepStartsAt).toBe(g.now);
+    expect(g.state.deadline).toBeNull();
+    expect(g.state.stepStartsAt).toBeNull();
   });
 
   it("rejects invalid settings", () => {
@@ -72,11 +71,10 @@ describe("lobby", () => {
     }
   });
 
-  it("seats players up to the limit and restarts the lobby clock", () => {
+  it("seats players up to the limit", () => {
     const g = new Game(1, 1, { seats: 2 });
     g.now += 5000;
     g.do({ type: "JOIN", player: ident("p2") });
-    expect(g.state.deadline).toBe(g.now + LOBBY_SECONDS * 1000);
     expect(g.state.players[1].ready).toBe(false);
     expect(code(() => g.do({ type: "JOIN", player: ident("p3") }))).toBe(
       "room_full",
@@ -193,21 +191,23 @@ describe("lobby", () => {
     );
   });
 
-  it("the lobby clock starts the match with 2+ players", () => {
-    const g = new Game(2);
+  it("only the host starts the match: a lobby never times out", () => {
+    const g = new Game(4);
+    expect(g.state.deadline).toBeNull();
     expect(code(() => g.do({ type: "TIMEOUT", themes: THEMES }))).toBe(
       "wrong_phase",
     );
-    expect(code(() => g.timeout())).toBe("invalid_input");
-    g.timeout({ themes: THEMES });
-    expect(g.state.phase).toBe("voting");
+    // a room saved while lobbies had a clock just drops it
+    g.state.deadline = g.now;
+    g.do({ type: "TIMEOUT", themes: THEMES });
+    expect(g.state.phase).toBe("lobby");
+    expect(g.state.deadline).toBeNull();
   });
 
   it("the room goes to whoever joined first", () => {
     const g = new Game(3);
     g.do({ type: "LEAVE", playerId: "p1" });
     expect(g.state.hostId).toBe("p2");
-    expect(g.state.deadline).not.toBeNull();
   });
 });
 
@@ -363,9 +363,9 @@ describe("the host types the theme", () => {
     expect(pair.state.phase).toBe("lobby");
   });
 
-  it("the lobby clock and the next match go to the host's typing too", () => {
+  it("the match and the next one go to the host's typing", () => {
     const g = new Game(2, 1, { themeMode: "host" });
-    g.timeout({ themes: [] });
+    g.do({ type: "START", playerId: "p1", themes: [] });
     expect(g.state.phase).toBe("theming");
     g.do({ type: "SET_THEME", playerId: "p1", text: "Pirates" });
     g.skipReveal();
@@ -954,7 +954,7 @@ describe("whole matches", () => {
     );
     g.do({ type: "BACK_TO_LOBBY", playerId: s.hostId });
     expect(g.state.phase).toBe("lobby");
-    expect(g.state.deadline).toBe(g.now + LOBBY_SECONDS * 1000);
+    expect(g.state.deadline).toBeNull();
     expect(g.state.players.map((p) => p.ready)).toEqual([
       true,
       false,

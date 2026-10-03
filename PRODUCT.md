@@ -4,7 +4,7 @@
 
 ## How to play
 
-1. Someone creates a room (public or private) and shares the link or the code.
+1. Someone creates a room (public or private) and shares the link or the code. Players mark themselves ready; the host starts the match when they like (if someone is not ready yet, the host is asked first).
 2. Everyone votes on one of three themes, like "Superheroes", drawn from the theme sets the host turned on (movies, anime, sports...). Or the host just types the theme.
 3. Each player picks a character for another player. You see everyone's card but yours.
 4. On your turn, you ask a yes-or-no question. Everyone answers: Yes, Probably, Don't know, Probably not, No or Doesn't matter, with a comment if they want.

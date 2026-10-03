@@ -106,8 +106,12 @@ export const PICK_SECONDS = 120;
 export const ANSWER_CUT = 0.2;
 /** ...but whoever is left keeps at least this long (ms). */
 export const ANSWER_CUT_FLOOR_MS = 10_000;
-/** The lobby always waits 2 minutes, whatever the step time is. */
-export const LOBBY_SECONDS = 120;
+/**
+ * A lobby has no clock: the match starts when the host starts it. One nobody
+ * changed in this long leaves the room list (its pages may have died without
+ * saying so).
+ */
+export const LOBBY_LISTED_MS = 15 * 60_000;
 /**
  * How long a closed page counts as a reload. After that a lobby lets the
  * player go, and a match whose players have all closed their pages ends.
