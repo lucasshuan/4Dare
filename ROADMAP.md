@@ -148,3 +148,6 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] One loader for the whole site: a hand of "?" cards shuffling, centred in the window with what is going on under it (creating a room, opening it, the profile, a match elsewhere)
 - [x] Guests draw a new name and critter from the user menu (dice beside the name); it shows at once in every room they sit in, and an account's profile change does too; a room named after its host keeps its name
 - [x] The lobby has no clock: only the host starts the match. Starting while someone is not ready asks first, listing who is missing, live (it turns into "Everyone is ready!" if they confirm meanwhile)
+- [x] Tab titles name the room ("Bia's room" when it has no name), never its code; the lobby's big title is always the room's name, the greeting goes under it
+- [x] One room at a time, guest or account: joining or creating a room leaves your other lobby; a match still going blocks other rooms; a tab that lost its seat to another room says where it went and can take it back
+- [x] Signing in from anywhere hands every guest seat to the account, so a match carries on
