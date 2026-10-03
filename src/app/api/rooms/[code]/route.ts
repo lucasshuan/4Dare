@@ -1,6 +1,7 @@
+import { GameError } from "@/game/types";
 import { toView } from "@/game/view";
 import { getBackend } from "@/server/backend";
-import { applyDueTimeouts, normalizeCode } from "@/server/rooms";
+import { applyDueTimeouts, dispatch, normalizeCode } from "@/server/rooms";
 
 const noStore = { "Cache-Control": "no-store" };
 
@@ -27,14 +28,23 @@ export async function GET(
       { status: 404, headers: noStore },
     );
   }
-  if (!stored.state.players.some((p) => p.id === me.id)) {
+  const mine = stored.state.players.find((p) => p.id === me.id);
+  if (!mine) {
     return Response.json(
       { error: "not_member" },
       { status: 403, headers: noStore },
     );
   }
-  return Response.json(
-    toView(stored.state, stored.version, me.id, Date.now()),
-    { headers: noStore },
-  );
+  // Their page is open again (a reload, or back after a dropped connection).
+  let room = stored;
+  if (mine.goneAt != null) {
+    try {
+      room = await dispatch(code, () => ({ type: "BACK", playerId: me.id }));
+    } catch (e) {
+      if (!(e instanceof GameError)) throw e;
+    }
+  }
+  return Response.json(toView(room.state, room.version, me.id, Date.now()), {
+    headers: noStore,
+  });
 }

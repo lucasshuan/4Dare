@@ -82,6 +82,11 @@ export const STEP_SECONDS_MIN = 30;
 export const STEP_SECONDS_MAX = 300;
 /** The lobby always waits 2 minutes, whatever the step time is. */
 export const LOBBY_SECONDS = 120;
+/**
+ * How long a closed page counts as a reload. After that a lobby lets the
+ * player go, and a match whose players have all closed their pages ends.
+ */
+export const GONE_GRACE_MS = 5000;
 /** The podium stays this long; then the room goes back to the lobby on its own (the host can go sooner). */
 export const RESULT_SECONDS = 15;
 /** Themes offered in the vote before each match, and how long the vote lasts. */
@@ -148,6 +153,8 @@ export interface RoomPlayer extends Identity {
   strikes: number;
   /** Left the match (or struck out). Never asked to act again; answers default to "unknown". */
   away: boolean;
+  /** When their page closed (tab or window), until they show up again. Absent in older rooms. */
+  goneAt?: number | null;
 }
 
 /** Keyed by the player who must discover the character. */
@@ -258,6 +265,12 @@ export interface RoomState {
 export type GameEvent =
   | { type: "JOIN"; player: Identity; password?: string }
   | { type: "LEAVE"; playerId: PlayerId }
+  /** The player's page closed; they may just be reloading. */
+  | { type: "GONE"; playerId: PlayerId }
+  /** The player's page is open again. */
+  | { type: "BACK"; playerId: PlayerId }
+  /** Settles players whose page has been closed for longer than GONE_GRACE_MS. */
+  | { type: "SWEEP" }
   | { type: "SET_READY"; playerId: PlayerId; ready: boolean }
   | {
       type: "UPDATE_SETTINGS";

@@ -1,5 +1,6 @@
 import "server-only";
 import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
+import { presenceDue } from "@/game/helpers";
 import { matchRecord } from "@/game/record";
 import {
   type Character,
@@ -69,7 +70,11 @@ export async function dispatch(
       if (next.phase === "finished" && stored.state.phase !== "finished") {
         saveMatch(next);
       }
-      if (next.phase === "lobby" || stored.state.phase === "lobby") {
+      if (
+        next.phase === "lobby" ||
+        next.phase === "closed" ||
+        stored.state.phase === "lobby"
+      ) {
         background(notify.lobbyChanged);
       }
       return { state: next, version: stored.version + 1 };
@@ -157,6 +162,15 @@ async function fallbackCharacters(state: RoomState): Promise<Character[]> {
 export async function applyDueTimeouts(code: string) {
   const { rooms, themes } = getBackend();
   let stored = await rooms.get(code);
+  // Closed pages first: a freed seat or a room nobody is left in.
+  if (stored && presenceDue(stored.state, Date.now())) {
+    try {
+      stored = await dispatch(code, () => ({ type: "SWEEP" }));
+    } catch (e) {
+      if (!(e instanceof GameError)) throw e;
+      stored = await rooms.get(code);
+    }
+  }
   for (let i = 0; i < 4; i++) {
     if (!stored || !isExpired(stored.state, Date.now())) return stored;
     try {

@@ -45,6 +45,22 @@ export function RoomScreen({ code }: { code: string }) {
     });
   }, [error, code, refresh]);
 
+  // Closing the page tells the room; a reload or a dropped connection comes back in time.
+  const member = !!data;
+  useEffect(() => {
+    if (!member) return;
+    const gone = () => navigator.sendBeacon(`/api/rooms/${code}/gone`);
+    const back = (e: PageTransitionEvent) => {
+      if (e.persisted) void refresh();
+    };
+    window.addEventListener("pagehide", gone);
+    window.addEventListener("pageshow", back);
+    return () => {
+      window.removeEventListener("pagehide", gone);
+      window.removeEventListener("pageshow", back);
+    };
+  }, [member, code, refresh]);
+
   const problem = joinError ?? (error === "not_found" ? "not_found" : null);
   if (problem === "in_match") return <InMatchElsewhere />;
   if (problem) return <RoomProblem code={problem} />;

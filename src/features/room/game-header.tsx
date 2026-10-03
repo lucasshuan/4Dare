@@ -7,6 +7,7 @@ import { Timer } from "@/components/ui/timer";
 import { useRoomContext } from "@/features/data/room-context";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
+import { LeaveMatchButton } from "./leave-match-button";
 
 /** Header of the match screens: theme, the screen's buttons around the step clock. No logo during a match. */
 export function GameHeader({
@@ -35,6 +36,7 @@ export function GameHeader({
         ) : null}
       </div>
       <div className="ml-auto flex items-center gap-2">
+        <LeaveMatchButton />
         {actions}
         <Timer
           deadline={view.deadline}

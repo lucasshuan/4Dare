@@ -123,6 +123,7 @@
     },
     "back": "Voltar à partida",
     "leave": "Sair da partida",
+    "leaveShort": "Sair",
     "leaveSure": "Sair de vez? Você não volta mais para esta partida.",
     "leaveYes": "Sair",
     "stay": "Ficar",

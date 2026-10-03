@@ -3,10 +3,12 @@
 import { isGameKey } from "./games";
 import {
   findPlayer,
+  goneFor,
   isActive,
   isPresent,
   openQuestion,
   pendingGuess,
+  presenceDue,
   validatorOf,
 } from "./helpers";
 import { isCloseMatch } from "./match";
@@ -468,6 +470,20 @@ export function isExpired(state: RoomState, now: number): boolean {
   return state.deadline !== null && now >= state.deadline;
 }
 
+/** A closed lobby page frees the seat; a match only ends once every page is closed. */
+function sweep(s: RoomState, ctx: Ctx) {
+  if (!presenceDue(s, ctx.now)) fail("wrong_phase");
+  if (s.phase === "lobby") {
+    for (const p of s.players.filter((x) => goneFor(x, ctx.now)))
+      leave(s, p.id, ctx);
+    return;
+  }
+  s.phase = "closed";
+  s.turnPlayerId = null;
+  s.reveal = null;
+  stopClock(s);
+}
+
 /** Applies one event. Returns a new state; throws GameError when the event is not allowed. */
 export function reduce(
   state: RoomState,
@@ -486,6 +502,20 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       return join(s, e.player, e.password, ctx);
     case "LEAVE":
       return leave(s, e.playerId, ctx);
+    case "GONE": {
+      const p = requireSeated(s, e.playerId);
+      if (s.phase === "closed" || p.goneAt != null) fail("already_done");
+      p.goneAt = ctx.now;
+      return;
+    }
+    case "BACK": {
+      const p = requireSeated(s, e.playerId);
+      if (p.goneAt == null) fail("already_done");
+      p.goneAt = null;
+      return;
+    }
+    case "SWEEP":
+      return sweep(s, ctx);
     case "SET_READY": {
       if (s.phase !== "lobby") fail("wrong_phase");
       const p = requireSeated(s, e.playerId);

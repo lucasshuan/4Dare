@@ -1,6 +1,7 @@
 // What each player is allowed to see. This is the only place that decides secrecy.
 import { DEFAULT_GAME } from "./games";
 import {
+  abandoned,
   findPlayer,
   isPresent,
   lastQuestionBy,
@@ -373,6 +374,8 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
   const host = findPlayer(s, s.hostId);
   const locked = s.settings.visibility === "private";
   if (!host || (locked && !s.settings.password)) return null;
+  // every page closed: as good as closed, even before anyone sweeps it
+  if (abandoned(s, now)) return null;
   let status: PublicRoom["status"];
   if (s.phase === "lobby") {
     // Alone the lobby has no clock: list it only for as long as the clock would run.

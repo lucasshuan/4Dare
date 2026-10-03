@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createRoom, isExpired, reduce } from "./engine";
+import { abandoned, presenceDue } from "./helpers";
 import { char, Game, ident, THEMES } from "./test-utils";
 import {
   DEFAULT_SETTINGS,
   GameError,
+  GONE_GRACE_MS,
   HOST_THEME_SECONDS,
   LOBBY_SECONDS,
   RESULT_SECONDS,
@@ -874,5 +876,54 @@ describe("whole matches", () => {
     reduce(g.state, { type: "ASK", playerId: g.turn, text: "Q?" }, g.ctx());
     expect(JSON.stringify(g.state)).toBe(frozen);
     expect(g.state).toEqual(before);
+  });
+});
+
+describe("closed pages", () => {
+  it("a lobby frees the seat of a closed page, unless it opens again in time", () => {
+    const g = new Game(3);
+    g.do({ type: "GONE", playerId: "p1" });
+    g.do({ type: "GONE", playerId: "p2" });
+    // a reload: back before the grace is over
+    g.now += GONE_GRACE_MS - 1;
+    g.do({ type: "BACK", playerId: "p2" });
+    expect(presenceDue(g.state, g.now)).toBe(false);
+    expect(code(() => g.do({ type: "SWEEP" }))).toBe("wrong_phase");
+    g.now += 1;
+    expect(presenceDue(g.state, g.now)).toBe(true);
+    g.do({ type: "SWEEP" });
+    expect(g.state.players.map((p) => p.id)).toEqual(["p2", "p3"]);
+    // the host was gone: the room goes to whoever joined next
+    expect(g.state.hostId).toBe("p2");
+  });
+
+  it("a match waits for closed pages, and closes once every page is closed", () => {
+    const g = started(3);
+    const [a, b, c] = g.state.order;
+    g.do({ type: "GONE", playerId: a });
+    g.do({ type: "GONE", playerId: b });
+    g.now += GONE_GRACE_MS * 10;
+    // one page still open: everyone keeps their seat
+    expect(presenceDue(g.state, g.now)).toBe(false);
+    expect(g.state.players.every((p) => !p.away)).toBe(true);
+    g.do({ type: "GONE", playerId: c });
+    g.now += GONE_GRACE_MS - 1;
+    expect(abandoned(g.state, g.now)).toBe(false);
+    g.now += 1;
+    expect(abandoned(g.state, g.now)).toBe(true);
+    g.do({ type: "SWEEP" });
+    expect(g.state.phase).toBe("closed");
+    expect(g.state.deadline).toBeNull();
+  });
+
+  it("someone who left the match does not keep it open", () => {
+    const g = started(3);
+    const [a, b, c] = g.state.order;
+    g.do({ type: "LEAVE", playerId: a });
+    g.do({ type: "GONE", playerId: b });
+    g.do({ type: "GONE", playerId: c });
+    g.now += GONE_GRACE_MS;
+    g.do({ type: "SWEEP" });
+    expect(g.state.phase).toBe("closed");
   });
 });

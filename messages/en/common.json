@@ -123,6 +123,7 @@
     },
     "back": "Back to the match",
     "leave": "Leave the match",
+    "leaveShort": "Leave",
     "leaveSure": "Leave for good? You can't come back to this match.",
     "leaveYes": "Leave",
     "stay": "Stay",

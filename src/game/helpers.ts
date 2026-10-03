@@ -1,5 +1,11 @@
 // Small lookups shared by the engine and the view.
-import type { Play, PlayerId, RoomPlayer, RoomState } from "./types";
+import {
+  GONE_GRACE_MS,
+  type Play,
+  type PlayerId,
+  type RoomPlayer,
+  type RoomState,
+} from "./types";
 
 export const isPresent = (p: RoomPlayer) => !p.away;
 
@@ -46,4 +52,25 @@ export function validatorOf(state: RoomState, guesserId: PlayerId) {
     if (p && isPresent(p) && id !== guesserId) return id;
   }
   return null;
+}
+
+/** Their page has been closed for longer than a reload takes. */
+export const goneFor = (p: RoomPlayer, now: number) =>
+  p.goneAt != null && now - p.goneAt >= GONE_GRACE_MS;
+
+/**
+ * Everyone still playing closed their page a while ago: nobody is left to
+ * wait for. A lobby only counts its own seats; a match skips who left it.
+ */
+export function abandoned(state: RoomState, now: number): boolean {
+  if (state.phase === "closed") return false;
+  const here = state.players.filter((p) => !p.away);
+  return here.length > 0 && here.every((p) => goneFor(p, now));
+}
+
+/** True when a SWEEP has something to do: a lobby seat to free, or a room to close. */
+export function presenceDue(state: RoomState, now: number): boolean {
+  if (state.phase === "lobby")
+    return state.players.some((p) => goneFor(p, now));
+  return abandoned(state, now);
 }
