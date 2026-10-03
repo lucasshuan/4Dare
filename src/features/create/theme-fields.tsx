@@ -178,7 +178,8 @@ function SetCard({
           whileTap="press"
         />
       }
-      className="block w-full rounded-md text-left"
+      // The card under the tooltip rises above it (z-50), out of its shadow.
+      className="relative block w-full rounded-md text-left data-popup-open:z-51"
     >
       <motion.span
         variants={CARD_FACE}
@@ -187,7 +188,8 @@ function SetCard({
           "flex h-12 w-full items-center gap-2.5 rounded-md border-[1.5px] py-1.5 pr-2.5 pl-1.5 transition-[background-color,border-color,color,box-shadow] duration-200 ease-soft",
           on
             ? "border-transparent bg-surface text-ink shadow-card"
-            : "border-line border-dashed text-ink-muted hover:border-line-strong",
+            : // canvas, not transparent: the shadow would show through
+              "border-line border-dashed bg-canvas text-ink-muted hover:border-line-strong",
         )}
       >
         <motion.span
