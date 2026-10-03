@@ -17,6 +17,7 @@ import { dur, ease } from "@/lib/motion";
 import type { CreateRoomInput } from "@/server/contract";
 import { GameField } from "./game-field";
 import {
+  missingName,
   missingPassword,
   RulesFields,
   SettingsFields,
@@ -27,12 +28,12 @@ type Tab = "room" | "rules" | "themes";
 
 const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
 
-/** Looks of the "Back" link (or button) that opens the setup screen. */
+/** Looks of the "Back" link (or button) at the top of the setup screens. */
 export const backClass =
   "-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink";
 
 /**
- * Creating a room and editing it in the lobby: back, the title with the
+ * Editing a room from the lobby: back, the title with the
  * game select and the submit button on its far right, then the settings in
  * tabs: room, the game's rules and, for "Who am I?", its themes.
  */
@@ -60,7 +61,13 @@ export function RoomSetup({
   const [tab, setTab] = useState<Tab>("room");
   const problemId = useId();
   const problems: Record<Tab, string | null> = {
-    room: value && missingPassword(value) ? t("needPassword") : null,
+    room: !value
+      ? null
+      : missingName(value)
+        ? t("needName")
+        : missingPassword(value)
+          ? t("needPassword")
+          : null,
     rules: null,
     themes: value && missingSets(value) ? t("needOneSet") : null,
   };

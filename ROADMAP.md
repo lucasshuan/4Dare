@@ -83,7 +83,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Discord or Google account: picks name, picture or critter, and color (without Supabase, signs into a test account)
 - [x] Public rooms on the game screen: open seats first, "See more" shows full ones and ones in a match
 - [x] Create room: public or private, 2 to 4 seats, seconds per step (120 by default)
-- [x] Create room at `/new?game=who-am-i`, with the top bar and "Back" above the title
+- [x] Create room at `/new?game=who-am-i`: opens the room right away and goes into it
 - [x] Lobby: host edits the settings and starts; the others mark "I'm ready" (green ✓, red ✗)
 - [x] Starts on its own in 2 minutes or as soon as it's full; the clock only runs with 2 players or more
 - [x] When the host leaves, whoever joined first takes the room, in the lobby or mid-match
@@ -138,3 +138,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] /rooms filters in one row: the search, then the game and who can join as selects
 - [x] Theme vote lasts 13 s (was 11 s)
 - [x] Pictures: any type the browser opens (JFIF, AVIF...), pasted or dragged from a web page, always sent as cropped even when saved at once; card pictures load ahead for everyone
+- [x] "Create room" goes straight into a new room named after you ("Bob123's room", "Sala de Bob123"); the other settings live only in the lobby's "Edit settings"; the room name is required, with nothing under the field

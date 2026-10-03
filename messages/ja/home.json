@@ -7,10 +7,9 @@
   "createRoom": {
     "game": "ゲーム",
     "roomName": "ルーム名",
-    "roomNameHint": "任意。待合室とルーム一覧に表示されます。",
     "roomNamePlaceholder": "例：土曜の仲間",
     "back": "戻る",
-    "title": "ルームを作る",
+    "creating": "ルームを作っています…",
     "tabRoom": "ルーム",
     "roomSummary": "{visibility}・{seats}人",
     "tabRules": "ルール",
@@ -23,6 +22,7 @@
     "passwordHint": "参加する人が入力します。",
     "passwordPlaceholder": "例：pizza",
     "needPassword": "非公開ルームのパスワードを決めてください。",
+    "needName": "ルーム名を決めてください。",
     "seats": "人数",
     "seatsHint": "2人以上でゲームを始められます。",
     "seconds": "1ステップの時間",
@@ -41,8 +41,7 @@
     "needOneSet": "セットを1つ以上オンにしてください。",
     "hostNoteTitle": "あなたがテーマを書きます",
     "hostNote": "試合が始まったら、好きなテーマを書きます（アイデアも出ます）。30秒たつと、みんなの投票に切り替わります。",
-    "hostNoteRandom": "書いたテーマでは「ランダム」は使えません。",
-    "submit": "ルームを作る"
+    "hostNoteRandom": "書いたテーマでは「ランダム」は使えません。"
   },
   "signIn": "{provider}でログイン",
   "editProfile": "プロフィールを編集",

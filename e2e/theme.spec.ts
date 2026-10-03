@@ -1,16 +1,19 @@
 import { expect, test } from "@playwright/test";
-import { joinRoom, newPlayer } from "./helpers";
+import { createRoom, editSettings, joinRoom, newPlayer } from "./helpers";
 
 test("the host types the theme, and the next room starts the same way", async ({
   browser,
 }) => {
   const host = await newPlayer(browser);
   const guest = await newPlayer(browser);
-  await host.goto("/en/new?game=who-am-i");
-  await host.getByRole("button", { name: /i type it/i }).click();
-  await host.getByRole("button", { name: /^create room$/i }).click();
-  await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
-  const code = host.url().split("/").pop() as string;
+  await createRoom(host);
+  await editSettings(host, async () => {
+    await host.getByRole("tab", { name: /themes/i }).click();
+    await host.getByRole("button", { name: /i type it/i }).click();
+  });
+  await expect(host.getByText(/the host types the theme/i)).toBeVisible();
+  // the next room starts the same way
+  const code = await createRoom(host);
   await expect(host.getByText(/the host types the theme/i)).toBeVisible();
   await joinRoom(guest, code);
   await host.getByRole("button", { name: /start match/i }).click();
@@ -34,11 +37,6 @@ test("the host types the theme, and the next room starts the same way", async ({
     timeout: 10_000,
   });
   await expect(guest.getByRole("button", { name: /^random$/i })).toHaveCount(0);
-
-  await host.goto("/en/new?game=who-am-i");
-  await expect(
-    host.getByRole("button", { name: /i type it/i }),
-  ).toHaveAttribute("aria-pressed", "true");
 });
 
 test("the vote only offers themes from the sets turned on", async ({
@@ -46,14 +44,13 @@ test("the vote only offers themes from the sets turned on", async ({
 }) => {
   const host = await newPlayer(browser);
   const guest = await newPlayer(browser);
-  await host.goto("/en/new?game=who-am-i");
-  await host.getByRole("button", { name: /turn all off/i }).click();
-  const create = host.getByRole("button", { name: /^create room$/i });
-  await expect(create).toBeDisabled();
-  await host.getByRole("button", { name: /^sports$/i }).click();
-  await create.click();
-  await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
-  const code = host.url().split("/").pop() as string;
+  const code = await createRoom(host);
+  await editSettings(host, async () => {
+    await host.getByRole("tab", { name: /themes/i }).click();
+    await host.getByRole("button", { name: /turn all off/i }).click();
+    await expect(host.getByRole("button", { name: /^save$/i })).toBeDisabled();
+    await host.getByRole("button", { name: /^sports$/i }).click();
+  });
   await joinRoom(guest, code);
   await host.getByRole("button", { name: /start match/i }).click();
 

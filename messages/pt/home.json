@@ -7,10 +7,9 @@
   "createRoom": {
     "game": "Jogo",
     "roomName": "Nome da sala",
-    "roomNameHint": "Opcional. Aparece na sala de espera e na lista de salas.",
     "roomNamePlaceholder": "Ex.: Turma do sábado",
     "back": "Voltar",
-    "title": "Criar sala",
+    "creating": "Criando sua sala…",
     "tabRoom": "Sala",
     "roomSummary": "{visibility} · {seats} vagas",
     "tabRules": "Regras",
@@ -23,6 +22,7 @@
     "passwordHint": "Quem entrar precisa digitar.",
     "passwordPlaceholder": "Ex.: pizza",
     "needPassword": "Defina uma senha para a sala privada.",
+    "needName": "Dê um nome para a sala.",
     "seats": "Vagas",
     "seatsHint": "A partida pode começar com 2 jogadores ou mais.",
     "seconds": "Tempo por etapa",
@@ -41,8 +41,7 @@
     "needOneSet": "Ligue pelo menos um conjunto.",
     "hostNoteTitle": "Você escreve o tema",
     "hostNote": "Quando a partida começar, você escreve o tema que quiser, com umas ideias à mão. Se passarem 30 s, todo mundo vota.",
-    "hostNoteRandom": "Tema escrito não tem o botão “Sortear”.",
-    "submit": "Criar sala"
+    "hostNoteRandom": "Tema escrito não tem o botão “Sortear”."
   },
   "signIn": "Entrar com {provider}",
   "editProfile": "Editar perfil",

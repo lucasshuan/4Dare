@@ -129,7 +129,7 @@ export function LobbyScreen() {
         }),
       );
 
-  // The host edits the room on the same screen that creates one.
+  // The host changes the room here; a new room skips this screen and starts with the last setup.
   if (editing) {
     return (
       <Screen left={<HubBrand />} right={<HubActions />}>

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { newPlayer } from "./helpers";
+import { createRoom, newPlayer } from "./helpers";
 
 test("a private room is listed with a lock and asks for its password", async ({
   browser,
@@ -7,17 +7,24 @@ test("a private room is listed with a lock and asks for its password", async ({
   const host = await newPlayer(browser);
   const guest = await newPlayer(browser);
 
-  await host.goto("/en/new?game=who-am-i");
-  await host.getByRole("textbox", { name: "Room name" }).fill("Pizza night");
+  const code = await createRoom(host);
+  // a new room is named after its host
+  await expect(host.getByRole("heading", { level: 1 })).toHaveText(/'s room$/);
+  await host.getByRole("button", { name: /edit settings/i }).click();
+  const save = host.getByRole("button", { name: /^save$/i });
+  const name = host.getByRole("textbox", { name: "Room name" });
+  // no name, no room
+  await name.fill(" ");
+  await expect(save).toBeDisabled();
+  await name.fill("Pizza night");
   await host.getByRole("button", { name: "Private" }).click();
   // no password, no room
-  await expect(
-    host.getByRole("button", { name: /^create room$/i }),
-  ).toBeDisabled();
+  await expect(save).toBeDisabled();
   await host.getByRole("textbox", { name: "Password" }).fill("pizza");
-  await host.getByRole("button", { name: /^create room$/i }).click();
-  await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
-  const code = host.url().split("/").pop() as string;
+  await save.click();
+  await expect(
+    host.getByRole("heading", { name: "Pizza night" }),
+  ).toBeVisible();
   // the host sees the password to share it
   await expect(host.getByText("pizza", { exact: true })).toBeVisible();
 

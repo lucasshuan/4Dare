@@ -141,6 +141,9 @@ function SecondsStepper({
 export const missingPassword = (v: CreateRoomInput) =>
   v.visibility === "private" && !v.password.trim();
 
+/** True when the room has no name: it can't be saved like that. */
+export const missingName = (v: CreateRoomInput) => !v.name.trim();
+
 /**
  * Name, who can join (and the password of a private room) on one row, then
  * seats: used to create a room and to edit it in the lobby. Each label carries
@@ -244,7 +247,7 @@ export function RulesFields({
   );
 }
 
-/** The room's name: optional, up to ROOM_NAME_MAX characters. */
+/** The room's name: required, up to ROOM_NAME_MAX characters, nothing under the field. */
 function RoomNameField({
   value,
   onChange,
@@ -256,10 +259,11 @@ function RoomNameField({
   return (
     <TextField
       label={t("roomName")}
-      hint={t("roomNameHint")}
       placeholder={t("roomNamePlaceholder")}
       value={value}
-      max={ROOM_NAME_MAX}
+      maxLength={ROOM_NAME_MAX}
+      required
+      aria-invalid={!value.trim()}
       onChange={(e) => onChange(e.target.value)}
       className="w-full max-w-sm sm:w-72"
     />

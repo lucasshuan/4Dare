@@ -98,7 +98,7 @@ async function act(
 
 const createSchema = z.object({
   game: z.enum(GAME_KEYS),
-  name: z.string().trim().max(ROOM_NAME_MAX),
+  name: z.string().trim().min(1).max(ROOM_NAME_MAX),
   visibility: z.enum(["public", "private"]),
   password: z.string().trim().max(ROOM_PASSWORD_MAX),
   seats: z.union([z.literal(2), z.literal(3), z.literal(4)]),

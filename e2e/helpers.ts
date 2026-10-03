@@ -15,11 +15,19 @@ export async function newPlayer(browser: Browser, phone = false) {
 
 const button = (page: Page, name: RegExp) => page.getByRole("button", { name });
 
+/** /new opens the room right away, with the last setup. */
 export async function createRoom(host: Page) {
   await host.goto("/en/new?game=who-am-i");
-  await button(host, /^create room$/i).click();
   await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
   return host.url().split("/").pop() as string;
+}
+
+/** The host opens "Edit settings" in the lobby, makes `change` and saves. */
+export async function editSettings(host: Page, change: () => Promise<void>) {
+  await button(host, /edit settings/i).click();
+  await change();
+  await button(host, /^save$/i).click();
+  await expect(button(host, /edit settings/i)).toBeVisible();
 }
 
 export async function joinRoom(page: Page, code: string) {

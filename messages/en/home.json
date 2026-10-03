@@ -7,10 +7,9 @@
   "createRoom": {
     "game": "Game",
     "roomName": "Room name",
-    "roomNameHint": "Optional. Shown in the lobby and in the room list.",
     "roomNamePlaceholder": "e.g. Saturday crew",
     "back": "Back",
-    "title": "Create a room",
+    "creating": "Creating your room…",
     "tabRoom": "Room",
     "roomSummary": "{visibility} · {seats} seats",
     "tabRules": "Rules",
@@ -23,6 +22,7 @@
     "passwordHint": "Whoever joins types it in.",
     "passwordPlaceholder": "e.g. pizza",
     "needPassword": "Set a password for the private room.",
+    "needName": "Give the room a name.",
     "seats": "Seats",
     "seatsHint": "The match can start with 2 players or more.",
     "seconds": "Time per step",
@@ -41,8 +41,7 @@
     "needOneSet": "Turn on at least one set.",
     "hostNoteTitle": "You type the theme",
     "hostNote": "When the match starts, you write any theme you like, with a few ideas at hand. If 30 s go by, everyone votes instead.",
-    "hostNoteRandom": "Typed themes have no “Random” button.",
-    "submit": "Create room"
+    "hostNoteRandom": "Typed themes have no “Random” button."
   },
   "signIn": "Sign in with {provider}",
   "editProfile": "Edit profile",
