@@ -126,38 +126,22 @@
   --ease-swap: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-/* "Create room": lighter and deeper blues drift across it and a shine sweeps by now and then. */
+/* "Create room": the cards behind it peek over its top now and then (each card sets --x). */
 @theme {
-  --animate-drift: drift 6s linear infinite;
-  --animate-shine: shine 4.5s var(--ease-swap) infinite;
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-peek: peek 5s var(--ease-spring) infinite;
 
-  @keyframes drift {
-    to {
-      background-position: 200% 0;
-    }
-  }
-  @keyframes shine {
+  @keyframes peek {
     0%,
-    60% {
-      transform: translateX(-150%) skewX(-20deg);
-    }
+    66%,
     100% {
-      transform: translateX(400%) skewX(-20deg);
+      translate: var(--x) 0;
+    }
+    76%,
+    88% {
+      translate: var(--x) -22px;
     }
   }
-}
-
-/* Shades of sky, one tile ending where it starts so the drift loops. */
-@utility bg-sky-shades {
-  background-image: linear-gradient(
-    90deg in oklch,
-    var(--sky),
-    color-mix(in oklch, var(--sky), white 22%),
-    var(--sky),
-    color-mix(in oklch, var(--sky), black 14%),
-    var(--sky)
-  );
-  background-size: 200% 100%;
 }
 
 :root {
