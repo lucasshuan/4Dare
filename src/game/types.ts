@@ -108,8 +108,8 @@ export const REVEAL_TIMING = {
   perNoteChar: 60,
   answersMin: 6000,
   answersMax: 10000,
-  guessMiss: 2500,
-  guessHit: 3500,
+  guessMiss: 4000,
+  guessHit: 5000,
   /** The theme takes the stage before picking (after a vote, with a short spotlight on the winner first); a tie first spins between the tied themes. */
   theme: 3000,
   themeTieSpin: 2000,
