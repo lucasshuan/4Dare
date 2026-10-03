@@ -6,10 +6,12 @@ import { useTranslations } from "next-intl";
 import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { MatchGate } from "@/features/current-match/match-lock";
+import { useCurrentMatch } from "@/features/data/use-current-match";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { PublicRooms } from "@/features/home/public-rooms";
 import { useAuthErrorToast } from "@/features/home/use-auth-error";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { GAMES, newRoom } from "@/lib/routes";
 import { JoinByCode } from "./join-by-code";
@@ -19,6 +21,7 @@ import { WhoAmIBanner } from "./who-am-i-banner";
 export function WhoAmIScreen() {
   const t = useTranslations("home");
   useAuthErrorToast();
+  const { match } = useCurrentMatch();
 
   return (
     <Screen
@@ -46,13 +49,17 @@ export function WhoAmIScreen() {
           <h1 className="text-balance font-display font-extrabold text-[clamp(40px,5vw,60px)] leading-none tracking-[-0.025em]">
             {t("games.whoAmI.name")}
           </h1>
-          <p className="text-ink-muted text-lg">{t("pitch")}</p>
-        </motion.section>
-
-        {/* the public rooms, then creating one or joining by code; locked during a match */}
-        <MatchGate className="flex flex-col gap-6">
-          <PublicRooms game="who-am-i" />
-          <div className="flex flex-wrap items-end gap-x-6 gap-y-5">
+          <p className="text-[17px] text-ink-muted leading-[26px]">
+            {t("pitch")}
+          </p>
+          {/* creating or joining by code sits under the pitch, so the rooms get the height; off during a match */}
+          <div
+            inert={match ? true : undefined}
+            className={cn(
+              "mt-2 flex flex-wrap items-end gap-x-6 gap-y-5 transition-opacity duration-500 ease-soft",
+              match && "pointer-events-none select-none opacity-35 grayscale",
+            )}
+          >
             <Link
               href={newRoom("who-am-i")}
               className={buttonClass("primary", "lg", "max-sm:w-full")}
@@ -61,6 +68,11 @@ export function WhoAmIScreen() {
             </Link>
             <JoinByCode />
           </div>
+        </motion.section>
+
+        {/* the public rooms; locked during a match */}
+        <MatchGate>
+          <PublicRooms game="who-am-i" />
         </MatchGate>
       </div>
     </Screen>
