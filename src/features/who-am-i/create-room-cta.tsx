@@ -28,13 +28,13 @@ export function CreateRoomCta({
       {/* the glow: the same blues, blurred, brighter on hover */}
       <span
         aria-hidden="true"
-        className="absolute inset-1 -z-20 rounded-pill bg-sky-shades opacity-60 blur-lg transition-opacity duration-300 group-hover:opacity-100 animate-drift motion-reduce:animate-none"
+        className="absolute inset-2 -z-20 rounded-pill bg-sky-shades opacity-35 blur-md transition-opacity duration-300 group-hover:opacity-60 animate-drift motion-reduce:animate-none"
       />
       <span
         aria-hidden="true"
         className="absolute inset-0 -z-10 overflow-hidden rounded-pill bg-sky-shades animate-drift motion-reduce:animate-none"
       >
-        <span className="absolute inset-y-0 left-0 w-1/4 bg-linear-to-r from-transparent via-white/50 to-transparent animate-shine motion-reduce:hidden" />
+        <span className="absolute inset-y-0 left-0 w-1/4 bg-linear-to-r from-transparent via-white/20 to-transparent animate-shine motion-reduce:hidden" />
       </span>
       <Plus
         className="size-6 shrink-0 transition-transform duration-300 ease-soft group-hover:rotate-90"

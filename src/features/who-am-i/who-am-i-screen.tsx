@@ -60,7 +60,10 @@ export function WhoAmIScreen() {
               match && "pointer-events-none select-none opacity-35 grayscale",
             )}
           >
-            <CreateRoomCta href={newRoom("who-am-i")} className="max-sm:w-full">
+            <CreateRoomCta
+              href={newRoom("who-am-i")}
+              className="grow max-sm:w-full sm:max-w-80"
+            >
               {t("create")}
             </CreateRoomCta>
             <JoinByCode />
