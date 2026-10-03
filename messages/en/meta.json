@@ -22,7 +22,7 @@
     "title": "Your profile"
   },
   "room": {
-    "title": "Room {code}",
+    "title": "Room",
     "inviteTitle": "Come play Who am I? with me",
     "inviteDescription": "Room {code} on 4Dare. Everyone picks a character for someone else, and you find out yours with yes-or-no questions. Free, no sign-up.",
     "invited": "You're invited!",

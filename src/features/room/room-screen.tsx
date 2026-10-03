@@ -22,6 +22,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
+import { useRoomTitle } from "@/lib/names";
 import { WHO_AM_I } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
 import { joinRoom, leaveRoom } from "@/server/actions";
@@ -282,16 +283,19 @@ const TAB_ALERT: Partial<Record<PlayerStatus, string>> = {
   validating: "validating",
 };
 
-/** "0:42 · Lobby · ABCDE · 4Dare", or "0:42 · Your turn! · 4Dare" on the player's move. */
+/** "0:42 · Lobby · Bia's room · 4Dare", or "0:42 · Your turn! · 4Dare" on the player's move. */
 function useRoomTab() {
   const t = useTranslations("meta");
-  const { code, view, me, offset } = useRoomContext();
+  const roomTitle = useRoomTitle();
+  const { view, me, offset } = useRoomContext();
   const phase = TAB_PHASE[view.phase];
   const alert = TAB_ALERT[me.status];
+  const title = roomTitle(
+    view.settings.name,
+    view.players.find((p) => p.isHost),
+  );
   useTabTitle(
-    phase
-      ? `${t(`tab.${phase}`)} · ${view.settings.name || code}`
-      : t("room.title", { code }),
+    phase ? `${t(`tab.${phase}`)} · ${title}` : title,
     alert ? t(`tab.alert.${alert}`) : null,
     {
       deadline: view.deadline,

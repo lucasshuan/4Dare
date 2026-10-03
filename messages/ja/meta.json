@@ -22,7 +22,7 @@
     "title": "プロフィール"
   },
   "room": {
-    "title": "ルーム {code}",
+    "title": "ルーム",
     "inviteTitle": "一緒に「わたしはだれ？」で遊ぼう",
     "inviteDescription": "4Dareのルーム {code}。みんなが誰かのためにキャラクターを選び、はい・いいえの質問で自分のを当てます。無料、登録なし。",
     "invited": "招待が届きました！",

@@ -36,7 +36,7 @@ import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
-import { formatClock, useDisplayName } from "@/lib/names";
+import { formatClock, useDisplayName, useRoomTitle } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
 import {
   leaveRoom,
@@ -80,8 +80,8 @@ const editable = ({
 export function LobbyScreen() {
   const t = useTranslations("lobby");
   const tCreate = useTranslations("home.createRoom");
-  const tRooms = useTranslations("home.rooms");
   const name = useDisplayName();
+  const roomTitle = useRoomTitle();
   const withNames = useWithNames();
   const toast = useToast();
   const router = useRouter();
@@ -129,9 +129,7 @@ export function LobbyScreen() {
     }
   };
 
-  // a room without a name goes by its host's, like in the room list
-  const title =
-    roomName || (host ? tRooms("roomOf", { name: name(host) }) : "");
+  const title = roomTitle(roomName, host);
   // after a match the room is not new any more
   const greeting = me.isHost
     ? t(view.round > 0 ? "titleHostAgain" : "titleHost")

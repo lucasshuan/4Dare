@@ -25,6 +25,17 @@ export function useDisplayName() {
   );
 }
 
+/** A room's name, or "<host>'s room" when the host left it unnamed. */
+export function useRoomTitle() {
+  const t = useTranslations("home.rooms");
+  const name = useDisplayName();
+  return useCallback(
+    (roomName: string, host: Named | undefined) =>
+      roomName || (host ? t("roomOf", { name: name(host) }) : ""),
+    [t, name],
+  );
+}
+
 export function formatClock(seconds: number) {
   const s = Math.max(0, Math.ceil(seconds));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
