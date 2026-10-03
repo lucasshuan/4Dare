@@ -8,7 +8,7 @@ import { browserClient } from "./supabase-browser";
 
 type Unsubscribe = () => void;
 
-type OnChange = (payload: { version?: number }) => void;
+type OnChange = (payload: { version?: number; at?: number }) => void;
 
 function listen(topic: string, onChange: OnChange): Unsubscribe {
   if (BACKEND !== "supabase") return () => {};
@@ -16,7 +16,7 @@ function listen(topic: string, onChange: OnChange): Unsubscribe {
   const channel = supabase
     .channel(topic)
     .on("broadcast", { event: "changed" }, (message) =>
-      onChange((message.payload ?? {}) as { version?: number }),
+      onChange((message.payload ?? {}) as { version?: number; at?: number }),
     )
     .subscribe();
   return () => {

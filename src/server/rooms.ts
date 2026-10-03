@@ -16,6 +16,7 @@ import {
   THEME_OPTIONS,
   type Theme,
 } from "@/game/types";
+import { toPublicRoom } from "@/game/view";
 import { getBackend } from "./backend";
 import { background } from "./background";
 import type { CurrentMatch } from "./contract";
@@ -50,6 +51,15 @@ export async function openRoom(host: Identity, settings: RoomSettings) {
   throw new GameError("unknown");
 }
 
+/** True when the room list would show this room differently (readiness and presence don't show there). */
+function listingChanged(before: RoomState, after: RoomState) {
+  const now = Date.now();
+  return (
+    JSON.stringify(toPublicRoom(before, now)) !==
+    JSON.stringify(toPublicRoom(after, now))
+  );
+}
+
 /**
  * Applies one event with optimistic concurrency: load, reduce, compare-and-swap,
  * and on a lost race start over from the newer state.
@@ -70,13 +80,7 @@ export async function dispatch(
       if (next.phase === "finished" && stored.state.phase !== "finished") {
         saveMatch(next);
       }
-      if (
-        next.phase === "lobby" ||
-        next.phase === "closed" ||
-        stored.state.phase === "lobby"
-      ) {
-        background(notify.lobbyChanged);
-      }
+      if (listingChanged(stored.state, next)) background(notify.lobbyChanged);
       return { state: next, version: stored.version + 1 };
     }
   }

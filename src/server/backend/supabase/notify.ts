@@ -18,6 +18,7 @@ async function ping(topic: string, payload: Record<string, unknown>) {
 export function supabaseNotify(): Notifier {
   return {
     roomChanged: (code, version) => ping(`room:${code}`, { version }),
-    lobbyChanged: () => ping("lobby", {}),
+    // `at` names this version of the list, so browsers ask the CDN for it by name
+    lobbyChanged: () => ping("lobby", { at: Date.now() }),
   };
 }
