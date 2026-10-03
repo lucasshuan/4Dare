@@ -153,3 +153,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Signing in from anywhere hands every guest seat to the account, so a match carries on
 - [x] Game cards show how many players are online right now (in a lobby, a match or on the podium), with a live dot; it updates with the room list
 - [x] /rooms filters by the host's language, left of who can join: only yours by default, several or all on request (kept in the link); a full room shows an icon too
+- [x] More guest names (about 117k): 60 more adjectives and nouns, hybrids of two nouns (PotatoNinja, BatataNinja, ジャガイモ忍者), titles that follow the noun's gender (QueenFox, RainhaRaposa, キツネ女王) and, for one new guest in a hundred, a legendary meme name (Doge, Sextou, 花金)

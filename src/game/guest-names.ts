@@ -1,6 +1,11 @@
 import { LANGS, type Lang } from "./types";
 
-// Guest names are an adjective and a noun: "WonderfulCat", "GatoMaravilhoso", "すてきなネコ".
+// Guest names come in four shapes:
+// - an adjective and a noun: "WonderfulCat", "GatoMaravilhoso", "すてきなネコ";
+// - two nouns, a hybrid: "PotatoNinja", "BatataNinja", "ジャガイモ忍者";
+// - a title and a noun, the title following the noun's Portuguese gender in every
+//   language: "QueenFox", "RainhaRaposa", "キツネ女王";
+// - now and then, a legendary meme name: "TGIF", "Sextou", "花金".
 // Each row holds the same idea in every language, so the same guest number gives the
 // same name, translated, to everyone in a room (whatever language each one plays in).
 // Words are friendly or playfully silly, never insults; nouns avoid ones that are slurs
@@ -10,6 +15,17 @@ import { LANGS, type Lang } from "./types";
 type Adjective = readonly [en: string, ptM: string, ptF: string, ja: string];
 /** [English, Portuguese, its grammatical gender, Japanese]. */
 type Noun = readonly [en: string, pt: string, gender: "m" | "f", ja: string];
+/** Masculine and feminine: [English, English, Portuguese, Portuguese, Japanese suffix, Japanese suffix]. */
+type Title = readonly [
+  enM: string,
+  enF: string,
+  ptM: string,
+  ptF: string,
+  jaM: string,
+  jaF: string,
+];
+/** [English, Portuguese, Japanese]: the meme, or its local twin where one exists. */
+type Legendary = readonly [en: string, pt: string, ja: string];
 
 export const ADJECTIVES: readonly Adjective[] = [
   ["Brave", "Corajoso", "Corajosa", "勇敢な"],
@@ -171,6 +187,66 @@ export const ADJECTIVES: readonly Adjective[] = [
   ["Barefoot", "Descalço", "Descalça", "はだしの"],
   ["Infinite", "Infinito", "Infinita", "無限の"],
   ["Lone", "Solitário", "Solitária", "一匹狼の"],
+  ["Sunny", "Ensolarado", "Ensolarada", "晴れやかな"],
+  ["Snowy", "Nevado", "Nevada", "雪の"],
+  ["Rainy", "Chuvoso", "Chuvosa", "雨の"],
+  ["Daring", "Destemido", "Destemida", "恐れ知らずの"],
+  ["Valiant", "Valente", "Valente", "勇ましい"],
+  ["Witty", "Espirituoso", "Espirituosa", "機転の利く"],
+  ["Cheerful", "Contente", "Contente", "朗らかな"],
+  ["Bubbly", "Borbulhante", "Borbulhante", "あわあわ"],
+  ["Juicy", "Suculento", "Suculenta", "ジューシーな"],
+  ["Tasty", "Saboroso", "Saborosa", "おいしい"],
+  ["Toasty", "Tostado", "Tostada", "こんがり"],
+  ["Frosty", "Congelado", "Congelada", "凍った"],
+  ["Muddy", "Enlameado", "Enlameada", "どろんこ"],
+  ["Sassy", "Atrevido", "Atrevida", "生意気な"],
+  ["Royal", "Real", "Real", "王家の"],
+  ["Cyber", "Cibernético", "Cibernética", "サイバーな"],
+  ["Supersonic", "Supersônico", "Supersônica", "超音速の"],
+  ["Masked", "Mascarado", "Mascarada", "覆面の"],
+  ["Squishy", "Molinho", "Molinha", "もちもち"],
+  ["Round", "Redondo", "Redonda", "まんまるの"],
+  ["Glittery", "Purpurinado", "Purpurinada", "ラメ入りの"],
+  ["Pastel", "Pastel", "Pastel", "パステルの"],
+  ["Silky", "Sedoso", "Sedosa", "サラサラ"],
+  ["Brilliant", "Genial", "Genial", "天才的な"],
+  ["Celestial", "Celestial", "Celestial", "天空の"],
+  ["Mythic", "Mítico", "Mítica", "神話の"],
+  ["Enchanted", "Encantado", "Encantada", "魅惑の"],
+  ["Sneezy", "Espirrento", "Espirrenta", "くしゃみ中の"],
+  ["Hopeful", "Esperançoso", "Esperançosa", "希望の"],
+  ["Nerdy", "Nerd", "Nerd", "オタクな"],
+  ["Punk", "Punk", "Punk", "パンクな"],
+  ["Groovy", "Gingado", "Gingada", "グルーヴィーな"],
+  ["Funky", "Funkeiro", "Funkeira", "ファンキーな"],
+  ["Victorious", "Vitorioso", "Vitoriosa", "勝利の"],
+  ["Undefeated", "Invicto", "Invicta", "無敗の"],
+  ["Homemade", "Caseiro", "Caseira", "手作りの"],
+  ["Creamy", "Cremoso", "Cremosa", "クリーミーな"],
+  ["Fizzy", "Efervescente", "Efervescente", "シュワシュワ"],
+  ["Caramel", "Caramelado", "Caramelada", "キャラメルの"],
+  ["Chocolate", "Achocolatado", "Achocolatada", "チョコの"],
+  ["Buttery", "Amanteigado", "Amanteigada", "バターの"],
+  ["Plaid", "Xadrez", "Xadrez", "チェックの"],
+  ["Origami", "Origami", "Origami", "折り紙の"],
+  ["Martian", "Marciano", "Marciana", "火星の"],
+  ["Volcanic", "Vulcânico", "Vulcânica", "火山の"],
+  ["Oceanic", "Oceânico", "Oceânica", "大海の"],
+  ["Festive", "Festivo", "Festiva", "お祭りの"],
+  ["Supreme", "Supremo", "Suprema", "至高の"],
+  ["Ultimate", "Definitivo", "Definitiva", "究極の"],
+  ["Whistling", "Assobiador", "Assobiadora", "口笛好きの"],
+  ["Adventurous", "Aventureiro", "Aventureira", "冒険好きの"],
+  ["Creative", "Criativo", "Criativa", "創造的な"],
+  ["Stylish", "Estiloso", "Estilosa", "イケてる"],
+  ["Wacky", "Maluco", "Maluca", "ハチャメチャな"],
+  ["Metallic", "Metálico", "Metálica", "メタリックな"],
+  ["Bronze", "Bronzeado", "Bronzeada", "銅色の"],
+  ["Crimson", "Carmesim", "Carmesim", "深紅の"],
+  ["Emerald", "Esmeralda", "Esmeralda", "エメラルドの"],
+  ["Gray", "Cinza", "Cinza", "灰色の"],
+  ["Platinum", "Platinado", "Platinada", "プラチナの"],
 ];
 
 export const NOUNS: readonly Noun[] = [
@@ -347,23 +423,227 @@ export const NOUNS: readonly Noun[] = [
   ["Pillow", "Travesseiro", "m", "まくら"],
   ["Balloon", "Balão", "m", "風船"],
   ["Kite", "Pipa", "f", "カイト"],
+  ["Orca", "Orca", "f", "シャチ"],
+  ["Manatee", "PeixeBoi", "m", "マナティー"],
+  ["Stingray", "Arraia", "f", "エイ"],
+  ["Jellyfish", "ÁguaViva", "f", "クラゲ"],
+  ["Seahorse", "CavaloMarinho", "m", "タツノオトシゴ"],
+  ["Clownfish", "PeixePalhaço", "m", "クマノミ"],
+  ["Hummingbird", "BeijaFlor", "m", "ハチドリ"],
+  ["Macaw", "Arara", "f", "コンゴウインコ"],
+  ["Puffin", "PapagaioDoMar", "m", "ツノメドリ"],
+  ["Stork", "Cegonha", "f", "コウノトリ"],
+  ["Rooster", "Galo", "m", "オンドリ"],
+  ["Fennec", "Feneco", "m", "フェネック"],
+  ["Coati", "Quati", "m", "ハナグマ"],
+  ["Ocelot", "Jaguatirica", "f", "オセロット"],
+  ["PolarBear", "UrsoPolar", "m", "シロクマ"],
+  ["Koi", "Carpa", "f", "コイ"],
+  ["Mongoose", "Mangusto", "m", "マングース"],
+  ["Iguana", "Iguana", "f", "イグアナ"],
+  ["Tortoise", "Jabuti", "m", "リクガメ"],
+  ["Tadpole", "Girino", "m", "オタマジャクシ"],
+  ["Firefly", "VagaLume", "m", "ホタル"],
+  ["Tanuki", "Tanuki", "m", "タヌキ"],
+  ["Centaur", "Centauro", "m", "ケンタウロス"],
+  ["Cyclops", "Ciclope", "m", "サイクロプス"],
+  ["Golem", "Golem", "m", "ゴーレム"],
+  ["Chupacabra", "Chupacabra", "m", "チュパカブラ"],
+  ["Bigfoot", "PéGrande", "m", "ビッグフット"],
+  ["Werewolf", "Lobisomem", "m", "狼男"],
+  ["Cowboy", "Caubói", "m", "カウボーイ"],
+  ["Samurai", "Samurai", "m", "侍"],
+  ["Spy", "Espião", "m", "スパイ"],
+  ["Explorer", "Explorador", "m", "探検家"],
+  ["Scientist", "Cientista", "m", "科学者"],
+  ["Firefighter", "Bombeiro", "m", "消防士"],
+  ["Sailor", "Marinheiro", "m", "船乗り"],
+  ["Surfer", "Surfista", "m", "サーファー"],
+  ["Poet", "Poeta", "m", "詩人"],
+  ["Gamer", "Gamer", "m", "ゲーマー"],
+  ["Strawberry", "Morango", "m", "イチゴ"],
+  ["Watermelon", "Melancia", "f", "スイカ"],
+  ["Cheese", "Queijo", "m", "チーズ"],
+  ["Pizza", "Pizza", "f", "ピザ"],
+  ["Burger", "Hambúrguer", "m", "ハンバーガー"],
+  ["Dumpling", "Guioza", "m", "ギョーザ"],
+  ["RiceBall", "Oniguiri", "m", "おにぎり"],
+  ["CheeseBread", "PãoDeQueijo", "m", "チーズパン"],
+  ["Tapioca", "Tapioca", "f", "タピオカ"],
+  ["Churro", "Churro", "m", "チュロス"],
+  ["Marshmallow", "Marshmallow", "m", "マシュマロ"],
+  ["Takoyaki", "Takoyaki", "m", "たこ焼き"],
+  ["Sunflower", "Girassol", "m", "ヒマワリ"],
+  ["Bonsai", "Bonsai", "m", "盆栽"],
+  ["Crystal", "Cristal", "m", "水晶"],
+  ["Snowman", "BonecoDeNeve", "m", "雪だるま"],
+  ["Planet", "Planeta", "m", "惑星"],
+  ["UFO", "Óvni", "m", "ユーフォー"],
+  ["Umbrella", "GuardaChuva", "m", "カサ"],
+  ["Ukulele", "Ukulele", "m", "ウクレレ"],
+  ["Slipper", "Chinelo", "m", "スリッパ"],
+  ["Submarine", "Submarino", "m", "潜水艦"],
 ];
 
-export const GUEST_NAME_COUNT = ADJECTIVES.length * NOUNS.length;
+/** Japanese puts the title after the noun, as a suffix ("ネコ船長", "キツネ女王"). */
+export const TITLES: readonly Title[] = [
+  ["Captain", "Captain", "Capitão", "Capitã", "船長", "船長"],
+  ["Doctor", "Doctor", "Doutor", "Doutora", "博士", "博士"],
+  ["Professor", "Professor", "Professor", "Professora", "教授", "教授"],
+  ["Agent", "Agent", "Agente", "Agente", "捜査官", "捜査官"],
+  ["General", "General", "General", "General", "将軍", "将軍"],
+  ["Admiral", "Admiral", "Almirante", "Almirante", "提督", "提督"],
+  ["Sergeant", "Sergeant", "Sargento", "Sargento", "軍曹", "軍曹"],
+  ["Colonel", "Colonel", "Coronel", "Coronel", "大佐", "大佐"],
+  ["Major", "Major", "Major", "Major", "少佐", "少佐"],
+  ["Lieutenant", "Lieutenant", "Tenente", "Tenente", "中尉", "中尉"],
+  ["Commander", "Commander", "Comandante", "Comandante", "司令官", "司令官"],
+  ["Mayor", "Mayor", "Prefeito", "Prefeita", "市長", "市長"],
+  ["Governor", "Governor", "Governador", "Governadora", "知事", "知事"],
+  ["President", "President", "Presidente", "Presidente", "大統領", "大統領"],
+  ["Senator", "Senator", "Senador", "Senadora", "議員", "議員"],
+  ["Minister", "Minister", "Ministro", "Ministra", "大臣", "大臣"],
+  ["Ambassador", "Ambassador", "Embaixador", "Embaixadora", "大使", "大使"],
+  ["Judge", "Judge", "Juiz", "Juíza", "裁判長", "裁判長"],
+  ["Sheriff", "Sheriff", "Xerife", "Xerife", "保安官", "保安官"],
+  ["Officer", "Officer", "Guarda", "Guarda", "巡査", "巡査"],
+  ["Inspector", "Inspector", "Inspetor", "Inspetora", "警部", "警部"],
+  ["King", "Queen", "Rei", "Rainha", "大王", "女王"],
+  ["Prince", "Princess", "Príncipe", "Princesa", "王子", "姫"],
+  ["Emperor", "Empress", "Imperador", "Imperatriz", "皇帝", "女帝"],
+  ["Duke", "Duchess", "Duque", "Duquesa", "公爵", "公爵夫人"],
+  ["Marquis", "Marchioness", "Marquês", "Marquesa", "侯爵", "侯爵夫人"],
+  ["Count", "Countess", "Conde", "Condessa", "伯爵", "伯爵夫人"],
+  ["Viscount", "Viscountess", "Visconde", "Viscondessa", "子爵", "子爵夫人"],
+  ["Baron", "Baroness", "Barão", "Baronesa", "男爵", "男爵夫人"],
+  ["Lord", "Lady", "Lorde", "Lady", "卿", "夫人"],
+  ["Pharaoh", "Pharaoh", "Faraó", "Faraó", "ファラオ", "ファラオ"],
+  ["Overlord", "Overlord", "Soberano", "Soberana", "魔王", "魔王"],
+  ["Master", "Master", "Mestre", "Mestra", "師匠", "師匠"],
+  ["Sensei", "Sensei", "Sensei", "Sensei", "先生", "先生"],
+  ["Elder", "Elder", "Ancião", "Anciã", "長老", "長老"],
+  ["Chief", "Chief", "Chefe", "Chefe", "隊長", "隊長"],
+  ["Boss", "Boss", "Chefão", "Chefona", "親分", "親分"],
+  ["CEO", "CEO", "CEO", "CEO", "社長", "社長"],
+  ["Manager", "Manager", "Gerente", "Gerente", "店長", "店長"],
+  ["Principal", "Principal", "Diretor", "Diretora", "校長", "校長"],
+  ["Coach", "Coach", "Técnico", "Técnica", "監督", "監督"],
+  ["Champion", "Champion", "Campeão", "Campeã", "王者", "王者"],
+  ["Hero", "Heroine", "Herói", "Heroína", "勇者", "勇者"],
+  ["Guardian", "Guardian", "Guardião", "Guardiã", "守護神", "守護神"],
+  ["Tycoon", "Tycoon", "Magnata", "Magnata", "大富豪", "大富豪"],
+  ["Mister", "Madam", "Senhor", "Senhora", "さん", "さん"],
+  ["Uncle", "Aunt", "Tio", "Tia", "おじさん", "おばさん"],
+  ["Grandpa", "Grandma", "Vovô", "Vovó", "じいじ", "ばあば"],
+  ["Papa", "Mama", "Papai", "Mamãe", "パパ", "ママ"],
+  ["Bro", "Sis", "Mano", "Mana", "兄貴", "姉貴"],
+  ["Baby", "Baby", "Bebê", "Bebê", "ちゃん", "ちゃん"],
+];
+
+/** Rare names, hand-picked: one new guest in a hundred gets one (see LEGENDARY_CHANCE). */
+export const LEGENDARY: readonly Legendary[] = [
+  ["Doge", "Doge", "ドージ"],
+  ["Stonks", "Stonks", "ストンクス"],
+  ["NyanCat", "NyanCat", "ニャンキャット"],
+  ["PopCat", "PopCat", "ポップキャット"],
+  ["HappyHappyCat", "GatoHappyHappy", "ハッピーハッピー猫"],
+  ["HuhCat", "GatoHuh", "ハァ猫"],
+  ["BananaCat", "GatoBanana", "バナナ猫"],
+  ["ChipiChipiChapa", "ChipiChipiChapa", "チピチピチャパ"],
+  ["OiiaOiiaCat", "GatoOiiaOiia", "オイアオイア猫"],
+  ["VibingCat", "GatoVibando", "ノリノリ猫"],
+  ["KeyboardCat", "GatoTecladista", "キーボード猫"],
+  ["CeilingCat", "GatoDoTeto", "天井猫"],
+  ["Longcat", "Longcat", "ロングキャット"],
+  ["BongoCat", "BongoCat", "ボンゴキャット"],
+  ["Bingus", "Bingus", "ビンガス"],
+  ["BigFloppa", "BigFloppa", "ビッグフロッパ"],
+  ["Cheems", "Cheems", "チームズ"],
+  ["Doggo", "Doguinho", "わんこ"],
+  ["CaramelMutt", "ViraLataCaramelo", "キャラメル犬"],
+  ["MooDeng", "MooDeng", "ムーデン"],
+  ["PedroRaccoon", "GuaxinimPedro", "ペドロアライグマ"],
+  ["SadHamster", "HamsterTriste", "悲しいハムスター"],
+  ["TrashPanda", "PandaDoLixo", "ゴミパンダ"],
+  ["DangerNoodle", "MacarrãoPerigoso", "危険なヌードル"],
+  ["SeaPancake", "PanquecaDoMar", "海のパンケーキ"],
+  ["AbsoluteUnit", "UnidadeAbsoluta", "規格外"],
+  ["DatBoi", "DatBoi", "ダットボーイ"],
+  ["Trollface", "Trollface", "トロールフェイス"],
+  ["Rickroll", "Rickroll", "リックロール"],
+  ["ThisIsFine", "TáTudoBem", "大丈夫だ問題ない"],
+  ["GalaxyBrain", "CérebroGaláctico", "銀河脳"],
+  ["GigaChad", "GigaChad", "ギガチャド"],
+  ["Bonk", "Bonk", "ボンク"],
+  ["Moai", "Moai", "モアイ"],
+  ["Skibidi", "Skibidi", "スキビディ"],
+  ["Amogus", "Amogus", "アモングス"],
+  ["Kappa", "Kappa", "カッパ"],
+  ["Hackerman", "Hackerman", "ハッカーマン"],
+  ["CakeIsALie", "OBoloÉMentira", "ケーキは嘘"],
+  ["OverNineThousand", "MaisDeOitoMil", "戦闘力53万"],
+  ["FinalAnswer", "RespostaFinal", "ファイナルアンサー"],
+  ["MainCharacter", "Protagonista", "主人公"],
+  ["RageQuit", "RageQuit", "台パン"],
+  ["PressF", "PressF", "Fで敬意を"],
+  ["NullPointer", "NullPointer", "ぬるぽ"],
+  ["Orz", "Orz", "orz"],
+  ["PleadingFace", "CarinhaPidona", "ぴえん"],
+  ["SmugFace", "CaraDeConvencido", "ドヤ顔"],
+  ["Rofl", "Kkkkkkk", "大草原"],
+  ["TGIF", "Sextou", "花金"],
+  ["DadJoker", "TioDoPavê", "ダジャレおじさん"],
+  ["GifOrJif", "BiscoitoOuBolacha", "きのこたけのこ"],
+  ["BrrBrrPatapim", "BrrBrrPatapim", "ブルブルパタピン"],
+  ["TungTungSahur", "TungTungSahur", "トゥントゥンサフール"],
+  ["Chimpanzini", "Chimpanzini", "チンパンジーニ"],
+];
+
+// Guest numbers run through the shapes in order: adjective and noun, hybrids, titles,
+// then the legendary names.
+const ADJECTIVE_NOUNS = ADJECTIVES.length * NOUNS.length;
+const HYBRIDS = NOUNS.length * NOUNS.length;
+const TITLED = TITLES.length * NOUNS.length;
+const COMMON_NAME_COUNT = ADJECTIVE_NOUNS + HYBRIDS + TITLED;
+export const GUEST_NAME_COUNT = COMMON_NAME_COUNT + LEGENDARY.length;
 
 /**
- * A guest's name from their guest number. English: adjective then noun ("WonderfulCat").
- * Portuguese: noun then adjective, agreeing in gender ("GatoMaravilhoso", "RaposaMaravilhosa").
- * Japanese: adjective then noun, as one word ("すてきなネコ").
+ * A guest's name from their guest number, written as one word.
+ * Adjective and noun: English and Japanese put the adjective first ("WonderfulCat",
+ * "すてきなネコ"); Portuguese puts the noun first and agrees in gender ("GatoMaravilhoso",
+ * "RaposaMaravilhosa").
+ * Hybrid: two nouns in the same order everywhere ("PotatoNinja", "BatataNinja").
+ * Title: before the noun, after it in Japanese ("QueenFox", "RainhaRaposa", "キツネ女王").
  */
 export function guestName(guestNumber: number, lang: Lang): string {
-  const i = Math.abs(Math.trunc(guestNumber) || 0) % GUEST_NAME_COUNT;
-  const [en, ptM, ptF, ja] = ADJECTIVES[i % ADJECTIVES.length];
-  const [nounEn, nounPt, gender, nounJa] =
-    NOUNS[Math.floor(i / ADJECTIVES.length)];
-  if (lang === "pt") return nounPt + (gender === "f" ? ptF : ptM);
-  if (lang === "ja") return ja + nounJa;
-  return en + nounEn;
+  let i = Math.abs(Math.trunc(guestNumber) || 0) % GUEST_NAME_COUNT;
+  if (i < ADJECTIVE_NOUNS) {
+    const [en, ptM, ptF, ja] = ADJECTIVES[i % ADJECTIVES.length];
+    const [nounEn, nounPt, gender, nounJa] =
+      NOUNS[Math.floor(i / ADJECTIVES.length)];
+    if (lang === "pt") return nounPt + (gender === "f" ? ptF : ptM);
+    if (lang === "ja") return ja + nounJa;
+    return en + nounEn;
+  }
+  i -= ADJECTIVE_NOUNS;
+  if (i < HYBRIDS) {
+    const word = (noun: Noun) =>
+      lang === "pt" ? noun[1] : lang === "ja" ? noun[3] : noun[0];
+    return (
+      word(NOUNS[Math.floor(i / NOUNS.length)]) + word(NOUNS[i % NOUNS.length])
+    );
+  }
+  i -= HYBRIDS;
+  if (i < TITLED) {
+    const [enM, enF, ptM, ptF, jaM, jaF] = TITLES[i % TITLES.length];
+    const [en, pt, gender, ja] = NOUNS[Math.floor(i / TITLES.length)];
+    const f = gender === "f";
+    if (lang === "pt") return (f ? ptF : ptM) + pt;
+    if (lang === "ja") return ja + (f ? jaF : jaM);
+    return (f ? enF : enM) + en;
+  }
+  const [en, pt, ja] = LEGENDARY[i - TITLED];
+  return lang === "pt" ? pt : lang === "ja" ? ja : en;
 }
 
 /** Longest name allowed per language (in characters), so names fit the player strip. */
@@ -372,11 +652,16 @@ export const GUEST_NAME_MAX: Record<Lang, number> = { en: 18, pt: 18, ja: 10 };
 const fits = (n: number) =>
   LANGS.every((l) => [...guestName(n, l)].length <= GUEST_NAME_MAX[l]);
 
-/** A random guest number whose name is short enough in every language. */
+/** How often a new guest gets a legendary name. */
+export const LEGENDARY_CHANCE = 1 / 100;
+
+/** A random guest number whose name is short enough in every language; now and then a legendary one. */
 export function randomGuestNumber(random: () => number = Math.random): number {
+  if (random() < LEGENDARY_CHANCE)
+    return COMMON_NAME_COUNT + Math.floor(random() * LEGENDARY.length);
   let n = 0;
   for (let tries = 0; tries < 100; tries++) {
-    n = Math.floor(random() * GUEST_NAME_COUNT);
+    n = Math.floor(random() * COMMON_NAME_COUNT);
     if (fits(n)) return n;
   }
   return n;
