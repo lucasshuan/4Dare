@@ -175,7 +175,7 @@ export function RoomQr({
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-scrim transition-opacity duration-200 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
-        <Dialog.Popup className="-translate-x-1/2 -translate-y-1/2 fixed top-1/2 left-1/2 z-50 flex w-[min(400px,calc(100vw-2rem))] flex-col items-center gap-5 rounded-xl bg-canvas p-6 text-center shadow-pop outline-none transition-[scale,opacity] duration-250 ease-soft data-ending-style:scale-90 data-starting-style:scale-90 data-ending-style:opacity-0 data-starting-style:opacity-0 sm:p-7">
+        <Dialog.Popup className="-translate-x-1/2 -translate-y-1/2 fixed top-1/2 left-1/2 z-50 flex w-[min(528px,calc(100vw-2rem))] flex-col items-center gap-5 rounded-xl bg-canvas p-6 text-center shadow-pop outline-none transition-[scale,opacity] duration-250 ease-soft data-ending-style:scale-90 data-starting-style:scale-90 data-ending-style:opacity-0 data-starting-style:opacity-0 sm:p-7">
           <Dialog.Close
             aria-label={tc("close")}
             className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-pill text-ink-muted transition-colors hover:bg-sunken hover:text-ink"
@@ -192,7 +192,7 @@ export function RoomQr({
             </Dialog.Description>
           </div>
           <div
-            className="aspect-square w-full max-w-80 rounded-xl p-5 shadow-card ring-1 ring-line"
+            className="aspect-square w-full max-w-[calc(100dvh-16rem)] rounded-xl p-6 shadow-card ring-1 ring-line"
             style={{ backgroundColor: PAPER }}
           >
             <QrArt url={url} still={still} />
