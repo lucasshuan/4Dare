@@ -8,19 +8,21 @@ import { useRoomContext } from "@/features/data/room-context";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 
-/** Header of the match screens: theme, the screen's buttons and the step clock. No logo during a match. */
+/** Header of the match screens: theme, the screen's buttons around the step clock. No logo during a match. */
 export function GameHeader({
   hideTheme = false,
   actions,
+  after,
 }: {
   hideTheme?: boolean;
   actions?: ReactNode;
+  after?: ReactNode;
 }) {
   const t = useTranslations("room");
   const lang = useLocale() as Lang;
   const { view, offset } = useRoomContext();
   return (
-    <header className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-3">
+    <header className="flex w-full flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-4">
         {view.theme && !hideTheme ? (
           <ThemeTag
@@ -40,27 +42,37 @@ export function GameHeader({
           rechargeFrom={view.reveal?.startsAt ?? null}
           offset={offset}
         />
+        {after}
       </div>
     </header>
   );
 }
 
-/** Page frame for the match screens. */
+/** Page frame for the match screens: the whole width, with room for a sidebar on the right. */
 export function GameFrame({
   children,
   hideTheme,
   actions,
+  after,
+  sidebar,
 }: {
   children: ReactNode;
   /** The vote screen keeps the winner a surprise until it is revealed. */
   hideTheme?: boolean;
-  /** Buttons left of the clock (the turn screen's history and give up). */
+  /** Buttons left of the clock (the turn screen's give up). */
   actions?: ReactNode;
+  /** Buttons right of the clock (the turn screen's history). */
+  after?: ReactNode;
+  /** Beside the screen, full height (the turn screen's history on wide windows). */
+  sidebar?: ReactNode;
 }) {
   return (
     <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-8 short:gap-4 short:pb-4 sm:px-8 sm:pt-6 sm:short:pt-4">
-      <GameHeader hideTheme={hideTheme} actions={actions} />
-      <main className="mx-auto w-full max-w-[1120px] flex-1">{children}</main>
+      <GameHeader hideTheme={hideTheme} actions={actions} after={after} />
+      <div className="flex w-full flex-1 items-start">
+        <main className="min-w-0 flex-1">{children}</main>
+        {sidebar}
+      </div>
     </div>
   );
 }

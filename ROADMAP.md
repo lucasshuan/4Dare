@@ -133,3 +133,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] /rooms: every listed room, filtered by game, a search (room, host or code) and who can join, all kept in the link; the game page shows its open rooms with "See all" at the top right
 - [x] New name 4Dare and a new logo: the 4 is a speech bubble with the "?" inside (its leg is the tail), "Dare" in four colours; icons, favicon and the tab "!" follow
 - [x] "Who am I?" banner full width under the top bar: five players around a table, answers that wrap in longer languages, a burst when you get it; the top bar stays put and turns to frosted glass as the page scrolls under it
+- [x] The match uses the full width; History sits right of the clock: a sidebar beside the game on the web (remembered per browser), a small button and a drawer on phones; filter by player and by questions or guesses

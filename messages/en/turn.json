@@ -77,6 +77,12 @@
     "title": "History",
     "close": "Close history",
     "filter": "Whose plays",
+    "kindFilter": "Which kind",
+    "kinds": {
+      "all": "All",
+      "question": "Questions",
+      "guess": "Guesses"
+    },
     "mineCaption": "Your questions and guesses: {shown} of {total} plays · newest first",
     "playerCaption": "{name}'s questions and guesses: {shown} of {total} plays · newest first",
     "nothing": "Nothing here yet.",

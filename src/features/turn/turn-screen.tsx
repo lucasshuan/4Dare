@@ -30,6 +30,7 @@ import {
   type PlayerView,
 } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import {
@@ -40,7 +41,12 @@ import {
   validateGuess,
 } from "@/server/actions";
 import { GiveUpButton } from "./give-up-button";
-import { HistoryButton } from "./history-panel";
+import {
+  HistoryButton,
+  HistorySidebar,
+  useHistorySidebar,
+  WIDE,
+} from "./history-panel";
 import { PlayerStrip } from "./player-strip";
 
 type Mode =
@@ -97,6 +103,8 @@ export function TurnScreen() {
   const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
   const mode = useMode();
+  const wide = useMedia(WIDE);
+  const [sidebar, setSidebar] = useHistorySidebar();
   const turnPlayer = playerById(view.turn?.playerId) as PlayerView;
   const focusMine =
     mode === "ask" ||
@@ -120,11 +128,14 @@ export function TurnScreen() {
 
   return (
     <GameFrame
-      actions={
-        <>
-          <HistoryButton />
-          <GiveUpButton />
-        </>
+      actions={<GiveUpButton />}
+      after={<HistoryButton sidebarOpen={sidebar} onSidebar={setSidebar} />}
+      sidebar={
+        <AnimatePresence initial={false}>
+          {wide && sidebar ? (
+            <HistorySidebar key="history" onClose={() => setSidebar(false)} />
+          ) : null}
+        </AnimatePresence>
       }
     >
       <div className="flex flex-col gap-6 short:gap-4">

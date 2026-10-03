@@ -77,6 +77,12 @@
     "title": "履歴",
     "close": "履歴を閉じる",
     "filter": "誰の手",
+    "kindFilter": "種類",
+    "kinds": {
+      "all": "すべて",
+      "question": "質問",
+      "guess": "予想"
+    },
     "mineCaption": "自分の質問と予想：{total}手中{shown}手 · 新しい順",
     "playerCaption": "{name}さんの質問と予想：{total}手中{shown}手 · 新しい順",
     "nothing": "まだ何もありません。",

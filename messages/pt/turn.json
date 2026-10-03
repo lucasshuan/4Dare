@@ -77,6 +77,12 @@
     "title": "Histórico",
     "close": "Fechar histórico",
     "filter": "De quem",
+    "kindFilter": "Que tipo",
+    "kinds": {
+      "all": "Tudo",
+      "question": "Perguntas",
+      "guess": "Palpites"
+    },
     "mineCaption": "Suas perguntas e palpites: {shown} de {total} jogadas · a mais recente em cima",
     "playerCaption": "Perguntas e palpites de {name}: {shown} de {total} jogadas · a mais recente em cima",
     "nothing": "Nada por aqui ainda.",

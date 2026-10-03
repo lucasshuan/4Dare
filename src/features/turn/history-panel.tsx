@@ -1,12 +1,12 @@
 "use client";
 
-import { PanelRightOpen, X } from "lucide-react";
+import { History, PanelRightClose, PanelRightOpen, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnswerChip, ResultChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { buttonClass } from "@/components/ui/button";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
@@ -15,29 +15,114 @@ import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease } from "@/lib/motion";
 
-/** "History" in the match header, with how many plays so far; opens the history drawer. */
-export function HistoryButton() {
-  const t = useTranslations("turn.history");
+/** Wide windows show the history as a sidebar; narrower ones as a drawer. */
+export const WIDE = "(min-width: 1024px)";
+const SIDEBAR_KEY = "ludodare:history-sidebar";
+
+type Kind = "all" | HistoryEntryView["kind"];
+
+/**
+ * Whether the sidebar is open on wide windows, remembered in this browser so
+ * the next match opens the same way.
+ */
+export function useHistorySidebar() {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setOpen(localStorage.getItem(SIDEBAR_KEY) === "1");
+    } catch {}
+  }, []);
+  const set = (next: boolean) => {
+    setOpen(next);
+    try {
+      localStorage.setItem(SIDEBAR_KEY, next ? "1" : "0");
+    } catch {}
+  };
+  return [open, set] as const;
+}
+
+/**
+ * "History" right of the clock, with how many plays so far. On wide windows
+ * it opens and closes the sidebar; on narrow ones it is a small button that
+ * opens a drawer.
+ */
+export function HistoryButton({
+  sidebarOpen,
+  onSidebar,
+}: {
+  sidebarOpen: boolean;
+  onSidebar: (open: boolean) => void;
+}) {
+  const t = useTranslations("turn.history");
+  const wide = useMedia(WIDE);
+  const [drawer, setDrawer] = useState(false);
   const { view } = useRoomContext();
   const count = view.history.length;
+  const open = wide ? sidebarOpen : drawer;
+  const Icon = wide ? (open ? PanelRightClose : PanelRightOpen) : History;
   return (
     <>
-      <Button
-        size="sm"
-        onClick={() => setOpen(true)}
-        className="h-10 max-sm:px-3"
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-label={wide ? undefined : t("title")}
+        onClick={() => (wide ? onSidebar(!sidebarOpen) : setDrawer(true))}
+        className={buttonClass(
+          "secondary",
+          "sm",
+          cn(
+            "relative h-10 max-lg:w-10 max-lg:px-0",
+            open && "border-ink bg-ink text-on-ink",
+          ),
+        )}
       >
-        <PanelRightOpen strokeWidth={1.75} />
-        <span className="max-sm:sr-only">{t("title")}</span>
+        <Icon strokeWidth={1.75} />
+        <span className="max-lg:sr-only">{t("title")}</span>
         {count ? (
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-pill bg-sunken px-1.5 font-mono text-xs tabular-nums">
+          <span
+            className={cn(
+              "flex h-5 min-w-5 items-center justify-center rounded-pill px-1.5 font-mono text-xs tabular-nums",
+              open ? "bg-on-ink/15" : "bg-sunken",
+              // on the small button the count sits on its corner
+              "max-lg:-top-1.5 max-lg:-right-1.5 max-lg:absolute max-lg:h-[18px] max-lg:min-w-[18px] max-lg:bg-sky max-lg:px-1 max-lg:text-[11px] max-lg:text-on-ink",
+            )}
+          >
             {count}
           </span>
         ) : null}
-      </Button>
-      <HistoryDrawer open={open} onClose={() => setOpen(false)} />
+      </button>
+      {wide ? null : (
+        <HistoryDrawer open={drawer} onClose={() => setDrawer(false)} />
+      )}
     </>
+  );
+}
+
+/** The history beside the screen on wide windows: slides open, scrolls on its own. */
+export function HistorySidebar({ onClose }: { onClose: () => void }) {
+  return (
+    <motion.aside
+      initial={{ width: 0, opacity: 0 }}
+      animate={{
+        width: "auto",
+        opacity: 1,
+        transition: { duration: dur.slow, ease: ease.soft },
+      }}
+      exit={{
+        width: 0,
+        opacity: 0,
+        transition: { duration: dur.base, ease: ease.soft },
+      }}
+      className="sticky top-6 shrink-0 self-start overflow-hidden"
+    >
+      {/* fixed width inside, so the text doesn't reflow while it slides */}
+      <section
+        aria-label={useTranslations("turn.history")("title")}
+        className="ml-6 flex h-[calc(100dvh-7.5rem)] w-[clamp(320px,26vw,420px)] flex-col overflow-hidden rounded-xl bg-surface shadow-card short:h-[calc(100dvh-6rem)]"
+      >
+        <HistoryBody onClose={onClose} />
+      </section>
+    </motion.aside>
   );
 }
 
@@ -52,18 +137,6 @@ function HistoryDrawer({
   onClose: () => void;
 }) {
   const t = useTranslations("turn.history");
-  const withNames = useWithNames();
-  const { view, me, playerById } = useRoomContext();
-  // One tab per player, you first, like the player strip.
-  const players = [...view.players].sort(
-    (a, b) => Number(b.isYou) - Number(a.isYou),
-  );
-  const [whose, setWhose] = useState(me.id);
-  const wide = useMedia("(min-width: 1024px)");
-  const hidden = wide ? { x: "100%" } : { y: "100%" };
-  const playsOf = (id: string) => view.history.filter((e) => e.byId === id);
-  const entries = playsOf(whose).reverse();
-  const selected = playerById(whose);
   return (
     <AnimatePresence>
       {open ? (
@@ -81,150 +154,209 @@ function HistoryDrawer({
             role="dialog"
             aria-modal="true"
             aria-label={t("title")}
-            initial={hidden}
+            initial={{ y: "100%" }}
             animate={{
-              x: 0,
               y: 0,
               transition: { duration: dur.slow, ease: ease.soft },
             }}
             exit={{
-              ...hidden,
+              y: "100%",
               transition: { duration: dur.base, ease: ease.soft },
             }}
             onKeyDown={(e) => e.key === "Escape" && onClose()}
-            className="absolute flex w-full flex-col bg-surface shadow-pop max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[85dvh] max-lg:rounded-t-xl lg:inset-y-0 lg:right-0 lg:max-w-110 lg:rounded-l-xl"
+            className="absolute inset-x-0 bottom-0 flex h-[85dvh] w-full flex-col rounded-t-xl bg-surface shadow-pop"
           >
-            <div className="flex items-center justify-between gap-4 px-6 pt-5 pb-3">
-              <h2 className="font-bold font-display text-3xl">{t("title")}</h2>
-              <button
-                type="button"
-                ref={(el) => el?.focus()}
-                onClick={onClose}
-                aria-label={t("close")}
-                className="flex size-11 items-center justify-center rounded-pill border-[1.5px] border-line-strong"
-              >
-                <X className="size-5" strokeWidth={1.75} />
-              </button>
-            </div>
-            <div className="flex flex-col gap-2 border-line border-b px-6 pb-4">
-              <ChoiceGroup
-                label={t("filter")}
-                className="flex-wrap self-start rounded-[22px]"
-              >
-                {players.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    aria-pressed={whose === p.id}
-                    onClick={() => setWhose(p.id)}
-                    className={cn(
-                      "flex h-9 items-center gap-1.5 rounded-pill px-3 font-semibold text-sm transition-colors",
-                      whose === p.id
-                        ? "bg-surface text-ink shadow-card"
-                        : "text-ink-muted hover:text-ink",
-                    )}
-                  >
-                    <PlayerName player={p} isYou={p.isYou} />
-                    <span className="text-xs tabular-nums opacity-60">
-                      {playsOf(p.id).length}
-                    </span>
-                  </button>
-                ))}
-              </ChoiceGroup>
-              <span className="font-medium text-[13px] text-ink-muted">
-                {whose === me.id || !selected
-                  ? t("mineCaption", {
-                      shown: entries.length,
-                      total: view.history.length,
-                    })
-                  : withNames((n) =>
-                      t("playerCaption", {
-                        name: n(selected),
-                        shown: entries.length,
-                        total: view.history.length,
-                      }),
-                    )}
-              </span>
-            </div>
-            <ol className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6 py-5">
-              {entries.length === 0 ? (
-                <li className="text-ink-muted">{t("nothing")}</li>
-              ) : null}
-              {entries.map((e) => {
-                const by = playerById(e.byId);
-                return (
-                  <li key={e.n} className="flex gap-3">
-                    <span
-                      className={cn(
-                        "flex size-7 shrink-0 items-center justify-center rounded-pill font-mono text-[13px]",
-                        e.byId === me.id ? "bg-sky-soft" : "bg-sunken",
-                      )}
-                    >
-                      {e.n}
-                    </span>
-                    <div className="flex min-w-0 flex-col items-start gap-1">
-                      <span className="font-semibold text-[13px] text-ink-muted">
-                        {withNames((n) =>
-                          t(e.kind === "question" ? "question" : "guess", {
-                            name: by ? n(by, by.isYou) : "",
-                          }),
-                        )}
-                      </span>
-                      <p className="text-base">{summary(e)}</p>
-                      {e.kind === "guess" ? (
-                        <ResultChip result={e.result} />
-                      ) : (
-                        <div className="flex flex-wrap gap-x-2.5 gap-y-1.5">
-                          {e.answers.map((a) => {
-                            const p = playerById(a.byId);
-                            return (
-                              <span
-                                key={a.byId}
-                                className="inline-flex items-center gap-1.5"
-                              >
-                                {p ? (
-                                  <Avatar
-                                    avatar={p.avatar}
-                                    isGuest={p.isGuest}
-                                    name={p.name}
-                                    size={20}
-                                  />
-                                ) : null}
-                                <AnswerChip value={a.value} small />
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
-                      {e.kind === "question"
-                        ? e.answers
-                            .filter((a) => a.note)
-                            .map((a) => {
-                              const p = playerById(a.byId);
-                              return (
-                                <p
-                                  key={a.byId}
-                                  className="text-ink-muted text-sm"
-                                >
-                                  {p ? (
-                                    <>
-                                      <PlayerName player={p} isYou={p.isYou} />
-                                      {": "}
-                                    </>
-                                  ) : null}
-                                  “{a.note}”
-                                </p>
-                              );
-                            })
-                        : null}
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
+            <HistoryBody onClose={onClose} focusClose />
           </motion.section>
         </div>
       ) : null}
     </AnimatePresence>
+  );
+}
+
+/** Title, the filters (whose plays, and questions or guesses) and the plays, newest first. */
+function HistoryBody({
+  onClose,
+  focusClose = false,
+}: {
+  onClose: () => void;
+  focusClose?: boolean;
+}) {
+  const t = useTranslations("turn.history");
+  const withNames = useWithNames();
+  const { view, me, playerById } = useRoomContext();
+  // One tab per player, you first, like the player strip.
+  const players = [...view.players].sort(
+    (a, b) => Number(b.isYou) - Number(a.isYou),
+  );
+  const [whose, setWhose] = useState(me.id);
+  const [kind, setKind] = useState<Kind>("all");
+  const playsOf = (id: string) => view.history.filter((e) => e.byId === id);
+  const theirs = playsOf(whose);
+  const entries = theirs
+    .filter((e) => kind === "all" || e.kind === kind)
+    .reverse();
+  const selected = playerById(whose);
+  const kinds: Kind[] = ["all", "question", "guess"];
+  const kindCount = (k: Kind) =>
+    k === "all" ? theirs.length : theirs.filter((e) => e.kind === k).length;
+
+  return (
+    <>
+      <div className="flex items-center justify-between gap-4 px-5 pt-4 pb-3 sm:px-6">
+        <h2 className="font-bold font-display text-2xl">{t("title")}</h2>
+        <button
+          type="button"
+          ref={focusClose ? (el) => el?.focus() : undefined}
+          onClick={onClose}
+          aria-label={t("close")}
+          className="flex size-10 items-center justify-center rounded-pill border-[1.5px] border-line-strong transition-colors hover:bg-sunken"
+        >
+          <X className="size-5" strokeWidth={1.75} />
+        </button>
+      </div>
+      <div className="flex flex-col gap-2.5 border-line border-b px-5 pb-4 sm:px-6">
+        <ChoiceGroup
+          label={t("filter")}
+          className="flex-wrap self-start rounded-[22px]"
+        >
+          {players.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              aria-pressed={whose === p.id}
+              onClick={() => setWhose(p.id)}
+              className={cn(
+                "flex h-9 items-center gap-1.5 rounded-pill px-3 font-semibold text-sm transition-colors",
+                whose === p.id
+                  ? "bg-surface text-ink shadow-card"
+                  : "text-ink-muted hover:text-ink",
+              )}
+            >
+              <PlayerName player={p} isYou={p.isYou} />
+              <span className="text-xs tabular-nums opacity-60">
+                {playsOf(p.id).length}
+              </span>
+            </button>
+          ))}
+        </ChoiceGroup>
+        <fieldset className="m-0 flex gap-1.5 border-0 p-0">
+          <legend className="sr-only">{t("kindFilter")}</legend>
+          {kinds.map((k) => (
+            <button
+              key={k}
+              type="button"
+              aria-pressed={kind === k}
+              onClick={() => setKind(k)}
+              className={cn(
+                "inline-flex h-8 items-center gap-1.5 rounded-pill border-[1.5px] px-3 font-semibold text-[13px] transition-colors",
+                kind === k
+                  ? "border-ink bg-ink text-on-ink"
+                  : "border-line-strong text-ink-muted hover:text-ink",
+              )}
+            >
+              {t(`kinds.${k}`)}
+              <span className="tabular-nums opacity-60">{kindCount(k)}</span>
+            </button>
+          ))}
+        </fieldset>
+        <span className="font-medium text-[13px] text-ink-muted">
+          {whose === me.id || !selected
+            ? t("mineCaption", {
+                shown: entries.length,
+                total: view.history.length,
+              })
+            : withNames((n) =>
+                t("playerCaption", {
+                  name: n(selected),
+                  shown: entries.length,
+                  total: view.history.length,
+                }),
+              )}
+        </span>
+      </div>
+      <ol className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-5 sm:px-6">
+        {entries.length === 0 ? (
+          <li className="text-ink-muted">{t("nothing")}</li>
+        ) : null}
+        <AnimatePresence initial={false}>
+          {entries.map((e) => {
+            const by = playerById(e.byId);
+            return (
+              <motion.li
+                key={e.n}
+                layout="position"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                className="flex gap-3"
+              >
+                <span
+                  className={cn(
+                    "flex size-7 shrink-0 items-center justify-center rounded-pill font-mono text-[13px]",
+                    e.byId === me.id ? "bg-sky-soft" : "bg-sunken",
+                  )}
+                >
+                  {e.n}
+                </span>
+                <div className="flex min-w-0 flex-col items-start gap-1">
+                  <span className="font-semibold text-[13px] text-ink-muted">
+                    {withNames((n) =>
+                      t(e.kind === "question" ? "question" : "guess", {
+                        name: by ? n(by, by.isYou) : "",
+                      }),
+                    )}
+                  </span>
+                  <p className="text-base">{summary(e)}</p>
+                  {e.kind === "guess" ? (
+                    <ResultChip result={e.result} />
+                  ) : (
+                    <div className="flex flex-wrap gap-x-2.5 gap-y-1.5">
+                      {e.answers.map((a) => {
+                        const p = playerById(a.byId);
+                        return (
+                          <span
+                            key={a.byId}
+                            className="inline-flex items-center gap-1.5"
+                          >
+                            {p ? (
+                              <Avatar
+                                avatar={p.avatar}
+                                isGuest={p.isGuest}
+                                name={p.name}
+                                size={20}
+                              />
+                            ) : null}
+                            <AnswerChip value={a.value} small />
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {e.kind === "question"
+                    ? e.answers
+                        .filter((a) => a.note)
+                        .map((a) => {
+                          const p = playerById(a.byId);
+                          return (
+                            <p key={a.byId} className="text-ink-muted text-sm">
+                              {p ? (
+                                <>
+                                  <PlayerName player={p} isYou={p.isYou} />
+                                  {": "}
+                                </>
+                              ) : null}
+                              “{a.note}”
+                            </p>
+                          );
+                        })
+                    : null}
+                </div>
+              </motion.li>
+            );
+          })}
+        </AnimatePresence>
+      </ol>
+    </>
   );
 }
