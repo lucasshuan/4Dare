@@ -697,13 +697,21 @@ export const LEGENDARY: readonly Legendary[] = [
   ["Yatta", "Yatta", "やった"],
 ];
 
-// Guest numbers run through the shapes in order: adjective and noun, hybrids, titles,
-// then the legendary names.
+/** Titles that also stand alone in Japanese, after an adjective: not さん, ちゃん, くん or 殿. */
+const STANDALONE_TITLES = TITLES.filter(
+  ([, , , , ja]) => !["さん", "ちゃん", "くん", "殿"].includes(ja),
+);
+
+// Guest numbers run through the shapes in order: adjective and noun, hybrids, title and
+// noun, the legendary names, then title and adjective (added last, so older numbers keep
+// their names).
 const ADJECTIVE_NOUNS = ADJECTIVES.length * NOUNS.length;
 const HYBRIDS = NOUNS.length * NOUNS.length;
 const TITLED = TITLES.length * NOUNS.length;
-const COMMON_NAME_COUNT = ADJECTIVE_NOUNS + HYBRIDS + TITLED;
-export const GUEST_NAME_COUNT = COMMON_NAME_COUNT + LEGENDARY.length;
+const LEGENDARY_START = ADJECTIVE_NOUNS + HYBRIDS + TITLED;
+const TITLED_ADJECTIVES = STANDALONE_TITLES.length * ADJECTIVES.length;
+export const GUEST_NAME_COUNT =
+  LEGENDARY_START + LEGENDARY.length + TITLED_ADJECTIVES;
 
 /**
  * A guest's name from their guest number, written as one word.
@@ -711,7 +719,10 @@ export const GUEST_NAME_COUNT = COMMON_NAME_COUNT + LEGENDARY.length;
  * "すてきなネコ"); Portuguese puts the noun first and agrees in gender ("GatoMaravilhoso",
  * "RaposaMaravilhosa").
  * Hybrid: two nouns in the same order everywhere ("PotatoNinja", "BatataNinja").
- * Title: before the noun, after it in Japanese ("QueenFox", "RainhaRaposa", "キツネ女王").
+ * Title and noun: the title first, last in Japanese ("QueenFox", "RainhaRaposa", "キツネ女王").
+ * Title and adjective: the same order, the adjective first in Japanese ("CaptainBrave",
+ * "CapitãoCorajoso", "勇敢な船長"). With no noun to give a gender, half the pairs are
+ * masculine and half feminine; both would read the same in English.
  */
 export function guestName(guestNumber: number, lang: Lang): string {
   let i = Math.abs(Math.trunc(guestNumber) || 0) % GUEST_NAME_COUNT;
@@ -740,8 +751,20 @@ export function guestName(guestNumber: number, lang: Lang): string {
     if (lang === "ja") return ja + (f ? jaF : jaM);
     return (f ? enF : enM) + en;
   }
-  const [en, pt, ja] = LEGENDARY[i - TITLED];
-  return lang === "pt" ? pt : lang === "ja" ? ja : en;
+  i -= TITLED;
+  if (i < LEGENDARY.length) {
+    const [en, pt, ja] = LEGENDARY[i];
+    return lang === "pt" ? pt : lang === "ja" ? ja : en;
+  }
+  i -= LEGENDARY.length;
+  const t = i % STANDALONE_TITLES.length;
+  const a = Math.floor(i / STANDALONE_TITLES.length);
+  const [enM, enF, ptM, ptF, jaM, jaF] = STANDALONE_TITLES[t];
+  const [en, adjPtM, adjPtF, ja] = ADJECTIVES[a];
+  const f = (t + a) % 2 === 1;
+  if (lang === "pt") return f ? ptF + adjPtF : ptM + adjPtM;
+  if (lang === "ja") return ja + (f ? jaF : jaM);
+  return (f ? enF : enM) + en;
 }
 
 /** Longest name allowed per language (in characters), so names fit the player strip. */
@@ -756,10 +779,12 @@ export const LEGENDARY_CHANCE = 1 / 100;
 /** A random guest number whose name is short enough in every language; now and then a legendary one. */
 export function randomGuestNumber(random: () => number = Math.random): number {
   if (random() < LEGENDARY_CHANCE)
-    return COMMON_NAME_COUNT + Math.floor(random() * LEGENDARY.length);
+    return LEGENDARY_START + Math.floor(random() * LEGENDARY.length);
   let n = 0;
   for (let tries = 0; tries < 100; tries++) {
-    n = Math.floor(random() * COMMON_NAME_COUNT);
+    // every number but the legendary ones
+    n = Math.floor(random() * (GUEST_NAME_COUNT - LEGENDARY.length));
+    if (n >= LEGENDARY_START) n += LEGENDARY.length;
     if (fits(n)) return n;
   }
   return n;

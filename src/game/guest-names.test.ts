@@ -54,6 +54,26 @@ describe("guest names", () => {
     expect(guestName(n, "ja")).toBe("花金");
   });
 
+  it("pairs titles with adjectives, half of them feminine", () => {
+    const king = numberOf("KingSleepy");
+    expect(guestName(king, "pt")).toBe("ReiSonolento");
+    expect(guestName(king, "ja")).toBe("眠たい大王");
+    const queen = numberOf("QueenBrave");
+    expect(guestName(queen, "pt")).toBe("RainhaCorajosa");
+    expect(guestName(queen, "ja")).toBe("勇敢な女王");
+  });
+
+  it("keeps older numbers' names: titles with adjectives come after the legendary ones", () => {
+    expect(numberOf(LEGENDARY[0][0])).toBe(
+      ADJECTIVES.length * NOUNS.length +
+        NOUNS.length * NOUNS.length +
+        TITLES.length * NOUNS.length,
+    );
+    expect(numberOf("CaptainBrave")).toBe(
+      numberOf(LEGENDARY[0][0]) + LEGENDARY.length,
+    );
+  });
+
   it("gives every number its own name in every language", () => {
     for (const lang of LANGS) {
       const names = new Set<string>();
@@ -90,8 +110,9 @@ describe("guest names", () => {
   });
 
   it("keeps every legendary name short enough", () => {
+    const start = numberOf(LEGENDARY[0][0]);
     for (let i = 0; i < LEGENDARY.length; i++)
-      expect(fits(GUEST_NAME_COUNT - LEGENDARY.length + i)).toBe(true);
+      expect(fits(start + i)).toBe(true);
   });
 
   it("draws names short enough in every language", () => {
