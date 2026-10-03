@@ -12,6 +12,8 @@
     "roomNamePlaceholder": "e.g. Saturday crew",
     "back": "Back",
     "title": "Create a room",
+    "tabRoom": "Room",
+    "roomSummary": "{visibility} · {seats} seats · {seconds} s per step",
     "visibility": "Who can join",
     "public": "Public",
     "private": "Private",

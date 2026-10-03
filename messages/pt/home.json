@@ -12,6 +12,8 @@
     "roomNamePlaceholder": "Ex.: Turma do sábado",
     "back": "Voltar",
     "title": "Criar sala",
+    "tabRoom": "Sala",
+    "roomSummary": "{visibility} · {seats} vagas · {seconds} s por etapa",
     "visibility": "Quem pode entrar",
     "public": "Pública",
     "private": "Privada",

@@ -28,14 +28,11 @@
   "imReady": "I'm ready",
   "leave": "Leave room",
   "editSettings": "Edit settings",
+  "settingsTitle": "Room settings",
   "saveSettings": "Save",
-  "cancel": "Cancel",
   "settingsSaved": "Settings saved",
   "mode": "Classic mode",
-  "themes": "Themes",
   "themeVote": "Everyone votes · {on} of {total} sets",
   "themeVoteAll": "Everyone votes · every set",
-  "themeHost": "The host types the theme",
-  "changeThemes": "Change",
-  "done": "Done"
+  "themeHost": "The host types the theme"
 }

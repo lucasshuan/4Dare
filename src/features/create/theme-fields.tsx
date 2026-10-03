@@ -1,11 +1,9 @@
 "use client";
 
-import { Dialog } from "@base-ui/react/dialog";
 import { Check, PenLine, UsersRound } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useId, useState } from "react";
-import { buttonClass } from "@/components/ui/button";
+import { useId } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { HintLabel } from "@/components/ui/hint-label";
 import { THEME_SET_KEYS, THEME_SETS, type ThemeSet } from "@/game/theme-sets";
@@ -308,81 +306,3 @@ export function ThemeFields({
 /** True when a vote has no set to draw from: the room can't be saved like that. */
 export const missingSets = (v: ThemeSettings) =>
   v.themeMode === "vote" && v.themeSets.length === 0;
-
-/** The lobby's compact version: a summary that opens the whole thing in a dialog. */
-export function ThemeFieldsButton({
-  value,
-  onChange,
-}: {
-  value: ThemeSettings;
-  onChange: (v: ThemeSettings) => void;
-}) {
-  const t = useTranslations("lobby");
-  const tCreate = useTranslations("home.createRoom");
-  const [open, setOpen] = useState(false);
-  const total = THEME_SET_KEYS.length;
-  const on = THEME_SETS.filter((s) => value.themeSets.includes(s.key));
-  const emojis =
-    value.themeMode === "host" ? ["✍️"] : on.slice(0, 3).map((s) => s.emoji);
-  const summary =
-    value.themeMode === "host"
-      ? t("themeHost")
-      : on.length === total
-        ? t("themeVoteAll")
-        : t("themeVote", { on: on.length, total });
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="font-semibold text-sm">{tCreate("themes")}</span>
-      <Dialog.Root open={open} onOpenChange={setOpen}>
-        <Dialog.Trigger
-          className={cn(
-            "flex h-12 items-center justify-between gap-3 rounded-md border-[1.5px] bg-surface pr-1.5 pl-3 text-left transition-colors duration-200 hover:border-ink",
-            missingSets(value) ? "border-no" : "border-line-strong",
-          )}
-        >
-          <span className="flex min-w-0 items-center gap-2.5">
-            <span aria-hidden className="-space-x-1.5 flex shrink-0">
-              {emojis.map((e) => (
-                <span
-                  key={e}
-                  className="flex size-7 items-center justify-center rounded-full bg-sunken text-sm ring-2 ring-surface"
-                >
-                  {e}
-                </span>
-              ))}
-            </span>
-            <span className="truncate font-medium text-sm">{summary}</span>
-          </span>
-          <span className="shrink-0 rounded-pill bg-sunken px-3 py-1.5 font-semibold text-sm">
-            {t("changeThemes")}
-          </span>
-        </Dialog.Trigger>
-        <Dialog.Portal>
-          <Dialog.Backdrop className="fixed inset-0 z-40 bg-scrim transition-opacity duration-200 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
-          <Dialog.Popup className="-translate-x-1/2 -translate-y-1/2 fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(1000px,calc(100vw-2rem))] flex-col gap-5 overflow-y-auto rounded-xl bg-canvas p-5 shadow-pop outline-none transition-[scale,opacity] duration-200 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0 sm:p-7">
-            <Dialog.Title className="sr-only">{tCreate("themes")}</Dialog.Title>
-            <ThemeFields value={value} onChange={onChange} />
-            <div className="flex flex-wrap items-center justify-end gap-3">
-              <AnimatePresence>
-                {missingSets(value) ? (
-                  <motion.span
-                    {...fadeSwap}
-                    className="font-medium text-[13px] text-no"
-                  >
-                    {tCreate("needOneSet")}
-                  </motion.span>
-                ) : null}
-              </AnimatePresence>
-              <Dialog.Close
-                disabled={missingSets(value)}
-                className={buttonClass("primary", "md")}
-              >
-                {t("done")}
-              </Dialog.Close>
-            </div>
-          </Dialog.Popup>
-        </Dialog.Portal>
-      </Dialog.Root>
-    </div>
-  );
-}

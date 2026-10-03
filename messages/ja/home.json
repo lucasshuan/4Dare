@@ -12,6 +12,8 @@
     "roomNamePlaceholder": "例：土曜の仲間",
     "back": "戻る",
     "title": "ルームを作る",
+    "tabRoom": "ルーム",
+    "roomSummary": "{visibility}・{seats}人・1ステップ{seconds}秒",
     "visibility": "参加できる人",
     "public": "公開",
     "private": "非公開",

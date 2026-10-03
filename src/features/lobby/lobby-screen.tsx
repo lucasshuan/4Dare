@@ -2,6 +2,7 @@
 
 import {
   Check,
+  ChevronLeft,
   Clock,
   Copy,
   Crown,
@@ -25,17 +26,9 @@ import { Screen } from "@/components/ui/screen";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Timer } from "@/components/ui/timer";
 import { useToast } from "@/components/ui/toast";
-import {
-  GameField,
-  GameThumb,
-  useGameName,
-} from "@/features/create/game-field";
+import { GameThumb, useGameName } from "@/features/create/game-field";
 import { saveSetup } from "@/features/create/last-setup";
-import {
-  missingPassword,
-  SettingsFields,
-} from "@/features/create/settings-fields";
-import { missingSets, ThemeFieldsButton } from "@/features/create/theme-fields";
+import { backClass, RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
@@ -78,6 +71,7 @@ const editable = ({
 
 export function LobbyScreen() {
   const t = useTranslations("lobby");
+  const tCreate = useTranslations("home.createRoom");
   const name = useDisplayName();
   const withNames = useWithNames();
   const toast = useToast();
@@ -123,16 +117,51 @@ export function LobbyScreen() {
     }
   };
 
+  const right = (
+    <>
+      <LanguageSwitch />
+      <ThemeToggle />
+    </>
+  );
+
+  // The host edits the room on the same screen that creates one.
+  if (editing) {
+    return (
+      <Screen left={null} right={right}>
+        <motion.div {...riseIn}>
+          <RoomSetup
+            back={
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className={backClass}
+              >
+                <ChevronLeft className="size-4" strokeWidth={2} />
+                {tCreate("back")}
+              </button>
+            }
+            title={t("settingsTitle")}
+            submit={t("saveSettings")}
+            value={draft}
+            onChange={setDraft}
+            minSeats={view.players.length}
+            pending={pending}
+            onSubmit={async (v) => {
+              const r = await act(() => updateSettings(code, v));
+              if (r.ok) {
+                setEditing(false);
+                saveSetup(v);
+                toast(t("settingsSaved"));
+              }
+            }}
+          />
+        </motion.div>
+      </Screen>
+    );
+  }
+
   return (
-    <Screen
-      left={null}
-      right={
-        <>
-          <LanguageSwitch />
-          <ThemeToggle />
-        </>
-      }
-    >
+    <Screen left={null} right={right}>
       <div className="flex flex-wrap items-start gap-10 lg:gap-16">
         <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
           <div className="flex flex-col gap-3">
@@ -290,106 +319,55 @@ export function LobbyScreen() {
               />
             </div>
           ) : null}
-          <AnimatePresence mode="wait" initial={false}>
-            {editing ? (
-              <motion.form
-                key="edit"
-                {...riseIn}
-                className="flex flex-col gap-5"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const r = await act(() => updateSettings(code, draft));
-                  if (r.ok) {
-                    setEditing(false);
-                    saveSetup(draft);
-                    toast(t("settingsSaved"));
-                  }
-                }}
-              >
-                <GameField
-                  value={draft.game}
-                  onChange={(next) => setDraft({ ...draft, game: next })}
-                />
-                <SettingsFields
-                  value={draft}
-                  onChange={setDraft}
-                  minSeats={view.players.length}
-                />
-                <ThemeFieldsButton
-                  value={draft}
-                  onChange={(v) => setDraft({ ...draft, ...v })}
-                />
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={
-                      pending || missingSets(draft) || missingPassword(draft)
-                    }
-                  >
-                    {t("saveSettings")}
-                  </Button>
-                  <Button variant="ghost" onClick={() => setEditing(false)}>
-                    {t("cancel")}
-                  </Button>
-                </div>
-              </motion.form>
-            ) : (
-              <motion.div
-                key="view"
-                {...riseIn}
-                className="flex flex-col gap-4"
-              >
-                <div className="flex items-center gap-3">
-                  <GameThumb game={game} size="sm" />
-                  <span className="font-bold font-display text-lg">
-                    {gameName(game)}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <GameThumb game={game} size="sm" />
+              <span className="font-bold font-display text-lg">
+                {gameName(game)}
+              </span>
+            </div>
+            <ul className="flex flex-col gap-3">
+              <Setting icon={visibility === "public" ? Globe : Lock}>
+                {t(visibility === "public" ? "public" : "private")}
+                {/* the host shares the password; nobody else gets it */}
+                {visibility === "private" && view.settings.password ? (
+                  <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
+                    {view.settings.password}
                   </span>
-                </div>
-                <ul className="flex flex-col gap-3">
-                  <Setting icon={visibility === "public" ? Globe : Lock}>
-                    {t(visibility === "public" ? "public" : "private")}
-                    {/* the host shares the password; nobody else gets it */}
-                    {visibility === "private" && view.settings.password ? (
-                      <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
-                        {view.settings.password}
-                      </span>
-                    ) : null}
-                  </Setting>
-                  <Setting icon={UsersRound}>{t("seats", { seats })}</Setting>
-                  <Setting icon={Clock}>
-                    {t("stepSeconds", {
-                      seconds: stepSeconds,
-                      clock: formatClock(stepSeconds),
-                    })}
-                  </Setting>
-                  <Setting icon={themeMode === "host" ? PenLine : Vote}>
-                    {themeMode === "host"
-                      ? t("themeHost")
-                      : themeSets.length === THEME_SET_KEYS.length
-                        ? t("themeVoteAll")
-                        : t("themeVote", {
-                            on: themeSets.length,
-                            total: THEME_SET_KEYS.length,
-                          })}
-                  </Setting>
-                  <Setting icon={Play}>{t("mode")}</Setting>
-                </ul>
-                {me.isHost ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDraft(editable(view.settings));
-                      setEditing(true);
-                    }}
-                    className="self-start font-semibold text-sky text-sm underline underline-offset-2"
-                  >
-                    {t("editSettings")}
-                  </button>
                 ) : null}
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </Setting>
+              <Setting icon={UsersRound}>{t("seats", { seats })}</Setting>
+              <Setting icon={Clock}>
+                {t("stepSeconds", {
+                  seconds: stepSeconds,
+                  clock: formatClock(stepSeconds),
+                })}
+              </Setting>
+              <Setting icon={themeMode === "host" ? PenLine : Vote}>
+                {themeMode === "host"
+                  ? t("themeHost")
+                  : themeSets.length === THEME_SET_KEYS.length
+                    ? t("themeVoteAll")
+                    : t("themeVote", {
+                        on: themeSets.length,
+                        total: THEME_SET_KEYS.length,
+                      })}
+              </Setting>
+              <Setting icon={Play}>{t("mode")}</Setting>
+            </ul>
+            {me.isHost ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setDraft(editable(view.settings));
+                  setEditing(true);
+                }}
+                className="self-start font-semibold text-sky text-sm underline underline-offset-2"
+              >
+                {t("editSettings")}
+              </button>
+            ) : null}
+          </div>
           {me.isHost ? (
             <>
               <Button
