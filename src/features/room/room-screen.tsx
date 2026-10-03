@@ -23,9 +23,16 @@ import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
 import { WHO_AM_I } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
-import { joinRoom } from "@/server/actions";
+import { joinRoom, leaveRoom } from "@/server/actions";
 import { PasswordDialog } from "./password-dialog";
 import { RevealOverlay } from "./reveal-overlay";
+
+/**
+ * The room this page just left without closing (a link, the back button),
+ * told a moment later: React's dev double mount comes straight back to the same
+ * room and calls it off.
+ */
+let leaving: { code: string; timer: number } | null = null;
 
 /** /r/CODE: joins if needed, then shows the screen for the current phase. */
 export function RoomScreen({ code }: { code: string }) {
@@ -47,9 +54,17 @@ export function RoomScreen({ code }: { code: string }) {
   }, [error, code, refresh]);
 
   // Closing the page tells the room; a reload or a dropped connection comes back in time.
+  // Leaving it for another page of the site tells it too: a lobby at once (the seat is
+  // freed, an empty room closes), a match like a closed page.
   const member = !!data;
+  const inLobby = useRef(false);
+  inLobby.current = data?.view.phase === "lobby";
   useEffect(() => {
     if (!member) return;
+    if (leaving?.code === code) {
+      window.clearTimeout(leaving.timer);
+      leaving = null;
+    }
     const gone = () => navigator.sendBeacon(`/api/rooms/${code}/gone`);
     const back = (e: PageTransitionEvent) => {
       if (e.persisted) void refresh();
@@ -59,6 +74,15 @@ export function RoomScreen({ code }: { code: string }) {
     return () => {
       window.removeEventListener("pagehide", gone);
       window.removeEventListener("pageshow", back);
+      const lobby = inLobby.current;
+      leaving = {
+        code,
+        timer: window.setTimeout(() => {
+          leaving = null;
+          if (lobby) void leaveRoom(code);
+          else gone();
+        }, 0),
+      };
     };
   }, [member, code, refresh]);
 
