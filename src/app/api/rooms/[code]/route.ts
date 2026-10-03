@@ -1,7 +1,12 @@
 import { GameError } from "@/game/types";
 import { toView } from "@/game/view";
 import { getBackend } from "@/server/backend";
-import { applyDueTimeouts, dispatch, normalizeCode } from "@/server/rooms";
+import {
+  applyDueTimeouts,
+  dispatch,
+  normalizeCode,
+  seatedElsewhere,
+} from "@/server/rooms";
 
 const noStore = { "Cache-Control": "no-store" };
 
@@ -30,8 +35,10 @@ export async function GET(
   }
   const mine = stored.state.players.find((p) => p.id === me.id);
   if (!mine) {
+    // A seat given up for another room (one room at a time) says which one.
+    const elsewhere = await seatedElsewhere(me.id, code);
     return Response.json(
-      { error: "not_member" },
+      { error: "not_member", elsewhere },
       { status: 403, headers: noStore },
     );
   }

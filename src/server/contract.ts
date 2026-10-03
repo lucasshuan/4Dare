@@ -5,6 +5,7 @@ import type {
   Avatar,
   Character,
   ErrorCode,
+  Identity,
   Lang,
   Phase,
   PlayerId,
@@ -37,6 +38,14 @@ export interface CurrentMatch {
   code: string;
   game: GameKey;
   phase: Phase;
+}
+
+/** The room a player sits in now, told by a room they lost their seat in (one room at a time). */
+export interface ElsewhereRoom {
+  code: string;
+  /** Empty when the host left it unnamed. */
+  name: string;
+  host: Pick<Identity, "isGuest" | "name" | "guestNumber">;
 }
 
 /** A character as the autocomplete shows it. */

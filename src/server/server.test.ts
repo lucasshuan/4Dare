@@ -441,6 +441,74 @@ describe("server, local mode", () => {
     expect(await current()).toBeNull();
     must(await A.joinRoom(other));
   });
+
+  it("one room at a time: another lobby gives up the old seat and says where it went", async () => {
+    const settings = {
+      ...ROOM,
+      visibility: "public",
+      seats: 3,
+      ...TIMES,
+    } as const;
+    as("o1");
+    const first = must(await A.createRoom(settings)).code;
+    as("o2");
+    const second = must(await A.createRoom(settings)).code;
+    as("o3");
+    must(await A.joinRoom(first));
+    must(await A.joinRoom(second));
+    expect((await view(second)).body.players).toHaveLength(2);
+    const old = await view(first);
+    expect(old.status).toBe(403);
+    expect(old.body).toMatchObject({
+      error: "not_member",
+      elsewhere: { code: second, name: ROOM.name, host: { isGuest: true } },
+    });
+    as("o1");
+    expect((await view(first)).body.players).toHaveLength(1);
+
+    // a new room leaves the old one too; a room left empty closes
+    as("o3");
+    const own = must(await A.createRoom(settings)).code;
+    expect((await view(second)).body).toMatchObject({ error: "not_member" });
+    as("o2");
+    expect((await view(second)).body.players).toHaveLength(1);
+    must(await A.joinRoom(first));
+    expect((await view(second)).status).toBe(404);
+
+    // a match going on is never left for a lobby: joining waits until it ends
+    as("o1");
+    must(await A.startGame(first));
+    expect(await A.joinRoom(own)).toEqual({ ok: false, error: "in_match" });
+    expect((await view(first)).body.phase).toBe("voting");
+  });
+
+  it("signing in anywhere hands every guest seat to the account; its match wins", async () => {
+    const { handOverSeats } = await import("./rooms");
+    const settings = {
+      ...ROOM,
+      visibility: "public",
+      seats: 2,
+      ...TIMES,
+    } as const;
+    as("s3");
+    const account = must(await A.enterTestAccount());
+    const lobby = must(await A.createRoom(settings)).code;
+    as("s1");
+    const match = must(await A.createRoom(settings)).code;
+    as("s2");
+    must(await A.joinRoom(match));
+    as("s1");
+    must(await A.startGame(match));
+
+    await handOverSeats(uidOf(jarFor("s1")), { ...account, lang: "pt" }, null);
+    as("s3");
+    const seen = (await view(match)).body;
+    expect(seen.phase).toBe("voting");
+    expect(seen.players.map((p) => p.id)).toContain(account.id);
+    expect(seen.players.map((p) => p.id)).not.toContain(uidOf(jarFor("s1")));
+    // the account's own lobby was empty without it: closed
+    expect((await view(lobby)).status).toBe(404);
+  });
 });
 
 describe("random pick by theme", () => {

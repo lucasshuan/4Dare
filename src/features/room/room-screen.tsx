@@ -2,8 +2,8 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
-import { buttonClass } from "@/components/ui/button";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Button, buttonClass } from "@/components/ui/button";
 import { PageLoader } from "@/components/ui/loader";
 import { Screen } from "@/components/ui/screen";
 import { MatchLockPage } from "@/features/current-match/match-lock";
@@ -26,6 +26,7 @@ import { useRoomTitle } from "@/lib/names";
 import { WHO_AM_I } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
 import { joinRoom, leaveRoom } from "@/server/actions";
+import type { ElsewhereRoom } from "@/server/contract";
 import { PasswordDialog } from "./password-dialog";
 import { RevealOverlay } from "./reveal-overlay";
 
@@ -38,22 +39,36 @@ let leaving: { code: string; timer: number } | null = null;
 
 /** /r/CODE: joins if needed, then shows the screen for the current phase. */
 export function RoomScreen({ code }: { code: string }) {
-  const { data, error, refresh, apply } = useRoom(code);
+  const { data, error, elsewhere, refresh, apply } = useRoom(code);
   const te = useTranslations("common.errors");
   const router = useRouter();
   const [joinError, setJoinError] = useState<ErrorCode | null>(null);
   const [askPassword, setAskPassword] = useState(false);
   const triedJoin = useRef(false);
+  // One room at a time: their seat here went to a room they joined since (another
+  // tab, another device). Taking it back is up to them, or two tabs would trade it
+  // forever; it stays that way even once they leave that room too.
+  const [moved, setMoved] = useState<ElsewhereRoom | null>(null);
+  const movedNow = data && error === "not_member" ? elsewhere : null;
+  if (movedNow && movedNow.code !== moved?.code) setMoved(movedNow);
+  if (!error && moved) setMoved(null);
 
+  const join = useCallback(async () => {
+    const r = await joinRoom(code);
+    if (r.ok) void refresh();
+    else if (r.error === "password_required") setAskPassword(true);
+    else setJoinError(r.error);
+  }, [code, refresh]);
+
+  // Seated again: a seat lost later (a lobby page closed too long) is taken back too.
   useEffect(() => {
-    if (error !== "not_member" || triedJoin.current) return;
+    if (data && !error) triedJoin.current = false;
+  }, [data, error]);
+  useEffect(() => {
+    if (error !== "not_member" || moved || triedJoin.current) return;
     triedJoin.current = true;
-    void joinRoom(code).then((r) => {
-      if (r.ok) void refresh();
-      else if (r.error === "password_required") setAskPassword(true);
-      else setJoinError(r.error);
-    });
-  }, [error, code, refresh]);
+    void join();
+  }, [error, moved, join]);
 
   // Closing the page tells the room; a reload or a dropped connection comes back in time.
   // Leaving it for another page of the site tells it too: a lobby at once (the seat is
@@ -91,6 +106,7 @@ export function RoomScreen({ code }: { code: string }) {
   const problem = joinError ?? (error === "not_found" ? "not_found" : null);
   if (problem === "in_match") return <InMatchElsewhere />;
   if (problem) return <RoomProblem code={problem} />;
+  if (moved) return <MovedElsewhere room={moved} onStay={join} />;
   if (askPassword)
     return (
       <>
@@ -234,6 +250,49 @@ function InMatchElsewhere() {
       ) : (
         <PageLoader label={tc("loading")} />
       )}
+    </Screen>
+  );
+}
+
+/** Their seat went to another room: the way there, or back into this one. */
+function MovedElsewhere({
+  room,
+  onStay,
+}: {
+  room: ElsewhereRoom;
+  onStay: () => Promise<void>;
+}) {
+  const t = useTranslations("room.moved");
+  const roomTitle = useRoomTitle();
+  const [pending, setPending] = useState(false);
+  const there = roomTitle(room.name, room.host);
+  return (
+    <Screen left={<HubBrand />} right={<HubActions />}>
+      <motion.div {...riseIn} className="flex max-w-lg flex-col gap-6 pt-10">
+        <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em]">
+          {t("title")}
+        </h1>
+        <p className="text-ink-muted text-lg">{t("body", { room: there })}</p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={`/r/${room.code}`}
+            className={buttonClass("primary", "lg")}
+          >
+            {t("go")}
+          </Link>
+          <Button
+            size="lg"
+            disabled={pending}
+            onClick={async () => {
+              setPending(true);
+              await onStay();
+              setPending(false);
+            }}
+          >
+            {t("stay")}
+          </Button>
+        </div>
+      </motion.div>
     </Screen>
   );
 }

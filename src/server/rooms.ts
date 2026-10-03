@@ -19,7 +19,7 @@ import {
 import { toPublicRoom } from "@/game/view";
 import { getBackend } from "./backend";
 import { background } from "./background";
-import type { CurrentMatch } from "./contract";
+import type { CurrentMatch, ElsewhereRoom } from "./contract";
 
 const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 export const CODE_PATTERN = /^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5}$/;
@@ -231,6 +231,82 @@ export async function currentMatch(id: PlayerId): Promise<CurrentMatch | null> {
 
 /** Every room `player` still sits in, open or closed to newcomers: where a new name or avatar must show. */
 const SEATED: readonly Phase[] = ["lobby", ...LIVE, "finished"];
+
+/** Seats given up on the way into another room: lobbies, and podiums of matches already over. */
+const LEFT_BEHIND: readonly Phase[] = ["lobby", "finished"];
+
+/**
+ * One room at a time: once the player is in `code`, their seats in other
+ * lobbies and podiums are given up. A match going on is never left here;
+ * joining refuses it first (see currentMatch).
+ */
+export async function leaveOtherRooms(id: PlayerId, code: string) {
+  const codes = await getBackend().rooms.withPlayer(id, LEFT_BEHIND);
+  await Promise.all(
+    codes
+      .filter((c) => c !== code)
+      .map((c) =>
+        dispatch(c, (state) => {
+          // it started in the meantime: that seat stays
+          if (!LEFT_BEHIND.includes(state.phase) || !seated(state, id))
+            throw new GameError("wrong_phase");
+          return { type: "LEAVE", playerId: id };
+        }).catch((e: unknown) => {
+          if (!(e instanceof GameError)) throw e;
+        }),
+      ),
+  );
+}
+
+/**
+ * A guest signed in: every seat they hold becomes the account's, so their
+ * rooms and matches carry on wherever they signed in from. Then one room at a
+ * time again: a match going on wins, else `prefer` (the room they came back to).
+ */
+export async function handOverSeats(
+  from: PlayerId,
+  player: Identity,
+  prefer: string | null,
+) {
+  const codes = await getBackend().rooms.withPlayer(from, SEATED);
+  await Promise.all(
+    codes.map((code) =>
+      dispatch(code, () => ({ type: "SWAP_PLAYER", from, player })).catch(
+        (e: unknown) => {
+          // the account already sits there, or the room is gone
+          if (!(e instanceof GameError)) throw e;
+        },
+      ),
+    ),
+  );
+  const keep = (await currentMatch(player.id))?.code ?? prefer ?? codes[0];
+  if (keep) await leaveOtherRooms(player.id, keep);
+}
+
+/** Another room `id` sits in and has not left, if any: where their seat in `code` went. */
+export async function seatedElsewhere(
+  id: PlayerId,
+  code: string,
+): Promise<ElsewhereRoom | null> {
+  const { rooms } = getBackend();
+  for (const c of await rooms.withPlayer(id, SEATED)) {
+    if (c === code) continue;
+    const state = (await rooms.get(c))?.state;
+    const me = state?.players.find((p) => p.id === id);
+    const host = state?.players.find((p) => p.id === state.hostId);
+    if (!state || !me || me.away || !host) continue;
+    return {
+      code: c,
+      name: state.settings.name ?? "",
+      host: {
+        isGuest: host.isGuest,
+        name: host.name,
+        guestNumber: host.guestNumber,
+      },
+    };
+  }
+  return null;
+}
 
 /**
  * Shows the player's new name and avatar in every room they sit in, at once

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { createRoom, newPlayer } from "./helpers";
+import { createRoom, joinRoom, newPlayer, viewOf } from "./helpers";
 
 test("a private room is listed with a lock and asks for its password", async ({
   browser,
@@ -48,4 +48,28 @@ test("a private room is listed with a lock and asks for its password", async ({
   await expect(guest.getByRole("button", { name: /i'm ready/i })).toBeVisible();
   // the password stays with the host
   await expect(guest.getByText("pizza", { exact: true })).toHaveCount(0);
+});
+
+test("one room at a time: a second tab's room takes the seat, and the first tab says so", async ({
+  browser,
+}) => {
+  const first = await createRoom(await newPlayer(browser));
+  const second = await createRoom(await newPlayer(browser));
+  const me = await newPlayer(browser);
+  await joinRoom(me, first);
+  // the tab names the room, never its code
+  await expect(me).toHaveTitle(/^Lobby · .+'s room · 4Dare$/);
+
+  // same browser, same guest
+  const tab = await me.context().newPage();
+  await joinRoom(tab, second);
+  const moved = (page: typeof me) =>
+    page.getByRole("heading", { name: "You're in another room now" });
+  await expect(moved(me)).toBeVisible();
+
+  // coming back takes the seat back from the other room
+  await me.getByRole("button", { name: "Come back to this room" }).click();
+  await expect(me.getByRole("button", { name: /i'm ready/i })).toBeVisible();
+  await expect(moved(tab)).toBeVisible();
+  expect((await viewOf(me, first)).players).toHaveLength(2);
 });

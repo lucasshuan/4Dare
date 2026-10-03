@@ -47,6 +47,7 @@ import { allow } from "./rate-limit";
 import {
   currentMatch,
   dispatch,
+  leaveOtherRooms,
   normalizeCode,
   openRoom,
   roundThemes,
@@ -129,13 +130,16 @@ export async function createRoom(
       throw new GameError("rate_limited");
     if (await currentMatch(host.id)) throw new GameError("in_match");
     const settings: RoomSettings = { ...DEFAULT_SETTINGS, ...parsed.data };
-    return { code: await openRoom(host, settings) };
+    const code = await openRoom(host, settings);
+    await leaveOtherRooms(host.id, code);
+    return { code };
   });
 }
 
 /**
  * Idempotent: joining a room you are already in succeeds. A private room asks
- * newcomers for `password`. A match still going elsewhere has to be left first.
+ * newcomers for `password`. One room at a time: a match still going elsewhere
+ * has to be left first, while another lobby is left on the way in.
  */
 export async function joinRoom(
   rawCode: string,
@@ -156,6 +160,7 @@ export async function joinRoom(
       player: who,
       password: typed,
     }));
+    await leaveOtherRooms(who.id, code);
     return { code };
   });
 }

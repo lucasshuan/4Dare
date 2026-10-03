@@ -5,7 +5,7 @@ import { GUEST_COOKIE, openGuest } from "@/server/auth/guest";
 import { getBackend } from "@/server/backend";
 import { syncProfile } from "@/server/backend/supabase/auth";
 import { sessionClient } from "@/server/backend/supabase/clients";
-import { dispatch } from "@/server/rooms";
+import { handOverSeats } from "@/server/rooms";
 
 /** Only same-site paths, so the callback can't be used to bounce people elsewhere. */
 function safeNext(raw: string | null) {
@@ -16,8 +16,8 @@ function safeNext(raw: string | null) {
 
 /**
  * Discord/Google send people back here. The guest they were (a cookie, never
- * a database row) hands over to the account: its matches move to it, and if
- * they signed in from a room, the account takes the guest's seat.
+ * a database row) hands over to the account: its matches move to it, and the
+ * account takes every seat the guest had, wherever they signed in from.
  */
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -48,26 +48,26 @@ export async function GET(request: Request) {
     .catch((e: unknown) =>
       console.error("auth callback: moving guest matches failed", e),
     );
-  const room = /^\/(?:(en|pt|ja)\/)?r\/([A-Z0-9]{5})\/?$/.exec(next);
-  if (room && profile) {
-    const lang = (LANGS as readonly string[]).includes(room[1] ?? "")
-      ? (room[1] as Lang)
+  if (profile) {
+    const prefix = /^\/(en|pt|ja)(?:\/|$)/.exec(next)?.[1];
+    const lang: Lang = (LANGS as readonly string[]).includes(prefix ?? "")
+      ? (prefix as Lang)
       : "en";
-    const account = profile;
-    await dispatch(room[2], () => ({
-      type: "SWAP_PLAYER",
-      from: guest.id,
-      player: {
-        id: account.id,
+    const room = /^\/(?:(?:en|pt|ja)\/)?r\/([A-Z0-9]{5})\/?$/.exec(next);
+    await handOverSeats(
+      guest.id,
+      {
+        id: profile.id,
         isGuest: false,
-        name: account.name,
-        guestNumber: account.guest_number,
-        avatar: account.avatar,
+        name: profile.name,
+        guestNumber: profile.guest_number,
+        avatar: profile.avatar,
         lang,
       },
-    })).catch(() => {
-      // Not seated there (or the room is gone): nothing to hand over.
-    });
+      room?.[1] ?? null,
+    ).catch((e: unknown) =>
+      console.error("auth callback: moving guest seats failed", e),
+    );
   }
   return back(false);
 }

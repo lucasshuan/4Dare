@@ -20,6 +20,12 @@
       "body": "Tente de novo daqui a pouco."
     }
   },
+  "moved": {
+    "title": "Você está em outra sala agora",
+    "body": "Cada pessoa fica em uma sala por vez, e você entrou em {room}.",
+    "go": "Ir para lá",
+    "stay": "Voltar para esta sala"
+  },
   "pick": {
     "theme": "Tema da partida",
     "title": "Escolha um personagem para {name} descobrir",

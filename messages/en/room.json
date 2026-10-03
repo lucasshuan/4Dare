@@ -20,6 +20,12 @@
       "body": "Try again in a moment."
     }
   },
+  "moved": {
+    "title": "You're in another room now",
+    "body": "You can be in only one room at a time, and you joined {room}.",
+    "go": "Go there",
+    "stay": "Come back to this room"
+  },
   "pick": {
     "theme": "Theme of the match",
     "title": "Pick a character for {name} to discover",

@@ -5,11 +5,16 @@ import { useCallback, useEffect } from "react";
 import { BACKEND } from "@/config";
 import type { RoomView } from "@/game/types";
 import { subscribeRoom } from "@/lib/realtime";
+import type { ElsewhereRoom } from "@/server/contract";
 
 export type RoomFetchError = "not_found" | "not_member" | "unknown";
 
 export class RoomError extends Error {
-  constructor(public code: RoomFetchError) {
+  constructor(
+    public code: RoomFetchError,
+    /** not_member: the room the player sits in instead, if any. */
+    public elsewhere: ElsewhereRoom | null = null,
+  ) {
     super(code);
     this.name = "RoomError";
   }
@@ -33,7 +38,12 @@ async function fetchRoom(code: string): Promise<RoomData> {
   });
   const receivedAt = Date.now();
   if (res.status === 404) throw new RoomError("not_found");
-  if (res.status === 403) throw new RoomError("not_member");
+  if (res.status === 403) {
+    const body = (await res.json().catch(() => null)) as {
+      elsewhere?: ElsewhereRoom | null;
+    } | null;
+    throw new RoomError("not_member", body?.elsewhere ?? null);
+  }
   if (!res.ok) throw new RoomError("unknown");
   const view = (await res.json()) as RoomView;
   return { view, offset: view.serverNow - (sentAt + receivedAt) / 2 };
@@ -105,6 +115,7 @@ export function useRoom(code: string) {
   return {
     data: query.data ?? null,
     error: error as RoomFetchError | null,
+    elsewhere: query.error instanceof RoomError ? query.error.elsewhere : null,
     isLoading: query.isPending,
     refresh,
     apply,
