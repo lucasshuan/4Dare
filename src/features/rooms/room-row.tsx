@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Lock } from "lucide-react";
+import { ArrowRight, Lock, UsersRound } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
@@ -150,7 +150,9 @@ export function RoomRow({
         <span className="inline-flex shrink-0 items-center gap-1.5 justify-self-end rounded-pill bg-surface px-3 py-1.5 font-semibold text-[13px] text-ink-muted">
           {r.status === "playing" ? (
             <span className="size-2 animate-pulse rounded-pill bg-yes" />
-          ) : null}
+          ) : (
+            <UsersRound className="size-3.5" strokeWidth={2.25} />
+          )}
           {t(r.status)}
         </span>
       )}
