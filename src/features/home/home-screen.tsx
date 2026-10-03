@@ -4,7 +4,11 @@ import { ArrowRight, Sparkles, UsersRound } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Screen } from "@/components/ui/screen";
+import { LiveDot } from "@/features/current-match/match-lock";
+import { usePlayersOnline } from "@/features/data/use-public-rooms";
+import type { GameKey } from "@/game/games";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { WHO_AM_I } from "@/lib/routes";
 import { GamesCarousel } from "./games-carousel";
@@ -79,6 +83,7 @@ function WhoAmICard() {
               <UsersRound className="size-4" strokeWidth={1.75} />
               {t("players")}
             </span>
+            <OnlineNow game="who-am-i" />
           </div>
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-pill bg-ink px-4 py-2 font-semibold text-on-ink text-sm">
             {t("play")}
@@ -90,5 +95,29 @@ function WhoAmICard() {
         </div>
       </Link>
     </motion.div>
+  );
+}
+
+/** "12 players online" beside a live dot; the line is kept (blank) until the count arrives. */
+function OnlineNow({ game }: { game: GameKey }) {
+  const t = useTranslations("home.games");
+  const online = usePlayersOnline(game);
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 font-medium text-[13px] transition-opacity duration-300",
+        online ? "text-yes" : "text-ink-muted",
+        online === null && "invisible opacity-0",
+      )}
+    >
+      <span className="flex size-4 items-center justify-center">
+        {online ? (
+          <LiveDot />
+        ) : (
+          <span className="size-2 rounded-full bg-current opacity-50" />
+        )}
+      </span>
+      {t("online", { count: online ?? 0 })}
+    </span>
   );
 }

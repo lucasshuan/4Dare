@@ -3,29 +3,28 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { BACKEND } from "@/config";
+import type { GameKey } from "@/game/games";
 import type { PublicRoom } from "@/game/types";
 import { subscribeLobby } from "@/lib/realtime";
 
-const key = ["public-rooms"] as const;
-
 /**
- * Rooms waiting for players, for the home screen. With Supabase a ping says
- * when the list changed and the poll is only a safety net; local mode has no
- * pings and polls instead.
+ * Something every home screen shows the same: fetched from `path`, refreshed
+ * when the room list changes. With Supabase a ping says when it changed and
+ * the poll is only a safety net; local mode has no pings and polls instead.
  */
-export function usePublicRooms() {
+function useLobbyFeed<T>(name: string, path: string) {
   const client = useQueryClient();
   // The list version the last ping announced: the CDN serves each version once fetched.
   const version = useRef<number | null>(null);
   const query = useQuery({
-    queryKey: key,
-    queryFn: async (): Promise<PublicRoom[]> => {
+    queryKey: [name],
+    queryFn: async (): Promise<T> => {
       const v = version.current;
-      const res = await fetch(v ? `/api/rooms?v=${v}` : "/api/rooms", {
+      const res = await fetch(v ? `${path}?v=${v}` : path, {
         cache: "no-store",
       });
-      if (!res.ok) throw new Error(`rooms: ${res.status}`);
-      return ((await res.json()) as { rooms: PublicRoom[] }).rooms;
+      if (!res.ok) throw new Error(`${name}: ${res.status}`);
+      return (await res.json()) as T;
     },
     refetchInterval: BACKEND === "local" ? 3000 : 30_000,
   });
@@ -36,7 +35,7 @@ export function usePublicRooms() {
       if (at) version.current = Math.max(version.current ?? 0, at);
       window.clearTimeout(timer);
       timer = window.setTimeout(
-        () => void client.invalidateQueries({ queryKey: key }),
+        () => void client.invalidateQueries({ queryKey: [name] }),
         250,
       );
     });
@@ -44,6 +43,24 @@ export function usePublicRooms() {
       window.clearTimeout(timer);
       unsubscribe();
     };
-  }, [client]);
-  return { rooms: query.data ?? [], isLoading: query.isPending };
+  }, [client, name]);
+  return query;
+}
+
+/** Rooms waiting for players, for the home screen. */
+export function usePublicRooms() {
+  const query = useLobbyFeed<{ rooms: PublicRoom[] }>(
+    "public-rooms",
+    "/api/rooms",
+  );
+  return { rooms: query.data?.rooms ?? [], isLoading: query.isPending };
+}
+
+/** How many players have a room open right now (lobby, match or podium); null while loading. */
+export function usePlayersOnline(game: GameKey): number | null {
+  const query = useLobbyFeed<{ online: Partial<Record<GameKey, number>> }>(
+    "players-online",
+    "/api/online",
+  );
+  return query.data ? (query.data.online[game] ?? 0) : null;
 }

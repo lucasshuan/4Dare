@@ -1,5 +1,6 @@
 import "server-only";
-import type { RoomState } from "@/game/types";
+import { DEFAULT_GAME, type GameKey } from "@/game/games";
+import type { ActiveRoom, Phase, RoomState } from "@/game/types";
 import { toPublicRoom } from "@/game/view";
 import type { RoomStore } from "../types";
 import { serviceClient } from "./clients";
@@ -68,6 +69,25 @@ export function supabaseRooms(): RoomStore {
         const room = toPublicRoom(r.state as RoomState, now);
         return room ? [room] : [];
       });
+    },
+    async listActive(since) {
+      // only the fields counting needs, not each room's whole history
+      const { data, error } = await db()
+        .select(
+          "phase, updated_at, game:state->settings->>game, players:state->players",
+        )
+        .neq("phase", "closed")
+        .gte("updated_at", new Date(since).toISOString())
+        .limit(1000);
+      if (error) throw error;
+      return (data ?? []).map(
+        (r): ActiveRoom => ({
+          game: ((r.game as string | null) ?? DEFAULT_GAME) as GameKey,
+          phase: r.phase as Phase,
+          updatedAt: new Date(r.updated_at as string).getTime(),
+          players: (r.players as ActiveRoom["players"] | null) ?? [],
+        }),
+      );
     },
     async withPlayer(playerId, phases) {
       const { data, error } = await db()

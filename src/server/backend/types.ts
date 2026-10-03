@@ -6,6 +6,7 @@
 import type { MatchRecord } from "@/game/record";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
+  ActiveRoom,
   Character,
   Identity,
   Lang,
@@ -37,6 +38,8 @@ export interface RoomStore {
   ): Promise<boolean>;
   /** Rooms to list (public and private, see toPublicRoom), newest first. */
   listPublic(): Promise<PublicRoom[]>;
+  /** Rooms not closed and written since `since` (ms), for counting the players online. */
+  listActive(since: number): Promise<ActiveRoom[]>;
   /** Codes of the recent rooms in one of `phases` where `playerId` has a seat. */
   withPlayer(playerId: PlayerId, phases: readonly Phase[]): Promise<string[]>;
 }

@@ -151,3 +151,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Tab titles name the room ("Bia's room" when it has no name), never its code; the lobby's big title is always the room's name, the greeting goes under it
 - [x] One room at a time, guest or account: joining or creating a room leaves your other lobby; a match still going blocks other rooms; a tab that lost its seat to another room says where it went and can take it back
 - [x] Signing in from anywhere hands every guest seat to the account, so a match carries on
+- [x] Game cards show how many players are online right now (in a lobby, a match or on the podium), with a live dot; it updates with the room list

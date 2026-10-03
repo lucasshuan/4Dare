@@ -79,6 +79,7 @@
   "games": {
     "title": "Pick a game",
     "soon": "More games soon",
+    "online": "{count, plural, =0 {Nobody playing right now} one {# player online} other {# players online}}",
     "back": "Games",
     "whoAmI": {
       "name": "Who am I?",

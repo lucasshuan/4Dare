@@ -63,7 +63,7 @@ export function validatorOf(state: RoomState, guesserId: PlayerId) {
 }
 
 /** Their page has been closed for longer than a reload takes. */
-export const goneFor = (p: RoomPlayer, now: number) =>
+export const goneFor = (p: Pick<RoomPlayer, "goneAt">, now: number) =>
   p.goneAt != null && now - p.goneAt >= GONE_GRACE_MS;
 
 /**

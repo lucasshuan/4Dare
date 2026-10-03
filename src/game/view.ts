@@ -1,8 +1,11 @@
 // What each player is allowed to see. This is the only place that decides secrecy.
+
+import type { GameKey } from "./games";
 import { DEFAULT_GAME } from "./games";
 import {
   abandoned,
   findPlayer,
+  goneFor,
   isPresent,
   lastQuestionBy,
   openQuestion,
@@ -11,6 +14,7 @@ import {
   validatorOf,
 } from "./helpers";
 import {
+  type ActiveRoom,
   type AnswerEntry,
   type CardView,
   type Character,
@@ -379,6 +383,26 @@ const PLAYING_PHASES = new Set([
   "guessing",
   "validating",
 ]);
+
+/**
+ * Players with a room page open right now, per game: in a lobby, a match or
+ * on the podium. Who left a match or closed the page doesn't count; neither
+ * does a room the room list would leave out for being idle too long.
+ */
+export function playersOnline(
+  rooms: ActiveRoom[],
+  now: number,
+): Partial<Record<GameKey, number>> {
+  const counts: Partial<Record<GameKey, number>> = {};
+  for (const r of rooms) {
+    const idle = now - r.updatedAt;
+    if (r.phase === "closed" || idle >= PLAYING_FRESH_MS) continue;
+    if (r.phase === "lobby" && idle >= LOBBY_LISTED_MS) continue;
+    const here = r.players.filter((p) => !p.away && !goneFor(p, now)).length;
+    counts[r.game] = (counts[r.game] ?? 0) + here;
+  }
+  return counts;
+}
 
 /**
  * The room list's summary, or null when the room should not be listed. Private

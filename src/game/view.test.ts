@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { isCloseMatch, normalizeName } from "./match";
 import { Game, THEMES } from "./test-utils";
-import { GameError, LOBBY_LISTED_MS } from "./types";
-import { toPublicRoom, toView } from "./view";
+import {
+  type ActiveRoom,
+  GameError,
+  GONE_GRACE_MS,
+  LOBBY_LISTED_MS,
+} from "./types";
+import { playersOnline, toPublicRoom, toView } from "./view";
 
 function started(n: number, seed = 3) {
   const g = new Game(n, seed);
@@ -184,6 +189,42 @@ describe("what the view says", () => {
     expect(t.state.deadline).toBeNull();
     expect(toPublicRoom(t.state, t.now + 5 * 60_000)?.status).toBe("open");
     expect(toPublicRoom(t.state, t.now + LOBBY_LISTED_MS)).toBeNull();
+  });
+
+  it("players online count open pages in fresh rooms, per game", () => {
+    const now = 1_000_000_000;
+    const here = { away: false, goneAt: null };
+    const room = (
+      phase: ActiveRoom["phase"],
+      idleMs: number,
+      players: ActiveRoom["players"],
+    ): ActiveRoom => ({
+      game: "who-am-i",
+      phase,
+      updatedAt: now - idleMs,
+      players,
+    });
+    expect(
+      playersOnline(
+        [
+          room("lobby", 0, [here, here]),
+          // left the match, or closed the page past the grace: not counted
+          room("asking", 60_000, [
+            here,
+            { away: true, goneAt: null },
+            { away: false, goneAt: now - GONE_GRACE_MS },
+          ]),
+          // a reload in progress still counts
+          room("finished", 0, [{ away: false, goneAt: now - 1000 }]),
+          // idle too long, or closed
+          room("lobby", LOBBY_LISTED_MS, [here]),
+          room("guessing", 20 * 60_000, [here]),
+          room("closed", 0, [here]),
+        ],
+        now,
+      ),
+    ).toEqual({ "who-am-i": 4 });
+    expect(playersOnline([], now)).toEqual({});
   });
 
   it("a lobby whose every page closed leaves the list at once, and a reload brings it back", () => {

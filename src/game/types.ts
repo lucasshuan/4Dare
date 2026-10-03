@@ -582,3 +582,11 @@ export interface PublicRoom {
   answerSeconds: number;
   validateSeconds: number;
 }
+
+/** Just what counting the players online needs from a room. */
+export interface ActiveRoom {
+  game: GameKey;
+  phase: Phase;
+  updatedAt: number;
+  players: Pick<RoomPlayer, "away" | "goneAt">[];
+}

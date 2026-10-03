@@ -1,5 +1,6 @@
 import "server-only";
-import type { PublicRoom, RoomState } from "@/game/types";
+import { DEFAULT_GAME } from "@/game/games";
+import type { ActiveRoom, PublicRoom, RoomState } from "@/game/types";
 import { toPublicRoom } from "@/game/view";
 import type { RoomStore, StoredRoom } from "../types";
 import { processSingleton } from "./disk";
@@ -34,6 +35,19 @@ export function localRooms(): RoomStore {
         .sort((a, b) => b.at - a.at)
         .map((x) => x.room)
         .slice(0, 100);
+    },
+    async listActive(since) {
+      const list: ActiveRoom[] = [];
+      for (const { state } of rooms.values()) {
+        if (state.phase === "closed" || state.updatedAt < since) continue;
+        list.push({
+          game: state.settings.game ?? DEFAULT_GAME,
+          phase: state.phase,
+          updatedAt: state.updatedAt,
+          players: state.players,
+        });
+      }
+      return list;
     },
     async withPlayer(playerId, phases) {
       return [...rooms.values()]
