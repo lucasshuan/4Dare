@@ -98,7 +98,7 @@
     "count": "{count, plural, =0 {No rooms} one {# room · {open} with a free seat} other {# rooms · {open} with a free seat}}",
     "create": "Create room",
     "search": "Search",
-    "searchPlaceholder": "Search by room, host or code",
+    "searchPlaceholder": "Search by room name",
     "clearSearch": "Clear search",
     "game": "Game",
     "allGames": "All games",

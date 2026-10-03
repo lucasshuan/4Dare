@@ -98,7 +98,7 @@
     "count": "{count, plural, =0 {ルームなし} other {#件 · 空きあり{open}件}}",
     "create": "ルームを作る",
     "search": "検索",
-    "searchPlaceholder": "ルーム名・ホスト・コードで検索",
+    "searchPlaceholder": "ルーム名で検索",
     "clearSearch": "検索をクリア",
     "game": "ゲーム",
     "allGames": "すべてのゲーム",

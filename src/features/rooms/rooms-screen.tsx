@@ -33,7 +33,7 @@ export type Access = "all" | "public" | "private";
 export interface RoomFilters {
   /** null: every game. */
   game: GameKey | null;
-  /** Room name, host name or code; empty: no search. */
+  /** The room's name as listed ("<host>'s room" when it has none); empty: no search. */
   q: string;
   access: Access;
 }
@@ -59,6 +59,7 @@ function toSearch({ game, q, access }: RoomFilters) {
 /** /rooms: every listed room, filtered by game, a search and who can join. The filters live in the link. */
 export function RoomsScreen({ initial }: { initial: RoomFilters }) {
   const t = useTranslations("home.roomsPage");
+  const tr = useTranslations("home.rooms");
   const name = useDisplayName();
   const { rooms, isLoading } = usePublicRooms();
   const { match } = useCurrentMatch();
@@ -81,12 +82,10 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
           (filters.access === "all" ||
             (filters.access === "private") === r.locked) &&
           (!q ||
-            fold(r.name).includes(q) ||
-            fold(name(r.host)).includes(q) ||
-            fold(r.code).includes(q)),
+            fold(r.name || tr("roomOf", { name: name(r.host) })).includes(q)),
       ),
     );
-  }, [rooms, filters, name]);
+  }, [rooms, filters, name, tr]);
   const open = shown.filter((r) => r.status === "open").length;
   const filtered = !!(
     filters.game ||

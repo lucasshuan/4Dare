@@ -98,7 +98,7 @@
     "count": "{count, plural, =0 {Nenhuma sala} one {# sala · {open} com vaga} other {# salas · {open} com vaga}}",
     "create": "Criar sala",
     "search": "Buscar",
-    "searchPlaceholder": "Busque por sala, anfitrião ou código",
+    "searchPlaceholder": "Busque pelo nome da sala",
     "clearSearch": "Limpar busca",
     "game": "Jogo",
     "allGames": "Todos os jogos",
