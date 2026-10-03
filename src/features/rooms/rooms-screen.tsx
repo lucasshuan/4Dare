@@ -131,21 +131,22 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
           <Filters filters={filters} set={set} />
 
           {isLoading ? (
-            <div className="grid gap-2 md:grid-cols-2">
+            <div className="flex flex-col gap-2">
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-[68px] animate-pulse rounded-lg bg-surface"
+                  className="h-[76px] animate-pulse rounded-lg bg-surface"
                 />
               ))}
             </div>
           ) : shown.length ? (
-            <ul className="grid gap-2 md:grid-cols-2">
+            <ul className="flex flex-col gap-2">
               <AnimatePresence initial={false} mode="popLayout">
                 {shown.map((r) => (
                   <RoomRow
                     key={r.code}
                     room={r}
+                    showGame
                     className="bg-surface shadow-card"
                   />
                 ))}
