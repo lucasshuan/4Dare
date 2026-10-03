@@ -1,8 +1,9 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { keyClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
@@ -13,7 +14,6 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { GAMES, newRoom } from "@/lib/routes";
-import { CreateRoomCta } from "./create-room-cta";
 import { JoinByCode } from "./join-by-code";
 import { WhoAmIBanner } from "./who-am-i-banner";
 
@@ -60,12 +60,18 @@ export function WhoAmIScreen() {
               match && "pointer-events-none select-none opacity-35 grayscale",
             )}
           >
-            <CreateRoomCta
+            {/* as tall as the code field's label and input beside it, lip included */}
+            <Link
               href={newRoom("who-am-i")}
-              className="grow max-sm:w-full sm:max-w-80"
+              className={keyClass("sky", {
+                bounce: true,
+                className:
+                  "min-h-16 grow self-stretch px-8 text-xl max-sm:w-full sm:max-w-80",
+              })}
             >
+              <Plus className="size-6 shrink-0" strokeWidth={2.75} />
               {t("create")}
-            </CreateRoomCta>
+            </Link>
             <JoinByCode />
           </div>
         </motion.section>

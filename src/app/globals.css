@@ -18,8 +18,10 @@
   --sky: #2b69c8;
   --on-sky: #ffffff;
   --sky-soft: #dce8fa;
-  /* the lip under a "key" button; follows --sky in both themes */
+  /* the lips under "key" buttons; they follow their colour in both themes */
   --sky-deep: color-mix(in oklch, var(--sky), black 32%);
+  --yes-deep: color-mix(in oklch, var(--yes), black 32%);
+  --apricot-deep: color-mix(in oklch, var(--apricot), black 32%);
   --apricot: #cf7024;
   --on-apricot: #2a1707;
   --apricot-soft: #fce8d6;
@@ -128,7 +130,7 @@
   --ease-swap: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-/* "Create room": a key with a thick lip that gives a little squash-and-stretch bounce now and then. */
+/* Key buttons (keyClass): a little squash-and-stretch bounce now and then. */
 @theme {
   --animate-boing: boing 4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 

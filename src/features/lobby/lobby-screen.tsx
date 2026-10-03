@@ -17,7 +17,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, keyClass } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
 import { RoomQr } from "@/components/ui/room-qr";
 import { Screen } from "@/components/ui/screen";
@@ -324,18 +324,22 @@ export function LobbyScreen() {
             <span className="min-w-20 grow-999 basis-0 font-bold font-display text-lg leading-tight">
               {gameName(game)}
             </span>
+            {/* keys like "Create room": the host's starts the match; a guest's stays pressed down once ready */}
             {me.isHost ? (
               <>
-                <Button
-                  variant="primary"
-                  className="grow"
+                <button
+                  type="button"
+                  className={keyClass("yes", {
+                    bounce: true,
+                    className: "min-h-14 grow px-6 text-lg",
+                  })}
                   disabled={!view.canStart || pending}
                   onClick={() =>
                     waiting.length ? setConfirming(true) : start()
                   }
                 >
                   {t("start")}
-                </Button>
+                </button>
                 <StartDialog
                   open={confirming && view.canStart}
                   onClose={() => setConfirming(false)}
@@ -345,16 +349,20 @@ export function LobbyScreen() {
                 />
               </>
             ) : (
-              <Button
-                variant={myReady ? "secondary" : "primary"}
-                className="grow"
+              <button
+                type="button"
+                className={keyClass(myReady ? "yes" : "apricot", {
+                  pressed: myReady,
+                  bounce: true,
+                  className: "min-h-14 grow px-6 text-lg",
+                })}
                 aria-pressed={myReady}
                 disabled={pending}
                 onClick={toggleReady}
               >
-                <Check strokeWidth={2} />
+                <Check className="size-5 shrink-0" strokeWidth={2.5} />
                 {myReady ? t("readyDone") : t("imReady")}
-              </Button>
+              </button>
             )}
           </div>
           <ul className="flex flex-col gap-3">
