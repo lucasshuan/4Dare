@@ -196,6 +196,8 @@ export function SettingsFields({
                 max={ROOM_PASSWORD_MAX}
                 autoComplete="off"
                 spellCheck={false}
+                data-1p-ignore
+                data-lpignore="true"
                 aria-invalid={missingPassword(value)}
                 onChange={(e) =>
                   onChange({ ...value, password: e.target.value })

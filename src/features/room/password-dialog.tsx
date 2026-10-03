@@ -61,9 +61,12 @@ export function PasswordDialog({
               </Dialog.Description>
             </div>
             <div className="flex flex-col gap-2">
+              {/* Plain text, not type="password": the browser would offer to save a room's password as a login. The host sees it in the clear anyway. */}
               <TextField
                 label={t("label")}
-                type="password"
+                spellCheck={false}
+                data-1p-ignore
+                data-lpignore="true"
                 value={value}
                 maxLength={ROOM_PASSWORD_MAX}
                 autoFocus
