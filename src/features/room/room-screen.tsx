@@ -293,6 +293,11 @@ function useRoomTab() {
       ? `${t(`tab.${phase}`)} · ${view.settings.name || code}`
       : t("room.title", { code }),
     alert ? t(`tab.alert.${alert}`) : null,
-    { deadline: view.deadline, stepStartsAt: view.stepStartsAt, offset },
+    {
+      deadline: view.deadline,
+      stepStartsAt: view.stepStartsAt,
+      stepMs: view.stepMs,
+      offset,
+    },
   );
 }

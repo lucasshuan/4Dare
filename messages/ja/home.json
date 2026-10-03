@@ -13,7 +13,7 @@
     "tabRoom": "ルーム",
     "roomSummary": "{visibility}・{seats}人",
     "tabRules": "ルール",
-    "rulesSummary": "1ステップ{seconds}秒",
+    "rulesSummary": "{ask} · {answer} · {guess} · {validate}秒",
     "visibility": "参加できる人",
     "public": "公開",
     "private": "非公開",
@@ -25,11 +25,27 @@
     "needName": "ルーム名を決めてください。",
     "seats": "人数",
     "seatsHint": "2人以上でゲームを始められます。",
-    "seconds": "1ステップの時間",
+    "times": {
+      "askSeconds": {
+        "label": "質問の時間",
+        "hint": "手番のプレイヤーが、はい・いいえで答えられる質問を書きます。"
+      },
+      "answerSeconds": {
+        "label": "回答の時間",
+        "hint": "ほかの全員が答えます。誰かが答えるたびに、まだの人の残り時間がこの時間の20%ずつ減ります。"
+      },
+      "guessSeconds": {
+        "label": "予想の時間",
+        "hint": "回答のあと、手番のプレイヤーが自分が誰かを予想するか、パスします。"
+      },
+      "validateSeconds": {
+        "label": "判定の時間",
+        "hint": "キャラクターを選んだ人が、すぐには一致しなかった予想を判定します。"
+      }
+    },
     "less": "10秒減らす",
     "more": "10秒増やす",
     "secondsUnit": "秒",
-    "secondsHint": "標準は120秒。キャラ選び、質問、回答、予想、判定のそれぞれに使われます。30〜300秒。",
     "themes": "テーマ",
     "themesHint": "みんなで投票：毎回の試合の前に、オンにしたセットから3つのテーマが出て、すばやく投票します。自分で決める：試合が始まったら、あなたがテーマを書きます。",
     "themeMode": "テーマの決め方",

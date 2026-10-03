@@ -96,13 +96,18 @@ async function act(
 
 // --- rooms ------------------------------------------------------------------
 
+const seconds = z.number().int().min(STEP_SECONDS_MIN).max(STEP_SECONDS_MAX);
+
 const createSchema = z.object({
   game: z.enum(GAME_KEYS),
   name: z.string().trim().min(1).max(ROOM_NAME_MAX),
   visibility: z.enum(["public", "private"]),
   password: z.string().trim().max(ROOM_PASSWORD_MAX),
   seats: z.union([z.literal(2), z.literal(3), z.literal(4)]),
-  stepSeconds: z.number().int().min(STEP_SECONDS_MIN).max(STEP_SECONDS_MAX),
+  askSeconds: seconds,
+  guessSeconds: seconds,
+  answerSeconds: seconds,
+  validateSeconds: seconds,
   themeMode: z.enum(["vote", "host"]),
   themeSets: z
     .array(z.enum(THEME_SET_KEYS as [ThemeSet, ...ThemeSet[]]))

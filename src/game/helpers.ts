@@ -1,13 +1,21 @@
 // Small lookups shared by the engine and the view.
 import {
+  DEFAULT_SETTINGS,
   GONE_GRACE_MS,
   type Play,
   type PlayerId,
   type RoomPlayer,
+  type RoomSettings,
   type RoomState,
+  type StepTime,
 } from "./types";
 
 export const isPresent = (p: RoomPlayer) => !p.away;
+
+/** A step's seconds; rooms saved before the setting existed get its default. */
+export function stepSeconds(settings: RoomSettings, key: StepTime): number {
+  return settings[key] ?? DEFAULT_SETTINGS[key];
+}
 
 export function isActive(state: RoomState, id: PlayerId): boolean {
   const o = state.outcomes[id];

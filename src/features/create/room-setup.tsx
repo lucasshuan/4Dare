@@ -132,7 +132,12 @@ export function RoomSetup({
               icon={ScrollText}
               tone="bg-yes-soft text-yes"
               label={t("tabRules")}
-              summary={t("rulesSummary", { seconds: value.stepSeconds })}
+              summary={t("rulesSummary", {
+                ask: value.askSeconds,
+                answer: value.answerSeconds,
+                guess: value.guessSeconds,
+                validate: value.validateSeconds,
+              })}
               problem={problems.rules}
               problemId={`${problemId}-rules`}
             />

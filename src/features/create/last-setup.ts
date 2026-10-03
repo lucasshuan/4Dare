@@ -16,7 +16,10 @@ export const DEFAULT_SETUP: CreateRoomInput = {
   password: "",
   visibility: DEFAULT_SETTINGS.visibility,
   seats: DEFAULT_SETTINGS.seats,
-  stepSeconds: DEFAULT_SETTINGS.stepSeconds,
+  askSeconds: DEFAULT_SETTINGS.askSeconds,
+  guessSeconds: DEFAULT_SETTINGS.guessSeconds,
+  answerSeconds: DEFAULT_SETTINGS.answerSeconds,
+  validateSeconds: DEFAULT_SETTINGS.validateSeconds,
   themeMode: DEFAULT_SETTINGS.themeMode,
   themeSets: [...THEME_SET_KEYS],
 };
@@ -31,7 +34,13 @@ export function loadSetup(): CreateRoomInput {
     saved = JSON.parse(localStorage.getItem(KEY) ?? "{}") ?? {};
   } catch {}
   const d = DEFAULT_SETUP;
-  const seconds = saved.stepSeconds;
+  const seconds = (v: unknown, fallback: number) =>
+    typeof v === "number" &&
+    Number.isInteger(v) &&
+    v >= STEP_SECONDS_MIN &&
+    v <= STEP_SECONDS_MAX
+      ? v
+      : fallback;
   // Saved as the sets turned off, so a set added later starts on.
   const off = Array.isArray(saved.setsOff) ? saved.setsOff : [];
   const themeSets = THEME_SET_KEYS.filter((k) => !off.includes(k));
@@ -41,13 +50,10 @@ export function loadSetup(): CreateRoomInput {
     password: d.password,
     visibility: oneOf(saved.visibility, ["public", "private"], d.visibility),
     seats: d.seats,
-    stepSeconds:
-      typeof seconds === "number" &&
-      Number.isInteger(seconds) &&
-      seconds >= STEP_SECONDS_MIN &&
-      seconds <= STEP_SECONDS_MAX
-        ? seconds
-        : d.stepSeconds,
+    askSeconds: seconds(saved.askSeconds, d.askSeconds),
+    guessSeconds: seconds(saved.guessSeconds, d.guessSeconds),
+    answerSeconds: seconds(saved.answerSeconds, d.answerSeconds),
+    validateSeconds: seconds(saved.validateSeconds, d.validateSeconds),
     themeMode: oneOf(saved.themeMode, ["vote", "host"], d.themeMode),
     themeSets: themeSets.length ? themeSets : d.themeSets,
   };

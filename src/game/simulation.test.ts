@@ -80,9 +80,11 @@ function checkInvariants(s: RoomState) {
     for (const [t, a] of Object.entries(s.assignments))
       expect(a.pickerId).not.toBe(t);
     expect(s.deadline).not.toBeNull();
-    expect((s.deadline ?? 0) - (s.stepStartsAt ?? 0)).toBe(
-      s.settings.stepSeconds * 1000,
-    );
+    // answers can cut the clock short, never stretch it
+    const left = (s.deadline ?? 0) - (s.stepStartsAt ?? 0);
+    if (s.phase === "answering")
+      expect(left).toBeLessThanOrEqual(s.stepMs ?? 0);
+    else expect(left).toBe(s.stepMs);
     // turn steps start under an answers or guess reveal; only the theme holds the clock
     if (s.reveal?.kind === "theme")
       expect(s.stepStartsAt ?? 0).toBeGreaterThanOrEqual(s.reveal.until);

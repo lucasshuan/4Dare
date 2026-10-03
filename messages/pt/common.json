@@ -32,6 +32,8 @@
     "miss": "Ainda não"
   },
   "timeLeft": "Tempo restante: {time}",
+  "clockCut": "−{seconds} s",
+  "clockCutLabel": "{seconds} segundos a menos no relógio",
   "back": "Voltar",
   "close": "Fechar",
   "revealHint": "Clique em qualquer lugar ou aperte uma tecla para fechar",

@@ -13,6 +13,8 @@ import {
   ROOM_PASSWORD_MAX,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
+  STEP_TIMES,
+  type StepTime,
 } from "@/game/types";
 import { cn } from "@/lib/cn";
 import type { CreateRoomInput } from "@/server/contract";
@@ -63,19 +65,19 @@ function Segmented<T extends string | number>({
   );
 }
 
-const clampSeconds = (n: number) =>
+const clampSeconds = (n: number, fallback: number) =>
   Math.min(
     STEP_SECONDS_MAX,
-    Math.max(
-      STEP_SECONDS_MIN,
-      Math.round(n / 10) * 10 || DEFAULT_SETTINGS.stepSeconds,
-    ),
+    Math.max(STEP_SECONDS_MIN, Math.round(n / 10) * 10 || fallback),
   );
 
-function SecondsStepper({
+/** One step's seconds: a label with its hint, then − [90] + in steps of 10. */
+function SecondsField({
+  step,
   value,
   onChange,
 }: {
+  step: StepTime;
   value: number;
   onChange: (n: number) => void;
 }) {
@@ -84,26 +86,28 @@ function SecondsStepper({
   const [draft, setDraft] = useState(String(value));
   useEffect(() => setDraft(String(value)), [value]);
   const set = (n: number) => {
-    const v = clampSeconds(n);
+    const v = clampSeconds(n, DEFAULT_SETTINGS[step]);
     setDraft(String(v));
     onChange(v);
   };
+  const label = t(`times.${step}.label`);
   return (
     <div className="flex flex-col gap-2">
-      <HintLabel hint={t("secondsHint")} hintId={hintId}>
-        {t("seconds")}
+      <HintLabel hint={t(`times.${step}.hint`)} hintId={hintId}>
+        {label}
       </HintLabel>
       <div className="flex items-center gap-2">
         <button
           type="button"
-          aria-label={t("less")}
-          onClick={() => set(value - 10)}
-          className="flex size-11 items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface"
+          aria-label={`${label}: ${t("less")}`}
+          aria-disabled={value <= STEP_SECONDS_MIN}
+          onClick={() => value > STEP_SECONDS_MIN && set(value - 10)}
+          className="flex size-10 items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface transition-[opacity,transform] duration-150 active:scale-90 aria-disabled:opacity-35"
         >
-          <Minus className="size-5" strokeWidth={1.75} />
+          <Minus className="size-4.5" strokeWidth={1.75} />
         </button>
         <input
-          aria-label={t("seconds")}
+          aria-label={label}
           aria-describedby={hintId}
           inputMode="numeric"
           value={draft}
@@ -111,28 +115,22 @@ function SecondsStepper({
             setDraft(e.target.value.replace(/\D/g, "").slice(0, 3))
           }
           onBlur={() => set(Number(draft))}
-          className="h-13 w-24 rounded-md border-[1.5px] border-line-strong bg-surface text-center font-medium font-mono text-xl tabular-nums"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") set(Number(draft));
+          }}
+          className="h-11 w-18 rounded-md border-[1.5px] border-line-strong bg-surface text-center font-medium font-mono text-lg tabular-nums"
         />
         <button
           type="button"
-          aria-label={t("more")}
-          onClick={() => set(value + 10)}
-          className="flex size-11 items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface"
+          aria-label={`${label}: ${t("more")}`}
+          aria-disabled={value >= STEP_SECONDS_MAX}
+          onClick={() => value < STEP_SECONDS_MAX && set(value + 10)}
+          className="flex size-10 items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface transition-[opacity,transform] duration-150 active:scale-90 aria-disabled:opacity-35"
         >
-          <Plus className="size-5" strokeWidth={1.75} />
+          <Plus className="size-4.5" strokeWidth={1.75} />
         </button>
-        <span>{t("secondsUnit")}</span>
+        <span className="text-ink-muted text-sm">{t("secondsUnit")}</span>
       </div>
-      {/* the stepper does it all; very short windows skip the shortcuts */}
-      <Segmented
-        label={t("seconds")}
-        options={[60, 90, 120, 180, 300] as const}
-        value={value as 60}
-        onChange={set}
-        render={String}
-        describedBy={hintId}
-        className="sm:tiny:hidden"
-      />
     </div>
   );
 }
@@ -229,8 +227,8 @@ export function SettingsFields({
 }
 
 /**
- * The rules of the room's game. For now only the seconds per step, but each
- * game can bring its own here.
+ * The rules of the room's game: for now the seconds of each step of a turn,
+ * two by two. Each game can bring its own here.
  */
 export function RulesFields({
   value,
@@ -240,10 +238,16 @@ export function RulesFields({
   onChange: (v: CreateRoomInput) => void;
 }) {
   return (
-    <SecondsStepper
-      value={value.stepSeconds}
-      onChange={(stepSeconds) => onChange({ ...value, stepSeconds })}
-    />
+    <div className="grid gap-x-10 gap-y-6 sm:grid-cols-[repeat(2,max-content)] sm:tiny:gap-y-4">
+      {STEP_TIMES.map((step) => (
+        <SecondsField
+          key={step}
+          step={step}
+          value={value[step]}
+          onChange={(n) => onChange({ ...value, [step]: n })}
+        />
+      ))}
+    </div>
   );
 }
 

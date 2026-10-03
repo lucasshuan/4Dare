@@ -7,6 +7,7 @@ import {
   lastQuestionBy,
   openQuestion,
   pendingGuess,
+  stepSeconds,
   validatorOf,
 } from "./helpers";
 import {
@@ -25,6 +26,7 @@ import {
   type PublicRoom,
   type RevealView,
   type RoomPlayer,
+  type RoomSettings,
   type RoomState,
   type RoomView,
   type TurnView,
@@ -277,6 +279,14 @@ function reveal(
 }
 
 /** The room as `viewerId` may see it. Throws GameError("not_member") for outsiders. */
+/** Settings minus keys older rooms still carry (one "stepSeconds" became three times). */
+function withoutLegacy(settings: RoomSettings) {
+  const { stepSeconds: _old, ...rest } = settings as RoomSettings & {
+    stepSeconds?: number;
+  };
+  return rest;
+}
+
 export function toView(
   state: RoomState,
   version: number,
@@ -329,7 +339,7 @@ export function toView(
     // The password only goes to the host, who shares it.
     settings: {
       ...DEFAULT_SETTINGS,
-      ...s.settings,
+      ...withoutLegacy(s.settings),
       password: viewerId === s.hostId ? (s.settings.password ?? "") : "",
     },
     round: s.round,
@@ -340,6 +350,11 @@ export function toView(
     theme: s.theme,
     deadline: s.deadline,
     stepStartsAt: s.stepStartsAt,
+    stepMs:
+      s.stepMs ??
+      (s.deadline !== null && s.stepStartsAt !== null
+        ? s.deadline - s.stepStartsAt
+        : null),
     reveal: reveal(s, viewerId, now),
     serverNow: now,
     vote: voteView(s, viewerId, now),
@@ -405,6 +420,9 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
     },
     players: s.players.length,
     seats: s.settings.seats,
-    stepSeconds: s.settings.stepSeconds,
+    askSeconds: stepSeconds(s.settings, "askSeconds"),
+    guessSeconds: stepSeconds(s.settings, "guessSeconds"),
+    answerSeconds: stepSeconds(s.settings, "answerSeconds"),
+    validateSeconds: stepSeconds(s.settings, "validateSeconds"),
   };
 }

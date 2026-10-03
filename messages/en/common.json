@@ -32,6 +32,8 @@
     "miss": "Not yet"
   },
   "timeLeft": "Time left: {time}",
+  "clockCut": "−{seconds} s",
+  "clockCutLabel": "{seconds} seconds off the clock",
   "back": "Back",
   "close": "Close",
   "revealHint": "Click anywhere or press any key to close",

@@ -32,7 +32,7 @@ import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
-import type { Lang } from "@/game/types";
+import { type Lang, STEP_TIMES } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
@@ -57,7 +57,10 @@ const editable = ({
   visibility,
   password,
   seats,
-  stepSeconds,
+  askSeconds,
+  guessSeconds,
+  answerSeconds,
+  validateSeconds,
   themeMode,
   themeSets,
 }: CreateRoomInput): CreateRoomInput => ({
@@ -66,7 +69,10 @@ const editable = ({
   visibility,
   password,
   seats,
-  stepSeconds,
+  askSeconds,
+  guessSeconds,
+  answerSeconds,
+  validateSeconds,
   themeMode,
   themeSets,
 });
@@ -104,7 +110,6 @@ export function LobbyScreen() {
     name: roomName,
     visibility,
     seats,
-    stepSeconds,
     themeMode,
     themeSets,
   } = view.settings;
@@ -329,10 +334,21 @@ export function LobbyScreen() {
               </Setting>
               <Setting icon={UsersRound}>{t("seats", { seats })}</Setting>
               <Setting icon={Clock}>
-                {t("stepSeconds", {
-                  seconds: stepSeconds,
-                  clock: formatClock(stepSeconds),
-                })}
+                <span className="sr-only">{t("timesLabel")}: </span>
+                {/* a turn's steps in order, each with its clock */}
+                <span className="flex flex-wrap gap-1.5">
+                  {STEP_TIMES.map((step) => (
+                    <span
+                      key={step}
+                      className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm"
+                    >
+                      {t(`times.${step}`)}
+                      <span className="font-medium font-mono text-[13px] tabular-nums">
+                        {formatClock(view.settings[step])}
+                      </span>
+                    </span>
+                  ))}
+                </span>
               </Setting>
               <Setting icon={themeMode === "host" ? PenLine : Vote}>
                 {themeMode === "host"

@@ -13,7 +13,7 @@
     "tabRoom": "Sala",
     "roomSummary": "{visibility} · {seats} vagas",
     "tabRules": "Regras",
-    "rulesSummary": "{seconds} s por etapa",
+    "rulesSummary": "{ask} · {answer} · {guess} · {validate} s",
     "visibility": "Quem pode entrar",
     "public": "Pública",
     "private": "Privada",
@@ -25,11 +25,27 @@
     "needName": "Dê um nome para a sala.",
     "seats": "Vagas",
     "seatsHint": "A partida pode começar com 2 jogadores ou mais.",
-    "seconds": "Tempo por etapa",
+    "times": {
+      "askSeconds": {
+        "label": "Tempo para perguntar",
+        "hint": "Quem está na vez escreve uma pergunta de sim ou não."
+      },
+      "answerSeconds": {
+        "label": "Tempo para responder",
+        "hint": "Os outros respondem. Cada resposta tira 20% desse tempo de quem ainda falta."
+      },
+      "guessSeconds": {
+        "label": "Tempo para palpitar",
+        "hint": "Depois das respostas, quem está na vez arrisca quem é ou passa a vez."
+      },
+      "validateSeconds": {
+        "label": "Tempo para conferir o palpite",
+        "hint": "Quem escolheu o personagem confere um palpite que não bateu na hora."
+      }
+    },
     "less": "Menos 10 segundos",
     "more": "Mais 10 segundos",
     "secondsUnit": "segundos",
-    "secondsHint": "Padrão: 120 segundos. Vale para cada escolha, pergunta, resposta, palpite e validação. De 30 a 300.",
     "themes": "Temas",
     "themesHint": "Todos votam: antes de cada partida, 3 temas dos conjuntos ligados vão para uma votação rápida. Eu escolho: você escreve o tema quando a partida começa.",
     "themeMode": "Como o tema é escolhido",

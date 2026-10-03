@@ -43,6 +43,7 @@ export function GameHeader({
           stepStartsAt={view.stepStartsAt}
           rechargeFrom={view.reveal?.startsAt ?? null}
           offset={offset}
+          totalMs={view.stepMs}
           tick
         />
         {after}

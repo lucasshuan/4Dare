@@ -56,7 +56,10 @@ export interface CreateRoomInput {
   /** Required when private; ignored when public. */
   password: string;
   seats: 2 | 3 | 4;
-  stepSeconds: number;
+  askSeconds: number;
+  guessSeconds: number;
+  answerSeconds: number;
+  validateSeconds: number;
   themeMode: "vote" | "host";
   themeSets: ThemeSet[];
 }

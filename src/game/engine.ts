@@ -9,6 +9,7 @@ import {
   openQuestion,
   pendingGuess,
   presenceDue,
+  stepSeconds,
   validatorOf,
 } from "./helpers";
 import { isCloseMatch } from "./match";
@@ -19,6 +20,8 @@ import {
 } from "./question";
 import { isThemeSet, THEME_SET_KEYS } from "./theme-sets";
 import {
+  ANSWER_CUT,
+  ANSWER_CUT_FLOOR_MS,
   type AnswerEntry,
   type Character,
   type Ctx,
@@ -33,6 +36,7 @@ import {
   MAX_NOTE,
   MAX_QUESTION,
   MAX_THEME,
+  PICK_SECONDS,
   type Play,
   type PlayerId,
   RESULT_SECONDS,
@@ -43,6 +47,8 @@ import {
   type RoomState,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
+  STEP_TIMES,
+  type StepTime,
   THEME_IDEAS,
   THEME_OPTIONS,
   type Theme,
@@ -69,14 +75,17 @@ function mergeSettings(
     "visibility",
     "password",
     "seats",
-    "stepSeconds",
+    ...STEP_TIMES,
     "mode",
     "themeMode",
     "themeSets",
   ]);
   if (Object.keys(patch).some((k) => !allowed.has(k))) fail("invalid_input");
-  // Rooms made before a setting existed get its default.
-  const next = { ...DEFAULT_SETTINGS, ...base, ...patch };
+  // Rooms made before a setting existed get its default; one "stepSeconds" became three.
+  const { stepSeconds: _old, ...current } = base as RoomSettings & {
+    stepSeconds?: number;
+  };
+  const next = { ...DEFAULT_SETTINGS, ...current, ...patch };
   const sets: unknown = next.themeSets;
   const name: unknown = next.name;
   const password: unknown = next.password;
@@ -91,9 +100,12 @@ function mergeSettings(
     (next.visibility === "public" || password.trim().length > 0) &&
     [2, 3, 4].includes(next.seats) &&
     next.seats >= seated &&
-    Number.isInteger(next.stepSeconds) &&
-    next.stepSeconds >= STEP_SECONDS_MIN &&
-    next.stepSeconds <= STEP_SECONDS_MAX &&
+    STEP_TIMES.every(
+      (k) =>
+        Number.isInteger(next[k]) &&
+        next[k] >= STEP_SECONDS_MIN &&
+        next[k] <= STEP_SECONDS_MAX,
+    ) &&
     next.mode === "classic" &&
     (next.themeMode === "vote" || next.themeMode === "host") &&
     Array.isArray(sets) &&
@@ -123,13 +135,28 @@ function startStep(s: RoomState, ctx: Ctx, ms: number) {
   const start = Math.max(ctx.now, waits ? (s.reveal?.until ?? 0) : 0);
   s.stepStartsAt = start;
   s.deadline = start + ms;
+  s.stepMs = ms;
 }
 
-const stepMs = (s: RoomState) => s.settings.stepSeconds * 1000;
+const stepMs = (s: RoomState, key: StepTime) =>
+  stepSeconds(s.settings, key) * 1000;
 
 function stopClock(s: RoomState) {
   s.deadline = null;
   s.stepStartsAt = null;
+  s.stepMs = null;
+}
+
+/**
+ * An answer came in and others still owe theirs: the clock loses ANSWER_CUT
+ * of the answer time, so the last ones don't keep everybody waiting. It never
+ * goes below ANSWER_CUT_FLOOR_MS from now, nor moves later.
+ */
+function cutAnswerClock(s: RoomState, ctx: Ctx) {
+  if (s.deadline === null) return;
+  const cut = stepMs(s, "answerSeconds") * ANSWER_CUT;
+  const floor = ctx.now + ANSWER_CUT_FLOOR_MS;
+  s.deadline = Math.min(s.deadline, Math.max(s.deadline - cut, floor));
 }
 
 /** The lobby clock (re)starts once there are two to play; alone, the room just waits. */
@@ -215,7 +242,7 @@ function revealTheme(s: RoomState, ms: number, ctx: Ctx) {
     startsAt: ctx.now,
     until: ctx.now + ms,
   };
-  startStep(s, ctx, stepMs(s));
+  startStep(s, ctx, PICK_SECONDS * 1000);
 }
 
 function setTheme(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
@@ -270,7 +297,7 @@ function beginMatch(s: RoomState, theme: Theme, ctx: Ctx) {
   }
   s.playStartedAt = null;
   s.phase = "picking";
-  startStep(s, ctx, stepMs(s));
+  startStep(s, ctx, PICK_SECONDS * 1000);
 }
 
 /** Out of the match without discovering: gave up, left or timed out (`away` tells which). */
@@ -314,7 +341,7 @@ function goToTurn(s: RoomState, ctx: Ctx, from: PlayerId | null) {
   if (wrapped) s.turnRound = (s.turnRound ?? 0) + 1;
   s.phase = "asking";
   s.turnPlayerId = next;
-  startStep(s, ctx, stepMs(s));
+  startStep(s, ctx, stepMs(s, "askSeconds"));
 }
 
 const nextTurn = (s: RoomState, ctx: Ctx) => goToTurn(s, ctx, s.turnPlayerId);
@@ -351,7 +378,7 @@ function resolveQuestion(s: RoomState, q: Question, ctx: Ctx) {
     until: ctx.now + ms,
   };
   s.phase = "guessing";
-  startStep(s, ctx, stepMs(s));
+  startStep(s, ctx, stepMs(s, "guessSeconds"));
 }
 
 /**
@@ -749,7 +776,7 @@ function ask(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
   fillMissingAnswers(s, q, true);
   if (othersAnswered(s, q)) return resolveQuestion(s, q, ctx);
   s.phase = "answering";
-  startStep(s, ctx, stepMs(s));
+  startStep(s, ctx, stepMs(s, "answerSeconds"));
 }
 
 function answer(
@@ -769,6 +796,7 @@ function answer(
   if (n.length > MAX_NOTE) fail("invalid_input");
   q.answers.push({ by: playerId, value, note: n || null });
   if (othersAnswered(s, q)) resolveQuestion(s, q, ctx);
+  else cutAnswerClock(s, ctx);
 }
 
 function guess(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
@@ -786,7 +814,7 @@ function guess(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
   const c = s.assignments[playerId]?.character;
   if (c && isCloseMatch(g.text, [c.name, ...c.aliases])) return hit(s, g, ctx);
   s.phase = "validating";
-  startStep(s, ctx, stepMs(s));
+  startStep(s, ctx, stepMs(s, "validateSeconds"));
 }
 
 function giveUp(s: RoomState, playerId: PlayerId, ctx: Ctx) {

@@ -13,7 +13,7 @@
     "tabRoom": "Room",
     "roomSummary": "{visibility} · {seats} seats",
     "tabRules": "Rules",
-    "rulesSummary": "{seconds} s per step",
+    "rulesSummary": "{ask} · {answer} · {guess} · {validate} s",
     "visibility": "Who can join",
     "public": "Public",
     "private": "Private",
@@ -25,11 +25,27 @@
     "needName": "Give the room a name.",
     "seats": "Seats",
     "seatsHint": "The match can start with 2 players or more.",
-    "seconds": "Time per step",
+    "times": {
+      "askSeconds": {
+        "label": "Time to ask",
+        "hint": "Whoever's turn it is writes a yes-or-no question."
+      },
+      "answerSeconds": {
+        "label": "Time to answer",
+        "hint": "Everyone else answers. Each answer takes 20% of this time off for whoever is still answering."
+      },
+      "guessSeconds": {
+        "label": "Time to guess",
+        "hint": "After the answers, the player guesses who they are or passes."
+      },
+      "validateSeconds": {
+        "label": "Time to check the guess",
+        "hint": "Whoever picked the character checks a guess that wasn't an exact match."
+      }
+    },
     "less": "10 seconds less",
     "more": "10 seconds more",
     "secondsUnit": "seconds",
-    "secondsHint": "Default: 120 seconds. Counts for every pick, question, answer, guess and check. From 30 to 300.",
     "themes": "Themes",
     "themesHint": "Everyone votes: before each match, 3 themes from the sets you turn on go to a quick vote. I type it: you write the theme when the match starts.",
     "themeMode": "How the theme is chosen",

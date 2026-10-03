@@ -18,7 +18,13 @@
   "public": "公開：だれでも参加できます",
   "private": "非公開：パスワードが必要です",
   "seats": "最大{seats}人",
-  "stepSeconds": "1ステップ{seconds}秒（{clock}）",
+  "times": {
+    "askSeconds": "質問",
+    "answerSeconds": "回答",
+    "guessSeconds": "予想",
+    "validateSeconds": "判定"
+  },
+  "timesLabel": "時間",
   "start": "ゲームを始める",
   "startHint": "{others}人中{ready}人が準備OK。このまま始めてもOK。満員になるとすぐに始まります。",
   "needTwo": "2人以上必要です。",

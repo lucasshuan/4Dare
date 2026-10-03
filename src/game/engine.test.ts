@@ -3,11 +3,13 @@ import { createRoom, isExpired, reduce } from "./engine";
 import { abandoned, presenceDue } from "./helpers";
 import { char, Game, ident, THEMES } from "./test-utils";
 import {
+  ANSWER_CUT_FLOOR_MS,
   DEFAULT_SETTINGS,
   GameError,
   GONE_GRACE_MS,
   HOST_THEME_SECONDS,
   LOBBY_SECONDS,
+  PICK_SECONDS,
   RESULT_SECONDS,
   REVEAL_TIMING,
   type RoomState,
@@ -26,7 +28,8 @@ const code = (fn: () => unknown) => {
   return "no error";
 };
 
-const STEP = DEFAULT_SETTINGS.stepSeconds * 1000;
+const ASK = DEFAULT_SETTINGS.askSeconds * 1000;
+const GUESS = DEFAULT_SETTINGS.guessSeconds * 1000;
 
 describe("lobby", () => {
   it("creates a room with the host seated and no clock until someone joins", () => {
@@ -47,9 +50,10 @@ describe("lobby", () => {
     const ctx = { now: 0, random: Math.random };
     const bad = [
       { seats: 5 },
-      { stepSeconds: 10 },
-      { stepSeconds: 301 },
-      { stepSeconds: 60.5 },
+      { askSeconds: 10 },
+      { guessSeconds: 301 },
+      { answerSeconds: 60.5 },
+      { validateSeconds: "60" },
       { themeMode: "anyone" },
       { themeSets: [] },
       { themeSets: ["games", "nope"] },
@@ -91,7 +95,7 @@ describe("lobby", () => {
     g.do({
       type: "UPDATE_SETTINGS",
       playerId: "p1",
-      settings: { stepSeconds: STEP_SECONDS_MIN },
+      settings: { askSeconds: STEP_SECONDS_MIN },
     });
     expect(g.state.settings).toMatchObject({
       themeMode: "vote",
@@ -148,7 +152,9 @@ describe("lobby", () => {
       code(() => g.do({ type: "UPDATE_SETTINGS", playerId, settings }));
     expect(upd("p2", { seats: 4 })).toBe("not_host");
     expect(upd("p1", { seats: 2 })).toBe("invalid_input");
-    expect(upd("p1", { stepSeconds: 29 })).toBe("invalid_input");
+    expect(upd("p1", { answerSeconds: 29 })).toBe("invalid_input");
+    // one time per step now; the old single setting is gone
+    expect(upd("p1", { stepSeconds: 60 })).toBe("invalid_input");
     expect(upd("p1", { color: "red" })).toBe("invalid_input");
     expect(upd("p1", { game: "chess" })).toBe("invalid_input");
     expect(upd("p1", { name: "x".repeat(26) })).toBe("invalid_input");
@@ -163,10 +169,10 @@ describe("lobby", () => {
     g.do({
       type: "UPDATE_SETTINGS",
       playerId: "p1",
-      settings: { stepSeconds: 60, visibility: "private", password: "pw" },
+      settings: { askSeconds: 60, visibility: "private", password: "pw" },
     });
     expect(g.state.settings).toMatchObject({
-      stepSeconds: 60,
+      askSeconds: 60,
       visibility: "private",
     });
   });
@@ -400,9 +406,9 @@ describe("the ring", () => {
       const g = new Game(4, seed);
       g.start();
       const { order, assignments } = g.state;
-      order.forEach((id, i) =>
-        expect(assignments[order[(i + 1) % order.length]].pickerId).toBe(id),
-      );
+      order.forEach((id, i) => {
+        expect(assignments[order[(i + 1) % order.length]].pickerId).toBe(id);
+      });
       // the same ring, whoever it starts with
       const from = order.indexOf("p1");
       rings.add([...order.slice(from), ...order.slice(0, from)].join());
@@ -421,7 +427,7 @@ describe("picking", () => {
     g.pickAll();
     expect(g.state.phase).toBe("asking");
     expect(g.state.turnPlayerId).toBe(g.state.order[0]);
-    expect(g.state.deadline).toBe(g.now + STEP);
+    expect(g.state.deadline).toBe(g.now + ASK);
   });
 
   it("refuses a second pick and picks outside the phase", () => {
@@ -464,6 +470,120 @@ function started(n: number, seed = 7) {
   g.pickAll();
   return g;
 }
+
+describe("step times", () => {
+  const times = {
+    askSeconds: 40,
+    answerSeconds: 100,
+    guessSeconds: 50,
+    validateSeconds: 70,
+  };
+  const timed = (n: number) => {
+    const g = new Game(n, 7, times);
+    g.start();
+    g.pickAll();
+    return g;
+  };
+
+  it("each step runs on its own clock; picking always gets PICK_SECONDS", () => {
+    const g = new Game(3, 7, times);
+    g.start();
+    expect(g.state.phase).toBe("picking");
+    expect((g.state.deadline ?? 0) - (g.state.stepStartsAt ?? 0)).toBe(
+      PICK_SECONDS * 1000,
+    );
+    g.pickAll();
+    expect(g.state.deadline).toBe(g.now + 40_000);
+    const asker = g.turn;
+    g.do({ type: "ASK", playerId: asker, text: "Is it human?" });
+    expect(g.state.deadline).toBe(g.now + 100_000);
+    for (const id of g.state.order.filter((id) => id !== asker))
+      g.do({ type: "ANSWER", playerId: id, value: "no", note: null });
+    expect(g.state.phase).toBe("guessing");
+    expect(g.state.deadline).toBe(g.now + 50_000);
+    g.do({ type: "GUESS", playerId: asker, text: "Someone else" });
+    expect(g.state.phase).toBe("validating");
+    expect(g.state.deadline).toBe(g.now + 70_000);
+    expect(g.state.stepMs).toBe(70_000);
+  });
+
+  it("every answer that leaves others to answer cuts 20% of the answer time", () => {
+    // the user's example: 4 players, 100 s to answer
+    const g = timed(4);
+    const asker = g.turn;
+    g.do({ type: "ASK", playerId: asker, text: "Is it human?" });
+    const start = g.now;
+    const [a, b, c] = g.state.order.filter((id) => id !== asker);
+    g.now += 20_000; // 80 s left
+    g.do({ type: "ANSWER", playerId: a, value: "yes", note: null });
+    expect(g.state.deadline).toBe(start + 80_000); // 60 s left
+    g.do({ type: "ANSWER", playerId: b, value: "no", note: null });
+    expect(g.state.deadline).toBe(start + 60_000); // 40 s left
+    // the full length stays, so the clock can show what was cut
+    expect(g.state.stepMs).toBe(100_000);
+    expect(toView(g.state, 1, asker, g.now).stepMs).toBe(100_000);
+    // the last one still answers in time, or the clock runs out on them
+    g.timeout();
+    expect(g.state.phase).toBe("guessing");
+    expect(g.state.plays[0]).toMatchObject({ open: false });
+    expect(
+      (g.state.plays[0] as { answers: { by: string; value: string }[] })
+        .answers,
+    ).toContainEqual(expect.objectContaining({ by: c, value: "unknown" }));
+  });
+
+  it("a cut never leaves less than ANSWER_CUT_FLOOR_MS, nor adds time", () => {
+    const g = timed(4);
+    const asker = g.turn;
+    g.do({ type: "ASK", playerId: asker, text: "Is it human?" });
+    const [a, b] = g.state.order.filter((id) => id !== asker);
+    g.now = (g.state.deadline ?? 0) - 15_000; // 15 s left, a cut would take 20
+    g.do({ type: "ANSWER", playerId: a, value: "yes", note: null });
+    expect(g.state.deadline).toBe(g.now + ANSWER_CUT_FLOOR_MS);
+    g.now += 5_000; // 5 s left: already under the floor, nothing changes
+    const before = g.state.deadline;
+    g.do({ type: "ANSWER", playerId: b, value: "yes", note: null });
+    expect(g.state.deadline).toBe(before);
+  });
+
+  it("the last answer closes the step instead of cutting it", () => {
+    const g = timed(2);
+    const asker = g.turn;
+    g.do({ type: "ASK", playerId: asker, text: "Is it human?" });
+    const other = g.state.order.find((id) => id !== asker) as string;
+    g.do({ type: "ANSWER", playerId: other, value: "yes", note: null });
+    expect(g.state.phase).toBe("guessing");
+    expect(g.state.deadline).toBe(g.now + 50_000);
+  });
+
+  it("rooms saved with the old single time get the defaults and lose the old key", () => {
+    const g = new Game(2);
+    const {
+      askSeconds: _a,
+      guessSeconds: _g,
+      answerSeconds: _n,
+      validateSeconds: _v,
+      ...rest
+    } = g.state.settings;
+    g.state = {
+      ...g.state,
+      settings: {
+        ...rest,
+        stepSeconds: 120,
+      } as unknown as RoomState["settings"],
+    };
+    expect(toView(g.state, 1, "p1", g.now).settings).toMatchObject({
+      askSeconds: 90,
+      validateSeconds: 60,
+    });
+    expect(toView(g.state, 1, "p1", g.now).settings).not.toHaveProperty(
+      "stepSeconds",
+    );
+    g.start();
+    g.pickAll();
+    expect(g.state.deadline).toBe(g.now + 90_000);
+  });
+});
 
 describe("a turn", () => {
   it("asking validates the asker and the text", () => {
@@ -537,7 +657,7 @@ describe("a turn", () => {
     expect(s.reveal?.until).toBe(g.now + ms);
     // no pause: the clock runs while the reveal is up, and the player can act
     expect(s.stepStartsAt).toBe(g.now);
-    expect(s.deadline).toBe(g.now + STEP);
+    expect(s.deadline).toBe(g.now + GUESS);
     g.do({ type: "PASS", playerId: asker });
     expect(g.state.phase).toBe("asking");
   });

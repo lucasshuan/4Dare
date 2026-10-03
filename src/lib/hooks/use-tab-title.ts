@@ -40,6 +40,8 @@ function swapIcons(href: string): () => void {
 export type TabClock = {
   deadline: number | null;
   stepStartsAt: number | null;
+  /** The step's full length; answers can bring the deadline sooner. */
+  stepMs?: number | null;
   offset: number;
 };
 
@@ -52,7 +54,7 @@ export type TabClock = {
 export function useTabTitle(
   title: string,
   alert: string | null,
-  { deadline, stepStartsAt, offset }: TabClock,
+  { deadline, stepStartsAt, stepMs, offset }: TabClock,
 ) {
   useEffect(() => {
     let icon: string | null = null;
@@ -70,7 +72,8 @@ export function useTabTitle(
       const running =
         deadline !== null && stepStartsAt !== null && now >= stepStartsAt;
       const left = running ? Math.max(0, deadline - now) / 1000 : null;
-      const low = running && isLowClock(left ?? 0, deadline - stepStartsAt);
+      const low =
+        running && isLowClock(left ?? 0, stepMs ?? deadline - stepStartsAt);
       const clock = left === null ? null : formatClock(left);
       const next = [clock, alert ?? title, APP_NAME]
         .filter(Boolean)
@@ -91,5 +94,5 @@ export function useTabTitle(
       window.removeEventListener("blur", tick);
       setIcon(null);
     };
-  }, [title, alert, deadline, stepStartsAt, offset]);
+  }, [title, alert, deadline, stepStartsAt, stepMs, offset]);
 }

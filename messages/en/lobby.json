@@ -18,7 +18,13 @@
   "public": "Public: anyone can join",
   "private": "Private: asks for the password",
   "seats": "Up to {seats} players",
-  "stepSeconds": "{seconds} s per step ({clock})",
+  "times": {
+    "askSeconds": "Ask",
+    "answerSeconds": "Answer",
+    "guessSeconds": "Guess",
+    "validateSeconds": "Check"
+  },
+  "timesLabel": "Times",
   "start": "Start match",
   "startHint": "{others, plural, one {{ready} of 1 is ready.} other {{ready} of # are ready.}} You can start anyway; if the room fills up, it starts right away.",
   "needTwo": "You need at least 2 players.",

@@ -56,8 +56,14 @@ export interface RoomSettings {
    */
   password: string;
   seats: 2 | 3 | 4;
-  /** Seconds per step: 30..300, default 120. */
-  stepSeconds: number;
+  /** Seconds to ask a question: STEP_SECONDS_MIN..MAX, default 90. */
+  askSeconds: number;
+  /** Seconds to guess (or pass) once the answers are in. */
+  guessSeconds: number;
+  /** Seconds to answer a question. While several answer, each answer cuts ANSWER_CUT of it from the clock. */
+  answerSeconds: number;
+  /** Seconds for the picker to check a guess that was not an obvious match. */
+  validateSeconds: number;
   mode: "classic";
   /** "vote": everyone votes on themes drawn from `themeSets`. "host": the host types the theme. */
   themeMode: "vote" | "host";
@@ -71,7 +77,10 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   visibility: "public",
   password: "",
   seats: 4,
-  stepSeconds: 120,
+  askSeconds: 90,
+  guessSeconds: 90,
+  answerSeconds: 90,
+  validateSeconds: 60,
   mode: "classic",
   themeMode: "vote",
   themeSets: [...THEME_SET_KEYS],
@@ -80,6 +89,23 @@ export const ROOM_NAME_MAX = 25;
 export const ROOM_PASSWORD_MAX = 20;
 export const STEP_SECONDS_MIN = 30;
 export const STEP_SECONDS_MAX = 300;
+/** The timed steps a room sets, each with its own seconds, in the order a turn plays them. */
+export const STEP_TIMES = [
+  "askSeconds",
+  "answerSeconds",
+  "guessSeconds",
+  "validateSeconds",
+] as const;
+export type StepTime = (typeof STEP_TIMES)[number];
+/** Picking a character always gets this long. */
+export const PICK_SECONDS = 120;
+/**
+ * Every answer that leaves others still to answer cuts this share of the
+ * answer time from the clock, so nobody waits long on the last one...
+ */
+export const ANSWER_CUT = 0.2;
+/** ...but whoever is left keeps at least this long (ms). */
+export const ANSWER_CUT_FLOOR_MS = 10_000;
 /** The lobby always waits 2 minutes, whatever the step time is. */
 export const LOBBY_SECONDS = 120;
 /**
@@ -247,6 +273,8 @@ export interface RoomState {
   deadline: number | null;
   /** Epoch ms when the current step's clock starts: later than "now" while a reveal is showing. */
   stepStartsAt: number | null;
+  /** The step's full length (ms); the deadline can come sooner (answers cut it). Absent in older rooms. */
+  stepMs?: number | null;
   /** The latest reveal; only shown while it lasts. */
   reveal: Reveal | null;
   /** Counts matches played in this room. */
@@ -512,6 +540,8 @@ export interface RoomView {
   deadline: number | null;
   /** When the current step's clock starts. Before that a reveal is on screen and the timer refills. */
   stepStartsAt: number | null;
+  /** The step's full length (ms). The deadline lands sooner once answers cut the clock. */
+  stepMs: number | null;
   /** Shown to everyone until `reveal.until`; null when nothing is being revealed. */
   reveal: RevealView | null;
   /** Server clock when this view was built; use it to correct the countdown. */
@@ -543,5 +573,8 @@ export interface PublicRoom {
   host: Pick<Identity, "isGuest" | "name" | "guestNumber" | "avatar" | "lang">;
   players: number;
   seats: number;
-  stepSeconds: number;
+  askSeconds: number;
+  guessSeconds: number;
+  answerSeconds: number;
+  validateSeconds: number;
 }

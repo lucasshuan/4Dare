@@ -28,6 +28,12 @@ vi.mock("next/headers", () => ({
 vi.mock("next-intl/server", () => ({ getLocale: async () => "pt" }));
 
 /** Game and theme settings for createRoom: who-am-i, everyone votes, on every set. */
+const TIMES = {
+  askSeconds: 60,
+  guessSeconds: 60,
+  answerSeconds: 60,
+  validateSeconds: 60,
+};
 const ROOM = {
   game: DEFAULT_SETTINGS.game,
   name: "Test room",
@@ -99,7 +105,7 @@ describe("server, local mode", () => {
         visibility: "private",
         password: " secret ",
         seats: 3,
-        stepSeconds: 60,
+        ...TIMES,
       }),
     );
     expect(code).toMatch(/^[2-9A-Z]{5}$/);
@@ -194,7 +200,7 @@ describe("server, local mode", () => {
         visibility: "private",
         password: "pw",
         seats: 2,
-        stepSeconds: 60,
+        ...TIMES,
       }),
     );
     as("m2");
@@ -241,7 +247,7 @@ describe("server, local mode", () => {
         ...ROOM,
         visibility: "public",
         seats: 9 as 4,
-        stepSeconds: 60,
+        ...TIMES,
       }),
     ).toEqual({
       ok: false,
@@ -253,7 +259,7 @@ describe("server, local mode", () => {
           ...ROOM,
           visibility: "public",
           seats: 4,
-          stepSeconds: 60,
+          ...TIMES,
           themeSets,
         }),
       ).toEqual({ ok: false, error: "invalid_input" });
@@ -352,7 +358,7 @@ describe("server, local mode", () => {
       ...ROOM,
       visibility: "public",
       seats: 2,
-      stepSeconds: 60,
+      ...TIMES,
     } as const;
     as("b2");
     const other = must(await A.createRoom(settings)).code;
@@ -387,7 +393,7 @@ describe("random pick by theme", () => {
         visibility: "private",
         password: "pw",
         seats: 2,
-        stepSeconds: 60,
+        ...TIMES,
       }),
     );
     as("r2");
