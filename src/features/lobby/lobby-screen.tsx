@@ -21,6 +21,7 @@ import { type ReactNode, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
+import { RoomQr } from "@/components/ui/room-qr";
 import { Screen } from "@/components/ui/screen";
 import { Timer } from "@/components/ui/timer";
 import { useToast } from "@/components/ui/toast";
@@ -176,24 +177,28 @@ export function LobbyScreen() {
           <div className="flex flex-col gap-3">
             {/* a named room leads with its name; the greeting drops to a line under it */}
             {roomName ? (
-              <>
-                <h1 className={cn(titleClass, "wrap-break-word")}>
-                  {roomName}
-                </h1>
-                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
-                  {greeting}
+              <h1 className={cn(titleClass, "wrap-break-word")}>{roomName}</h1>
+            ) : null}
+            {/* the QR code sits right of the greeting and the description (not on phones) */}
+            <div className="flex items-center gap-6">
+              <div className="flex min-w-0 flex-1 flex-col gap-3">
+                {roomName ? (
+                  <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
+                    {greeting}
+                  </p>
+                ) : (
+                  <h1 className={titleClass}>{greeting}</h1>
+                )}
+                <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
+                  {me.isHost
+                    ? t(view.round > 0 ? "subtitleHostAgain" : "subtitleHost")
+                    : withNames((n) =>
+                        t("subtitleGuest", { name: host ? n(host) : "" }),
+                      )}
                 </p>
-              </>
-            ) : (
-              <h1 className={titleClass}>{greeting}</h1>
-            )}
-            <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
-              {me.isHost
-                ? t(view.round > 0 ? "subtitleHostAgain" : "subtitleHost")
-                : withNames((n) =>
-                    t("subtitleGuest", { name: host ? n(host) : "" }),
-                  )}
-            </p>
+              </div>
+              <RoomQr code={code} className="max-sm:hidden" />
+            </div>
           </div>
 
           {/* desktop: "Copy link" right of the code; phones: under it */}

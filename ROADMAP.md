@@ -143,3 +143,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Hover (or tap) a player at the top of the match: their card opens big under them, framed in their seat colour, with name, origin and who picked it
 - [x] "Who am I?" has its own small thumbnail (rooms list, selects, lobby): a hand of three cards, yours a big "?", crisp from 38×24 up
 - [x] One time per step of a turn, set in the room's rules with a hint each: ask, answer and guess (90 s), check a guess (60 s); picking always gets 120 s. Every answer that leaves others still to answer cuts 20% of the answer time (never under 10 s left), and the clock shows the cut
+- [x] Room QR code in the lobby, right of the greeting: rounded modules, blue eyes, the 4Dare icon in the middle; a click opens it big to scan from across the table
