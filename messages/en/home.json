@@ -104,7 +104,7 @@
     "allGames": "All games",
     "access": "Who can join",
     "accessOptions": {
-      "all": "All",
+      "all": "All rooms",
       "public": "Public",
       "private": "With password"
     },

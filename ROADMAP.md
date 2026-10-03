@@ -135,3 +135,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] "Who am I?" banner full width under the top bar: five players around a table, answers that wrap in longer languages, a burst when you get it; the top bar stays put and turns to frosted glass as the page scrolls under it
 - [x] The match uses the full width; History sits right of the clock: a sidebar beside the game on the web (remembered per browser), a small button and a drawer on phones; filter by player and by questions or guesses
 - [x] Sounds (temporary picks): a clock ticks in a loop when the step clock runs low, a pop on every step change of a turn, a fanfare with the podium's confetti
+- [x] /rooms filters in one row: the search, then the game and who can join as selects

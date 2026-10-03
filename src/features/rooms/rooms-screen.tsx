@@ -1,6 +1,16 @@
 "use client";
 
-import { ChevronLeft, Globe, Layers, Lock, Search, X } from "lucide-react";
+import { Select } from "@base-ui/react/select";
+import {
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  Globe,
+  Layers,
+  Lock,
+  Search,
+  X,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
@@ -13,7 +23,6 @@ import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { DEFAULT_GAME, GAME_KEYS, type GameKey } from "@/game/games";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/cn";
 import { ease, riseIn } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { GAMES, newRoom } from "@/lib/routes";
@@ -179,6 +188,9 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
   );
 }
 
+/** "all" stands for every game in the game select. */
+const ALL_GAMES = "all";
+
 function Filters({
   filters,
   set,
@@ -196,9 +208,9 @@ function Filters({
         y: 0,
         transition: { delay: 0.08, duration: 0.4, ease: ease.soft },
       }}
-      className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card sm:p-5"
+      className="flex flex-wrap gap-3 rounded-xl bg-surface p-4 shadow-card sm:p-5"
     >
-      <label className="group flex h-13 items-center gap-3 rounded-pill border-[1.5px] border-line-strong bg-canvas px-4 transition-colors focus-within:border-sky">
+      <label className="group flex h-13 min-w-64 flex-1 basis-full items-center gap-3 rounded-pill border-[1.5px] border-line-strong bg-canvas px-4 transition-colors focus-within:border-sky md:basis-0">
         <Search
           className="size-5 shrink-0 text-ink-muted transition-colors group-focus-within:text-sky"
           strokeWidth={1.75}
@@ -228,107 +240,118 @@ function Filters({
         </AnimatePresence>
       </label>
 
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-        <FilterGroup label={t("game")}>
-          <Chip
-            group="game"
-            on={filters.game === null}
-            onClick={() => set({ game: null })}
-            icon={<Layers className="size-4" strokeWidth={1.75} />}
-          >
-            {t("allGames")}
-          </Chip>
-          {GAME_KEYS.map((g) => (
-            <Chip
-              group="game"
-              key={g}
-              on={filters.game === g}
-              onClick={() => set({ game: g })}
-              icon={<GameThumb game={g} size="xs" />}
-            >
-              {gameName(g)}
-            </Chip>
-          ))}
-        </FilterGroup>
-        <FilterGroup label={t("access")}>
-          {(
-            [
-              ["all", null],
-              [
-                "public",
-                <Globe key="g" className="size-4" strokeWidth={1.75} />,
-              ],
-              [
-                "private",
-                <Lock key="l" className="size-4" strokeWidth={1.75} />,
-              ],
-            ] as const
-          ).map(([a, icon]) => (
-            <Chip
-              group="access"
-              key={a}
-              on={filters.access === a}
-              onClick={() => set({ access: a })}
-              icon={icon}
-            >
-              {t(`accessOptions.${a}`)}
-            </Chip>
-          ))}
-        </FilterGroup>
-      </div>
+      <FilterSelect
+        label={t("game")}
+        value={filters.game ?? ALL_GAMES}
+        onChange={(g) => set({ game: g === ALL_GAMES ? null : (g as GameKey) })}
+        options={[
+          {
+            value: ALL_GAMES,
+            label: t("allGames"),
+            icon: <Layers className="size-4" strokeWidth={1.75} />,
+          },
+          ...GAME_KEYS.map((g) => ({
+            value: g,
+            label: gameName(g),
+            icon: <GameThumb game={g} size="xs" />,
+          })),
+        ]}
+      />
+      <FilterSelect
+        label={t("access")}
+        value={filters.access}
+        onChange={(a) => set({ access: a as Access })}
+        options={[
+          {
+            value: "all",
+            label: t("accessOptions.all"),
+            icon: <Layers className="size-4" strokeWidth={1.75} />,
+          },
+          {
+            value: "public",
+            label: t("accessOptions.public"),
+            icon: <Globe className="size-4" strokeWidth={1.75} />,
+          },
+          {
+            value: "private",
+            label: t("accessOptions.private"),
+            icon: <Lock className="size-4" strokeWidth={1.75} />,
+          },
+        ]}
+      />
     </motion.div>
   );
 }
 
-/** A labelled row of chips; the label is for screen readers, the chips say enough. */
-function FilterGroup({
-  label,
-  children,
-}: {
+interface FilterOption {
+  value: string;
   label: string;
-  children: ReactNode;
-}) {
-  return (
-    <fieldset className="m-0 flex min-w-0 flex-wrap gap-1 rounded-pill border-0 bg-sunken p-1">
-      <legend className="sr-only">{label}</legend>
-      {children}
-    </fieldset>
-  );
+  icon: ReactNode;
 }
 
-function Chip({
-  group,
-  on,
-  onClick,
-  icon,
-  children,
+/** A filter as a select, as tall as the search beside it. */
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
 }: {
-  /** Chips of one group share the sliding highlight. */
-  group: string;
-  on: boolean;
-  onClick: () => void;
-  icon?: ReactNode;
-  children: ReactNode;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: FilterOption[];
 }) {
+  const current = options.find((o) => o.value === value) ?? options[0];
   return (
-    <button
-      type="button"
-      aria-pressed={on}
-      onClick={onClick}
-      className={cn(
-        "relative flex h-9 items-center gap-2 rounded-pill px-3.5 font-semibold text-sm transition-colors duration-200",
-        on ? "text-ink" : "text-ink-muted hover:text-ink",
-      )}
+    <Select.Root
+      items={options.map((o) => ({ value: o.value, label: o.label }))}
+      value={value}
+      onValueChange={(v) => {
+        if (v) onChange(v);
+      }}
     >
-      {on ? (
-        <motion.span
-          layoutId={`chip-${group}`}
-          className="absolute inset-0 rounded-pill bg-surface shadow-card"
-          transition={{ type: "spring", stiffness: 500, damping: 36 }}
-        />
-      ) : null}
-      {icon ? <span className="relative flex shrink-0">{icon}</span> : null}
-      <span className="relative whitespace-nowrap">{children}</span>
-    </button>
+      <Select.Trigger
+        aria-label={label}
+        className="flex h-13 min-w-0 flex-1 items-center gap-2.5 rounded-pill border-[1.5px] border-line-strong bg-canvas px-4 text-left max-sm:px-3.5 font-semibold text-sm transition-[border-color,box-shadow] duration-200 ease-soft hover:border-ink-muted data-popup-open:border-sky md:w-52 md:flex-none"
+      >
+        <span className="flex shrink-0 text-ink-muted max-sm:hidden">
+          {current.icon}
+        </span>
+        <Select.Value className="min-w-0 flex-1 truncate">
+          {() => current.label}
+        </Select.Value>
+        <Select.Icon className="text-ink-muted">
+          <ChevronDown className="size-4" strokeWidth={2} />
+        </Select.Icon>
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Positioner
+          sideOffset={6}
+          align="end"
+          alignItemWithTrigger={false}
+          className="z-50 outline-none"
+        >
+          <Select.Popup className="min-w-[var(--anchor-width)] origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+            <Select.List>
+              {options.map((o) => (
+                <Select.Item
+                  key={o.value}
+                  value={o.value}
+                  className="flex items-center gap-2.5 rounded-md py-2 pr-3 pl-2.5 font-semibold text-sm outline-none select-none data-highlighted:bg-sky-soft"
+                >
+                  <span className="flex shrink-0 text-ink-muted">{o.icon}</span>
+                  <Select.ItemText className="flex-1 whitespace-nowrap">
+                    {o.label}
+                  </Select.ItemText>
+                  <Select.ItemIndicator className="text-sky">
+                    <Check className="size-4" strokeWidth={2.25} />
+                  </Select.ItemIndicator>
+                </Select.Item>
+              ))}
+            </Select.List>
+          </Select.Popup>
+        </Select.Positioner>
+      </Select.Portal>
+    </Select.Root>
   );
 }

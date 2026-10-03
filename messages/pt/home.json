@@ -104,7 +104,7 @@
     "allGames": "Todos os jogos",
     "access": "Quem pode entrar",
     "accessOptions": {
-      "all": "Todas",
+      "all": "Todas as salas",
       "public": "Públicas",
       "private": "Com senha"
     },

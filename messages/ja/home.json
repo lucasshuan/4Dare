@@ -104,7 +104,7 @@
     "allGames": "すべてのゲーム",
     "access": "参加できる人",
     "accessOptions": {
-      "all": "すべて",
+      "all": "すべてのルーム",
       "public": "公開",
       "private": "パスワードあり"
     },
