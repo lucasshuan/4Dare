@@ -18,6 +18,12 @@ type ThemeSettings = Pick<CreateRoomInput, "themeMode" | "themeSets">;
 type SetTooltip = Tooltip.Handle<ThemeSet>;
 
 const spring = { type: "spring", stiffness: 420, damping: 32 } as const;
+/** A set card's face: lifts on hover, shrinks a little when pressed. */
+const CARD_FACE = {
+  rest: { y: 0, scale: 1 },
+  hover: { y: -2 },
+  press: { scale: 0.96 },
+} as const;
 /** Pastel tile behind each set's emoji, shifted every row so columns don't repeat. */
 const TONES = [
   "bg-sky-soft",
@@ -162,60 +168,69 @@ function SetCard({
       aria-pressed={on}
       aria-describedby={examplesId}
       onClick={onToggle}
+      // The button stays still and only its face lifts: a moving anchor makes
+      // the tooltip re-measure every frame of the spring, and it stutters.
       render={
         <motion.button
-          whileHover={still ? undefined : { y: -2 }}
-          whileTap={{ scale: 0.96 }}
-          transition={spring}
+          initial={false}
+          animate="rest"
+          whileHover={still ? undefined : "hover"}
+          whileTap="press"
         />
       }
-      className={cn(
-        "flex h-12 w-full items-center gap-2.5 rounded-md border-[1.5px] py-1.5 pr-2.5 pl-1.5 text-left transition-[background-color,border-color,color,box-shadow] duration-200 ease-soft",
-        on
-          ? "border-transparent bg-surface text-ink shadow-card"
-          : "border-line border-dashed text-ink-muted hover:border-line-strong",
-      )}
+      className="block w-full rounded-md text-left"
     >
       <motion.span
-        aria-hidden
-        initial={false}
-        animate={
-          on
-            ? {
-                scale: still ? 1 : [1, 1.28, 1],
-                rotate: still ? 0 : [0, -14, 0],
-                opacity: 1,
-                filter: "grayscale(0)",
-              }
-            : { scale: 0.88, rotate: 0, opacity: 0.5, filter: "grayscale(1)" }
-        }
-        transition={{ duration: 0.42, ease: ease.soft }}
+        variants={CARD_FACE}
+        transition={spring}
         className={cn(
-          "flex size-9 shrink-0 items-center justify-center rounded-sm text-xl leading-none transition-colors duration-200",
-          on ? toneOf(index) : "bg-sunken",
+          "flex h-12 w-full items-center gap-2.5 rounded-md border-[1.5px] py-1.5 pr-2.5 pl-1.5 transition-[background-color,border-color,color,box-shadow] duration-200 ease-soft",
+          on
+            ? "border-transparent bg-surface text-ink shadow-card"
+            : "border-line border-dashed text-ink-muted hover:border-line-strong",
         )}
       >
-        {set.emoji}
+        <motion.span
+          aria-hidden
+          initial={false}
+          animate={
+            on
+              ? {
+                  scale: still ? 1 : [1, 1.28, 1],
+                  rotate: still ? 0 : [0, -14, 0],
+                  opacity: 1,
+                  filter: "grayscale(0)",
+                }
+              : { scale: 0.88, rotate: 0, opacity: 0.5, filter: "grayscale(1)" }
+          }
+          transition={{ duration: 0.42, ease: ease.soft }}
+          className={cn(
+            "flex size-9 shrink-0 items-center justify-center rounded-sm text-xl leading-none transition-colors duration-200",
+            on ? toneOf(index) : "bg-sunken",
+          )}
+        >
+          {set.emoji}
+        </motion.span>
+        <span className="line-clamp-2 min-w-0 flex-1 font-semibold text-[13px] leading-4 [word-break:auto-phrase]">
+          {tSets(set.key)}
+        </span>
+        <span className="relative flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] border-line">
+          <AnimatePresence initial={false}>
+            {on ? (
+              <motion.span
+                key="on"
+                initial={{ scale: 0, rotate: -60 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={spring}
+                className="-inset-[1.5px] absolute flex items-center justify-center rounded-full bg-ink text-on-ink"
+              >
+                <Check className="size-3" strokeWidth={3.25} />
+              </motion.span>
+            ) : null}
+          </AnimatePresence>
+        </span>
       </motion.span>
-      <span className="line-clamp-2 min-w-0 flex-1 font-semibold text-[13px] leading-4 [word-break:auto-phrase]">
-        {tSets(set.key)}
-      </span>
-      <span className="relative flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] border-line">
-        <AnimatePresence initial={false}>
-          {on ? (
-            <motion.span
-              key="on"
-              initial={{ scale: 0, rotate: -60 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={spring}
-              className="-inset-[1.5px] absolute flex items-center justify-center rounded-full bg-ink text-on-ink"
-            >
-              <Check className="size-3" strokeWidth={3.25} />
-            </motion.span>
-          ) : null}
-        </AnimatePresence>
-      </span>
       {/* the tooltip is for the eyes only; screen readers get the examples here */}
       <span id={examplesId} hidden>
         {`${t("setExamples")}: ${THEME_SET_EXAMPLES[set.key].map((e) => e[lang]).join(", ")}`}
