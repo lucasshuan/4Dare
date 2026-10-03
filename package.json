@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed-supabase.ts",
-    "setup:supabase": "tsx --env-file-if-exists=.env.local scripts/setup-supabase.ts"
+    "setup:supabase": "tsx --env-file-if-exists=.env.local scripts/setup-supabase.ts",
+    "test-rooms": "tsx --env-file-if-exists=.env.local scripts/test-rooms.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

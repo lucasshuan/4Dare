@@ -30,3 +30,7 @@ To play with friends on the same network: `pnpm build && pnpm start`, and they o
 4. `vercel env pull .env.local` (or paste the integration's variables) and add a token from supabase.com/dashboard/account/tokens, the Discord and Google ID and secret, and your domain.
 5. `pnpm setup:supabase`: creates the tables, turns on Discord and Google (guests need nothing), sets the URLs, and puts the keys in `.env.local`.
 6. `pnpm seed` to load the character library.
+
+## Test rooms
+
+`pnpm test-rooms` fills the room list with made-up rooms: lobbies (open, full, private with password `1234`) and matches going on. `--keep` keeps them listed until Ctrl+C, `--hold` does that for the ones already there, and `--clear` closes them all.
