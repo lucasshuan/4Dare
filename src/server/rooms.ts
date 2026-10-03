@@ -235,6 +235,27 @@ export async function currentMatch(id: PlayerId): Promise<CurrentMatch | null> {
   return null;
 }
 
+/** Every room `player` still sits in, open or closed to newcomers: where a new name or avatar must show. */
+const SEATED: readonly Phase[] = ["lobby", ...LIVE, "finished"];
+
+/**
+ * Shows the player's new name and avatar in every room they sit in, at once
+ * (each change pings the room). A room's name stays as it was, even one
+ * named after its host.
+ */
+export async function syncIdentity(player: Identity) {
+  const codes = await getBackend().rooms.withPlayer(player.id, SEATED);
+  await Promise.all(
+    codes.map((code) =>
+      dispatch(code, () => ({ type: "UPDATE_IDENTITY", player })).catch(
+        (e: unknown) => {
+          if (!(e instanceof GameError)) throw e;
+        },
+      ),
+    ),
+  );
+}
+
 export async function loadRoom(code: string) {
   return getBackend().rooms.get(code);
 }

@@ -103,7 +103,8 @@
     "account": "Signed in",
     "editProfile": "Edit profile",
     "signOut": "Sign out",
-    "testAccount": "Without Supabase this enters a test account."
+    "testAccount": "Without Supabase this enters a test account.",
+    "reroll": "Draw another name and critter"
   },
   "codeNotFound": "No room with this code.",
   "joining": "Joining…",

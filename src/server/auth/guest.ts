@@ -89,6 +89,26 @@ interface CookieJar {
 }
 
 /**
+ * The same guest (same id, so the same seats and matches) with a new random
+ * name and critter. Null when there is no guest cookie to change.
+ */
+export function rerollGuest(
+  jar: CookieJar,
+  secure = process.env.NODE_ENV === "production",
+): Guest | null {
+  const current = openGuest(jar.get(GUEST_COOKIE)?.value);
+  if (!current) return null;
+  const fresh = newGuest();
+  const guest: Guest = {
+    id: current.id,
+    guestNumber: fresh.guestNumber,
+    avatar: fresh.avatar,
+  };
+  jar.set(GUEST_COOKIE, sealGuest(guest), guestCookieOptions(secure));
+  return guest;
+}
+
+/**
  * The caller's guest, made on first contact. The proxy makes it on the first
  * page, before the browser fires its parallel requests; this is the fallback
  * for callers that skip pages (tests, a stale tab after the cookie expired).

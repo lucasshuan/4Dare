@@ -1,8 +1,11 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { ChevronDown, LogOut, UserRoundPen } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { ChevronDown, Dices, LogOut, UserRoundPen } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import {
   AuthButton,
   PROVIDER_NAME,
@@ -14,8 +17,9 @@ import { useMe } from "@/features/data/use-me";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
+import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import { signOut } from "@/server/actions";
+import { rerollGuest, signOut } from "@/server/actions";
 import { useSignIn } from "./use-sign-in";
 
 /** Avatar and name at the top right; the popover says who you are and how to sign in or out. */
@@ -23,9 +27,21 @@ export function UserMenu() {
   const t = useTranslations("home.user");
   const name = useDisplayName();
   const router = useRouter();
-  const { me, refresh } = useMe();
+  const { me, refresh, setMe } = useMe();
   const { signIn, pending } = useSignIn();
   const { run, pending: leaving } = useAction();
+  const { run: runReroll, pending: rerolling } = useAction();
+  const client = useQueryClient();
+  const [rolls, setRolls] = useState(0);
+  const reroll = async () => {
+    setRolls((n) => n + 1);
+    const r = await runReroll(() => rerollGuest());
+    if (!r.ok) return;
+    setMe(r.data);
+    // the rooms they sit in show the new name at once
+    void client.invalidateQueries({ queryKey: ["room"] });
+    void client.invalidateQueries({ queryKey: ["public-rooms"] });
+  };
 
   if (!me)
     return (
@@ -64,11 +80,60 @@ export function UserMenu() {
         <Popover.Positioner sideOffset={8} align="end" className="z-50">
           <Popover.Popup className="flex w-[min(340px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-4 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
             <div className="flex items-center gap-3">
-              <Avatar avatar={me.avatar} isGuest={me.isGuest} name={me.name} />
+              {/* a new name and critter swap in */}
+              <AnimatePresence initial={false} mode="popLayout">
+                <motion.span
+                  key={`${me.guestNumber}-${me.avatar.kind === "critter" ? me.avatar.seed : ""}`}
+                  className="flex shrink-0"
+                  initial={{ opacity: 0, scale: 0.6, rotate: -20 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.6, rotate: 20 }}
+                  transition={{ duration: dur.base, ease: ease.soft }}
+                >
+                  <Avatar
+                    avatar={me.avatar}
+                    isGuest={me.isGuest}
+                    name={me.name}
+                  />
+                </motion.span>
+              </AnimatePresence>
               <div className="flex min-w-0 flex-col">
-                <Popover.Title className="truncate font-semibold">
-                  {name(me)}
-                </Popover.Title>
+                {/* a guest's name has the dice right beside it */}
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <Popover.Title className="min-w-0 truncate font-semibold">
+                    <AnimatePresence initial={false} mode="wait">
+                      <motion.span
+                        key={me.guestNumber}
+                        className="block truncate"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: dur.fast, ease: ease.soft }}
+                      >
+                        {name(me)}
+                      </motion.span>
+                    </AnimatePresence>
+                  </Popover.Title>
+                  {me.isGuest ? (
+                    <button
+                      type="button"
+                      aria-label={t("reroll")}
+                      title={t("reroll")}
+                      disabled={rerolling}
+                      onClick={reroll}
+                      className="flex size-7 shrink-0 items-center justify-center rounded-pill text-ink-muted transition-colors duration-200 ease-soft hover:bg-sunken hover:text-ink disabled:opacity-60"
+                    >
+                      <motion.span
+                        aria-hidden="true"
+                        className="flex"
+                        animate={{ rotate: rolls * 360 }}
+                        transition={{ duration: dur.slow, ease: ease.soft }}
+                      >
+                        <Dices className="size-4.5" strokeWidth={1.75} />
+                      </motion.span>
+                    </button>
+                  ) : null}
+                </span>
                 <Popover.Description className="font-medium text-[13px] text-ink-muted">
                   {me.isGuest
                     ? t("guest")

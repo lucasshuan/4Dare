@@ -344,6 +344,65 @@ describe("server, local mode", () => {
     });
   });
 
+  it("a guest draws a new name and critter, shown at once in their rooms", async () => {
+    const settings = {
+      ...ROOM,
+      name: "Sala de Fulano",
+      visibility: "public",
+      seats: 2,
+      ...TIMES,
+    } as const;
+    as("n1");
+    const { code } = must(await A.createRoom(settings));
+    const before = (await view(code)).body.players[0];
+    as("n2");
+    must(await A.joinRoom(code));
+
+    as("n1");
+    const me = must(await A.rerollGuest());
+    expect(me.id).toBe(before.id);
+    expect(me.isGuest).toBe(true);
+    expect(me.avatar).toMatchObject({ kind: "critter" });
+    expect(me.avatar).not.toEqual(before.avatar);
+
+    // the other player sees it on their next look; the room keeps its name
+    as("n2");
+    const seen = (await view(code)).body;
+    expect(seen.players.find((p) => p.id === me.id)).toMatchObject({
+      guestNumber: me.guestNumber,
+      avatar: me.avatar,
+    });
+    expect(seen.settings.name).toBe("Sala de Fulano");
+    // and the cookie keeps the new one
+    as("n1");
+    expect((await view(code)).body.players[0].avatar).toEqual(me.avatar);
+
+    // an account changes its name on its profile instead
+    must(await A.enterTestAccount());
+    expect(await A.rerollGuest()).toEqual({ ok: false, error: "unauthorized" });
+  });
+
+  it("a profile change shows at once in the account's rooms", async () => {
+    as("n3");
+    must(await A.enterTestAccount());
+    const { code } = must(
+      await A.createRoom({ ...ROOM, visibility: "public", seats: 2, ...TIMES }),
+    );
+    as("n4");
+    must(await A.joinRoom(code));
+    as("n3");
+    const form = new FormData();
+    form.set("name", "Renamed");
+    form.set("color", "#DCE8FA");
+    form.set("avatar", "color");
+    must(await A.updateProfile(form));
+    as("n4");
+    expect((await view(code)).body.players[0]).toMatchObject({
+      name: "Renamed",
+      avatar: { kind: "color", color: "#DCE8FA" },
+    });
+  });
+
   it("a match still going blocks other rooms until the player leaves it", async () => {
     const meta = await import("@/app/api/me/match/route");
     const current = async () =>

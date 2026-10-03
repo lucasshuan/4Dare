@@ -1,6 +1,7 @@
 "use server";
 // Every mutation the UI can make. Reads go through the route handlers under /api.
 
+import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { GAME_KEYS } from "@/game/games";
@@ -31,6 +32,7 @@ import {
   THEME_OPTIONS,
 } from "@/game/types";
 import { toView } from "@/game/view";
+import { rerollGuest as rerollGuestCookie } from "./auth/guest";
 import { getBackend } from "./backend";
 import {
   AVATAR_COLORS,
@@ -48,6 +50,7 @@ import {
   normalizeCode,
   openRoom,
   roundThemes,
+  syncIdentity,
 } from "./rooms";
 import { drawPopular, PICKS_FETCHED, pickKey } from "./theme-picks";
 
@@ -561,7 +564,31 @@ export async function updateProfile(form: FormData): Promise<Result<Me>> {
     } else if (kind !== "color") {
       bad();
     }
-    return auth.updateProfile({ name, avatar });
+    const updated = await auth.updateProfile({ name, avatar });
+    await syncIdentity(await auth.identity(await lang()));
+    return updated;
+  });
+}
+
+/** Guests only: a new random name and critter, shown at once in every room they sit in. */
+export async function rerollGuest(): Promise<Result<Me>> {
+  return run(async () => {
+    const l = await lang();
+    const current = await getBackend().auth.me(l);
+    if (!current.isGuest) throw new GameError("unauthorized");
+    if (!allow(`reroll:${current.id}`, 30, 60_000))
+      throw new GameError("rate_limited");
+    const guest = rerollGuestCookie(await cookies());
+    if (!guest) throw new GameError("unauthorized");
+    await syncIdentity({
+      id: guest.id,
+      isGuest: true,
+      name: null,
+      guestNumber: guest.guestNumber,
+      avatar: guest.avatar,
+      lang: l,
+    });
+    return { ...current, guestNumber: guest.guestNumber, avatar: guest.avatar };
   });
 }
 

@@ -103,7 +103,8 @@
     "account": "ログイン中",
     "editProfile": "プロフィールを編集",
     "signOut": "ログアウト",
-    "testAccount": "Supabaseなしではテスト用アカウントに入ります。"
+    "testAccount": "Supabaseなしではテスト用アカウントに入ります。",
+    "reroll": "別の名前とキャラを引く"
   },
   "codeNotFound": "このコードのルームはありません。",
   "joining": "参加中…",

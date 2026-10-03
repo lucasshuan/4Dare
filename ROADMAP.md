@@ -146,3 +146,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Room QR code in the lobby, right of the greeting: rounded modules, blue eyes, the 4Dare icon in the middle; a click opens it big to scan from across the table
 - [x] "Who am I?" banner about 100 px shorter: the question sits right under the top bar and right over the cards, which keep their size
 - [x] One loader for the whole site: a hand of "?" cards shuffling, centred in the window with what is going on under it (creating a room, opening it, the profile, a match elsewhere)
+- [x] Guests draw a new name and critter from the user menu (dice beside the name); it shows at once in every room they sit in, and an account's profile change does too; a room named after its host keeps its name
