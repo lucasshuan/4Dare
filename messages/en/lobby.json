@@ -38,7 +38,6 @@
   "settingsTitle": "Room settings",
   "saveSettings": "Save",
   "settingsSaved": "Settings saved",
-  "mode": "Classic mode",
   "themeVote": "Everyone votes · {on} of {total} sets",
   "themeVoteAll": "Everyone votes · every set",
   "themeHost": "The host types the theme"

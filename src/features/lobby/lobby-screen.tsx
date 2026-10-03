@@ -10,7 +10,6 @@ import {
   Link as LinkIcon,
   Lock,
   PenLine,
-  Play,
   UsersRound,
   Vote,
   X,
@@ -365,7 +364,6 @@ export function LobbyScreen() {
                         total: THEME_SET_KEYS.length,
                       })}
               </Setting>
-              <Setting icon={Play}>{t("mode")}</Setting>
             </ul>
             {me.isHost ? (
               <button
