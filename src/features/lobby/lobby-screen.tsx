@@ -6,6 +6,7 @@ import {
   Clock,
   Copy,
   Crown,
+  DoorOpen,
   Globe,
   Link as LinkIcon,
   Lock,
@@ -405,12 +406,13 @@ export function LobbyScreen() {
           )}
           <Button
             variant="ghost"
-            className="self-center"
+            className="self-center text-no hover:bg-no-soft hover:text-no"
             onClick={async () => {
               await leaving.run(() => leaveRoom(code));
               router.push(GAME_PATHS[game]);
             }}
           >
+            <DoorOpen strokeWidth={1.75} />
             {t("leave")}
           </Button>
         </aside>
