@@ -5,7 +5,6 @@ import {
   ChevronLeft,
   Clock,
   Crown,
-  DoorOpen,
   Globe,
   Link as LinkIcon,
   Lock,
@@ -180,6 +179,17 @@ export function LobbyScreen() {
       <div className="flex flex-wrap items-start gap-10 lg:gap-16">
         <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
           <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={async () => {
+                await leaving.run(() => leaveRoom(code));
+                router.push(GAME_PATHS[game]);
+              }}
+              className={backClass}
+            >
+              <ChevronLeft className="size-4" strokeWidth={2} />
+              {t("leave")}
+            </button>
             {/* the room leads with its name; the greeting drops to a line under it */}
             <h1 className={cn(titleClass, "wrap-break-word")}>{title}</h1>
             {/* the QR code sits right of the greeting and the description (not on phones) */}
@@ -307,117 +317,97 @@ export function LobbyScreen() {
           </div>
         </section>
 
-        <aside className="flex w-full flex-col gap-5 rounded-lg bg-surface p-6 lg:max-w-[416px] lg:flex-[1_1_360px]">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <GameThumb game={game} size="sm" />
-              <span className="font-bold font-display text-lg">
-                {gameName(game)}
-              </span>
-            </div>
-            <ul className="flex flex-col gap-3">
-              <Setting icon={visibility === "public" ? Globe : Lock}>
-                {t(visibility === "public" ? "public" : "private")}
-                {/* the host shares the password; nobody else gets it */}
-                {visibility === "private" && view.settings.password ? (
-                  <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
-                    {view.settings.password}
-                  </span>
-                ) : null}
-              </Setting>
-              <Setting icon={UsersRound}>{t("seats", { seats })}</Setting>
-              <Setting icon={Clock}>
-                <span className="sr-only">{t("timesLabel")}: </span>
-                {/* a turn's steps in order, each with its clock */}
-                <span className="flex flex-wrap gap-1.5">
-                  {STEP_TIMES.map((step) => (
-                    <span
-                      key={step}
-                      className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm"
-                    >
-                      {t(`times.${step}`)}
-                      <span className="font-medium font-mono text-[13px] tabular-nums">
-                        {formatClock(view.settings[step])}
-                      </span>
-                    </span>
-                  ))}
-                </span>
-              </Setting>
-              <Setting icon={themeMode === "host" ? PenLine : Vote}>
-                {themeMode === "host"
-                  ? t("themeHost")
-                  : themeSets.length === THEME_SET_KEYS.length
-                    ? t("themeVoteAll")
-                    : t("themeVote", {
-                        on: themeSets.length,
-                        total: THEME_SET_KEYS.length,
-                      })}
-              </Setting>
-            </ul>
+        <aside className="flex w-full flex-col gap-4 rounded-lg bg-surface p-6 lg:max-w-[416px] lg:flex-[1_1_360px]">
+          {/* the main action sits right of the game; when it does not fit, it drops to a full row */}
+          <div className="flex flex-wrap items-center gap-3">
+            <GameThumb game={game} size="sm" />
+            <span className="min-w-20 grow-999 basis-0 font-bold font-display text-lg leading-tight">
+              {gameName(game)}
+            </span>
             {me.isHost ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setDraft(editable(view.settings));
-                  setEditing(true);
-                }}
-                className="self-start font-semibold text-sky text-sm underline underline-offset-2"
-              >
-                {t("editSettings")}
-              </button>
-            ) : null}
-          </div>
-          {me.isHost ? (
-            <>
+              <>
+                <Button
+                  variant="primary"
+                  className="grow"
+                  disabled={!view.canStart || pending}
+                  onClick={() =>
+                    waiting.length ? setConfirming(true) : start()
+                  }
+                >
+                  {t("start")}
+                </Button>
+                <StartDialog
+                  open={confirming && view.canStart}
+                  onClose={() => setConfirming(false)}
+                  waiting={waiting}
+                  pending={pending}
+                  onStart={start}
+                />
+              </>
+            ) : (
               <Button
-                variant="primary"
-                size="lg"
-                className="w-full"
-                disabled={!view.canStart || pending}
-                onClick={() => (waiting.length ? setConfirming(true) : start())}
+                variant={myReady ? "secondary" : "primary"}
+                className="grow"
+                aria-pressed={myReady}
+                disabled={pending}
+                onClick={toggleReady}
               >
-                {t("start")}
+                <Check strokeWidth={2} />
+                {myReady ? t("readyDone") : t("imReady")}
               </Button>
-              <StartDialog
-                open={confirming && view.canStart}
-                onClose={() => setConfirming(false)}
-                waiting={waiting}
-                pending={pending}
-                onStart={start}
-              />
-              <p className="text-center font-medium text-[13px] text-ink-muted">
-                {view.canStart
-                  ? t("startHint", {
-                      ready: others.filter((p) => p.ready).length,
-                      others: others.length,
-                    })
-                  : t("needTwo")}
-              </p>
-            </>
-          ) : (
-            <Button
-              variant={myReady ? "secondary" : "primary"}
-              size="lg"
-              className="w-full"
-              aria-pressed={myReady}
-              disabled={pending}
-              onClick={toggleReady}
+            )}
+          </div>
+          <ul className="flex flex-col gap-3">
+            <Setting icon={visibility === "public" ? Globe : Lock}>
+              {t(visibility === "public" ? "public" : "private")}
+              {/* the host shares the password; nobody else gets it */}
+              {visibility === "private" && view.settings.password ? (
+                <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
+                  {view.settings.password}
+                </span>
+              ) : null}
+            </Setting>
+            <Setting icon={UsersRound}>{t("seats", { seats })}</Setting>
+            <Setting icon={Clock}>
+              <span className="sr-only">{t("timesLabel")}: </span>
+              {/* a turn's steps in order, each with its clock */}
+              <span className="flex flex-wrap gap-1.5">
+                {STEP_TIMES.map((step) => (
+                  <span
+                    key={step}
+                    className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm"
+                  >
+                    {t(`times.${step}`)}
+                    <span className="font-medium font-mono text-[13px] tabular-nums">
+                      {formatClock(view.settings[step])}
+                    </span>
+                  </span>
+                ))}
+              </span>
+            </Setting>
+            <Setting icon={themeMode === "host" ? PenLine : Vote}>
+              {themeMode === "host"
+                ? t("themeHost")
+                : themeSets.length === THEME_SET_KEYS.length
+                  ? t("themeVoteAll")
+                  : t("themeVote", {
+                      on: themeSets.length,
+                      total: THEME_SET_KEYS.length,
+                    })}
+            </Setting>
+          </ul>
+          {me.isHost ? (
+            <button
+              type="button"
+              onClick={() => {
+                setDraft(editable(view.settings));
+                setEditing(true);
+              }}
+              className="self-start font-semibold text-sky text-sm underline underline-offset-2"
             >
-              <Check strokeWidth={2} />
-              {myReady ? t("readyDone") : t("imReady")}
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            className="self-center text-no hover:bg-no-soft hover:text-no"
-            onClick={async () => {
-              await leaving.run(() => leaveRoom(code));
-              router.push(GAME_PATHS[game]);
-            }}
-          >
-            <DoorOpen strokeWidth={1.75} />
-            {t("leave")}
-          </Button>
+              {t("editSettings")}
+            </button>
+          ) : null}
         </aside>
       </div>
     </Screen>

@@ -28,8 +28,6 @@
   },
   "timesLabel": "Times",
   "start": "Start match",
-  "startHint": "{others, plural, one {{ready} of 1 is ready.} other {{ready} of # are ready.}}",
-  "needTwo": "You need at least 2 players.",
   "confirmStart": {
     "title": "Start before everyone is ready?",
     "waiting": "{count, plural, one {Still not ready:} other {Still not ready:}}",

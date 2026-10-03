@@ -28,8 +28,6 @@
   },
   "timesLabel": "Tempos",
   "start": "Começar partida",
-  "startHint": "{others, plural, one {{ready} de 1 confirmou.} other {{ready} de # confirmaram.}}",
-  "needTwo": "Precisa de pelo menos 2 jogadores.",
   "confirmStart": {
     "title": "Começar sem todo mundo pronto?",
     "waiting": "{count, plural, one {Ainda falta confirmar:} other {Ainda faltam confirmar:}}",

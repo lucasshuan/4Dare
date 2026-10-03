@@ -154,3 +154,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Game cards show how many players are online right now (in a lobby, a match or on the podium), with a live dot; it updates with the room list
 - [x] /rooms filters by the host's language, left of who can join: only yours by default, several or all on request (kept in the link); a full room shows an icon too
 - [x] More guest names (about 149k; a repeated name only gets even odds at around 400 guests): 90 more adjectives, 86 more nouns, hybrids of two nouns (PotatoNinja, BatataNinja, ジャガイモ忍者), 68 titles that follow the noun's gender (QueenFox, RainhaRaposa, キツネ女王) and, for one new guest in a hundred, one of 80 legendary meme names (Doge, Sextou, 花金)
+- [x] Shorter lobby card: "Start match" (or "I'm ready") sits right of the game's name and takes a full row only when it does not fit, with no hint under it; "Leave room" is a back link above the room's name

@@ -28,8 +28,6 @@
   },
   "timesLabel": "時間",
   "start": "ゲームを始める",
-  "startHint": "{others}人中{ready}人が準備OK。",
-  "needTwo": "2人以上必要です。",
   "confirmStart": {
     "title": "全員そろう前に始めますか？",
     "waiting": "まだ準備OKしていない人：",

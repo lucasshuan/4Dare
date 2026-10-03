@@ -40,7 +40,8 @@ export async function joinRoom(page: Page, code: string) {
  * anyway?" question never comes up.
  */
 export async function startMatch(host: Page) {
-  await expect(host.getByText(/^(\d+) of \1 (is|are) ready\.$/)).toBeVisible();
+  await expect(host.getByRole("img", { name: /^ready$/i }).first()).toBeVisible();
+  await expect(host.getByRole("img", { name: /^not ready/i })).toHaveCount(0);
   await button(host, /start match/i).click();
 }
 
