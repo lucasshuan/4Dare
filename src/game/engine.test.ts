@@ -390,6 +390,26 @@ describe("the ring", () => {
       }
     }
   });
+
+  it("follows a shuffled turn order: each picks for the next one, and the order changes match to match", () => {
+    const rings = new Set<string>();
+    const firsts = new Set<string>();
+    for (let seed = 1; seed <= 200; seed++) {
+      const g = new Game(4, seed);
+      g.start();
+      const { order, assignments } = g.state;
+      order.forEach((id, i) =>
+        expect(assignments[order[(i + 1) % order.length]].pickerId).toBe(id),
+      );
+      // the same ring, whoever it starts with
+      const from = order.indexOf("p1");
+      rings.add([...order.slice(from), ...order.slice(0, from)].join());
+      firsts.add(order[0]);
+    }
+    // 4 players sit in 6 different rings, and anyone can go first
+    expect(rings.size).toBe(6);
+    expect(firsts.size).toBe(4);
+  });
 });
 
 describe("picking", () => {

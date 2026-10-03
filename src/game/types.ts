@@ -386,6 +386,10 @@ export interface PlayerView {
   avatar: Avatar;
   ready: boolean;
   status: PlayerStatus;
+  /** Place in the room (join order), 0-based: it gives the player their colour, the same all match long. */
+  seat: number;
+  /** Place in this match's turn order, 0-based (the first to play is 0); null outside a match. */
+  turnOrder: number | null;
   /** It is this player's turn (the ring in the player strip). */
   isTurn: boolean;
   /** Null while it must stay secret from the viewer, or before it is picked. */

@@ -286,7 +286,7 @@ export function toView(
   if (!findPlayer(s, viewerId)) throw new GameError("not_member");
   const pickedOpen = CARDS_OPEN.includes(s.phase);
 
-  const players: PlayerView[] = s.players.map((p) => {
+  const players: PlayerView[] = s.players.map((p, seat) => {
     const o = s.outcomes[p.id];
     const isYou = p.id === viewerId;
     const visible = canSeeCard(s, viewerId, p.id);
@@ -304,6 +304,9 @@ export function toView(
       avatar: p.avatar,
       ready: p.ready,
       status: statusOf(s, p),
+      seat,
+      turnOrder:
+        inMatch && s.order.includes(p.id) ? s.order.indexOf(p.id) : null,
       isTurn: TURN.includes(s.phase) && p.id === s.turnPlayerId,
       card,
       cardHidden: isYou && inMatch && !visible,

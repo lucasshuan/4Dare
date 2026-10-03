@@ -48,6 +48,7 @@ import {
   WIDE,
 } from "./history-panel";
 import { PlayerStrip } from "./player-strip";
+import { TurnBackdrop } from "./turn-backdrop";
 
 type Mode =
   | "ask"
@@ -138,6 +139,7 @@ export function TurnScreen() {
         </AnimatePresence>
       }
     >
+      <TurnBackdrop seat={turnPlayer?.seat ?? null} />
       <div className="flex flex-col gap-6 short:gap-4">
         <PlayerStrip players={view.players} />
         <div className="flex flex-wrap items-stretch gap-5 lg:gap-12">

@@ -7,13 +7,17 @@ import { Portrait } from "@/components/ui/portrait";
 import type { PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useDisplayName } from "@/lib/names";
+import { seatColor } from "@/lib/seats";
 
-/** Everyone at the table: who they are, what they are doing, and their card. You come first. */
+/**
+ * Everyone at the table in turn order, left to right: the first to play on the
+ * left, the last on the right. Each ring has its player's seat colour.
+ */
 export function PlayerStrip({ players }: { players: PlayerView[] }) {
   const t = useTranslations("turn.status");
   const name = useDisplayName();
   const ordered = [...players].sort(
-    (a, b) => Number(b.isYou) - Number(a.isYou),
+    (a, b) => (a.turnOrder ?? a.seat + 99) - (b.turnOrder ?? b.seat + 99),
   );
   return (
     <ul className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
@@ -23,12 +27,13 @@ export function PlayerStrip({ players }: { players: PlayerView[] }) {
           layout
           className={cn(
             "flex min-w-0 items-center gap-2.5 rounded-md bg-surface p-2 transition-shadow duration-300 sm:flex-[1_1_150px]",
-            p.isTurn &&
-              (p.isYou
-                ? "shadow-[0_0_0_2px_var(--sky)]"
-                : "shadow-[0_0_0_2px_var(--apricot)]"),
             p.away && "opacity-60",
           )}
+          style={{
+            boxShadow: p.isTurn
+              ? `0 0 0 2px ${seatColor(p.seat)}`
+              : "0 0 0 0 transparent",
+          }}
         >
           <Avatar
             avatar={p.avatar}
