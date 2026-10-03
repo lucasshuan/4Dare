@@ -86,7 +86,7 @@ export const LOBBY_SECONDS = 120;
 export const RESULT_SECONDS = 15;
 /** Themes offered in the vote before each match, and how long the vote lasts. */
 export const THEME_OPTIONS = 3;
-export const VOTE_SECONDS = 8;
+export const VOTE_SECONDS = 11;
 /** How long the host has to type the theme; then everyone votes instead, on themes from every set. */
 export const HOST_THEME_SECONDS = 30;
 /** Ideas shown to the host while they type the theme. */
