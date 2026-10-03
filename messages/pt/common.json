@@ -62,12 +62,13 @@
   "image": {
     "choose": "Escolher imagem",
     "dropOrPaste": "ou arraste aqui, ou cole (Ctrl+V)",
-    "hint": "JPG, PNG, WebP ou GIF, até 8 MB. Depois você ajusta o recorte.",
+    "hint": "Qualquer imagem de até 8 MB. Depois você ajusta o recorte.",
     "zoom": "Zoom",
     "use": "Usar esta imagem",
     "other": "Escolher outra",
-    "wrongType": "Esse arquivo não é uma imagem. Use JPG, PNG, WebP ou GIF.",
-    "tooBig": "Essa imagem passa de 8 MB. Escolha uma menor."
+    "wrongType": "Esse arquivo não é uma imagem.",
+    "tooBig": "Essa imagem passa de 8 MB. Escolha uma menor.",
+    "notDownloadable": "Esse site não deixa pegar a imagem. Clique nela com o botão direito, escolha “Copiar imagem” e cole aqui."
   },
   "signInFailed": "Não deu para entrar. Tente de novo.",
   "categories": {

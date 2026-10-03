@@ -8,7 +8,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CharacterCard } from "@/components/ui/character-card";
-import { ImageDrop } from "@/components/ui/image-drop";
+import { ImageDrop, type ImageDropHandle } from "@/components/ui/image-drop";
 import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { TextField } from "@/components/ui/text-field";
@@ -64,7 +64,7 @@ export function PickScreen() {
   const [chosen, setChosen] = useState<CharacterDTO | null>(null);
   const [newName, setNewName] = useState("");
   const [origin, setOrigin] = useState("");
-  const [image, setImage] = useState<Blob | null>(null);
+  const drop = useRef<ImageDropHandle>(null);
   // The chosen character came from the dice; `flip` plays the card's entrance
   // once per draw; `noHistory`: the theme has too few past picks to draw from.
   const [drawn, setDrawn] = useState(false);
@@ -135,8 +135,12 @@ export function PickScreen() {
     form.set("name", newName.trim());
     form.set("origin", origin.trim());
     form.set("lang", lang);
-    if (image) form.set("image", image, "picture.webp");
-    const r = await run(() => createCharacter(form));
+    const r = await run(async () => {
+      // The crop as it is now, even if it was moved a moment ago.
+      const image = await drop.current?.exportCrop();
+      if (image) form.set("image", image, "picture.webp");
+      return createCharacter(form);
+    });
     if (r.ok) choose(r.data);
   };
   const changeImage = async (blob: Blob) => {
@@ -345,7 +349,7 @@ export function PickScreen() {
                     <span className="font-semibold text-sm">
                       {t("newImage")}
                     </span>
-                    <ImageDrop onChange={setImage} />
+                    <ImageDrop ref={drop} />
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">

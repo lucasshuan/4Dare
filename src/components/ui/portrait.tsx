@@ -21,7 +21,11 @@ export function Portrait({
   tone?: Tone;
   className?: string;
 }) {
-  const [state, setState] = useState<"loading" | "ok" | "broken">("loading");
+  // Keyed by the picture, so a new one (a card whose picture changed) fades in from scratch.
+  const [loaded, setLoaded] = useState<{ src: string; ok: boolean } | null>(
+    null,
+  );
+  const state = loaded?.src !== src ? "loading" : loaded.ok ? "ok" : "broken";
   const showImage = src && state !== "broken";
   return (
     <span
@@ -46,8 +50,8 @@ export function Portrait({
           src={src}
           alt=""
           loading="lazy"
-          onLoad={() => setState("ok")}
-          onError={() => setState("broken")}
+          onLoad={() => setLoaded({ src, ok: true })}
+          onError={() => setLoaded({ src, ok: false })}
           className={cn(
             "absolute inset-0 size-full object-cover transition-opacity duration-500 ease-soft",
             state === "ok" ? "opacity-100" : "opacity-0",

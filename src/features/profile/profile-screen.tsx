@@ -3,7 +3,7 @@
 import { Check, ChevronLeft, Dices, Upload } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   AuthButton,
   PROVIDER_NAME,
@@ -12,7 +12,7 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { randomCritterSeed } from "@/components/ui/critter";
-import { ImageDrop } from "@/components/ui/image-drop";
+import { ImageDrop, type ImageDropHandle } from "@/components/ui/image-drop";
 import { Screen } from "@/components/ui/screen";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
@@ -101,6 +101,7 @@ function AccountForm({ me }: { me: Me }) {
     me.avatar.kind === "critter" ? me.avatar.seed : randomCritterSeed(),
   );
   const [blob, setBlob] = useState<Blob | null>(null);
+  const drop = useRef<ImageDropHandle>(null);
   const blobUrl = useMemo(
     () => (blob ? URL.createObjectURL(blob) : null),
     [blob],
@@ -134,9 +135,12 @@ function AccountForm({ me }: { me: Me }) {
     const form = new FormData();
     form.set("name", trimmed);
     form.set("color", color);
-    if (kind === "upload" && blob) {
+    // A new picture goes as cropped now: the preview can lag a moment behind it.
+    const image =
+      kind === "upload" && blob && (await drop.current?.exportCrop());
+    if (image) {
       form.set("avatar", "upload");
-      form.set("image", blob, "avatar.webp");
+      form.set("image", image, "avatar.webp");
     } else if (kind === "critter") {
       form.set("avatar", "critter");
       form.set("seed", seed);
@@ -272,6 +276,7 @@ function AccountForm({ me }: { me: Me }) {
               >
                 <ImageDrop
                   shape="square"
+                  ref={drop}
                   onChange={setBlob}
                   className="mt-2 max-w-90"
                 />

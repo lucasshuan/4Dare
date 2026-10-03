@@ -137,3 +137,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Sounds (temporary picks): a clock ticks in a loop when the step clock runs low, a pop on every step change of a turn, a fanfare with the podium's confetti
 - [x] /rooms filters in one row: the search, then the game and who can join as selects
 - [x] Theme vote lasts 13 s (was 11 s)
+- [x] Pictures: any type the browser opens (JFIF, AVIF...), pasted or dragged from a web page, always sent as cropped even when saved at once; card pictures load ahead for everyone

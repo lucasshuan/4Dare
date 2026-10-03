@@ -3,25 +3,46 @@
 import { ImagePlus } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  type Ref,
+  useCallback,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import Cropper, { type Area } from "react-easy-crop";
 import { cn } from "@/lib/cn";
 import { riseIn } from "@/lib/motion";
 import { Button } from "./button";
 
-const TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+/** Any picture the browser can open (JFIF, AVIF, BMP...): it is re-encoded as WebP anyway. */
+const ACCEPT = "image/*,.jfif,.pjpeg,.pjp";
 const MAX_BYTES = 8 * 1024 * 1024;
 
-/** Crops `src` to `area` and returns a WebP of `width`×`height`. */
+/** The part of the picture shown when nobody has moved the crop yet: centered, covering the frame. */
+function coverArea(img: HTMLImageElement, aspect: number): Area {
+  const { naturalWidth: w, naturalHeight: h } = img;
+  if (w / h > aspect) {
+    const width = h * aspect;
+    return { x: (w - width) / 2, y: 0, width, height: h };
+  }
+  const height = w / aspect;
+  return { x: 0, y: (h - height) / 2, width: w, height };
+}
+
+/** Crops `src` to `area` (centered when null) and returns a WebP of `width`×`height`. */
 async function cropToWebp(
   src: string,
-  area: Area,
+  area: Area | null,
   width: number,
   height: number,
 ): Promise<Blob> {
   const img = new Image();
   img.src = src;
   await img.decode();
+  area ??= coverArea(img, width / height);
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -48,19 +69,76 @@ async function cropToWebp(
   );
 }
 
+const isImage = (f: File) =>
+  f.type.startsWith("image/") ||
+  (!f.type && /\.(jfif|pjpeg|pjp)$/i.test(f.name));
+
+/** A picture's address in what was pasted or dropped from a web page: an <img> in the HTML, or a link. */
+function imageAddress(data: DataTransfer): string | null {
+  const html = data.getData("text/html");
+  if (html) {
+    const img = new DOMParser()
+      .parseFromString(html, "text/html")
+      .querySelector("img[src]");
+    if (img) return (img as HTMLImageElement).src;
+  }
+  const link = (data.getData("text/uri-list") || data.getData("text/plain"))
+    .split(/\s+/)
+    .find((u) => /^(https?:|data:image\/)/.test(u));
+  return link ?? null;
+}
+
+/** What was pasted or dropped: a file, or else the address of a picture on a web page. */
+function fromTransfer(data: DataTransfer): File | string | null {
+  const file =
+    [...data.files].find(isImage) ??
+    [...data.items]
+      .filter((i) => i.kind === "file")
+      .map((i) => i.getAsFile())
+      .find((f): f is File => !!f && isImage(f));
+  return file ?? imageAddress(data);
+}
+
+/** Downloads a picture from a web page, when its site allows it. */
+async function download(url: string): Promise<File | null> {
+  try {
+    const res = await fetch(url, { mode: "cors", credentials: "omit" });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return blob.type.startsWith("image/")
+      ? new File([blob], "picture", { type: blob.type })
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+const editable = (el: EventTarget | null) =>
+  el instanceof HTMLElement &&
+  (el.isContentEditable || el.matches("input, textarea, select"));
+
+/** Exports the current crop on demand: forms call it when they submit, so the latest crop always goes. */
+export interface ImageDropHandle {
+  /** The cropped picture, or null when none is chosen. */
+  exportCrop: () => Promise<Blob | null>;
+}
+
 /**
- * Pick a picture (click, drag-and-drop or paste), then crop it.
+ * Pick a picture (click, drag-and-drop or paste, also from a web page), then crop it.
  * Portrait 4:5 → 640×800 for characters; square → 256×256 for avatars.
  * With `onDone` the person confirms the crop with a button; with `onChange` every crop is
- * sent right away (null when the picture is removed), for forms with their own save button.
+ * sent shortly after it settles (null when the picture is removed), as a preview for forms with
+ * their own save button; those forms take the picture itself from `ref` when they submit.
  */
 export function ImageDrop({
+  ref,
   onDone,
   onChange,
   shape = "portrait",
   busy,
   className,
 }: {
+  ref?: Ref<ImageDropHandle>;
   onDone?: (blob: Blob) => void | Promise<void>;
   onChange?: (blob: Blob | null) => void;
   shape?: "portrait" | "square";
@@ -78,10 +156,21 @@ export function ImageDrop({
   const [area, setArea] = useState<Area | null>(null);
   const size = shape === "portrait" ? { w: 640, h: 800 } : { w: 256, h: 256 };
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      exportCrop: () =>
+        src ? cropToWebp(src, area, size.w, size.h) : Promise.resolve(null),
+    }),
+    [src, area, size.w, size.h],
+  );
+
   const accept = useCallback(
-    async (file: File | null | undefined) => {
-      if (!file) return;
-      if (!TYPES.includes(file.type)) return setError(t("wrongType"));
+    async (picked: File | string | null | undefined) => {
+      if (!picked) return;
+      const file = typeof picked === "string" ? await download(picked) : picked;
+      if (!file) return setError(t("notDownloadable"));
+      if (!isImage(file)) return setError(t("wrongType"));
       if (file.size > MAX_BYTES) return setError(t("tooBig"));
       const url = URL.createObjectURL(file);
       // A file can say "image" and still not be one (or be broken): try it first.
@@ -106,10 +195,12 @@ export function ImageDrop({
 
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
-      const file = [...(e.clipboardData?.files ?? [])].find((f) =>
-        f.type.startsWith("image/"),
-      );
-      if (file) void accept(file);
+      if (!e.clipboardData) return;
+      const picked = fromTransfer(e.clipboardData);
+      // Text pasted into a field stays text, even a link.
+      if (!picked || (typeof picked === "string" && editable(e.target))) return;
+      e.preventDefault();
+      void accept(picked);
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
@@ -174,9 +265,9 @@ export function ImageDrop({
               {onDone ? (
                 <Button
                   variant="primary"
-                  disabled={!area || busy}
+                  disabled={busy}
                   onClick={async () => {
-                    if (!area || !src) return;
+                    if (!src) return;
                     await onDone(await cropToWebp(src, area, size.w, size.h));
                   }}
                 >
@@ -208,7 +299,7 @@ export function ImageDrop({
               onDrop={(e) => {
                 e.preventDefault();
                 setOver(false);
-                void accept(e.dataTransfer.files[0]);
+                void accept(fromTransfer(e.dataTransfer));
               }}
               className={cn(
                 "flex w-full max-w-[220px] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] border-dashed p-4 text-center font-medium text-ink-muted text-sm transition-colors",
@@ -228,7 +319,7 @@ export function ImageDrop({
               ref={input}
               id={id}
               type="file"
-              accept={TYPES.join(",")}
+              accept={ACCEPT}
               className="sr-only"
               onChange={(e) => void accept(e.target.files?.[0])}
             />

@@ -16,7 +16,7 @@ import { ResultScreen } from "@/features/result/result-screen";
 import { ThemeScreen } from "@/features/theme/theme-screen";
 import { TurnScreen } from "@/features/turn/turn-screen";
 import { VoteScreen } from "@/features/vote/vote-screen";
-import type { ErrorCode, Phase, PlayerStatus } from "@/game/types";
+import type { ErrorCode, Phase, PlayerStatus, RoomView } from "@/game/types";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
@@ -114,10 +114,22 @@ function useStepSound(phase: Phase) {
   }, [phase]);
 }
 
+/** Fetches every card's picture as soon as the room knows it, so the cards show up with it. */
+function usePreloadCards(view: RoomView) {
+  const urls = view.players
+    .map((p) => p.card?.imageUrl)
+    .filter(Boolean)
+    .join(" ");
+  useEffect(() => {
+    for (const url of urls.split(" ")) if (url) new Image().src = url;
+  }, [urls]);
+}
+
 function PhaseScreens() {
   const { view, offset } = useRoomContext();
   useRoomTab();
   useStepSound(view.phase);
+  usePreloadCards(view);
   const now = useServerClock(offset, 250);
   // A hit that ends the match keeps its reveal; the results wait until it is over.
   const revealing = view.reveal !== null && now < view.reveal.until;
