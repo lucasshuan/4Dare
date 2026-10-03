@@ -64,7 +64,7 @@
   "testAccount": "Sem Supabase, isso entra numa conta de teste.",
   "rooms": {
     "title": "Salas",
-    "waiting": "{count, plural, one {# esperando jogadores} other {# esperando jogadores}}",
+    "waiting": "{count, plural, one {# jogador esperando} other {# jogadores esperando}}",
     "roomOf": "Sala de {name}",
     "meta": "{players}/{seats} jogadores · {seconds} s por etapa",
     "join": "Entrar",
