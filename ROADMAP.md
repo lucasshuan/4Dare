@@ -141,3 +141,4 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] "Create room" goes straight into a new room named after you ("Bob123's room", "Sala de Bob123"); the other settings live only in the lobby's "Edit settings"; the room name is required, with nothing under the field
 - [x] A new room always starts with 4 seats; the lobby can lower it for that room
 - [x] Hover (or tap) a player at the top of the match: their card opens big under them, framed in their seat colour, with name, origin and who picked it
+- [x] "Who am I?" has its own small thumbnail (rooms list, selects, lobby): a hand of three cards, yours a big "?", crisp from 38×24 up

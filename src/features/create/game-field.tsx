@@ -5,18 +5,21 @@ import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ComponentType } from "react";
 import { WhoAmISnapshot } from "@/features/home/who-am-i-snapshot";
+import { WhoAmIThumb } from "@/features/home/who-am-i-thumb";
 import { GAME_KEYS, type GameKey } from "@/game/games";
 import { cn } from "@/lib/cn";
 
-/** What the screens show for each game: its messages (home.games.<key>) and its card art. */
+/** What the screens show for each game: its messages (home.games.<key>), its card art and its small thumbnail. */
 export const GAME_INFO: Record<
   GameKey,
   {
     messages: "whoAmI";
     Art: ComponentType<{ className?: string; still?: boolean }>;
+    /** Drawn for small boxes (16:10): fills whatever box it is given. */
+    Thumb: ComponentType;
   }
 > = {
-  "who-am-i": { messages: "whoAmI", Art: WhoAmISnapshot },
+  "who-am-i": { messages: "whoAmI", Art: WhoAmISnapshot, Thumb: WhoAmIThumb },
 };
 
 /** The game's name, as the hub card shows it. */
@@ -25,14 +28,14 @@ export function useGameName() {
   return (game: GameKey) => t(`${GAME_INFO[game].messages}.name`);
 }
 
-/** Thumbnail sizes: the box, and the scale that fits the 320×200 card art into it. */
+/** Thumbnail boxes, all 16:10. */
 const THUMB = {
-  md: ["h-14 w-[89.6px]", "scale-[0.28]"],
-  sm: ["h-10 w-16", "scale-[0.2]"],
-  xs: ["h-6 w-[38.4px]", "scale-[0.12]"],
+  md: "h-14 w-[89.6px]",
+  sm: "h-10 w-16",
+  xs: "h-6 w-[38.4px]",
 } as const;
 
-/** The game's card art, scaled down to a still thumbnail. */
+/** The game's small thumbnail, its own drawing (the card art turns to mush scaled this far down). */
 export function GameThumb({
   game,
   size = "md",
@@ -40,16 +43,16 @@ export function GameThumb({
   game: GameKey;
   size?: keyof typeof THUMB;
 }) {
-  const { Art } = GAME_INFO[game];
-  const [box, scale] = THUMB[size];
+  const { Thumb } = GAME_INFO[game];
   return (
     <span
       aria-hidden="true"
-      className={cn("relative block shrink-0 overflow-hidden rounded-md", box)}
+      className={cn(
+        "relative block shrink-0 overflow-hidden rounded-md",
+        THUMB[size],
+      )}
     >
-      <span className={cn("absolute top-0 left-0 w-80 origin-top-left", scale)}>
-        <Art still />
-      </span>
+      <Thumb />
     </span>
   );
 }
