@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { ease } from "@/lib/motion";
 import { WHO_AM_I } from "@/lib/routes";
 import { GamesCarousel } from "./games-carousel";
-import { HubActions } from "./hub-actions";
+import { HubActions, HubBrand } from "./hub-actions";
 import { useAuthErrorToast } from "./use-auth-error";
 import { WhoAmISnapshot } from "./who-am-i-snapshot";
 
@@ -24,7 +24,7 @@ export function HomeScreen() {
   useAuthErrorToast();
 
   return (
-    <Screen right={<HubActions />}>
+    <Screen left={<HubBrand />} right={<HubActions />}>
       <section className="flex flex-col gap-3">
         <motion.h1
           initial={{ opacity: 0, y: 12 }}

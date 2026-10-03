@@ -338,6 +338,45 @@ describe("server, local mode", () => {
       color: "#F4C7D9",
     });
   });
+
+  it("a match still going blocks other rooms until the player leaves it", async () => {
+    const meta = await import("@/app/api/me/match/route");
+    const current = async () =>
+      (
+        (await (
+          await meta.GET(new Request("http://x/api/me/match"))
+        ).json()) as {
+          match: { code: string } | null;
+        }
+      ).match;
+    const settings = {
+      ...ROOM,
+      visibility: "public",
+      seats: 2,
+      stepSeconds: 60,
+    } as const;
+    as("b2");
+    const other = must(await A.createRoom(settings)).code;
+    as("b1");
+    const { code } = must(await A.createRoom(settings));
+    // a lobby holds nobody
+    expect(await current()).toBeNull();
+    as("b3");
+    must(await A.joinRoom(code));
+    as("b1");
+    must(await A.startGame(code));
+    expect(await current()).toEqual({ code, game: ROOM.game, phase: "voting" });
+    expect(await A.createRoom(settings)).toEqual({
+      ok: false,
+      error: "in_match",
+    });
+    expect(await A.joinRoom(other)).toEqual({ ok: false, error: "in_match" });
+    // back into the match itself is fine
+    must(await A.joinRoom(code));
+    must(await A.leaveRoom(code));
+    expect(await current()).toBeNull();
+    must(await A.joinRoom(other));
+  });
 });
 
 describe("random pick by theme", () => {

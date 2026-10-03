@@ -7,6 +7,7 @@ import {
   type GameEvent,
   type Identity,
   type Lang,
+  type Phase,
   type PlayerId,
   type RoomSettings,
   type RoomState,
@@ -16,6 +17,7 @@ import {
 } from "@/game/types";
 import { getBackend } from "./backend";
 import { background } from "./background";
+import type { CurrentMatch } from "./contract";
 
 const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 export const CODE_PATTERN = /^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5}$/;
@@ -188,6 +190,31 @@ export async function applyDueTimeouts(code: string) {
     }
   }
   return stored;
+}
+
+/** From the theme to the last guess: a player in one of these can't join or create another room. */
+const LIVE: readonly Phase[] = [
+  "theming",
+  "voting",
+  "picking",
+  "asking",
+  "answering",
+  "guessing",
+  "validating",
+];
+
+/**
+ * The match `id` is playing, if any. Due timeouts fire first, so a match
+ * everyone walked away from ends instead of holding the player forever.
+ */
+export async function currentMatch(id: PlayerId): Promise<CurrentMatch | null> {
+  for (const code of await getBackend().rooms.withPlayer(id, LIVE)) {
+    const state = (await applyDueTimeouts(code))?.state;
+    const me = state?.players.find((p) => p.id === id);
+    if (state && me && !me.away && LIVE.includes(state.phase))
+      return { code, game: state.settings.game, phase: state.phase };
+  }
+  return null;
 }
 
 export async function loadRoom(code: string) {

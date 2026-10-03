@@ -6,6 +6,7 @@ import type {
   Character,
   ErrorCode,
   Lang,
+  Phase,
   PlayerId,
 } from "@/game/types";
 
@@ -29,6 +30,13 @@ export interface Me {
   providerAvatarUrl: string | null;
   /** "local" = no Supabase configured: guests only, plus a fake test account. */
   authMode: "local" | "supabase";
+}
+
+/** The match a player is in and has not left, while it is going (from the theme to the last guess). */
+export interface CurrentMatch {
+  code: string;
+  game: GameKey;
+  phase: Phase;
 }
 
 /** A character as the autocomplete shows it. */

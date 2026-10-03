@@ -10,6 +10,7 @@ import type {
   Identity,
   Lang,
   Localized,
+  Phase,
   PlayerId,
   PublicRoom,
   RoomState,
@@ -36,6 +37,8 @@ export interface RoomStore {
   ): Promise<boolean>;
   /** Rooms to list (public and private, see toPublicRoom), newest first. */
   listPublic(): Promise<PublicRoom[]>;
+  /** Codes of the recent rooms in one of `phases` where `playerId` has a seat. */
+  withPlayer(playerId: PlayerId, phases: readonly Phase[]): Promise<string[]>;
 }
 
 export interface NewCharacter {

@@ -5,8 +5,11 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
+import { MatchLockPage } from "@/features/current-match/match-lock";
 import { RoomProvider, useRoomContext } from "@/features/data/room-context";
+import { useCurrentMatch } from "@/features/data/use-current-match";
 import { useRoom } from "@/features/data/use-room";
+import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
 import { PickScreen } from "@/features/pick/pick-screen";
 import { ResultScreen } from "@/features/result/result-screen";
@@ -43,6 +46,7 @@ export function RoomScreen({ code }: { code: string }) {
   }, [error, code, refresh]);
 
   const problem = joinError ?? (error === "not_found" ? "not_found" : null);
+  if (problem === "in_match") return <InMatchElsewhere />;
   if (problem) return <RoomProblem code={problem} />;
   if (askPassword)
     return (
@@ -147,6 +151,22 @@ function RoomLoading() {
         <div className="h-12 w-2/3 animate-pulse rounded-md bg-sunken" />
         <div className="h-6 w-1/2 animate-pulse rounded-md bg-sunken" />
       </motion.div>
+    </Screen>
+  );
+}
+
+/**
+ * Another room's link while a match is going: the lock, with the way back or
+ * out. Once out (or once that match ends), the page loads again and joins.
+ */
+function InMatchElsewhere() {
+  const { match, isLoading } = useCurrentMatch();
+  useEffect(() => {
+    if (!isLoading && !match) window.location.reload();
+  }, [isLoading, match]);
+  return (
+    <Screen left={<HubBrand />} right={<HubActions />}>
+      {match ? <MatchLockPage match={match} /> : null}
     </Screen>
   );
 }

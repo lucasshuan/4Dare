@@ -69,5 +69,16 @@ export function supabaseRooms(): RoomStore {
         return room ? [room] : [];
       });
     },
+    async withPlayer(playerId, phases) {
+      const { data, error } = await db()
+        .select("code")
+        .in("phase", [...phases])
+        // jsonb containment: some seat has this id
+        .filter("state->players", "cs", JSON.stringify([{ id: playerId }]))
+        .gte("updated_at", new Date(Date.now() - 6 * 3600_000).toISOString())
+        .limit(10);
+      if (error) throw error;
+      return (data ?? []).map((r) => r.code as string);
+    },
   };
 }

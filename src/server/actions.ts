@@ -42,7 +42,13 @@ import {
   type Result,
 } from "./contract";
 import { allow } from "./rate-limit";
-import { dispatch, normalizeCode, openRoom, roundThemes } from "./rooms";
+import {
+  currentMatch,
+  dispatch,
+  normalizeCode,
+  openRoom,
+  roundThemes,
+} from "./rooms";
 import { drawPopular, PICKS_FETCHED, pickKey } from "./theme-picks";
 
 async function lang(): Promise<Lang> {
@@ -113,12 +119,16 @@ export async function createRoom(
     const host = await me();
     if (!allow(`create:${host.id}`, 20, 60_000))
       throw new GameError("rate_limited");
+    if (await currentMatch(host.id)) throw new GameError("in_match");
     const settings: RoomSettings = { ...DEFAULT_SETTINGS, ...parsed.data };
     return { code: await openRoom(host, settings) };
   });
 }
 
-/** Idempotent: joining a room you are already in succeeds. A private room asks newcomers for `password`. */
+/**
+ * Idempotent: joining a room you are already in succeeds. A private room asks
+ * newcomers for `password`. A match still going elsewhere has to be left first.
+ */
 export async function joinRoom(
   rawCode: string,
   password?: string,
@@ -129,6 +139,8 @@ export async function joinRoom(
     // Guessing a password takes one try per call: keep it slow.
     if (password !== undefined && !allow(`join:${who.id}:${code}`, 10, 60_000))
       throw new GameError("rate_limited");
+    const playing = await currentMatch(who.id);
+    if (playing && playing.code !== code) throw new GameError("in_match");
     const typed =
       typeof password === "string" ? password.slice(0, 100) : undefined;
     await dispatch(code, () => ({
@@ -140,9 +152,12 @@ export async function joinRoom(
   });
 }
 
-export async function leaveRoom(code: string): Promise<Result> {
+/** Out of the room, or out of the match (the seat stays, marked away). Nothing to show afterwards: a player who left has no view. */
+export async function leaveRoom(rawCode: string): Promise<Result> {
   return run(async () => {
-    await act(code, (id) => ({ type: "LEAVE", playerId: id }));
+    const code = roomCode(rawCode);
+    const who = await me();
+    await dispatch(code, () => ({ type: "LEAVE", playerId: who.id }));
   });
 }
 

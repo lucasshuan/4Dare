@@ -55,6 +55,7 @@
     "not_enough_picks": "No matches with this theme yet.",
     "password_required": "This room asks for a password.",
     "wrong_password": "Wrong password.",
+    "in_match": "You are in a match. Finish it or leave it first.",
     "unknown": "Something went wrong. Try again."
   },
   "image": {
@@ -111,5 +112,21 @@
     "family": "Family & friends",
     "quirks": "Personality & quirks",
     "looks": "Looks & colors"
+  },
+  "currentMatch": {
+    "badge": "Match in progress",
+    "phase": {
+      "theme": "Choosing the theme",
+      "picking": "Picking characters",
+      "playing": "Playing"
+    },
+    "back": "Back to the match",
+    "leave": "Leave the match",
+    "leaveSure": "Leave for good? You can't come back to this match.",
+    "leaveYes": "Leave",
+    "stay": "Stay",
+    "lockTitle": "You're in a match",
+    "lockText": "Finish it or leave it before you join or create another room.",
+    "left": "You left the match"
   }
 }

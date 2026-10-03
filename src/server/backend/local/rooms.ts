@@ -35,5 +35,14 @@ export function localRooms(): RoomStore {
         .map((x) => x.room)
         .slice(0, 100);
     },
+    async withPlayer(playerId, phases) {
+      return [...rooms.values()]
+        .filter(
+          ({ state }) =>
+            phases.includes(state.phase) &&
+            state.players.some((p) => p.id === playerId),
+        )
+        .map(({ state }) => state.code);
+    },
   };
 }

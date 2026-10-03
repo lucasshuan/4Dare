@@ -17,7 +17,7 @@ import { Screen } from "@/components/ui/screen";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
 import { useMe } from "@/features/data/use-me";
-import { HubActions } from "@/features/home/hub-actions";
+import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { useAuthErrorToast } from "@/features/home/use-auth-error";
 import { useSignIn } from "@/features/home/use-sign-in";
 import { type Avatar as AvatarData, MAX_NAME } from "@/game/types";
@@ -35,7 +35,7 @@ export function ProfileScreen() {
   const { me } = useMe();
   useAuthErrorToast();
   return (
-    <Screen right={<HubActions />}>
+    <Screen left={<HubBrand />} right={<HubActions />}>
       <div className="flex flex-col gap-4">
         <Link
           href={GAMES}

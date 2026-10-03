@@ -7,8 +7,10 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { GameThumb, useGameName } from "@/features/create/game-field";
+import { MatchGate } from "@/features/current-match/match-lock";
+import { useCurrentMatch } from "@/features/data/use-current-match";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
-import { HubActions } from "@/features/home/hub-actions";
+import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { DEFAULT_GAME, GAME_KEYS, type GameKey } from "@/game/games";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -50,6 +52,7 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
   const t = useTranslations("home.roomsPage");
   const name = useDisplayName();
   const { rooms, isLoading } = usePublicRooms();
+  const { match } = useCurrentMatch();
   const [filters, setFilters] = useState(initial);
   const set = (patch: Partial<RoomFilters>) =>
     setFilters((f) => ({ ...f, ...patch }));
@@ -83,7 +86,7 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
   );
 
   return (
-    <Screen right={<HubActions />}>
+    <Screen left={<HubBrand />} right={<HubActions />}>
       <div className="flex flex-col gap-6">
         <motion.div {...riseIn} className="flex flex-col gap-4">
           <Link
@@ -104,66 +107,73 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
             </div>
             <Link
               href={newRoom(filters.game ?? DEFAULT_GAME)}
-              className={buttonClass("primary", "md")}
+              inert={match ? true : undefined}
+              className={buttonClass(
+                "primary",
+                "md",
+                match ? "pointer-events-none opacity-35" : undefined,
+              )}
             >
               {t("create")}
             </Link>
           </div>
         </motion.div>
 
-        <Filters filters={filters} set={set} />
+        <MatchGate className="flex flex-col gap-6">
+          <Filters filters={filters} set={set} />
 
-        {isLoading ? (
-          <div className="grid gap-2 md:grid-cols-2">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-[68px] animate-pulse rounded-lg bg-surface"
-              />
-            ))}
-          </div>
-        ) : shown.length ? (
-          <ul className="grid gap-2 md:grid-cols-2">
-            <AnimatePresence initial={false} mode="popLayout">
-              {shown.map((r) => (
-                <RoomRow
-                  key={r.code}
-                  room={r}
-                  className="bg-surface shadow-card"
+          {isLoading ? (
+            <div className="grid gap-2 md:grid-cols-2">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-[68px] animate-pulse rounded-lg bg-surface"
                 />
               ))}
-            </AnimatePresence>
-          </ul>
-        ) : (
-          <motion.div
-            {...riseIn}
-            className="flex flex-col items-center gap-4 rounded-xl border-[1.5px] border-line-strong border-dashed px-6 py-12 text-center"
-          >
-            <span className="flex size-12 items-center justify-center rounded-pill bg-sunken text-ink-muted">
-              <Search className="size-6" strokeWidth={1.75} />
-            </span>
-            <p className="max-w-sm text-ink-muted">
-              {filtered ? t("emptyFiltered") : t("empty")}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {filtered ? (
-                <button
-                  type="button"
-                  onClick={() => set({ game: null, q: "", access: "all" })}
-                  className={buttonClass("secondary", "sm")}
-                >
-                  {t("clearFilters")}
-                </button>
-              ) : null}
-              <Link
-                href={newRoom(filters.game ?? DEFAULT_GAME)}
-                className={buttonClass("primary", "sm")}
-              >
-                {t("create")}
-              </Link>
             </div>
-          </motion.div>
-        )}
+          ) : shown.length ? (
+            <ul className="grid gap-2 md:grid-cols-2">
+              <AnimatePresence initial={false} mode="popLayout">
+                {shown.map((r) => (
+                  <RoomRow
+                    key={r.code}
+                    room={r}
+                    className="bg-surface shadow-card"
+                  />
+                ))}
+              </AnimatePresence>
+            </ul>
+          ) : (
+            <motion.div
+              {...riseIn}
+              className="flex flex-col items-center gap-4 rounded-xl border-[1.5px] border-line-strong border-dashed px-6 py-12 text-center"
+            >
+              <span className="flex size-12 items-center justify-center rounded-pill bg-sunken text-ink-muted">
+                <Search className="size-6" strokeWidth={1.75} />
+              </span>
+              <p className="max-w-sm text-ink-muted">
+                {filtered ? t("emptyFiltered") : t("empty")}
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {filtered ? (
+                  <button
+                    type="button"
+                    onClick={() => set({ game: null, q: "", access: "all" })}
+                    className={buttonClass("secondary", "sm")}
+                  >
+                    {t("clearFilters")}
+                  </button>
+                ) : null}
+                <Link
+                  href={newRoom(filters.game ?? DEFAULT_GAME)}
+                  className={buttonClass("primary", "sm")}
+                >
+                  {t("create")}
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </MatchGate>
       </div>
     </Screen>
   );

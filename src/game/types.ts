@@ -326,6 +326,8 @@ export const ERROR_CODES = [
   /** The room is private: a newcomer has to give its password. */
   "password_required",
   "wrong_password",
+  /** The player is in a match that is still going: they finish or leave it first. */
+  "in_match",
   "unknown",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
