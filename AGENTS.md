@@ -19,8 +19,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## AI
 
 - no AI calls in the app or the build: no generated text, no API cost at runtime
-- AI is fine in separate scripts (devDependencies) run by hand
-
 
 ## Commits
 
