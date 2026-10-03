@@ -573,15 +573,15 @@ describe("step times", () => {
       } as unknown as RoomState["settings"],
     };
     expect(toView(g.state, 1, "p1", g.now).settings).toMatchObject({
-      askSeconds: 90,
-      validateSeconds: 60,
+      askSeconds: DEFAULT_SETTINGS.askSeconds,
+      validateSeconds: DEFAULT_SETTINGS.validateSeconds,
     });
     expect(toView(g.state, 1, "p1", g.now).settings).not.toHaveProperty(
       "stepSeconds",
     );
     g.start();
     g.pickAll();
-    expect(g.state.deadline).toBe(g.now + 90_000);
+    expect(g.state.deadline).toBe(g.now + DEFAULT_SETTINGS.askSeconds * 1000);
   });
 });
 

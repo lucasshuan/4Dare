@@ -56,7 +56,7 @@ export interface RoomSettings {
    */
   password: string;
   seats: 2 | 3 | 4;
-  /** Seconds to ask a question: STEP_SECONDS_MIN..MAX, default 90. */
+  /** Seconds to ask a question: STEP_SECONDS_MIN..MAX, default 80. */
   askSeconds: number;
   /** Seconds to guess (or pass) once the answers are in. */
   guessSeconds: number;
@@ -77,10 +77,10 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   visibility: "public",
   password: "",
   seats: 4,
-  askSeconds: 90,
-  guessSeconds: 90,
-  answerSeconds: 90,
-  validateSeconds: 60,
+  askSeconds: 80,
+  guessSeconds: 60,
+  answerSeconds: 80,
+  validateSeconds: 40,
   mode: "classic",
   themeMode: "vote",
   themeSets: [...THEME_SET_KEYS],

@@ -142,7 +142,7 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] A new room always starts with 4 seats; the lobby can lower it for that room
 - [x] Hover (or tap) a player at the top of the match: their card opens big under them, framed in their seat colour, with name, origin and who picked it
 - [x] "Who am I?" has its own small thumbnail (rooms list, selects, lobby): a hand of three cards, yours a big "?", crisp from 38×24 up
-- [x] One time per step of a turn, set in the room's rules with a hint each: ask, answer and guess (90 s), check a guess (60 s); picking always gets 120 s. Every answer that leaves others still to answer cuts 20% of the answer time (never under 10 s left), and the clock shows the cut
+- [x] One time per step of a turn, set in the room's rules with a hint each: ask and answer (80 s), guess (60 s), check a guess (40 s); picking always gets 120 s. Every answer that leaves others still to answer cuts 20% of the answer time (never under 10 s left), and the clock shows the cut
 - [x] Room QR code in the lobby, right of the greeting: rounded modules, blue eyes, the 4Dare icon in the middle; a click opens it big to scan from across the table
 - [x] "Who am I?" banner about 100 px shorter: the question sits right under the top bar and right over the cards, which keep their size
 - [x] One loader for the whole site: a hand of "?" cards shuffling, centred in the window with what is going on under it (creating a room, opening it, the profile, a match elsewhere)

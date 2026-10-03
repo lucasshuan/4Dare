@@ -11,7 +11,7 @@
 5. Then you guess. The right name counts at once. If it's only close, whoever picked the character decides.
 6. First to find out wins. At the end there's a podium; a few seconds later everyone is back in the lobby for another one.
 
-Each step has a time limit, set per room: 90 s to ask, to answer and to guess, 60 s to check a guess (picking always gets 120 s). Every answer that leaves others still to answer cuts 20% of the answer time, so nobody waits long on the last one. Between steps, everyone sees the answers.
+Each step has a time limit, set per room: 80 s to ask and to answer, 60 s to guess, 40 s to check a guess (picking always gets 120 s). Every answer that leaves others still to answer cuts 20% of the answer time, so nobody waits long on the last one. Between steps, everyone sees the answers.
 
 ## Who plays
 

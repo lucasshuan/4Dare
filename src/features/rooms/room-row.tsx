@@ -31,7 +31,7 @@ export function sortRooms(rooms: PublicRoom[]) {
     .map(({ room }) => room);
 }
 
-/** "90", or "60–90" when the steps differ. A room listed by an older server has no times: the defaults. */
+/** "80", or "40–80" when the steps differ. A room listed by an older server has no times: the defaults. */
 function secondsRange(r: PublicRoom) {
   const all = STEP_TIMES.map((k) => r[k] ?? DEFAULT_SETTINGS[k]);
   const min = Math.min(...all);
