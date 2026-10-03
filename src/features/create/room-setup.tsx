@@ -1,7 +1,12 @@
 "use client";
 
 import { Tabs } from "@base-ui/react/tabs";
-import { ArrowRight, Shapes, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowRight,
+  ScrollText,
+  Shapes,
+  SlidersHorizontal,
+} from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type FormEvent, type ReactNode, useId, useState } from "react";
@@ -11,10 +16,14 @@ import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
 import type { CreateRoomInput } from "@/server/contract";
 import { GameField } from "./game-field";
-import { missingPassword, SettingsFields } from "./settings-fields";
+import {
+  missingPassword,
+  RulesFields,
+  SettingsFields,
+} from "./settings-fields";
 import { missingSets, ThemeFields } from "./theme-fields";
 
-type Tab = "room" | "themes";
+type Tab = "room" | "rules" | "themes";
 
 const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
 
@@ -23,9 +32,9 @@ export const backClass =
   "-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink";
 
 /**
- * Creating a room and editing it in the lobby: back, the title with the submit
- * button on its far right, the game, then the settings in tabs. "Who am I?"
- * keeps its themes in a second tab.
+ * Creating a room and editing it in the lobby: back, the title with the
+ * game select and the submit button on its far right, then the settings in
+ * tabs: room, the game's rules and, for "Who am I?", its themes.
  */
 export function RoomSetup({
   back,
@@ -52,6 +61,7 @@ export function RoomSetup({
   const problemId = useId();
   const problems: Record<Tab, string | null> = {
     room: value && missingPassword(value) ? t("needPassword") : null,
+    rules: null,
     themes: value && missingSets(value) ? t("needOneSet") : null,
   };
   const problemTab = problems.room ? "room" : problems.themes ? "themes" : null;
@@ -70,80 +80,98 @@ export function RoomSetup({
           <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em] sm:tiny:text-[36px] sm:tiny:leading-10">
             {title}
           </h1>
-          <SubmitButton
-            ready={value !== null && !problemTab}
-            pending={pending}
-            describedBy={problemTab ? `${problemId}-${problemTab}` : undefined}
-          >
-            {submit}
-          </SubmitButton>
+          <div className="ml-auto flex items-center gap-3 max-sm:w-full max-sm:flex-col max-sm:items-stretch">
+            {value ? (
+              <GameField
+                value={value.game}
+                onChange={(game) => onChange({ ...value, game })}
+              />
+            ) : null}
+            <SubmitButton
+              ready={value !== null && !problemTab}
+              pending={pending}
+              describedBy={
+                problemTab ? `${problemId}-${problemTab}` : undefined
+              }
+            >
+              {submit}
+            </SubmitButton>
+          </div>
         </div>
       </div>
       {value ? (
-        <>
-          <GameField
-            value={value.game}
-            onChange={(game) => onChange({ ...value, game })}
-          />
-          <Tabs.Root
-            value={tab}
-            onValueChange={(v) => setTab(v as Tab)}
-            className="flex flex-col gap-6 sm:tiny:gap-4"
-          >
-            <Tabs.List className="grid grid-cols-2 gap-1.5 rounded-lg bg-sunken p-1.5">
+        <Tabs.Root
+          value={tab}
+          onValueChange={(v) => setTab(v as Tab)}
+          className="flex flex-col gap-6 sm:tiny:gap-4"
+        >
+          <Tabs.List className="grid auto-cols-fr grid-flow-col gap-1.5 rounded-lg bg-sunken p-1.5">
+            <SetupTab
+              value="room"
+              active={tab === "room"}
+              icon={SlidersHorizontal}
+              tone="bg-sky-soft text-sky"
+              label={t("tabRoom")}
+              summary={t("roomSummary", {
+                visibility: t(value.visibility),
+                seats: value.seats,
+              })}
+              problem={problems.room}
+              problemId={`${problemId}-room`}
+            />
+            <SetupTab
+              value="rules"
+              active={tab === "rules"}
+              icon={ScrollText}
+              tone="bg-yes-soft text-yes"
+              label={t("tabRules")}
+              summary={t("rulesSummary", { seconds: value.stepSeconds })}
+              problem={problems.rules}
+              problemId={`${problemId}-rules`}
+            />
+            {value.game === "who-am-i" ? (
               <SetupTab
-                value="room"
-                active={tab === "room"}
-                icon={SlidersHorizontal}
-                tone="bg-sky-soft text-sky"
-                label={t("tabRoom")}
-                summary={t("roomSummary", {
-                  visibility: t(value.visibility),
-                  seats: value.seats,
-                  seconds: value.stepSeconds,
-                })}
-                problem={problems.room}
-                problemId={`${problemId}-room`}
+                value="themes"
+                active={tab === "themes"}
+                icon={Shapes}
+                tone="bg-apricot-soft text-apricot"
+                label={t("themes")}
+                summary={
+                  value.themeMode === "host"
+                    ? t("themeHost")
+                    : `${t("themeVote")} · ${t("setsOn", {
+                        on: value.themeSets.length,
+                        total: THEME_SET_KEYS.length,
+                      })}`
+                }
+                problem={problems.themes}
+                problemId={`${problemId}-themes`}
               />
-              {value.game === "who-am-i" ? (
-                <SetupTab
-                  value="themes"
-                  active={tab === "themes"}
-                  icon={Shapes}
-                  tone="bg-apricot-soft text-apricot"
-                  label={t("themes")}
-                  summary={
-                    value.themeMode === "host"
-                      ? t("themeHost")
-                      : `${t("themeVote")} · ${t("setsOn", {
-                          on: value.themeSets.length,
-                          total: THEME_SET_KEYS.length,
-                        })}`
-                  }
-                  problem={problems.themes}
-                  problemId={`${problemId}-themes`}
-                />
-              ) : null}
-            </Tabs.List>
-            <Tabs.Panel value="room" className="outline-none">
-              <PanelIn>
-                <SettingsFields
-                  value={value}
-                  onChange={onChange}
-                  minSeats={minSeats}
-                />
-              </PanelIn>
-            </Tabs.Panel>
-            <Tabs.Panel value="themes" className="outline-none">
-              <PanelIn>
-                <ThemeFields
-                  value={value}
-                  onChange={(v) => onChange({ ...value, ...v })}
-                />
-              </PanelIn>
-            </Tabs.Panel>
-          </Tabs.Root>
-        </>
+            ) : null}
+          </Tabs.List>
+          <Tabs.Panel value="room" className="outline-none">
+            <PanelIn>
+              <SettingsFields
+                value={value}
+                onChange={onChange}
+                minSeats={minSeats}
+              />
+            </PanelIn>
+          </Tabs.Panel>
+          <Tabs.Panel value="rules" className="outline-none">
+            <PanelIn>
+              <RulesFields value={value} onChange={onChange} />
+            </PanelIn>
+          </Tabs.Panel>
+          <Tabs.Panel value="themes" className="outline-none">
+            <PanelIn>
+              <ThemeFields
+                value={value}
+                onChange={(v) => onChange({ ...value, ...v })}
+              />
+            </PanelIn>
+          </Tabs.Panel>
+        </Tabs.Root>
       ) : null}
     </form>
   );
@@ -188,7 +216,7 @@ function SetupTab({
     <Tabs.Tab
       value={value}
       className={cn(
-        "relative flex min-w-0 items-center gap-3 rounded-md p-2 pr-4 text-left outline-none transition-colors duration-200 ease-soft focus-visible:ring-2 focus-visible:ring-sky sm:gap-4 sm:p-3 sm:pr-5",
+        "relative flex min-w-0 flex-col items-center gap-1.5 rounded-md p-2 text-center outline-none transition-colors duration-200 ease-soft focus-visible:ring-2 focus-visible:ring-sky sm:flex-row sm:gap-4 sm:p-3 sm:pr-5 sm:text-left",
         active ? "text-ink" : "text-ink-muted hover:text-ink",
       )}
     >
@@ -210,14 +238,14 @@ function SetupTab({
           <span className="-top-1 -right-1 absolute size-3 rounded-full bg-no ring-2 ring-sunken" />
         ) : null}
       </span>
-      <span className="relative flex min-w-0 flex-col">
-        <span className="font-bold font-display text-lg leading-tight sm:text-xl">
+      <span className="relative flex min-w-0 max-w-full flex-col">
+        <span className="truncate font-bold font-display text-base leading-tight sm:text-xl">
           {label}
         </span>
         <span
           id={problemId}
           className={cn(
-            "truncate font-medium text-[13px]",
+            "truncate font-medium text-[13px] max-sm:sr-only",
             problem ? "text-no" : "text-ink-muted",
           )}
         >
@@ -258,7 +286,7 @@ function SubmitButton({
       aria-describedby={describedBy}
       className={cn(
         buttonClass("primary", "lg"),
-        "relative ml-auto h-16 overflow-hidden px-9 font-bold font-display text-xl shadow-card sm:px-10",
+        "relative h-16 overflow-hidden px-9 font-bold font-display text-xl shadow-card sm:px-10",
         "disabled:shadow-none",
       )}
     >

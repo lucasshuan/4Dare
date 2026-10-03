@@ -1,8 +1,9 @@
 "use client";
 
+import { Select } from "@base-ui/react/select";
+import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type ComponentType, useId } from "react";
-import { HintLabel } from "@/components/ui/hint-label";
+import type { ComponentType } from "react";
 import { WhoAmISnapshot } from "@/features/home/who-am-i-snapshot";
 import { GAME_KEYS, type GameKey } from "@/game/games";
 import { cn } from "@/lib/cn";
@@ -54,8 +55,9 @@ export function GameThumb({
 }
 
 /**
- * The room's game, as tabs with each game's picture and name: the first thing
- * set when creating a room, and switchable in the lobby.
+ * The room's game, a select beside the submit button. Its width is fixed, since
+ * a game's name can run longer in other languages. Set when creating a room and
+ * switchable in the lobby.
  */
 export function GameField({
   value,
@@ -67,45 +69,65 @@ export function GameField({
   const t = useTranslations("home.createRoom");
   const tg = useTranslations("home.games");
   const name = useGameName();
-  const hintId = useId();
+  const players = (game: GameKey) => tg(`${GAME_INFO[game].messages}.players`);
   return (
-    <div className="flex flex-col gap-2">
-      <HintLabel hint={t("gameHint")} hintId={hintId}>
-        {t("game")}
-      </HintLabel>
-      <fieldset
-        aria-describedby={hintId}
-        className="m-0 flex min-w-0 flex-wrap gap-2 border-0 p-0"
+    <Select.Root
+      items={GAME_KEYS.map((game) => ({ value: game, label: name(game) }))}
+      value={value}
+      onValueChange={(game) => {
+        if (game) onChange(game as GameKey);
+      }}
+    >
+      <Select.Trigger
+        aria-label={t("game")}
+        className="flex h-16 w-full shrink-0 sm:w-72 items-center gap-3 rounded-pill border-[1.5px] border-line bg-surface py-1.5 pr-5 pl-3 text-left transition-[border-color,box-shadow] duration-200 ease-soft hover:border-line-strong data-popup-open:border-ink data-popup-open:shadow-card"
       >
-        <legend className="sr-only">{t("game")}</legend>
-        {GAME_KEYS.map((game) => {
-          const on = game === value;
-          return (
-            <button
-              key={game}
-              type="button"
-              aria-pressed={on}
-              onClick={() => onChange(game)}
-              className={cn(
-                "flex items-center gap-3 rounded-lg border-[1.5px] bg-surface p-1.5 pr-5 text-left transition-[border-color,box-shadow] duration-200 ease-soft",
-                on
-                  ? "border-ink shadow-card"
-                  : "border-line hover:border-line-strong",
-              )}
-            >
-              <GameThumb game={game} />
-              <span className="flex flex-col">
-                <span className="font-bold font-display text-lg leading-tight">
-                  {name(game)}
-                </span>
-                <span className="font-medium text-[13px] text-ink-muted">
-                  {tg(`${GAME_INFO[game].messages}.players`)}
-                </span>
-              </span>
-            </button>
-          );
-        })}
-      </fieldset>
-    </div>
+        <GameThumb game={value} size="sm" />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <Select.Value className="truncate font-bold font-display text-lg leading-tight">
+            {(game: GameKey) => name(game)}
+          </Select.Value>
+          <span className="truncate font-medium text-[13px] text-ink-muted">
+            {players(value)}
+          </span>
+        </span>
+        <Select.Icon className="text-ink-muted">
+          <ChevronDown className="size-5" strokeWidth={2} />
+        </Select.Icon>
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Positioner
+          sideOffset={6}
+          align="start"
+          alignItemWithTrigger={false}
+          className="z-50 outline-none"
+        >
+          <Select.Popup className="w-[var(--anchor-width)] origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+            <Select.List>
+              {GAME_KEYS.map((game) => (
+                <Select.Item
+                  key={game}
+                  value={game}
+                  className="flex items-center gap-3 rounded-md p-1.5 pr-3 outline-none select-none data-highlighted:bg-sky-soft"
+                >
+                  <GameThumb game={game} size="sm" />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <Select.ItemText className="truncate font-bold font-display leading-tight">
+                      {name(game)}
+                    </Select.ItemText>
+                    <span className="truncate font-medium text-[13px] text-ink-muted">
+                      {players(game)}
+                    </span>
+                  </span>
+                  <Select.ItemIndicator className="text-sky">
+                    <Check className="size-4" strokeWidth={2.25} />
+                  </Select.ItemIndicator>
+                </Select.Item>
+              ))}
+            </Select.List>
+          </Select.Popup>
+        </Select.Positioner>
+      </Select.Portal>
+    </Select.Root>
   );
 }

@@ -143,9 +143,9 @@ export const missingPassword = (v: CreateRoomInput) =>
 
 /**
  * Name, who can join (and the password of a private room) on one row, then
- * seats and seconds per step: used to create a room and to edit it in the
- * lobby. Each label carries its hint in a tooltip. The theme settings are in
- * theme-fields.tsx.
+ * seats: used to create a room and to edit it in the lobby. Each label carries
+ * its hint in a tooltip. The game's rules are in RulesFields below, the theme
+ * settings in theme-fields.tsx.
  */
 export function SettingsFields({
   value,
@@ -205,27 +205,40 @@ export function SettingsFields({
           ) : null}
         </AnimatePresence>
       </div>
-      <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
-        <div className="flex flex-col gap-2">
-          <HintLabel hint={t("seatsHint")} hintId={seatsHint}>
-            {t("seats")}
-          </HintLabel>
-          <Segmented
-            label={t("seats")}
-            options={[2, 3, 4] as const}
-            value={value.seats}
-            onChange={(seats) => onChange({ ...value, seats })}
-            render={String}
-            disabled={(n) => n < minSeats}
-            describedBy={seatsHint}
-          />
-        </div>
-        <SecondsStepper
-          value={value.stepSeconds}
-          onChange={(stepSeconds) => onChange({ ...value, stepSeconds })}
+      <div className="flex flex-col gap-2">
+        <HintLabel hint={t("seatsHint")} hintId={seatsHint}>
+          {t("seats")}
+        </HintLabel>
+        <Segmented
+          label={t("seats")}
+          options={[2, 3, 4] as const}
+          value={value.seats}
+          onChange={(seats) => onChange({ ...value, seats })}
+          render={String}
+          disabled={(n) => n < minSeats}
+          describedBy={seatsHint}
         />
       </div>
     </div>
+  );
+}
+
+/**
+ * The rules of the room's game. For now only the seconds per step, but each
+ * game can bring its own here.
+ */
+export function RulesFields({
+  value,
+  onChange,
+}: {
+  value: CreateRoomInput;
+  onChange: (v: CreateRoomInput) => void;
+}) {
+  return (
+    <SecondsStepper
+      value={value.stepSeconds}
+      onChange={(stepSeconds) => onChange({ ...value, stepSeconds })}
+    />
   );
 }
 
