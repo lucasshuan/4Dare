@@ -48,7 +48,7 @@ No AI theme was ever saved (0 rows with source `ai`).
 
 Rule: switching language or opening a menu never waits on a download; fonts swap in when ready.
 
-- [ ] Zen Maru Gothic only on Japanese pages (245 `@font-face` blocking every page today)
+- [x] Zen Maru Gothic only on Japanese pages: en/pt pages link 17 KB gzip of CSS instead of 81 KB (its 245 `@font-face` are a chunk of `ja-font.tsx`, linked only where it renders)
 - [ ] Critter avatars as SVG from a cached route, no DiceBear in the browser (152 KB)
 - [ ] Browser Supabase only for realtime, loaded on demand; OAuth starts on the server (−110 KB)
 - [ ] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB)
