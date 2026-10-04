@@ -58,6 +58,7 @@ export function CardPicture({
 }) {
   const t = useTranslations("pickCard");
   const tImage = useTranslations("common.image");
+  const tErrors = useTranslations("common.errors");
   const tPick = useTranslations("room.pick");
   const key = pictureKey(value);
   const takes = editable && key !== null;
@@ -69,46 +70,26 @@ export function CardPicture({
   const [tray, setTray] = useState(false);
   const [busy, setBusy] = useState(0);
 
-  // Async work reads the latest props.
-  const latest = useRef({ value, onChange, onNewImage, onLibraryImage });
+  // Async work and effects read the latest props and crop.
+  const latest = useRef({
+    value,
+    onChange,
+    onNewImage,
+    onLibraryImage,
+    editable,
+    session,
+  });
   useEffect(() => {
-    latest.current = { value, onChange, onNewImage, onLibraryImage };
+    latest.current = {
+      value,
+      onChange,
+      onNewImage,
+      onLibraryImage,
+      editable,
+      session,
+    };
   });
   const sent = useRef(0);
-
-  /** Shows the crop on the card at once and sends it: a new name's upload, or the library picture. */
-  const commit = useCallback(async (blob: Blob, forKey: string) => {
-    const { value: now, onChange: emit } = latest.current;
-    if (pictureKey(now) !== forKey) return;
-    const seq = ++sent.current;
-    const url = URL.createObjectURL(blob);
-    setLocal({ key: forKey, url });
-    setBusy((n) => n + 1);
-    try {
-      if (now.kind === "new") {
-        emit({ ...now, uploading: true });
-        const uploaded = await latest.current
-          .onNewImage(blob)
-          .catch(() => null);
-        const after = latest.current.value;
-        if (seq !== sent.current || after.kind !== "new") return;
-        latest.current.onChange({
-          ...after,
-          imageUrl: uploaded ?? after.imageUrl,
-          uploading: false,
-        });
-        if (!uploaded) setLocal(null);
-      } else if (now.kind === "picked") {
-        const ok = await latest.current
-          .onLibraryImage(now.card.characterId, blob)
-          .then(() => true)
-          .catch(() => false);
-        if (!ok && seq === sent.current) setLocal(null);
-      }
-    } finally {
-      setBusy((n) => n - 1);
-    }
-  }, []);
 
   const intake = useImageIntake({
     paste: takes,
@@ -128,27 +109,100 @@ export function CardPicture({
         };
       });
       // Centre-cropped at once, so the card holds the picture even if nobody adjusts it.
-      cropToWebp(src, null, SIZE.w, SIZE.h)
-        .then((blob) => commit(blob, forKey))
-        .catch(intake.exportError);
+      void commit(() => cropToWebp(src, null, SIZE.w, SIZE.h), forKey);
     },
   });
+  const { exportError, setError } = intake;
 
-  // Debounced export while the crop is being adjusted.
+  /**
+   * Exports a crop, shows it on the card and sends it: a new name's upload, or
+   * the library picture. A frozen card (confirmed, time up) takes nothing more,
+   * so it never shows a crop the saved character lacks. A new name is marked
+   * `uploading` before the export starts, so Confirm waits for it.
+   */
+  const commit = useCallback(
+    async (make: () => Promise<Blob>, forKey: string) => {
+      const first = latest.current;
+      if (!first.editable || pictureKey(first.value) !== forKey) return;
+      const seq = ++sent.current;
+      /** Clears a new name's `uploading` flag this send raised. */
+      const settle = () => {
+        const { value: now, onChange: emit } = latest.current;
+        if (now.kind === "new" && now.uploading)
+          emit({ ...now, uploading: false });
+      };
+      setBusy((n) => n + 1);
+      if (first.value.kind === "new" && !first.value.uploading)
+        first.onChange({ ...first.value, uploading: true });
+      try {
+        const blob = await make().catch(() => null);
+        if (seq !== sent.current) return; // a newer send owns the flags
+        if (!blob) {
+          exportError();
+          return settle();
+        }
+        const now = latest.current;
+        if (!now.editable || pictureKey(now.value) !== forKey) return settle();
+        setLocal({ key: forKey, url: URL.createObjectURL(blob) });
+        if (now.value.kind === "new") {
+          const uploaded = await now.onNewImage(blob).catch(() => null);
+          const after = latest.current.value;
+          if (seq !== sent.current || after.kind !== "new") return;
+          latest.current.onChange({
+            ...after,
+            imageUrl: uploaded ?? after.imageUrl,
+            uploading: false,
+          });
+          if (!uploaded) {
+            setLocal(null);
+            setError(tErrors("upload_failed"));
+          }
+        } else if (now.value.kind === "picked") {
+          const ok = await now
+            .onLibraryImage(now.value.card.characterId, blob)
+            .then(() => true)
+            .catch(() => false);
+          if (!ok && seq === sent.current) {
+            setLocal(null);
+            setError(tErrors("upload_failed"));
+          }
+        }
+      } finally {
+        setBusy((n) => n - 1);
+      }
+    },
+    [exportError, setError, tErrors],
+  );
+
+  // Debounced export of an adjusted crop: once per settled area, not per render.
+  // The area the crop opens on is the centred one already sent.
+  const area = session?.area
+    ? [session.key, session.src, ...Object.values(session.area)].join()
+    : null;
+  const touched = session?.touched ?? false;
+  const lastArea = useRef<string | null>(null);
   const pending = useRef<{ id: number; run: () => void } | null>(null);
   useEffect(() => {
-    if (!session?.touched || !session.area) return;
-    const { src, area, key: forKey } = session;
+    const now = latest.current.session;
+    if (!area || !now?.area) return;
+    if (!touched) {
+      lastArea.current = area;
+      return;
+    }
+    if (area === lastArea.current) return;
+    const { src, area: rect, key: forKey } = now;
     const run = () => {
       pending.current = null;
-      cropToWebp(src, area, SIZE.w, SIZE.h)
-        .then((blob) => commit(blob, forKey))
-        .catch(intake.exportError);
+      lastArea.current = area;
+      void commit(() => cropToWebp(src, rect, SIZE.w, SIZE.h), forKey);
     };
     const id = window.setTimeout(run, CROP_SETTLE_MS);
     pending.current = { id, run };
-    return () => window.clearTimeout(id);
-  }, [session, commit, intake.exportError]);
+    return () => {
+      window.clearTimeout(id);
+      if (pending.current?.id === id) pending.current = null;
+    };
+  }, [area, touched, commit]);
 
   /** Leaves the crop: the last adjustment goes at once, then the original is let go. */
   const endSession = useCallback(() => {
@@ -163,7 +217,8 @@ export function CardPicture({
     });
   }, []);
 
-  // Another character, or the card froze: close the crop and the tray, drop a stale picture.
+  // Another character, or the card froze: close the crop and the tray, drop a
+  // stale picture. A flushed export is refused by `commit` once the card froze.
   useEffect(() => {
     if (session && (session.key !== key || !editable)) endSession();
     if (!editable) setTray(false);
@@ -415,7 +470,7 @@ export function CardPicture({
         </div>
       ) : null}
 
-      {takes && picture && !session ? (
+      {takes && (picture || value.kind === "picked") && !session ? (
         <button
           type="button"
           aria-haspopup="dialog"

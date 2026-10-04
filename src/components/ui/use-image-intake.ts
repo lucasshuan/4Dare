@@ -133,6 +133,8 @@ export function useImageIntake({
   const t = useTranslations("common.image");
   const [error, setError] = useState<string | null>(null);
   const [over, setOver] = useState(false);
+  /** Stable, so it can sit in effect dependencies. */
+  const exportError = useCallback(() => setError(t("wrongType")), [t]);
   const picked = useRef(onPicked);
   useEffect(() => {
     picked.current = onPicked;
@@ -209,6 +211,6 @@ export function useImageIntake({
     dropHandlers,
     inputProps,
     /** The translated error for a crop that couldn't be exported. */
-    exportError: () => setError(t("wrongType")),
+    exportError,
   };
 }
