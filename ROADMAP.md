@@ -179,10 +179,10 @@ The "4Dare em cena" proposal (https://claude.ai/artifact/XwqNSpQWeXC1rrNyKKW4or)
 - [ ] Confirming makes the card grow a little, straight and centred; then the avatars of who has finished show up
 - [x] "Rafa picked yours": your "?" card falls in with who picked it, then the others turn face up
 - [x] Turn order: the cards shuffle into the order, get numbers, "Bia starts!", then shrink into the game's player strip
-- [ ] Chat in the lobby and the match: a tab at the bottom right, slightly inset; a click on its top opens it over the screen to about 60% of the height, another click folds it
-- [ ] New messages: the tab turns blue with a count and the senders' faces, a 3 s bubble with the text, a small nudge now and then until it is opened
-- [ ] Chat on phones: a bar at the bottom with the last message, opening from the bottom the same way
-- [ ] Chat has only messages and system lines ("Theme: Superheroes"): no who's-in-the-room list, no emoji shortcuts; up to 280 characters, rate limited, gone when the room closes
+- [x] Chat in the lobby and the match: a tab at the bottom right, slightly inset; a click on its top opens it over the screen to about 60% of the height, another click folds it
+- [x] New messages: the tab turns blue with a count and the senders' faces, a 3 s bubble with the text, a small nudge now and then until it is opened
+- [x] Chat on phones: a bar at the bottom with the last message, opening from the bottom the same way
+- [x] Chat has only messages and system lines ("Theme: Superheroes"): no who's-in-the-room list, no emoji shortcuts; up to 280 characters, rate limited, gone when the room closes
 - [x] History only during turns: a button left of the theme opens a full-height bar on the left that pushes the screen (over a scrim on phones)
-- [ ] The lobby stays as it is, plus the chat
+- [x] The lobby stays as it is, plus the chat
 - [ ] Desktop and phone, light and dark, 3 languages, reduced motion; everything that works today keeps working

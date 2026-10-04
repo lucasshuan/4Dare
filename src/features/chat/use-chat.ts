@@ -16,6 +16,7 @@ import {
 } from "@/game/chat";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { subscribeChat } from "@/lib/realtime";
+import { type ChatCache, chatKey, EMPTY, type Outgoing } from "./chat-cache";
 
 /** A line as the chat draws it: saved, or one of yours still on its way (negative id) or refused. */
 export interface ChatLine extends ChatMessage {
@@ -24,20 +25,7 @@ export interface ChatLine extends ChatMessage {
 
 export type ChatStatus = "loading" | "ready" | "error";
 
-/** A line you sent, shown at once until the server's copy replaces it. */
-interface Outgoing {
-  id: number;
-  text: string;
-  at: number;
-  failed: boolean;
-}
-
-interface ChatCache {
-  byId: Map<number, ChatMessage>;
-  outbox: Outgoing[];
-}
-
-export const chatKey = (code: string) => ["chat", code] as const;
+export { chatKey };
 
 // Pings make polling a safety net on Supabase (quicker while the channel is
 // down); local mode has no pings.
@@ -49,8 +37,6 @@ const KEEP = 500;
 
 /** Temporary ids of lines on their way: negative, never a server id. */
 let lastTempId = 0;
-
-const EMPTY: ChatCache = { byId: new Map(), outbox: [] };
 
 async function fetchLines(
   code: string,
