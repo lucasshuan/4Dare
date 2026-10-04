@@ -318,6 +318,32 @@ describe("the theme vote in the view", () => {
     expect(later.vote).toBeNull();
     expect(later.reveal).toBeNull();
   });
+
+  it("stays while the theme show plays, even with the cast queued behind it", () => {
+    const g = new Game(3);
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    g.skipShow();
+    g.voteAll(2);
+    const theme = g.state.reveal;
+    const until = theme?.until ?? 0;
+    expect(theme?.kind).toBe("theme");
+    // every card confirmed before the theme show ends: the cast waits behind it
+    g.pickAll();
+    expect(g.state.phase).toBe("asking");
+    expect(g.state.reveal).toMatchObject({
+      kind: "cast",
+      startsAt: until,
+      prev: { kind: "theme", until },
+    });
+    for (const p of g.state.players) {
+      expect(toView(g.state, 1, p.id, g.now).vote).toMatchObject({
+        chosen: 2,
+        yourVote: 2,
+      });
+      expect(toView(g.state, 1, p.id, until - 1).vote).not.toBeNull();
+      expect(toView(g.state, 1, p.id, until).vote).toBeNull();
+    }
+  });
 });
 
 describe("shows in the view", () => {
@@ -410,5 +436,23 @@ describe("picking in the view", () => {
       expect(json).not.toContain("u-zq-new");
     }
     expect(view(g, target).pick?.draft).toBeNull();
+  });
+});
+
+describe("sweep time", () => {
+  it("tells viewers when a closed page's lobby seat comes free", () => {
+    const g = new Game(3);
+    expect(view(g, "p1").sweepAt).toBeNull();
+    g.do({ type: "GONE", playerId: "p2" });
+    const goneAt = g.now;
+    g.now += 1000;
+    g.do({ type: "GONE", playerId: "p3" });
+    expect(view(g, "p1").sweepAt).toBe(goneAt + GONE_GRACE_MS);
+  });
+
+  it("has nothing to settle while someone is still in the match", () => {
+    const g = started(3);
+    g.do({ type: "GONE", playerId: "p2" });
+    expect(view(g, "p1").sweepAt).toBeNull();
   });
 });

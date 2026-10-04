@@ -1,27 +1,51 @@
 # Architecture
 
-Next.js 16 + React 19 + Tailwind 4, all TypeScript.
+Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
-## Folders
+## Code
 
-- `src/game`: the rules, pure. `reduce(room, event)` returns the new room. `toView` hides what each player can't see (like their own card).
-- `src/server`: player actions (server actions). Each one loads the room, applies the event and saves only if nobody changed it first; if someone did, it tries again.
-- `src/server/backend`: where things live. `local` = memory + the `.data` folder. `supabase` = Postgres, Realtime and Storage. Supabase key set? Supabase. Otherwise local.
-- `src/app`: pages and API. `/api/rooms/[code]` returns the room as you may see it.
-- `src/features`: the screens (home, lobby, vote, pick, turn, end).
-- `src/components/ui`: buttons, cards, clock and such.
-- `messages/<lang>`: the texts.
-- `data`: themes and characters.
+- `src/game`: rules, pure. `reduce(room, event)` gives new room; `toView` hides what a player can't see (own card).
+- `src/server`: actions. Load room, apply event, save only if nobody wrote first; else retry.
+- `src/server/backend`: storage. Supabase keys set: `supabase` (Postgres, Realtime, Storage). Else `local` (memory, `.data/`, `local/fixtures.ts`). Builds with keys leave `local` out.
+- `src/app`: pages, API. `src/features`: screens; `stage` routes them and plays scenes. `src/components/ui`: kit. `messages/<lang>`: texts (en, pt, ja).
+- Motion: `m.*` only, under one strict `LazyMotion` (`domAnimation`). `layout`/`layoutId` need `<LayoutMotion>` around them (loads `domMax`). `motion/react` aliased to framer-motion barrel in `next.config.ts`.
+- `data/`: old snapshot. Nothing reads it.
 
-## Details
+## Room
 
-- Clock without cron: when someone fetches the room, the server applies the timeouts already due.
-- Realtime: local fetches the room every 1 s. On Supabase a ping arrives through Realtime.
-- Matches: when one ends, it becomes one record per player (`src/game/record.ts`), saved after the response. A guest is only a signed cookie (`src/server/auth/guest.ts`: id, name number, critter), never a database row; the proxy makes it on the first page. Accounts are Supabase Auth users (Discord/Google; `auth.users`, `auth.identities`, `auth.sessions`) with a row in `profiles`. Signing in hands the guest's matches to the account, and their seat too when it happens in a room (`SWAP_PLAYER`).
-- Theme: a match starts with the `voting` phase: 3 themes, 8 s, open vote (players can change it until everyone voted); a tie is drawn on the server and the wheel on screen follows the server clock, so everyone sees the same spin. Then the theme stays up 3 s. All 3 come from the list (337 in `data/themes.json`). On Supabase the list is the `themes` table (`pnpm seed` loads it), read every 10 min; `active = false` turns a theme off.
-- Theme sets: each theme has a `set` (20 of them in `src/game/theme-sets.ts`, names in `messages/*/common.json`; `theme_set` on Supabase, migration 0009). The room's `themeSets` say which ones the vote draws from. With `themeMode: "host"` the room goes to `theming` instead: the host types the theme (`set: null`, the same text in every language, no "Random" pick, no stats); after 30 s it falls back to a vote among every set. The lobby's "Edit settings" keeps the last setup in `localStorage`; `/new` opens a room with it at once, named "<host>'s room" in the host's language.
-- Characters: `data/characters.json` has one entry per character, with name, aliases and popularity per language; `origin` is a key (`wd:Q8337` = Harry Potter, `job:actress`) translated in `data/origins.json`; `category` is a fixed list (anime, sports, mythology...) translated in `messages/*/common.json`. On Supabase they become `characters`, `character_names`, `origins` and `origin_labels`. The browser searches the whole library of its language (`/api/characters/library`, read from `character_entries`, kept an hour per server and a day on the CDN; local mode reads the files); until it arrives, `/api/characters` asks `search_characters`. Built by `scripts/library/build.ts`; popularity = median of 6 months of Wikipedia reads spread over 2 years, so a film or a World Cup doesn't skew it.
-- Random pick: each match saves its theme (`themeId`) and what everyone picked; the button draws among the 20 most picked for that theme, weighted by count, leaving out the ones already picked in the match and the ones the clock picked. One available in the language is enough. After a draw the player says if they liked it: the weight is (picks + likes) × 0.5 per 👎, for that theme only. Local counts in memory from `.data/matches.jsonl` and `.data/pick-feedback.json`; Supabase uses `theme_pick_scores` over `popular_picks` and `pick_feedback` (migrations 0006 and 0007).
-- Search and sharing: each page has `generateMetadata` (texts in `messages/*/meta.json`, helpers in `src/server/seo.ts`). Share images are drawn by `opengraph-image.tsx` files with `src/server/og` (fonts in `assets/fonts`; the Japanese one is cut to the characters the images draw by `pnpm og:font`, and a test checks it still covers them). `SITE_URL` sets the domain in links.
-- Tab: `useTabTitle` keeps "step · code · 4Dare" in a room and blinks the title and icon while a move waits on you in another tab.
-- Tests: `vitest` on the engine (including 300 random matches) and `playwright` with whole matches.
+- Phases: lobby, voting or theming, picking, turns, finished.
+- No cron: fetching a room applies due timeouts.
+- Shows: scenes between steps (opening, theme and rule, draw, "for whom", cast) are beats with server times on `reveal` (`src/game/show-timing/`). Step clocks wait for show end, so every screen plays same frame. Client: `stageFrame` picks screen and backdrop, `useStageTimeline` seeks motion to server time. Lab: `/[locale]/dev/stage` (dev only).
+- Sync: local polls 1 s. Supabase: Realtime ping (`src/lib/realtime.ts`, one channel per room, loaded on demand); poll 45 s joined, 10 s down.
+- Cleanup: hourly `pg_cron` drops closed rooms after a day, idle ones after a week (0013).
+
+## Themes
+
+- `themes` table, cached 10 min per server; `active = false` hides one. Local: 60 fixture themes.
+- 20 sets (`src/game/theme-sets.ts`); room's `themeSets` filter vote. Set examples: `example` 1–3 (0014, `/api/themes/examples`).
+- Vote: 3 themes, 20 s (clock starts after opening), open vote. Server draws tie (wheel).
+- Host mode (`theming`): host types theme (no set, no Random, no stats). 30 s, then vote.
+
+## Characters and picks
+
+- Library: `characters`, `character_names` (names, aliases, popularity per language), `origins`, `origin_labels`. Hand-fed: insert or update only. Browser searches whole library of its language (`/api/characters/library`); `/api/characters` until it loads.
+- Draft: card saved quietly (`PUT /api/rooms/[code]/draft`, no ping). Timeout makes it the pick; new name creates character once. Empty card gets random.
+- Random: theme's 20 most picked, weight picks + likes, ×0.5 per dislike, minus match picks (`theme_pick_scores`, 0006, 0007). Draw saved as draft.
+- `theme_starters` (~5 per theme, 0011, rows in `supabase/seed/theme_starters.sql`, insert only): rule scene examples, base of hand (`/api/themes/[id]/picks`, 8 per theme, 5 shown, shuffled per viewer).
+- Rule ✗: fiction-set themes get an athlete or musician, real-people sets a cartoon or game character, only when all the theme's starters are that set's kind; cross-cutting sets (world, jobs, family, quirks, looks, books) get ✓✓ only (`src/server/rule-examples.ts`).
+- Trade-off: hand and typed names can duplicate someone's secret. Refusing would leak who holds what. Random still skips match picks, so it never deals you your own secret.
+
+## People
+
+- Guest: signed cookie (`src/server/auth/guest.ts`), no DB row. Proxy makes it.
+- Account: Supabase Auth (Discord, Google; started server-side at `/auth/sign-in`) plus `profiles` row. Sign-in moves guest's matches, and seat (`SWAP_PLAYER`), to account.
+- Match end: one record per player (`src/game/record.ts`), saved after response.
+
+## Chat
+
+- `room_messages` (0012; per-author limit inside insert function) via `/api/rooms/[code]/messages`. Server posts system lines at their scene. Pings carry ids only. Room close clears chat.
+
+## Other
+
+- SEO: `generateMetadata` per page (`src/server/seo.ts`, `messages/*/meta.json`). Share images: `opengraph-image.tsx` with `src/server/og`. `SITE_URL` sets domain.
+- Tests: Vitest (engine, 300 random matches), Playwright (whole matches on a production build, two tests at a time, `@smoke` for the hub and one match; `DARE_SHOW_SCALE=0.25` speeds shows 4×, never clocks).

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, Sparkles, UsersRound } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Screen } from "@/components/ui/screen";
 import { LiveDot } from "@/features/current-match/match-lock";
@@ -30,7 +30,7 @@ export function HomeScreen() {
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
       <section className="flex flex-col gap-3">
-        <motion.h1
+        <m.h1
           initial={{ opacity: 0, y: 12 }}
           animate={{
             opacity: 1,
@@ -40,17 +40,17 @@ export function HomeScreen() {
           className="font-semibold text-xl"
         >
           {t("games.title")}
-        </motion.h1>
+        </m.h1>
         <GamesCarousel>
           <WhoAmICard />
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.35 } }}
             className={`${CARD} flex h-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-line-strong border-dashed p-6 font-semibold text-ink-muted`}
           >
             <Sparkles className="size-5" strokeWidth={1.75} />
             {t("games.soon")}
-          </motion.div>
+          </m.div>
         </GamesCarousel>
       </section>
     </Screen>
@@ -60,7 +60,7 @@ export function HomeScreen() {
 function WhoAmICard() {
   const t = useTranslations("home.games.whoAmI");
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 20 }}
       animate={{
         opacity: 1,
@@ -94,7 +94,7 @@ function WhoAmICard() {
           </span>
         </div>
       </Link>
-    </motion.div>
+    </m.div>
   );
 }
 

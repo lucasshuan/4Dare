@@ -2,6 +2,10 @@
 
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 import type { PlayerView, RoomView } from "@/game/types";
+import {
+  type ServerClock,
+  ServerClockContext,
+} from "@/lib/hooks/use-server-clock";
 
 export interface RoomContextValue {
   code: string;
@@ -12,7 +16,7 @@ export interface RoomContextValue {
   refresh: () => Promise<void>;
   /** Show a room view an action returned (see useRoomAction). */
   apply: (view: RoomView) => void;
-  /** The server's current time, estimated from the local clock. */
+  /** The server's current time, estimated from the local clock (or the lab's clock). */
   serverTime: () => number;
   me: PlayerView;
   playerById: (id: string | null | undefined) => PlayerView | undefined;
@@ -26,6 +30,7 @@ export function RoomProvider({
   offset,
   refresh,
   apply,
+  clock,
   children,
 }: {
   code: string;
@@ -33,8 +38,14 @@ export function RoomProvider({
   offset: number;
   refresh: () => Promise<void>;
   apply: (view: RoomView) => void;
+  /** Another clock than the local one + `offset` (the stage lab's). */
+  clock?: ServerClock;
   children: ReactNode;
 }) {
+  const roomClock = useMemo<ServerClock>(
+    () => clock ?? { now: () => Date.now() + offset, frozen: false, rate: 1 },
+    [clock, offset],
+  );
   const value = useMemo<RoomContextValue>(() => {
     const byId = new Map(view.players.map((p) => [p.id, p]));
     const me = byId.get(view.youId);
@@ -45,13 +56,17 @@ export function RoomProvider({
       offset,
       refresh,
       apply,
-      serverTime: () => Date.now() + offset,
+      serverTime: roomClock.now,
       me,
       playerById: (id) => (id ? byId.get(id) : undefined),
     };
-  }, [code, view, offset, refresh, apply]);
+  }, [code, view, offset, refresh, apply, roomClock]);
 
-  return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;
+  return (
+    <ServerClockContext.Provider value={roomClock}>
+      <RoomContext.Provider value={value}>{children}</RoomContext.Provider>
+    </ServerClockContext.Provider>
+  );
 }
 
 /** Everything a room screen needs. Only usable under <RoomProvider>. */

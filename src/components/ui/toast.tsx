@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import {
   createContext,
   type ReactNode,
@@ -37,13 +37,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       >
         <AnimatePresence>
           {toasts.map((x) => (
-            <motion.div
+            <m.div
               key={x.id}
               {...riseIn}
               className="pointer-events-auto max-w-md rounded-pill bg-ink px-5 py-3 font-medium text-on-ink text-sm shadow-pop"
             >
               {x.text}
-            </motion.div>
+            </m.div>
           ))}
         </AnimatePresence>
       </div>

@@ -2,7 +2,7 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { Maximize2, X } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useMemo, useSyncExternalStore } from "react";
 import { encode } from "uqr";
@@ -66,7 +66,7 @@ function QrArt({ url, still }: { url: string; still: boolean }) {
       aria-hidden="true"
     >
       {/* the modules sweep out from the middle */}
-      <motion.path
+      <m.path
         d={d}
         fill={INK}
         initial={still ? false : { clipPath: "circle(0% at 50% 50%)" }}
@@ -74,7 +74,7 @@ function QrArt({ url, still }: { url: string; still: boolean }) {
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
       />
       {eyes.map(([x, y], i) => (
-        <motion.g
+        <m.g
           key={`${x}-${y}`}
           style={{ transformOrigin: `${x + 3.5}px ${y + 3.5}px` }}
           initial={still ? false : { scale: 0.4, opacity: 0 }}
@@ -97,10 +97,10 @@ function QrArt({ url, still }: { url: string; still: boolean }) {
             strokeWidth={1}
           />
           <rect x={x + 2} y={y + 2} width={3} height={3} rx={0.9} fill={SKY} />
-        </motion.g>
+        </m.g>
       ))}
       {/* the 4Dare icon in the clearing */}
-      <motion.g
+      <m.g
         style={{ transformOrigin: `${n / 2}px ${n / 2}px` }}
         initial={still ? false : { scale: 0, rotate: -12 }}
         animate={{ scale: 1, rotate: 0 }}
@@ -125,7 +125,7 @@ function QrArt({ url, still }: { url: string; still: boolean }) {
           <path d={BUBBLE} fill={BUTTER} />
           <path d={QUESTION} fill={SKY} />
         </g>
-      </motion.g>
+      </m.g>
     </svg>
   );
 }

@@ -10,6 +10,7 @@ import {
   lastQuestionBy,
   openQuestion,
   pendingGuess,
+  presenceDue,
   stepSeconds,
   validatorOf,
 } from "./helpers";
@@ -20,6 +21,7 @@ import {
   type Character,
   DEFAULT_SETTINGS,
   GameError,
+  GONE_GRACE_MS,
   type HistoryEntryView,
   LOBBY_LISTED_MS,
   type Phase,
@@ -213,14 +215,20 @@ function pick(s: RoomState, viewer: PlayerId, now: number): PickView | null {
   };
 }
 
-/** The theme vote, while it runs and while the theme show plays its result out. */
+/**
+ * The theme vote, while it runs and while the theme show plays its result out,
+ * also when the cast already waits behind it (every card confirmed early).
+ */
 function voteView(
   s: RoomState,
   viewer: PlayerId,
   now: number,
 ): VoteView | null {
   const v = s.vote;
-  const revealing = s.reveal?.kind === "theme" && now < s.reveal.until;
+  const r = s.reveal;
+  const show =
+    r?.kind === "theme" ? r : r?.prev?.kind === "theme" ? r.prev : null;
+  const revealing = !!show && now < show.until;
   if (!v || (s.phase !== "voting" && !revealing)) return null;
   const seated = new Set(s.players.map((p) => p.id));
   return {
@@ -391,6 +399,7 @@ export function toView(
       (s.deadline !== null && s.stepStartsAt !== null
         ? s.deadline - s.stepStartsAt
         : null),
+    sweepAt: sweepAt(s),
     reveal: reveal(s, viewerId, now),
     serverNow: now,
     vote: voteView(s, viewerId, now),
@@ -434,6 +443,18 @@ export function playersOnline(
     counts[r.game] = (counts[r.game] ?? 0) + here;
   }
   return counts;
+}
+
+/**
+ * The first moment a closed page's grace ends with something to settle (a
+ * lobby seat to free, a room nobody is left in), or null. Viewers refetch
+ * then, and that read applies it.
+ */
+function sweepAt(s: RoomState): number | null {
+  const gone = s.players.flatMap((p) => (p.goneAt != null ? [p.goneAt] : []));
+  if (!gone.length) return null;
+  const at = Math.min(...gone) + GONE_GRACE_MS;
+  return presenceDue(s, at) ? at : null;
 }
 
 /**

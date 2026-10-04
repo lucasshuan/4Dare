@@ -14,6 +14,7 @@
       "!dist",
       "!build",
       "!.next-*",
+      "!.claude",
       "!.data",
       "!docs/phase10"
     ]
@@ -38,6 +39,28 @@
       "react": "recommended"
     }
   },
+  "overrides": [
+    {
+      "includes": ["src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/data/*.json", "**/data/**/*.json"],
+                    "message": "data/ is an old snapshot: the app reads Supabase (local mode: src/server/backend/local/fixtures.ts)."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "assist": {
     "actions": {
       "source": {

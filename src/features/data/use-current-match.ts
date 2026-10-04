@@ -4,11 +4,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { useToast } from "@/components/ui/toast";
+import { BACKEND } from "@/config";
 import { useAction } from "@/lib/hooks/use-action";
 import { leaveRoom } from "@/server/actions";
 import type { CurrentMatch } from "@/server/contract";
 
 const key = ["current-match"] as const;
+
+// No ping says when a match starts or ends for you, so this one polls. With no
+// match only your own moves start one (another tab or device: coming back to
+// this tab refetches); during one, it ends without you.
+const pollMs = (match: CurrentMatch | null | undefined) =>
+  BACKEND === "local" ? 15_000 : match ? 30_000 : 60_000;
 
 /** The match you are playing and have not left, if any. Checked now and then: it ends without you. */
 export function useCurrentMatch() {
@@ -22,7 +29,7 @@ export function useCurrentMatch() {
       if (!res.ok) throw new Error(`match: ${res.status}`);
       return ((await res.json()) as { match: CurrentMatch | null }).match;
     },
-    refetchInterval: 15_000,
+    refetchInterval: (q) => pollMs(q.state.data),
     staleTime: 5_000,
   });
   return { match: query.data ?? null, isLoading: query.isPending };

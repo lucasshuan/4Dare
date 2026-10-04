@@ -2,7 +2,7 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { CheckCheck, Hourglass } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { PlayerName } from "@/components/ui/player-name";
@@ -50,7 +50,7 @@ export function StartDialog({
             )}
           >
             <AnimatePresence initial={false} mode="wait">
-              <motion.span
+              <m.span
                 key={all ? "all" : "waiting"}
                 className="flex"
                 initial={{ scale: 0.4, rotate: -30, opacity: 0 }}
@@ -63,30 +63,30 @@ export function StartDialog({
                 ) : (
                   <Hourglass className="size-6" strokeWidth={1.75} />
                 )}
-              </motion.span>
+              </m.span>
             </AnimatePresence>
           </span>
 
           <div className="flex flex-col gap-3">
             <Dialog.Title className="font-bold font-display text-2xl">
               <AnimatePresence initial={false} mode="wait">
-                <motion.span
+                <m.span
                   key={all ? "all" : "waiting"}
                   className="block"
                   {...swap}
                 >
                   {all ? t("allTitle") : t("title")}
-                </motion.span>
+                </m.span>
               </AnimatePresence>
             </Dialog.Title>
             <Dialog.Description className="text-ink-muted" render={<div />}>
               <AnimatePresence initial={false} mode="wait">
                 {all ? (
-                  <motion.p key="all" {...swap}>
+                  <m.p key="all" {...swap}>
                     {t("allBody")}
-                  </motion.p>
+                  </m.p>
                 ) : (
-                  <motion.div
+                  <m.div
                     key="waiting"
                     className="flex flex-col gap-2.5"
                     {...swap}
@@ -95,7 +95,7 @@ export function StartDialog({
                     <ul className="flex flex-wrap gap-2">
                       <AnimatePresence initial={false} mode="popLayout">
                         {waiting.map((p) => (
-                          <motion.li
+                          <m.li
                             key={p.id}
                             layout
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -105,11 +105,11 @@ export function StartDialog({
                             className="rounded-pill bg-surface px-3 py-1.5 font-semibold text-ink text-sm shadow-card"
                           >
                             <PlayerName player={p} />
-                          </motion.li>
+                          </m.li>
                         ))}
                       </AnimatePresence>
                     </ul>
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
             </Dialog.Description>

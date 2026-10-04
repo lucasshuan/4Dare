@@ -426,7 +426,12 @@ function endOutcome(s: RoomState, id: PlayerId, ctx: Ctx) {
 /** The podium; its clock (after the last reveal) takes everyone back to the lobby. */
 function finish(s: RoomState, ctx: Ctx) {
   // A match that ends mid-show goes to the podium at once; a guess reveal still holds it.
-  if (isShow(s.reveal) && ctx.now < s.reveal.until) s.reveal = null;
+  if (isShow(s.reveal) && ctx.now < s.reveal.until) {
+    s.reveal = null;
+    // Play was to start once the cast ended: it never got there, so the record starts now.
+    if (s.playStartedAt !== null)
+      s.playStartedAt = Math.min(s.playStartedAt, ctx.now);
+  }
   s.phase = "finished";
   s.turnPlayerId = null;
   startStep(s, ctx, RESULT_SECONDS * 1000);

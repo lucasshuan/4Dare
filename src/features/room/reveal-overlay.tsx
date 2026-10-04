@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
@@ -12,6 +12,7 @@ import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
 import type { AnswerValue, CardView, RevealView } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { insideChat } from "@/lib/focus";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
@@ -25,7 +26,7 @@ const FIELD =
 /**
  * What just happened, shown to everyone while the next step already runs.
  * It closes by itself, or earlier with its button, a click outside it, or any
- * key; a typed letter goes on into the step's text field.
+ * key (except in the chat); a typed letter goes on into the step's text field.
  */
 export function RevealOverlay() {
   const t = useTranslations("common");
@@ -40,7 +41,8 @@ export function RevealOverlay() {
   useEffect(() => {
     if (!active || !id) return;
     const onKey = (e: KeyboardEvent) => {
-      if (MODIFIERS.has(e.key)) return;
+      // typing in the chat leaves the reveal up
+      if (MODIFIERS.has(e.key) || insideChat(e.target)) return;
       setClosed(id);
       // Nothing focused: the letter goes to the step's field, as if the reveal were never there.
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -55,7 +57,7 @@ export function RevealOverlay() {
   return (
     <AnimatePresence>
       {active && r ? (
-        <motion.div
+        <m.div
           key={id}
           role="status"
           aria-live="polite"
@@ -75,7 +77,7 @@ export function RevealOverlay() {
           }}
           className="fixed inset-0 z-30 flex items-center justify-center bg-scrim p-4"
         >
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 40, scale: 0.94 }}
             animate={{
               opacity: 1,
@@ -108,8 +110,8 @@ export function RevealOverlay() {
               {t("revealHint")}
             </p>
             <Progress startsAt={r.startsAt} until={r.until} now={now} />
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       ) : null}
     </AnimatePresence>
   );
@@ -157,7 +159,7 @@ function AnswersReveal({
   const words = reveal.question.split(/(\s+)/);
   return (
     <div className="flex flex-col gap-5 pb-2">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 8 }}
         animate={{
           opacity: 1,
@@ -180,8 +182,8 @@ function AnswersReveal({
             name: asker ? name(asker, asker.isYou) : "",
           })}
         </span>
-      </motion.div>
-      <motion.p
+      </m.div>
+      <m.p
         initial="hidden"
         animate="shown"
         variants={{
@@ -190,7 +192,7 @@ function AnswersReveal({
         className="text-balance font-bold font-display text-[clamp(24px,3.2vw,32px)] leading-tight"
       >
         {words.map((w, i) => (
-          <motion.span
+          <m.span
             // biome-ignore lint/suspicious/noArrayIndexKey: words of a fixed sentence
             key={i}
             variants={{
@@ -204,10 +206,10 @@ function AnswersReveal({
             className="inline-block whitespace-pre"
           >
             {w}
-          </motion.span>
+          </m.span>
         ))}
-      </motion.p>
-      <motion.ul
+      </m.p>
+      <m.ul
         initial="hidden"
         animate="shown"
         variants={{
@@ -218,7 +220,7 @@ function AnswersReveal({
         {reveal.answers.map((a) => {
           const p = playerById(a.byId);
           return (
-            <motion.li
+            <m.li
               key={a.byId}
               variants={{
                 hidden: { opacity: 0, y: 22, scale: 0.96 },
@@ -246,7 +248,7 @@ function AnswersReveal({
                 <span className="min-w-24 flex-1 truncate font-semibold">
                   {p ? name(p, p.isYou) : ""}
                 </span>
-                <motion.span
+                <m.span
                   variants={{
                     hidden: { opacity: 0, x: 16, scale: 0.9 },
                     shown: {
@@ -265,13 +267,13 @@ function AnswersReveal({
                     value={a.value}
                     pressed={a.value === "yes" || a.value === "no"}
                   />
-                </motion.span>
+                </m.span>
               </div>
               {a.note ? <p className="pl-11 text-ink">“{a.note}”</p> : null}
-            </motion.li>
+            </m.li>
           );
         })}
-      </motion.ul>
+      </m.ul>
     </div>
   );
 }
@@ -307,7 +309,7 @@ function GuessReveal({
           }),
         )}
       </span>
-      <motion.p
+      <m.p
         initial={{ opacity: 0, scale: 0.85 }}
         animate={{
           opacity: 1,
@@ -317,7 +319,7 @@ function GuessReveal({
         className="font-display font-extrabold text-[clamp(32px,5vw,52px)] leading-none"
       >
         “{reveal.guess}”
-      </motion.p>
+      </m.p>
 
       <FlipCard
         flipped={shown && reveal.card !== null}
@@ -328,7 +330,7 @@ function GuessReveal({
       <div className="flex h-12 items-center">
         <AnimatePresence mode="wait">
           {shown ? (
-            <motion.span
+            <m.span
               key="result"
               initial={{ opacity: 0, scale: hit ? 1.4 : 0.9 }}
               animate={{
@@ -348,16 +350,16 @@ function GuessReveal({
                     })
                   : t("hit")
                 : t("miss")}
-            </motion.span>
+            </m.span>
           ) : (
-            <motion.span
+            <m.span
               key="dots"
               exit={{ opacity: 0 }}
               aria-hidden="true"
               className="flex gap-2"
             >
               {[0, 1, 2].map((i) => (
-                <motion.span
+                <m.span
                   key={i}
                   className="size-3 rounded-pill bg-line-strong"
                   animate={{ opacity: [0.25, 1, 0.25], scale: [0.8, 1, 0.8] }}
@@ -368,7 +370,7 @@ function GuessReveal({
                   }}
                 />
               ))}
-            </motion.span>
+            </m.span>
           )}
         </AnimatePresence>
       </div>
@@ -388,7 +390,7 @@ function FlipCard({
 }) {
   return (
     <div className="w-44 perspective-[1000px] sm:w-52">
-      <motion.div
+      <m.div
         initial={false}
         animate={{ rotateY: flipped ? 180 : 0 }}
         transition={{ duration: dur.reveal, ease: ease.swap }}
@@ -412,7 +414,7 @@ function FlipCard({
             {card?.name}
           </span>
         </div>
-      </motion.div>
+      </m.div>
     </div>
   );
 }

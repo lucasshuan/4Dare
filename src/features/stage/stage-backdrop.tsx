@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { type CSSProperties, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { type ThemeSet, TYPED_GLYPHS, themeGlyphs } from "@/game/theme-sets";
@@ -118,7 +118,7 @@ export function StageBackdrop({
     >
       <AnimatePresence initial={false} custom={look.fade}>
         {look.tone === "none" ? null : (
-          <motion.div
+          <m.div
             key={look.tone}
             custom={look.fade}
             variants={fade}
@@ -128,12 +128,12 @@ export function StageBackdrop({
             className="absolute inset-0"
           >
             <Wash {...TONES[look.tone]} />
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
       <AnimatePresence initial={false} custom={look.fade}>
         {glyphs ? (
-          <motion.div
+          <m.div
             key={glyphs.key}
             custom={look.fade}
             variants={fade}
@@ -147,7 +147,7 @@ export function StageBackdrop({
               color={look.glyphColor}
               fade={look.fade}
             />
-          </motion.div>
+          </m.div>
         ) : null}
       </AnimatePresence>
     </div>,

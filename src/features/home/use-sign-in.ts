@@ -30,7 +30,7 @@ export function useSignIn() {
     }
     setLeaving(true);
     try {
-      await signInWith(provider, `/${locale}/profile`);
+      signInWith(provider, `/${locale}/profile`);
     } catch {
       setLeaving(false);
       toast(t("unknown"));

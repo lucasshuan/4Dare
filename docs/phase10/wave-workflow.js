@@ -1,39 +1,51 @@
-// Workflow script for one wave of Phase 10 (run with the Workflow tool, `scriptPath`
-// pointing here, and args like {"wave": 2, "wps": ["WP3", "WP5", "WP9a"], "e2e": true}).
-// Each package: an engineer builds it, an adversarial reviewer checks it against the
-// plan's acceptance criteria, a fixer repairs medium/high defects (up to 3 reviews),
-// then one agent runs the full checks on the combined tree. The lead session commits.
+// Workflow script for Phase 10 packages (Workflow tool, `scriptPath` pointing here).
+//
+//   build:  {"mode": "build", "wps": ["WP4"], "others": ["WP6", "WP9a"], "env": "...", "extra": {"WP4": "..."}}
+//   fix:    {"mode": "fix", "wps": ["WP9a"], "defects": {"WP9a": [...]}, "others": [...], "env": "..."}
+//   review: {"mode": "review", "wps": ["WP3", "WP5"], "commits": {"WP3": "a80883c", "WP5": "712de86"}, "env": "..."}
+//
+// Before a build, the lead writes each package's brief (`python3 docs/phase10/briefs/make.py WP4`)
+// and starts one dev server on 3100 with the e2e env, which every agent shares.
+// A build is one engineer per package. A run gets only (CPUs - 2) agent slots, so the
+// lead starts one run per package to build a wave in parallel. When an engineer returns,
+// the lead runs the checks and commits the package; one review per package then runs in
+// the background while the next packages build, and the lead fixes what it confirms.
+// The whole unit suite and the e2e run once, at the end of Phase 10 (WP12).
 export const meta = {
-  name: 'phase10-wave',
-  description: 'Implement one wave of Phase 10 work packages: build, adversarial review, fix, wave check',
+  name: 'phase10-packages',
+  description: 'Build Phase 10 work packages from their briefs, or review committed packages once',
   phases: [
-    { title: 'Build', detail: 'one engineer per work package, in parallel' },
-    { title: 'Review', detail: 'adversarial review against acceptance criteria, fix up to 2 rounds' },
-    { title: 'Wave check', detail: 'full test, typecheck and lint on the combined tree' },
+    { title: 'Build', detail: 'one engineer per package, from its brief' },
+    { title: 'Review', detail: 'one adversarial review per committed package' },
   ],
 }
 
 const P = 'docs/phase10'
-const PROTO = P + '/prototype'
-const WAVE = args.wave
 const WPS = args.wps
+const OTHERS = (wp) => [...WPS.filter((w) => w !== wp), ...(args.others || [])].join(', ') || 'none'
 const EXTRA = args.extra || {}
+// notes on the machine (cloud session: node path, browser for e2e, known flaky tests)
+const ENV = args.env ? `\nEnvironment: ${args.env}` : ''
+// Jean's caveman-pt skill, level full, for the agents' own words (not for what they write in the repo)
+const STYLE = `
+Style (caveman full): in your messages and your final return, no articles, filler, hedging, politeness or narration; fragments are fine; one idea per short sentence; no text between tool calls unless it clarifies a risk or an ambiguity. Keep exact: code, paths, commands, numbers, negations. Code, comments, docs, reports and commits stay normal English prose, by the repo's rules.`
 
 const RULES = (wp) => `
 Rules:
-- Edit only the files your work package owns in the plan (plus files the plan explicitly allows it to touch). Other packages (${WPS.filter((w) => w !== wp).join(', ') || 'none'}) run at the same time in the same working tree and own other files: never edit, revert or reformat their files; if a check fails only because of their in-progress files, note it in your report and carry on.
-- Never run git checkout, reset, stash, clean, commit or push. Do not commit (the lead commits).
-- Read the relevant guide in node_modules/next/dist/docs before writing Next-specific code. Match the repo's style (read neighbouring files: naming, comment density, idioms). Every player name shown has its avatar beside it (PlayerName / useWithNames).
-- The approved prototype in ${PROTO}/ is the look to match (layout, sizes, colours, timings, eases), ported to React + motion/react.
-- Migrations: one file at a time with the Supabase MCP apply_migration (project zooqjsrhjupqghuuipon). Never pnpm seed, never pnpm setup:supabase, never change library rows except inserts the plan allows. Never read data/*.json.
-- If you start a dev or e2e server, stop it when done; restore tsconfig.json by hand if next dev rewrote it (never git checkout). Screenshots go outside test-results/ (every e2e run empties it).`
+- Edit only the files your package owns (brief, "Your package"), plus files it explicitly allows. Other packages (${OTHERS(wp)}) run at the same time in this working tree: never edit, revert or reformat their files; if a check fails only because of their files, say so in your report and carry on.
+- Never run git add, rm, mv, restore, checkout, reset, stash, clean, commit or push: the lead stages and commits. Delete a file with plain rm.
+- Work in few, large steps: every tool call re-reads your whole context, so fewer calls are faster and cheaper. Write whole files with Write rather than many small edits; no task list (TaskCreate/TaskUpdate); pipe command output through tail or grep so only the decisive lines come back.
+- Next 16: read the guide in node_modules/next/dist/docs for any Next-specific API you touch.
+- A dev server is already running at http://localhost:3100 with the e2e env (the lead started it; it picks up your edits). Use it for the lab (/en/dev/stage) and screenshots. Never start, stop or restart a server; if it is down, say so in your report and skip the screenshots.
+- Screenshots go under .data/shots/${wp}/ (gitignored, never emptied by e2e). Throwaway scripts go in your own folder under the scratchpad (others share it), never in the repo.${ENV}${STYLE}`
 
-const build = (wp) => agent(`You are the engineer for ${wp} (wave ${WAVE}) of Phase 10 in the 4Dare repo (the current directory).
-Read ${P}/HANDOFF.md first. The final plan is ${P}/plan.md. Read: the header ground rules; the parts of section 1 your package relies on; section 2 (timing); the section 3 rows for your package; the section 4 strings for your package; your entry in section 5 (goal, owned files, acceptance, verification); section 6 for your tests; section 7 risks. Read the reports of earlier packages in ${P}/reports/ (they record deviations you must build on). Read the spec files the plan cites (${P}/spec-a.md, spec-b.md, spec-c.md, engine.md, server-data.md, ui-flow.md, ui-turn-lobby-style.md) and the prototype source where your package builds a scene.
-${EXTRA[wp] ? 'Extra instructions from the lead: ' + EXTRA[wp] : ''}
+const build = (wp) => agent(`You are the engineer for ${wp} of Phase 10 in the 4Dare repo (the current directory).
+Your spec is ${P}/briefs/${wp}.md: everything this package relies on, cut verbatim from the plan, the specs and the earlier packages' reports. Read it first and whole; open another doc only through its pointers or to settle a doubt. The prototype files it names are the look to match (port to React + motion/react).
+${EXTRA[wp] ? 'From the lead: ' + EXTRA[wp] : ''}
 ${RULES(wp)}
-Finish the package completely (no stubs except the ones the plan assigns to a later package). Run its verification. Write a report to ${P}/reports/${wp}.md: files changed/created; what was built; every deviation from the plan with the reason; verification commands and results (decisive lines only); screenshot paths; requests for WP12 (shared files you could not edit); notes for Jean. Return a 10-line summary.`,
-  { label: `build:${wp}`, phase: 'Build' })
+Build the whole package (no stubs except those the plan gives to a later package). Then verify, and only this: your package's own test files (\`pnpm exec vitest run <files>\`, never the whole suite); \`pnpm typecheck\`; \`pnpm exec biome check <your files>\`; for a package with UI, a few screenshots of the moments its acceptance names (desktop 1280x800 and phone 390x844 in light, one dark, one names=long), and look at each. Never run e2e or the whole unit suite: they run once, at the end of Phase 10 (WP12), with the full screenshot matrix.
+Write ${P}/reports/${wp}.md in at most about 80 lines, with these sections: Files; What was built (the API later packages use); Deviations from the plan (each with its reason); Requests (shared files you could not edit, and what later packages must know); Verification (decisive lines only); Notes for Jean (only if any). Return a 5-line summary.`,
+  { label: `build:${wp}`, phase: 'Build', effort: 'high' })
 
 const REVIEW_SCHEMA = {
   type: 'object',
@@ -48,43 +60,30 @@ const REVIEW_SCHEMA = {
           file: { type: 'string' }, line: { type: 'number' },
           problem: { type: 'string' }, evidence: { type: 'string' }, fix: { type: 'string' },
         },
-        required: ['severity', 'file', 'problem', 'fix'],
+        required: ['severity', 'file', 'problem', 'evidence', 'fix'],
       },
     },
   },
   required: ['passed', 'defects'],
 }
 
-const review = (wp, round) => agent(`You are an adversarial reviewer of ${wp} (wave ${WAVE}) of Phase 10 in the 4Dare repo (the current directory). Review round ${round + 1}.
-Read ${P}/HANDOFF.md, the plan ${P}/plan.md (header ground rules, your package's entry in section 5 and the sections it relies on), the engineer's report ${P}/reports/${wp}.md, and the actual changes: git diff plus new untracked files among the package's owned files (ignore changes that belong to other packages ${WPS.filter((w) => w !== wp).join(', ')}).
-Check every acceptance criterion one by one against the code AND by running the package's verification (unit tests, typecheck, lint; e2e or screenshots where the package requires them; look at screenshots you take). Hunt for real defects: logic errors, races, server-clock sync, reconnect/reload mid-scene, secrecy leaks (a player must never learn their own character), missing i18n keys or languages, phone layout at 390x844, dark theme, reduced motion, names without avatars, deviations from the approved prototype look in ${PROTO}/, and anything that breaks behaviour that works today. Do not edit files. Report only defects with evidence; no style nits. passed = no high or medium defects. Write your findings to ${P}/reports/${wp}-review-${round + 1}.md too.`,
-  { label: `review:${wp}#${round + 1}`, phase: 'Review', schema: REVIEW_SCHEMA })
+const review = (wp) => agent(`You review ${wp} of Phase 10 in the 4Dare repo (the current directory), committed as ${args.commits[wp]} (\`git show ${args.commits[wp]}\`; other packages may be building in the working tree, ignore their uncommitted files).
+Read ${P}/briefs/${wp}.md (the acceptance is under "Your package") and the engineer's report ${P}/reports/${wp}.md, then the code. Check each acceptance criterion against the code; run only the package's own test files and \`pnpm typecheck\` (never e2e or the whole suite). Hunt for real defects: logic errors, races, server-clock sync, reload mid-scene, secrecy (a player must never learn their own character), missing i18n keys or languages, phone layout at 390x844, dark theme, reduced motion, names without avatars, the prototype's look, and anything that breaks what works today. Take screenshots only for a visual criterion you can't judge from the code (at most 4, through the dev server at http://localhost:3100; never start or stop a server).
+Do not edit files. Report only defects with evidence; lows only when they are real and cheap to fix; no style nits. passed = no high or medium defect. Also write the findings to ${P}/reports/${wp}-review.md.${ENV}${STYLE}`,
+  { label: `review:${wp}`, phase: 'Review', effort: 'high', schema: REVIEW_SCHEMA })
 
-const fix = (wp, defects) => agent(`You are the engineer for ${wp} (wave ${WAVE}) of Phase 10 in the 4Dare repo (the current directory). A reviewer found these defects:
-${JSON.stringify(defects, null, 1)}
-Verify each against the code; fix every real one (high and medium first, low when cheap). Read ${P}/plan.md and ${P}/reports/${wp}.md for context.
-${RULES(wp)}
-Re-run the package's verification. Append a "Fixes" section to ${P}/reports/${wp}.md (each defect: fixed / not a defect + why). Return a 6-line summary.`,
-  { label: `fix:${wp}`, phase: 'Review' })
+const fix = (wp) => agent(`You fix review findings in ${wp} of Phase 10 in the 4Dare repo (the current directory). The package is committed; its brief is ${P}/briefs/${wp}.md and its report ${P}/reports/${wp}.md. Findings:
+${JSON.stringify(args.defects[wp], null, 1)}
+Check each against the code and fix every real one, the high and medium first. Verify only this: the package's own test files, \`pnpm typecheck\`, \`pnpm exec biome check <changed files>\`, and a quick check in the dev server where a finding is visual or interactive. Append a short "Review fixes" section to ${P}/reports/${wp}.md (each finding: fixed, or not a defect and why). Return a 5-line summary.
+${RULES(wp)}`,
+  { label: `fix:${wp}`, phase: 'Review', effort: 'high' })
 
-const results = await pipeline(
-  WPS,
-  (wp) => build(wp),
-  async (summary, wp) => {
-    let last = null
-    for (let round = 0; round < 3; round++) {
-      last = await review(wp, round)
-      if (!last) break
-      const serious = last.defects.filter((d) => d.severity !== 'low')
-      if (!serious.length || round === 2) break
-      await fix(wp, last.defects)
-    }
-    return { wp, summary, review: last }
-  },
-)
-
-phase('Wave check')
-const check = await agent(`Wave ${WAVE} of Phase 10 (${WPS.join(', ')}) is built in the 4Dare repo (the current directory). Reports are in ${P}/reports/. Run the full checks on the combined tree: pnpm test, pnpm typecheck, pnpm lint${args.e2e ? ', and pnpm test:e2e (stop any server already on port 3100 first)' : ''}. Fix any failure caused by the interaction of this wave's packages, editing only files those packages own (see ${P}/plan.md section 5). Never run git checkout/reset/stash/commit. Write ${P}/reports/wave${WAVE}-check.md with the commands and results, and return: for each command pass/fail with the decisive lines, and the list of files changed by this wave (git status --short, marking which belong to which package).`,
-  { label: `wave${WAVE}:check`, phase: 'Wave check' })
-
-return { results: results.map((r) => r && { wp: r.wp, passed: r.review?.passed, open: r.review?.defects }), check }
+if (args.mode === 'fix') {
+  return await parallel(WPS.map((wp) => () => fix(wp).then((summary) => ({ wp, summary }))))
+}
+if (args.mode === 'review') {
+  const results = await parallel(WPS.map((wp) => () => review(wp).then((r) => r && { wp, ...r })))
+  return results.filter(Boolean)
+}
+const results = await parallel(WPS.map((wp) => () => build(wp).then((summary) => ({ wp, summary }))))
+return results

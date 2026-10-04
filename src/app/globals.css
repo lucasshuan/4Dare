@@ -147,9 +147,12 @@
   --color-brand-butter: var(--brand-butter);
   --color-on-brand: var(--on-brand);
 
+  /* Zen Maru Gothic is only loaded on Japanese pages (ja-font.tsx) */
   --font-display:
-    var(--font-bricolage), var(--font-zen-maru), system-ui, sans-serif;
-  --font-sans: var(--font-figtree), var(--font-zen-maru), system-ui, sans-serif;
+    var(--font-bricolage), var(--font-zen-maru, system-ui), system-ui,
+    sans-serif;
+  --font-sans:
+    var(--font-figtree), var(--font-zen-maru, system-ui), system-ui, sans-serif;
   --font-mono:
     var(--font-dm-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
 

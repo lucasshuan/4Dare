@@ -40,7 +40,7 @@ test("the host types the theme, and the next room starts the same way", async ({
   // a typed theme has no past picks, so no "Random" button
   for (const page of [host, guest])
     await expect(
-      page.getByRole("textbox", { name: /character for/i }),
+      page.getByRole("combobox", { name: /character for/i }),
     ).toBeVisible({ timeout: 20_000 });
   await expect(guest.getByText("Space pirates").first()).toBeVisible();
   await expect(guest.getByRole("button", { name: /^random$/i })).toHaveCount(0);

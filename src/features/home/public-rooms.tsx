@@ -1,8 +1,9 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
+import { LayoutMotion } from "@/components/ui/layout-motion";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { RoomRow, sortRooms } from "@/features/rooms/room-row";
 import type { GameKey } from "@/game/games";
@@ -48,22 +49,24 @@ export function PublicRooms({ game }: { game: GameKey }) {
       {isLoading ? (
         <div className="h-[68px] animate-pulse rounded-lg bg-sunken" />
       ) : (
-        <ul className="flex flex-col gap-2">
-          {/* popLayout: a leaving row stops taking space at once, and everything below glides up together */}
-          <AnimatePresence initial={false} mode="popLayout">
-            {shown.map((r) => (
-              <RoomRow key={r.code} room={r} />
-            ))}
-          </AnimatePresence>
-          {shown.length === 0 ? (
-            <motion.li
-              layout="position"
-              className="rounded-lg border-[1.5px] border-line border-dashed p-4 text-ink-muted"
-            >
-              {mine.length ? t("noOpen") : t("empty")}
-            </motion.li>
-          ) : null}
-        </ul>
+        <LayoutMotion>
+          <ul className="flex flex-col gap-2">
+            {/* popLayout: a leaving row stops taking space at once, and everything below glides up together */}
+            <AnimatePresence initial={false} mode="popLayout">
+              {shown.map((r) => (
+                <RoomRow key={r.code} room={r} />
+              ))}
+            </AnimatePresence>
+            {shown.length === 0 ? (
+              <m.li
+                layout="position"
+                className="rounded-lg border-[1.5px] border-line border-dashed p-4 text-ink-muted"
+              >
+                {mine.length ? t("noOpen") : t("empty")}
+              </m.li>
+            ) : null}
+          </ul>
+        </LayoutMotion>
       )}
     </section>
   );

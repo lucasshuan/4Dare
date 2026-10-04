@@ -3,7 +3,7 @@
 import { Sparkles } from "lucide-react";
 import {
   AnimatePresence,
-  motion,
+  m,
   useMotionValue,
   useReducedMotion,
   useSpring,
@@ -60,7 +60,7 @@ const STEPS: {
 const STILL = 5;
 
 /** The others around the table, left to right. Phones keep the two nearest you. */
-const SEATS: {
+export const SEATS: {
   seat: Seat;
   place: string;
   tilt: number;
@@ -101,7 +101,7 @@ const SEATS: {
     card: "#F3D3B8",
   },
 ];
-const YOU = { seed: "banner-you", color: "#D9C7F4", card: "#F2E3A8" };
+export const YOU = { seed: "banner-you", color: "#D9C7F4", card: "#F2E3A8" };
 
 /** Question marks drifting in the background, across the whole width: [left %, top %, size px, colour, seconds]. */
 const MARKS: [number, number, number, string, number][] = [
@@ -118,7 +118,7 @@ const MARKS: [number, number, number, string, number][] = [
 ];
 
 /** A critter on its pastel, as a round avatar or a card portrait. */
-function Critter({
+export function Critter({
   seed,
   color,
   className,
@@ -143,7 +143,7 @@ function Critter({
 }
 
 /** A card held up for the others to see: the character's picture. `fill` stretches it to its box (the flipped "?" card). */
-function HeldCard({
+export function HeldCard({
   seed,
   color,
   fill = false,
@@ -253,7 +253,7 @@ export function WhoAmIBanner() {
       )}
     >
       {/* light and question marks, drifting the other way */}
-      <motion.div
+      <m.div
         style={{ x: backX, y: backY }}
         className="-inset-10 -z-10 absolute"
       >
@@ -261,7 +261,7 @@ export function WhoAmIBanner() {
         <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-butter/60 blur-3xl" />
         <span className="absolute top-[5%] right-[22%] h-[45%] w-[25%] rounded-pill bg-apricot-soft/70 blur-3xl" />
         {MARKS.map(([left, top, size, color, seconds]) => (
-          <motion.span
+          <m.span
             key={`${left}-${top}`}
             className={cn(
               "absolute font-display font-extrabold leading-none opacity-[0.16]",
@@ -280,11 +280,11 @@ export function WhoAmIBanner() {
                 })}
           >
             ?
-          </motion.span>
+          </m.span>
         ))}
-      </motion.div>
+      </m.div>
 
-      <motion.div
+      <m.div
         style={{ x: frontX, y: frontY }}
         className="relative mx-auto h-[clamp(180px,min(22vw,27vh),230px)] max-sm:h-[210px] w-full max-w-[1040px] [container-type:size]"
       >
@@ -295,16 +295,16 @@ export function WhoAmIBanner() {
         <div className="absolute inset-x-0 top-[1%] flex justify-center px-4">
           <AnimatePresence mode="wait">
             {s.hit ? (
-              <motion.div
+              <m.div
                 key="hit"
                 {...pop}
                 className="inline-flex items-center gap-1.5 rounded-pill bg-yes px-4 py-2 font-bold font-display text-[clamp(15px,2vw,20px)] text-on-yes leading-tight shadow-card"
               >
                 <Sparkles className="size-[1.1em]" strokeWidth={2} />
                 {t("hit")}
-              </motion.div>
+              </m.div>
             ) : s.ask ? (
-              <motion.div
+              <m.div
                 key={s.ask}
                 {...pop}
                 className={cn(
@@ -315,7 +315,7 @@ export function WhoAmIBanner() {
                 )}
               >
                 {t(s.ask)}
-              </motion.div>
+              </m.div>
             ) : null}
           </AnimatePresence>
         </div>
@@ -335,20 +335,20 @@ export function WhoAmIBanner() {
               <div className="-translate-x-1/2 absolute bottom-full left-1/2 mb-[2.6cqh] flex w-max max-w-[min(9.5rem,15cqw)] justify-center max-sm:max-w-[26cqw]">
                 <AnimatePresence>
                   {answer ? (
-                    <motion.span key={`${s.ask}-${answer}`} {...pop}>
+                    <m.span key={`${s.ask}-${answer}`} {...pop}>
                       <AnswerChip value={answer} small pressed wrap />
-                    </motion.span>
+                    </m.span>
                   ) : null}
                 </AnimatePresence>
               </div>
-              <motion.div
+              <m.div
                 className="w-[33cqh]"
                 style={{ rotate: p.tilt }}
                 {...floating(i * 0.7)}
               >
                 <HeldCard seed={`${p.seed}-card`} color={p.card} />
-              </motion.div>
-              <motion.span
+              </m.div>
+              <m.span
                 animate={s.hit && !reduced ? { y: [0, -8, 0] } : { y: 0 }}
                 transition={{ duration: 0.45, delay: 0.15 + i * 0.08 }}
                 className="-mt-[4cqh] block"
@@ -358,25 +358,25 @@ export function WhoAmIBanner() {
                   color={p.color}
                   className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--sky-soft)]"
                 />
-              </motion.span>
+              </m.span>
             </div>
           );
         })}
 
         {/* you: the "?" card, which flips when you get it */}
         <div className="-translate-x-1/2 absolute bottom-[3%] left-1/2 flex flex-col items-center">
-          <motion.div
+          <m.div
             className="relative w-[38.5cqh] sm:w-[39.5cqh]"
             {...floating(0.4)}
           >
             <div className="perspective-[800px]">
-              <motion.div
+              <m.div
                 className="relative transform-3d"
                 animate={{ rotateY: s.hit ? 180 : 0 }}
                 transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               >
                 <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-surface font-display font-extrabold text-[23.5cqh] text-sky shadow-pop backface-hidden">
-                  <motion.span
+                  <m.span
                     animate={
                       reduced || s.ask !== "guess" || s.hit
                         ? { rotate: 0 }
@@ -385,17 +385,17 @@ export function WhoAmIBanner() {
                     transition={{ duration: 0.6 }}
                   >
                     ?
-                  </motion.span>
+                  </m.span>
                 </div>
                 <div className="absolute inset-0 rotate-y-180 rounded-[14%/11%] outline-[3px] outline-yes outline-solid backface-hidden">
                   <HeldCard seed={`${YOU.seed}-card`} color={YOU.card} fill />
                 </div>
-              </motion.div>
+              </m.div>
             </div>
             <AnimatePresence>
               {s.hit && !reduced
                 ? BURST.map((b, i) => (
-                    <motion.span
+                    <m.span
                       // biome-ignore lint/suspicious/noArrayIndexKey: a fixed burst
                       key={i}
                       className={cn(
@@ -419,14 +419,14 @@ export function WhoAmIBanner() {
                   ))
                 : null}
             </AnimatePresence>
-          </motion.div>
+          </m.div>
           <Critter
             seed={YOU.seed}
             color={YOU.color}
             className="-mt-[4cqh] size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--sky-soft),0_0_0_6px_var(--sky)]"
           />
         </div>
-      </motion.div>
+      </m.div>
 
       {/* melts into the page below */}
       <span className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-b from-transparent to-canvas/70" />

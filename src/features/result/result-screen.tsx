@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, Trophy } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
@@ -42,7 +42,7 @@ function LobbyCountdown() {
   const total = view.deadline - view.stepStartsAt;
   const left = Math.max(0, view.deadline - Math.max(now, view.stepStartsAt));
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 10 }}
       animate={{
         opacity: 1,
@@ -61,7 +61,7 @@ function LobbyCountdown() {
           style={{ transform: `scaleX(${total > 0 ? left / total : 0})` }}
         />
       </span>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -121,12 +121,12 @@ export function ResultScreen() {
           />
         ) : null}
       </header>
-      <div className="mx-auto grid w-full max-w-[1120px] flex-1 gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-12">
+      <div className="mx-auto grid w-full max-w-[1120px] flex-1 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-12">
         <div className="flex flex-col gap-3 lg:self-center lg:pb-16">
           <span className="font-semibold text-ink-muted text-sm">
             {t("kicker", { count: view.history.length })}
           </span>
-          <motion.h1
+          <m.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{
               opacity: 1,
@@ -154,7 +154,7 @@ export function ResultScreen() {
                 : winner.isYou
                   ? t("youFirst")
                   : withNames((n) => t("winner", { name: n(winner) }))}
-          </motion.h1>
+          </m.h1>
           {youLine ? <p className="text-ink-muted">{youLine}</p> : null}
           <div className="mt-3 flex flex-col items-start gap-3">
             <LobbyCountdown />
@@ -192,7 +192,7 @@ export function ResultScreen() {
                 key={p.id}
                 className="flex w-full max-w-[min(250px,30vh)] min-w-0 flex-col gap-3"
               >
-                <motion.article
+                <m.article
                   initial={{ opacity: 0, y: 40, rotateX: 25 }}
                   animate={{
                     opacity: 1,
@@ -226,8 +226,8 @@ export function ResultScreen() {
                         )
                       : null}
                   </p>
-                </motion.article>
-                <motion.div
+                </m.article>
+                <m.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{
                     opacity: 1,
@@ -260,8 +260,8 @@ export function ResultScreen() {
                           : t("notFound")}
                     </span>
                   </div>
-                </motion.div>
-                <motion.div
+                </m.div>
+                <m.div
                   initial={{ height: 0 }}
                   animate={{
                     height: plinth,
@@ -280,7 +280,7 @@ export function ResultScreen() {
                     <Trophy className="size-8" strokeWidth={1.75} />
                   ) : null}
                   {p.place ? t("placeShort", { place: p.place }) : null}
-                </motion.div>
+                </m.div>
               </li>
             );
           })}

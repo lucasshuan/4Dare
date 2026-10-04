@@ -10,64 +10,44 @@ Working folder for ROADMAP Phase 10, "The match presents itself": building the a
 - **`engine.md`, `server-data.md`, `ui-flow.md`, `ui-turn-lobby-style.md`:** maps of the code the plan is built on.
 - **`plan-critique.md`:** the adversarial review of the plan. The plan's "Critique log" answers every point.
 - **`reports/WPn.md`:** what each package built, its deviations from the plan and its requests to later packages. Read them before building on a package.
-- **`wave-workflow.js`:** the workflow script that runs one wave (see "Next").
+- **`briefs/`:** one brief per package, cut verbatim from the plan, the specs and the reports by `briefs/make.py`. An engineer reads only its brief.
+- **`wave-workflow.js`:** the workflow script that builds packages from their briefs, or reviews committed ones (see "Next").
 
-## Status (2026-10-03)
+## Status (2026-10-04)
 
-The work lives on the branch **`phase-10`**. Do not merge it into `main` or deploy it before the scene packages land. With only WP1 in, the live app shows today's vote result through the whole theme show and silently refuses "Ask" during the cast.
+The work lives on the branch **`phase-10`**. Do not merge it into `main` or deploy it before the scene packages land: until then the live app shows today's vote result through the whole theme show and silently refuses "Ask" during the cast.
 
 Done and committed:
-- **Roadmap:** the Phase 10 items, plus the starters item.
-- **`theme_starters`** (migration `0011` and `supabase/seed/theme_starters.sql`):
-  - About five famous, common characters per theme. They are the base for the ✓ examples and the pick hand, kept apart from picks and likes.
-  - Applied and seeded on the hosted project: 1666 rows covering all 337 active themes.
-  - Three library entries were added by hand (insert only): Tyrannosaurus rex `wd-Q14332`, Rex from Toy Story `wd-Q2152060`, Romeo and Juliet `wd-Q83186`.
-- **WP1, engine** (`feat(game): server-timed shows, 20 s theme vote and pick drafts`): shows timed by the server, 20 s vote, pick drafts, views. See `reports/WP1.md`.
-- **WP2, design kit** (`feat(ui): stage design kit, step backdrops and phase 10 strings`): tokens, eases, backdrop, mini card, logo mark, every new string in en, pt and ja. See `reports/WP2.md`.
+- **Roadmap:** the Phase 10 items, plus the starters item (ticked).
+- **`theme_starters`** (migration `0011` and `supabase/seed/theme_starters.sql`): about five famous characters per theme, 1666 rows over all 337 active themes on the hosted project. They back the ✓ examples and the hand. Three library entries were added by hand (insert only): `wd-Q14332`, `wd-Q2152060`, `wd-Q83186`.
+- **WP1, engine:** shows timed by the server, 20 s vote, pick drafts, views. Re-reviewed in wave 2: no high or medium finding; the four lows are fixed (`fix(game): keep the vote through a queued cast…`).
+- **WP2, design kit:** tokens, eases, backdrop, mini card, logo mark, every new string in en, pt and ja.
+- **WP3, stage runtime and lab:** `stageFrame`, `stageLook`, `useStageTimeline`, the clock context, `RoomStage`, the lab at `/[locale]/dev/stage` and the screenshot runner.
+- **WP5, server:** draft routes, `confirmCard`, rule examples from the starters, the hand route.
+- **`build-roadmap` merged** (local mode on fixtures, themes from the table, realtime on demand, critters on the server). The lab takes its themes from `src/server/backend/local/fixtures.ts`.
 
-Checks at hand-off:
-- `pnpm test`: 191 passed.
-- `pnpm typecheck`: passes.
-- `pnpm lint`: clean apart from 3 old warnings in `globals.css`.
-- `pnpm test:e2e`: 13 of 13 passed.
+Checks after the merge: `pnpm test` 281 passed, `pnpm typecheck` passes, `pnpm lint` clean apart from 3 old warnings in `globals.css`, `pnpm test:e2e` 13 of 13.
 
-WP1's adversarial review was stopped before it reported, so no WP1 findings were recorded. WP2's review passed with two low findings, carried below.
-
-Open low findings:
-- **Light turn screen contrast:** small muted text sits on the 20% step wash ("Play 1", the ask helper, the 0/140 counter). It measures 4.42–4.45:1 on seats 1, 3 and 4, under the 4.5:1 it needs. Fix it in WP4 or WP12 with a darker muted token on washes or text on a surface.
-- **Dark seat-ink near the glow:** in dark mode, seat-ink drops to about 2.8:1 near the backdrop's corner glows. WP8 keeps the "for whom" name centred, away from them.
-- **Requests from WP1:** see "Requests for WP12 and later packages" in `reports/WP1.md`.
+Open:
+- **WP9a** (pick card) has not started. Its brief is ready.
+- **WP3 and WP5 have had no review yet:** run one review each (below) when the next packages start.
+- **Light turn screen contrast:** small muted text on the 20% step wash measures 4.42–4.45:1 on seats 1, 3 and 4 (needs 4.5). Fix it in WP4 or WP12.
+- **Dark seat-ink near the glow:** about 2.8:1 near the backdrop's corner glows; WP8 keeps the "for whom" name centred.
+- **Requests to later packages:** in each report's "Requests" section (the briefs carry them).
 
 ## Next
 
-The waves are batches of packages. Packages in the same wave run in parallel; each wave builds on the one before.
+1. **WP9a** (pick card form), then **wave 3:** WP4 (room shell, header, history on the left, backdrop, guards) ∥ WP6 (chat server). WP9a can run beside them.
+2. **Wave 4:** WP7 (opening, vote, theme and rule) ∥ WP8 (draw, for whom) ∥ WP9b (pick table, drafts, timeout) ∥ WP10 (your character, turn order) ∥ WP11 (chat UI).
+3. **Wave 5:** WP12 (integration, live matches on desktop and phone, the screenshot matrix, docs, the final list for Jean).
 
-1. **Wave 2:** WP3 (stage runtime and lab) ∥ WP5 (server: drafts, confirm, rule examples, hand) ∥ WP9a (pick card form).
-2. **Wave 3:** WP4 (room shell, header, history on the left, backdrop, guards) ∥ WP6 (chat server).
-3. **Wave 4:** WP7 (opening, vote, theme and rule) ∥ WP8 (draw, for whom) ∥ WP9b (pick table, drafts, timeout) ∥ WP10 (your character, turn order) ∥ WP11 (chat UI).
-4. **Wave 5:** WP12 (integration, live matches on desktop and phone, docs, the final list for Jean).
-
-How to run a wave: use the Workflow tool with `scriptPath: "docs/phase10/wave-workflow.js"` and args such as:
-
-```json
-{
-  "wave": 2,
-  "wps": ["WP3", "WP5", "WP9a"],
-  "e2e": true,
-  "extra": {
-    "WP5": "theme_starters already exists and is seeded (plan 1.6); only read it."
-  }
-}
-```
-
-After each wave:
-1. Read the reports and the review files.
-2. Run the checks yourself.
-3. Commit one commit per package.
-4. Tick the ROADMAP items it finished.
-5. Push `phase-10`.
-
-A quick re-review of WP1 before wave 2 is cheap insurance: run only the review part, or ask a reviewer agent with `plan.md` and `reports/WP1.md`.
+How to run packages (the lean flow; the first wave-2 run took about 45 minutes per package, mostly an xhigh model working, its own e2e and screenshot matrices, and review loops):
+1. `python3 docs/phase10/briefs/make.py WP4 WP6` writes the briefs, with the reports so far.
+2. Start one dev server on 3100 with the e2e env (`NEXT_DIST_DIR=.next-e2e DARE_DATA_DIR=.data/e2e DARE_SHOW_SCALE=0.25`, Supabase variables empty). Every agent shares it; Playwright reuses it.
+3. Start one Workflow run per package (a run gets only CPUs − 2 agent slots), with `scriptPath: "docs/phase10/wave-workflow.js"` and args such as `{"mode": "build", "wps": ["WP4"], "others": ["WP6"], "env": "<machine notes>", "extra": {"WP4": "<lead notes>"}}`. Engineers run at effort high, verify only their unit tests, typecheck, lint and a few screenshots, and write a short report.
+4. When an engineer returns: run `pnpm typecheck`, `pnpm lint` and the package's own test files, read the report, commit the package, tick its ROADMAP items, push.
+5. Then one review per committed package in the background: `{"mode": "review", "wps": ["WP4"], "commits": {"WP4": "<sha>"}}`. Fix what it confirms in a small `fix(...)` commit.
+6. Tests (Jean's call): no e2e and no whole unit suite until the end of Phase 10. WP12 runs `pnpm test`, `pnpm test:e2e` and the screenshot matrix once, and fixes what they find.
 
 ## Decisions Jean made (do not reopen)
 
@@ -112,11 +92,15 @@ A quick re-review of WP1 before wave 2 is cheap insurance: run only the review p
   - Run migrations one at a time with the Supabase MCP, project `zooqjsrhjupqghuuipon`.
 - **No AI:** no AI calls in the app or the build.
 - **`tsconfig.json`:** `next dev` with a new `NEXT_DIST_DIR` rewrites it. Reuse `.next-e2e`, or restore the file by hand.
-- **ROADMAP_BUILD.md:** that work (Supabase as the only data source, lighter bundles) lands on `main` in parallel. Merge `main` into `phase-10` now and then, and stay out of its areas.
+- **`build-roadmap`** (ROADMAP_BUILD.md: Supabase as the only data source, lighter bundles) moves in parallel. Between packages, merge it into `phase-10`, resolve the conflicts, and make phase 10's code follow its later conventions and fixes. Stay out of its areas.
+- **Caveman:** Jean uses the `caveman-pt` skill. Talk to Jean in caveman full; subagents get its full-level rules in their prompt (`STYLE` in `wave-workflow.js`). Repo text stays normal prose.
+- **Tests** (AGENTS.md "Working"): no e2e and no whole unit suite while building; once at the end of the phase.
 
 ## Cloud setup
 
 - **Environment:** set the variables of `.env.example` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `POSTGRES_URL_NON_POOLING`, …) in the cloud environment. Never commit them.
 - **Supabase MCP:** connect it for migrations and SQL checks.
-- **Playwright:** install it with `pnpm exec playwright install chromium` before e2e.
+- **Node:** the container ships Node 22 first on `PATH`; the repo pins 24. `nvm install 24` (nvm lives in `/opt/nvm`), then prefix commands with `export PATH=/opt/nvm/versions/node/v24.21.0/bin:$PATH`.
+- **Playwright:** don't install browsers; set `PW_CHROMIUM=/opt/pw-browsers/chromium` and `playwright.config.ts` launches that binary instead of Edge.
+- **Without Supabase env vars** the app, unit tests and e2e run in local mode; check Supabase-side SQL read-only with the MCP.
 - **e2e timing:** e2e needs a calm machine. Under heavy CPU load the timing-based tests fail for that reason alone. `DARE_SHOW_SCALE=0.25` speeds up the shows in e2e (only the shows, never the clocks).

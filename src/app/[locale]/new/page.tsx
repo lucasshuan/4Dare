@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CreateScreen } from "@/features/create/create-screen";
-import { DEFAULT_GAME, isGameKey } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { NEW_ROOM } from "@/lib/routes";
 import { pageMetadata } from "@/server/seo";
@@ -20,13 +19,9 @@ export async function generateMetadata({
   });
 }
 
-/** /new?game=who-am-i: a new room for that game (an unknown game falls back to the first). */
-export default async function NewRoom({
-  params,
-  searchParams,
-}: PageProps<"/[locale]/new">) {
+/** /new?game=who-am-i: a new room for that game. Static: the screen reads the game. */
+export default async function NewRoom({ params }: PageProps<"/[locale]/new">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { game } = await searchParams;
-  return <CreateScreen game={isGameKey(game) ? game : DEFAULT_GAME} />;
+  return <CreateScreen />;
 }

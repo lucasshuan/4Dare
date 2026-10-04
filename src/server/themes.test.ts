@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import type { Theme } from "@/game/types";
+import { LOCAL_THEMES } from "./backend/local/fixtures";
 import type { ThemeStore } from "./backend/types";
-import { themeBank, themes } from "./themes";
+import { themes } from "./themes";
 
 const t = (en: string, set: Theme["set"] = "heroes"): Theme => ({
   en,
@@ -14,17 +15,13 @@ const LIST = [t("Pirates"), t("Robots"), t("Wizards")];
 
 function store(list: () => Promise<Theme[]>) {
   let reads = 0;
-  const added: Theme[] = [];
   const s: ThemeStore = {
     list: () => {
       reads++;
       return list();
     },
-    add: async (theme) => {
-      added.push(theme);
-    },
   };
-  return { s, added, reads: () => reads };
+  return { s, reads: () => reads };
 }
 
 describe("themes", () => {
@@ -75,26 +72,36 @@ describe("themes", () => {
     }
   });
 
-  it("every bundled theme belongs to a known set, and every set has themes", () => {
-    const sets = new Set(themeBank().map((x) => x.set));
-    expect([...sets].sort()).toEqual([...THEME_SET_KEYS].sort());
+  it("local mode has three themes in every set", () => {
+    for (const set of THEME_SET_KEYS)
+      expect(LOCAL_THEMES.filter((x) => x.set === set)).toHaveLength(3);
+    expect(LOCAL_THEMES).toHaveLength(THEME_SET_KEYS.length * 3);
   });
 
-  it("falls back to the bundled list when the store fails", async () => {
-    const { s } = store(async () => {
-      throw new Error("database down");
-    });
-    const drawn = await themes(s).draw([], 3);
-    expect(drawn).toHaveLength(3);
-    for (const theme of drawn)
-      expect(themeBank().map((x) => x.en)).toContain(theme.en);
+  it("reads the list as it starts, so instant draws come from it", async () => {
+    const { s, reads } = store(async () => LIST);
+    const source = themes(s);
+    expect(reads()).toBe(1);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    for (let i = 0; i < 20; i++)
+      expect(
+        source
+          .drawFromBank(3)
+          .map((x) => x.en)
+          .sort(),
+      ).toEqual(LIST.map((x) => x.en));
+    expect(reads()).toBe(1);
   });
 
-  it("answers instantly from the bundled list before the first read", () => {
-    const { s } = store(() => new Promise(() => {}));
-    const drawn = themes(s).drawFromBank(3);
+  it("has three themes in hand before the first read and when the store fails", async () => {
+    const pending = themes(store(() => new Promise(() => {})).s);
+    expect(new Set(pending.drawFromBank(3).map((x) => x.en)).size).toBe(3);
+    const failing = themes(
+      store(async () => {
+        throw new Error("database down");
+      }).s,
+    );
+    const drawn = await failing.draw([], 3);
     expect(new Set(drawn.map((x) => x.en)).size).toBe(3);
-    for (const theme of drawn)
-      expect(themeBank().map((x) => x.en)).toContain(theme.en);
   });
 });

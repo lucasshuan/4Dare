@@ -1399,6 +1399,8 @@ describe("leaving and giving up", () => {
     expect(h.state.phase).toBe("finished");
     expect(h.state.reveal).toBeNull();
     expect(h.state.stepStartsAt).toBe(h.now);
+    // play never started: it does not start after the match finished
+    expect(h.state.playStartedAt).toBe(h.now);
   });
 
   it("a guest signing in during a show keeps it", () => {

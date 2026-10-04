@@ -1,11 +1,10 @@
 "use client";
 
-import { Select } from "@base-ui/react/select";
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { LANGS, type Lang } from "@/game/types";
-import { getPathname, usePathname } from "@/i18n/navigation";
+import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { deferred, useDeferred } from "@/lib/hooks/use-deferred";
 
 /** A round flag for a language; `size-5` unless `className` says otherwise. */
 export function Flag({ lang, className }: { lang: Lang; className?: string }) {
@@ -24,71 +23,38 @@ export function Flag({ lang, className }: { lang: Lang; className?: string }) {
   );
 }
 
+export const LANGUAGE_TRIGGER =
+  "inline-flex h-10 items-center gap-2 rounded-pill bg-surface pr-3 pl-2.5 font-semibold text-sm transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line";
+
+const loadSelect = deferred(() =>
+  import("./language-select").then((m) => m.LanguageSelect),
+);
+
 /**
  * A select with flags and language names; keeps you on the same page. Only on
  * home and lobby. White in the light theme, like the theme toggle next to it.
+ * The select comes after the page; until then a look-alike stands in.
  */
 export function LanguageSwitch() {
   const t = useTranslations("common");
   const locale = useLocale() as Lang;
-  const pathname = usePathname();
-  const items = LANGS.map((l) => ({ value: l, label: t(`languages.${l}`) }));
+  const { loaded: Select, props, reach } = useDeferred(loadSelect);
+  if (Select) return <Select {...props} />;
   return (
-    <Select.Root
-      items={items}
-      value={locale}
-      onValueChange={(l) => {
-        if (!l || l === locale) return;
-        // A full load, not a client navigation: the whole app (its <html> included)
-        // lives under the locale, and re-rendering it on the client trips React
-        // over the theme script.
-        window.location.assign(
-          getPathname({ href: pathname, locale: l as Lang }) +
-            window.location.search,
-        );
-      }}
+    <button
+      type="button"
+      role="combobox"
+      aria-haspopup="listbox"
+      aria-expanded={false}
+      aria-label={t("language")}
+      className={LANGUAGE_TRIGGER}
+      {...reach}
     >
-      <Select.Trigger
-        aria-label={t("language")}
-        className="inline-flex h-10 items-center gap-2 rounded-pill bg-surface pr-3 pl-2.5 font-semibold text-sm transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line"
-      >
-        <Flag lang={locale} />
-        <Select.Value className="max-sm:sr-only">
-          {(l: Lang) => t(`languages.${l}`)}
-        </Select.Value>
-        <Select.Icon className="text-ink-muted">
-          <ChevronDown className="size-4" strokeWidth={2} />
-        </Select.Icon>
-      </Select.Trigger>
-      <Select.Portal>
-        <Select.Positioner
-          sideOffset={6}
-          align="end"
-          alignItemWithTrigger={false}
-          className="z-50 outline-none"
-        >
-          <Select.Popup className="min-w-44 origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
-            <Select.List>
-              {LANGS.map((l) => (
-                <Select.Item
-                  key={l}
-                  value={l}
-                  lang={l}
-                  className="flex items-center gap-2.5 rounded-md py-2 pr-3 pl-2 font-semibold text-sm outline-none select-none data-highlighted:bg-sky-soft"
-                >
-                  <Flag lang={l} />
-                  <Select.ItemText className="flex-1">
-                    {t(`languages.${l}`)}
-                  </Select.ItemText>
-                  <Select.ItemIndicator className="text-sky">
-                    <Check className="size-4" strokeWidth={2.25} />
-                  </Select.ItemIndicator>
-                </Select.Item>
-              ))}
-            </Select.List>
-          </Select.Popup>
-        </Select.Positioner>
-      </Select.Portal>
-    </Select.Root>
+      <Flag lang={locale} />
+      <span className="max-sm:sr-only">{t(`languages.${locale}`)}</span>
+      <span aria-hidden className="text-ink-muted">
+        <ChevronDown className="size-4" strokeWidth={2} />
+      </span>
+    </button>
   );
 }

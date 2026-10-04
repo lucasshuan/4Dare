@@ -1,8 +1,10 @@
 "use client";
 
+import { m, type Variants } from "motion/react";
 import { type ReactNode, useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { gs } from "@/lib/motion";
 import { Logo } from "./logo";
 
 /**
@@ -10,6 +12,18 @@ import { Logo } from "./logo";
  * Keep in step with the bar's height below.
  */
 export const UNDER_TOPBAR = "pt-[60px] sm:pt-[72px] sm:short:pt-[60px]";
+
+/**
+ * How a page leaves when a parent plays its `leave` variant (the lobby, when
+ * the match starts): the top bar slides up and the content fades and shrinks.
+ */
+const LEAVE = { duration: 0.45, ease: gs.p2In };
+const BAR_LEAVES: Variants = {
+  leave: { y: "-100%", opacity: 0, transition: LEAVE },
+};
+const CONTENT_LEAVES: Variants = {
+  leave: { opacity: 0, scale: 0.97, transition: LEAVE },
+};
 
 /**
  * Page shell: header row and a centred column. `left={null}` drops the wordmark.
@@ -64,17 +78,21 @@ export function Screen({
   }
   return (
     <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:gap-10 sm:px-8 sm:pt-6 sm:pb-[calc(3rem+var(--dock))] sm:short:gap-6 sm:short:pt-4 sm:short:pb-[calc(1.5rem+var(--dock))]">
-      <header
+      <m.header
+        variants={BAR_LEAVES}
         className={cn(
           "mx-auto flex w-full items-center justify-between gap-3",
           wide ? "max-w-[1120px]" : "max-w-[1120px]",
         )}
       >
         {bar}
-      </header>
-      <main className={cn("mx-auto w-full max-w-[1120px] flex-1", className)}>
+      </m.header>
+      <m.main
+        variants={CONTENT_LEAVES}
+        className={cn("mx-auto w-full max-w-[1120px] flex-1", className)}
+      >
         {children}
-      </main>
+      </m.main>
     </div>
   );
 }

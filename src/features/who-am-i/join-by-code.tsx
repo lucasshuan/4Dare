@@ -1,7 +1,7 @@
 "use client";
 
 import { LoaderCircle } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useId, useRef, useState } from "react";
 import type { ErrorCode } from "@/game/types";
@@ -96,7 +96,7 @@ export function JoinByCode() {
       </div>
       <AnimatePresence initial={false}>
         {problem ? (
-          <motion.p
+          <m.p
             key={problem}
             id={`${id}-problem`}
             role="alert"
@@ -107,7 +107,7 @@ export function JoinByCode() {
             className="absolute top-full left-0 mt-1.5 font-medium text-no text-sm"
           >
             {problem}
-          </motion.p>
+          </m.p>
         ) : null}
       </AnimatePresence>
     </form>

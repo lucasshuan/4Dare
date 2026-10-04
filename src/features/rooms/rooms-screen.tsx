@@ -12,18 +12,18 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { Flag } from "@/components/ui/language-switch";
 import { Screen } from "@/components/ui/screen";
-import { GameThumb, useGameName } from "@/features/create/game-field";
+import { GameThumb, useGameName } from "@/features/create/game-info";
 import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { DEFAULT_GAME, GAME_KEYS, type GameKey } from "@/game/games";
+import { DEFAULT_GAME, GAME_KEYS, type GameKey, isGameKey } from "@/game/games";
 import { LANGS, type Lang } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { ease, riseIn } from "@/lib/motion";
@@ -63,23 +63,50 @@ function toSearch({ game, q, access, langs }: RoomFilters, locale: Lang) {
   return s ? `?${s}` : "";
 }
 
+/**
+ * The filters a link carries (?game=who-am-i&q=crew&access=private&lang=pt,ja),
+ * each optional. `lang` is "all" or languages separated by commas; anything
+ * else means the viewer's.
+ */
+function fromSearch(search: string, locale: Lang): RoomFilters {
+  const sp = new URLSearchParams(search);
+  const game = sp.get("game");
+  const access = sp.get("access");
+  const lang = sp.get("lang");
+  const picked = LANGS.filter((l) => lang?.split(",").includes(l));
+  return {
+    game: isGameKey(game) ? game : null,
+    q: (sp.get("q") ?? "").slice(0, 50),
+    access: access === "public" || access === "private" ? access : "all",
+    langs: lang === "all" ? null : picked.length ? picked : [locale],
+  };
+}
+
 /** /rooms: every listed room, filtered by game, a search, language and who can join. The filters live in the link. */
-export function RoomsScreen({ initial }: { initial: RoomFilters }) {
+export function RoomsScreen() {
   const t = useTranslations("home.roomsPage");
   const locale = useLocale() as Lang;
   const tr = useTranslations("home.rooms");
   const name = useDisplayName();
   const { rooms, isLoading } = usePublicRooms();
   const { match } = useCurrentMatch();
-  const [filters, setFilters] = useState(initial);
+  // The page is static: it starts with no filter, then takes the link's.
+  const [filters, setFilters] = useState(() => fromSearch("", locale));
+  const [linked, setLinked] = useState(false);
   const set = (patch: Partial<RoomFilters>) =>
     setFilters((f) => ({ ...f, ...patch }));
 
+  useEffect(() => {
+    setFilters(fromSearch(window.location.search, locale));
+    setLinked(true);
+  }, [locale]);
+
   // A reload or a shared link opens the same filters.
   useEffect(() => {
+    if (!linked) return;
     const next = `${window.location.pathname}${toSearch(filters, locale)}`;
     window.history.replaceState(null, "", next);
-  }, [filters, locale]);
+  }, [linked, filters, locale]);
 
   const shown = useMemo(() => {
     const q = fold(filters.q);
@@ -106,7 +133,7 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
       <div className="flex flex-col gap-6">
-        <motion.div {...riseIn} className="flex flex-col gap-4">
+        <m.div {...riseIn} className="flex flex-col gap-4">
           <Link
             href={GAMES}
             className="-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink"
@@ -135,7 +162,7 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
               {t("create")}
             </Link>
           </div>
-        </motion.div>
+        </m.div>
 
         <MatchGate className="flex flex-col gap-6">
           <Filters filters={filters} set={set} />
@@ -163,7 +190,7 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
               </AnimatePresence>
             </ul>
           ) : (
-            <motion.div
+            <m.div
               {...riseIn}
               className="flex flex-col items-center gap-4 rounded-xl border-[1.5px] border-line-strong border-dashed px-6 py-12 text-center"
             >
@@ -192,7 +219,7 @@ export function RoomsScreen({ initial }: { initial: RoomFilters }) {
                   {t("create")}
                 </Link>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </MatchGate>
       </div>
@@ -214,7 +241,7 @@ function Filters({
   const t = useTranslations("home.roomsPage");
   const gameName = useGameName();
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 8 }}
       animate={{
         opacity: 1,
@@ -238,7 +265,7 @@ function Filters({
         />
         <AnimatePresence>
           {filters.q ? (
-            <motion.button
+            <m.button
               type="button"
               initial={{ opacity: 0, scale: 0.6 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -248,7 +275,7 @@ function Filters({
               className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-sunken text-ink-muted hover:text-ink"
             >
               <X className="size-4" strokeWidth={2} />
-            </motion.button>
+            </m.button>
           ) : null}
         </AnimatePresence>
       </label>
@@ -293,7 +320,7 @@ function Filters({
           },
         ]}
       />
-    </motion.div>
+    </m.div>
   );
 }
 

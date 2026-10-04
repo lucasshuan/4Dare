@@ -3,6 +3,7 @@
 //   supabase → Postgres, Storage, Realtime, Auth
 // Server actions and route handlers only talk to these interfaces (via getBackend()).
 
+import type { ChatMessage, NewChatMessage } from "@/game/chat";
 import type { MatchRecord } from "@/game/record";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
@@ -45,11 +46,26 @@ export interface RoomStore {
 }
 
 export interface NewCharacter {
+  /** "u-<uuid>" fixed in advance (a pick draft's newId): creating it again returns the one made first. */
+  id?: string;
   lang: Lang;
   name: string;
   origin: string | null;
   imageUrl: string | null;
   createdBy: PlayerId;
+}
+
+/** One of a theme's starters: famous characters picked by hand for it (table theme_starters). */
+export interface ThemeStarter {
+  themeId: string;
+  /** The theme's set; null for a theme that is no longer drawn. */
+  set: ThemeSet | null;
+  /** Language-free library id: "wd-Q302", "al-40". */
+  characterId: string;
+  /** 1 and 2 are the clearest fits. */
+  position: number;
+  /** A real person or a made-up character, as the library knows it. */
+  kind: "fictional" | "human" | null;
 }
 
 export interface CharacterStore {
@@ -58,6 +74,7 @@ export interface CharacterStore {
   get(id: string): Promise<Character | null>;
   /** The ones of `ids` (app ids) that exist in `lang`, in one read. */
   getMany(ids: string[], lang: Lang): Promise<Character[]>;
+  /** Inserts only. With an `id` it is idempotent: an id already there comes back as it is. */
   create(input: NewCharacter): Promise<Character>;
   setImage(id: string, imageUrl: string): Promise<Character | null>;
   /** Used when a player lets the clock run out while picking. */
@@ -67,24 +84,24 @@ export interface CharacterStore {
     created: Character[];
     images: Record<string, string>;
   }>;
+  /** Every active theme's starters, by theme then position (cached; local mode has none). */
+  starters(): Promise<ThemeStarter[]>;
 }
 
-/** Where the theme list lives: the bundled file locally, a table on Supabase. */
+/** Where the theme list lives: the fixtures locally, a table on Supabase. */
 export interface ThemeStore {
   /** Every theme that may be drawn. */
   list(): Promise<Theme[]>;
-  /** Keeps a theme the AI invented; an existing one is left as it is. */
-  add(theme: Theme): Promise<void>;
 }
 
 export interface ThemeSource {
-  /** `count` different themes in the three languages, from `sets` (every set when left out) while they have enough. Never throws: falls back to the built-in bank. */
+  /** `count` different themes in the three languages, from `sets` (every set when left out) while they have enough. Never throws: falls back to the list in hand. */
   draw(
     avoid: Localized[],
     count: number,
     sets?: readonly ThemeSet[],
   ): Promise<Theme[]>;
-  /** Instant, no network: straight from the bank. */
+  /** Instant, no network: from the list in hand (src/server/themes.ts). */
   drawFromBank(count: number, sets?: readonly ThemeSet[]): Theme[];
 }
 
@@ -115,6 +132,28 @@ export interface Notifier {
   roomChanged(code: string, version: number): Promise<void>;
   /** Tell home screens that the public room list changed. Best effort. */
   lobbyChanged(): Promise<void>;
+  /** New chat lines in the room; `id` is the newest. A ping only, never the text (topics are public). Best effort. */
+  chatChanged(code: string, id: number): Promise<void>;
+}
+
+export type { NewChatMessage };
+
+/** Room chat (src/game/chat.ts): out of RoomState, so it never races the game's compare-and-swap. */
+export interface ChatStore {
+  /**
+   * Saves lines in order and returns them with id and times. A player's line
+   * past CHAT_LIMITS (per author and room, across server instances) fails
+   * with rate_limited.
+   */
+  add(code: string, items: NewChatMessage[]): Promise<ChatMessage[]>;
+  /** Lines created at or after `since` (ms), oldest first, at most `limit` (the newest ones when cut). */
+  list(code: string, since: number, limit: number): Promise<ChatMessage[]>;
+  /** The room closed: its chat goes. */
+  clear(code: string): Promise<void>;
+  /** Chats of rooms that died without closing: every line older than `before` (ms). */
+  prune(before: number): Promise<void>;
+  /** A guest signed in: their lines, and the system lines naming them, become the account's. */
+  reassign(from: PlayerId, to: PlayerId): Promise<void>;
 }
 
 /** Finished matches, kept per player (not shown anywhere yet). */
@@ -137,4 +176,5 @@ export interface Backend {
   files: FileStore;
   auth: AuthService;
   notify: Notifier;
+  chat: ChatStore;
 }

@@ -7,10 +7,11 @@ import {
   Shapes,
   SlidersHorizontal,
 } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type FormEvent, type ReactNode, useId, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
+import { LayoutMotion } from "@/components/ui/layout-motion";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
@@ -113,53 +114,55 @@ export function RoomSetup({
           className="flex flex-col gap-6 sm:tiny:gap-4"
         >
           <Tabs.List className="grid auto-cols-fr grid-flow-col gap-1.5 rounded-lg bg-sunken p-1.5">
-            <SetupTab
-              value="room"
-              active={tab === "room"}
-              icon={SlidersHorizontal}
-              tone="bg-sky-soft text-sky"
-              label={t("tabRoom")}
-              summary={t("roomSummary", {
-                visibility: t(value.visibility),
-                seats: value.seats,
-              })}
-              problem={problems.room}
-              problemId={`${problemId}-room`}
-            />
-            <SetupTab
-              value="rules"
-              active={tab === "rules"}
-              icon={ScrollText}
-              tone="bg-yes-soft text-yes"
-              label={t("tabRules")}
-              summary={t("rulesSummary", {
-                ask: value.askSeconds,
-                answer: value.answerSeconds,
-                guess: value.guessSeconds,
-                validate: value.validateSeconds,
-              })}
-              problem={problems.rules}
-              problemId={`${problemId}-rules`}
-            />
-            {value.game === "who-am-i" ? (
+            <LayoutMotion>
               <SetupTab
-                value="themes"
-                active={tab === "themes"}
-                icon={Shapes}
-                tone="bg-apricot-soft text-apricot"
-                label={t("themes")}
-                summary={
-                  value.themeMode === "host"
-                    ? t("themeHost")
-                    : `${t("themeVote")} · ${t("setsOn", {
-                        on: value.themeSets.length,
-                        total: THEME_SET_KEYS.length,
-                      })}`
-                }
-                problem={problems.themes}
-                problemId={`${problemId}-themes`}
+                value="room"
+                active={tab === "room"}
+                icon={SlidersHorizontal}
+                tone="bg-sky-soft text-sky"
+                label={t("tabRoom")}
+                summary={t("roomSummary", {
+                  visibility: t(value.visibility),
+                  seats: value.seats,
+                })}
+                problem={problems.room}
+                problemId={`${problemId}-room`}
               />
-            ) : null}
+              <SetupTab
+                value="rules"
+                active={tab === "rules"}
+                icon={ScrollText}
+                tone="bg-yes-soft text-yes"
+                label={t("tabRules")}
+                summary={t("rulesSummary", {
+                  ask: value.askSeconds,
+                  answer: value.answerSeconds,
+                  guess: value.guessSeconds,
+                  validate: value.validateSeconds,
+                })}
+                problem={problems.rules}
+                problemId={`${problemId}-rules`}
+              />
+              {value.game === "who-am-i" ? (
+                <SetupTab
+                  value="themes"
+                  active={tab === "themes"}
+                  icon={Shapes}
+                  tone="bg-apricot-soft text-apricot"
+                  label={t("themes")}
+                  summary={
+                    value.themeMode === "host"
+                      ? t("themeHost")
+                      : `${t("themeVote")} · ${t("setsOn", {
+                          on: value.themeSets.length,
+                          total: THEME_SET_KEYS.length,
+                        })}`
+                  }
+                  problem={problems.themes}
+                  problemId={`${problemId}-themes`}
+                />
+              ) : null}
+            </LayoutMotion>
           </Tabs.List>
           <Tabs.Panel value="room" className="outline-none">
             <PanelIn>
@@ -191,7 +194,7 @@ export function RoomSetup({
 
 function PanelIn({ children }: { children: ReactNode }) {
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 8 }}
       animate={{
         opacity: 1,
@@ -200,7 +203,7 @@ function PanelIn({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -233,7 +236,7 @@ function SetupTab({
       )}
     >
       {active ? (
-        <motion.span
+        <m.span
           layoutId="room-setup-tab"
           transition={spring}
           className="absolute inset-0 rounded-md bg-surface shadow-card"
@@ -303,7 +306,7 @@ function SubmitButton({
       )}
     >
       {live ? (
-        <motion.span
+        <m.span
           aria-hidden
           initial={{ x: "-120%" }}
           animate={{ x: "320%" }}
@@ -312,14 +315,14 @@ function SubmitButton({
         />
       ) : null}
       <span className="relative">{children}</span>
-      <motion.span
+      <m.span
         aria-hidden
         className="relative flex"
         animate={live ? { x: [0, 4, 0] } : { x: 0 }}
         transition={live ? { ...loop, duration: 0.8, delay: 0.5 } : undefined}
       >
         <ArrowRight className="size-6!" strokeWidth={2.25} />
-      </motion.span>
+      </m.span>
     </button>
   );
 }

@@ -2,6 +2,7 @@ import "server-only";
 import { DEFAULT_GAME, type GameKey } from "@/game/games";
 import type { ActiveRoom, Phase, RoomState } from "@/game/types";
 import { toPublicRoom } from "@/game/view";
+import { LISTED_COLUMNS } from "../../listing";
 import type { RoomStore } from "../types";
 import { serviceClient } from "./clients";
 
@@ -49,8 +50,9 @@ export function supabaseRooms(): RoomStore {
       return (data?.length ?? 0) === 1;
     },
     async listPublic() {
+      // only what the list shows, never each room's history
       const { data, error } = await db()
-        .select("state")
+        .select(LISTED_COLUMNS)
         .in("phase", [
           "lobby",
           "voting",
@@ -66,7 +68,7 @@ export function supabaseRooms(): RoomStore {
       if (error) throw error;
       const now = Date.now();
       return (data ?? []).flatMap((r) => {
-        const room = toPublicRoom(r.state as RoomState, now);
+        const room = toPublicRoom(r as unknown as RoomState, now);
         return room ? [room] : [];
       });
     },

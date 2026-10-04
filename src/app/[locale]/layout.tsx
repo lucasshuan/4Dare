@@ -1,18 +1,19 @@
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
-import {
-  Bricolage_Grotesque,
-  DM_Mono,
-  Figtree,
-  Zen_Maru_Gothic,
-} from "next/font/google";
+import { Bricolage_Grotesque, DM_Mono, Figtree } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  getMessages,
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
+import { JaFontLoader } from "@/components/ja-font-loader";
 import { Providers } from "@/components/providers";
 import { APP_NAME } from "@/config";
 import { routing } from "@/i18n/routing";
+import { hubMessages } from "@/i18n/scopes";
 import { pageMetadata, SITE_URL } from "@/server/seo";
 import "../globals.css";
 
@@ -26,12 +27,6 @@ const dmMono = DM_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
 });
-const zenMaru = Zen_Maru_Gothic({
-  variable: "--font-zen-maru",
-  weight: ["500", "700"],
-  preload: false,
-});
-
 export async function generateMetadata({
   params,
 }: LayoutProps<"/[locale]">): Promise<Metadata> {
@@ -75,11 +70,13 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale === "pt" ? "pt-BR" : locale}
-      className={`${bricolage.variable} ${figtree.variable} ${dmMono.variable} ${zenMaru.variable}`}
+      className={`${bricolage.variable} ${figtree.variable} ${dmMono.variable}`}
       suppressHydrationWarning
     >
       <body>
-        <NextIntlClientProvider>
+        {locale === "ja" ? <JaFontLoader /> : null}
+        {/* the hub's namespaces; r/ and dev/ layouts hand theirs every one */}
+        <NextIntlClientProvider messages={hubMessages(await getMessages())}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
         {/* Vercel Web Analytics and Speed Insights (half the visits: enough data, half the cost); they only send data on Vercel. */}

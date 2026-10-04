@@ -1,11 +1,11 @@
 "use client";
 
 import { ArrowRight, Lock, UsersRound } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { buttonClass } from "@/components/ui/button";
-import { GameThumb, useGameName } from "@/features/create/game-field";
+import { GameThumb, useGameName } from "@/features/create/game-info";
 import { DEFAULT_SETTINGS, type PublicRoom, STEP_TIMES } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -61,7 +61,7 @@ export function RoomRow({
   const host = name(r.host);
   const title = r.name || t("roomOf", { name: host });
   return (
-    <motion.li
+    <m.li
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{
@@ -156,6 +156,6 @@ export function RoomRow({
           {t(r.status)}
         </span>
       )}
-    </motion.li>
+    </m.li>
   );
 }
