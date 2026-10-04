@@ -14,16 +14,16 @@ After the first quick wins (same day): API functions ~2 MB, pages ~9 MB, share i
 ## Phase 1 — Supabase is the law
 
 - [x] AGENTS.md: the character library is protected, `pnpm seed` is off, no AI in the app
-- [ ] The app never reads `data/*.json`: library, search, themes and local mode come from Supabase
+- [x] The app never reads `data/*.json`: library, search and themes come from Supabase, local mode from `local/fixtures.ts` (43 characters, 60 themes)
 - [x] Library index per language read from the database and cached (an hour per server, a day on the CDN), not built from the files
 - [x] `/api/characters/extras` stops pulling the library in
 - [x] Search before the index arrives uses `search_characters` in the database
 - [x] `data/` out of every server function (`outputFileTracingExcludes`)
-- [ ] Themes only from the `themes` table, no bundled list
+- [x] Themes only from the `themes` table, no bundled list (read as a server starts; three fallback themes until it lands)
 - [ ] Theme set examples (hover) from the `themes` table, not a hand copy
-- [ ] Tests stop importing `data/*.json`
-- [ ] `.vercelignore` leaves `data/` out of the deploy; Biome blocks `data/` imports in `src/`
-- [ ] `pnpm seed` retired for the library (it deletes rows the files lack); library changes go straight to the database, insert or update only
+- [x] Tests stop importing `data/*.json`
+- [x] `.vercelignore` leaves `data/` out of the deploy; Biome blocks `data/` imports in `src/`
+- [x] `pnpm seed` retired (it deleted rows the files lacked); library and theme changes go straight to the database, insert or update only; `pnpm test-rooms` reads Supabase
 - [x] Local mode (dev and e2e without Supabase) decided: small fixtures in the local backend (Jean, 2026-10-04); with `.env.local` dev uses Supabase as before
 - [x] `themes` and `theme_starters` protected like the library in AGENTS.md (Jean, 2026-10-04)
 

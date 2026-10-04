@@ -6,9 +6,6 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   // lets several dev servers run side by side (e.g. NEXT_DIST_DIR=.next-e2e)
   distDir: process.env.NEXT_DIST_DIR || ".next",
-  // data/*.json are old starter files: only local mode reads them, from the
-  // checkout, so no server function ships them (the library is in Supabase)
-  outputFileTracingExcludes: { "/*": ["./data/**/*"] },
   env: {
     // The Supabase integration on Vercel may set only SUPABASE_URL; the browser needs the public one.
     NEXT_PUBLIC_SUPABASE_URL:
