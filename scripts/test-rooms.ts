@@ -7,11 +7,10 @@
 // Needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY in .env.local.
 // Test players' ids start with "test-", which is how --clear finds their rooms.
 import { randomBytes, randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { createRoom, reduce } from "../src/game/engine";
 import { randomGuestNumber } from "../src/game/guest-names";
+import type { ThemeSet } from "../src/game/theme-sets";
 import {
   type Character,
   DEFAULT_SETTINGS,
@@ -22,7 +21,7 @@ import {
   type RoomState,
   type Theme,
 } from "../src/game/types";
-import type { SeedCharacter } from "../src/server/backend/seed-format";
+import { entryId } from "../src/server/backend/seed-format";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key =
@@ -31,8 +30,8 @@ if (!url || !key) {
   console.error("Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY first.");
   process.exit(1);
 }
-const rooms = () =>
-  createClient(url, key, { auth: { persistSession: false } }).from("rooms");
+const db = createClient(url, key, { auth: { persistSession: false } });
+const rooms = () => db.from("rooms");
 
 /** Lobbies leave the list after 15 minutes without a change, matches after 20: refresh well before. */
 const KEEP_EVERY_MS = 4 * 60_000;
@@ -63,26 +62,46 @@ function guest(lang: Lang): Identity {
   };
 }
 
-const readData = <T>(name: string) =>
-  JSON.parse(readFileSync(join(process.cwd(), "data", name), "utf8")) as T;
+/** The themes a vote may draw, read from the database once per run. */
+let themes: Theme[] = [];
+/** Per language, well-known characters with a picture, for the matches' picks. */
+const characters = new Map<Lang, Character[]>();
 
-const themes = readData<Theme[]>("themes.json");
-/** Well-known characters with a picture, for the matches' picks. */
-const characters = readData<SeedCharacter[]>("characters.json")
-  .filter((c) => c.imageUrl && c.names.pt)
-  .slice(0, 300);
-
-function character(lang: Lang): Character {
-  const c = pick(characters);
-  return {
-    id: c.id,
-    lang,
-    name: c.names[lang] ?? c.names.en ?? c.names.pt ?? c.id,
-    origin: null,
-    imageUrl: c.imageUrl,
-    aliases: [],
-  };
+async function loadData(langs: Lang[]) {
+  const listed = await db
+    .from("themes")
+    .select("en, pt, ja, theme_set")
+    .eq("active", true);
+  if (listed.error) throw listed.error;
+  themes = listed.data.map(({ theme_set, ...t }) => ({
+    ...t,
+    set: theme_set as ThemeSet | null,
+  }));
+  for (const lang of new Set(langs)) {
+    const { data, error } = await db
+      .from("character_entries")
+      .select("character_id, name, image_url")
+      .eq("lang", lang)
+      .not("image_url", "is", null)
+      .not("character_id", "like", "u-%")
+      .order("popularity", { ascending: false })
+      .limit(300);
+    if (error) throw error;
+    characters.set(
+      lang,
+      data.map((c) => ({
+        id: entryId(lang, c.character_id),
+        lang,
+        name: c.name,
+        origin: null,
+        imageUrl: c.image_url,
+        aliases: [],
+      })),
+    );
+  }
 }
+
+const character = (lang: Lang): Character => pick(characters.get(lang) ?? []);
 
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const newCode = () =>
@@ -243,6 +262,7 @@ async function main() {
   if (closed) console.log(`Closed ${closed} old test room(s).`);
   if (args.has("--clear")) process.exit(0);
 
+  await loadData(PLANS.map((p) => p.lang));
   const now = Date.now();
   for (const plan of PLANS) {
     const state = build(plan, now);
