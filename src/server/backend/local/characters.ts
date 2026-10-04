@@ -31,7 +31,9 @@ function toRow(c: Character, popularity: number): Row {
 function readData<T>(name: string, fallback: T): T {
   try {
     const file = join(process.cwd(), "data", name);
-    return JSON.parse(readFileSync(file, "utf8")) as T;
+    return JSON.parse(
+      readFileSync(/* turbopackIgnore: true */ file, "utf8"),
+    ) as T;
   } catch {
     return fallback;
   }
