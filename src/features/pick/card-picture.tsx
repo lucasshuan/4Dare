@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ImagePlus, Upload, X } from "lucide-react";
-import { AnimatePresence, motion, useAnimate } from "motion/react";
+import { AnimatePresence, m, useAnimate } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
@@ -326,7 +326,7 @@ export function CardPicture({
         />
         <AnimatePresence>
           {ghost && !picture ? (
-            <motion.span
+            <m.span
               key={ghost[0]}
               className="absolute inset-0"
               initial={{ opacity: 0 }}
@@ -350,7 +350,7 @@ export function CardPicture({
                   className="size-full object-cover"
                 />
               ) : null}
-            </motion.span>
+            </m.span>
           ) : null}
         </AnimatePresence>
 
@@ -379,7 +379,7 @@ export function CardPicture({
 
         <AnimatePresence>
           {dropZone ? (
-            <motion.button
+            <m.button
               key="drop"
               type="button"
               onClick={browse}
@@ -409,7 +409,7 @@ export function CardPicture({
               <small className="font-medium text-[12.5px]">
                 {t("dropOptional")}
               </small>
-            </motion.button>
+            </m.button>
           ) : null}
         </AnimatePresence>
 
@@ -490,7 +490,7 @@ export function CardPicture({
 
       <AnimatePresence>
         {tray && takes ? (
-          <motion.div
+          <m.div
             key="tray"
             role="dialog"
             aria-label={tPick("changeImage")}
@@ -538,7 +538,7 @@ export function CardPicture({
               <Upload className="size-5" aria-hidden />
               <span>{t("upload")}</span>
             </button>
-          </motion.div>
+          </m.div>
         ) : null}
       </AnimatePresence>
 

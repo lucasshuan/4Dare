@@ -52,7 +52,7 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] Critter avatars as SVG from a cached route (`/api/critter/<seed>/<rrggbb>`), no DiceBear in the browser: home 391 → 361 KB gzip of JS
 - [x] Browser Supabase only for realtime, loaded on demand; OAuth starts on the server (`/auth/sign-in`): home 457 → 391 KB gzip of JS
 - [x] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB): the header's (language, user menu, match badge) load when idle or when reached for, behind look-alikes (`useDeferred`); the game's name and thumbnail left the game select's module. Home 361 → 297 KB gzip of JS, no Base UI. Screens built around one (rooms filters, lobby, settings) keep theirs
-- [ ] `LazyMotion` + `m`; full motion features only where `layoutId` is used
+- [x] `LazyMotion` + `m`; full motion features only where `layoutId` is used: one strict `LazyMotion` with `domAnimation` in `Providers`, `m.*` everywhere, and `LayoutMotion` around the few `layout`/`layoutId` subtrees fetches `domMax` (14 KB gzip) when one mounts. `motion/react` points at framer-motion's own barrel (`next.config.ts`), else its `fm.motion` read keeps everything. Home 291 → 281 KB gzip of JS
 - [ ] Guest names resolved on the server (−24 KB)
 - [x] Each page gets only its message namespaces: hub pages leave the room's and `meta` out (`src/i18n/scopes.ts`); the `r/` and `dev/` layouts hand theirs every one. `/en/who-am-i` HTML 13.8 KB gzip
 - [x] `/new` and `/rooms` static (query read in the browser): served from the CDN, no function per visit

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { critterUri } from "@/components/ui/critter";
@@ -77,7 +77,7 @@ export function WhoAmISnapshot({
       <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-surface/40 blur-2xl" />
       <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/50 blur-2xl" />
 
-      <motion.div
+      <m.div
         className="absolute bottom-[-6%] left-[8%] w-[26%]"
         style={{ rotate: -10 }}
         {...(still
@@ -92,8 +92,8 @@ export function WhoAmISnapshot({
             })}
       >
         <MiniCard seed="dare-left" color="#F3D3B8" />
-      </motion.div>
-      <motion.div
+      </m.div>
+      <m.div
         className="absolute right-[8%] bottom-[-6%] w-[26%]"
         style={{ rotate: 10 }}
         {...(still
@@ -109,11 +109,11 @@ export function WhoAmISnapshot({
             })}
       >
         <MiniCard seed="dare-right" color="#BFE6C8" />
-      </motion.div>
+      </m.div>
 
       {/* your card: "?" on the front, the critter on the back */}
       <div className="absolute bottom-[4%] left-1/2 w-[30%] -translate-x-1/2 perspective-[800px]">
-        <motion.div
+        <m.div
           className="relative transform-3d"
           {...(still
             ? {}
@@ -137,22 +137,22 @@ export function WhoAmISnapshot({
               className="h-full outline-[3px] outline-yes outline-solid"
             />
           </div>
-        </motion.div>
+        </m.div>
       </div>
 
       {/* the question, then the answer */}
-      <motion.div
+      <m.div
         className="absolute top-[9%] left-[7%] max-w-[52%] origin-bottom-left rounded-lg rounded-bl-sm bg-surface px-3 py-2 font-bold font-display text-[clamp(13px,1.6vw,16px)] text-ink leading-tight shadow-card"
         {...(still ? {} : popIn(0.06))}
       >
         {t("demoQuestion")}
-      </motion.div>
-      <motion.div
+      </m.div>
+      <m.div
         className="absolute top-[11%] right-[7%] origin-left"
         {...(still ? {} : popIn(0.22))}
       >
         <AnswerChip value="yes" small pressed />
-      </motion.div>
+      </m.div>
     </div>
   );
 }

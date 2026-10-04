@@ -1,7 +1,7 @@
 "use client";
 
 import { ImagePlus } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import {
   type Ref,
@@ -88,7 +88,7 @@ export function ImageDrop({
     <div className={cn("flex flex-col gap-3", className)}>
       <AnimatePresence mode="wait">
         {src ? (
-          <motion.div key="crop" {...riseIn} className="flex flex-col gap-3">
+          <m.div key="crop" {...riseIn} className="flex flex-col gap-3">
             <div
               className={cn(
                 "relative w-full max-w-[320px] overflow-hidden rounded-lg bg-ink",
@@ -151,9 +151,9 @@ export function ImageDrop({
                 {t("other")}
               </Button>
             </div>
-          </motion.div>
+          </m.div>
         ) : (
-          <motion.div key="drop" {...riseIn}>
+          <m.div key="drop" {...riseIn}>
             <label
               htmlFor={id}
               {...dropHandlers}
@@ -172,7 +172,7 @@ export function ImageDrop({
               <span>{t("dropOrPaste")}</span>
             </label>
             <input {...inputProps} id={id} className="sr-only" />
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
       {error ? (

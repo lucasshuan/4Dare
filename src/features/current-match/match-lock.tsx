@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, DoorOpen, Lock } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { Button, buttonClass } from "@/components/ui/button";
@@ -93,7 +93,7 @@ export function MatchActions({
       </Link>
       <AnimatePresence mode="wait" initial={false}>
         {sure ? (
-          <motion.div
+          <m.div
             key="sure"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
@@ -117,9 +117,9 @@ export function MatchActions({
                 {t("stay")}
               </Button>
             </div>
-          </motion.div>
+          </m.div>
         ) : (
-          <motion.div
+          <m.div
             key="leave"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -134,7 +134,7 @@ export function MatchActions({
               <DoorOpen strokeWidth={1.75} />
               {t("leave")}
             </Button>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -154,7 +154,7 @@ function PulsingLock({ big }: { big?: boolean }) {
       {still
         ? null
         : [0, 1].map((i) => (
-            <motion.span
+            <m.span
               key={i}
               aria-hidden
               className="absolute inset-0 rounded-full bg-no"
@@ -168,7 +168,7 @@ function PulsingLock({ big }: { big?: boolean }) {
               }}
             />
           ))}
-      <motion.span
+      <m.span
         className="relative flex size-full items-center justify-center rounded-full bg-no text-on-no shadow-card"
         initial={{ rotate: 0, scale: 0.6 }}
         animate={
@@ -179,7 +179,7 @@ function PulsingLock({ big }: { big?: boolean }) {
         transition={{ duration: 0.7, ease: ease.soft }}
       >
         <Lock className={big ? "size-9" : "size-7"} strokeWidth={2} />
-      </motion.span>
+      </m.span>
     </span>
   );
 }
@@ -196,7 +196,7 @@ export function MatchLockCard({
 }) {
   const t = useTranslations("common.currentMatch");
   return (
-    <motion.div
+    <m.div
       role="status"
       initial={{ opacity: 0, y: 12, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -224,7 +224,7 @@ export function MatchLockCard({
         <MatchChip match={match} />
         <MatchActions match={match} />
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -260,7 +260,7 @@ export function MatchGate({
       </div>
       <AnimatePresence>
         {match ? (
-          <motion.div
+          <m.div
             key="lock"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -272,7 +272,7 @@ export function MatchGate({
             )}
           >
             <MatchLockCard match={match} />
-          </motion.div>
+          </m.div>
         ) : null}
       </AnimatePresence>
     </div>
@@ -336,7 +336,7 @@ export function CurrentMatchBadge() {
   return (
     <AnimatePresence>
       {match ? (
-        <motion.div
+        <m.div
           key="badge"
           initial={{ opacity: 0, scale: 0.85, x: -6 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -358,7 +358,7 @@ export function CurrentMatchBadge() {
               <BadgeFace match={match} />
             </button>
           )}
-        </motion.div>
+        </m.div>
       ) : null}
     </AnimatePresence>
   );

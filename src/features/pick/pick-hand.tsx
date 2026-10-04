@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { MiniCard } from "@/components/ui/mini-card";
 import { themeId } from "@/game/theme-id";
@@ -57,7 +57,7 @@ export function PickHand({
   const mid = (cards.length - 1) / 2;
 
   return (
-    <motion.div
+    <m.div
       initial={false}
       animate={open ? { y: 0, opacity: 1 } : { y: 200, opacity: 0 }}
       transition={
@@ -123,6 +123,6 @@ export function PickHand({
           );
         })}
       </div>
-    </motion.div>
+    </m.div>
   );
 }

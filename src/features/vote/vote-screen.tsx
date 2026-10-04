@@ -1,10 +1,11 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import { LayoutMotion } from "@/components/ui/layout-motion";
 import { useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
@@ -73,10 +74,19 @@ export function VoteScreen() {
   const theme = useSceneShow("theme", THEME_BEATS);
   const { view } = useRoomContext();
   usePreloadRule(showOf(view, "theme"));
-  if (opening) return <ColdOpen show={opening} />;
-  if (theme) return <ThemeStage show={theme} from="vote" />;
-  if (!view.vote) return null;
-  return <Vote v={view.vote} />;
+  // layoutId: voters land on cards, the winner flies to the theme stage; the
+  // layout features start loading during the cold open
+  return (
+    <LayoutMotion>
+      {opening ? (
+        <ColdOpen show={opening} />
+      ) : theme ? (
+        <ThemeStage show={theme} from="vote" />
+      ) : view.vote ? (
+        <Vote v={view.vote} />
+      ) : null}
+    </LayoutMotion>
+  );
 }
 
 function Vote({ v }: { v: VoteView }) {
@@ -274,7 +284,7 @@ function Vote({ v }: { v: VoteView }) {
               )}
             >
               <AnimatePresence mode="wait" initial={false}>
-                <motion.span
+                <m.span
                   key={spinning ? "tie" : "line"}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1, transition: { duration: dur.base } }}
@@ -282,7 +292,7 @@ function Vote({ v }: { v: VoteView }) {
                   className="block"
                 >
                   {spinning ? t("tieTitle") : ts("line")}
-                </motion.span>
+                </m.span>
               </AnimatePresence>
             </h1>
           </div>
@@ -313,7 +323,7 @@ function Vote({ v }: { v: VoteView }) {
           className="mt-[22px] flex min-w-0 flex-col gap-2.5 sm:mt-9 sm:flex-row sm:gap-4"
         >
           {v.options.map((option, i) => (
-            <motion.div
+            <m.div
               // biome-ignore lint/suspicious/noArrayIndexKey: the three options never move
               key={i}
               layoutId={result && i === chosen ? THEME_CARD : undefined}
@@ -345,7 +355,7 @@ function Vote({ v }: { v: VoteView }) {
                   />
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </fieldset>
 
@@ -399,7 +409,7 @@ function OptionCard({
   const live = open && !disabled;
   const share = total ? voters.length / total : 0;
   return (
-    <motion.button
+    <m.button
       type="button"
       aria-pressed={mine}
       aria-disabled={!open || undefined}
@@ -438,7 +448,7 @@ function OptionCard({
         </span>
         <AnimatePresence>
           {mine ? (
-            <motion.span
+            <m.span
               key="mine"
               initial={{ opacity: 0, scale: 0.4, rotate: -30 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -448,7 +458,7 @@ function OptionCard({
             >
               <Check className="size-4" strokeWidth={2.75} />
               <span>{t("yourVote")}</span>
-            </motion.span>
+            </m.span>
           ) : null}
         </AnimatePresence>
       </span>
@@ -468,7 +478,7 @@ function OptionCard({
         <span className="-space-x-2 flex">
           <AnimatePresence initial={false}>
             {voters.map((p) => (
-              <motion.span
+              <m.span
                 key={p.id}
                 layoutId={`voter-${p.id}`}
                 initial={{ opacity: 0, scale: 0.3, y: 10 }}
@@ -484,12 +494,12 @@ function OptionCard({
                   size={32}
                   className="ring-2 ring-surface/80"
                 />
-              </motion.span>
+              </m.span>
             ))}
           </AnimatePresence>
         </span>
         <AnimatePresence mode="popLayout" initial={false}>
-          <motion.span
+          <m.span
             key={voters.length}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -498,7 +508,7 @@ function OptionCard({
             className="font-semibold text-sm tabular-nums"
           >
             {t("votes", { count: voters.length })}
-          </motion.span>
+          </m.span>
         </AnimatePresence>
       </span>
 
@@ -507,7 +517,7 @@ function OptionCard({
         aria-hidden
         className={cn("absolute inset-x-0 bottom-0 h-1.5 opacity-40", tone.bar)}
       />
-      <motion.span
+      <m.span
         aria-hidden
         initial={false}
         animate={{ scaleX: share }}
@@ -517,7 +527,7 @@ function OptionCard({
           tone.fill,
         )}
       />
-    </motion.button>
+    </m.button>
   );
 }
 
@@ -540,7 +550,7 @@ function Footer({
       <span className="flex items-center gap-2.5">
         <span className="flex gap-[5px]" aria-hidden>
           {Array.from({ length: total }, (_, i) => (
-            <motion.span
+            <m.span
               // biome-ignore lint/suspicious/noArrayIndexKey: one dot per seat
               key={i}
               initial={false}

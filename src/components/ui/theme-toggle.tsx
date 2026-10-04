@@ -1,11 +1,12 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useEffect, useId, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
+import { LayoutMotion } from "@/components/ui/layout-motion";
 import { cn } from "@/lib/cn";
 
 const spring = { type: "spring", stiffness: 480, damping: 34 } as const;
@@ -40,13 +41,13 @@ export function ThemeToggle() {
         )}
       >
         {on ? (
-          <motion.span
+          <m.span
             layoutId={`${id}-pill`}
             transition={spring}
             className="absolute inset-0 rounded-pill bg-ink shadow-card"
           />
         ) : null}
-        <motion.span
+        <m.span
           // a new key each time it is chosen replays the turn
           key={on ? "on" : "off"}
           className="relative flex"
@@ -55,14 +56,17 @@ export function ThemeToggle() {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <Icon className="size-5" strokeWidth={1.75} />
-        </motion.span>
+        </m.span>
       </button>
     );
   };
   return (
     <ChoiceGroup label={t("label")} className="bg-surface dark:bg-sunken">
-      {item("light", Sun)}
-      {item("dark", Moon)}
+      {/* the pill's layoutId needs the layout features */}
+      <LayoutMotion>
+        {item("light", Sun)}
+        {item("dark", Moon)}
+      </LayoutMotion>
     </ChoiceGroup>
   );
 }

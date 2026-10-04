@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
@@ -152,7 +152,7 @@ export function TurnScreen() {
             {/* the card's width follows the window height, so the whole screen fits */}
             <div className="w-full lg:w-[clamp(232px,calc((100dvh_-_330px)_*_0.66),368px)] lg:flex-none">
               <AnimatePresence mode="wait" initial={false}>
-                <motion.div
+                <m.div
                   key={focus.id}
                   initial={{ opacity: 0, rotateY: -12, y: 10 }}
                   animate={{
@@ -184,12 +184,12 @@ export function TurnScreen() {
                     title={t("card.whoAreYou")}
                     meta={meta}
                   />
-                </motion.div>
+                </m.div>
               </AnimatePresence>
             </div>
             <section className="flex min-w-0 flex-[1_1_360px] flex-col gap-5 short:gap-3">
               <AnimatePresence mode="wait">
-                <motion.div
+                <m.div
                   key={`${view.phase}-${view.turn?.n}-${mode}`}
                   initial={{ opacity: 0, y: 14 }}
                   animate={{
@@ -201,7 +201,7 @@ export function TurnScreen() {
                   className="flex flex-col gap-5 short:gap-3"
                 >
                   <Step mode={mode} />
-                </motion.div>
+                </m.div>
               </AnimatePresence>
             </section>
           </Rise>
@@ -450,7 +450,7 @@ function Answer() {
       <span className="font-semibold text-sm tiny:sr-only">
         {t("yourAnswer")}
       </span>
-      <motion.div
+      <m.div
         role="group"
         aria-label={t("yourAnswer")}
         initial="hidden"
@@ -459,7 +459,7 @@ function Answer() {
         className="grid grid-cols-2 gap-2 sm:grid-flow-col sm:grid-cols-3 sm:grid-rows-2"
       >
         {ANSWER_GRID.map((a) => (
-          <motion.div
+          <m.div
             key={a}
             variants={{
               hidden: { opacity: 0, y: 8 },
@@ -473,9 +473,9 @@ function Answer() {
               // phones: a little smaller, so "Probably yes" stays on one line
               className="w-full whitespace-nowrap max-sm:gap-1.5 max-sm:px-3 max-sm:text-sm max-[380px]:px-2.5 max-[380px]:text-[13px]"
             />
-          </motion.div>
+          </m.div>
         ))}
-      </motion.div>
+      </m.div>
       <TextArea
         label={t("note")}
         value={note}
@@ -693,7 +693,7 @@ function Waiting({ mode }: { mode: Mode }) {
           )}
         </p>
       ) : null}
-      <motion.div
+      <m.div
         aria-hidden="true"
         className="flex gap-2"
         initial="a"
@@ -708,7 +708,7 @@ function Waiting({ mode }: { mode: Mode }) {
         }}
       >
         {[0, 1, 2].map((i) => (
-          <motion.span
+          <m.span
             key={i}
             className="size-2.5 rounded-pill bg-line-strong"
             animate={{ opacity: [0.3, 1, 0.3] }}
@@ -719,7 +719,7 @@ function Waiting({ mode }: { mode: Mode }) {
             }}
           />
         ))}
-      </motion.div>
+      </m.div>
     </div>
   );
 }

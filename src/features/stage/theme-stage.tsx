@@ -1,10 +1,11 @@
 "use client";
 
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { fireConfetti } from "@/components/ui/confetti";
+import { LayoutMotion } from "@/components/ui/layout-motion";
 import { useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import { thumbUrl } from "@/game/character-search";
@@ -81,7 +82,12 @@ export function ThemeStage({ show, from }: ThemeStageProps) {
         "relative flex flex-col items-center justify-center",
       )}
     >
-      {theme ? <Hero beat={theme} from={from} /> : null}
+      {/* the hero lands with layoutId (from the vote's winning card) */}
+      {theme ? (
+        <LayoutMotion>
+          <Hero beat={theme} from={from} />
+        </LayoutMotion>
+      ) : null}
       {rule ? <RuleScene beat={rule} rule={show.rule} /> : null}
       <output aria-live="polite" className="sr-only">
         {beat?.kind === "rule"
@@ -175,7 +181,7 @@ function Hero({ beat, from }: { beat: Beat; from: "vote" | "typed" }) {
         >
           {tv("chosenTitle")}
         </h1>
-        <motion.div
+        <m.div
           layoutId={THEME_CARD}
           transition={FLIGHT}
           className="w-[330px] max-w-full sm:w-[620px]"
@@ -233,7 +239,7 @@ function Hero({ beat, from }: { beat: Beat; from: "vote" | "typed" }) {
               </span>
             )}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </div>
   );

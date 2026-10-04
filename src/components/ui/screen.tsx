@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "motion/react";
+import { m, type Variants } from "motion/react";
 import { type ReactNode, useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -78,7 +78,7 @@ export function Screen({
   }
   return (
     <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:gap-10 sm:px-8 sm:pt-6 sm:pb-[calc(3rem+var(--dock))] sm:short:gap-6 sm:short:pt-4 sm:short:pb-[calc(1.5rem+var(--dock))]">
-      <motion.header
+      <m.header
         variants={BAR_LEAVES}
         className={cn(
           "mx-auto flex w-full items-center justify-between gap-3",
@@ -86,13 +86,13 @@ export function Screen({
         )}
       >
         {bar}
-      </motion.header>
-      <motion.main
+      </m.header>
+      <m.main
         variants={CONTENT_LEAVES}
         className={cn("mx-auto w-full max-w-[1120px] flex-1", className)}
       >
         {children}
-      </motion.main>
+      </m.main>
     </div>
   );
 }

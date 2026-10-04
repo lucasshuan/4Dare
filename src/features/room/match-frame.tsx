@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, type Ref, useEffect, useRef, useState } from "react";
 import { ThemeTag } from "@/components/ui/screen";
@@ -93,7 +93,7 @@ export function MatchFrame({ children }: { children: ReactNode }) {
   };
 
   return (
-    <motion.div
+    <m.div
       exit={{ opacity: 0, transition: { duration: dur.base, ease: ease.soft } }}
       className="flex min-h-dvh w-full"
     >
@@ -116,7 +116,7 @@ export function MatchFrame({ children }: { children: ReactNode }) {
         <main className="w-full min-w-0 flex-1">{children}</main>
       </div>
       {wide ? null : <HistoryDrawer open={open} onClose={close} />}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -140,7 +140,7 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
   const theme = tagReached ? view.theme : null;
 
   return (
-    <motion.header
+    <m.header
       initial={arrives ? { opacity: 0 } : false}
       animate={{ opacity: 1, transition: { duration: 0.4 } }}
       className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-[18px] sm:short:py-3"
@@ -149,28 +149,24 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
       <div className="flex min-w-24 flex-1 basis-0 items-center gap-2.5">
         <AnimatePresence initial={false}>
           {history ? (
-            <motion.div
-              key="history"
-              {...HISTORY_POP}
-              className="flex shrink-0"
-            >
+            <m.div key="history" {...HISTORY_POP} className="flex shrink-0">
               <HistoryButton
                 ref={history.ref}
                 open={history.open}
                 onClick={history.onToggle}
               />
-            </motion.div>
+            </m.div>
           ) : null}
         </AnimatePresence>
         <AnimatePresence initial={false}>
           {theme ? (
-            <motion.div key="tag" {...TAG_POP} className="flex min-w-0">
+            <m.div key="tag" {...TAG_POP} className="flex min-w-0">
               <ThemeTag
                 label={t("theme")}
                 theme={theme[lang]}
                 emoji={theme.set === null ? "✍️" : themeSetEmoji(theme.set)}
               />
-            </motion.div>
+            </m.div>
           ) : null}
         </AnimatePresence>
       </div>
@@ -178,14 +174,14 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
         <LeaveMatchButton />
         <AnimatePresence initial={false}>
           {history && canGiveUp ? (
-            <motion.div key="give-up" {...HISTORY_POP} className="flex">
+            <m.div key="give-up" {...HISTORY_POP} className="flex">
               <GiveUpButton />
-            </motion.div>
+            </m.div>
           ) : null}
         </AnimatePresence>
         <AnimatePresence initial={false}>
           {clockShown ? (
-            <motion.div
+            <m.div
               key="clock"
               {...CLOCK_POP}
               // only a show's clock pops; the one under an answers or guess reveal recharges as ever
@@ -205,10 +201,10 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
                 totalMs={view.stepMs}
                 tick
               />
-            </motion.div>
+            </m.div>
           ) : null}
         </AnimatePresence>
       </div>
-    </motion.header>
+    </m.header>
   );
 }

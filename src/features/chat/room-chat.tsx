@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useAnimate, useReducedMotionConfig } from "motion/react";
+import { m, useAnimate, useReducedMotionConfig } from "motion/react";
 import { useTranslations } from "next-intl";
 import {
   useCallback,
@@ -242,7 +242,7 @@ export function RoomChat() {
           unread > 0 && !reduced && "animate-nudge motion-reduce:animate-none",
         )}
       >
-        <motion.aside
+        <m.aside
           aria-label={t("title")}
           initial={false}
           animate={{ height: open ? tall : shut }}
@@ -284,7 +284,7 @@ export function RoomChat() {
               />
             </div>
           ) : null}
-        </motion.aside>
+        </m.aside>
       </div>
       <p aria-live="polite" className="sr-only">
         {open ? "" : said}

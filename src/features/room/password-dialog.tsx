@@ -2,7 +2,7 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { LockKeyhole } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ export function PasswordDialog({
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-scrim transition-opacity duration-200 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
         <Dialog.Popup className="-translate-x-1/2 -translate-y-1/2 fixed top-1/2 left-1/2 z-50 w-[min(400px,calc(100vw-2rem))] rounded-xl bg-canvas p-6 shadow-pop outline-none transition-[scale,opacity] duration-200 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0 sm:p-7">
-          <motion.form
+          <m.form
             key={tries}
             animate={tries ? { x: [0, -8, 8, -5, 5, 0] } : undefined}
             transition={{ duration: 0.35 }}
@@ -95,7 +95,7 @@ export function PasswordDialog({
                 {t("back")}
               </Button>
             </div>
-          </motion.form>
+          </m.form>
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, buttonClass } from "@/components/ui/button";
@@ -178,7 +178,7 @@ function MovedElsewhere({
   const there = roomTitle(room.name, room.host);
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
-      <motion.div {...riseIn} className="flex max-w-lg flex-col gap-6 pt-10">
+      <m.div {...riseIn} className="flex max-w-lg flex-col gap-6 pt-10">
         <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em]">
           {t("title")}
         </h1>
@@ -202,7 +202,7 @@ function MovedElsewhere({
             {t("stay")}
           </Button>
         </div>
-      </motion.div>
+      </m.div>
     </Screen>
   );
 }

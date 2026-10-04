@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
@@ -82,7 +82,7 @@ export function Timer({
     >
       <AnimatePresence>
         {cut ? (
-          <motion.span
+          <m.span
             key={cut.key}
             aria-hidden="true"
             initial={{ opacity: 0, y: -6, scale: 0.85 }}
@@ -96,7 +96,7 @@ export function Timer({
             className="pointer-events-none absolute top-full right-3 mt-1.5 whitespace-nowrap rounded-pill bg-no px-2 py-0.5 font-semibold text-[13px] text-on-no shadow-card"
           >
             {t("clockCut", { seconds: Math.round(cut.ms / 1000) })}
-          </motion.span>
+          </m.span>
         ) : null}
       </AnimatePresence>
       {/* always mounted, so screen readers hear the cut when the text arrives */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import type { CardContent } from "@/game/character-search";
@@ -73,7 +73,7 @@ export function PickCard({
         : "";
 
   return (
-    <motion.div
+    <m.div
       data-pick-card={value.kind}
       initial={false}
       animate={{ scale: editing ? 1 : CARD_SETTLED_SCALE }}
@@ -113,7 +113,7 @@ export function PickCard({
 
       <AnimatePresence initial={false}>
         {value.kind === "new" ? (
-          <motion.span
+          <m.span
             key="seal"
             aria-hidden="true"
             initial={{ scale: 2.2, rotate: -20 }}
@@ -126,13 +126,13 @@ export function PickCard({
             )}
           >
             {t("newSeal")}
-          </motion.span>
+          </m.span>
         ) : null}
       </AnimatePresence>
 
       <AnimatePresence initial={false}>
         {stamp ? (
-          <motion.div
+          <m.div
             key="stamp"
             role="status"
             initial={{ x: "-50%", y: "-50%", scale: 2.4, rotate: -16 }}
@@ -144,9 +144,9 @@ export function PickCard({
             )}
           >
             {t("timeUp")}
-          </motion.div>
+          </m.div>
         ) : null}
       </AnimatePresence>
-    </motion.div>
+    </m.div>
   );
 }

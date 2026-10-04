@@ -3,11 +3,12 @@
 import { Tooltip } from "@base-ui/react/tooltip";
 import { useQuery } from "@tanstack/react-query";
 import { Check, PenLine, UsersRound } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useId, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { HintLabel } from "@/components/ui/hint-label";
+import { LayoutMotion } from "@/components/ui/layout-motion";
 import { THEME_SET_KEYS, THEME_SETS, type ThemeSet } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -62,28 +63,30 @@ function ModeSwitch({
   ] as const;
   return (
     <ChoiceGroup label={t("themeMode")} describedBy={describedBy}>
-      {options.map(({ mode, icon: Icon, label }) => (
-        <button
-          key={mode}
-          type="button"
-          aria-pressed={value === mode}
-          onClick={() => onChange(mode)}
-          className={cn(
-            "relative inline-flex h-9 items-center gap-1.5 rounded-pill px-4 font-semibold text-sm transition-colors duration-200 ease-soft",
-            value === mode ? "text-ink" : "text-ink-muted hover:text-ink",
-          )}
-        >
-          {value === mode ? (
-            <motion.span
-              layoutId={`${id}-pill`}
-              transition={spring}
-              className="absolute inset-0 rounded-pill bg-surface shadow-card"
-            />
-          ) : null}
-          <Icon className="relative size-4" strokeWidth={2} />
-          <span className="relative">{label}</span>
-        </button>
-      ))}
+      <LayoutMotion>
+        {options.map(({ mode, icon: Icon, label }) => (
+          <button
+            key={mode}
+            type="button"
+            aria-pressed={value === mode}
+            onClick={() => onChange(mode)}
+            className={cn(
+              "relative inline-flex h-9 items-center gap-1.5 rounded-pill px-4 font-semibold text-sm transition-colors duration-200 ease-soft",
+              value === mode ? "text-ink" : "text-ink-muted hover:text-ink",
+            )}
+          >
+            {value === mode ? (
+              <m.span
+                layoutId={`${id}-pill`}
+                transition={spring}
+                className="absolute inset-0 rounded-pill bg-surface shadow-card"
+              />
+            ) : null}
+            <Icon className="relative size-4" strokeWidth={2} />
+            <span className="relative">{label}</span>
+          </button>
+        ))}
+      </LayoutMotion>
     </ChoiceGroup>
   );
 }
@@ -188,7 +191,7 @@ function SetCard({
       // The button stays still and only its face lifts: a moving anchor makes
       // the tooltip re-measure every frame of the spring, and it stutters.
       render={
-        <motion.button
+        <m.button
           initial={false}
           animate="rest"
           whileHover={still ? undefined : "hover"}
@@ -198,7 +201,7 @@ function SetCard({
       // The card under the tooltip rises above it (z-50), out of its shadow.
       className="relative block w-full rounded-md text-left data-popup-open:z-51"
     >
-      <motion.span
+      <m.span
         variants={CARD_FACE}
         transition={spring}
         className={cn(
@@ -209,7 +212,7 @@ function SetCard({
               "border-line border-dashed bg-canvas text-ink-muted hover:border-line-strong",
         )}
       >
-        <motion.span
+        <m.span
           aria-hidden
           initial={false}
           animate={
@@ -229,14 +232,14 @@ function SetCard({
           )}
         >
           {set.emoji}
-        </motion.span>
+        </m.span>
         <span className="line-clamp-2 min-w-0 flex-1 font-semibold text-[13px] leading-4 [word-break:auto-phrase]">
           {tSets(set.key)}
         </span>
         <span className="relative flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] border-line">
           <AnimatePresence initial={false}>
             {on ? (
-              <motion.span
+              <m.span
                 key="on"
                 initial={{ scale: 0, rotate: -60 }}
                 animate={{ scale: 1, rotate: 0 }}
@@ -245,11 +248,11 @@ function SetCard({
                 className="-inset-[1.5px] absolute flex items-center justify-center rounded-full bg-ink text-on-ink"
               >
                 <Check className="size-3" strokeWidth={3.25} />
-              </motion.span>
+              </m.span>
             ) : null}
           </AnimatePresence>
         </span>
-      </motion.span>
+      </m.span>
       {/* the tooltip is for the eyes only; screen readers get the examples here */}
       <span id={examplesId} hidden>
         {`${t("setExamples")}: ${examples.join(", ")}`}
@@ -275,14 +278,14 @@ function SetGrid({
   const [tooltip] = useState(() => Tooltip.createHandle<ThemeSet>());
   return (
     <>
-      <motion.ul
+      <m.ul
         initial="hidden"
         animate="shown"
         variants={{ shown: { transition: { staggerChildren: 0.018 } } }}
         className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
       >
         {THEME_SETS.map((set, i) => (
-          <motion.li
+          <m.li
             key={set.key}
             variants={{
               hidden: { opacity: 0, y: 10 },
@@ -300,9 +303,9 @@ function SetGrid({
               onToggle={() => toggle(set.key)}
               tooltip={tooltip}
             />
-          </motion.li>
+          </m.li>
         ))}
-      </motion.ul>
+      </m.ul>
       <ExamplesTooltip handle={tooltip} />
     </>
   );
@@ -313,7 +316,7 @@ function HostNote() {
   const still = useReducedMotion() ?? false;
   return (
     <div className="flex items-start gap-4 rounded-lg bg-butter-soft p-5">
-      <motion.span
+      <m.span
         aria-hidden
         initial={{ rotate: 0 }}
         animate={still ? undefined : { rotate: [0, -10, 8, -5, 0] }}
@@ -321,7 +324,7 @@ function HostNote() {
         className="origin-bottom-left text-[34px] leading-none"
       >
         ✍️
-      </motion.span>
+      </m.span>
       <div className="flex flex-col gap-1">
         <span className="font-semibold">{t("hostNoteTitle")}</span>
         <p className="text-ink-muted text-sm">{t("hostNote")}</p>
@@ -356,13 +359,13 @@ export function ThemeFields({
           </HintLabel>
           <AnimatePresence initial={false}>
             {voting ? (
-              <motion.span
+              <m.span
                 key="count"
                 {...fadeSwap}
                 className="flex items-center gap-3"
               >
                 <AnimatePresence mode="popLayout" initial={false}>
-                  <motion.span
+                  <m.span
                     key={on}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -374,7 +377,7 @@ export function ThemeFields({
                     )}
                   >
                     {t("setsOn", { on, total })}
-                  </motion.span>
+                  </m.span>
                 </AnimatePresence>
                 <button
                   type="button"
@@ -388,7 +391,7 @@ export function ThemeFields({
                 >
                   {on === total ? t("allOff") : t("allOn")}
                 </button>
-              </motion.span>
+              </m.span>
             ) : null}
           </AnimatePresence>
         </div>
@@ -400,16 +403,16 @@ export function ThemeFields({
       </div>
       <AnimatePresence mode="wait" initial={false}>
         {voting ? (
-          <motion.div key="sets" {...fadeSwap}>
+          <m.div key="sets" {...fadeSwap}>
             <SetGrid
               value={value.themeSets}
               onChange={(themeSets) => onChange({ ...value, themeSets })}
             />
-          </motion.div>
+          </m.div>
         ) : (
-          <motion.div key="host" {...fadeSwap}>
+          <m.div key="host" {...fadeSwap}>
             <HostNote />
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ThumbsDown, ThumbsUp, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
@@ -49,7 +49,7 @@ export function DrawFeedback({
   return (
     <AnimatePresence>
       {show && state !== "gone" ? (
-        <motion.div
+        <m.div
           key="bubble"
           role="group"
           aria-label={t("rateQuestion")}
@@ -60,7 +60,7 @@ export function DrawFeedback({
         >
           <AnimatePresence mode="popLayout" initial={false}>
             {state === "thanks" ? (
-              <motion.span
+              <m.span
                 key="thanks"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -69,9 +69,9 @@ export function DrawFeedback({
               >
                 <Check className="size-4 text-yes" strokeWidth={2.75} />
                 {t("rateThanks")}
-              </motion.span>
+              </m.span>
             ) : (
-              <motion.span
+              <m.span
                 key="ask"
                 exit={{ opacity: 0, y: -8 }}
                 className="flex items-center gap-1"
@@ -100,10 +100,10 @@ export function DrawFeedback({
                 >
                   <X className="size-4" strokeWidth={2} />
                 </Vote>
-              </motion.span>
+              </m.span>
             )}
           </AnimatePresence>
-        </motion.div>
+        </m.div>
       ) : null}
     </AnimatePresence>
   );
@@ -121,7 +121,7 @@ function Vote({
   children: React.ReactNode;
 }) {
   return (
-    <motion.button
+    <m.button
       type="button"
       aria-label={label}
       title={label}
@@ -133,6 +133,6 @@ function Vote({
       )}
     >
       {children}
-    </motion.button>
+    </m.button>
   );
 }

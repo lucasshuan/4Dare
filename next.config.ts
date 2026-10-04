@@ -1,3 +1,5 @@
+import { existsSync, realpathSync } from "node:fs";
+import { join, relative } from "node:path";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -11,13 +13,28 @@ const supabaseKeys = !!(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 );
 
+// "motion/react" is `export * from "framer-motion"` plus `const motion = fm.motion`:
+// that namespace read keeps all of framer-motion (drag, layout projection) in
+// every page. Pointing it at framer-motion's own barrel (motion's sibling, the
+// same copy) lets `m` + LazyMotion drop what a page does not use.
+const framerMotion = join(
+  realpathSync("node_modules/motion"),
+  "../framer-motion/dist/es/index.mjs",
+);
+const motionAlias: Record<string, string> = existsSync(framerMotion)
+  ? { "motion/react": `./${relative(process.cwd(), framerMotion)}` }
+  : {};
+
 const nextConfig: NextConfig = {
   // lets several dev servers run side by side (e.g. NEXT_DIST_DIR=.next-e2e)
   distDir: process.env.NEXT_DIST_DIR || ".next",
   turbopack: {
-    resolveAlias: supabaseKeys
-      ? { "@/server/backend/local": "./src/server/backend/local/off.ts" }
-      : {},
+    resolveAlias: {
+      ...motionAlias,
+      ...(supabaseKeys
+        ? { "@/server/backend/local": "./src/server/backend/local/off.ts" }
+        : {}),
+    },
   },
   env: {
     // The Supabase integration on Vercel may set only SUPABASE_URL; the browser needs the public one.

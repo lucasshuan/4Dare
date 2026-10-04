@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
@@ -38,7 +38,7 @@ function Shuffle() {
   return (
     <div aria-hidden="true" className="relative h-44 w-60">
       {/* the table's shadow, breathing with the hand */}
-      <motion.span
+      <m.span
         className="absolute bottom-2 left-1/2 h-4 w-40 -translate-x-1/2 rounded-[50%] bg-ink/10 blur-[6px]"
         animate={reduced ? undefined : { scaleX: [1, 0.86, 1] }}
         transition={{
@@ -53,7 +53,7 @@ function Shuffle() {
         // the card that just left the right goes round the back, lifted
         const wrapping = step > 0 && slot === 0;
         return (
-          <motion.div
+          <m.div
             key={card.face}
             className="absolute top-9 left-1/2 -ml-9 flex h-25 w-18 flex-col rounded-[15px] bg-surface p-1.5 shadow-card ring-1 ring-line"
             style={{ zIndex: wrapping ? 0 : at.z }}
@@ -76,7 +76,7 @@ function Shuffle() {
               ?
             </span>
             <span className="mx-1 mt-1.5 mb-0.5 h-1.5 w-2/3 rounded-pill bg-line" />
-          </motion.div>
+          </m.div>
         );
       })}
     </div>
@@ -95,7 +95,7 @@ export function Loader({
   className?: string;
 }) {
   return (
-    <motion.div
+    <m.div
       role="status"
       aria-live="polite"
       initial={{ opacity: 0, y: 8 }}
@@ -108,7 +108,7 @@ export function Loader({
     >
       <Shuffle />
       <span className="font-semibold text-ink-muted text-lg">{label}</span>
-    </motion.div>
+    </m.div>
   );
 }
 

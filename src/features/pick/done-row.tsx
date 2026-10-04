@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { Avatar } from "@/components/ui/avatar";
@@ -37,7 +37,7 @@ export function DoneRow({
   return (
     <AnimatePresence initial={false}>
       {show ? (
-        <motion.div
+        <m.div
           key="done"
           initial={{ opacity: 0, y: 16 }}
           animate={{
@@ -52,7 +52,7 @@ export function DoneRow({
             {players.map((p) => {
               const done = confirmedIds.includes(p.id);
               return (
-                <motion.span
+                <m.span
                   key={p.id}
                   initial={false}
                   animate={{ opacity: done ? 1 : 0.45 }}
@@ -67,7 +67,7 @@ export function DoneRow({
                   />
                   <AnimatePresence initial={false}>
                     {done ? (
-                      <motion.span
+                      <m.span
                         key="tick"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -75,10 +75,10 @@ export function DoneRow({
                         className="-right-1 -bottom-1 absolute flex size-[18px] items-center justify-center rounded-full bg-yes text-on-yes"
                       >
                         <Check className="size-[11px]" strokeWidth={3.5} />
-                      </motion.span>
+                      </m.span>
                     ) : null}
                   </AnimatePresence>
-                </motion.span>
+                </m.span>
               );
             })}
           </div>
@@ -91,7 +91,7 @@ export function DoneRow({
                 )
               : t("doneAll")}
           </output>
-        </motion.div>
+        </m.div>
       ) : null}
     </AnimatePresence>
   );

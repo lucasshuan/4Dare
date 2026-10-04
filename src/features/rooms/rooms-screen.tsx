@@ -12,7 +12,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
@@ -133,7 +133,7 @@ export function RoomsScreen() {
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
       <div className="flex flex-col gap-6">
-        <motion.div {...riseIn} className="flex flex-col gap-4">
+        <m.div {...riseIn} className="flex flex-col gap-4">
           <Link
             href={GAMES}
             className="-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink"
@@ -162,7 +162,7 @@ export function RoomsScreen() {
               {t("create")}
             </Link>
           </div>
-        </motion.div>
+        </m.div>
 
         <MatchGate className="flex flex-col gap-6">
           <Filters filters={filters} set={set} />
@@ -190,7 +190,7 @@ export function RoomsScreen() {
               </AnimatePresence>
             </ul>
           ) : (
-            <motion.div
+            <m.div
               {...riseIn}
               className="flex flex-col items-center gap-4 rounded-xl border-[1.5px] border-line-strong border-dashed px-6 py-12 text-center"
             >
@@ -219,7 +219,7 @@ export function RoomsScreen() {
                   {t("create")}
                 </Link>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </MatchGate>
       </div>
@@ -241,7 +241,7 @@ function Filters({
   const t = useTranslations("home.roomsPage");
   const gameName = useGameName();
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 8 }}
       animate={{
         opacity: 1,
@@ -265,7 +265,7 @@ function Filters({
         />
         <AnimatePresence>
           {filters.q ? (
-            <motion.button
+            <m.button
               type="button"
               initial={{ opacity: 0, scale: 0.6 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -275,7 +275,7 @@ function Filters({
               className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-sunken text-ink-muted hover:text-ink"
             >
               <X className="size-4" strokeWidth={2} />
-            </motion.button>
+            </m.button>
           ) : null}
         </AnimatePresence>
       </label>
@@ -320,7 +320,7 @@ function Filters({
           },
         ]}
       />
-    </motion.div>
+    </m.div>
   );
 }
 

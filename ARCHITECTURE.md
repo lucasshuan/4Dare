@@ -8,6 +8,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 - `src/server`: actions. Load room, apply event, save only if nobody wrote first; else retry.
 - `src/server/backend`: storage. Supabase keys set: `supabase` (Postgres, Realtime, Storage). Else `local` (memory, `.data/`, `local/fixtures.ts`). Builds with keys leave `local` out.
 - `src/app`: pages, API. `src/features`: screens; `stage` routes them and plays scenes. `src/components/ui`: kit. `messages/<lang>`: texts (en, pt, ja).
+- Motion: `m.*` only, under one strict `LazyMotion` (`domAnimation`). `layout`/`layoutId` need `<LayoutMotion>` around them (loads `domMax`). `motion/react` aliased to framer-motion barrel in `next.config.ts`.
 - `data/`: old snapshot. Nothing reads it.
 
 ## Room

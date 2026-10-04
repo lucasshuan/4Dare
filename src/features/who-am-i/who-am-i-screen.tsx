@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, Plus } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { keyClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
@@ -30,7 +30,7 @@ export function WhoAmIScreen() {
       banner={<WhoAmIBanner />}
     >
       <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,500px)_minmax(0,472px)] lg:justify-between">
-        <motion.section
+        <m.section
           initial={{ opacity: 0, y: 12 }}
           animate={{
             opacity: 1,
@@ -74,7 +74,7 @@ export function WhoAmIScreen() {
             </Link>
             <JoinByCode />
           </div>
-        </motion.section>
+        </m.section>
 
         {/* the public rooms; locked during a match */}
         <MatchGate>

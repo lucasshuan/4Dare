@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronUp, MessageCircle } from "lucide-react";
-import { motion, useReducedMotionConfig } from "motion/react";
+import { m, useReducedMotionConfig } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { Ref } from "react";
 import { Avatar } from "@/components/ui/avatar";
@@ -95,7 +95,7 @@ export function ChatHead({
           <span className="flex-1" />
         </>
       )}
-      <motion.span
+      <m.span
         key={pop}
         aria-hidden="true"
         initial={pop > 0 && !reduced ? { scale: 0.3 } : false}
@@ -107,7 +107,7 @@ export function ChatHead({
         )}
       >
         {countLabel(unread)}
-      </motion.span>
+      </m.span>
       <span
         aria-hidden="true"
         className={cn(

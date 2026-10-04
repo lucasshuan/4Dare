@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { Avatar } from "@/components/ui/avatar";
@@ -112,14 +112,14 @@ function Line({
 
   if (line.system)
     return (
-      <motion.div
+      <m.div
         initial={enter ? { opacity: 0, y: 8 } : false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         className="max-w-full self-center rounded-[14px] bg-sunken px-3 py-1 text-center font-bold text-[12.5px] text-ink-muted leading-[1.55]"
       >
         <SystemText line={line.system} />
-      </motion.div>
+      </m.div>
     );
 
   const text = line.text ?? "";
@@ -150,7 +150,7 @@ function Line({
 
   if (mine)
     return (
-      <motion.div
+      <m.div
         {...entrance}
         style={{ transformOrigin: "100% 100%" }}
         className="flex flex-col items-end"
@@ -169,12 +169,12 @@ function Line({
         ) : (
           bubble
         )}
-      </motion.div>
+      </m.div>
     );
 
   const p = playerById(line.by) ?? line.author;
   return (
-    <motion.div
+    <m.div
       {...entrance}
       style={{ transformOrigin: "0% 100%" }}
       className="grid grid-cols-[28px_minmax(0,1fr)] items-end gap-x-2 gap-y-0.5"
@@ -194,7 +194,7 @@ function Line({
         {p ? name(p) : ""}
       </small>
       {bubble}
-    </motion.div>
+    </m.div>
   );
 }
 

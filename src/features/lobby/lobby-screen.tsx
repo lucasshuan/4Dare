@@ -13,7 +13,7 @@ import {
   Vote,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
@@ -142,7 +142,7 @@ export function LobbyScreen() {
   if (editing) {
     return (
       <Screen left={<HubBrand />} right={<HubActions />}>
-        <motion.div {...riseIn}>
+        <m.div {...riseIn}>
           <RoomSetup
             back={
               <button
@@ -169,7 +169,7 @@ export function LobbyScreen() {
               }
             }}
           />
-        </motion.div>
+        </m.div>
       </Screen>
     );
   }
@@ -251,7 +251,7 @@ export function LobbyScreen() {
                     ? { ...player, ready: myReady }
                     : player;
                   return (
-                    <motion.li
+                    <m.li
                       key={p.id}
                       layout
                       {...riseIn}
@@ -295,11 +295,11 @@ export function LobbyScreen() {
                           )}
                         </span>
                       )}
-                    </motion.li>
+                    </m.li>
                   );
                 })}
                 {Array.from({ length: empty }, (_, i) => (
-                  <motion.li
+                  <m.li
                     // biome-ignore lint/suspicious/noArrayIndexKey: empty seats have no identity
                     key={`empty-${i}`}
                     layout
@@ -310,7 +310,7 @@ export function LobbyScreen() {
                       ?
                     </span>
                     <span className="font-medium">{t("emptySeat")}</span>
-                  </motion.li>
+                  </m.li>
                 ))}
               </AnimatePresence>
             </ul>

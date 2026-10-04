@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Dices } from "lucide-react";
-import { type AnimationSequence, motion } from "motion/react";
+import { type AnimationSequence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   type CSSProperties,
@@ -449,7 +449,7 @@ function PickTable() {
             ) : null}
           </div>
 
-          <motion.div
+          <m.div
             initial={false}
             animate={{ opacity: editing ? 1 : 0 }}
             transition={{ duration: 0.3 }}
@@ -485,14 +485,14 @@ function PickTable() {
                     onClick={roll}
                     className="mb-1.5 inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-pill border-[1.5px] border-line-strong bg-surface px-[18px] font-semibold text-[15px] text-ink transition-[translate,opacity] duration-150 ease-soft hover:-translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:size-[18px]"
                   >
-                    <motion.span
+                    <m.span
                       aria-hidden
                       className="inline-flex"
                       animate={{ rotate: rolls * 360 }}
                       transition={{ duration: dur.slow, ease: ease.soft }}
                     >
                       <Dices strokeWidth={1.75} />
-                    </motion.span>
+                    </m.span>
                     {drawnId ? tPick("randomAgain") : tPick("random")}
                   </button>
                 )}
@@ -507,7 +507,7 @@ function PickTable() {
                 <span>{t("rule")}</span>
               </small>
             </div>
-          </motion.div>
+          </m.div>
         </div>
 
         <PickHand

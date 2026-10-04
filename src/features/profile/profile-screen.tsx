@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronLeft, Dices, Upload } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -62,7 +62,7 @@ function GuestProfile() {
   const t = useTranslations("profile");
   const { signIn, pending } = useSignIn();
   return (
-    <motion.section {...riseIn} className="flex max-w-[560px] flex-col gap-5">
+    <m.section {...riseIn} className="flex max-w-[560px] flex-col gap-5">
       <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em]">
         {t("guestTitle")}
       </h1>
@@ -79,7 +79,7 @@ function GuestProfile() {
           onClick={() => signIn("google")}
         />
       </div>
-    </motion.section>
+    </m.section>
   );
 }
 
@@ -159,7 +159,7 @@ function AccountForm({ me }: { me: Me }) {
 
   return (
     <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,560px)_minmax(0,380px)] lg:justify-between">
-      <motion.form
+      <m.form
         {...riseIn}
         className="flex flex-col gap-6"
         onSubmit={(e) => {
@@ -238,7 +238,7 @@ function AccountForm({ me }: { me: Me }) {
               label={t("critter")}
             >
               <AnimatePresence mode="popLayout" initial={false}>
-                <motion.span
+                <m.span
                   key={seed}
                   initial={{ opacity: 0, scale: 0.6, rotate: -12 }}
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -252,7 +252,7 @@ function AccountForm({ me }: { me: Me }) {
                     name={trimmed}
                     size={64}
                   />
-                </motion.span>
+                </m.span>
               </AnimatePresence>
             </Tile>
           </div>
@@ -269,7 +269,7 @@ function AccountForm({ me }: { me: Me }) {
           </Button>
           <AnimatePresence initial={false}>
             {kind === "upload" ? (
-              <motion.div
+              <m.div
                 key="drop"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
@@ -282,7 +282,7 @@ function AccountForm({ me }: { me: Me }) {
                   onChange={setBlob}
                   className="mt-2 max-w-90"
                 />
-              </motion.div>
+              </m.div>
             ) : null}
           </AnimatePresence>
         </fieldset>
@@ -290,7 +290,7 @@ function AccountForm({ me }: { me: Me }) {
         {/* a picture brings its own background; only a critter sits on a colour */}
         <AnimatePresence initial={false}>
           {kind === "critter" ? (
-            <motion.fieldset
+            <m.fieldset
               key="color"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -321,7 +321,7 @@ function AccountForm({ me }: { me: Me }) {
                   </button>
                 ))}
               </div>
-            </motion.fieldset>
+            </m.fieldset>
           ) : null}
         </AnimatePresence>
 
@@ -334,7 +334,7 @@ function AccountForm({ me }: { me: Me }) {
         >
           {t("save")}
         </Button>
-      </motion.form>
+      </m.form>
 
       <Preview name={trimmed} avatar={preview} guestNumber={me.guestNumber} />
     </div>

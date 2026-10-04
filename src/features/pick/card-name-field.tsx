@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
 import { Portrait } from "@/components/ui/portrait";
@@ -238,7 +238,7 @@ export function CardNameField({
       </div>
       <AnimatePresence>
         {showList ? (
-          <motion.div
+          <m.div
             key="list"
             initial={{ opacity: 0, y: -8 }}
             animate={{
@@ -309,7 +309,7 @@ export function CardNameField({
                 </div>
               )}
             </div>
-          </motion.div>
+          </m.div>
         ) : null}
       </AnimatePresence>
     </div>

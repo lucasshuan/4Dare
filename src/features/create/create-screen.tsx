@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { PageLoader } from "@/components/ui/loader";
@@ -56,16 +56,16 @@ export function CreateScreen() {
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
       {match ? (
-        <motion.div {...riseIn}>
+        <m.div {...riseIn}>
           <MatchLockPage match={match} />
-        </motion.div>
+        </m.div>
       ) : failed ? (
-        <motion.div {...riseIn}>
+        <m.div {...riseIn}>
           <Link href={GAME_PATHS[failed]} className={backClass}>
             <ChevronLeft className="size-4" strokeWidth={2} />
             {t("createRoom.back")}
           </Link>
-        </motion.div>
+        </m.div>
       ) : (
         // also while it checks for a match going on: one loader, start to end
         <PageLoader label={t("createRoom.creating")} />

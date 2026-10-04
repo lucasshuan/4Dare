@@ -1,7 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { type AnimationSequence, motion } from "motion/react";
+import { type AnimationSequence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { useWithNames } from "@/components/ui/player-name";
@@ -62,7 +62,7 @@ export function PlayerStrip({
   return (
     <ul ref={ref} className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
       {ordered.map((p) => (
-        <motion.li
+        <m.li
           key={p.id}
           layout
           className={cn(
@@ -89,7 +89,7 @@ export function PlayerStrip({
               <PlayerRow player={p} />
             )}
           </div>
-        </motion.li>
+        </m.li>
       ))}
     </ul>
   );
@@ -112,14 +112,14 @@ function PlayerRow({ player: p }: { player: PlayerView }) {
         <span className="truncate font-semibold text-sm">
           {name(p, p.isYou)}
         </span>
-        <motion.span
+        <m.span
           key={p.status}
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           className="truncate font-medium text-ink-muted text-xs"
         >
           {t(p.status)}
-        </motion.span>
+        </m.span>
       </span>
       <span className="w-10 shrink-0">
         {p.cardHidden ? (

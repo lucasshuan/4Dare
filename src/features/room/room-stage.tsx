@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, type Variants } from "motion/react";
+import { AnimatePresence, m, type Variants } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { buttonClass } from "@/components/ui/button";
@@ -112,7 +112,7 @@ function Areas() {
   return (
     <AnimatePresence mode="wait">
       {area === "lobby" ? (
-        <motion.div
+        <m.div
           key="lobby"
           variants={LOBBY}
           initial="enter"
@@ -120,30 +120,30 @@ function Areas() {
           exit="leave"
         >
           <LobbyScreen />
-        </motion.div>
+        </m.div>
       ) : area === "match" ? (
         <MatchFrame key="match">
           {/* the screens swap under the header with a short crossfade */}
           <AnimatePresence mode="wait">
-            <motion.div
+            <m.div
               key={screen ?? "none"}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { duration: 0.2 } }}
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
             >
               <MatchScreen screen={screen} />
-            </motion.div>
+            </m.div>
           </AnimatePresence>
         </MatchFrame>
       ) : area === "result" ? (
         // a hit that ends the match keeps its reveal; the results wait until it is over
-        <motion.div key={finishedWait ? "result-wait" : "result"} {...RISE}>
+        <m.div key={finishedWait ? "result-wait" : "result"} {...RISE}>
           {finishedWait ? null : <ResultScreen />}
-        </motion.div>
+        </m.div>
       ) : (
-        <motion.div key="closed" {...RISE}>
+        <m.div key="closed" {...RISE}>
           <RoomProblem code="not_found" />
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );
@@ -170,7 +170,7 @@ export function RoomProblem({ code }: { code: ErrorCode }) {
   const known = ["not_found", "room_full", "already_started"].includes(code);
   return (
     <Screen>
-      <motion.div {...riseIn} className="flex max-w-lg flex-col gap-6 pt-10">
+      <m.div {...riseIn} className="flex max-w-lg flex-col gap-6 pt-10">
         <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em]">
           {t(`problem.${known ? code : "other"}.title`)}
         </h1>
@@ -183,7 +183,7 @@ export function RoomProblem({ code }: { code: ErrorCode }) {
         >
           {t("goHome")}
         </Link>
-      </motion.div>
+      </m.div>
     </Screen>
   );
 }

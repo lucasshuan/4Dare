@@ -3,7 +3,7 @@
 import { Popover } from "@base-ui/react/popover";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dices, LogOut, UserRoundPen } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
@@ -60,7 +60,7 @@ export function UserMenuPopover({
             <div className="flex items-center gap-3">
               {/* a new name and critter swap in */}
               <AnimatePresence initial={false} mode="popLayout">
-                <motion.span
+                <m.span
                   key={`${me.guestNumber}-${me.avatar.kind === "critter" ? me.avatar.seed : ""}`}
                   className="flex shrink-0"
                   initial={{ opacity: 0, scale: 0.6, rotate: -20 }}
@@ -73,14 +73,14 @@ export function UserMenuPopover({
                     isGuest={me.isGuest}
                     name={me.name}
                   />
-                </motion.span>
+                </m.span>
               </AnimatePresence>
               <div className="flex min-w-0 flex-col">
                 {/* a guest's name has the dice right beside it */}
                 <span className="flex min-w-0 items-center gap-1.5">
                   <Popover.Title className="min-w-0 truncate font-semibold">
                     <AnimatePresence initial={false} mode="wait">
-                      <motion.span
+                      <m.span
                         key={me.guestNumber}
                         className="block truncate"
                         initial={{ opacity: 0, y: 6 }}
@@ -89,7 +89,7 @@ export function UserMenuPopover({
                         transition={{ duration: dur.fast, ease: ease.soft }}
                       >
                         {name(me)}
-                      </motion.span>
+                      </m.span>
                     </AnimatePresence>
                   </Popover.Title>
                   {me.isGuest ? (
@@ -101,14 +101,14 @@ export function UserMenuPopover({
                       onClick={reroll}
                       className="flex size-7 shrink-0 items-center justify-center rounded-pill text-ink-muted transition-colors duration-200 ease-soft hover:bg-sunken hover:text-ink disabled:opacity-60"
                     >
-                      <motion.span
+                      <m.span
                         aria-hidden="true"
                         className="flex"
                         animate={{ rotate: rolls * 360 }}
                         transition={{ duration: dur.slow, ease: ease.soft }}
                       >
                         <Dices className="size-4.5" strokeWidth={1.75} />
-                      </motion.span>
+                      </m.span>
                     </button>
                   ) : null}
                 </span>

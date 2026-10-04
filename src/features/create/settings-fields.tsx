@@ -1,7 +1,7 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
@@ -182,7 +182,7 @@ export function SettingsFields({
         </div>
         <AnimatePresence initial={false}>
           {value.visibility === "private" ? (
-            <motion.div
+            <m.div
               key="password"
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
@@ -203,7 +203,7 @@ export function SettingsFields({
                   onChange({ ...value, password: e.target.value })
                 }
               />
-            </motion.div>
+            </m.div>
           ) : null}
         </AnimatePresence>
       </div>

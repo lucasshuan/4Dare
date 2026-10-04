@@ -1,12 +1,13 @@
 "use client";
 
 import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type Ref, useEffect, useRef, useState } from "react";
 import { AnswerChip, ResultChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { ChoiceGroup } from "@/components/ui/choice-group";
+import { LayoutMotion } from "@/components/ui/layout-motion";
 import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import type { HistoryEntryView } from "@/game/types";
@@ -97,7 +98,7 @@ export function HistoryButton({
 export function HistorySidebar({ onClose }: { onClose: () => void }) {
   const t = useTranslations("turn.history");
   return (
-    <motion.div
+    <m.div
       initial={{ width: 0 }}
       animate={{
         width: SIDEBAR_WIDTH,
@@ -112,7 +113,7 @@ export function HistorySidebar({ onClose }: { onClose: () => void }) {
       >
         <HistoryBody onClose={onClose} />
       </section>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -137,7 +138,7 @@ export function HistoryDrawer({
     <AnimatePresence>
       {open ? (
         <div key="history" className="fixed inset-0 z-40">
-          <motion.button
+          <m.button
             type="button"
             tabIndex={-1}
             aria-label={t("close")}
@@ -147,7 +148,7 @@ export function HistoryDrawer({
             exit={{ opacity: 0, transition: { duration: 0.3 } }}
             className="absolute inset-0 bg-scrim"
           />
-          <motion.section
+          <m.section
             role="dialog"
             aria-modal="true"
             aria-label={t("title")}
@@ -157,7 +158,7 @@ export function HistoryDrawer({
             className="absolute inset-y-0 left-0 flex w-[88vw] flex-col overflow-hidden rounded-r-[28px] bg-surface pt-[env(safe-area-inset-top)] shadow-pop"
           >
             <HistoryBody onClose={onClose} focusClose />
-          </motion.section>
+          </m.section>
         </div>
       ) : null}
     </AnimatePresence>
@@ -285,83 +286,88 @@ function HistoryBody({
             {t("nothing")}
           </li>
         ) : null}
-        <AnimatePresence initial={false}>
-          {entries.map((e) => {
-            const by = playerById(e.byId);
-            return (
-              <motion.li
-                key={e.n}
-                layout="position"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, transition: { duration: 0.12 } }}
-                className="flex gap-3"
-              >
-                <span
-                  className={cn(
-                    "flex size-7 shrink-0 items-center justify-center rounded-pill font-medium font-mono text-[13px]",
-                    e.byId === me.id ? "bg-sky-soft" : "bg-sunken",
-                  )}
+        <LayoutMotion>
+          <AnimatePresence initial={false}>
+            {entries.map((e) => {
+              const by = playerById(e.byId);
+              return (
+                <m.li
+                  key={e.n}
+                  layout="position"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                  className="flex gap-3"
                 >
-                  {e.n}
-                </span>
-                <div className="flex min-w-0 flex-col items-start gap-[5px]">
-                  <span className="font-semibold text-[13px] text-ink-muted">
-                    {withNames((n) =>
-                      t(e.kind === "question" ? "question" : "guess", {
-                        name: by ? n(by, by.isYou) : "",
-                      }),
+                  <span
+                    className={cn(
+                      "flex size-7 shrink-0 items-center justify-center rounded-pill font-medium font-mono text-[13px]",
+                      e.byId === me.id ? "bg-sky-soft" : "bg-sunken",
                     )}
+                  >
+                    {e.n}
                   </span>
-                  <p className="text-base leading-[1.35]">{summary(e)}</p>
-                  {e.kind === "guess" ? (
-                    <ResultChip result={e.result} />
-                  ) : (
-                    <div className="flex flex-wrap gap-x-2.5 gap-y-1.5">
-                      {e.answers.map((a) => {
-                        const p = playerById(a.byId);
-                        return (
-                          <span
-                            key={a.byId}
-                            className="inline-flex items-center gap-1.5"
-                          >
-                            {p ? (
-                              <Avatar
-                                avatar={p.avatar}
-                                isGuest={p.isGuest}
-                                name={p.name}
-                                size={20}
-                              />
-                            ) : null}
-                            <AnswerChip value={a.value} small />
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {e.kind === "question"
-                    ? e.answers
-                        .filter((a) => a.note)
-                        .map((a) => {
+                  <div className="flex min-w-0 flex-col items-start gap-[5px]">
+                    <span className="font-semibold text-[13px] text-ink-muted">
+                      {withNames((n) =>
+                        t(e.kind === "question" ? "question" : "guess", {
+                          name: by ? n(by, by.isYou) : "",
+                        }),
+                      )}
+                    </span>
+                    <p className="text-base leading-[1.35]">{summary(e)}</p>
+                    {e.kind === "guess" ? (
+                      <ResultChip result={e.result} />
+                    ) : (
+                      <div className="flex flex-wrap gap-x-2.5 gap-y-1.5">
+                        {e.answers.map((a) => {
                           const p = playerById(a.byId);
                           return (
-                            <p key={a.byId} className="text-ink-muted text-sm">
+                            <span
+                              key={a.byId}
+                              className="inline-flex items-center gap-1.5"
+                            >
                               {p ? (
-                                <>
-                                  <PlayerName player={p} isYou={p.isYou} />
-                                  {": "}
-                                </>
+                                <Avatar
+                                  avatar={p.avatar}
+                                  isGuest={p.isGuest}
+                                  name={p.name}
+                                  size={20}
+                                />
                               ) : null}
-                              “{a.note}”
-                            </p>
+                              <AnswerChip value={a.value} small />
+                            </span>
                           );
-                        })
-                    : null}
-                </div>
-              </motion.li>
-            );
-          })}
-        </AnimatePresence>
+                        })}
+                      </div>
+                    )}
+                    {e.kind === "question"
+                      ? e.answers
+                          .filter((a) => a.note)
+                          .map((a) => {
+                            const p = playerById(a.byId);
+                            return (
+                              <p
+                                key={a.byId}
+                                className="text-ink-muted text-sm"
+                              >
+                                {p ? (
+                                  <>
+                                    <PlayerName player={p} isYou={p.isYou} />
+                                    {": "}
+                                  </>
+                                ) : null}
+                                “{a.note}”
+                              </p>
+                            );
+                          })
+                      : null}
+                  </div>
+                </m.li>
+              );
+            })}
+          </AnimatePresence>
+        </LayoutMotion>
       </ol>
     </>
   );

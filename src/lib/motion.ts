@@ -26,9 +26,6 @@ export const stagger = {
   animate: { transition: { staggerChildren: 0.04 } },
 } as const;
 
-/** Shared-element moves (the character card travelling between screens). */
-export const layoutSpring = { duration: dur.slow, ease: ease.soft } as const;
-
 export type EaseFn = (t: number) => number;
 
 // GSAP's powerN eases: power1 is quadratic, power2 cubic, power3 quartic.

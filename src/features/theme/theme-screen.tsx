@@ -1,12 +1,7 @@
 "use client";
 
 import { ArrowRight, Shuffle } from "lucide-react";
-import {
-  AnimatePresence,
-  motion,
-  useAnimate,
-  useReducedMotion,
-} from "motion/react";
+import { AnimatePresence, m, useAnimate, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
@@ -116,7 +111,7 @@ function Theming() {
     >
       <Heading stage={stage} {...heading} />
 
-      <motion.form
+      <m.form
         ref={card}
         layout
         onSubmit={submit}
@@ -135,7 +130,7 @@ function Theming() {
       >
         <AnimatePresence mode="popLayout" initial={false}>
           {stage === "typing" ? (
-            <motion.div
+            <m.div
               key="typing"
               exit={{ opacity: 0, transition: { duration: dur.fast } }}
               className="flex flex-col gap-3"
@@ -176,22 +171,22 @@ function Theming() {
                   <ArrowRight strokeWidth={2} />
                 </Button>
               </div>
-            </motion.div>
+            </m.div>
           ) : (
-            <motion.div
+            <m.div
               key="waiting"
               exit={{ opacity: 0, transition: { duration: dur.fast } }}
             >
               <HostAtWork host={host} />
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
-      </motion.form>
+      </m.form>
 
       <div className="flex min-h-24 flex-col items-center gap-3">
         <AnimatePresence mode="wait" initial={false}>
           {stage === "typing" && ideas.length ? (
-            <motion.div
+            <m.div
               key="ideas"
               exit={{ opacity: 0, transition: { duration: dur.fast } }}
               className="flex w-full flex-col items-center gap-3"
@@ -204,14 +199,14 @@ function Theming() {
                     variant="ghost"
                     onClick={() => setPage((p) => p + 1)}
                   >
-                    <motion.span
+                    <m.span
                       aria-hidden
                       className="inline-flex"
                       animate={{ rotate: page * 180 }}
                       transition={{ duration: dur.slow, ease: ease.soft }}
                     >
                       <Shuffle strokeWidth={1.75} />
-                    </motion.span>
+                    </m.span>
                     {t("moreIdeas")}
                   </Button>
                 ) : null}
@@ -219,7 +214,7 @@ function Theming() {
               <ul className="flex flex-wrap justify-center gap-2">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {shown.map((idea, i) => (
-                    <motion.li
+                    <m.li
                       key={`${page}-${idea.en}`}
                       layout
                       initial={{ opacity: 0, y: 10, scale: 0.9 }}
@@ -231,7 +226,7 @@ function Theming() {
                       }}
                       exit={{ opacity: 0, scale: 0.9 }}
                     >
-                      <motion.button
+                      <m.button
                         type="button"
                         whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.96 }}
@@ -240,12 +235,12 @@ function Theming() {
                       >
                         <span aria-hidden>{themeSetEmoji(idea.set)}</span>
                         {idea[lang]}
-                      </motion.button>
-                    </motion.li>
+                      </m.button>
+                    </m.li>
                   ))}
                 </AnimatePresence>
               </ul>
-            </motion.div>
+            </m.div>
           ) : null}
         </AnimatePresence>
         <p className="font-medium text-[13px] text-ink-muted">
@@ -269,15 +264,15 @@ function Heading({
 }) {
   return (
     <div className="flex flex-col items-center gap-2 text-center">
-      <motion.span
+      <m.span
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0, transition: { duration: dur.base } }}
         className="inline-flex items-center gap-1.5 rounded-pill bg-sunken px-3 py-1 font-semibold text-ink-muted text-xs uppercase tracking-[0.08em]"
       >
         {kicker}
-      </motion.span>
+      </m.span>
       <AnimatePresence mode="wait" initial={false}>
-        <motion.div
+        <m.div
           key={stage}
           initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
           animate={{
@@ -295,7 +290,7 @@ function Heading({
           {sub ? (
             <p className="max-w-120 text-balance text-ink-muted">{sub}</p>
           ) : null}
-        </motion.div>
+        </m.div>
       </AnimatePresence>
     </div>
   );
@@ -309,7 +304,7 @@ function HostAtWork({ host }: { host: PlayerView }) {
       {still
         ? null
         : [0, 0.8].map((delay) => (
-            <motion.span
+            <m.span
               key={delay}
               aria-hidden
               className="-inset-1 absolute rounded-full border-2 border-on-butter/40"
@@ -330,7 +325,7 @@ function HostAtWork({ host }: { host: PlayerView }) {
         size={64}
         className="relative ring-4 ring-surface/70"
       />
-      <motion.span
+      <m.span
         aria-hidden
         initial={{ opacity: 0, scale: 0.6, y: 6 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -338,7 +333,7 @@ function HostAtWork({ host }: { host: PlayerView }) {
         className="-top-3 -right-10 absolute flex items-center gap-1 rounded-pill rounded-bl-sm bg-surface px-3 py-2.5 shadow-card"
       >
         {[0, 1, 2].map((i) => (
-          <motion.span
+          <m.span
             key={i}
             className="size-1.5 rounded-full bg-ink"
             animate={
@@ -352,7 +347,7 @@ function HostAtWork({ host }: { host: PlayerView }) {
             }}
           />
         ))}
-      </motion.span>
+      </m.span>
     </div>
   );
 }
