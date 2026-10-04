@@ -1,12 +1,12 @@
-import { searchItems } from "@/game/character-search";
 import { LANGS, type Lang } from "@/game/types";
+import { getBackend } from "@/server/backend";
 import type { CharacterSearchResponse } from "@/server/contract";
-import { searchableItems } from "@/server/library";
 import { allow } from "@/server/rate-limit";
 
 /**
  * Server-side search, used only until the browser has the library index
- * (see /api/characters/library). Same ranking, in memory, no database.
+ * (see /api/characters/library): search_characters in the database, or the
+ * local backend's search in memory.
  */
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
@@ -19,9 +19,13 @@ export async function GET(request: Request) {
   if (!allow(`search:${ip ?? "local"}`, 240, 60_000)) {
     return Response.json({ error: "rate_limited" }, { status: 429 });
   }
+  const found = await getBackend().characters.search(q, lang, 6);
   const body: CharacterSearchResponse = {
-    results: searchItems(await searchableItems(lang), q, 6).map((r) => ({
-      ...r,
+    results: found.map((c) => ({
+      id: c.id,
+      name: c.name,
+      origin: c.origin,
+      imageUrl: c.imageUrl,
       lang,
     })),
   };

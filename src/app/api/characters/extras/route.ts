@@ -1,5 +1,5 @@
 import { LANGS, type Lang } from "@/game/types";
-import { characterExtras } from "@/server/library";
+import { characterExtras } from "@/server/character-extras";
 
 /** Characters players created and pictures they swapped: small, the same for everyone, cached for seconds. */
 export async function GET(request: Request) {
