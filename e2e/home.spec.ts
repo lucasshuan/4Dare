@@ -1,30 +1,28 @@
 import { expect, test } from "@playwright/test";
 import { createRoom, newPlayer } from "./helpers";
 
-test(
-  "the hub leads to the game, and the language select keeps the page",
-  {
-    tag: "@smoke",
-  },
-  async ({ page }) => {
-    await page.goto("/pt");
-    await page.getByRole("link", { name: /quem sou eu\?/i }).click();
-    await page.waitForURL(/\/pt\/who-am-i$/);
-    await expect(page.getByRole("link", { name: "Criar sala" })).toBeVisible();
-    // a click that lands before the page hydrates opens nothing: try again
-    await expect(async () => {
-      await page.getByRole("combobox", { name: "Idioma" }).click();
-      await expect(page.getByRole("option", { name: "日本語" })).toBeVisible({
-        timeout: 2_000,
-      });
-    }).toPass({ timeout: 30_000 });
-    await page.getByRole("option", { name: "日本語" }).click();
-    await page.waitForURL(/\/ja\/who-am-i$/);
-    await expect(
-      page.getByRole("link", { name: "ルームを作る" }),
-    ).toBeVisible();
-  },
-);
+test("the hub leads to the game, and the language select keeps the page", {
+  tag: "@smoke",
+}, async ({ page }) => {
+  await page.goto("/pt");
+  await page.getByRole("link", { name: /quem sou eu\?/i }).click();
+  await page.waitForURL(/\/pt\/who-am-i$/);
+  await expect(page.getByRole("link", { name: "Criar sala" })).toBeVisible();
+  // A click that lands before the page hydrates opens nothing: try again. Only
+  // press a select that is not open (a press on an open one closes it), and
+  // wait for it to say it is open: a closing list is still visible a moment.
+  const select = page.getByRole("combobox", { name: "Idioma" });
+  await expect(async () => {
+    if ((await select.getAttribute("aria-expanded")) !== "true")
+      await select.click();
+    await expect(select).toHaveAttribute("aria-expanded", "true", {
+      timeout: 2_000,
+    });
+  }).toPass({ timeout: 30_000 });
+  await page.getByRole("option", { name: "日本語" }).click();
+  await page.waitForURL(/\/ja\/who-am-i$/);
+  await expect(page.getByRole("link", { name: "ルームを作る" })).toBeVisible();
+});
 
 test("signing in from the user menu (test account) lets you pick a name", async ({
   page,

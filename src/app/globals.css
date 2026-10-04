@@ -305,6 +305,7 @@ body {
   outline-offset: 2px;
 }
 
+/* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must beat every component's own timing */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -314,3 +315,4 @@ body {
     scroll-behavior: auto !important;
   }
 }
+/* biome-ignore-end lint/complexity/noImportantStyles: see above */

@@ -77,32 +77,33 @@ describe("messages", () => {
     }
   });
 
-  it.each([
-    ...NAMESPACES,
-  ])("%s: same keys and arguments in every language", (ns) => {
-    const [first, ...others] = LANGS;
-    const base = leaves(load(first, ns));
-    for (const lang of others) {
-      const other = leaves(load(lang, ns));
-      expect([...other.keys()].sort(), `${ns} ${lang} keys`).toEqual(
-        [...base.keys()].sort(),
-      );
-      for (const [key, text] of base) {
-        const silent = new Set<string>();
-        const wanted = args(text, new Set(), silent);
-        const got = args(other.get(key) ?? "");
-        // never an argument the code doesn't pass; never one dropped that is shown
-        expect(
-          [...got].filter((a) => !wanted.has(a)),
-          `${ns}.${key} (${lang}) extra`,
-        ).toEqual([]);
-        expect(
-          [...wanted].filter((a) => !got.has(a) && !silent.has(a)),
-          `${ns}.${key} (${lang}) missing`,
-        ).toEqual([]);
+  it.each([...NAMESPACES])(
+    "%s: same keys and arguments in every language",
+    (ns) => {
+      const [first, ...others] = LANGS;
+      const base = leaves(load(first, ns));
+      for (const lang of others) {
+        const other = leaves(load(lang, ns));
+        expect([...other.keys()].sort(), `${ns} ${lang} keys`).toEqual(
+          [...base.keys()].sort(),
+        );
+        for (const [key, text] of base) {
+          const silent = new Set<string>();
+          const wanted = args(text, new Set(), silent);
+          const got = args(other.get(key) ?? "");
+          // never an argument the code doesn't pass; never one dropped that is shown
+          expect(
+            [...got].filter((a) => !wanted.has(a)),
+            `${ns}.${key} (${lang}) extra`,
+          ).toEqual([]);
+          expect(
+            [...wanted].filter((a) => !got.has(a) && !silent.has(a)),
+            `${ns}.${key} (${lang}) missing`,
+          ).toEqual([]);
+        }
       }
-    }
-  });
+    },
+  );
 
   it("reads ICU arguments, plural branches included", () => {
     expect([

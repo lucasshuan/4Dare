@@ -609,8 +609,32 @@ async function pickingRoom(a: string, b: string) {
 }
 
 describe("random pick by theme", () => {
+  /**
+   * A picking room on a theme no test has played: the backend lives as long
+   * as the file, so a theme drawn for an earlier match would bring its picks
+   * into the draw.
+   */
+  let unplayed = 0;
+  async function unplayedRoom(a: string, b: string) {
+    const { getBackend } = await import("./backend");
+    const n = ++unplayed;
+    const draw = vi.spyOn(getBackend().themes, "draw").mockResolvedValue(
+      [1, 2, 3].map((i) => ({
+        en: `Unplayed ${n}.${i}`,
+        pt: `Inédito ${n}.${i}`,
+        ja: `未プレイ ${n}.${i}`,
+        set: "heroes",
+      })),
+    );
+    try {
+      return await pickingRoom(a, b);
+    } finally {
+      draw.mockRestore();
+    }
+  }
+
   it("draws among the characters picked most for the theme, once there are enough", async () => {
-    const { code } = await pickingRoom("r1", "r2");
+    const { code } = await unplayedRoom("r1", "r2");
     as("r1");
     const theme = (await view(code)).body.theme;
     if (!theme) throw new Error("no theme");
@@ -669,7 +693,7 @@ describe("random pick by theme", () => {
   });
 
   it("never draws a character already picked in the match, the caller's own secret included", async () => {
-    const { code } = await pickingRoom("x1", "x2");
+    const { code } = await unplayedRoom("x1", "x2");
     as("x1");
     const theme = (await view(code)).body.theme;
     if (!theme) throw new Error("no theme");
