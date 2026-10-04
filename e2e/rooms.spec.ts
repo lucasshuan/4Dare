@@ -45,7 +45,9 @@ test("a private room is listed with a lock and asks for its password", async ({
   await expect(dialog.getByRole("alert")).toHaveText("Wrong password.");
   await dialog.getByLabel("Password").fill("pizza");
   await dialog.getByRole("button", { name: "Join" }).click();
-  await expect(guest.getByRole("button", { name: /i'm ready/i })).toBeVisible();
+  await expect(
+    guest.getByRole("button", { name: /^ready$/i, pressed: false }),
+  ).toBeVisible();
   // the password stays with the host
   await expect(guest.getByText("pizza", { exact: true })).toHaveCount(0);
 });
@@ -69,7 +71,9 @@ test("one room at a time: a second tab's room takes the seat, and the first tab 
 
   // coming back takes the seat back from the other room
   await me.getByRole("button", { name: "Come back to this room" }).click();
-  await expect(me.getByRole("button", { name: /i'm ready/i })).toBeVisible();
+  await expect(
+    me.getByRole("button", { name: /^ready$/i, pressed: false }),
+  ).toBeVisible();
   await expect(moved(tab)).toBeVisible();
   expect((await viewOf(me, first)).players).toHaveLength(2);
 });

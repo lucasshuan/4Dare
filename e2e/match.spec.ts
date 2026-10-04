@@ -59,7 +59,7 @@ test("three players on phones, with a wrong guess checked by the picker", {
   for (const page of guests) {
     await expect(page.getByText(/back in/i)).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /i'm ready/i }),
+      page.getByRole("button", { name: /^ready$/i, pressed: false }),
     ).toBeVisible();
   }
 });

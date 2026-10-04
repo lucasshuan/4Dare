@@ -4,7 +4,7 @@
   "titleGuest": "You're in {name}'s room.",
   "subtitleGuest": "{name} starts the match. Let them know when you're ready.",
   "titleHostAgain": "Another match?",
-  "subtitleHostAgain": "Change the settings if you like and start whenever you want. Everyone marks “I'm ready” again.",
+  "subtitleHostAgain": "Change the settings if you like and start whenever you want. Everyone marks “Ready” again.",
   "titleGuestAgain": "Back in {name}'s room.",
   "codeLabel": "Room code: {code}",
   "linkCopied": "Link copied",
@@ -39,8 +39,7 @@
     "start": "Start match",
     "wait": "Wait"
   },
-  "readyDone": "Ready",
-  "imReady": "I'm ready",
+  "readyButton": "Ready",
   "leave": "Leave room",
   "editSettings": "Edit settings",
   "settingsTitle": "Room settings",

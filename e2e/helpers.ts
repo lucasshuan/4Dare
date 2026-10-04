@@ -50,7 +50,7 @@ export async function editSettings(host: Page, change: () => Promise<void>) {
 
 export async function joinRoom(page: Page, code: string) {
   await page.goto(`/en/r/${code}`);
-  await button(page, /i'm ready/i).click();
+  await page.getByRole("button", { name: /^ready$/i, pressed: false }).click();
 }
 
 /**
