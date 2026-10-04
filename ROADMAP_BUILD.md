@@ -32,7 +32,7 @@ After the first quick wins (same day): API functions ~2 MB, pages ~9 MB, share i
 - [x] AI theme drawing removed (`drawWithAI` called Claude Opus in half the votes)
 - [x] `@anthropic-ai/sdk` out of the dependencies
 - [x] `ANTHROPIC_API_KEY` out of `.env.example` and the docs
-- [ ] `ANTHROPIC_API_KEY` deleted from the Vercel env (dashboard)
+- [x] `ANTHROPIC_API_KEY` deleted from the Vercel env (checked 2026-10-04: not among the project's 22 variables)
 - [x] No AI package left in the app, the build or the scripts
 
 No AI theme was ever saved (0 rows with source `ai`).
