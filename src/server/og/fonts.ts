@@ -5,14 +5,13 @@ import type { ImageResponse } from "next/og";
 import type { Lang } from "@/game/types";
 
 // Fonts for the share images (satori takes ttf, not the woff2 next/font serves).
-// Japanese gets its own font; it's big, so it's only read for Japanese images.
+// Japanese gets its own font, cut to the characters the images draw (`pnpm og:font`),
+// and it's only read for Japanese images. Each file is read through a literal path,
+// so the build traces exactly these files into the image routes.
 
 type Font = NonNullable<
   NonNullable<ConstructorParameters<typeof ImageResponse>[1]>["fonts"]
 >[number];
-
-const read = (file: string) =>
-  readFile(join(process.cwd(), "assets/fonts", file));
 
 let latin: Promise<Font[]> | null = null;
 let japanese: Promise<Font[]> | null = null;
@@ -25,9 +24,11 @@ export const FONT = {
 
 function loadLatin(): Promise<Font[]> {
   latin ??= Promise.all([
-    read("BricolageGrotesque-ExtraBold.ttf"),
-    read("Figtree-SemiBold.ttf"),
-    read("Figtree-Bold.ttf"),
+    readFile(
+      join(process.cwd(), "assets/fonts/BricolageGrotesque-ExtraBold.ttf"),
+    ),
+    readFile(join(process.cwd(), "assets/fonts/Figtree-SemiBold.ttf")),
+    readFile(join(process.cwd(), "assets/fonts/Figtree-Bold.ttf")),
   ]).then(([display, body, bold]) => [
     { name: FONT.display, data: display, weight: 800, style: "normal" },
     { name: FONT.body, data: body, weight: 600, style: "normal" },
@@ -37,7 +38,9 @@ function loadLatin(): Promise<Font[]> {
 }
 
 function loadJapanese(): Promise<Font[]> {
-  japanese ??= read("ZenMaruGothic-Bold.ttf").then((data) => [
+  japanese ??= readFile(
+    join(process.cwd(), "assets/fonts/ZenMaruGothic-Bold-og.ttf"),
+  ).then((data) => [
     { name: FONT.japanese, data, weight: 700, style: "normal" },
   ]);
   return japanese;

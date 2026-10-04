@@ -16,7 +16,8 @@
     "test:e2e": "playwright test",
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed-supabase.ts",
     "setup:supabase": "tsx --env-file-if-exists=.env.local scripts/setup-supabase.ts",
-    "test-rooms": "tsx --env-file-if-exists=.env.local scripts/test-rooms.ts"
+    "test-rooms": "tsx --env-file-if-exists=.env.local scripts/test-rooms.ts",
+    "og:font": "tsx scripts/og-font.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -50,7 +51,10 @@
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/subset-font": "^2.3.0",
+    "harfbuzzjs": "^1.6.2",
     "postgres": "^3.4.9",
+    "subset-font": "^2.9.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
