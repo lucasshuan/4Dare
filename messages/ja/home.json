@@ -10,6 +10,8 @@
     "roomNamePlaceholder": "例：土曜の仲間",
     "back": "戻る",
     "creating": "ルームを作っています…",
+    "failed": "ルームを作れませんでした",
+    "retry": "もう一度",
     "tabRoom": "ルーム",
     "roomSummary": "{visibility}・{seats}人",
     "tabRules": "ルール",

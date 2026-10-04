@@ -28,7 +28,13 @@ export const DEFAULT_SETUP: CreateRoomInput = {
 const oneOf = <T>(value: unknown, options: readonly T[], fallback: T): T =>
   options.includes(value as T) ? (value as T) : fallback;
 
-/** The setup saved last, field by field; anything missing or odd falls back to the default. The game comes from the link; each room gets its own name and password, and starts with 4 seats (none of these stored here). */
+/**
+ * The setup saved last, field by field; anything missing or odd falls back to
+ * the default. The game comes from the link; each room gets its own name and
+ * password, and starts public with 4 seats (none of these stored here). A
+ * room saved private never comes back private: its password isn't kept, and
+ * a private room without one is refused, so every new room would fail.
+ */
 export function loadSetup(): CreateRoomInput {
   let saved: Record<string, unknown> = {};
   try {
@@ -49,7 +55,7 @@ export function loadSetup(): CreateRoomInput {
     game: d.game,
     name: d.name,
     password: d.password,
-    visibility: oneOf(saved.visibility, ["public", "private"], d.visibility),
+    visibility: d.visibility,
     seats: d.seats,
     voteSeconds: seconds(saved.voteSeconds, d.voteSeconds),
     askSeconds: seconds(saved.askSeconds, d.askSeconds),
@@ -65,6 +71,7 @@ export function saveSetup({
   game: _game,
   name: _name,
   password: _password,
+  visibility: _visibility,
   seats: _seats,
   themeSets,
   ...rest

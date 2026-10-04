@@ -10,6 +10,8 @@
     "roomNamePlaceholder": "Ex.: Turma do sábado",
     "back": "Voltar",
     "creating": "Criando sua sala…",
+    "failed": "Não deu para criar a sala",
+    "retry": "Tentar de novo",
     "tabRoom": "Sala",
     "roomSummary": "{visibility} · {seats} vagas",
     "tabRules": "Regras",

@@ -10,6 +10,8 @@
     "roomNamePlaceholder": "e.g. Saturday crew",
     "back": "Back",
     "creating": "Creating your room…",
+    "failed": "Couldn't create the room",
+    "retry": "Try again",
     "tabRoom": "Room",
     "roomSummary": "{visibility} · {seats} seats",
     "tabRules": "Rules",
