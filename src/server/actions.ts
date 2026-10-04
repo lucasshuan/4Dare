@@ -49,6 +49,7 @@ import { allow } from "./rate-limit";
 import {
   currentMatch,
   dispatch,
+  hasNewcomer,
   leaveOtherRooms,
   normalizeCode,
   openRoom,
@@ -216,23 +217,28 @@ export async function setReady(
 /**
  * Host only, 2+ players. Draws the themes everyone votes on (or the host's
  * ideas, when they type the theme), avoiding the last vote's. A room's first
- * vote brings the rule scene's cards for each theme along.
+ * match, or one where someone seated plays their first ever, gets the long
+ * shows; its vote brings the rule scene's cards for each theme along.
  */
 export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {
     const stored = await getBackend().rooms.get(roomCode(code));
-    const themes = stored
-      ? await roundThemes(stored.state, stored.state.vote?.options ?? [])
-      : [];
+    const [themes, newcomer] = stored
+      ? await Promise.all([
+          roundThemes(stored.state, stored.state.vote?.options ?? []),
+          hasNewcomer(stored.state),
+        ])
+      : [[], false];
     const examples =
       stored?.state.settings.themeMode === "vote"
-        ? await roundExamples(stored.state, themes)
+        ? await roundExamples(stored.state, themes, newcomer)
         : undefined;
     return act(code, (id) => ({
       type: "START",
       playerId: id,
       themes,
       ...(examples ? { examples } : {}),
+      ...(newcomer ? { newcomer } : {}),
     }));
   });
 }

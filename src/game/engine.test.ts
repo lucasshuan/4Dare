@@ -749,6 +749,40 @@ describe("picking", () => {
     ]);
   });
 
+  it("a later match with a newcomer gets the long show versions again", () => {
+    const g = new Game(2);
+    g.start();
+    g.pickAll();
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+    g.do({
+      type: "START",
+      playerId: "p1",
+      themes: THEMES,
+      examples: EXAMPLES,
+      newcomer: true,
+    });
+    const opening = g.state.reveal;
+    expect(opening).toMatchObject({ kind: "opening", n: 2, first: true });
+    expect(beats(opening)).toContainEqual(["intro", T.intro]);
+    g.skipShow();
+    g.voteAll(0);
+    const theme = g.state.reveal;
+    expect(theme).toMatchObject({ kind: "theme", n: 2, first: true });
+    expect(theme).toHaveProperty("rule");
+    expect(beats(theme)).toContainEqual(["draw", T.draw.first]);
+    g.skipShow();
+    g.pickAll();
+    expect(g.state.reveal).toMatchObject({ kind: "cast", n: 2, first: true });
+    // the next match, with no newcomer, is short again
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    expect(g.state.reveal).toMatchObject({ n: 3, first: false });
+  });
+
   it("a typed theme on a later match has no rule either", () => {
     const g = new Game(2, 1, { themeMode: "host" });
     g.do({ type: "START", playerId: "p1", themes: [] });

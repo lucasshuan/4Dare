@@ -62,6 +62,12 @@ export function localMatches(): MatchStore {
       saved.add(match.id);
       tallyPicks([match], picks);
     },
+    async played(userIds) {
+      const all = new Set(
+        read().flatMap((m) => m.players.map((p) => p.userId)),
+      );
+      return new Set(userIds.filter((id) => all.has(id)));
+    },
     async reassign(fromUserId, toUserId) {
       const all = read();
       let changed = false;

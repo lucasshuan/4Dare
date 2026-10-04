@@ -269,6 +269,12 @@ describe("voteExamples", () => {
     expect(await voteExamples(room(1), themes, sources())).toBeUndefined();
   });
 
+  it("sends cards on a later match when a newcomer is seated", async () => {
+    expect(await voteExamples(room(1), themes, sources(), true)).toHaveLength(
+      3,
+    );
+  });
+
   it("never stands in the way of the match", async () => {
     const broken: ExampleSources = {
       ...sources(),

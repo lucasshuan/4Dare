@@ -11,6 +11,21 @@ export function supabaseMatches(): MatchStore {
       });
       if (error) throw error;
     },
+    async played(userIds) {
+      // One row is enough: a player can have hundreds (indexed by user_id).
+      const found = await Promise.all(
+        userIds.map(async (id) => {
+          const { data, error } = await serviceClient()
+            .from("match_players")
+            .select("user_id")
+            .eq("user_id", id)
+            .limit(1);
+          if (error) throw error;
+          return data.length > 0 ? id : null;
+        }),
+      );
+      return new Set(found.filter((id) => id !== null));
+    },
     async reassign(fromUserId, toUserId) {
       const { error } = await serviceClient().rpc("reassign_matches", {
         from_id: fromUserId,

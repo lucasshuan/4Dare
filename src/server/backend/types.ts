@@ -160,6 +160,8 @@ export interface ChatStore {
 export interface MatchStore {
   /** Saves a finished match; saving the same match id again does nothing. */
   record(match: MatchRecord): Promise<void>;
+  /** Which of these players have finished at least one match. */
+  played(userIds: string[]): Promise<Set<string>>;
   /** A guest signed in to an account that already existed: their matches move to it. */
   reassign(fromUserId: string, toUserId: string): Promise<void>;
   /** Characters people picked (not the clock) in finished matches with this theme, most picked first. */

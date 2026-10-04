@@ -201,8 +201,25 @@ const exampleSources = (): ExampleSources => {
 export function roundExamples(
   state: RoomState,
   themes: Theme[],
+  newcomer?: boolean,
 ): Promise<(RuleExamples | null)[] | undefined> {
-  return voteExamples(state, themes, exampleSources());
+  return voteExamples(state, themes, exampleSources(), newcomer);
+}
+
+/**
+ * Someone seated has never finished a match: theirs plays the long shows.
+ * Never in the way of the match: if the data can't be read, nobody is new.
+ */
+export async function hasNewcomer(state: RoomState): Promise<boolean> {
+  try {
+    const played = await getBackend().matches.played(
+      state.players.map((p) => p.id),
+    );
+    return state.players.some((p) => !played.has(p.id));
+  } catch (e) {
+    console.warn("[newcomer] unknown:", e instanceof Error ? e.message : e);
+    return false;
+  }
 }
 
 /** Saves the finished match after the response is sent, so nobody waits for it. */

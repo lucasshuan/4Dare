@@ -232,10 +232,14 @@ function shuffle<T>(items: T[], random: () => number): T[] {
   return a;
 }
 
+/** Match `round` plays the long shows: the room's first, or someone's first ever. */
+const longShows = (s: RoomState, round: number) =>
+  round === 1 || s.newcomer === true;
+
 /**
  * A new round needs a theme: the host types it, or everyone votes on `themes`.
- * The opening plays first: the lobby leaves, then the cold open (the room's
- * first match) or "Round N", then the vote or the host's form comes in.
+ * The opening plays first: the lobby leaves, then the cold open (a long
+ * match, see longShows) or "Round N", then the vote or the host's form comes in.
  */
 function beginTheme(
   s: RoomState,
@@ -246,7 +250,7 @@ function beginTheme(
   const T = SHOW_TIMING;
   const open: Part[] = [
     ["curtain", T.curtain],
-    s.round === 0 ? ["intro", T.intro] : ["round", T.round],
+    longShows(s, s.round + 1) ? ["intro", T.intro] : ["round", T.round],
   ];
   if (s.settings.themeMode === "host")
     return beginTheming(
@@ -271,7 +275,7 @@ function beginTheming(
   s.reveal = null;
   s.turnPlayerId = null;
   s.phase = "theming";
-  stage(s, "opening", s.round + 1, s.round === 0, opening, ctx);
+  stage(s, "opening", s.round + 1, longShows(s, s.round + 1), opening, ctx);
   startStep(s, ctx, HOST_THEME_SECONDS * 1000);
 }
 
@@ -297,7 +301,7 @@ function beginVote(
   s.reveal = null;
   s.turnPlayerId = null;
   s.phase = "voting";
-  stage(s, "opening", s.round + 1, s.round === 0, opening, ctx);
+  stage(s, "opening", s.round + 1, longShows(s, s.round + 1), opening, ctx);
   startStep(s, ctx, stepMs(s, "voteSeconds"));
 }
 
@@ -326,7 +330,7 @@ function closeVote(s: RoomState, ctx: Ctx) {
 
 /**
  * The theme show: the vote's result (a tie spins first), the theme, the rule
- * (the room's first match), the draw and "you pick for…", then the pick table
+ * (a long match), the draw and "you pick for…", then the pick table
  * comes in. Picking starts when it ends.
  */
 function showTheme(
@@ -334,7 +338,7 @@ function showTheme(
   o: { tie: boolean; typed: boolean; rule: RuleExamples | null },
   ctx: Ctx,
 ) {
-  const first = s.round === 1;
+  const first = longShows(s, s.round);
   const v = first ? "first" : "later";
   const T = SHOW_TIMING;
   const rule = first
@@ -584,7 +588,7 @@ function cleanText(text: string, max: number) {
  * character you got, the turn order), then the first turn's clock.
  */
 function startTurns(s: RoomState, ctx: Ctx, how: "confirmed" | "timeout") {
-  const first = s.round === 1;
+  const first = longShows(s, s.round);
   const v = first ? "first" : "later";
   const T = SHOW_TIMING;
   // The first question can come once the cast is over.
@@ -720,6 +724,7 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       if (e.playerId !== s.hostId) fail("not_host");
       if (s.phase !== "lobby") fail("wrong_phase");
       if (s.players.length < 2) fail("need_two_players");
+      s.newcomer = e.newcomer === true;
       return beginTheme(s, e.themes, e.examples, ctx);
     }
     case "VOTE":

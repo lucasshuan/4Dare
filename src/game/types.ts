@@ -367,6 +367,11 @@ export interface RoomState {
   /** Counts matches played in this room. */
   round: number;
   /**
+   * Someone seated when the match started had never finished one: the match
+   * plays the long shows, as on the room's first. Absent in older rooms.
+   */
+  newcomer?: boolean;
+  /**
    * Turn rounds of the current match: 1 while everyone takes their first turn,
    * 2 for the second, and so on. Absent in rooms saved before ties existed.
    */
@@ -411,6 +416,8 @@ export type GameEvent =
       playerId: PlayerId;
       themes: Theme[];
       examples?: (RuleExamples | null)[];
+      /** Someone seated has never finished a match (the server checks). */
+      newcomer?: boolean;
     }
   | { type: "VOTE"; playerId: PlayerId; option: number }
   /** The host typed the theme. */
