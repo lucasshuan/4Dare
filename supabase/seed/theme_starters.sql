@@ -46,8 +46,10 @@ insert into public.theme_starters (theme_id, character_id, position) values
   ('characters-with-an-animal-sidekick', 'wd-Q52986', 3), -- Tintin
   ('characters-with-an-animal-sidekick', 'wd-Q4902053', 4), -- Rapunzel
   ('characters-with-an-animal-sidekick', 'al-6866', 5), -- Kiki
-  ('dinosaurs', 'wd-Q214174', 1), -- Yoshi
-  ('dinosaurs', 'wd-Q6567', 2), -- Godzilla
+  ('dinosaurs', 'wd-Q14332', 1), -- Tyrannosaurus rex
+  ('dinosaurs', 'wd-Q2152060', 2), -- Rex (Toy Story)
+  ('dinosaurs', 'wd-Q214174', 3), -- Yoshi
+  ('dinosaurs', 'wd-Q6567', 4), -- Godzilla
   ('dogs', 'wd-Q207369', 1), -- Snoopy
   ('dogs', 'wd-Q901323', 2), -- Scooby-Doo
   ('dogs', 'wd-Q108732', 3), -- Pluto
@@ -420,10 +422,11 @@ insert into public.theme_starters (theme_id, character_id, position) values
   ('elderly-characters', 'wd-Q1752065', 3), -- Master Roshi
   ('elderly-characters', 'wd-Q315796', 4), -- Santa Claus
   ('elderly-characters', 'wd-Q1809674', 5), -- Granny
-  ('famous-couples', 'wd-Q58701', 1), -- Adam and Eve
-  ('famous-couples', 'wd-Q7103994', 2), -- Orpheus and Eurydice
-  ('famous-couples', 'wd-Q2521223', 3), -- Jonathan and Martha Kent
-  ('famous-couples', 'wd-Q1255696', 4), -- Tommy and Tuppence
+  ('famous-couples', 'wd-Q83186', 1), -- Romeo and Juliet
+  ('famous-couples', 'wd-Q58701', 2), -- Adam and Eve
+  ('famous-couples', 'wd-Q7103994', 3), -- Orpheus and Eurydice
+  ('famous-couples', 'wd-Q2521223', 4), -- Jonathan and Martha Kent
+  ('famous-couples', 'wd-Q1255696', 5), -- Tommy and Tuppence
   ('famous-dads', 'wd-Q7810', 1), -- Homer Simpson
   ('famous-dads', 'wd-Q12206942', 2), -- Darth Vader
   ('famous-dads', 'wd-Q2287748', 3), -- Mufasa
