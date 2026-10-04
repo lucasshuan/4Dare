@@ -15,8 +15,7 @@
       "!build",
       "!.next-*",
       "!.claude",
-      "!.data",
-      "!docs/phase10"
+      "!.data"
     ]
   },
   "formatter": {
