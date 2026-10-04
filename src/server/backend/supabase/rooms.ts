@@ -4,7 +4,7 @@ import type { ActiveRoom, Phase, RoomState } from "@/game/types";
 import { toPublicRoom } from "@/game/view";
 import { LISTED_COLUMNS } from "../../listing";
 import type { RoomStore } from "../types";
-import { serviceClient } from "./clients";
+import { json, serviceClient } from "./clients";
 
 const UNIQUE_VIOLATION = "23505";
 
@@ -18,13 +18,13 @@ export function supabaseRooms(): RoomStore {
         .maybeSingle();
       if (error) throw error;
       return data
-        ? { state: data.state as RoomState, version: data.version as number }
+        ? { state: data.state as unknown as RoomState, version: data.version }
         : null;
     },
     async create(state) {
       const { error } = await db().insert({
         code: state.code,
-        state,
+        state: json(state),
         version: 1,
         phase: state.phase,
         visibility: state.settings.visibility,
@@ -37,7 +37,7 @@ export function supabaseRooms(): RoomStore {
     async compareAndSwap(code, expectedVersion, next) {
       const { data, error } = await db()
         .update({
-          state: next,
+          state: json(next),
           version: expectedVersion + 1,
           phase: next.phase,
           visibility: next.settings.visibility,

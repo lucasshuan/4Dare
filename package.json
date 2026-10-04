@@ -16,6 +16,7 @@
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test --grep @smoke",
     "setup:supabase": "tsx --env-file-if-exists=.env.local scripts/setup-supabase.ts",
+    "db:types": "tsx --env-file-if-exists=.env.local scripts/supabase-types.ts",
     "test-rooms": "tsx --env-file-if-exists=.env.local scripts/test-rooms.ts",
     "og:font": "tsx scripts/og-font.ts"
   },

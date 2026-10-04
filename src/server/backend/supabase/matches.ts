@@ -1,12 +1,14 @@
 import "server-only";
 import type { MatchStore } from "../types";
-import { serviceClient } from "./clients";
+import { json, serviceClient } from "./clients";
 
 /** Supabase: one call per finished match (see record_match in the migrations). */
 export function supabaseMatches(): MatchStore {
   return {
     async record(match) {
-      const { error } = await serviceClient().rpc("record_match", { m: match });
+      const { error } = await serviceClient().rpc("record_match", {
+        m: json(match),
+      });
       if (error) throw error;
     },
     async reassign(fromUserId, toUserId) {

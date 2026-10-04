@@ -16,6 +16,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Local mode (no Supabase keys: dev, unit tests, e2e) runs on the local backend's fixtures, never on `data/`.
 - Everything else (rooms, matches, profiles, pick stats) may be lost; keep what you can.
 - Migrations are the agent's job: run them when needed, without asking.
+- After a migration: refresh the types (`pnpm db:types`, or the Supabase MCP `generate_typescript_types` written to `src/server/backend/supabase/database.types.ts` and formatted with Biome) and run the Supabase advisors (security and performance).
 
 ## AI
 
