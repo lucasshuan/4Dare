@@ -106,7 +106,8 @@ export function HistorySidebar({ onClose }: { onClose: () => void }) {
         transition: { duration: 0.55, ease: gs.p3Out },
       }}
       exit={{ width: 0, transition: { duration: 0.4, ease: gs.p3In } }}
-      className="sticky top-0 flex h-dvh shrink-0 justify-end self-start overflow-hidden"
+      // over the turn band and a guess's scene, like the match header
+      className="sticky top-0 z-[38] flex h-dvh shrink-0 justify-end self-start overflow-hidden"
     >
       <section
         aria-label={t("title")}

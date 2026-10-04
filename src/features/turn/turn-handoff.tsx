@@ -41,7 +41,8 @@ export function TurnHandoff() {
     elapsed: number;
   } | null>(null);
   useEffect(() => {
-    if (startsAt === null || playerId === null) return;
+    // the first turn needs none: the cast's last beat just said who starts
+    if (startsAt === null || playerId === null || n === 1) return;
     const wait = startsAt - now.current();
     if (wait < -HANDOFF_MS) return;
     const id = window.setTimeout(
@@ -166,7 +167,8 @@ function Band({
     <div
       ref={band}
       role="status"
-      className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center gap-4 px-6 sm:gap-6"
+      // over a guess's scene (z-36), under the match header and history (z-38)
+      className="pointer-events-none fixed inset-0 z-[37] flex items-center justify-center gap-4 px-6 sm:gap-6"
       style={{ backgroundColor: seatColor(slot), color: onSeat(slot) }}
     >
       <span

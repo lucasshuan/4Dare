@@ -69,8 +69,8 @@ export function GuessScene() {
             opacity: handoff ? 1 : 0,
             transition: { duration: handoff ? 0 : dur.slow, ease: ease.soft },
           }}
-          // over the chat (z-35), under the handoff band (z-40)
-          className="fixed inset-0 z-[38] flex flex-col items-center justify-center overflow-hidden px-6 py-10"
+          // over the chat (z-35), under the handoff band (z-37) and the match header (z-38)
+          className="fixed inset-0 z-[36] flex flex-col items-center justify-center overflow-hidden px-6 py-10"
           style={{
             backgroundColor: seatColor(player.colorSlot),
             color: onSeat(player.colorSlot),
