@@ -2,8 +2,12 @@
 // pointing here, and args like {"wave": 2, "wps": ["WP3", "WP5", "WP9a"], "e2e": true};
 // optional "extra" (per-package notes) and "env" (machine notes every agent gets).
 // Each package: an engineer builds it, an adversarial reviewer checks it against the
-// plan's acceptance criteria, a fixer repairs medium/high defects (up to 3 reviews),
-// then one agent runs the full checks on the combined tree. The lead session commits.
+// plan's acceptance criteria, a fixer repairs medium/high defects (up to "rounds"
+// reviews, 3 by default), then one agent runs the full checks on the combined tree
+// ("check": false skips it). "only" builds a subset of "wps" in this run, so one wave
+// can be split over several runs (each run gets its own agent slots); the prompts
+// stay the same, so a resumed run replays the agents that already finished.
+// The lead session commits.
 export const meta = {
   name: 'phase10-wave',
   description: 'Implement one wave of Phase 10 work packages: build, adversarial review, fix, wave check',
@@ -19,6 +23,9 @@ const PROTO = P + '/prototype'
 const WAVE = args.wave
 const WPS = args.wps
 const EXTRA = args.extra || {}
+const ONLY = args.only || WPS
+const ROUNDS = args.rounds || 3
+const CHECK = args.check !== false
 // notes on the machine (cloud session: node path, browser for e2e, known flaky tests)
 const ENV = args.env ? `\nEnvironment: ${args.env}` : ''
 
@@ -72,23 +79,23 @@ Re-run the package's verification. Append a "Fixes" section to ${P}/reports/${wp
   { label: `fix:${wp}`, phase: 'Review' })
 
 const results = await pipeline(
-  WPS,
+  ONLY,
   (wp) => build(wp),
   async (summary, wp) => {
     let last = null
-    for (let round = 0; round < 3; round++) {
+    for (let round = 0; round < ROUNDS; round++) {
       last = await review(wp, round)
       if (!last) break
       const serious = last.defects.filter((d) => d.severity !== 'low')
-      if (!serious.length || round === 2) break
+      if (!serious.length || round === ROUNDS - 1) break
       await fix(wp, last.defects)
     }
     return { wp, summary, review: last }
   },
 )
 
-phase('Wave check')
-const check = await agent(`Wave ${WAVE} of Phase 10 (${WPS.join(', ')}) is built in the 4Dare repo (the current directory). Reports are in ${P}/reports/. Run the full checks on the combined tree: pnpm test, pnpm typecheck, pnpm lint${args.e2e ? ', and pnpm test:e2e (stop any server already on port 3100 first)' : ''}. Fix any failure caused by the interaction of this wave's packages, editing only files those packages own (see ${P}/plan.md section 5). Never run git checkout/reset/stash/commit. Write ${P}/reports/wave${WAVE}-check.md with the commands and results, and return: for each command pass/fail with the decisive lines, and the list of files changed by this wave (git status --short, marking which belong to which package).${ENV}`,
+if (CHECK) phase('Wave check')
+const check = CHECK && await agent(`Wave ${WAVE} of Phase 10 (${WPS.join(', ')}) is built in the 4Dare repo (the current directory). Reports are in ${P}/reports/. Run the full checks on the combined tree: pnpm test, pnpm typecheck, pnpm lint${args.e2e ? ', and pnpm test:e2e (stop any server already on port 3100 first)' : ''}. Fix any failure caused by the interaction of this wave's packages, editing only files those packages own (see ${P}/plan.md section 5). Never run git checkout/reset/stash/commit. Write ${P}/reports/wave${WAVE}-check.md with the commands and results, and return: for each command pass/fail with the decisive lines, and the list of files changed by this wave (git status --short, marking which belong to which package).${ENV}`,
   { label: `wave${WAVE}:check`, phase: 'Wave check' })
 
 return { results: results.map((r) => r && { wp: r.wp, passed: r.review?.passed, open: r.review?.defects }), check }
