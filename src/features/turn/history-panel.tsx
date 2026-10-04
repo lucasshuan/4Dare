@@ -3,7 +3,7 @@
 import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { type Ref, useEffect, useState } from "react";
+import { type Ref, useEffect, useRef, useState } from "react";
 import { AnswerChip, ResultChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { ChoiceGroup } from "@/components/ui/choice-group";
@@ -186,6 +186,11 @@ function HistoryBody({
   );
   const [whose, setWhose] = useState(me.id);
   const [kind, setKind] = useState<Kind>("all");
+  // Focus the close button once when the drawer opens, not on every render.
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (focusClose) closeRef.current?.focus();
+  }, [focusClose]);
   const playsOf = (id: string) => view.history.filter((e) => e.byId === id);
   const theirs = playsOf(whose);
   const entries = theirs
@@ -204,7 +209,7 @@ function HistoryBody({
         </h2>
         <button
           type="button"
-          ref={focusClose ? (el) => el?.focus() : undefined}
+          ref={closeRef}
           onClick={onClose}
           aria-label={t("close")}
           className="flex size-10 shrink-0 items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface transition-colors hover:bg-sunken"
