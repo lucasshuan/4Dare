@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DRAW } from "@/game/show-timing/draw";
 import { drawTimes, hopFrames } from "./draw-urn";
 import { RING_GAP, ringGeometry, ringTimes } from "./who-ring";
 
@@ -37,12 +38,20 @@ describe("draw schedule", () => {
       tm.marks,
       tm.slosh,
     ]).toEqual([2.45, 2.67, 1.15, 2.7, 2.75]);
-    expect([tm.swell, tm.slip, tm.slipDur, tm.front, tm.urnOut]).toEqual([
-      3.85, 4.13, 0.6, 4.3, 4.3,
-    ]);
+    expect([
+      tm.swell,
+      tm.slip,
+      tm.slipRise,
+      tm.slipFall,
+      tm.front,
+      tm.urnOut,
+    ]).toEqual([3.85, 4.13, 0.3, 0.7, 4.4, 4.3]);
+    expect(tm.slip + tm.slipRise + tm.slipFall).toBeLessThanOrEqual(
+      DRAW.draw.first / 1000,
+    );
   });
 
-  it("fits the later variant in its 3 s: hops together, one 0.6 s shake", () => {
+  it("fits the later variant in its beat: hops together, one 0.6 s shake", () => {
     const tm = drawTimes(4, false);
     expect(new Set(tm.hops).size).toBe(1);
     expect(tm.squashes).toHaveLength(1);
@@ -51,8 +60,9 @@ describe("draw schedule", () => {
       tm.hops[0],
     );
     expect(tm.squashes[0] + SQUASH).toBeLessThanOrEqual(tm.anticipation + 1e-9);
-    expect(tm.slip + tm.slipDur).toBeLessThanOrEqual(3);
-    expect(tm.urnOut + 0.45).toBeLessThanOrEqual(3);
+    const end = DRAW.draw.later / 1000;
+    expect(tm.slip + tm.slipRise + tm.slipFall).toBeLessThanOrEqual(end);
+    expect(tm.urnOut + 0.45).toBeLessThanOrEqual(end);
   });
 
   it("hops in a straight tent, 90 px above the landing at half way", () => {

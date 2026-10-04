@@ -184,7 +184,7 @@ function CardPeek({ player: p }: { player: PlayerView }) {
               className="block overflow-hidden rounded-lg p-[3px]"
               style={{ background: seat }}
             >
-              <span className="block overflow-hidden rounded-[9px]">
+              <span className="block overflow-hidden rounded-[calc(var(--radius-lg)-3px)]">
                 <span className="block transition-[scale] duration-500 ease-soft group-data-starting-style/peek:scale-110 motion-reduce:transition-none">
                   <Portrait
                     src={card.imageUrl}

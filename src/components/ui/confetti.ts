@@ -10,18 +10,19 @@ const COLORS = [
   "var(--seat-4)",
 ];
 
-/** Quadratic eases: in-out for each leg of the rise and fall, out for the drift and spin. */
-const EASE_IN_OUT = "cubic-bezier(0.45, 0, 0.55, 1)";
-const EASE_OUT = "cubic-bezier(0.5, 1, 0.89, 1)";
+/** The fall starts already moving and picks up a little speed on the way down. */
+const EASE_FALL = "cubic-bezier(0.3, 0.18, 0.6, 0.55)";
+/** Each swing of the sway slows at its ends, like paper in the air. */
+const EASE_SWING = "cubic-bezier(0.45, 0, 0.55, 1)";
 
 /** A number in (-1, 1) that looks random but is fixed by n, so the pieces spread evenly. */
 const scatter = (n: number) => (Math.sin(n * 12.9898) * 43758.5453) % 1;
 
 /**
- * A burst of confetti: rounded slips, one colour after another, thrown up from
- * across the screen, hanging at the top and falling past the bottom while they
- * drift sideways and spin. "big" (a hit, the podium) throws more of them.
- * Skipped for reduced motion.
+ * A burst of confetti: rounded slips, one colour after another, falling from
+ * above the top edge across the whole screen and past the bottom, swaying and
+ * spinning on the way. "big" (a hit, the podium) drops more of them. Skipped
+ * for reduced motion.
  */
 export function fireConfetti(size: "small" | "big" = "small") {
   if (typeof window === "undefined") return;
@@ -44,13 +45,15 @@ export function fireConfetti(size: "small" | "big" = "small") {
   const falls: Promise<unknown>[] = [];
   for (let i = 0; i < count; i++) {
     const k = i + seed;
-    // the outer box rises and falls, the slip inside it drifts and spins
+    // the box falls, the swing inside it sways, the slip inside that spins
     const box = document.createElement("span");
     Object.assign(box.style, {
       position: "absolute",
       top: "-20px",
-      left: `${50 + scatter(k) * 48}%`,
+      left: `${50 + scatter(k) * 50}%`,
     });
+    const swing = document.createElement("span");
+    swing.style.display = "block";
     const slip = document.createElement("span");
     Object.assign(slip.style, {
       display: "block",
@@ -59,28 +62,36 @@ export function fireConfetti(size: "small" | "big" = "small") {
       borderRadius: "3px",
       background: COLORS[k % COLORS.length],
     });
-    box.append(slip);
+    swing.append(slip);
+    box.append(swing);
     layer.append(box);
 
-    const duration = 2200 + (k % 5) * 250;
-    const peak = h * 0.05 - (k % 7) * 18;
-    const drift = (((k * 37) % 100) / 100 - 0.5) * w * 0.9;
-    const spin = 540 + (i % 46) * 20;
+    const duration = 2600 + (k % 5) * 300;
+    // not tied to the colour, so the pieces don't arrive in coloured rows
+    const delay = Math.abs(scatter(k + 0.5)) * 1000;
+    const above = (k % 6) * 20;
+    const sway = (18 + (k % 4) * 10) * (k % 2 ? 1 : -1);
+    const drift = scatter(k + 0.25) * w * 0.1;
+    const spin = (360 + (i % 8) * 90) * (k % 3 ? 1 : -1);
+    const x = (px: number) => ({
+      transform: `translateX(${px}px)`,
+      easing: EASE_SWING,
+    });
     falls.push(
       box.animate(
         [
-          { transform: `translateY(${h * 0.35}px)`, easing: EASE_IN_OUT },
-          { transform: `translateY(${peak}px)`, easing: EASE_IN_OUT },
+          { transform: `translateY(${-above}px)` },
           { transform: `translateY(${h + 40}px)` },
         ],
-        { duration, fill: "forwards" },
+        { duration, delay, easing: EASE_FALL, fill: "both" },
+      ).finished,
+      swing.animate(
+        [x(0), x(sway), x(drift - sway * 0.6), x(drift + sway * 0.5), x(drift)],
+        { duration, delay, fill: "both" },
       ).finished,
       slip.animate(
-        [
-          { transform: "translateX(0px) rotate(0deg)" },
-          { transform: `translateX(${drift}px) rotate(${spin}deg)` },
-        ],
-        { duration, easing: EASE_OUT, fill: "forwards" },
+        [{ transform: "rotate(0deg)" }, { transform: `rotate(${spin}deg)` }],
+        { duration, delay, fill: "both" },
       ).finished,
     );
   }

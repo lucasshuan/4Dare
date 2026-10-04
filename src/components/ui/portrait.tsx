@@ -11,7 +11,11 @@ const TONE: Record<Tone, string> = {
   other: "bg-apricot-soft text-apricot",
 };
 
-/** A 4:5 picture with a soft fade-in, or a silhouette when there is none. */
+/**
+ * A 4:5 picture with a soft fade-in, or a silhouette when there is none. It is
+ * cropped from the top, not the middle: a character's head is almost always
+ * there, and it is what makes them recognisable.
+ */
 export function Portrait({
   src,
   tone = "neutral",
@@ -53,7 +57,7 @@ export function Portrait({
           onLoad={() => setLoaded({ src, ok: true })}
           onError={() => setLoaded({ src, ok: false })}
           className={cn(
-            "absolute inset-0 size-full object-cover transition-opacity duration-500 ease-soft",
+            "absolute inset-0 size-full object-cover object-top transition-opacity duration-500 ease-soft",
             state === "ok" ? "opacity-100" : "opacity-0",
           )}
         />

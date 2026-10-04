@@ -95,7 +95,9 @@ export interface DrawTimes {
   swellDur: number;
   /** The squeeze, and the slip's launch from the bubble's mouth. */
   slip: number;
-  slipDur: number;
+  /** The slip's flight up, to edge-on, then its fall to where it stays. */
+  slipRise: number;
+  slipFall: number;
   /** The slip comes in front of the bubble ("it rises from behind it"). */
   front: number;
   urnOut: number;
@@ -110,8 +112,9 @@ const SHAKE = 1.15;
  * at 1.40 + 0.22·i. The anticipation waits for the last swallow squash
  * (`max(2.45, lastSquashEnd)`), so the two never touch the urn at once; the
  * shake follows it and still ends before the swell (3.85), so with 3-4
- * players it plays its keyframes a little faster. Later matches (3 s): the
- * avatars hop together, one 0.6 s shake, the slip out at 2.35.
+ * players it plays its keyframes a little faster. Later matches (3.4 s): the
+ * avatars hop together, one 0.6 s shake, the slip out at 2.35. The slip's
+ * flight (0.3 s up, 0.7 s down) is the prototype's in both.
  */
 export function drawTimes(n: number, first: boolean): DrawTimes {
   if (!first) {
@@ -141,8 +144,9 @@ export function drawTimes(n: number, first: boolean): DrawTimes {
       swell: shake + 0.6,
       swellDur: 0.2,
       slip: shake + 0.8,
-      slipDur: 0.6,
-      front: shake + 0.97,
+      slipRise: 0.3,
+      slipFall: 0.7,
+      front: shake + 1.07,
       urnOut: shake + 0.97,
       rowOut: 2.4,
     };
@@ -176,8 +180,9 @@ export function drawTimes(n: number, first: boolean): DrawTimes {
     swell,
     swellDur: 0.28,
     slip: 4.13,
-    slipDur: 0.6,
-    front: 4.3,
+    slipRise: 0.3,
+    slipFall: 0.7,
+    front: 4.4,
     urnOut: 4.3,
     rowOut: 4.2,
   };
@@ -218,14 +223,16 @@ const SLOSH_Q = {
  * The draw's part of the timeline: the line, the urn and the row come in,
  * the avatars hop into the bubble (it swallows each one), it takes a breath,
  * shakes on its tail, swells, squeezes and spits out the slip (`[data-slip]`,
- * the target header itself), which rises straight from the bubble's mouth to
- * its place, growing from 0.15 to 1, behind the bubble until `front`.
+ * the target header itself): tiny and mirrored, it shoots up from the
+ * bubble's mouth turning edge-on, a thin sliver spinning in the air, then
+ * falls to its place opening face front, upright and full size. It is behind
+ * the bubble until `front`.
  * Reduced motion: everything fades in still, and at the launch the draw
  * fades out while the slip fades in where it stays.
  */
 export function drawSequence(
   scope: HTMLElement,
-  o: { times: DrawTimes; reduced: boolean; map: TimeMap },
+  o: { times: DrawTimes; reduced: boolean; phone: boolean; map: TimeMap },
 ): AnimationSequence {
   const { times: tm, map } = o;
   const { at, d } = map;
@@ -243,6 +250,8 @@ export function drawSequence(
   const s = layoutRect(slip, scope);
   const mouth = u.y + 0.2 * u.height;
   const slipFrom = r3(mouth - (s.y + s.height / 2));
+  // the top of its flight, above the mouth
+  const slipTop = r3(slipFrom - (o.phone ? 110 : 150));
 
   // the slip is behind the bubble until it has risen past it
   const front = at(tm.front);
@@ -381,7 +390,7 @@ export function drawSequence(
       },
       { at: at(tm.marks), duration: d(tm.marksDur), ease: gs.p1InOut },
     ]);
-  // it swells, squeezes and spits the slip out of its top, straight up to where it stays
+  // it swells, squeezes and spits the slip out of its top: up, edge-on, then down to where it stays
   seq.push(
     [
       urn,
@@ -406,12 +415,29 @@ export function drawSequence(
     [
       slip,
       {
-        y: [slipFrom, 0],
-        scaleX: [0.15, 1],
-        scaleY: [0.15, 1],
+        y: [slipFrom, slipTop],
+        scaleX: [0.12, 0.5],
+        scaleY: [0.12, 0.5],
+        rotate: [-18, 12],
+        rotateY: [180, 90],
         opacity: [0, 1],
       },
-      { at: at(tm.slip), duration: d(tm.slipDur), ease: gs.backOut(1.4) },
+      { at: at(tm.slip), duration: d(tm.slipRise), ease: gs.p2Out },
+    ],
+    [
+      slip,
+      {
+        y: [slipTop, 0],
+        scaleX: [0.5, 1],
+        scaleY: [0.5, 1],
+        rotate: [12, 0],
+        rotateY: [90, 0],
+      },
+      {
+        at: at(tm.slip + tm.slipRise),
+        duration: d(tm.slipFall),
+        ease: gs.backOut(1.5),
+      },
     ],
     [
       row,
