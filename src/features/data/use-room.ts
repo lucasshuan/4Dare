@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BACKEND } from "@/config";
 import type { RoomView } from "@/game/types";
 import { subscribeRoom } from "@/lib/realtime";
@@ -26,8 +26,10 @@ export interface RoomData {
   offset: number;
 }
 
-// Realtime pings make polling a safety net in Supabase mode; local mode has no pings.
-const POLL_MS = BACKEND === "local" ? 1000 : 10_000;
+// Realtime pings make polling a safety net in Supabase mode, slow while the
+// channel is joined and quick while it is down; local mode has no pings.
+const pollMs = (connected: boolean) =>
+  BACKEND === "local" ? 1000 : connected ? 45_000 : 10_000;
 
 export const roomKey = (code: string) => ["room", code] as const;
 
@@ -52,6 +54,7 @@ async function fetchRoom(code: string): Promise<RoomData> {
 /** The room as the current player sees it, kept fresh by realtime pings, polling and the step clock. */
 export function useRoom(code: string) {
   const client = useQueryClient();
+  const [connected, setConnected] = useState(false);
   const query = useQuery({
     queryKey: roomKey(code),
     queryFn: async () => {
@@ -62,7 +65,7 @@ export function useRoom(code: string) {
         ? current
         : next;
     },
-    refetchInterval: POLL_MS,
+    refetchInterval: pollMs(connected),
     refetchOnWindowFocus: true,
     retry: (count, error) => !(error instanceof RoomError) && count < 2,
   });
@@ -84,16 +87,29 @@ export function useRoom(code: string) {
     [client, code],
   );
 
-  // A ping for a version we already have (usually our own action) needs no refetch.
-  useEffect(
-    () =>
-      subscribeRoom(code, ({ version }) => {
+  // A ping for a version we already have (usually our own action) needs no
+  // refetch. Joining (or rejoining after a drop) refetches: pings sent before
+  // it never arrive.
+  useEffect(() => {
+    let joined = false;
+    const unsubscribe = subscribeRoom(
+      code,
+      ({ version }) => {
         const current = client.getQueryData<RoomData>(roomKey(code));
         if (version && current && current.view.version >= version) return;
         void refresh();
-      }),
-    [client, code, refresh],
-  );
+      },
+      (now) => {
+        if (now && !joined) void refresh();
+        joined = now;
+        setConnected(now);
+      },
+    );
+    return () => {
+      unsubscribe();
+      setConnected(false);
+    };
+  }, [client, code, refresh]);
 
   // When the step's clock runs out the server applies the timeout on the next read.
   const deadline = query.data?.view.deadline ?? null;

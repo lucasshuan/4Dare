@@ -61,8 +61,8 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 
 ## Phase 5 — Cheaper at scale
 
-- [ ] Room poll every 30–60 s while realtime is connected, 10 s only when it drops
-- [ ] `/api/me/match` polled by the same rule
+- [x] Room poll every 45 s while its realtime channel is joined, 10 s only when it drops; a join or rejoin refetches once (pings sent meanwhile are lost); one shared channel per topic
+- [x] `/api/me/match` every 60 s with no match, 30 s during one (no ping carries it; coming back to the tab refetches), was 15 s
 - [ ] Room list reads a small `listing` column, not every room's whole state
 - [ ] `player_ids` column with a GIN index for "rooms I sit in"
 - [ ] Old rooms deleted by `pg_cron`
