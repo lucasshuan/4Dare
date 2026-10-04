@@ -32,7 +32,7 @@ After the first quick wins (same day): API functions ~2 MB, pages ~9 MB, share i
 - [x] AI theme drawing removed (`drawWithAI` called Claude Opus in half the votes)
 - [x] `@anthropic-ai/sdk` out of the dependencies
 - [x] `ANTHROPIC_API_KEY` out of `.env.example` and the docs
-- [ ] `ANTHROPIC_API_KEY` deleted from the Vercel env (dashboard)
+- [x] `ANTHROPIC_API_KEY` deleted from the Vercel env (checked 2026-10-04: not among the project's 22 variables)
 - [x] No AI package left in the app, the build or the scripts
 
 No AI theme was ever saved (0 rows with source `ai`).
@@ -54,7 +54,7 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB): the header's (language, user menu, match badge) load when idle or when reached for, behind look-alikes (`useDeferred`); the game's name and thumbnail left the game select's module. Home 361 → 297 KB gzip of JS, no Base UI. Screens built around one (rooms filters, lobby, settings) keep theirs
 - [ ] `LazyMotion` + `m`; full motion features only where `layoutId` is used
 - [ ] Guest names resolved on the server (−24 KB)
-- [ ] Each page gets only its message namespaces
+- [x] Each page gets only its message namespaces: hub pages leave the room's and `meta` out (`src/i18n/scopes.ts`); the `r/` and `dev/` layouts hand theirs every one. `/en/who-am-i` HTML 13.8 KB gzip
 - [x] `/new` and `/rooms` static (query read in the browser): served from the CDN, no function per visit
 - [x] Game sounds re-encoded mono 80 kbps (371 KB → 118 KB)
 - [ ] Home under ~250 KB gzip of JS
@@ -66,9 +66,9 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] Room list reads only what it shows, not every room's whole state: six JSON paths instead of a new column (`src/server/listing.ts`; a test fails if `toPublicRoom` starts reading more)
 - [x] ~~`player_ids` column with a GIN index for "rooms I sit in"~~ not needed: the query takes 1.4 ms on the `updated_at` index, and the hourly cleanup keeps the table small
 - [x] Old rooms deleted by `pg_cron` (hourly: closed a day ago, or a week without a write; migration 0013, applied)
-- [ ] The `gone` beacon no longer keeps a function alive for 5 s
+- [x] The `gone` beacon no longer keeps a function alive for 5 s: the view carries `sweepAt` and the other pages refetch then, which settles it
 - [x] Speed Insights with a `sampleRate` (half the visits)
-- [ ] Vercel project checked: Fluid compute, Node version, memory
+- [x] Vercel project checked: Node 24.x (matches `engines`), region `gru1` (next to Supabase's `sa-east-1`), Fluid compute forced on by `vercel.json`; memory is not exposed through the API, see Settings → Functions
 
 ## Phase 6 — Cleanup
 
@@ -78,4 +78,4 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] Patch updates: next-intl, react-query, lucide
 - [ ] React 19.3, Biome 2.5, motion 14 and TypeScript 7 after Phase 10, changelogs first
 - [x] Unused `public/brand/logo-dark.svg` removed
-- [ ] AI leftovers in the game files after Phase 10: `ThemeStore.add`, `.data/themes-ai.json`, `THEME_SETS[].about`, old comments
+- [x] AI leftovers: `ThemeStore.add`, `.data/themes-ai.json`, `THEME_SETS[].about`, old comments (done during Phase 10: none of it was in a wave-4 file)

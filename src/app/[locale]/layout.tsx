@@ -4,11 +4,16 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, DM_Mono, Figtree } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  getMessages,
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
 import { JaFontLoader } from "@/components/ja-font-loader";
 import { Providers } from "@/components/providers";
 import { APP_NAME } from "@/config";
 import { routing } from "@/i18n/routing";
+import { hubMessages } from "@/i18n/scopes";
 import { pageMetadata, SITE_URL } from "@/server/seo";
 import "../globals.css";
 
@@ -70,7 +75,8 @@ export default async function LocaleLayout({
     >
       <body>
         {locale === "ja" ? <JaFontLoader /> : null}
-        <NextIntlClientProvider>
+        {/* the hub's namespaces; r/ and dev/ layouts hand theirs every one */}
+        <NextIntlClientProvider messages={hubMessages(await getMessages())}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
         {/* Vercel Web Analytics and Speed Insights (half the visits: enough data, half the cost); they only send data on Vercel. */}

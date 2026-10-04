@@ -88,22 +88,20 @@ export interface CharacterStore {
   starters(): Promise<ThemeStarter[]>;
 }
 
-/** Where the theme list lives: the bundled file locally, a table on Supabase. */
+/** Where the theme list lives: the fixtures locally, a table on Supabase. */
 export interface ThemeStore {
   /** Every theme that may be drawn. */
   list(): Promise<Theme[]>;
-  /** Keeps a theme the AI invented; an existing one is left as it is. */
-  add(theme: Theme): Promise<void>;
 }
 
 export interface ThemeSource {
-  /** `count` different themes in the three languages, from `sets` (every set when left out) while they have enough. Never throws: falls back to the built-in bank. */
+  /** `count` different themes in the three languages, from `sets` (every set when left out) while they have enough. Never throws: falls back to the list in hand. */
   draw(
     avoid: Localized[],
     count: number,
     sets?: readonly ThemeSet[],
   ): Promise<Theme[]>;
-  /** Instant, no network: straight from the bank. */
+  /** Instant, no network: from the list in hand (src/server/themes.ts). */
   drawFromBank(count: number, sets?: readonly ThemeSet[]): Theme[];
 }
 

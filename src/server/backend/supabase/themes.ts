@@ -1,6 +1,5 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { themeId } from "@/game/theme-id";
 import type { ThemeSet } from "@/game/theme-sets";
 import type { Theme } from "@/game/types";
 import type { ThemeStarter, ThemeStore } from "../types";
@@ -22,13 +21,6 @@ export function supabaseThemes(): ThemeStore {
           set: theme_set as ThemeSet | null,
         }),
       );
-    },
-    async add({ set, ...theme }) {
-      const { error } = await table().upsert(
-        { id: themeId(theme), ...theme, theme_set: set, source: "ai" },
-        { onConflict: "id", ignoreDuplicates: true },
-      );
-      if (error) throw error;
     },
   };
 }

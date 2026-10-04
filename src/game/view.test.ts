@@ -438,3 +438,21 @@ describe("picking in the view", () => {
     expect(view(g, target).pick?.draft).toBeNull();
   });
 });
+
+describe("sweep time", () => {
+  it("tells viewers when a closed page's lobby seat comes free", () => {
+    const g = new Game(3);
+    expect(view(g, "p1").sweepAt).toBeNull();
+    g.do({ type: "GONE", playerId: "p2" });
+    const goneAt = g.now;
+    g.now += 1000;
+    g.do({ type: "GONE", playerId: "p3" });
+    expect(view(g, "p1").sweepAt).toBe(goneAt + GONE_GRACE_MS);
+  });
+
+  it("has nothing to settle while someone is still in the match", () => {
+    const g = started(3);
+    g.do({ type: "GONE", playerId: "p2" });
+    expect(view(g, "p1").sweepAt).toBeNull();
+  });
+});

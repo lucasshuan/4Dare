@@ -133,7 +133,8 @@ export async function dispatch(
 
 /**
  * What a new round needs: ideas for a host who types the theme, or themes to
- * vote on from the room's sets. `quick` skips the AI (a round the clock starts).
+ * vote on from the room's sets. `quick` draws at once from the list in hand,
+ * without avoiding the last themes (a round the clock starts).
  */
 export async function roundThemes(
   state: RoomState,

@@ -1,131 +1,107 @@
 // The theme list, split into sets. The host picks which sets a vote draws from.
-// Each theme in data/themes.json names its set; the names people read live in
-// messages/<lang>/common.json (themeSets), and `about` tells the AI what fits.
+// Each theme in the themes table names its set (`theme_set`); the names people
+// read live in messages/<lang>/common.json (themeSets).
 
 export const THEME_SETS = [
   {
     key: "screen",
     emoji: "🎬",
     glyphs: ["🎬", "🍿", "🎥", "⭐", "🎞️", "🍿", "🎬"],
-    about:
-      "movies, TV series and big franchises like Disney, Marvel or Harry Potter",
   },
   {
     key: "cartoons",
     emoji: "🧸",
     glyphs: ["🧸", "🎈", "🪀", "🧸", "🎨", "🎈", "🪁"],
-    about:
-      "cartoons, kids' shows, toys, puppets, talking objects and cute characters",
   },
   {
     key: "anime",
     emoji: "🍥",
     glyphs: ["🍥", "⛩️", "🌸", "🍜", "🗡️", "🌸", "🍥"],
-    about: "anime, manga and tokusatsu",
   },
   {
     key: "games",
     emoji: "🎮",
     glyphs: ["🎮", "👾", "🕹️", "⭐", "🍄", "👾", "🎮"],
-    about: "video games and their characters",
   },
   {
     key: "books",
     emoji: "📚",
     glyphs: ["📚", "📖", "✒️", "🐉", "📜", "📖", "📚"],
-    about: "books, comics, fairy tales and the people who write them",
   },
   {
     key: "heroes",
     emoji: "🦸",
     glyphs: ["🦸", "⚡", "🛡️", "🦸‍♀️", "💥", "⚡", "🦹"],
-    about: "heroes, villains, sidekicks, mentors and rivals",
   },
   {
     key: "powers",
     emoji: "⚡",
     glyphs: ["⚡", "✨", "🔮", "🌀", "🪄", "✨", "⚡"],
-    about:
-      "superpowers, magic, curses and twists like time travel or coming back from the dead",
   },
   {
     key: "myths",
     emoji: "🐉",
     glyphs: ["🐉", "🦄", "🧜‍♀️", "🔱", "🧚", "🐉", "👻"],
-    about: "myths, religion, monsters and fantasy creatures",
   },
   {
     key: "scifi",
     emoji: "🚀",
     glyphs: ["🚀", "👽", "🤖", "🛸", "🪐", "🚀", "🌌"],
-    about: "science fiction: robots, aliens, space",
   },
   {
     key: "warriors",
     emoji: "⚔️",
     glyphs: ["⚔️", "🏴‍☠️", "🥷", "🛡️", "🗡️", "⚔️", "🏹"],
-    about: "warriors, pirates, ninjas, knights, thieves and outlaws",
   },
   {
     key: "animals",
     emoji: "🐾",
     glyphs: ["🐾", "🦁", "🐶", "🐱", "🐸", "🐾", "🦊"],
-    about: "animals, real or fictional",
   },
   {
     key: "music",
     emoji: "🎤",
     glyphs: ["🎤", "🎸", "🎵", "🥁", "🎧", "🎶", "🎤"],
-    about: "singers, bands and music",
   },
   {
     key: "celebs",
     emoji: "⭐",
     glyphs: ["⭐", "🌟", "🎬", "📸", "🎤", "⭐", "💫"],
-    about:
-      "real celebrities: actors, comedians, TV hosts, internet stars, the famous of a decade",
   },
   {
     key: "sports",
     emoji: "⚽",
     glyphs: ["⚽", "🏀", "🏆", "🎾", "🏈", "⚽", "🥇"],
-    about: "athletes and sports, real or fictional",
   },
   {
     key: "history",
     emoji: "🏛️",
     glyphs: ["🏛️", "👑", "📜", "🗿", "⚱️", "🏛️", "🎨"],
-    about: "real people from history, politics, science and art",
   },
   {
     key: "world",
     emoji: "🌎",
     glyphs: ["🌎", "🗺️", "✈️", "🗼", "🏝️", "🌍", "🧭"],
-    about: "places and countries: where characters live or come from",
   },
   {
     key: "jobs",
     emoji: "💼",
     glyphs: ["💼", "🩺", "🔍", "🧑‍🍳", "👮", "💼", "🧑‍🏫"],
-    about: "jobs and roles: doctors, detectives, spies, cooks, teachers",
   },
   {
     key: "family",
     emoji: "👪",
     glyphs: ["👪", "💞", "👶", "👵", "👫", "👪", "🎂"],
-    about: "families, ages, couples, duos, trios and groups of friends",
   },
   {
     key: "quirks",
     emoji: "🎭",
     glyphs: ["🎭", "💬", "🤪", "🎭", "😎", "🗯️", "🤓"],
-    about: "personality, habits, catchphrases and names",
   },
   {
     key: "looks",
     emoji: "🕶️",
     glyphs: ["🕶️", "👗", "💇", "👒", "💄", "🕶️", "👟"],
-    about: "looks: clothes, hair, faces, shapes and colors",
   },
 ] as const;
 
