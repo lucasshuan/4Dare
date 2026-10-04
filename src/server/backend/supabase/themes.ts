@@ -1,9 +1,8 @@
 import "server-only";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ThemeSet } from "@/game/theme-sets";
 import type { Theme } from "@/game/types";
 import type { ThemeStarter, ThemeStore } from "../types";
-import { serviceClient } from "./clients";
+import { type Db, serviceClient } from "./clients";
 
 /** Supabase: the themes table (see supabase/migrations/0003_themes.sql and 0009_theme_sets.sql). */
 export function supabaseThemes(): ThemeStore {
@@ -46,9 +45,7 @@ const STARTERS_TTL = 10 * 60_000;
  * by theme then position, a page at a time until an empty page: the table
  * outgrows one page (about 1700 rows).
  */
-export async function readStarters(
-  db: SupabaseClient,
-): Promise<ThemeStarter[]> {
+export async function readStarters(db: Db): Promise<ThemeStarter[]> {
   const out: ThemeStarter[] = [];
   for (let from = 0; ; ) {
     const { data, error } = await db
@@ -80,7 +77,7 @@ export async function readStarters(
  * and the next request tries again, so a starter never breaks a match.
  */
 export function supabaseStarters(
-  db: () => SupabaseClient = serviceClient,
+  db: () => Db = serviceClient,
   ttl = STARTERS_TTL,
 ) {
   let cached: { at: number; rows: ThemeStarter[] } | null = null;

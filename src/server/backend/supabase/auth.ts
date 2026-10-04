@@ -54,7 +54,7 @@ export async function syncProfile(
   };
   const insert = await profiles().upsert(row).select("*").single();
   if (insert.error) throw insert.error;
-  return insert.data as ProfileRow;
+  return insert.data as unknown as ProfileRow;
 }
 
 const accountMe = (p: ProfileRow): Me => ({
@@ -144,7 +144,7 @@ export function supabaseAuth(): AuthService {
         .select("*")
         .single();
       if (error) throw error;
-      return accountMe(data as ProfileRow);
+      return accountMe(data as unknown as ProfileRow);
     },
     async signOut() {
       const client = await sessionClient();

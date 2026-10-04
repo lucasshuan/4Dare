@@ -1,9 +1,8 @@
 import "server-only";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { type SearchItem, toSearchItem } from "@/game/character-search";
 import type { Lang } from "@/game/types";
 import { entryId } from "../seed-format";
-import { serviceClient } from "./clients";
+import { type Db, serviceClient } from "./clients";
 
 /** A library row of the character_entries view, as the index needs it. */
 export interface LibraryRow {
@@ -36,10 +35,7 @@ export const toLibraryItem = (lang: Lang, r: LibraryRow): SearchItem =>
  * the rows so far end and only an empty one ends the read, so a server that
  * caps pages below PAGE still gives the whole library.
  */
-export async function readLibrary(
-  db: SupabaseClient,
-  lang: Lang,
-): Promise<SearchItem[]> {
+export async function readLibrary(db: Db, lang: Lang): Promise<SearchItem[]> {
   const items: SearchItem[] = [];
   for (;;) {
     const from = items.length;
@@ -64,10 +60,7 @@ export async function readLibrary(
  * instance. Requests that arrive during a read share it. A failed read is
  * not kept: the last index stays in use and the next request tries again.
  */
-export function supabaseLibrary(
-  db: () => SupabaseClient = serviceClient,
-  ttl = TTL,
-) {
+export function supabaseLibrary(db: () => Db = serviceClient, ttl = TTL) {
   const cache = new Map<Lang, { at: number; items: SearchItem[] }>();
   const loading = new Map<Lang, Promise<SearchItem[]>>();
   return (lang: Lang): Promise<SearchItem[]> => {
