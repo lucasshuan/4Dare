@@ -35,10 +35,10 @@ const PAPER_X = { desktop: 44, phone: 30 };
  * The draw and "for whom", as one scene (spec B §2-3): the avatars hop into
  * the logo's 4, it shakes like a jar and spits out a slip, and the slip is
  * the "for whom" header itself (you pick for, the face, the name), laid out
- * at its final size and place from the first frame: it rises straight from
- * the bubble, growing from 0.15 to 1, and never moves again. At the target
- * beat only its paper dissolves; the hint and the ring of who picks for whom
- * come in under it.
+ * at its final size and place from the first frame: it shoots up from the
+ * bubble edge-on, spinning, then falls into that place and never moves
+ * again. At the target beat only its paper dissolves; the hint and the ring
+ * of who picks for whom come in under it.
  *
  * Mounted after the draw (a reload mid-target), there is no slip: the header
  * comes in on its own. The stage lab's stopped clock always shows the slip's
@@ -100,6 +100,7 @@ export function PickIntro({ show }: PickIntroProps) {
           ...drawSequence(scope, {
             times: drawTimes(order.length, first),
             reduced: info.reduced,
+            phone: info.phone,
             map: { at: (s) => s * kD, d: (s) => s * kD },
           }),
         );
@@ -138,7 +139,7 @@ export function PickIntro({ show }: PickIntroProps) {
               className="relative flex w-max max-w-none flex-col items-center gap-3 sm:gap-3.5"
               style={
                 slip
-                  ? { zIndex: 0, opacity: 0, transform: "scale(0.15)" }
+                  ? { zIndex: 0, opacity: 0, transform: "scale(0.12)" }
                   : { zIndex: 2 }
               }
             >
