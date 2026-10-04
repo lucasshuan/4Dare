@@ -21,6 +21,7 @@ import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
+import { onSeat, seatColor, seatInk, seatSoft } from "@/lib/seats";
 import { playSound } from "@/lib/sound";
 import { backToLobby, leaveRoom } from "@/server/actions";
 
@@ -204,10 +205,17 @@ export function ResultScreen() {
                       ease: ease.soft,
                     },
                   }}
+                  style={
+                    p.place === 1
+                      ? {
+                          outlineColor: seatColor(p.colorSlot),
+                          boxShadow: `0 0 48px -8px ${seatColor(p.colorSlot)}`,
+                        }
+                      : undefined
+                  }
                   className={cn(
                     "flex flex-col gap-2 rounded-xl bg-surface p-2.5 shadow-card",
-                    p.place === 1 &&
-                      "outline-[3px] outline-yes outline-solid shadow-[0_0_48px_-8px_var(--yes)]",
+                    p.place === 1 && "outline-[3px] outline-solid",
                   )}
                 >
                   <Portrait
@@ -245,8 +253,8 @@ export function ResultScreen() {
                     isGuest={p.isGuest}
                     name={p.name}
                     size={48}
-                    ring={p.isYou ? "sky" : undefined}
-                    className="max-sm:size-8"
+                    seat={p.colorSlot}
+                    className="max-sm:size-8 [--ring-gap:var(--canvas)]"
                   />
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate font-bold text-[clamp(14px,1.6vw,18px)]">
@@ -267,13 +275,21 @@ export function ResultScreen() {
                     height: plinth,
                     transition: { delay, duration: 0.7, ease: ease.soft },
                   }}
+                  // each plinth in its player's colour: the winner's full, the rest light
+                  style={
+                    p.place === 1
+                      ? {
+                          backgroundColor: seatColor(p.colorSlot),
+                          color: onSeat(p.colorSlot),
+                        }
+                      : {
+                          backgroundColor: seatSoft(p.colorSlot),
+                          color: seatInk(p.colorSlot),
+                        }
+                  }
                   className={cn(
                     "flex items-center justify-center gap-2 overflow-hidden rounded-t-[20px] font-display font-extrabold",
-                    p.place === 1
-                      ? "bg-yes text-[clamp(32px,4vw,48px)] text-on-yes"
-                      : p.isYou
-                        ? "bg-sky-soft text-4xl text-sky"
-                        : "bg-sunken text-3xl text-ink-muted",
+                    p.place === 1 ? "text-[clamp(32px,4vw,48px)]" : "text-3xl",
                   )}
                 >
                   {p.place === 1 ? (

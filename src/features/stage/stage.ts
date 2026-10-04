@@ -261,7 +261,7 @@ export function stageLook(
       : { glyphs: "set", glyphColor: "var(--ink)" };
   const theme: Look = { tone: "theme", ...glyphs, fade: 1.1 };
   const seatOf = (id: string | null | undefined) =>
-    view.players.find((p) => p.id === id)?.seat ?? null;
+    view.players.find((p) => p.id === id)?.colorSlot ?? null;
   const withSet = (seat: number | null): Look =>
     seat === null ? theme : { tone: seatTone(seat), ...glyphs, fade: 0.8 };
   const withQ = (seat: number | null): Look => seatLook(seat, 1);

@@ -12,6 +12,7 @@ import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
+import { seatInk } from "@/lib/seats";
 import { isEmojiOnly } from "./chat-ui";
 import type { ChatLine } from "./use-chat";
 
@@ -173,6 +174,8 @@ function Line({
     );
 
   const p = playerById(line.by) ?? line.author;
+  // the author's room colour, while they are in the room
+  const slot = playerById(line.by)?.colorSlot ?? null;
   return (
     <m.div
       {...entrance}
@@ -185,12 +188,16 @@ function Line({
           isGuest={p.isGuest}
           name={p.name}
           size={28}
+          seat={slot}
           className="row-span-2 self-end"
         />
       ) : (
         <span className="row-span-2" />
       )}
-      <small className="truncate pl-1 font-bold text-[12px] text-ink-muted">
+      <small
+        style={slot === null ? undefined : { color: seatInk(slot) }}
+        className="truncate pl-1 font-bold text-[12px] text-ink-muted"
+      >
         {p ? name(p) : ""}
       </small>
       {bubble}

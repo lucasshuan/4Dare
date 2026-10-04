@@ -7,6 +7,7 @@ import { useRoomContext } from "@/features/data/room-context";
 import type { ChatMessage } from "@/game/chat";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
+import { seatInk } from "@/lib/seats";
 
 /** A message popped above the folded tab until `until` (server ms). */
 export interface Bubble {
@@ -31,6 +32,8 @@ export function ChatBubbles({ bubbles }: { bubbles: Bubble[] }) {
         <AnimatePresence initial>
           {bubbles.map(({ line }) => {
             const p = playerById(line.by) ?? line.author;
+            // the author's room colour, while they are in the room
+            const slot = playerById(line.by)?.colorSlot ?? null;
             return (
               <m.div
                 key={line.id}
@@ -57,10 +60,14 @@ export function ChatBubbles({ bubbles }: { bubbles: Bubble[] }) {
                     isGuest={p.isGuest}
                     name={p.name}
                     size={30}
+                    seat={slot}
                   />
                 ) : null}
                 <p className="min-w-0 rounded-[18px_18px_6px_18px] bg-surface px-3.5 py-[9px] text-[15px] text-ink leading-[1.35] shadow-pop">
-                  <small className="block truncate font-bold text-[12px] text-ink-muted">
+                  <small
+                    style={slot === null ? undefined : { color: seatInk(slot) }}
+                    className="block truncate font-bold text-[12px] text-ink-muted"
+                  >
                     {p ? name(p) : ""}
                   </small>
                   <span className="line-clamp-4 whitespace-pre-wrap [overflow-wrap:anywhere]">

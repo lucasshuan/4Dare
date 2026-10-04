@@ -99,6 +99,39 @@ describe("lobby", () => {
     expect(g.state.stepStartsAt).toBeNull();
   });
 
+  it("gives each player a colour of their own, the closest free one to their avatar, kept until they leave", () => {
+    const g = new Game(1);
+    const join = (id: string, color: string) =>
+      g.do({
+        type: "JOIN",
+        player: { ...ident(id), avatar: { kind: "color", color } },
+      });
+    const slots = () =>
+      Object.fromEntries(g.state.players.map((p) => [p.id, p.colorSlot]));
+    // p1's pale blue took the blue; peach goes apricot, mint goes teal
+    join("p2", "#F3D3B8");
+    join("p3", "#BFE6C8");
+    // another blue avatar gets what is left
+    join("p4", "#DCE8FA");
+    expect(slots()).toEqual({ p1: 0, p2: 1, p3: 2, p4: 3 });
+    // someone leaving changes nobody else's colour; the next one gets theirs
+    g.do({ type: "LEAVE", playerId: "p2" });
+    expect(slots()).toEqual({ p1: 0, p3: 2, p4: 3 });
+    join("p5", "#D9C7F4");
+    expect(slots()).toMatchObject({ p5: 1 });
+    expect(
+      toView(g.state, 0, "p3", g.now).players.map((p) => p.colorSlot),
+    ).toEqual([0, 2, 3, 1]);
+  });
+
+  it("an older room without colours goes by seat", () => {
+    const g = new Game(3);
+    for (const p of g.state.players) delete p.colorSlot;
+    expect(
+      toView(g.state, 0, "p1", g.now).players.map((p) => p.colorSlot),
+    ).toEqual([0, 1, 2]);
+  });
+
   it("rejects invalid settings", () => {
     const ctx = { now: 0, random: Math.random };
     const bad = [

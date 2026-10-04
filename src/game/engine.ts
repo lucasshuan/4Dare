@@ -2,6 +2,7 @@
 
 import { isGameKey } from "./games";
 import {
+  colorSlotOf,
   findPlayer,
   goneFor,
   isActive,
@@ -19,6 +20,7 @@ import {
   withoutQuestionMark,
   withQuestionMark,
 } from "./question";
+import { pickColorSlot } from "./seat-colors";
 import { isThemeSet, THEME_SET_KEYS } from "./theme-sets";
 import {
   type AnswerEntry,
@@ -627,7 +629,14 @@ export function createRoom(
     settings: valid,
     phase: "lobby",
     players: [
-      { ...host, ready: true, joinedAt: ctx.now, strikes: 0, away: false },
+      {
+        ...host,
+        ready: true,
+        joinedAt: ctx.now,
+        strikes: 0,
+        away: false,
+        colorSlot: pickColorSlot([], host.avatar.color),
+      },
     ],
     order: [],
     theme: null,
@@ -834,6 +843,10 @@ function join(
     joinedAt: ctx.now,
     strikes: 0,
     away: false,
+    colorSlot: pickColorSlot(
+      s.players.map((p) => colorSlotOf(s, p)),
+      player.avatar.color,
+    ),
   });
 }
 

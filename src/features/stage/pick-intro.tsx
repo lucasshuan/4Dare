@@ -19,7 +19,7 @@ import { useMedia } from "@/lib/hooks/use-media";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import { seatColor } from "@/lib/seats";
+import { seatColor, seatInk } from "@/lib/seats";
 import { DrawUrn, drawSequence, drawTimes } from "./draw-urn";
 import { ringSequence, type TimeMap, WhoRing } from "./who-ring";
 
@@ -118,8 +118,8 @@ export function PickIntro({ show }: PickIntroProps) {
   });
 
   if (!person || !target) return null;
-  const color = seatColor(person.seat);
-  const ink = `var(--seat-${(person.seat % 4) + 1}-ink)`;
+  const color = seatColor(person.colorSlot);
+  const ink = seatInk(person.colorSlot);
 
   return (
     <div

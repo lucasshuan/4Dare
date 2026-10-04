@@ -235,6 +235,11 @@ export interface RoomPlayer extends Identity {
   away: boolean;
   /** When their page closed (tab or window), until they show up again. Absent in older rooms. */
   goneAt?: number | null;
+  /**
+   * Their colour (0-based, --seat-1..4), given on joining and theirs until they
+   * leave the room. Absent in older rooms, where the seat gives it.
+   */
+  colorSlot?: number;
 }
 
 /**
@@ -542,8 +547,10 @@ export interface PlayerView {
   avatar: Avatar;
   ready: boolean;
   status: PlayerStatus;
-  /** Place in the room (join order), 0-based: it gives the player their colour, the same all match long. */
+  /** Place in the room (join order), 0-based. */
   seat: number;
+  /** Their colour (0-based, --seat-1..4): theirs from joining until they leave the room. */
+  colorSlot: number;
   /** Place in this match's turn order, 0-based (the first to play is 0); null outside a match. */
   turnOrder: number | null;
   /** It is this player's turn (the ring in the player strip). */

@@ -492,7 +492,7 @@ function OptionCard({
                   isGuest={p.isGuest}
                   name={p.name}
                   size={32}
-                  className="ring-2 ring-surface/80"
+                  seat={p.colorSlot}
                 />
               </m.span>
             ))}

@@ -616,7 +616,7 @@ function Column({
               className="pointer-events-none absolute inset-0 rounded-[inherit]"
               style={{
                 opacity: 0,
-                boxShadow: `0 0 0 4px color-mix(in oklab, ${seatColor(p.seat)} 90%, transparent), 0 24px 56px rgba(30,36,51,.2)`,
+                boxShadow: `0 0 0 4px color-mix(in oklab, ${seatColor(p.colorSlot)} 90%, transparent), 0 24px 56px rgba(30,36,51,.2)`,
               }}
             />
           </>

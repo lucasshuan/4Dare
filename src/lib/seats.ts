@@ -1,7 +1,26 @@
-// Each seat in a room has its colour (--seat-1..4 in globals.css), kept all match long.
+// Each player in a room has a colour (--seat-1..4 in globals.css), theirs from
+// joining until they leave (PlayerView.colorSlot, picked in game/seat-colors.ts).
 
-const SEAT_COLORS = 4;
+import type { CSSProperties } from "react";
+import { SEAT_COLORS } from "@/game/seat-colors";
 
-/** The CSS colour of a seat (0-based, in join order). */
-export const seatColor = (seat: number) =>
-  `var(--seat-${(seat % SEAT_COLORS) + 1})`;
+const n = (slot: number) => (slot % SEAT_COLORS) + 1;
+
+/** The CSS colour of a player's slot (0-based). */
+export const seatColor = (slot: number) => `var(--seat-${n(slot)})`;
+
+/** The colour as text: deeper in the light theme, so it reads on a surface. */
+export const seatInk = (slot: number) => `var(--seat-${n(slot)}-ink)`;
+
+/** The colour as a light fill, behind its player. */
+export const seatSoft = (slot: number) => `var(--seat-${n(slot)}-soft)`;
+
+/** Text on the full colour. */
+export const onSeat = (slot: number) => `var(--on-seat-${n(slot)})`;
+
+/** A light fill in the player's colour, with seat rings on it gapped in the same fill. */
+export const seatWash = (slot: number) =>
+  ({
+    backgroundColor: seatSoft(slot),
+    "--ring-gap": seatSoft(slot),
+  }) as CSSProperties;

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { colorSlotOf } from "@/game/helpers";
 import { char, Game, THEMES } from "@/game/test-utils";
 import {
   type Beat,
@@ -45,9 +46,12 @@ const beat = (show: ShowView, kind: Beat["kind"]) => {
   if (!b) throw new Error(`no ${kind} beat`);
   return b;
 };
-const seatOf = (g: Game, id: string) =>
-  g.state.players.findIndex((p) => p.id === id);
-const seatTone = (seat: number) => `seat-${(seat % 4) + 1}`;
+/** The player's colour slot. */
+const seatOf = (g: Game, id: string) => {
+  const p = g.state.players.find((x) => x.id === id);
+  return p ? colorSlotOf(g.state, p) : -1;
+};
+const seatTone = (slot: number) => `seat-${(slot % 4) + 1}`;
 /** Everyone picks for their target (the theme show may still be on). */
 const pickAll = (g: Game) => g.pickAll();
 

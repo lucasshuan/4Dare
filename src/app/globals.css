@@ -35,7 +35,7 @@
   --on-no: #ffffff;
   --no-soft: #fadfd8;
   --on-avatar: #1e2433;
-  /* One colour per seat in the room, in join order: the turn ring and the match backdrop. */
+  /* One colour per player in the room, theirs from joining (seat-colors.ts): their ring, their name, the match backdrop. */
   --seat-1: #2b69c8;
   --seat-2: #cf7024;
   --seat-3: #0b7a75;
@@ -50,6 +50,28 @@
   --seat-2-ink: color-mix(in oklch, var(--seat-2), black 30%);
   --seat-3-ink: color-mix(in oklch, var(--seat-3), black 30%);
   --seat-4-ink: color-mix(in oklch, var(--seat-4), black 30%);
+  /* a seat colour as a light fill behind its player (lobby seat, history number, podium) */
+  --seat-soft-mix: 14%;
+  --seat-1-soft: color-mix(
+    in oklch,
+    var(--seat-1) var(--seat-soft-mix),
+    var(--surface)
+  );
+  --seat-2-soft: color-mix(
+    in oklch,
+    var(--seat-2) var(--seat-soft-mix),
+    var(--surface)
+  );
+  --seat-3-soft: color-mix(
+    in oklch,
+    var(--seat-3) var(--seat-soft-mix),
+    var(--surface)
+  );
+  --seat-4-soft: color-mix(
+    in oklch,
+    var(--seat-4) var(--seat-soft-mix),
+    var(--surface)
+  );
   /* The match stage: brand blue with butter marks (cold open, draw), the same hues in both themes. */
   --brand-stage: #2b69c8;
   --brand-butter: #f6e3a1;
@@ -105,6 +127,7 @@
   --seat-2-ink: var(--seat-2);
   --seat-3-ink: var(--seat-3);
   --seat-4-ink: var(--seat-4);
+  --seat-soft-mix: 24%;
   --brand-stage: #1d4a93;
   --wash-mix: 26%;
   --scrim: rgba(0, 0, 0, 0.6);

@@ -4,6 +4,7 @@ import type { GameKey } from "./games";
 import { DEFAULT_GAME } from "./games";
 import {
   abandoned,
+  colorSlotOf,
   findPlayer,
   goneFor,
   isPresent,
@@ -366,6 +367,7 @@ export function toView(
       ready: p.ready,
       status: statusOf(s, p),
       seat,
+      colorSlot: colorSlotOf(s, p),
       turnOrder:
         inMatch && s.order.includes(p.id) ? s.order.indexOf(p.id) : null,
       isTurn: TURN.includes(s.phase) && p.id === s.turnPlayerId,

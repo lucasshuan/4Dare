@@ -1,4 +1,5 @@
 // Small lookups shared by the engine and the view.
+import { SEAT_COLORS } from "./seat-colors";
 import {
   DEFAULT_SETTINGS,
   GONE_GRACE_MS,
@@ -21,6 +22,10 @@ export function isActive(state: RoomState, id: PlayerId): boolean {
   const o = state.outcomes[id];
   return !o || (o.discoveredAt === null && !o.gaveUp);
 }
+
+/** A player's colour (0-based); rooms saved before colours were kept go by seat. */
+export const colorSlotOf = (state: RoomState, p: RoomPlayer) =>
+  p.colorSlot ?? state.players.indexOf(p) % SEAT_COLORS;
 
 export function findPlayer(state: RoomState, id: PlayerId) {
   return state.players.find((p) => p.id === id);

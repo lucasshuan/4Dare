@@ -12,15 +12,16 @@ import type { PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import { seatColor } from "@/lib/seats";
+import { seatColor, seatWash } from "@/lib/seats";
 
 /** The strip's entrance after the cast: each item drops in, one after the other. */
 const DROP = { y: -30, duration: 0.5, stagger: 0.06 } as const;
 
 /**
  * Everyone at the table in turn order, left to right: the first to play on the
- * left, the last on the right. Each ring has its player's seat colour. A player
- * whose card you can see opens it bigger on hover (or tap): picture, name, origin.
+ * left, the last on the right. Each face wears its player's colour as a ring;
+ * the turn's card takes the colour whole. A player whose card you can see opens
+ * it bigger on hover (or tap): picture, name, origin.
  *
  * `enter.at` (server ms): the items drop in from there (the cast's entrance
  * beat), on the server clock, so a reload lands on the same frame.
@@ -73,10 +74,12 @@ export function PlayerStrip({
           {/* the entrance moves this one, so it never fights the layout animation above */}
           <div
             data-strip-item
-            className="flex min-w-0 flex-1 rounded-md bg-surface transition-shadow duration-300"
+            className="flex min-w-0 flex-1 rounded-md bg-surface transition-[box-shadow,background-color] duration-300"
             style={{
+              // the turn widens the player's colour from their ring to the whole card
+              ...(p.isTurn ? seatWash(p.colorSlot) : null),
               boxShadow: p.isTurn
-                ? `0 0 0 2px ${seatColor(p.seat)}`
+                ? `0 0 0 2px ${seatColor(p.colorSlot)}`
                 : "0 0 0 0 transparent",
               ...(at !== null
                 ? { opacity: 0, transform: `translateY(${DROP.y}px)` }
@@ -106,6 +109,7 @@ function PlayerRow({ player: p }: { player: PlayerView }) {
         isGuest={p.isGuest}
         name={p.name}
         size={32}
+        seat={p.colorSlot}
         className="max-sm:size-6"
       />
       <span className="flex min-w-0 flex-1 flex-col">
@@ -154,7 +158,7 @@ function CardPeek({ player: p }: { player: PlayerView }) {
     : picker
       ? withNames((n) => t("pickedBy", { name: n(picker) }))
       : null;
-  const seat = seatColor(p.seat);
+  const seat = seatColor(p.colorSlot);
   return (
     <Popover.Root>
       <Popover.Trigger

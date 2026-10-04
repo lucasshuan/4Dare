@@ -13,6 +13,7 @@ import { useRoomContext } from "@/features/data/room-context";
 import type { HistoryEntryView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
+import { seatInk, seatSoft } from "@/lib/seats";
 
 /** Wide windows show the history as a bar that pushes the screen; narrower ones as a drawer over it. */
 export const WIDE = "(min-width: 1024px)";
@@ -299,11 +300,17 @@ function HistoryBody({
                   exit={{ opacity: 0, transition: { duration: 0.12 } }}
                   className="flex gap-3"
                 >
+                  {/* the round's number in its player's colour: one glance finds someone's plays */}
                   <span
-                    className={cn(
-                      "flex size-7 shrink-0 items-center justify-center rounded-pill font-medium font-mono text-[13px]",
-                      e.byId === me.id ? "bg-sky-soft" : "bg-sunken",
-                    )}
+                    style={
+                      by
+                        ? {
+                            backgroundColor: seatSoft(by.colorSlot),
+                            color: seatInk(by.colorSlot),
+                          }
+                        : undefined
+                    }
+                    className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-sunken font-medium font-mono text-[13px]"
                   >
                     {e.n}
                   </span>

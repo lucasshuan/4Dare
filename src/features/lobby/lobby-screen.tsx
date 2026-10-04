@@ -38,6 +38,7 @@ import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
 import { formatClock, useDisplayName, useRoomTitle } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
+import { seatWash } from "@/lib/seats";
 import {
   leaveRoom,
   setReady,
@@ -258,12 +259,15 @@ export function LobbyScreen() {
                       key={p.id}
                       layout
                       {...riseIn}
-                      className="flex items-center gap-3 rounded-md bg-surface p-3"
+                      // the seat shows the colour that is theirs while they stay
+                      style={seatWash(p.colorSlot)}
+                      className="flex items-center gap-3 rounded-md p-3"
                     >
                       <Avatar
                         avatar={p.avatar}
                         isGuest={p.isGuest}
                         name={p.name}
+                        seat={p.colorSlot}
                       />
                       <div className="flex min-w-0 flex-col">
                         <span className="truncate font-semibold">

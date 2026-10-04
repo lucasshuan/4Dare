@@ -1,6 +1,7 @@
 import { UserRound } from "lucide-react";
 import type { Avatar as AvatarData } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { seatColor } from "@/lib/seats";
 import { critterUri } from "./critter";
 
 // Larger faces (the stage's 120-150 px ones) pass `size-[…] text-[…]` in className.
@@ -23,33 +24,42 @@ const SIZE = {
   68: "size-17 text-[28px]",
 } as const;
 
+/**
+ * The ring in a player's room colour: a gap the colour of what is behind
+ * (`--ring-gap`, the surface by default), then the colour; thinner on small faces.
+ */
+function seatRing(slot: number, size: number) {
+  const [gap, ring] = size <= 28 ? [1.5, 3] : [2, 4];
+  return `0 0 0 ${gap}px var(--ring-gap, var(--surface)), 0 0 0 ${ring}px ${seatColor(slot)}`;
+}
+
 /** A critter on a pastel, a picture, or (older avatars) an initial / person icon on a pastel. */
 export function Avatar({
   avatar,
   isGuest,
   name,
   size = 44,
-  ring,
+  seat,
   className,
 }: {
   avatar: AvatarData;
   isGuest: boolean;
   name: string | null;
   size?: keyof typeof SIZE;
-  ring?: "sky" | "apricot";
+  /** In a room: the player's colour slot, drawn as a ring. */
+  seat?: number | null;
   className?: string;
 }) {
   return (
     <span
       aria-hidden="true"
-      style={{ backgroundColor: avatar.color }}
+      style={{
+        backgroundColor: avatar.color,
+        ...(seat != null ? { boxShadow: seatRing(seat, size) } : null),
+      }}
       className={cn(
         "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-pill font-bold font-display text-on-avatar",
         SIZE[size],
-        ring === "sky" &&
-          "shadow-[0_0_0_3px_var(--canvas),0_0_0_6px_var(--sky)]",
-        ring === "apricot" &&
-          "shadow-[0_0_0_3px_var(--canvas),0_0_0_6px_var(--apricot)]",
         className,
       )}
     >
