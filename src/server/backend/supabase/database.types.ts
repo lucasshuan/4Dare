@@ -14,6 +14,105 @@ export type Database = {
   };
   public: {
     Tables: {
+      character_image_picks: {
+        Row: {
+          created_at: string;
+          image_id: string;
+          player_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          image_id: string;
+          player_id: string;
+        };
+        Update: {
+          created_at?: string;
+          image_id?: string;
+          player_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "character_image_picks_image_id_fkey";
+            columns: ["image_id"];
+            isOneToOne: false;
+            referencedRelation: "character_images";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      character_image_reports: {
+        Row: {
+          created_at: string;
+          image_id: string;
+          reporter_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          image_id: string;
+          reporter_id: string;
+        };
+        Update: {
+          created_at?: string;
+          image_id?: string;
+          reporter_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "character_image_reports_image_id_fkey";
+            columns: ["image_id"];
+            isOneToOne: false;
+            referencedRelation: "character_images";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      character_images: {
+        Row: {
+          author: Json | null;
+          bonus: number;
+          character_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          moderation: Json | null;
+          picks: number;
+          status: string;
+          url: string;
+        };
+        Insert: {
+          author?: Json | null;
+          bonus?: number;
+          character_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          moderation?: Json | null;
+          picks?: number;
+          status?: string;
+          url: string;
+        };
+        Update: {
+          author?: Json | null;
+          bonus?: number;
+          character_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          moderation?: Json | null;
+          picks?: number;
+          status?: string;
+          url?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "character_images_character_id_fkey";
+            columns: ["character_id"];
+            isOneToOne: false;
+            referencedRelation: "characters";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       character_names: {
         Row: {
           alias_norms: string[];
@@ -486,7 +585,19 @@ export type Database = {
         Args: { p_from: string; p_to: string };
         Returns: undefined;
       };
+      record_image_pick: {
+        Args: { p_character: string; p_player: string; p_url: string };
+        Returns: undefined;
+      };
       record_match: { Args: { m: Json }; Returns: undefined };
+      refresh_character_cover: {
+        Args: { p_character: string };
+        Returns: undefined;
+      };
+      report_character_image: {
+        Args: { p_hide_at: number; p_image: string; p_reporter: string };
+        Returns: string;
+      };
       search_characters: {
         Args: { p_lang: string; p_limit: number; q: string };
         Returns: {
