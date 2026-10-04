@@ -32,7 +32,7 @@ Style (caveman full): in your messages and your final return, no articles, fille
 const RULES = (wp) => `
 Rules:
 - Edit only the files your package owns (brief, "Your package"), plus files it explicitly allows. Other packages (${OTHERS(wp)}) run at the same time in this working tree: never edit, revert or reformat their files; if a check fails only because of their files, say so in your report and carry on.
-- Never run git add, rm, mv, restore, checkout, reset, stash, clean, commit or push: the lead stages and commits. Delete a file with plain `rm`.
+- Never run git add, rm, mv, restore, checkout, reset, stash, clean, commit or push: the lead stages and commits. Delete a file with plain rm.
 - Work in few, large steps: every tool call re-reads your whole context, so fewer calls are faster and cheaper. Write whole files with Write rather than many small edits; no task list (TaskCreate/TaskUpdate); pipe command output through tail or grep so only the decisive lines come back.
 - Next 16: read the guide in node_modules/next/dist/docs for any Next-specific API you touch.
 - A dev server is already running at http://localhost:3100 with the e2e env (the lead started it; it picks up your edits). Use it for the lab (/en/dev/stage) and screenshots. Never start, stop or restart a server; if it is down, say so in your report and skip the screenshots.
