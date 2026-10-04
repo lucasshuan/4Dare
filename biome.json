@@ -15,7 +15,8 @@
       "!build",
       "!.next-*",
       "!.claude",
-      "!.data"
+      "!.data",
+      "!data/characters.json"
     ]
   },
   "formatter": {
