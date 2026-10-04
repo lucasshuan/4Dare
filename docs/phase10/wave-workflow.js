@@ -1,6 +1,7 @@
 // Workflow script for Phase 10 packages (Workflow tool, `scriptPath` pointing here).
 //
 //   build:  {"mode": "build", "wps": ["WP4"], "others": ["WP6", "WP9a"], "env": "...", "extra": {"WP4": "..."}}
+//   fix:    {"mode": "fix", "wps": ["WP9a"], "defects": {"WP9a": [...]}, "others": [...], "env": "..."}
 //   review: {"mode": "review", "wps": ["WP3", "WP5"], "commits": {"WP3": "a80883c", "WP5": "712de86"}, "env": "..."}
 //
 // Before a build, the lead writes each package's brief (`python3 docs/phase10/briefs/make.py WP4`)
@@ -71,6 +72,15 @@ Read ${P}/briefs/${wp}.md (the acceptance is under "Your package") and the engin
 Do not edit files. Report only defects with evidence; lows only when they are real and cheap to fix; no style nits. passed = no high or medium defect. Also write the findings to ${P}/reports/${wp}-review.md.${ENV}${STYLE}`,
   { label: `review:${wp}`, phase: 'Review', effort: 'high', schema: REVIEW_SCHEMA })
 
+const fix = (wp) => agent(`You fix review findings in ${wp} of Phase 10 in the 4Dare repo (the current directory). The package is committed; its brief is ${P}/briefs/${wp}.md and its report ${P}/reports/${wp}.md. Findings:
+${JSON.stringify(args.defects[wp], null, 1)}
+Check each against the code and fix every real one, the high and medium first. Verify only this: the package's own test files, \`pnpm typecheck\`, \`pnpm exec biome check <changed files>\`, and a quick check in the dev server where a finding is visual or interactive. Append a short "Review fixes" section to ${P}/reports/${wp}.md (each finding: fixed, or not a defect and why). Return a 5-line summary.
+${RULES(wp)}`,
+  { label: `fix:${wp}`, phase: 'Review', effort: 'high' })
+
+if (args.mode === 'fix') {
+  return await parallel(WPS.map((wp) => () => fix(wp).then((summary) => ({ wp, summary }))))
+}
 if (args.mode === 'review') {
   const results = await parallel(WPS.map((wp) => () => review(wp).then((r) => r && { wp, ...r })))
   return results.filter(Boolean)
