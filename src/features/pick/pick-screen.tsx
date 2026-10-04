@@ -118,6 +118,19 @@ function useCardWidth(phone: boolean): number {
   return Math.round(Math.max(200, Math.min(phone ? 224 : 270, fit)));
 }
 
+/** Whether the server's pick is another character than the card holds. */
+function differs(pick: CardView, card: CardContent): boolean {
+  switch (card.kind) {
+    case "empty":
+    case "typing":
+      return true;
+    case "picked":
+      return card.card.characterId !== pick.characterId;
+    case "new":
+      return card.name.trim() !== pick.name.trim();
+  }
+}
+
 interface Part {
   els: Element[];
   at: number;
@@ -278,8 +291,17 @@ function PickTable() {
   const roll = async () => {
     const id = ++rollId.current;
     setRolls((n) => n + 1);
+    draft.drawing();
     const r = await run(() => randomPick(code, drawnId ?? undefined));
-    if (id !== rollId.current) return;
+    // the server saved the draw as the draft, even when the card moved on
+    const kept = id === rollId.current;
+    draft.drawn(
+      r.ok
+        ? { characterId: r.data.id, name: r.data.name, imageUrl: null }
+        : null,
+      kept,
+    );
+    if (!kept) return;
     if (r.ok)
       setContent({ kind: "picked", card: toCard(r.data), via: "random" });
     else if (r.error === "not_enough_picks") setNoHistory(true);
@@ -337,9 +359,14 @@ function PickTable() {
 
   // What the card shows. Once the server has the pick, a card left empty
   // (the clock drew one) flips to it, and a half-typed name shows the
-  // character it became; anything else stays as the player left it.
+  // character it became. Out of time, a card changed after its last save
+  // shows the saved draft the server picked; anything else stays as the
+  // player left it.
   const shown: CardContent =
-    pick.character && (content.kind === "empty" || content.kind === "typing")
+    pick.character &&
+    (content.kind === "empty" ||
+      content.kind === "typing" ||
+      (timeUp && differs(pick.character, content)))
       ? {
           kind: "picked",
           card: pick.character,

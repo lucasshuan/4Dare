@@ -4,7 +4,14 @@ import { useCallback, useEffect, useRef } from "react";
 import type { CardContent, SearchItem } from "@/game/character-search";
 import type { PickView } from "@/game/types";
 import { useClock } from "@/lib/hooks/use-server-clock";
-import { draftKey, fromDraft, putDraft, toDraft } from "./draft-api";
+import {
+  type DraftCard,
+  draftKey,
+  fromDraft,
+  putDraft,
+  saveOutcome,
+  toDraft,
+} from "./draft-api";
 
 /** Quiet time after the last keystroke before the card is saved. */
 export const DRAFT_DEBOUNCE_MS = 600;
@@ -12,6 +19,8 @@ export const DRAFT_DEBOUNCE_MS = 600;
 export const FINAL_FLUSH_MS = 1500;
 /** …plus up to this much, so the pickers' last saves don't land together. */
 export const FINAL_JITTER_MS = 400;
+/** A save that failed for a passing reason (a lost race, the rate limit, the network) is tried again after this. */
+export const DRAFT_RETRY_MS = 1000;
 
 interface Saver {
   /** Key of the last draft the server accepted (or gave us). */
@@ -23,6 +32,13 @@ interface Saver {
   inflight: Promise<void> | null;
   again: boolean;
   timer: number;
+  retry: number;
+  /** Bumped when the server's draft changed under a save in flight: its answer no longer says what the server holds. */
+  epoch: number;
+  /** Random is drawing: the server's draft may turn into the draw at any moment. */
+  drawing: number;
+  /** A save went out (or was in flight) while Random drew: the two raced on the server. */
+  raced: boolean;
   /** Refused for good (the card is closed): stop saving. */
   stopped: boolean;
   /** Confirm is under way: hold the autosave. */
@@ -43,7 +59,8 @@ interface Saver {
  *   later only when the server's draft is new to this page and the field is
  *   neither focused nor holding unsaved changes.
  * `flush` sends what is unsaved now (Confirm of a new name needs the stored
- * draft); `pause` holds the autosave while Confirm runs.
+ * draft); `pause` holds the autosave while Confirm runs; `drawing` and
+ * `drawn` bracket a Random draw, which the server saves as the draft itself.
  */
 export function usePickDraft({
   code,
@@ -77,6 +94,10 @@ export function usePickDraft({
     inflight: null,
     again: false,
     timer: 0,
+    retry: 0,
+    epoch: 0,
+    drawing: 0,
+    raced: false,
     stopped: false,
     paused: false,
     image: content.kind === "new" ? content.imageUrl : null,
@@ -105,10 +126,20 @@ export function usePickDraft({
     const key = draftKey(draft);
     if (key === s.accepted) return Promise.resolve();
     s.known.add(key);
+    window.clearTimeout(s.retry);
+    if (s.drawing) s.raced = true;
+    const epoch = s.epoch;
     s.inflight = putDraft(room, draft).then((r) => {
-      if (r.ok) s.accepted = key;
-      // closed (confirmed, out of time, not seated): nothing more to save
-      else if (r.status === 403 || r.status === 409) s.stopped = true;
+      const outcome = saveOutcome(r);
+      if (outcome === "saved") {
+        if (epoch === s.epoch) s.accepted = key;
+      } else if (outcome === "closed") {
+        // confirmed, out of time, not seated: nothing more to save
+        s.stopped = true;
+      } else {
+        // still unsaved: the next change, the final flush or this retry sends it again
+        s.retry = window.setTimeout(() => void send(), DRAFT_RETRY_MS);
+      }
     });
     return s.inflight.finally(() => {
       s.inflight = null;
@@ -132,6 +163,43 @@ export function usePickDraft({
     if (on) window.clearTimeout(s.timer);
   }, []);
 
+  /** Random starts drawing: hold the server's drafts until it is back. */
+  const drawing = useCallback(() => {
+    const s = saver.current as Saver;
+    if (!s.drawing) s.raced = s.inflight !== null;
+    s.drawing++;
+  }, []);
+
+  /**
+   * Random is back. `card` is the draw the server saved as the draft (null
+   * when it failed); `kept` says whether the card shows it, or moved on
+   * meanwhile (a hand card, typing). Call it before showing the draw.
+   */
+  const drawn = useCallback(
+    (card: DraftCard | null, kept: boolean) => {
+      const s = saver.current as Saver;
+      s.drawing = Math.max(0, s.drawing - 1);
+      if (!card) return;
+      const key = draftKey(card);
+      s.known.add(key);
+      if (kept && !s.raced) {
+        s.accepted = key;
+        return;
+      }
+      // The server's draft is now the draw, or a save of ours that raced it:
+      // what saves in flight report no longer holds. Save the card again.
+      s.epoch++;
+      if (kept) {
+        // nothing saved matches: the autosave sends the draw once the card shows it
+        s.accepted = "\u0000";
+        return;
+      }
+      s.accepted = key;
+      void send();
+    },
+    [send],
+  );
+
   // the card as the server left it, once (reload, rejoin): a library id waits for the index
   useEffect(() => {
     const s = saver.current as Saver;
@@ -154,7 +222,8 @@ export function usePickDraft({
   useEffect(() => {
     const s = saver.current as Saver;
     const now = latest.current;
-    if (!s.restored || !now.active || s.known.has(serverKey)) return;
+    if (!s.restored || !now.active || s.drawing || s.known.has(serverKey))
+      return;
     const local = draftKey(toDraft(now.content));
     if (serverKey === local) return;
     if (now.focused || local !== s.accepted || s.inflight) return;
@@ -174,19 +243,19 @@ export function usePickDraft({
     window.clearTimeout(s.timer);
     if (!s.restored || !active) return;
     const key = draftKey(toDraft(content));
-    // a draw is saved by the server, a restored card is what it holds
-    if (
-      content.kind === "picked" &&
-      (content.via === "random" || content.via === "restore")
-    ) {
-      if (content.via === "random") s.accepted = key;
+    // a restored card is what the server holds (a draw: see drawn)
+    if (content.kind === "picked" && content.via === "restore") {
       s.known.add(key);
       return;
     }
     if (key === s.accepted || s.paused) return;
+    const { deadline: end, clock: now } = latest.current;
+    // in the last moments a debounce would outlast the clock
+    const late = end !== null && now.now() >= end - FINAL_FLUSH_MS;
     const typing =
       focused &&
       !pictured &&
+      !late &&
       (content.kind === "typing" ||
         content.kind === "new" ||
         content.kind === "empty");
@@ -222,9 +291,13 @@ export function usePickDraft({
   }, []);
 
   useEffect(
-    () => () => window.clearTimeout((saver.current as Saver).timer),
+    () => () => {
+      const s = saver.current as Saver;
+      window.clearTimeout(s.timer);
+      window.clearTimeout(s.retry);
+    },
     [],
   );
 
-  return { flush, pause };
+  return { flush, pause, drawing, drawn };
 }

@@ -85,7 +85,12 @@ export function fromDraft(
     : { kind: "typing", text: draft.name, preview: item };
 }
 
-export type DraftSave = { ok: boolean; status: number };
+export type DraftSave = {
+  ok: boolean;
+  status: number;
+  /** The `{ error }` code of a refusal, when the body had one. */
+  error?: string;
+};
 
 /** PUT the whole card (or null for an empty one). Never throws: status 0 when the network failed. */
 export async function putDraft(
@@ -100,10 +105,38 @@ export async function putDraft(
       body: JSON.stringify(draft),
       keepalive,
     });
-    return { ok: res.ok, status: res.status };
+    if (res.ok) return { ok: true, status: res.status };
+    let error: string | undefined;
+    try {
+      const body = (await res.json()) as { error?: unknown };
+      if (typeof body.error === "string") error = body.error;
+    } catch {
+      // no JSON body (a proxy's error page): judged by the status alone
+    }
+    return { ok: false, status: res.status, error };
   } catch {
     return { ok: false, status: 0 };
   }
+}
+
+/** Refusals that mean the card is closed for good: confirmed, out of time, not seated, no room. */
+const CLOSED = new Set([
+  "already_done",
+  "wrong_phase",
+  "not_member",
+  "unauthorized",
+  "not_found",
+]);
+
+/**
+ * What a save's answer means for the autosave: `saved`; `closed` (stop
+ * saving, the card can no longer change); or `retry` (a lost CAS race, the
+ * rate limit, a server or network failure: the card is still unsaved).
+ */
+export function saveOutcome(r: DraftSave): "saved" | "closed" | "retry" {
+  if (r.ok) return "saved";
+  if (r.error !== undefined) return CLOSED.has(r.error) ? "closed" : "retry";
+  return r.status === 403 || r.status === 404 ? "closed" : "retry";
 }
 
 /**

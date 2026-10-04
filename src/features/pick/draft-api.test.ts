@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { type SearchItem, toSearchItem } from "@/game/character-search";
-import { draftKey, drawHand, fromDraft, toDraft } from "./draft-api";
+import {
+  draftKey,
+  drawHand,
+  fromDraft,
+  saveOutcome,
+  toDraft,
+} from "./draft-api";
 
 const item = (id: string, name: string): SearchItem =>
   toSearchItem({ id, name, origin: "Marvel", imageUrl: null, aliases: [] });
@@ -143,5 +149,31 @@ describe("drawHand", () => {
 
   it("keeps a short hand whole", () => {
     expect(drawHand(["a", "b"], "p1:1")).toEqual(["a", "b"]);
+  });
+});
+
+describe("saveOutcome", () => {
+  it("stops only for refusals that close the card", () => {
+    expect(saveOutcome({ ok: true, status: 204 })).toBe("saved");
+    for (const error of ["already_done", "wrong_phase", "not_member"])
+      expect(saveOutcome({ ok: false, status: 409, error })).toBe("closed");
+    expect(saveOutcome({ ok: false, status: 403, error: "unauthorized" })).toBe(
+      "closed",
+    );
+    expect(saveOutcome({ ok: false, status: 404 })).toBe("closed");
+  });
+
+  it("keeps the card unsaved after a transient failure", () => {
+    expect(saveOutcome({ ok: false, status: 409, error: "conflict" })).toBe(
+      "retry",
+    );
+    expect(saveOutcome({ ok: false, status: 429, error: "rate_limited" })).toBe(
+      "retry",
+    );
+    expect(saveOutcome({ ok: false, status: 500, error: "unknown" })).toBe(
+      "retry",
+    );
+    expect(saveOutcome({ ok: false, status: 502 })).toBe("retry");
+    expect(saveOutcome({ ok: false, status: 0 })).toBe("retry");
   });
 });
