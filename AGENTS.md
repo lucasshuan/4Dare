@@ -26,6 +26,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Keep the context small: read only what the task needs, and cut command output to the lines that decide.
 - Tests are slow: while working, run only the tests of what changed, plus `pnpm typecheck` and `pnpm lint`. The whole suite (`pnpm test`) and e2e (`pnpm test:e2e`) run once, at the very end of a phase, and only when really needed; a browser check mid-phase is `pnpm test:e2e:smoke` (the hub and one match).
+- CI (`.github/workflows/ci.yml`) runs lint, typecheck, `pnpm knip`, the unit tests and the e2e smoke on every push. When it fails, read the failed job's log (GitHub MCP `get_job_logs`) rather than rerunning everything locally.
+- `pnpm knip` lists unused files, exports and dependencies: delete them, or keep a planned export with a `/** @public */` comment.
 
 ## Commits
 
