@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { JwtPayload, User, UserAppMetadata } from "@supabase/supabase-js";
 import { MAX_NAME } from "@/game/types";
 import type { Me } from "@/server/contract";
 
@@ -12,6 +12,12 @@ function oauthIdentity(user: User) {
   return user.identities?.find((identity) => isProvider(identity.provider));
 }
 
+/** Discord or Google among the providers Auth lists in `app_metadata`. */
+function listedProvider(meta: UserAppMetadata | undefined): Me["provider"] {
+  const listed: unknown[] = [meta?.provider, ...(meta?.providers ?? [])];
+  return listed.find(isProvider) ?? null;
+}
+
 /**
  * Discord or Google, if the user has one. A guest who links an account keeps
  * `app_metadata.provider = "anonymous"`, so identities are checked first.
@@ -19,16 +25,19 @@ function oauthIdentity(user: User) {
 export function providerOf(user: User): Me["provider"] {
   const fromIdentity = oauthIdentity(user)?.provider;
   if (isProvider(fromIdentity)) return fromIdentity;
-  const listed: unknown[] = [
-    user.app_metadata?.provider,
-    ...(user.app_metadata?.providers ?? []),
-  ];
-  return listed.find(isProvider) ?? null;
+  return listedProvider(user.app_metadata);
 }
 
 /** A Discord/Google user who is no longer an anonymous guest. */
 export const isAccount = (user: User) =>
   user.is_anonymous !== true && providerOf(user) !== null;
+
+/**
+ * isAccount for a verified access token (getClaims). A token carries no
+ * identities, but a linked provider is listed in `app_metadata.providers` too.
+ */
+export const isAccountClaims = (claims: JwtPayload) =>
+  claims.is_anonymous !== true && listedProvider(claims.app_metadata) !== null;
 
 /** What the provider tells us about the person: display name and picture. */
 export function accountDefaults(user: User) {

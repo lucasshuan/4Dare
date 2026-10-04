@@ -13,7 +13,7 @@ import {
 import { randomAvatar } from "../pastel";
 import type { AuthService } from "../types";
 import { serviceClient, sessionClient } from "./clients";
-import { accountDefaults, isAccount } from "./identity";
+import { accountDefaults, isAccount, isAccountClaims } from "./identity";
 
 interface ProfileRow {
   id: string;
@@ -26,6 +26,15 @@ interface ProfileRow {
 
 const profiles = () => serviceClient().from("profiles");
 
+async function profileOf(id: string): Promise<ProfileRow | null> {
+  const { data, error } = await profiles()
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return data as ProfileRow | null;
+}
+
 /**
  * An account's profile, made the first time it signs in. It starts from the
  * guest it was (same critter and name number), with the provider's name and
@@ -35,12 +44,8 @@ export async function syncProfile(
   user: User,
   guest: Guest | null,
 ): Promise<ProfileRow> {
-  const { data, error } = await profiles()
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (error) throw error;
-  if (data) return data as ProfileRow;
+  const found = await profileOf(user.id);
+  if (found) return found;
   const row: ProfileRow = {
     id: user.id,
     guest_number: guest?.guestNumber ?? randomGuestNumber(),
@@ -81,8 +86,19 @@ const guestMe = (g: Guest): Me => ({
 export function supabaseAuth(): AuthService {
   async function account(): Promise<ProfileRow | null> {
     const client = await sessionClient();
-    const { data } = await client.auth.getUser();
-    const user = data.user;
+    // Checked here against the project's public signing key (cached), so no
+    // call to Supabase Auth; an expiring token is refreshed like getUser does.
+    // A garbled or forged cookie can make it throw: that visitor is a guest.
+    const { data } = await client.auth
+      .getClaims()
+      .catch(() => ({ data: null }));
+    if (!data || !isAccountClaims(data.claims)) return null;
+    const profile = await profileOf(data.claims.sub);
+    if (profile) return profile;
+    // No profile yet (the callback could not make one): the provider's name
+    // and picture are only on the full user.
+    const { data: fresh } = await client.auth.getUser();
+    const user = fresh.user;
     if (!user || !isAccount(user)) return null;
     const jar = await cookies();
     return syncProfile(user, openGuest(jar.get(GUEST_COOKIE)?.value));

@@ -1,6 +1,11 @@
-import type { User } from "@supabase/supabase-js";
+import type { JwtPayload, User } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
-import { accountDefaults, isAccount, providerOf } from "./identity";
+import {
+  accountDefaults,
+  isAccount,
+  isAccountClaims,
+  providerOf,
+} from "./identity";
 
 // Shapes as Supabase Auth returns them (trimmed to what we read).
 const user = (fields: Partial<User>): User =>
@@ -80,5 +85,71 @@ describe("Supabase identity", () => {
       }),
     );
     expect(d).toMatchObject({ name: "bia", provider_avatar_url: null });
+  });
+});
+
+// Access token payloads as getClaims returns them: no identities, only app_metadata.
+const claims = (fields: Partial<JwtPayload>): JwtPayload => ({
+  iss: "https://project.supabase.co/auth/v1",
+  sub: "u1",
+  aud: "authenticated",
+  exp: 0,
+  iat: 0,
+  role: "authenticated",
+  aal: "aal1",
+  session_id: "s1",
+  ...fields,
+});
+
+describe("Supabase identity from a token", () => {
+  it("tells guests from accounts, also after a guest links Discord", () => {
+    expect(
+      isAccountClaims(
+        claims({
+          is_anonymous: true,
+          app_metadata: { provider: "anonymous", providers: ["anonymous"] },
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      isAccountClaims(
+        claims({
+          is_anonymous: false,
+          app_metadata: {
+            provider: "anonymous",
+            providers: ["anonymous", "discord"],
+          },
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isAccountClaims(
+        claims({
+          is_anonymous: false,
+          app_metadata: { provider: "google", providers: ["google"] },
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it("wants Discord or Google and no anonymous flag", () => {
+    expect(
+      isAccountClaims(claims({ app_metadata: { provider: "discord" } })),
+    ).toBe(true);
+    // The anonymous flag wins, as in isAccount.
+    expect(
+      isAccountClaims(
+        claims({
+          is_anonymous: true,
+          app_metadata: { providers: ["anonymous", "discord"] },
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      isAccountClaims(
+        claims({ app_metadata: { provider: "email", providers: ["email"] } }),
+      ),
+    ).toBe(false);
+    expect(isAccountClaims(claims({}))).toBe(false);
   });
 });
