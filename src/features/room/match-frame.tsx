@@ -193,7 +193,7 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
             <m.div
               key="clock"
               {...CLOCK_POP}
-              // only a show's clock pops; the one under an answers or guess reveal recharges as ever
+              // a show's or a guess scene's clock pops; the one under the answers reveal recharges as ever
               initial={frame.clockPops ? CLOCK_POP.initial : false}
               className="flex"
             >

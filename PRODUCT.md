@@ -12,7 +12,7 @@
 6. Each player fills a card for their target: type a name (the library suggests matches), tap one of the theme's popular characters in the hand at the bottom, or draw one at random. You can put another picture on the card (one players sent, or your own) or create a new character. The card is saved as you go: when time runs out, it goes as it is, and an empty card gets a random character.
 7. The cast: you see who picked your card, then the turn order. You see everyone's card but yours.
 8. On your turn, you ask a yes-or-no question. Everyone answers: Yes, Probably, Don't know, Probably not, No or Doesn't matter, with a comment if they want.
-9. Then you guess. The right name counts at once. If it's only close, whoever picked the character decides.
+9. Then you guess, or pass. The right name counts at once. If it's only close, whoever picked the character decides. The result takes the whole screen for a few seconds in your colour (your guess, your card turning over, "Got it" or "Not yet"; or that you passed), then the next player's turn sweeps in.
 10. First to find out wins. At the end there's a podium; a few seconds later everyone is back in the lobby for another one.
 
 Each step has a time limit, set per room: 40 s to vote on the theme, 80 s to ask and to answer, 60 s to guess, 40 s to check a guess (picking always gets 120 s). A step's clock starts when the scene before it ends. Every vote or answer that leaves others still to act cuts that step's time split evenly among who acts (a third with three, a quarter with four), so nobody waits long on the last one. Between steps, everyone sees the answers.

@@ -36,6 +36,8 @@ export interface LabParams {
   tie: boolean;
   /** The pick clock runs out: drafts and empty cards are filled by the server. */
   timeout: boolean;
+  /** The first turn's guess: right, wrong (the picker says no), or passed. */
+  guess: "hit" | "miss" | "pass";
   /** The winning theme's set (its glyphs and colour). */
   set: ThemeSet;
   /** The clock runs from `at`; otherwise it stays there. */
@@ -64,6 +66,7 @@ export const LAB_DEFAULTS: LabParams = {
   typed: false,
   tie: false,
   timeout: false,
+  guess: "hit",
   set: "heroes",
   play: false,
   speed: 1,
@@ -110,6 +113,7 @@ export function parseLabParams(query: Query, lang: Lang): LabParams {
     typed: flag("typed"),
     tie: flag("tie"),
     timeout: flag("timeout"),
+    guess: one("guess", ["hit", "miss", "pass"]),
     set: one("set", THEME_SET_KEYS),
     play: flag("play"),
     speed: SPEEDS.includes(speed) ? speed : 1,

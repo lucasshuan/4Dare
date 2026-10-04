@@ -12,6 +12,10 @@ import { onSeat, seatColor } from "@/lib/seats";
 
 /** How long the band stays on screen (ms): in, a hold, out. */
 const HANDOFF_MS = 2100;
+/** The share of it after which the band covers the whole screen. */
+const COVERED = 0.28;
+/** When the band covers the whole screen (ms after it starts): what was under it can go. */
+export const HANDOFF_COVERED_MS = Math.round(HANDOFF_MS * COVERED);
 
 /**
  * The turn passing: when a player's question step starts, a band in their
@@ -106,7 +110,7 @@ function Band({
               { clipPath: "polygon(0 0, 0 0, -20% 100%, -20% 100%)" },
               {
                 clipPath: "polygon(0 0, 120% 0, 100% 100%, -20% 100%)",
-                offset: 0.28,
+                offset: COVERED,
               },
               {
                 clipPath: "polygon(0 0, 120% 0, 100% 100%, -20% 100%)",

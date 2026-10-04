@@ -135,6 +135,26 @@ function mergeSettings(
 
 const isShow = (r: Reveal | null | undefined): r is Reveal =>
   !!r && (r.kind === "opening" || r.kind === "theme" || r.kind === "cast");
+/** A guess's result, or a pass, on the whole screen: the next turn waits for it. */
+const isGuessScene = (r: Reveal | null | undefined): r is Reveal =>
+  !!r && (r.kind === "guess" || r.kind === "pass");
+
+/** Puts a guess's result (or a pass) on screen for `ms`, scaled like the shows. */
+function guessScene(
+  s: RoomState,
+  kind: "guess" | "pass",
+  n: number,
+  ms: number,
+  ctx: Ctx,
+) {
+  const scale = ctx.showScale && ctx.showScale > 0 ? ctx.showScale : 1;
+  s.reveal = {
+    kind,
+    n,
+    startsAt: ctx.now,
+    until: ctx.now + Math.round(ms * scale),
+  };
+}
 
 /** A beat and its length (ms) before scaling; a 0 drops it. */
 type Part = [BeatKind, number];
@@ -181,12 +201,13 @@ function stage(
 }
 
 /**
- * Starts a step. Turn steps start at once, under the answers or guess reveal
- * (players close it when they like); the rest, and any step under a show,
- * wait for what is on screen (the shows, the last guess before the podium).
+ * Starts a step. The guessing step starts at once, under the answers reveal
+ * (players close it when they like); the rest, and any step under a show or
+ * a guess's scene, wait for what is on screen.
  */
 function startStep(s: RoomState, ctx: Ctx, ms: number) {
-  const waits = isShow(s.reveal) || !TURN_PHASES.has(s.phase);
+  const waits =
+    isShow(s.reveal) || isGuessScene(s.reveal) || !TURN_PHASES.has(s.phase);
   const start = Math.max(ctx.now, waits ? (s.reveal?.until ?? 0) : 0);
   s.stepStartsAt = start;
   s.deadline = start + ms;
@@ -544,15 +565,19 @@ function hit(s: RoomState, g: Guess, ctx: Ctx) {
     gaveUp: false,
     endedAt: ctx.now,
   };
-  const until = ctx.now + REVEAL_TIMING.guessHit;
-  s.reveal = { kind: "guess", n: g.n, startsAt: ctx.now, until };
+  guessScene(s, "guess", g.n, REVEAL_TIMING.guessHit, ctx);
   nextTurn(s, ctx);
 }
 
 function miss(s: RoomState, g: Guess, ctx: Ctx) {
   g.result = "miss";
-  const until = ctx.now + REVEAL_TIMING.guessMiss;
-  s.reveal = { kind: "guess", n: g.n, startsAt: ctx.now, until };
+  guessScene(s, "guess", g.n, REVEAL_TIMING.guessMiss, ctx);
+  nextTurn(s, ctx);
+}
+
+/** The turn player let the guess go (or its clock ran out): a short scene says so. */
+function pass(s: RoomState, ctx: Ctx) {
+  guessScene(s, "pass", turnNumber(s), REVEAL_TIMING.pass, ctx);
   nextTurn(s, ctx);
 }
 
@@ -754,7 +779,7 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       if (s.phase !== "guessing") fail("wrong_phase");
       guardStep(s, ctx);
       if (e.playerId !== s.turnPlayerId) fail("not_your_turn");
-      return nextTurn(s, ctx);
+      return pass(s, ctx);
     }
     case "VALIDATE": {
       if (s.phase !== "validating") fail("wrong_phase");
@@ -1163,7 +1188,7 @@ function timeout(
       return resolveQuestion(s, q, ctx);
     }
     case "guessing":
-      return nextTurn(s, ctx);
+      return pass(s, ctx);
     case "validating": {
       const g = pendingGuess(s) ?? fail("wrong_phase");
       return miss(s, g, ctx);

@@ -1262,7 +1262,8 @@ describe("a turn", () => {
     expect((s.reveal?.until ?? 0) - g.now).toBe(REVEAL_TIMING.guessHit);
     expect(s.phase).toBe("asking");
     expect(s.turnPlayerId).not.toBe(first);
-    expect(s.stepStartsAt).toBe(g.now);
+    // the next turn waits for the guess's scene
+    expect(s.stepStartsAt).toBe(s.reveal?.until);
 
     // the next player had no turn before the first one hit: same round, same place
     const second = g.askAndAnswer();
@@ -1346,13 +1347,41 @@ describe("a turn", () => {
     expect(g.state.outcomes[guesser].place).toBe(1);
   });
 
-  it("a pass makes no new reveal", () => {
+  it("a pass plays a short scene, and the next turn waits for it", () => {
     const g = started(2);
     const asker = g.askAndAnswer();
-    const before = g.state.reveal;
     g.do({ type: "PASS", playerId: asker });
-    expect(g.state.reveal).toEqual(before);
-    expect(g.state.stepStartsAt).toBe(g.now);
+    const r = g.state.reveal;
+    expect(r).toMatchObject({ kind: "pass", n: 1, startsAt: g.now });
+    expect((r?.until ?? 0) - g.now).toBe(REVEAL_TIMING.pass);
+    expect(g.state.stepStartsAt).toBe(r?.until);
+    for (const viewer of g.state.order)
+      expect(toView(g.state, 1, viewer, g.now).reveal).toEqual({
+        kind: "pass",
+        n: 1,
+        byId: asker,
+        startsAt: g.now,
+        until: r?.until,
+      });
+    // the question waits for it
+    const next = g.state.turnPlayerId as string;
+    expect(() =>
+      reduce(g.state, { type: "ASK", playerId: next, text: "Q?" }, g.ctx()),
+    ).toThrow("too_early");
+  });
+
+  it("scales a guess's scene with the shows", () => {
+    const g = started(2);
+    const asker = g.askAndAnswer();
+    g.state = reduce(
+      g.state,
+      { type: "GUESS", playerId: asker, text: `name ${asker}` },
+      { ...g.ctx(), showScale: 0.25 },
+    );
+    const r = g.state.reveal;
+    expect((r?.until ?? 0) - (r?.startsAt ?? 0)).toBe(
+      REVEAL_TIMING.guessHit * 0.25,
+    );
   });
 });
 

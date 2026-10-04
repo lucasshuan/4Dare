@@ -96,7 +96,11 @@
     "hitPlace": "正解 · {place}位",
     "hitTie": "正解 · {place}位タイ",
     "miss": "まだです",
-    "cardOf": "{name}さんのカード"
+    "cardOf": "{name}さんのカード",
+    "passRound": "{n}ラウンド目 · 予想なし",
+    "passed": "{name}さんはパス",
+    "passedYou": "あなたはパス",
+    "passedNote": "また次のラウンドで。"
   },
   "turnTag": "番",
   "steps": {

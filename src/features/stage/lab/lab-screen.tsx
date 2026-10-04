@@ -50,6 +50,7 @@ const ROOM_KEYS = [
   "typed",
   "tie",
   "timeout",
+  "guess",
   "set",
   "names",
 ] as const;
@@ -444,6 +445,12 @@ function LabPanel({
           value={params.rule}
           options={["cards", "sentence"]}
           onChange={(v) => set("rule", v as LabParams["rule"])}
+        />
+        <Select
+          label="Guess"
+          value={params.guess}
+          options={["hit", "miss", "pass"]}
+          onChange={(v) => set("guess", v as LabParams["guess"])}
         />
         <Select
           label="Set"

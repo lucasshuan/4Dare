@@ -10,10 +10,11 @@ import { useRoomContext } from "@/features/data/room-context";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
 import { PickScreen } from "@/features/pick/pick-screen";
 import { ResultScreen } from "@/features/result/result-screen";
-import { isShow, type StageScreen } from "@/features/stage/stage";
+import { isGuessScene, isShow, type StageScreen } from "@/features/stage/stage";
 import { StageBackdrop } from "@/features/stage/stage-backdrop";
 import { StageProvider, useStage } from "@/features/stage/stage-context";
 import { ThemeScreen } from "@/features/theme/theme-screen";
+import { GuessScene } from "@/features/turn/guess-scene";
 import { TurnScreen } from "@/features/turn/turn-screen";
 import { VoteScreen } from "@/features/vote/vote-screen";
 import type { ErrorCode, Phase, RoomView } from "@/game/types";
@@ -30,7 +31,7 @@ import { RevealOverlay } from "./reveal-overlay";
 /**
  * Everything a room shows once the player is seated (plan 1.2): one backdrop
  * for the whole room, the area on screen (lobby, match, result), the reveals
- * over it and the chat. The match frame stays mounted across the match's
+ * and a guess's scene over it, and the chat. The match frame stays mounted across the match's
  * screens. Lives inside <RoomProvider>; the stage lab renders it too, with a
  * made-up room and its own clock.
  */
@@ -40,6 +41,7 @@ export function RoomStage() {
       <RoomBackdrop />
       <Areas />
       <RevealOverlay />
+      <GuessScene />
       <FoundFeedback />
       <Chat />
     </StageProvider>
@@ -228,7 +230,10 @@ function useRoomTab() {
   const roomTitle = useRoomTitle();
   const { view, me, offset } = useRoomContext();
   const started = useReached(view.stepStartsAt);
-  const held = isShow(view.reveal) && view.stepStartsAt !== null && !started;
+  const held =
+    (isShow(view.reveal) || isGuessScene(view.reveal)) &&
+    view.stepStartsAt !== null &&
+    !started;
   const phase = TAB_PHASE[view.phase];
   const alert = held || !isAwaited(me.status) ? null : me.status;
   const title = roomTitle(

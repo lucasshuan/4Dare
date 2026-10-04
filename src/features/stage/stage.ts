@@ -36,7 +36,7 @@ export interface StageFrame {
   themeFrom: number | null;
   /** The header's clock shows from this server time; null = no clock. */
   clockFrom: number | null;
-  /** True: a show holds the clock, which pops in at `clockFrom`. False: today's recharge under an answers or guess reveal. */
+  /** True: a show or a guess's scene holds the clock, which pops in at `clockFrom`. False: the recharge under an answers reveal. */
   clockPops: boolean;
   /** The history button and give up show from this server time; null = not on this screen. */
   historyFrom: number | null;
@@ -61,6 +61,10 @@ const MATCH_PHASES: ReadonlySet<Phase> = new Set([
 
 export const isShow = (r: RevealView | null | undefined): r is ShowView =>
   !!r && (r.kind === "opening" || r.kind === "theme" || r.kind === "cast");
+
+/** A guess's result or a pass on the whole screen: the next turn waits for it. */
+export const isGuessScene = (r: RevealView | null | undefined) =>
+  !!r && (r.kind === "guess" || r.kind === "pass");
 
 /** The beat of that kind in a show, if the show has one. */
 export function beatOf(
@@ -171,7 +175,7 @@ export function stageFrame(view: RoomView, now: number): StageFrame {
       : 0;
   }
 
-  // the clock: a show holds it until its step starts; answers and guess reveals recharge it
+  // the clock: a show or a guess's scene holds it until its step starts; the answers reveal recharges it
   let clockFrom: number | null = null;
   let clockPops = false;
   if (
@@ -179,7 +183,7 @@ export function stageFrame(view: RoomView, now: number): StageFrame {
     view.deadline !== null &&
     view.stepStartsAt !== null
   ) {
-    clockPops = isShow(r);
+    clockPops = isShow(r) || isGuessScene(r);
     clockFrom =
       !clockPops && r && now < r.until && r.startsAt < view.stepStartsAt
         ? r.startsAt

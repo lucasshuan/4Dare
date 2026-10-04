@@ -152,6 +152,8 @@ export const REVEAL_TIMING = {
   answersMax: 10000,
   guessMiss: 4000,
   guessHit: 5000,
+  /** The turn player passed instead of guessing. */
+  pass: 2600,
 } as const;
 
 // One file per scene in show-timing/; tests read the constants, never literals.
@@ -332,7 +334,7 @@ export interface ThemeVote {
  * lives in `plays`), or a show that presents the match.
  */
 export interface Reveal {
-  kind: "answers" | "guess" | ShowKind;
+  kind: "answers" | "guess" | "pass" | ShowKind;
   /** The turn revealed; for a show, the match it presents (`round`; `round + 1` for the opening). */
   n: number;
   startsAt: number;
@@ -647,6 +649,14 @@ export type RevealView =
       place: number | null;
       /** Someone else discovered in the same turn round and shares the place. */
       tied: boolean;
+      startsAt: number;
+      until: number;
+    }
+  /** The turn player let the guess go (or its clock ran out). */
+  | {
+      kind: "pass";
+      n: number;
+      byId: PlayerId;
       startsAt: number;
       until: number;
     };

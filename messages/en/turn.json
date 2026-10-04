@@ -96,7 +96,11 @@
     "hitPlace": "Got it · {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
     "hitTie": "Got it · tied for {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
     "miss": "Not yet",
-    "cardOf": "{name}'s card"
+    "cardOf": "{name}'s card",
+    "passRound": "Round {n} · No guess",
+    "passed": "{name} passed",
+    "passedYou": "You passed",
+    "passedNote": "Maybe next round."
   },
   "turnTag": "Turn",
   "steps": {
