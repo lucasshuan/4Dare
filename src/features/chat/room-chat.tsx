@@ -132,10 +132,13 @@ export function RoomChat() {
         { duration: 0.6, times: HOP_TIMES, ease: "linear" },
       );
     if (!phone)
-      setBubbles((b) => [
-        ...b,
-        ...arrivals.map((m) => ({ line: m, until: at + BUBBLE_MS })),
-      ]);
+      // a burst keeps the newest few, so the stack never climbs off the window
+      setBubbles((b) =>
+        [
+          ...b,
+          ...arrivals.map((m) => ({ line: m, until: at + BUBBLE_MS })),
+        ].slice(-3),
+      );
     const p = playerById(latest.by) ?? latest.author;
     say(t("line", { name: p ? name(p) : "", text: latest.text ?? "" }));
   }, [

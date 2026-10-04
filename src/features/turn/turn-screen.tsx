@@ -17,7 +17,7 @@ import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
 import { CastScene } from "@/features/stage/cast-scene";
 import { beatOf } from "@/features/stage/stage";
 import { useStage } from "@/features/stage/stage-context";
-import { useStageTimeline } from "@/features/stage/use-stage-timeline";
+import { PHONE, useStageTimeline } from "@/features/stage/use-stage-timeline";
 import {
   endsWithQuestionMark,
   questionMark,
@@ -371,7 +371,10 @@ function Ask() {
   // text already ends with one; leaving the field or sending swaps it for the suffix.
   const [text, setText] = useState("");
   // the field takes the focus unless the player is typing in the chat
-  const [autoFocus] = useState(focusIsFree);
+  // not on phones: a field focused by itself would raise the keyboard and hide the chat bar
+  const [autoFocus] = useState(
+    () => !window.matchMedia(PHONE).matches && focusIsFree(),
+  );
   // nothing goes out before the step starts (the cast still plays)
   const started = useStepStarted();
   const typedMark = endsWithQuestionMark(text.trimEnd());
@@ -535,7 +538,10 @@ function Guess() {
   const { act, pending } = useRoomAction();
   const [text, setText] = useState("");
   // typed under the answers reveal, sent once the step starts
-  const [autoFocus] = useState(focusIsFree);
+  // not on phones: a field focused by itself would raise the keyboard and hide the chat bar
+  const [autoFocus] = useState(
+    () => !window.matchMedia(PHONE).matches && focusIsFree(),
+  );
   const started = useStepStarted();
   return (
     <form
