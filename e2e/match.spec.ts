@@ -55,7 +55,7 @@ test("three players on phones, with a wrong guess checked by the picker", {
   // the host takes everyone back to the lobby for another match; a named room
   // leads with its name, the greeting is the line under it
   await host.getByRole("button", { name: /back to the lobby/i }).click();
-  await expect(host.getByText(/another round/i)).toBeVisible();
+  await expect(host.getByText(/another match/i)).toBeVisible();
   for (const page of guests) {
     await expect(page.getByText(/back in/i)).toBeVisible();
     await expect(
