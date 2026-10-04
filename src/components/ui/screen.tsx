@@ -149,16 +149,17 @@ export function ThemeTag({
     // a surface pill, so it reads on any step's colour behind it
     <span
       title={theme}
-      className="inline-flex h-10 min-w-0 max-w-full items-center gap-2 rounded-pill bg-surface pr-4 pl-3 font-bold text-[15px] text-ink shadow-card"
+      // "Theme:" then the set's emoji right before the theme (phones hide the word)
+      className="inline-flex h-10 min-w-0 max-w-full items-center gap-2 rounded-pill bg-surface px-4 font-bold text-[15px] text-ink shadow-card max-sm:pl-3"
     >
+      <span className="shrink-0 whitespace-nowrap font-semibold text-[13px] text-ink-muted max-sm:sr-only">
+        {label}
+      </span>
       {emoji ? (
         <span aria-hidden className="shrink-0">
           {emoji}
         </span>
       ) : null}
-      <span className="shrink-0 whitespace-nowrap font-semibold text-[13px] text-ink-muted max-sm:sr-only">
-        {label}
-      </span>
       <span className="truncate">{theme}</span>
     </span>
   );
