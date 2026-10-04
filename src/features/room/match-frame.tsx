@@ -121,8 +121,8 @@ export function MatchFrame({ children }: { children: ReactNode }) {
 }
 
 /**
- * Left: the history button (turns only) and the theme tag. Right: leave, give
- * up (turns only) and the step clock. Each part pops in when it arrives live
+ * Left: the history button (turns only) and the theme tag. Right: the step
+ * clock, then leave and give up (turns only). Each part pops in when it arrives live
  * (at the times the stage gives); one already there on mount just shows.
  */
 export function MatchHeader({ history }: { history: HistoryControl | null }) {
@@ -171,14 +171,6 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
         </AnimatePresence>
       </div>
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        <LeaveMatchButton />
-        <AnimatePresence initial={false}>
-          {history && canGiveUp ? (
-            <m.div key="give-up" {...HISTORY_POP} className="flex">
-              <GiveUpButton />
-            </m.div>
-          ) : null}
-        </AnimatePresence>
         <AnimatePresence initial={false}>
           {clockShown ? (
             <m.div
@@ -201,6 +193,14 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
                 totalMs={view.stepMs}
                 tick
               />
+            </m.div>
+          ) : null}
+        </AnimatePresence>
+        <LeaveMatchButton />
+        <AnimatePresence initial={false}>
+          {history && canGiveUp ? (
+            <m.div key="give-up" {...HISTORY_POP} className="flex">
+              <GiveUpButton />
             </m.div>
           ) : null}
         </AnimatePresence>
