@@ -54,7 +54,7 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB): the header's (language, user menu, match badge) load when idle or when reached for, behind look-alikes (`useDeferred`); the game's name and thumbnail left the game select's module. Home 361 → 297 KB gzip of JS, no Base UI. Screens built around one (rooms filters, lobby, settings) keep theirs
 - [ ] `LazyMotion` + `m`; full motion features only where `layoutId` is used
 - [ ] Guest names resolved on the server (−24 KB)
-- [ ] Each page gets only its message namespaces
+- [x] Each page gets only its message namespaces: hub pages leave the room's and `meta` out (`src/i18n/scopes.ts`); the `r/` and `dev/` layouts hand theirs every one. `/en/who-am-i` HTML 13.8 KB gzip
 - [x] `/new` and `/rooms` static (query read in the browser): served from the CDN, no function per visit
 - [x] Game sounds re-encoded mono 80 kbps (371 KB → 118 KB)
 - [ ] Home under ~250 KB gzip of JS
