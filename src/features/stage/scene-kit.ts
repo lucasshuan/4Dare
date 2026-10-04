@@ -9,9 +9,9 @@ import { useEffect, useReducer } from "react";
 import type { RoomView, ShowView } from "@/game/types";
 import { useClock } from "@/lib/hooks/use-server-clock";
 
-/** A scene fills the screen under the match header, so it can centre itself. */
+/** A scene fills the screen under the match header, so it can centre itself (the same sizes as PickIntro). */
 export const SCENE_MIN_H =
-  "min-h-[calc(100dvh-6.5rem-var(--dock))] sm:min-h-[calc(100dvh-7.5rem-var(--dock))] sm:short:min-h-[calc(100dvh-6rem-var(--dock))]";
+  "min-h-[calc(100dvh-7rem-var(--dock))] short:min-h-[calc(100dvh-5.5rem-var(--dock))] sm:min-h-[calc(100dvh-7.5rem-var(--dock))] sm:short:min-h-[calc(100dvh-5.5rem-var(--dock))]";
 
 /** The prototype's `.s-big`: the stage's big display lines. */
 export const BIG =

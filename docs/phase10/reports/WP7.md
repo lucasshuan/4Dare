@@ -31,3 +31,7 @@
 - `pnpm typecheck`: passes. `pnpm exec biome check` (my 9 files): clean.
 - Shots in `.data/shots/WP7/` (lab, desktop/phone, light/dark): cold open 2.1/6.4 (intro +1.3/+5.6), round card, vote entrance −0.1, vote 1, tie 1.0, settle 1.8/3.0, hero 3.8/4.8, rule 7.9/9.3, sentence 6.9, typed 1.0, pt `names=long` (cold open, typed hero), ja (rule with the en fallback, cold open). `flight-*.png`: live run at speed 0.25 showing the winner flying to the centre.
 - Not run (by the lead's rule): e2e, the full unit suite.
+
+## Review fixes
+
+One review after the commit: passed, two lows. Fixed: `SCENE_MIN_H` now uses the match frame's real sizes (as `PickIntro`), so the scenes no longer scroll 8 px on phones. Left for WP12: on a reload or late join during `tie_spin`, the vote title's reserved height is measured from the one-line tie title, so the card row sits ~24 px high and drops when the settle starts (measure an invisible copy of the line instead).
