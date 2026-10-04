@@ -2,7 +2,6 @@
 
 import { Popover } from "@base-ui/react/popover";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 import type { DeferredProps } from "@/lib/hooks/use-deferred";
 import type { CurrentMatch } from "@/server/contract";
 import {
@@ -15,13 +14,13 @@ import {
 /** The badge's popover itself, loaded after the page (CurrentMatchBadge shows a stand-in until then). */
 export function MatchBadgePopover({
   match,
-  defaultOpen,
+  open,
+  onOpenChange,
   autoFocus,
 }: { match: CurrentMatch } & DeferredProps) {
   const t = useTranslations("common.currentMatch");
-  const [open, setOpen] = useState(defaultOpen);
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
+    <Popover.Root open={open} onOpenChange={onOpenChange}>
       <Popover.Trigger
         autoFocus={autoFocus}
         aria-label={`${t("badge")} · ${match.code}`}
@@ -36,7 +35,7 @@ export function MatchBadgePopover({
               {t("badge")}
             </Popover.Title>
             <MatchChip match={match} />
-            <MatchActions match={match} onLeft={() => setOpen(false)} />
+            <MatchActions match={match} onLeft={() => onOpenChange(false)} />
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>

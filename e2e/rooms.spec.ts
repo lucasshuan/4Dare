@@ -85,8 +85,11 @@ test("rooms are filtered by the host's language: yours by default, more on reque
   const ptRoom = brazilian.url().split("/").pop() as string;
 
   const viewer = await newPlayer(browser);
-  await viewer.goto("/en/rooms");
   const row = (code: string) => viewer.locator(`a[href$="/r/${code}"]`);
+  // the game's page lists the public rooms too
+  await viewer.goto("/en/who-am-i");
+  await expect(row(enRoom)).toBeVisible({ timeout: 10_000 });
+  await viewer.goto("/en/rooms");
   await expect(row(enRoom)).toBeVisible();
   await expect(row(ptRoom)).toHaveCount(0);
 

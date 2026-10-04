@@ -130,7 +130,7 @@ async function asker(players: Page[], code: string) {
   throw new Error("nobody got to ask");
 }
 
-test("a key typed in the chat leaves the answers reveal up", async ({
+test("over the answers reveal, a key goes to the chat when it is open, else to the guess", async ({
   browser,
 }) => {
   test.setTimeout(150_000);
@@ -160,7 +160,13 @@ test("a key typed in the chat leaves the answers reveal up", async ({
   await me.keyboard.press("N");
   await expect(field(me)).toHaveValue("N");
   await expect(hint).toBeVisible();
-  await expect(me.getByRole("textbox", { name: /your guess/i })).toHaveValue(
-    "",
-  );
+  const guess = me.getByRole("textbox", { name: /your guess/i });
+  await expect(guess).toHaveValue("");
+
+  // with the chat folded, a letter closes the reveal and lands in the guess
+  await head(me).click();
+  await guess.focus();
+  await me.keyboard.press("N");
+  await expect(hint).toBeHidden();
+  await expect(guess).toHaveValue("N");
 });
