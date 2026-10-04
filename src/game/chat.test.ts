@@ -236,14 +236,24 @@ describe("chat order and unread", () => {
     ...m,
   });
 
-  it("hides a line until its scene and sorts by when it shows, then id", () => {
+  it("hides a system line until its scene and sorts by when it shows, then id", () => {
+    const started = { type: "started" } as const;
     const lines = [
       msg({ id: 3, at: 100, showAt: 100 }),
-      msg({ id: 1, at: 50, showAt: 500, by: null, text: null }),
+      msg({
+        id: 1,
+        at: 50,
+        showAt: 500,
+        by: null,
+        text: null,
+        system: started,
+      }),
       msg({ id: 2, at: 100, showAt: 100 }),
+      // a player's line shows at once, even a hair before its database time
+      msg({ id: 4, at: 150, showAt: 300 }),
     ];
-    expect(visibleChat(lines, 200).map((m) => m.id)).toEqual([2, 3]);
-    expect(visibleChat(lines, 500).map((m) => m.id)).toEqual([2, 3, 1]);
+    expect(visibleChat(lines, 200).map((m) => m.id)).toEqual([2, 3, 4]);
+    expect(visibleChat(lines, 500).map((m) => m.id)).toEqual([2, 3, 4, 1]);
   });
 
   it("counts others' visible lines past the last seen; system lines never", () => {
@@ -254,7 +264,7 @@ describe("chat order and unread", () => {
       msg({ id: 4, by: null, text: null }),
       msg({ id: 5, showAt: 999 }),
     ];
-    expect(countUnread(lines, 1, "p1", 100)).toBe(1);
+    expect(countUnread(lines, 1, "p1", 100)).toBe(2);
     expect(countUnread(lines, 0, "p1", 1000)).toBe(3);
   });
 
