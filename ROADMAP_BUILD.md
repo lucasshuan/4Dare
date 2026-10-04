@@ -51,7 +51,7 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] Zen Maru Gothic only on Japanese pages: en/pt pages link 17 KB gzip of CSS instead of 81 KB (its 245 `@font-face` are a chunk of `ja-font.tsx`, linked only where it renders)
 - [x] Critter avatars as SVG from a cached route (`/api/critter/<seed>/<rrggbb>`), no DiceBear in the browser: home 391 → 361 KB gzip of JS
 - [x] Browser Supabase only for realtime, loaded on demand; OAuth starts on the server (`/auth/sign-in`): home 457 → 391 KB gzip of JS
-- [ ] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB)
+- [x] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB): the header's (language, user menu, match badge) load when idle or when reached for, behind look-alikes (`useDeferred`); the game's name and thumbnail left the game select's module. Home 361 → 297 KB gzip of JS, no Base UI. Screens built around one (rooms filters, lobby, settings) keep theirs
 - [ ] `LazyMotion` + `m`; full motion features only where `layoutId` is used
 - [ ] Guest names resolved on the server (−24 KB)
 - [ ] Each page gets only its message namespaces
