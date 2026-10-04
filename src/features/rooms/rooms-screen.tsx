@@ -18,7 +18,7 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { Flag } from "@/components/ui/language-switch";
 import { Screen } from "@/components/ui/screen";
-import { GameThumb, useGameName } from "@/features/create/game-field";
+import { GameThumb, useGameName } from "@/features/create/game-info";
 import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { usePublicRooms } from "@/features/data/use-public-rooms";

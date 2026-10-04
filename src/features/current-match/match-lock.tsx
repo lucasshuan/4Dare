@@ -1,12 +1,11 @@
 "use client";
 
-import { Popover } from "@base-ui/react/popover";
 import { ArrowRight, DoorOpen, Lock } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { Button, buttonClass } from "@/components/ui/button";
-import { GameThumb, useGameName } from "@/features/create/game-field";
+import { GameThumb, useGameName } from "@/features/create/game-info";
 import {
   useCurrentMatch,
   useLeaveMatch,
@@ -14,6 +13,7 @@ import {
 import type { Phase } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { deferred, useDeferred } from "@/lib/hooks/use-deferred";
 import { ease } from "@/lib/motion";
 import type { CurrentMatch } from "@/server/contract";
 
@@ -303,11 +303,36 @@ export function MatchLockPage({
   );
 }
 
-/** Next to the logo: the match you are in, in red. Opens the way back or out. */
+/** The badge's look, for its stand-in and for the popover's trigger. */
+export const BADGE_TRIGGER =
+  "inline-flex h-10 items-center gap-2 rounded-pill bg-no px-3.5 font-semibold text-on-no text-sm shadow-card transition-[transform,filter] duration-150 ease-soft hover:brightness-110 active:scale-[0.97] max-sm:size-9 max-sm:justify-center max-sm:px-0";
+
+/** What the badge shows: a live dot, "In a match" and the room code. */
+export function BadgeFace({ match }: { match: CurrentMatch }) {
+  const t = useTranslations("common.currentMatch");
+  return (
+    <>
+      <LiveDot />
+      <span className="max-sm:sr-only">{t("badge")}</span>
+      <span className="font-mono text-[13px] tracking-[0.12em] opacity-80 max-md:hidden">
+        {match.code}
+      </span>
+    </>
+  );
+}
+
+const loadBadgePopover = deferred<{ match: CurrentMatch }>(() =>
+  import("./match-badge-popover").then((m) => m.MatchBadgePopover),
+);
+
+/**
+ * Next to the logo: the match you are in, in red. Opens the way back or out.
+ * The popover comes after the page; until then a look-alike stands in.
+ */
 export function CurrentMatchBadge() {
   const t = useTranslations("common.currentMatch");
   const { match } = useCurrentMatch();
-  const [open, setOpen] = useState(false);
+  const { loaded: Popover, props, reach } = useDeferred(loadBadgePopover);
   return (
     <AnimatePresence>
       {match ? (
@@ -319,29 +344,20 @@ export function CurrentMatchBadge() {
           transition={{ duration: 0.3, ease: ease.soft }}
           className="shrink-0"
         >
-          <Popover.Root open={open} onOpenChange={setOpen}>
-            <Popover.Trigger
+          {Popover ? (
+            <Popover match={match} {...props} />
+          ) : (
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={false}
               aria-label={`${t("badge")} · ${match.code}`}
-              className="inline-flex h-10 items-center gap-2 rounded-pill bg-no px-3.5 font-semibold text-on-no text-sm shadow-card transition-[transform,filter] duration-150 ease-soft hover:brightness-110 active:scale-[0.97] max-sm:size-9 max-sm:justify-center max-sm:px-0"
+              className={BADGE_TRIGGER}
+              {...reach}
             >
-              <LiveDot />
-              <span className="max-sm:sr-only">{t("badge")}</span>
-              <span className="font-mono text-[13px] tracking-[0.12em] opacity-80 max-md:hidden">
-                {match.code}
-              </span>
-            </Popover.Trigger>
-            <Popover.Portal>
-              <Popover.Positioner sideOffset={8} align="start" className="z-50">
-                <Popover.Popup className="flex w-[min(320px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-3 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
-                  <Popover.Title className="font-semibold">
-                    {t("badge")}
-                  </Popover.Title>
-                  <MatchChip match={match} />
-                  <MatchActions match={match} onLeft={() => setOpen(false)} />
-                </Popover.Popup>
-              </Popover.Positioner>
-            </Popover.Portal>
-          </Popover.Root>
+              <BadgeFace match={match} />
+            </button>
+          )}
         </motion.div>
       ) : null}
     </AnimatePresence>
