@@ -11,9 +11,12 @@ import { useDisplayName } from "@/lib/names";
 import { onSeat, seatColor } from "@/lib/seats";
 
 /** How long the band stays on screen (ms): in, a hold, out. */
-const HANDOFF_MS = 2100;
-/** The share of it after which the band covers the whole screen. */
-const COVERED = 0.28;
+const HANDOFF_MS = 2730;
+/** The share of that time after which the band covers the whole screen, and when it starts to leave. */
+const COVERED = 0.42;
+const LEAVES = 0.58;
+/** Each sweep, in and out, eases on its own (the times above stay exact). */
+const SWEEP = "cubic-bezier(0.7, 0, 0.3, 1)";
 /** When the band covers the whole screen (ms after it starts): what was under it can go. */
 export const HANDOFF_COVERED_MS = Math.round(HANDOFF_MS * COVERED);
 
@@ -107,18 +110,22 @@ function Band({
       : [
           band.current.animate(
             [
-              { clipPath: "polygon(0 0, 0 0, -20% 100%, -20% 100%)" },
+              {
+                clipPath: "polygon(0 0, 0 0, -20% 100%, -20% 100%)",
+                easing: SWEEP,
+              },
               {
                 clipPath: "polygon(0 0, 120% 0, 100% 100%, -20% 100%)",
                 offset: COVERED,
               },
               {
                 clipPath: "polygon(0 0, 120% 0, 100% 100%, -20% 100%)",
-                offset: 0.72,
+                offset: LEAVES,
+                easing: SWEEP,
               },
               { clipPath: "polygon(120% 0, 120% 0, 100% 100%, 100% 100%)" },
             ],
-            { ...timing, easing: "cubic-bezier(0.7, 0, 0.3, 1)" },
+            timing,
           ),
           face.current.animate(
             [
