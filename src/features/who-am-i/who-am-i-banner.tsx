@@ -60,7 +60,7 @@ const STEPS: {
 const STILL = 5;
 
 /** The others around the table, left to right. Phones keep the two nearest you. */
-const SEATS: {
+export const SEATS: {
   seat: Seat;
   place: string;
   tilt: number;
@@ -101,7 +101,7 @@ const SEATS: {
     card: "#F3D3B8",
   },
 ];
-const YOU = { seed: "banner-you", color: "#D9C7F4", card: "#F2E3A8" };
+export const YOU = { seed: "banner-you", color: "#D9C7F4", card: "#F2E3A8" };
 
 /** Question marks drifting in the background, across the whole width: [left %, top %, size px, colour, seconds]. */
 const MARKS: [number, number, number, string, number][] = [
@@ -118,7 +118,7 @@ const MARKS: [number, number, number, string, number][] = [
 ];
 
 /** A critter on its pastel, as a round avatar or a card portrait. */
-function Critter({
+export function Critter({
   seed,
   color,
   className,
@@ -143,7 +143,7 @@ function Critter({
 }
 
 /** A card held up for the others to see: the character's picture. `fill` stretches it to its box (the flipped "?" card). */
-function HeldCard({
+export function HeldCard({
   seed,
   color,
   fill = false,

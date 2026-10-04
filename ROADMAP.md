@@ -163,12 +163,12 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 
 The "4Dare em cena" proposal (https://claude.ai/artifact/XwqNSpQWeXC1rrNyKKW4or) built into the game, as pretty as the proposal and as solid as today.
 
-- [ ] The start of a match plays like a stage show: one thing at a time, big and centred, no written tutorial; synced for everyone by the server clock, like the reveals
-- [ ] Each step has its own background colour, with symbols from the theme's set; while picking, the colour of whoever you pick for
-- [ ] Cold open on a room's first match: everyone's card over their head (yours a "?"), someone asks "Am I from Marvel?" and answers come in; later matches get a short "Round 2" card
+- [x] The start of a match plays like a stage show: one thing at a time, big and centred, no written tutorial; synced for everyone by the server clock, like the reveals
+- [x] Each step has its own background colour, with symbols from the theme's set; while picking, the colour of whoever you pick for
+- [x] Cold open on a room's first match: everyone's card over their head (yours a "?"), someone asks "Am I from Marvel?" and answers come in; later matches get a short "Round 2" card
 - [x] Theme vote lasts 20 s (was 13 s)
-- [ ] "Now, choose a theme together" shows alone for a moment, rises into the title, the cards are dealt and only then the clock starts
-- [ ] Chosen theme grows in the middle, then the rule as a scene: "Every character must be from this theme", two cards that fit get ✓, one that doesn't gets ✗ and falls out; a typed theme gets only the sentence
+- [x] "Now, choose a theme together" shows alone for a moment, rises into the title, the cards are dealt and only then the clock starts
+- [x] Chosen theme grows in the middle, then the rule as a scene: "Every character must be from this theme", two cards that fit get ✓, one that doesn't gets ✗ and falls out; a typed theme gets only the sentence
 - [x] Draw: the avatars hop into the yellow 4 of the logo, it shakes like a jar and spits out a slip, already straight and at its final size and place: "You pick for Leo"
 - [x] "For whom": the slip becomes the screen (big face, name in their colour, "Pick a character Leo knows"), with a ring of who picks for whom, yours highlighted
 - [x] Pick screen is one card in the middle and the card is the form: a name with autocomplete and a live preview, the picture changed right on it, no "Create character" button; a name not in the library gets a "New!" seal
