@@ -26,6 +26,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Keep the context small: read only what the task needs, and cut command output to the lines that decide.
 - Tests are slow: while working, run only the tests of what changed, plus `pnpm typecheck` and `pnpm lint`. The whole suite (`pnpm test`) and e2e (`pnpm test:e2e`) run once, at the very end of a phase, and only when really needed.
 
+## Style
+
+- Caveman full (the `caveman-pt` skill, level full) for every agent's own words, with no command needed: chat replies, a subagent's messages and return, and the prompts you write for subagents (ask them for caveman full too: some agent types don't read this file). No articles, filler, hedging, politeness or narration; fragments are fine; short sentences; code, paths, commands, numbers and negations exact; clarity wins a conflict.
+- Repo text stays normal prose: code, comments, docs, reports, commits.
+
 ## Commits
 
 Conventional Commits, in English: `type(scope): short imperative summary`.
