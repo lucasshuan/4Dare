@@ -8,10 +8,14 @@ test("the hub leads to the game, and the language select keeps the page", {
   await page.getByRole("link", { name: /quem sou eu\?/i }).click();
   await page.waitForURL(/\/pt\/who-am-i$/);
   await expect(page.getByRole("link", { name: "Criar sala" })).toBeVisible();
-  // a click that lands before the page hydrates opens nothing: try again
+  // A click that lands before the page hydrates opens nothing: try again. Only
+  // press a select that is not open (a press on an open one closes it), and
+  // wait for it to say it is open: a closing list is still visible a moment.
+  const select = page.getByRole("combobox", { name: "Idioma" });
   await expect(async () => {
-    await page.getByRole("combobox", { name: "Idioma" }).click();
-    await expect(page.getByRole("option", { name: "日本語" })).toBeVisible({
+    if ((await select.getAttribute("aria-expanded")) !== "true")
+      await select.click();
+    await expect(select).toHaveAttribute("aria-expanded", "true", {
       timeout: 2_000,
     });
   }).toPass({ timeout: 30_000 });
