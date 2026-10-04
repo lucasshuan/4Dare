@@ -49,7 +49,7 @@ No AI theme was ever saved (0 rows with source `ai`).
 Rule: switching language or opening a menu never waits on a download; fonts swap in when ready.
 
 - [x] Zen Maru Gothic only on Japanese pages: en/pt pages link 17 KB gzip of CSS instead of 81 KB (its 245 `@font-face` are a chunk of `ja-font.tsx`, linked only where it renders)
-- [ ] Critter avatars as SVG from a cached route, no DiceBear in the browser (152 KB)
+- [x] Critter avatars as SVG from a cached route (`/api/critter/<seed>/<rrggbb>`), no DiceBear in the browser: home 391 → 361 KB gzip of JS
 - [x] Browser Supabase only for realtime, loaded on demand; OAuth starts on the server (`/auth/sign-in`): home 457 → 391 KB gzip of JS
 - [ ] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB)
 - [ ] `LazyMotion` + `m`; full motion features only where `layoutId` is used

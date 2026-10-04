@@ -2,9 +2,9 @@ import "server-only";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ReactNode } from "react";
-import { critterUri } from "@/components/ui/critter";
 import { APP_NAME } from "@/config";
 import type { Lang } from "@/game/types";
+import { critterDataUri } from "../critter-art";
 import { FONT } from "./fonts";
 
 // The share images (Open Graph / Twitter / Discord embeds), 1200×630, drawn in
@@ -39,10 +39,7 @@ const ICON = brand("icon.svg");
 /** logo.svg's viewBox is 2880×838. */
 const LOGO_RATIO = 2880 / 838;
 
-const critter = (seed: string, color: string) =>
-  `data:image/svg+xml;base64,${Buffer.from(
-    decodeURIComponent(critterUri(seed, color).split(",")[1] ?? ""),
-  ).toString("base64")}`;
+const critter = critterDataUri;
 
 const fonts = (lang: Lang) =>
   lang === "ja"
