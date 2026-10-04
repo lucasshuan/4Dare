@@ -91,16 +91,23 @@ export async function voteAll(players: Page[], option = 0) {
   );
 }
 
-/** Every player creates a new character named "Hero <n>" for their target and confirms it. */
+/**
+ * Every player types a name the library certainly lacks ("Zqxj …", unique per
+ * run, so characters made by earlier runs don't turn up as rows), waits for
+ * the card's "New!" seal and confirms it.
+ */
 export async function pickAll(players: Page[]) {
+  const run = Date.now().toString(36).slice(-5);
   for (const [i, page] of players.entries()) {
     // the theme show plays before the pick table
-    const field = page.getByRole("textbox", { name: /character for/i });
+    const field = page.getByRole("combobox", { name: /character for/i });
     await expect(field).toBeVisible({ timeout: 20_000 });
-    await field.fill(`Hero ${i + 1}`);
-    await button(page, /create “hero/i).click();
-    await button(page, /save and pick/i).click();
-    await button(page, /confirm pick/i).click();
+    await expect(field).toBeEditable();
+    await field.fill(`Zqxj Hero ${run}${i + 1}`);
+    await expect(page.getByText("New!", { exact: true })).toBeVisible();
+    const confirm = button(page, /^confirm$/i);
+    await confirm.click();
+    await expect(confirm).toBeDisabled();
   }
 }
 
