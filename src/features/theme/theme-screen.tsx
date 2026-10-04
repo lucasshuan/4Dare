@@ -15,7 +15,9 @@ import { fireConfetti } from "@/components/ui/confetti";
 import { useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { GameFrame } from "@/features/room/game-header";
+import { useSceneShow } from "@/features/room/match-frame";
+import { ColdOpen } from "@/features/stage/cold-open";
+import { ThemeStage } from "@/features/stage/theme-stage";
 import { themeSetEmoji } from "@/game/theme-sets";
 import {
   type Lang,
@@ -97,7 +99,8 @@ export function ThemeScreen() {
         : { kicker: t("kicker"), title: t("chosenTitle"), sub: null };
 
   return (
-    <GameFrame hideTheme>
+    <>
+      <Scenes />
       <div className="mx-auto flex w-full max-w-[880px] flex-col justify-center gap-6 pb-4 sm:min-h-[calc(100dvh-8rem)] sm:gap-8 sm:pb-10 sm:short:gap-6 sm:short:pb-4">
         <Heading stage={stage} {...heading} />
 
@@ -267,7 +270,7 @@ export function ThemeScreen() {
           {revealed ? t("announce", { theme: revealed[lang] }) : ""}
         </output>
       </div>
-    </GameFrame>
+    </>
   );
 }
 
@@ -397,5 +400,17 @@ function Revealed({ theme }: { theme: string }) {
         {theme}
       </motion.span>
     </motion.div>
+  );
+}
+
+/** The scenes that play over this screen: the opening, then the theme hero and the rule. */
+function Scenes() {
+  const opening = useSceneShow("opening", ["curtain", "intro", "round"]);
+  const theme = useSceneShow("theme", ["theme", "rule"]);
+  return (
+    <>
+      {opening ? <ColdOpen show={opening} /> : null}
+      {theme ? <ThemeStage show={theme} from="typed" /> : null}
+    </>
   );
 }

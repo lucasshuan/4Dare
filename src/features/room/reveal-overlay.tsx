@@ -12,6 +12,7 @@ import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
 import type { AnswerValue, CardView, RevealView } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { insideChat } from "@/lib/focus";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
@@ -25,7 +26,7 @@ const FIELD =
 /**
  * What just happened, shown to everyone while the next step already runs.
  * It closes by itself, or earlier with its button, a click outside it, or any
- * key; a typed letter goes on into the step's text field.
+ * key (except in the chat); a typed letter goes on into the step's text field.
  */
 export function RevealOverlay() {
   const t = useTranslations("common");
@@ -40,7 +41,8 @@ export function RevealOverlay() {
   useEffect(() => {
     if (!active || !id) return;
     const onKey = (e: KeyboardEvent) => {
-      if (MODIFIERS.has(e.key)) return;
+      // typing in the chat leaves the reveal up
+      if (MODIFIERS.has(e.key) || insideChat(e.target)) return;
       setClosed(id);
       // Nothing focused: the letter goes to the step's field, as if the reveal were never there.
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {

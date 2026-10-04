@@ -14,7 +14,8 @@ import { Portrait } from "@/components/ui/portrait";
 import { TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { GameFrame } from "@/features/room/game-header";
+import { useSceneShow } from "@/features/room/match-frame";
+import { PickIntro } from "@/features/stage/pick-intro";
 import { searchItems, thumbUrl } from "@/game/character-search";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -153,7 +154,8 @@ export function PickScreen() {
   };
 
   return (
-    <GameFrame>
+    <>
+      <Scenes />
       <div className="flex flex-wrap items-start gap-10 lg:gap-16">
         <section className="flex min-w-0 flex-[1_1_420px] flex-col gap-6">
           <motion.div
@@ -467,6 +469,12 @@ export function PickScreen() {
           </AnimatePresence>
         </section>
       </div>
-    </GameFrame>
+    </>
   );
+}
+
+/** The scene that plays over this screen: the draw and "for whom". */
+function Scenes() {
+  const show = useSceneShow("theme", ["draw", "target"]);
+  return show ? <PickIntro show={show} /> : null;
 }

@@ -13,8 +13,8 @@ import { Portrait } from "@/components/ui/portrait";
 import { TextArea, TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { GameFrame } from "@/features/room/game-header";
-import { StageBackdrop, seatLook } from "@/features/stage/stage-backdrop";
+import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
+import { CastScene } from "@/features/stage/cast-scene";
 import {
   endsWithQuestionMark,
   questionMark,
@@ -30,7 +30,7 @@ import {
   type PlayerView,
 } from "@/game/types";
 import { cn } from "@/lib/cn";
-import { useMedia } from "@/lib/hooks/use-media";
+import { focusIsFree } from "@/lib/focus";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import {
@@ -40,13 +40,6 @@ import {
   submitGuess,
   validateGuess,
 } from "@/server/actions";
-import { GiveUpButton } from "./give-up-button";
-import {
-  HistoryButton,
-  HistorySidebar,
-  useHistorySidebar,
-  WIDE,
-} from "./history-panel";
 import { PlayerStrip } from "./player-strip";
 
 type Mode =
@@ -107,8 +100,7 @@ export function TurnScreen() {
   const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
   const mode = useMode();
-  const wide = useMedia(WIDE);
-  const [sidebar, setSidebar] = useHistorySidebar();
+  const cast = useSceneShow("cast", ["received", "order"]);
   const turnPlayer = playerById(view.turn?.playerId) as PlayerView;
   const focusMine =
     mode === "ask" ||
@@ -131,79 +123,68 @@ export function TurnScreen() {
     : withNames((n) => t("card.theirs", { name: n(focus) }));
 
   return (
-    <GameFrame
-      actions={<GiveUpButton />}
-      after={<HistoryButton sidebarOpen={sidebar} onSidebar={setSidebar} />}
-      sidebar={
-        <AnimatePresence initial={false}>
-          {wide && sidebar ? (
-            <HistorySidebar key="history" onClose={() => setSidebar(false)} />
-          ) : null}
-        </AnimatePresence>
-      }
-    >
-      <StageBackdrop look={seatLook(turnPlayer?.seat ?? null)} set={null} />
-      <div className="flex flex-col gap-6 short:gap-4">
-        <PlayerStrip players={view.players} />
-        <div className="flex flex-wrap items-stretch gap-5 lg:gap-12">
-          {/* the card's width follows the window height, so the whole screen fits */}
-          <div className="w-full lg:w-[clamp(232px,calc((100dvh_-_330px)_*_0.66),368px)] lg:flex-none">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={focus.id}
-                initial={{ opacity: 0, rotateY: -12, y: 10 }}
-                animate={{
-                  opacity: 1,
-                  rotateY: 0,
-                  y: 0,
-                  transition: { duration: dur.slow, ease: ease.soft },
-                }}
-                exit={{
-                  opacity: 0,
-                  rotateY: 12,
-                  transition: { duration: dur.base, ease: ease.soft },
-                }}
-                className="perspective-[1200px]"
-              >
-                <CharacterCard
-                  className="max-lg:hidden"
-                  card={focus.card}
-                  hidden={focus.cardHidden}
-                  tone={focus.isYou ? "you" : "other"}
-                  label={label}
-                  title={t("card.whoAreYou")}
-                  meta={meta}
-                  found={focus.discoveredAt !== null}
-                />
-                <FocusRow
-                  focus={focus}
-                  label={label}
-                  title={t("card.whoAreYou")}
-                  meta={meta}
-                />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <section className="flex min-w-0 flex-[1_1_360px] flex-col gap-5 short:gap-3">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${view.phase}-${view.turn?.n}-${mode}`}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  transition: { duration: dur.slow, ease: ease.soft },
-                }}
-                exit={{ opacity: 0, transition: { duration: dur.fast } }}
-                className="flex flex-col gap-5 short:gap-3"
-              >
-                <Step mode={mode} />
-              </motion.div>
-            </AnimatePresence>
-          </section>
+    // small muted text sits on the seat's wash here: a touch darker (lighter in dark) keeps it at 4.5:1
+    <div className="flex flex-col gap-6 short:gap-4 [&_.text-ink-muted]:text-[color:color-mix(in_oklab,var(--ink-muted)_80%,var(--ink))]">
+      {cast ? <CastScene show={cast} /> : null}
+      <PlayerStrip players={view.players} />
+      <div className="flex flex-wrap items-stretch gap-5 lg:gap-12">
+        {/* the card's width follows the window height, so the whole screen fits */}
+        <div className="w-full lg:w-[clamp(232px,calc((100dvh_-_330px)_*_0.66),368px)] lg:flex-none">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={focus.id}
+              initial={{ opacity: 0, rotateY: -12, y: 10 }}
+              animate={{
+                opacity: 1,
+                rotateY: 0,
+                y: 0,
+                transition: { duration: dur.slow, ease: ease.soft },
+              }}
+              exit={{
+                opacity: 0,
+                rotateY: 12,
+                transition: { duration: dur.base, ease: ease.soft },
+              }}
+              className="perspective-[1200px]"
+            >
+              <CharacterCard
+                className="max-lg:hidden"
+                card={focus.card}
+                hidden={focus.cardHidden}
+                tone={focus.isYou ? "you" : "other"}
+                label={label}
+                title={t("card.whoAreYou")}
+                meta={meta}
+                found={focus.discoveredAt !== null}
+              />
+              <FocusRow
+                focus={focus}
+                label={label}
+                title={t("card.whoAreYou")}
+                meta={meta}
+              />
+            </motion.div>
+          </AnimatePresence>
         </div>
+        <section className="flex min-w-0 flex-[1_1_360px] flex-col gap-5 short:gap-3">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${view.phase}-${view.turn?.n}-${mode}`}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                transition: { duration: dur.slow, ease: ease.soft },
+              }}
+              exit={{ opacity: 0, transition: { duration: dur.fast } }}
+              className="flex flex-col gap-5 short:gap-3"
+            >
+              <Step mode={mode} />
+            </motion.div>
+          </AnimatePresence>
+        </section>
       </div>
-    </GameFrame>
+    </div>
   );
 }
 
@@ -327,6 +308,10 @@ function Ask() {
   // As typed. The field shows the final mark as a suffix, hidden only while the
   // text already ends with one; leaving the field or sending swaps it for the suffix.
   const [text, setText] = useState("");
+  // the field takes the focus unless the player is typing in the chat
+  const [autoFocus] = useState(focusIsFree);
+  // nothing goes out before the step starts (the cast still plays)
+  const started = useStepStarted();
   const typedMark = endsWithQuestionMark(text.trimEnd());
   const others = view.players.filter((p) => !p.isYou && !p.away).length;
   return (
@@ -348,7 +333,7 @@ function Ask() {
         max={MAX_QUESTION}
         suffix={mark}
         suffixHidden={typedMark}
-        autoFocus
+        autoFocus={autoFocus}
         onChange={(e) => setText(e.target.value)}
         onBlur={() => setText((t) => withoutQuestionMark(t.trimEnd()))}
       />
@@ -356,7 +341,9 @@ function Ask() {
         <Button
           type="submit"
           variant="primary"
-          disabled={pending || !withoutQuestionMark(text.trim()).trim()}
+          disabled={
+            pending || !started || !withoutQuestionMark(text.trim()).trim()
+          }
         >
           {t("send")}
         </Button>
@@ -485,11 +472,15 @@ function Guess() {
   const { view, code } = useRoomContext();
   const { act, pending } = useRoomAction();
   const [text, setText] = useState("");
+  // typed under the answers reveal, sent once the step starts
+  const [autoFocus] = useState(focusIsFree);
+  const started = useStepStarted();
   return (
     <form
       className="flex flex-col gap-5"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!started) return;
         await act(() => submitGuess(code, text));
       }}
     >
@@ -505,14 +496,14 @@ function Guess() {
         hint={t("hint")}
         value={text}
         max={MAX_GUESS}
-        autoFocus
+        autoFocus={autoFocus}
         onChange={(e) => setText(e.target.value)}
       />
       <div className="flex flex-wrap gap-3">
         <Button
           type="submit"
           variant="primary"
-          disabled={pending || !text.trim()}
+          disabled={pending || !started || !text.trim()}
         >
           {t("send")}
         </Button>

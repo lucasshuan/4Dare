@@ -14,7 +14,9 @@ import { fireConfetti } from "@/components/ui/confetti";
 import { useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { GameFrame } from "@/features/room/game-header";
+import { useSceneShow } from "@/features/room/match-frame";
+import { ColdOpen } from "@/features/stage/cold-open";
+import { ThemeStage } from "@/features/stage/theme-stage";
 import { type ThemeSet, themeSetEmoji } from "@/game/theme-sets";
 import type { Lang, PlayerView, VoteView } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -124,7 +126,8 @@ export function VoteScreen() {
   };
 
   return (
-    <GameFrame hideTheme>
+    <>
+      <Scenes />
       <div className="mx-auto flex w-full max-w-[1040px] sm:min-h-[calc(100dvh-8rem)] flex-col justify-center gap-5 short:gap-5 pb-4 sm:gap-8 sm:pb-10 sm:short:pb-4">
         <Heading stage={stage} tie={v.tied.length > 1} />
 
@@ -175,7 +178,7 @@ export function VoteScreen() {
               : ""}
         </output>
       </div>
-    </GameFrame>
+    </>
   );
 }
 
@@ -506,5 +509,17 @@ function Footer({
         {hasVote && waiting.length ? ` · ${t("change")}` : ""}
       </span>
     </motion.div>
+  );
+}
+
+/** The scenes that play over this screen: the opening, then the theme hero and the rule. */
+function Scenes() {
+  const opening = useSceneShow("opening", ["curtain", "intro", "round"]);
+  const theme = useSceneShow("theme", ["theme", "rule"]);
+  return (
+    <>
+      {opening ? <ColdOpen show={opening} /> : null}
+      {theme ? <ThemeStage show={theme} from="vote" /> : null}
+    </>
   );
 }

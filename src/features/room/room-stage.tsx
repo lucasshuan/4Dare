@@ -1,39 +1,60 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, type Variants } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
+import { RoomChat } from "@/features/chat/room-chat";
 import { useRoomContext } from "@/features/data/room-context";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
 import { PickScreen } from "@/features/pick/pick-screen";
 import { ResultScreen } from "@/features/result/result-screen";
+import { isShow, type StageScreen } from "@/features/stage/stage";
+import { StageBackdrop } from "@/features/stage/stage-backdrop";
+import { StageProvider, useStage } from "@/features/stage/stage-context";
 import { ThemeScreen } from "@/features/theme/theme-screen";
 import { TurnScreen } from "@/features/turn/turn-screen";
 import { VoteScreen } from "@/features/vote/vote-screen";
 import type { ErrorCode, Phase, PlayerStatus, RoomView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
-import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
 import { useRoomTitle } from "@/lib/names";
 import { WHO_AM_I } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
+import { MatchFrame, useReached } from "./match-frame";
 import { RevealOverlay } from "./reveal-overlay";
 
 /**
- * Everything a room shows once the player is seated: the screen for the
- * current phase and the reveals over it. Lives inside <RoomProvider>; the
- * stage lab renders it too, with a made-up room and its own clock.
+ * Everything a room shows once the player is seated (plan 1.2): one backdrop
+ * for the whole room, the area on screen (lobby, match, result), the reveals
+ * over it and the chat. The match frame stays mounted across the match's
+ * screens. Lives inside <RoomProvider>; the stage lab renders it too, with a
+ * made-up room and its own clock.
  */
 export function RoomStage() {
   return (
-    <>
-      <PhaseScreens />
+    <StageProvider>
+      <RoomBackdrop />
+      <Areas />
       <RevealOverlay />
-    </>
+      <Chat />
+    </StageProvider>
   );
+}
+
+/** The room-level backdrop: crossfades from step to step across every screen. */
+function RoomBackdrop() {
+  const { look } = useStage();
+  const { view } = useRoomContext();
+  return <StageBackdrop look={look} set={view.theme?.set ?? null} />;
+}
+
+/** The chat: lobby, match and result (never on a closed room). */
+function Chat() {
+  const { area } = useStage();
+  return area === "closed" ? null : <RoomChat />;
 }
 
 const TURN_STEPS: Phase[] = ["asking", "answering", "guessing", "validating"];
@@ -59,61 +80,88 @@ function usePreloadCards(view: RoomView) {
   }, [urls]);
 }
 
-function PhaseScreens() {
-  const { view, offset } = useRoomContext();
+/**
+ * The lobby rises in and, when the match starts, leaves (its top bar slides
+ * up, its content fades and shrinks: Screen's `leave` variants).
+ */
+const LOBBY: Variants = {
+  enter: { opacity: 0, y: 16 },
+  shown: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: dur.slow, ease: ease.soft },
+  },
+  leave: { opacity: 1, transition: { duration: 0.45 } },
+};
+const RISE = {
+  initial: { opacity: 0, y: 16 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: dur.slow, ease: ease.soft },
+  },
+  exit: { opacity: 0, transition: { duration: dur.base, ease: ease.soft } },
+};
+
+function Areas() {
+  const { view } = useRoomContext();
+  const { area, screen, finishedWait } = useStage();
   useRoomTab();
   useStepSound(view.phase);
   usePreloadCards(view);
-  const now = useServerClock(offset, 250);
-  // A hit that ends the match keeps its reveal; the results wait until it is over.
-  const revealing = view.reveal !== null && now < view.reveal.until;
-  // The theme stays on its screen (the vote's, or the host's) while it is shown to everyone.
-  const phase =
-    view.phase === "finished" && revealing
-      ? "finished-wait"
-      : view.reveal?.kind === "theme" && revealing
-        ? view.vote
-          ? "voting"
-          : "theming"
-        : view.phase;
-  const screen =
-    phase === "lobby" ? (
-      <LobbyScreen />
-    ) : phase === "theming" ? (
-      <ThemeScreen />
-    ) : phase === "voting" ? (
-      <VoteScreen />
-    ) : phase === "picking" ? (
-      <PickScreen />
-    ) : phase === "finished" ? (
-      <ResultScreen />
-    ) : phase === "closed" ? (
-      <RoomProblem code="not_found" />
-    ) : phase === "finished-wait" ? null : (
-      <TurnScreen />
-    );
-  const key = ["asking", "answering", "guessing", "validating"].includes(phase)
-    ? "turn"
-    : phase;
   return (
     <AnimatePresence mode="wait">
-      <motion.div
-        key={key}
-        initial={{ opacity: 0, y: 16 }}
-        animate={{
-          opacity: 1,
-          y: 0,
-          transition: { duration: dur.slow, ease: ease.soft },
-        }}
-        exit={{
-          opacity: 0,
-          transition: { duration: dur.base, ease: ease.soft },
-        }}
-      >
-        {screen}
-      </motion.div>
+      {area === "lobby" ? (
+        <motion.div
+          key="lobby"
+          variants={LOBBY}
+          initial="enter"
+          animate="shown"
+          exit="leave"
+        >
+          <LobbyScreen />
+        </motion.div>
+      ) : area === "match" ? (
+        <MatchFrame key="match">
+          {/* the screens swap under the header with a short crossfade */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={screen ?? "none"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.2 } }}
+              exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            >
+              <MatchScreen screen={screen} />
+            </motion.div>
+          </AnimatePresence>
+        </MatchFrame>
+      ) : area === "result" ? (
+        // a hit that ends the match keeps its reveal; the results wait until it is over
+        <motion.div key={finishedWait ? "result-wait" : "result"} {...RISE}>
+          {finishedWait ? null : <ResultScreen />}
+        </motion.div>
+      ) : (
+        <motion.div key="closed" {...RISE}>
+          <RoomProblem code="not_found" />
+        </motion.div>
+      )}
     </AnimatePresence>
   );
+}
+
+function MatchScreen({ screen }: { screen: StageScreen | null }) {
+  switch (screen) {
+    case "theming":
+      return <ThemeScreen />;
+    case "vote":
+      return <VoteScreen />;
+    case "pick":
+      return <PickScreen />;
+    case "turn":
+      return <TurnScreen />;
+    default:
+      return null;
+  }
 }
 
 /** The room can't be shown: gone, full, already playing, or another problem. */
@@ -162,13 +210,18 @@ const TAB_ALERT: Partial<Record<PlayerStatus, string>> = {
   validating: "validating",
 };
 
-/** "0:42 · Lobby · Bia's room · 4Dare", or "0:42 · Your turn! · 4Dare" on the player's move. */
+/**
+ * "0:42 · Lobby · Bia's room · 4Dare", or "0:42 · Your turn! · 4Dare" on the
+ * player's move. While a show holds the step, the call waits for the step.
+ */
 function useRoomTab() {
   const t = useTranslations("meta");
   const roomTitle = useRoomTitle();
   const { view, me, offset } = useRoomContext();
+  const started = useReached(view.stepStartsAt);
+  const held = isShow(view.reveal) && view.stepStartsAt !== null && !started;
   const phase = TAB_PHASE[view.phase];
-  const alert = TAB_ALERT[me.status];
+  const alert = held ? undefined : TAB_ALERT[me.status];
   const title = roomTitle(
     view.settings.name,
     view.players.find((p) => p.isHost),

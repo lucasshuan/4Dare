@@ -47,8 +47,6 @@ export interface LabParams {
   theme: "light" | "dark";
   /** The lab's own controls; off for screenshots. */
   ui: boolean;
-  /** The room-level backdrop, until the room renders its own (WP4). */
-  backdrop: boolean;
   /** The useStageTimeline demo strip. */
   demo: boolean;
   /** Motion's reduced builds (CSS loops follow the system setting). */
@@ -72,7 +70,6 @@ export const LAB_DEFAULTS: LabParams = {
   names: "short",
   theme: "light",
   ui: true,
-  backdrop: true,
   demo: false,
   reduced: false,
 };
@@ -119,7 +116,6 @@ export function parseLabParams(query: Query, lang: Lang): LabParams {
     names: one("names", ["short", "long"]),
     theme: one("theme", ["light", "dark"]),
     ui: flag("ui"),
-    backdrop: flag("backdrop"),
     demo: flag("demo"),
     reduced: flag("reduced"),
   };

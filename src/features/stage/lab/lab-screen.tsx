@@ -16,7 +16,6 @@ import { THEME_SET_KEYS } from "@/game/theme-sets";
 import type { Lang, RoomView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { type ServerClock, useServerClock } from "@/lib/hooks/use-server-clock";
-import { StageBackdrop } from "../stage-backdrop";
 import { StageProvider, useStage } from "../stage-context";
 import {
   LAB_SHOWS,
@@ -202,7 +201,6 @@ function LabRoomStage({
           clock={clock}
         >
           <StageProvider>
-            {params.backdrop ? <LabBackdrop view={view} /> : null}
             <RoomStage />
             {/* for the screenshot runner: the stage is up */}
             <span data-lab-ready hidden />
@@ -281,12 +279,6 @@ function useLabTheme(theme: "light" | "dark") {
       html.style.colorScheme = before.scheme;
     };
   }, [theme]);
-}
-
-/** The room-level backdrop the room itself will render (WP4); here so the looks can be checked. */
-function LabBackdrop({ view }: { view: RoomView }) {
-  const { look } = useStage();
-  return <StageBackdrop look={look} set={view.theme?.set ?? null} />;
 }
 
 const secs = (ms: number) => `${ms >= 0 ? "+" : ""}${(ms / 1000).toFixed(2)} s`;
@@ -471,9 +463,7 @@ function LabPanel({
           options={["light", "dark"]}
           onChange={(v) => set("theme", v as LabParams["theme"])}
         />
-        {(
-          ["typed", "tie", "timeout", "backdrop", "demo", "reduced"] as const
-        ).map((k) => (
+        {(["typed", "tie", "timeout", "demo", "reduced"] as const).map((k) => (
           <label key={k} className="flex items-center gap-1">
             <input
               type="checkbox"

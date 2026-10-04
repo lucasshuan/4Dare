@@ -1,29 +1,29 @@
 "use client";
 
-import { History, PanelRightClose, PanelRightOpen, X } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { type Ref, useEffect, useState } from "react";
 import { AnswerChip, ResultChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
-import { buttonClass } from "@/components/ui/button";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import type { HistoryEntryView } from "@/game/types";
 import { cn } from "@/lib/cn";
-import { useMedia } from "@/lib/hooks/use-media";
-import { dur, ease } from "@/lib/motion";
+import { gs } from "@/lib/motion";
 
-/** Wide windows show the history as a sidebar; narrower ones as a drawer. */
+/** Wide windows show the history as a bar that pushes the screen; narrower ones as a drawer over it. */
 export const WIDE = "(min-width: 1024px)";
 const SIDEBAR_KEY = "ludodare:history-sidebar";
+/** The bar's width on wide windows (px). */
+const SIDEBAR_WIDTH = 360;
 
 type Kind = "all" | HistoryEntryView["kind"];
 
 /**
- * Whether the sidebar is open on wide windows, remembered in this browser so
- * the next match opens the same way.
+ * Whether the bar is open on wide windows, remembered in this browser so the
+ * next match opens the same way.
  */
 export function useHistorySidebar() {
   const [open, setOpen] = useState(false);
@@ -42,94 +42,82 @@ export function useHistorySidebar() {
 }
 
 /**
- * "History" right of the clock, with how many plays so far. On wide windows
- * it opens and closes the sidebar; on narrow ones it is a small button that
- * opens a drawer.
+ * "History" left of the theme, with how many plays so far: inked while the
+ * history is open. On phones an icon button with the count on its corner.
  */
 export function HistoryButton({
-  sidebarOpen,
-  onSidebar,
+  open,
+  onClick,
+  ref,
 }: {
-  sidebarOpen: boolean;
-  onSidebar: (open: boolean) => void;
+  open: boolean;
+  onClick: () => void;
+  ref?: Ref<HTMLButtonElement>;
 }) {
   const t = useTranslations("turn.history");
-  const wide = useMedia(WIDE);
-  const [drawer, setDrawer] = useState(false);
   const { view } = useRoomContext();
   const count = view.history.length;
-  const open = wide ? sidebarOpen : drawer;
-  const Icon = wide ? (open ? PanelRightClose : PanelRightOpen) : History;
+  const Icon = open ? PanelLeftClose : PanelLeftOpen;
   return (
-    <>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-label={wide ? undefined : t("title")}
-        onClick={() => (wide ? onSidebar(!sidebarOpen) : setDrawer(true))}
-        className={buttonClass(
-          "secondary",
-          "sm",
-          cn(
-            "relative h-10 max-lg:w-10 max-lg:px-0",
-            open && "border-ink bg-ink text-on-ink",
-          ),
-        )}
-      >
-        <Icon strokeWidth={1.75} />
-        <span className="max-lg:sr-only">{t("title")}</span>
-        {count ? (
-          <span
-            className={cn(
-              "flex h-5 min-w-5 items-center justify-center rounded-pill px-1.5 font-mono text-xs tabular-nums",
-              open ? "bg-on-ink/15" : "bg-sunken",
-              // on the small button the count sits on its corner
-              "max-lg:-top-1.5 max-lg:-right-1.5 max-lg:absolute max-lg:h-[18px] max-lg:min-w-[18px] max-lg:bg-sky max-lg:px-1 max-lg:text-[11px] max-lg:text-on-ink",
-            )}
-          >
-            {count}
-          </span>
-        ) : null}
-      </button>
-      {wide ? null : (
-        <HistoryDrawer open={drawer} onClose={() => setDrawer(false)} />
+    <button
+      ref={ref}
+      type="button"
+      aria-expanded={open}
+      onClick={onClick}
+      className={cn(
+        "relative inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-pill border-[1.5px] font-semibold text-sm transition-colors duration-150 max-lg:w-10 lg:px-3",
+        open
+          ? "border-ink bg-ink text-on-ink"
+          : "border-line-strong bg-surface text-ink hover:bg-sunken",
       )}
-    </>
+    >
+      <Icon className="size-[19px]" strokeWidth={1.75} />
+      <span className="max-lg:sr-only">{t("title")}</span>
+      {count ? (
+        <span
+          className={cn(
+            "flex h-5 min-w-5 items-center justify-center rounded-pill px-1.5 font-medium font-mono text-xs tabular-nums",
+            open ? "bg-on-ink/18 text-on-ink" : "bg-sunken text-ink",
+            // on the small button the count sits on its corner
+            "max-lg:-top-1.5 max-lg:-right-1.5 max-lg:absolute max-lg:h-[18px] max-lg:min-w-[18px] max-lg:bg-sky max-lg:px-1 max-lg:text-[11px] max-lg:text-on-sky",
+          )}
+        >
+          {count}
+        </span>
+      ) : null}
+    </button>
   );
 }
 
-/** The history beside the screen on wide windows: slides open, scrolls on its own. */
+/**
+ * Wide windows: a full-height flat bar on the left. Its width opens from 0,
+ * pushing the header and the screen aside, while the panel inside keeps its
+ * width, anchored right, so it seems to slide in from the edge.
+ */
 export function HistorySidebar({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("turn.history");
   return (
-    <motion.aside
-      initial={{ width: 0, opacity: 0 }}
+    <motion.div
+      initial={{ width: 0 }}
       animate={{
-        width: "auto",
-        opacity: 1,
-        transition: { duration: dur.slow, ease: ease.soft },
+        width: SIDEBAR_WIDTH,
+        transition: { duration: 0.55, ease: gs.p3Out },
       }}
-      exit={{
-        width: 0,
-        opacity: 0,
-        transition: { duration: dur.base, ease: ease.soft },
-      }}
-      className="sticky top-6 shrink-0 self-start overflow-hidden"
+      exit={{ width: 0, transition: { duration: 0.4, ease: gs.p3In } }}
+      className="sticky top-0 flex h-dvh shrink-0 justify-end self-start overflow-hidden"
     >
-      {/* fixed width inside, so the text doesn't reflow while it slides */}
       <section
-        aria-label={useTranslations("turn.history")("title")}
-        className="ml-6 flex h-[calc(100dvh-7.5rem)] w-[clamp(320px,26vw,420px)] flex-col overflow-hidden rounded-xl bg-surface shadow-card short:h-[calc(100dvh-6rem)]"
+        aria-label={t("title")}
+        className="flex h-full w-[360px] shrink-0 flex-col border-line border-r bg-surface"
       >
         <HistoryBody onClose={onClose} />
       </section>
-    </motion.aside>
+    </motion.div>
   );
 }
 
-const summary = (e: HistoryEntryView) =>
-  e.kind === "guess" ? `“${e.text}”` : e.text;
-
-function HistoryDrawer({
+/** Phones and narrow windows: a drawer from the left over a scrim; Escape, the scrim or X close it. */
+export function HistoryDrawer({
   open,
   onClose,
 }: {
@@ -137,34 +125,36 @@ function HistoryDrawer({
   onClose: () => void;
 }) {
   const t = useTranslations("turn.history");
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
   return (
     <AnimatePresence>
       {open ? (
-        <div className="fixed inset-0 z-40">
+        <div key="history" className="fixed inset-0 z-40">
           <motion.button
             type="button"
+            tabIndex={-1}
             aria-label={t("close")}
             onClick={onClose}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.3 } }}
+            exit={{ opacity: 0, transition: { duration: 0.3 } }}
             className="absolute inset-0 bg-scrim"
           />
           <motion.section
             role="dialog"
             aria-modal="true"
             aria-label={t("title")}
-            initial={{ y: "100%" }}
-            animate={{
-              y: 0,
-              transition: { duration: dur.slow, ease: ease.soft },
-            }}
-            exit={{
-              y: "100%",
-              transition: { duration: dur.base, ease: ease.soft },
-            }}
-            onKeyDown={(e) => e.key === "Escape" && onClose()}
-            className="absolute inset-x-0 bottom-0 flex h-[85dvh] w-full flex-col rounded-t-xl bg-surface shadow-pop"
+            initial={{ x: "-100%" }}
+            animate={{ x: 0, transition: { duration: 0.55, ease: gs.p3Out } }}
+            exit={{ x: "-100%", transition: { duration: 0.4, ease: gs.p3In } }}
+            className="absolute inset-y-0 left-0 flex w-[88vw] flex-col overflow-hidden rounded-r-[28px] bg-surface pt-[env(safe-area-inset-top)] shadow-pop"
           >
             <HistoryBody onClose={onClose} focusClose />
           </motion.section>
@@ -173,6 +163,9 @@ function HistoryDrawer({
     </AnimatePresence>
   );
 }
+
+const summary = (e: HistoryEntryView) =>
+  e.kind === "guess" ? `“${e.text}”` : e.text;
 
 /** Title, the filters (whose plays, and questions or guesses) and the plays, newest first. */
 function HistoryBody({
@@ -185,9 +178,11 @@ function HistoryBody({
   const t = useTranslations("turn.history");
   const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
-  // One tab per player, you first, like the player strip.
+  // One tab per player: you first, then the others in turn order, like the player strip.
   const players = [...view.players].sort(
-    (a, b) => Number(b.isYou) - Number(a.isYou),
+    (a, b) =>
+      Number(b.isYou) - Number(a.isYou) ||
+      (a.turnOrder ?? a.seat + 99) - (b.turnOrder ?? b.seat + 99),
   );
   const [whose, setWhose] = useState(me.id);
   const [kind, setKind] = useState<Kind>("all");
@@ -203,22 +198,24 @@ function HistoryBody({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-4 px-5 pt-4 pb-3 sm:px-6">
-        <h2 className="font-bold font-display text-2xl">{t("title")}</h2>
+      <div className="flex items-center justify-between gap-4 pt-[18px] pr-4 pb-2.5 pl-[22px]">
+        <h2 className="font-display font-extrabold text-[26px] leading-tight">
+          {t("title")}
+        </h2>
         <button
           type="button"
           ref={focusClose ? (el) => el?.focus() : undefined}
           onClick={onClose}
           aria-label={t("close")}
-          className="flex size-10 items-center justify-center rounded-pill border-[1.5px] border-line-strong transition-colors hover:bg-sunken"
+          className="flex size-10 shrink-0 items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface transition-colors hover:bg-sunken"
         >
-          <X className="size-5" strokeWidth={1.75} />
+          <X className="size-[18px]" strokeWidth={1.75} />
         </button>
       </div>
-      <div className="flex flex-col gap-2.5 border-line border-b px-5 pb-4 sm:px-6">
+      <div className="flex flex-col gap-2.5 border-line border-b px-[22px] pb-3.5">
         <ChoiceGroup
           label={t("filter")}
-          className="flex-wrap self-start rounded-[22px]"
+          className="flex-wrap gap-0.5 self-start rounded-[22px]"
         >
           {players.map((p) => (
             <button
@@ -227,20 +224,20 @@ function HistoryBody({
               aria-pressed={whose === p.id}
               onClick={() => setWhose(p.id)}
               className={cn(
-                "flex h-9 items-center gap-1.5 rounded-pill px-3 font-semibold text-sm transition-colors",
+                "flex h-8 items-center gap-1.5 rounded-pill px-2.5 font-semibold text-[13px] transition-colors",
                 whose === p.id
                   ? "bg-surface text-ink shadow-card"
                   : "text-ink-muted hover:text-ink",
               )}
             >
               <PlayerName player={p} isYou={p.isYou} />
-              <span className="text-xs tabular-nums opacity-60">
+              <span className="text-[11.5px] tabular-nums opacity-60">
                 {playsOf(p.id).length}
               </span>
             </button>
           ))}
         </ChoiceGroup>
-        <fieldset className="m-0 flex gap-1.5 border-0 p-0">
+        <fieldset className="m-0 flex flex-wrap gap-1.5 border-0 p-0">
           <legend className="sr-only">{t("kindFilter")}</legend>
           {kinds.map((k) => (
             <button
@@ -249,18 +246,20 @@ function HistoryBody({
               aria-pressed={kind === k}
               onClick={() => setKind(k)}
               className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-pill border-[1.5px] px-3 font-semibold text-[13px] transition-colors",
+                "inline-flex h-[30px] items-center gap-1.5 rounded-pill border-[1.5px] px-3 font-semibold text-[13px] transition-colors",
                 kind === k
                   ? "border-ink bg-ink text-on-ink"
                   : "border-line-strong text-ink-muted hover:text-ink",
               )}
             >
               {t(`kinds.${k}`)}
-              <span className="tabular-nums opacity-60">{kindCount(k)}</span>
+              <span className="text-[11.5px] tabular-nums opacity-60">
+                {kindCount(k)}
+              </span>
             </button>
           ))}
         </fieldset>
-        <span className="font-medium text-[13px] text-ink-muted">
+        <span className="font-medium text-[12.5px] text-ink-muted leading-[1.4]">
           {whose === me.id || !selected
             ? t("mineCaption", {
                 shown: entries.length,
@@ -275,9 +274,11 @@ function HistoryBody({
               )}
         </span>
       </div>
-      <ol className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-5 sm:px-6">
+      <ol className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-[22px] py-4">
         {entries.length === 0 ? (
-          <li className="text-ink-muted">{t("nothing")}</li>
+          <li className="text-[15px] text-ink-muted leading-[1.45]">
+            {t("nothing")}
+          </li>
         ) : null}
         <AnimatePresence initial={false}>
           {entries.map((e) => {
@@ -293,13 +294,13 @@ function HistoryBody({
               >
                 <span
                   className={cn(
-                    "flex size-7 shrink-0 items-center justify-center rounded-pill font-mono text-[13px]",
+                    "flex size-7 shrink-0 items-center justify-center rounded-pill font-medium font-mono text-[13px]",
                     e.byId === me.id ? "bg-sky-soft" : "bg-sunken",
                   )}
                 >
                   {e.n}
                 </span>
-                <div className="flex min-w-0 flex-col items-start gap-1">
+                <div className="flex min-w-0 flex-col items-start gap-[5px]">
                   <span className="font-semibold text-[13px] text-ink-muted">
                     {withNames((n) =>
                       t(e.kind === "question" ? "question" : "guess", {
@@ -307,7 +308,7 @@ function HistoryBody({
                       }),
                     )}
                   </span>
-                  <p className="text-base">{summary(e)}</p>
+                  <p className="text-base leading-[1.35]">{summary(e)}</p>
                   {e.kind === "guess" ? (
                     <ResultChip result={e.result} />
                   ) : (
