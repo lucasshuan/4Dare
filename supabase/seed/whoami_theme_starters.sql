@@ -4,7 +4,7 @@
 -- again: it only inserts and never deletes or reorders what is there.
 -- To add a theme, append its rows (position 1 and 2 are the clearest fits).
 
-insert into public.theme_starters (theme_id, character_id, position) values
+insert into public.whoami_theme_starters (theme_id, character_id, position) values
   -- animals
   ('a-character-and-their-pet', 'wd-Q1168491', 1), -- Charlie Brown
   ('a-character-and-their-pet', 'wd-Q11934', 2), -- Mickey Mouse

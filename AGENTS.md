@@ -11,7 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Database
 
 - Supabase is the source of truth. `data/*.json` is an old snapshot: the app, the build and the tests never read it.
-- Hand-fed tables: the library (`characters`, `character_names`, `origins`, `origin_labels`, its storage pictures) and the themes (`themes`, `theme_starters`). Never reset, truncate or bulk-delete them; back them up before a migration that touches them; change them by insert or update only (`active = false` turns a theme off).
+- Hand-fed tables: the library (`characters`, `character_names`, `origins`, `origin_labels`, its storage pictures) and the "Who am I?" themes (`whoami_themes`, `whoami_theme_starters`). Never reset, truncate or bulk-delete them; back them up before a migration that touches them; change them by insert or update only (`active = false` turns a theme off).
 - No seed, ever (`pnpm seed` once rewrote the library from `data/` and deleted what it lacked).
 - Local mode (no Supabase keys: dev, unit tests, e2e) runs on the local backend's fixtures, never on `data/`.
 - Everything else (rooms, matches, profiles, pick stats) may be lost; keep what you can.

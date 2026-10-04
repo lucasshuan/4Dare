@@ -1,7 +1,7 @@
 import "server-only";
 // The rule scene's cards ("Every character must be from this theme"): two
 // characters that fit the theme get ✓, one that clearly doesn't gets ✗. They
-// come from the theme's starters (supabase/seed/theme_starters.sql), then its
+// come from the theme's starters (supabase/seed/whoami_theme_starters.sql), then its
 // history; decided once by the server at START, so everyone sees the same.
 import { themeId } from "@/game/theme-id";
 import type { ThemeSet } from "@/game/theme-sets";

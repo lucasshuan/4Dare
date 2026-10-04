@@ -14,6 +14,105 @@ export type Database = {
   };
   public: {
     Tables: {
+      character_image_picks: {
+        Row: {
+          created_at: string;
+          image_id: string;
+          player_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          image_id: string;
+          player_id: string;
+        };
+        Update: {
+          created_at?: string;
+          image_id?: string;
+          player_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "character_image_picks_image_id_fkey";
+            columns: ["image_id"];
+            isOneToOne: false;
+            referencedRelation: "character_images";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      character_image_reports: {
+        Row: {
+          created_at: string;
+          image_id: string;
+          reporter_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          image_id: string;
+          reporter_id: string;
+        };
+        Update: {
+          created_at?: string;
+          image_id?: string;
+          reporter_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "character_image_reports_image_id_fkey";
+            columns: ["image_id"];
+            isOneToOne: false;
+            referencedRelation: "character_images";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      character_images: {
+        Row: {
+          author: Json | null;
+          bonus: number;
+          character_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          moderation: Json | null;
+          picks: number;
+          status: string;
+          url: string;
+        };
+        Insert: {
+          author?: Json | null;
+          bonus?: number;
+          character_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          moderation?: Json | null;
+          picks?: number;
+          status?: string;
+          url: string;
+        };
+        Update: {
+          author?: Json | null;
+          bonus?: number;
+          character_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          moderation?: Json | null;
+          picks?: number;
+          status?: string;
+          url?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "character_images_character_id_fkey";
+            columns: ["character_id"];
+            isOneToOne: false;
+            referencedRelation: "characters";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       character_names: {
         Row: {
           alias_norms: string[];
@@ -226,30 +325,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      pick_feedback: {
-        Row: {
-          character_id: string;
-          created_at: string;
-          liked: boolean;
-          theme_id: string;
-          user_id: string;
-        };
-        Insert: {
-          character_id: string;
-          created_at?: string;
-          liked: boolean;
-          theme_id: string;
-          user_id: string;
-        };
-        Update: {
-          character_id?: string;
-          created_at?: string;
-          liked?: boolean;
-          theme_id?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
       profiles: {
         Row: {
           avatar: Json;
@@ -348,7 +423,31 @@ export type Database = {
         };
         Relationships: [];
       };
-      theme_starters: {
+      whoami_pick_feedback: {
+        Row: {
+          character_id: string;
+          created_at: string;
+          liked: boolean;
+          theme_id: string;
+          user_id: string;
+        };
+        Insert: {
+          character_id: string;
+          created_at?: string;
+          liked: boolean;
+          theme_id: string;
+          user_id: string;
+        };
+        Update: {
+          character_id?: string;
+          created_at?: string;
+          liked?: boolean;
+          theme_id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      whoami_theme_starters: {
         Row: {
           character_id: string;
           position: number;
@@ -366,22 +465,29 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "theme_starters_character_id_fkey";
+            foreignKeyName: "whoami_theme_starters_character_id_fkey";
             columns: ["character_id"];
             isOneToOne: false;
             referencedRelation: "characters";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "theme_starters_theme_id_fkey";
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
             columns: ["theme_id"];
             isOneToOne: false;
             referencedRelation: "themes";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
+            referencedRelation: "whoami_themes";
+            referencedColumns: ["id"];
+          },
         ];
       };
-      themes: {
+      whoami_themes: {
         Row: {
           active: boolean;
           created_at: string;
@@ -442,6 +548,106 @@ export type Database = {
           },
         ];
       };
+      pick_feedback: {
+        Row: {
+          character_id: string | null;
+          created_at: string | null;
+          liked: boolean | null;
+          theme_id: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          character_id?: string | null;
+          created_at?: string | null;
+          liked?: boolean | null;
+          theme_id?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          character_id?: string | null;
+          created_at?: string | null;
+          liked?: boolean | null;
+          theme_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
+      theme_starters: {
+        Row: {
+          character_id: string | null;
+          position: number | null;
+          theme_id: string | null;
+        };
+        Insert: {
+          character_id?: string | null;
+          position?: number | null;
+          theme_id?: string | null;
+        };
+        Update: {
+          character_id?: string | null;
+          position?: number | null;
+          theme_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "whoami_theme_starters_character_id_fkey";
+            columns: ["character_id"];
+            isOneToOne: false;
+            referencedRelation: "characters";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
+            referencedRelation: "themes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
+            referencedRelation: "whoami_themes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      themes: {
+        Row: {
+          active: boolean | null;
+          created_at: string | null;
+          en: string | null;
+          example: number | null;
+          id: string | null;
+          ja: string | null;
+          pt: string | null;
+          source: string | null;
+          theme_set: string | null;
+        };
+        Insert: {
+          active?: boolean | null;
+          created_at?: string | null;
+          en?: string | null;
+          example?: number | null;
+          id?: string | null;
+          ja?: string | null;
+          pt?: string | null;
+          source?: string | null;
+          theme_set?: string | null;
+        };
+        Update: {
+          active?: boolean | null;
+          created_at?: string | null;
+          en?: string | null;
+          example?: number | null;
+          id?: string | null;
+          ja?: string | null;
+          pt?: string | null;
+          source?: string | null;
+          theme_set?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       add_room_message: {
@@ -486,7 +692,19 @@ export type Database = {
         Args: { p_from: string; p_to: string };
         Returns: undefined;
       };
+      record_image_pick: {
+        Args: { p_character: string; p_player: string; p_url: string };
+        Returns: undefined;
+      };
       record_match: { Args: { m: Json }; Returns: undefined };
+      refresh_character_cover: {
+        Args: { p_character: string };
+        Returns: undefined;
+      };
+      report_character_image: {
+        Args: { p_hide_at: number; p_image: string; p_reporter: string };
+        Returns: string;
+      };
       search_characters: {
         Args: { p_lang: string; p_limit: number; q: string };
         Returns: {

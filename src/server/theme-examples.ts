@@ -26,10 +26,10 @@ export function groupExamples(rows: ExampleRow[]): ThemeExamples {
   return out;
 }
 
-/** The examples marked in the themes table (`example`, 1 to 3 per set). */
+/** The examples marked in the whoami_themes table (`example`, 1 to 3 per set). */
 async function readExamples(db: Db): Promise<ThemeExamples> {
   const { data, error } = await db
-    .from("themes")
+    .from("whoami_themes")
     .select("en, pt, ja, theme_set")
     .eq("active", true)
     .not("example", "is", null)

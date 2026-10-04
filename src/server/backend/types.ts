@@ -55,7 +55,7 @@ export interface NewCharacter {
   createdBy: PlayerId;
 }
 
-/** One of a theme's starters: famous characters picked by hand for it (table theme_starters). */
+/** One of a theme's starters: famous characters picked by hand for it (table whoami_theme_starters). */
 export interface ThemeStarter {
   themeId: string;
   /** The theme's set; null for a theme that is no longer drawn. */
