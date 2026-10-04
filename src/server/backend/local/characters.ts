@@ -144,7 +144,7 @@ export function localCharacters(): LocalCharacterStore {
       }
       return picked;
     },
-    // The starters live only in Supabase (theme_starters); the dev lab has fixtures.
+    // The starters live only in Supabase (whoami_theme_starters); the dev lab has fixtures.
     async starters() {
       return [];
     },

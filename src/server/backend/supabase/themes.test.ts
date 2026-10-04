@@ -62,8 +62,8 @@ describe("theme starters from Supabase", () => {
       kind: "human",
     });
     expect(calls.slice(0, 4)).toEqual([
-      "from theme_starters",
-      "select theme_id, character_id, position, characters(kind), themes(theme_set, active)",
+      "from whoami_theme_starters",
+      "select theme_id, character_id, position, characters(kind), themes:whoami_themes(theme_set, active)",
       "order theme_id asc",
       "order position asc",
     ]);

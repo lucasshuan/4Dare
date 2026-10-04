@@ -4,9 +4,9 @@ import type { Theme } from "@/game/types";
 import type { ThemeStarter, ThemeStore } from "../types";
 import { type Db, serviceClient } from "./clients";
 
-/** Supabase: the themes table (see supabase/migrations/0003_themes.sql and 0009_theme_sets.sql). */
+/** Supabase: the whoami_themes table (see supabase/migrations/0003_themes.sql and 0009_theme_sets.sql). */
 export function supabaseThemes(): ThemeStore {
-  const table = () => serviceClient().from("themes");
+  const table = () => serviceClient().from("whoami_themes");
   return {
     async list() {
       const { data, error } = await table()
@@ -24,7 +24,7 @@ export function supabaseThemes(): ThemeStore {
   };
 }
 
-/** A theme_starters row with its character's kind and its theme's set. */
+/** A whoami_theme_starters row with its character's kind and its theme's set. */
 interface StarterRow {
   theme_id: string;
   character_id: string;
@@ -34,7 +34,7 @@ interface StarterRow {
 }
 
 const STARTER_COLUMNS =
-  "theme_id, character_id, position, characters(kind), themes(theme_set, active)";
+  "theme_id, character_id, position, characters(kind), themes:whoami_themes(theme_set, active)";
 /** Rows asked for per request; PostgREST may hand out fewer (its "max rows"). */
 const PAGE = 1000;
 /** As long as the theme list is kept (src/server/themes.ts). */
@@ -49,7 +49,7 @@ export async function readStarters(db: Db): Promise<ThemeStarter[]> {
   const out: ThemeStarter[] = [];
   for (let from = 0; ; ) {
     const { data, error } = await db
-      .from("theme_starters")
+      .from("whoami_theme_starters")
       .select(STARTER_COLUMNS)
       .order("theme_id", { ascending: true })
       .order("position", { ascending: true })
@@ -92,7 +92,7 @@ export function supabaseStarters(
       })
       .catch((e: unknown) => {
         console.warn(
-          "[starters] could not read theme_starters:",
+          "[starters] could not read whoami_theme_starters:",
           e instanceof Error ? e.message : e,
         );
         return cached?.rows ?? [];

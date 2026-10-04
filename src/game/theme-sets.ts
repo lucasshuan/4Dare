@@ -1,5 +1,5 @@
 // The theme list, split into sets. The host picks which sets a vote draws from.
-// Each theme in the themes table names its set (`theme_set`); the names people
+// Each theme in the whoami_themes table names its set (`theme_set`); the names people
 // read live in messages/<lang>/common.json (themeSets).
 
 export const THEME_SETS = [

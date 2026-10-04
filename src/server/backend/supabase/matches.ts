@@ -54,13 +54,15 @@ export function supabaseMatches(): MatchStore {
       }));
     },
     async rateDraw(f) {
-      const { error } = await serviceClient().from("pick_feedback").upsert({
-        theme_id: f.themeId,
-        character_id: f.characterId,
-        user_id: f.userId,
-        liked: f.liked,
-        created_at: new Date().toISOString(),
-      });
+      const { error } = await serviceClient()
+        .from("whoami_pick_feedback")
+        .upsert({
+          theme_id: f.themeId,
+          character_id: f.characterId,
+          user_id: f.userId,
+          liked: f.liked,
+          created_at: new Date().toISOString(),
+        });
       if (error) throw error;
     },
   };

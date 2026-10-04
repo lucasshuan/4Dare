@@ -325,30 +325,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      pick_feedback: {
-        Row: {
-          character_id: string;
-          created_at: string;
-          liked: boolean;
-          theme_id: string;
-          user_id: string;
-        };
-        Insert: {
-          character_id: string;
-          created_at?: string;
-          liked: boolean;
-          theme_id: string;
-          user_id: string;
-        };
-        Update: {
-          character_id?: string;
-          created_at?: string;
-          liked?: boolean;
-          theme_id?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
       profiles: {
         Row: {
           avatar: Json;
@@ -447,7 +423,31 @@ export type Database = {
         };
         Relationships: [];
       };
-      theme_starters: {
+      whoami_pick_feedback: {
+        Row: {
+          character_id: string;
+          created_at: string;
+          liked: boolean;
+          theme_id: string;
+          user_id: string;
+        };
+        Insert: {
+          character_id: string;
+          created_at?: string;
+          liked: boolean;
+          theme_id: string;
+          user_id: string;
+        };
+        Update: {
+          character_id?: string;
+          created_at?: string;
+          liked?: boolean;
+          theme_id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      whoami_theme_starters: {
         Row: {
           character_id: string;
           position: number;
@@ -465,22 +465,29 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "theme_starters_character_id_fkey";
+            foreignKeyName: "whoami_theme_starters_character_id_fkey";
             columns: ["character_id"];
             isOneToOne: false;
             referencedRelation: "characters";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "theme_starters_theme_id_fkey";
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
             columns: ["theme_id"];
             isOneToOne: false;
             referencedRelation: "themes";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
+            referencedRelation: "whoami_themes";
+            referencedColumns: ["id"];
+          },
         ];
       };
-      themes: {
+      whoami_themes: {
         Row: {
           active: boolean;
           created_at: string;
@@ -540,6 +547,106 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      pick_feedback: {
+        Row: {
+          character_id: string | null;
+          created_at: string | null;
+          liked: boolean | null;
+          theme_id: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          character_id?: string | null;
+          created_at?: string | null;
+          liked?: boolean | null;
+          theme_id?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          character_id?: string | null;
+          created_at?: string | null;
+          liked?: boolean | null;
+          theme_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
+      theme_starters: {
+        Row: {
+          character_id: string | null;
+          position: number | null;
+          theme_id: string | null;
+        };
+        Insert: {
+          character_id?: string | null;
+          position?: number | null;
+          theme_id?: string | null;
+        };
+        Update: {
+          character_id?: string | null;
+          position?: number | null;
+          theme_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "whoami_theme_starters_character_id_fkey";
+            columns: ["character_id"];
+            isOneToOne: false;
+            referencedRelation: "characters";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
+            referencedRelation: "themes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
+            referencedRelation: "whoami_themes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      themes: {
+        Row: {
+          active: boolean | null;
+          created_at: string | null;
+          en: string | null;
+          example: number | null;
+          id: string | null;
+          ja: string | null;
+          pt: string | null;
+          source: string | null;
+          theme_set: string | null;
+        };
+        Insert: {
+          active?: boolean | null;
+          created_at?: string | null;
+          en?: string | null;
+          example?: number | null;
+          id?: string | null;
+          ja?: string | null;
+          pt?: string | null;
+          source?: string | null;
+          theme_set?: string | null;
+        };
+        Update: {
+          active?: boolean | null;
+          created_at?: string | null;
+          en?: string | null;
+          example?: number | null;
+          id?: string | null;
+          ja?: string | null;
+          pt?: string | null;
+          source?: string | null;
+          theme_set?: string | null;
+        };
+        Relationships: [];
       };
     };
     Functions: {

@@ -91,7 +91,7 @@ function ModeSwitch({
   );
 }
 
-/** A set's example themes in this language, from the themes table: empty until they arrive. */
+/** A set's example themes in this language, from the whoami_themes table: empty until they arrive. */
 function useExamples(set: ThemeSet): string[] {
   const lang = useLocale() as Lang;
   const { data } = useQuery({
