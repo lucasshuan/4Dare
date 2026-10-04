@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import type { MatchRecord, PlayerRecord } from "@/game/record";
 import type { Character, Lang } from "@/game/types";
 import {
+  buildHand,
   drawPopular,
   drawWeight,
+  HAND_SIZE,
   MIN_RANDOM_PICKS,
   pickKey,
+  rankPopular,
   tallyFeedback,
   tallyPicks,
   topPicks,
@@ -61,8 +64,9 @@ describe("pickKey", () => {
     expect(pickKey("ja-al-40")).toBe("al-40");
     expect(pickKey("u-123")).toBe("u-123");
   });
-  it("skips the clock's stand-ins and empty picks", () => {
+  it("skips the clock's stand-ins, unsaved draft names and empty picks", () => {
     expect(pickKey("emergency-pt-0")).toBeNull();
+    expect(pickKey("draft-ABCDE-1-p2")).toBeNull();
     expect(pickKey(null)).toBeNull();
   });
 });
@@ -208,5 +212,103 @@ describe("tallyFeedback", () => {
     ]);
     expect(t.get("villains")?.get("wd-Q1")).toEqual({ likes: 1, dislikes: 2 });
     expect(t.get("robots")?.get("wd-Q1")).toEqual({ likes: 1, dislikes: 0 });
+  });
+});
+
+describe("rankPopular", () => {
+  it("orders what exists in the language by weight, then id, and drops the voted out", async () => {
+    const resolve = async (ids: string[]) =>
+      ids
+        .filter((id) => id !== "pt-wd-Q9")
+        .map((id) => character(id, id.startsWith("u-") ? "en" : "pt"));
+    const ranked = await rankPopular(
+      [
+        { id: "wd-Q2", picks: 1 },
+        { id: "wd-Q1", picks: 1 },
+        { id: "wd-Q3", picks: 5, dislikes: 1 },
+        { id: "wd-Q9", picks: 9 }, // gone in Portuguese
+        { id: "u-1", picks: 9 }, // made in English
+        { id: "wd-Q4", picks: 0 },
+      ],
+      "pt",
+      resolve,
+    );
+    expect(ranked.map((r) => r.character.id)).toEqual([
+      "pt-wd-Q3",
+      "pt-wd-Q1",
+      "pt-wd-Q2",
+    ]);
+    expect(ranked[0].pick).toEqual({ id: "wd-Q3", picks: 5, dislikes: 1 });
+  });
+});
+
+describe("buildHand", () => {
+  /** Library ids exist in every language with a picture, except the ones listed. */
+  const resolver =
+    (noPicture: string[] = [], gone: string[] = []) =>
+    async (ids: string[]) =>
+      ids.flatMap((id) => {
+        const [lang, ...rest] = id.split("-");
+        const key = rest.join("-");
+        if (gone.includes(key)) return [];
+        return [
+          {
+            ...character(id, lang as Lang),
+            imageUrl: noPicture.includes(key)
+              ? null
+              : `https://img.test/${key}`,
+          },
+        ];
+      });
+
+  it("puts history with real signal first, then the starters, each once", async () => {
+    const hand = await buildHand(
+      [
+        { id: "wd-Q1", picks: 1 }, // one pick and no like: not enough signal
+        { id: "wd-Q2", picks: 2 },
+        { id: "wd-Q3", picks: 1, likes: 1 },
+        { id: "wd-Q4", picks: 3, likes: 2 },
+      ],
+      ["wd-Q10", "wd-Q2", "wd-Q1", "wd-Q11"],
+      "ja",
+      resolver(),
+    );
+    expect(hand.map((c) => c.id)).toEqual([
+      "ja-wd-Q4",
+      "ja-wd-Q2",
+      "ja-wd-Q3",
+      "ja-wd-Q10",
+      "ja-wd-Q1",
+      "ja-wd-Q11",
+    ]);
+    // the counts come along: the heart shows likes only when there are some
+    expect(hand[0]).toMatchObject({ lang: "ja", picks: 3, likes: 2 });
+    expect(hand.find((c) => c.id === "ja-wd-Q1")).toMatchObject({
+      picks: 1,
+      likes: 0,
+    });
+    expect(hand.find((c) => c.id === "ja-wd-Q10")).toMatchObject({
+      picks: 0,
+      likes: 0,
+    });
+  });
+
+  it("shows pictures first, skips what the language lacks, and stops at the hand size", async () => {
+    const starters = Array.from({ length: 12 }, (_, i) => `wd-Q${i + 1}`);
+    const hand = await buildHand(
+      [],
+      starters,
+      "pt",
+      resolver(["wd-Q1"], ["wd-Q2"]),
+    );
+    expect(hand).toHaveLength(HAND_SIZE);
+    expect(hand[0].id).toBe("pt-wd-Q3");
+    expect(hand.map((c) => c.id)).not.toContain("pt-wd-Q2");
+    // the one without a picture sank past the cut
+    expect(hand.map((c) => c.id)).not.toContain("pt-wd-Q1");
+  });
+
+  it("is empty for a theme with neither history nor starters", async () => {
+    expect(await buildHand([], [], "en", resolver())).toEqual([]);
   });
 });

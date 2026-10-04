@@ -116,8 +116,11 @@ export function localCharacters(): CharacterStore {
       return r ? strip(r) : null;
     },
     async create(input) {
+      // A fixed id made already (a clock and a confirm racing): that one.
+      const made = input.id ? rows.get(input.id) : undefined;
+      if (made) return strip(made);
       const c: Character = {
-        id: `u-${randomUUID()}`,
+        id: input.id ?? `u-${randomUUID()}`,
         lang: input.lang,
         name: input.name,
         origin: input.origin,
@@ -172,6 +175,10 @@ export function localCharacters(): CharacterStore {
         picked.push(strip(pool.splice(i, 1)[0]));
       }
       return picked;
+    },
+    // The starters live only in Supabase (theme_starters); the dev lab has fixtures.
+    async starters() {
+      return [];
     },
   };
 }

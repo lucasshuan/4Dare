@@ -45,11 +45,26 @@ export interface RoomStore {
 }
 
 export interface NewCharacter {
+  /** "u-<uuid>" fixed in advance (a pick draft's newId): creating it again returns the one made first. */
+  id?: string;
   lang: Lang;
   name: string;
   origin: string | null;
   imageUrl: string | null;
   createdBy: PlayerId;
+}
+
+/** One of a theme's starters: famous characters picked by hand for it (table theme_starters). */
+export interface ThemeStarter {
+  themeId: string;
+  /** The theme's set; null for a theme that is no longer drawn. */
+  set: ThemeSet | null;
+  /** Language-free library id: "wd-Q302", "al-40". */
+  characterId: string;
+  /** 1 and 2 are the clearest fits. */
+  position: number;
+  /** A real person or a made-up character, as the library knows it. */
+  kind: "fictional" | "human" | null;
 }
 
 export interface CharacterStore {
@@ -58,6 +73,7 @@ export interface CharacterStore {
   get(id: string): Promise<Character | null>;
   /** The ones of `ids` (app ids) that exist in `lang`, in one read. */
   getMany(ids: string[], lang: Lang): Promise<Character[]>;
+  /** Inserts only. With an `id` it is idempotent: an id already there comes back as it is. */
   create(input: NewCharacter): Promise<Character>;
   setImage(id: string, imageUrl: string): Promise<Character | null>;
   /** Used when a player lets the clock run out while picking. */
@@ -67,6 +83,8 @@ export interface CharacterStore {
     created: Character[];
     images: Record<string, string>;
   }>;
+  /** Every active theme's starters, by theme then position (cached; local mode has none). */
+  starters(): Promise<ThemeStarter[]>;
 }
 
 /** Where the theme list lives: the bundled file locally, a table on Supabase. */

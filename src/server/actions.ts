@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { GAME_KEYS } from "@/game/games";
-import { normalizeName } from "@/game/match";
 import { themeId } from "@/game/theme-id";
 import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
 import {
@@ -18,6 +17,7 @@ import {
   type Identity,
   LANGS,
   type Lang,
+  MAX_CHARACTER_NAME,
   MAX_GUESS,
   MAX_NAME,
   MAX_NOTE,
@@ -34,6 +34,7 @@ import {
 import { toView } from "@/game/view";
 import { rerollGuest as rerollGuestCookie } from "./auth/guest";
 import { getBackend } from "./backend";
+import { findSameName, getOrCreateCharacter } from "./characters";
 import {
   AVATAR_COLORS,
   type CharacterDTO,
@@ -43,6 +44,7 @@ import {
   ok,
   type Result,
 } from "./contract";
+import { readImage } from "./images";
 import { allow } from "./rate-limit";
 import {
   currentMatch,
@@ -50,7 +52,9 @@ import {
   leaveOtherRooms,
   normalizeCode,
   openRoom,
+  roundExamples,
   roundThemes,
+  saveDraft,
   syncIdentity,
 } from "./rooms";
 import { drawPopular, PICKS_FETCHED, pickKey } from "./theme-picks";
@@ -203,14 +207,27 @@ export async function setReady(
   );
 }
 
-/** Host only, 2+ players. Draws the themes everyone votes on (or the host's ideas, when they type the theme), avoiding the last vote's. */
+/**
+ * Host only, 2+ players. Draws the themes everyone votes on (or the host's
+ * ideas, when they type the theme), avoiding the last vote's. A room's first
+ * vote brings the rule scene's cards for each theme along.
+ */
 export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {
     const stored = await getBackend().rooms.get(roomCode(code));
     const themes = stored
       ? await roundThemes(stored.state, stored.state.vote?.options ?? [])
       : [];
-    return act(code, (id) => ({ type: "START", playerId: id, themes }));
+    const examples =
+      stored?.state.settings.themeMode === "vote"
+        ? await roundExamples(stored.state, themes)
+        : undefined;
+    return act(code, (id) => ({
+      type: "START",
+      playerId: id,
+      themes,
+      ...(examples ? { examples } : {}),
+    }));
   });
 }
 
@@ -246,18 +263,69 @@ export async function confirmPick(
   code: string,
   characterId: string,
 ): Promise<Result<RoomView>> {
+  return run(() => confirmed(code, characterId));
+}
+
+/**
+ * Confirms what is on the caller's pick card in one call: a character of the
+ * library (`characterId`), or a name, found in the library or added to it
+ * (insert only). A new character's picture is the one the card's draft holds
+ * (uploaded through /api/rooms/[code]/draft/image), never a URL from the
+ * browser; its id is the draft's, so a clock running out at the same moment
+ * makes the same character.
+ */
+export async function confirmCard(
+  code: string,
+  card: { characterId: string } | { name: string },
+): Promise<Result<RoomView>> {
   return run(async () => {
-    if (typeof characterId !== "string" || characterId.length > 200) bad();
-    const character = (await getBackend().characters.get(characterId)) ?? bad();
-    return act(code, (id) => ({ type: "PICK", playerId: id, character }));
+    if (!card || typeof card !== "object") bad();
+    if ("characterId" in card) return confirmed(code, card.characterId);
+    const name = text(
+      (card as { name: unknown }).name,
+      MAX_CHARACTER_NAME,
+    ).replace(/\s+/g, " ");
+    const room = roomCode(code);
+    const who = await me();
+    const state = (await getBackend().rooms.get(room))?.state;
+    if (!state) throw new GameError("not_found");
+    if (state.phase !== "picking") throw new GameError("wrong_phase");
+    const player = state.players.find((p) => p.id === who.id);
+    const mine = Object.values(state.assignments).find(
+      (a) => a.pickerId === who.id,
+    );
+    if (!player || !mine) throw new GameError("not_member");
+    if (mine.character) throw new GameError("already_done");
+    if (!allow(`upload:${who.id}`, 30, 60_000))
+      throw new GameError("rate_limited");
+    const draft = mine.draft ?? null;
+    const character = await getOrCreateCharacter({
+      id: draft?.newId ?? undefined,
+      lang: player.lang,
+      name,
+      origin: null,
+      imageUrl: draft && draft.characterId === null ? draft.imageUrl : null,
+      createdBy: who.id,
+    });
+    return act(room, (id) => ({ type: "PICK", playerId: id, character }));
   });
+}
+
+/** PICK with a character the library has. */
+async function confirmed(code: string, characterId: unknown) {
+  if (typeof characterId !== "string" || characterId.length > 200) bad();
+  const character =
+    (await getBackend().characters.get(characterId as string)) ?? bad();
+  return act(code, (id) => ({ type: "PICK", playerId: id, character }));
 }
 
 /**
  * A character for the caller to pick, drawn among the ones players picked
  * most in finished matches with this theme. Fails with "not_enough_picks"
  * until the theme has enough history. `skip` is the one drawn last, so a
- * second press shows someone else. The player still confirms it.
+ * second press shows someone else. The draw goes on the caller's card (its
+ * draft), so it is the pick if the clock runs out; they still confirm it.
+ * Never one already picked in the match, the caller's own secret included.
  */
 export async function randomPick(
   code: string,
@@ -300,6 +368,16 @@ export async function randomPick(
       Math.random,
     );
     if (!c) throw new GameError("not_enough_picks");
+    try {
+      await saveDraft(roomCode(code), who.id, {
+        characterId: c.id,
+        name: c.name,
+        imageUrl: null,
+      });
+    } catch (e) {
+      // the card was confirmed or the clock ran out meanwhile: the draw still shows
+      if (!(e instanceof GameError)) throw e;
+    }
     return toDTO(c);
   });
 }
@@ -430,24 +508,6 @@ export async function backToLobby(code: string): Promise<Result<RoomView>> {
 
 // --- character library --------------------------------------------------------
 
-const MAX_IMAGE = 4 * 1024 * 1024;
-
-/** Accepts only real WebP, JPEG or PNG files (checked by their first bytes). */
-async function readImage(
-  file: FormDataEntryValue | null,
-): Promise<{ bytes: Uint8Array; type: string } | null> {
-  if (!file || typeof file === "string" || file.size === 0) return null;
-  if (file.size > MAX_IMAGE) throw new GameError("upload_failed");
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  const has = (sig: number[], at = 0) =>
-    sig.every((b, i) => bytes[at + i] === b);
-  if (has([0x52, 0x49, 0x46, 0x46]) && has([0x57, 0x45, 0x42, 0x50], 8))
-    return { bytes, type: "image/webp" };
-  if (has([0xff, 0xd8, 0xff])) return { bytes, type: "image/jpeg" };
-  if (has([0x89, 0x50, 0x4e, 0x47])) return { bytes, type: "image/png" };
-  throw new GameError("upload_failed");
-}
-
 const toDTO = (c: {
   id: string;
   lang: Lang;
@@ -486,11 +546,7 @@ export async function createCharacter(
       ? await files.put("characters", image.bytes, image.type)
       : null;
     // same name (and origin, when given) as a library entry: reuse it instead of a duplicate
-    const same = (await characters.search(name, l, 10)).find(
-      (c) =>
-        normalizeName(c.name) === normalizeName(name) &&
-        (!origin || normalizeName(c.origin ?? "") === normalizeName(origin)),
-    );
+    const same = await findSameName(name, l, origin);
     if (same) {
       if (!imageUrl) return toDTO(same);
       return toDTO((await characters.setImage(same.id, imageUrl)) ?? same);
