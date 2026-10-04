@@ -177,8 +177,8 @@ The "4Dare em cena" proposal (https://claude.ai/artifact/XwqNSpQWeXC1rrNyKKW4or)
 - [ ] "Random" big beside "Confirm"
 - [ ] Out of time: whatever is on the card (picked or being created) is the pick, saved on the server while you edit; random only for an empty card
 - [ ] Confirming makes the card grow a little, straight and centred; then the avatars of who has finished show up
-- [ ] "Rafa picked yours": your "?" card falls in with who picked it, then the others turn face up
-- [ ] Turn order: the cards shuffle into the order, get numbers, "Bia starts!", then shrink into the game's player strip
+- [x] "Rafa picked yours": your "?" card falls in with who picked it, then the others turn face up
+- [x] Turn order: the cards shuffle into the order, get numbers, "Bia starts!", then shrink into the game's player strip
 - [ ] Chat in the lobby and the match: a tab at the bottom right, slightly inset; a click on its top opens it over the screen to about 60% of the height, another click folds it
 - [ ] New messages: the tab turns blue with a count and the senders' faces, a 3 s bubble with the text, a small nudge now and then until it is opened
 - [ ] Chat on phones: a bar at the bottom with the last message, opening from the bottom the same way

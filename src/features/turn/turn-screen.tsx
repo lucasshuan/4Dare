@@ -15,6 +15,9 @@ import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
 import { CastScene } from "@/features/stage/cast-scene";
+import { beatOf } from "@/features/stage/stage";
+import { useStage } from "@/features/stage/stage-context";
+import { useStageTimeline } from "@/features/stage/use-stage-timeline";
 import {
   endsWithQuestionMark,
   questionMark,
@@ -31,7 +34,7 @@ import {
 } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { focusIsFree } from "@/lib/focus";
-import { dur, ease } from "@/lib/motion";
+import { dur, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import {
   answerQuestion,
@@ -100,7 +103,14 @@ export function TurnScreen() {
   const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
   const mode = useMode();
-  const cast = useSceneShow("cast", ["received", "order"]);
+  const { beat } = useStage();
+  // the cast plays here: the table alone while it runs, then the strip and body come in under its exit
+  const cast = useSceneShow("cast", ["received", "order", "entrance"]);
+  const tableOnly = cast !== null && beat?.kind !== "entrance";
+  // kept after the cast leaves the view, so the entrance is never cut at its end
+  const entranceAt = beatOf(cast, "entrance")?.startsAt ?? null;
+  const [enterAt, setEnterAt] = useState(entranceAt);
+  if (entranceAt !== null && entranceAt !== enterAt) setEnterAt(entranceAt);
   const turnPlayer = playerById(view.turn?.playerId) as PlayerView;
   const focusMine =
     mode === "ask" ||
@@ -124,66 +134,118 @@ export function TurnScreen() {
 
   return (
     // small muted text sits on the seat's wash here: a touch darker (lighter in dark) keeps it at 4.5:1
-    <div className="flex flex-col gap-6 short:gap-4 [&_.text-ink-muted]:text-[color:color-mix(in_oklab,var(--ink-muted)_80%,var(--ink))]">
+    <div
+      className={cn(
+        "relative flex flex-col gap-6 short:gap-4 [&_.text-ink-muted]:text-[color:color-mix(in_oklab,var(--ink-muted)_80%,var(--ink))]",
+        // the scene is laid over the screen: keep its height while it plays
+        cast && "min-h-[calc(100dvh-9rem)]",
+      )}
+    >
       {cast ? <CastScene show={cast} /> : null}
-      <PlayerStrip players={view.players} />
-      <div className="flex flex-wrap items-stretch gap-5 lg:gap-12">
-        {/* the card's width follows the window height, so the whole screen fits */}
-        <div className="w-full lg:w-[clamp(232px,calc((100dvh_-_330px)_*_0.66),368px)] lg:flex-none">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={focus.id}
-              initial={{ opacity: 0, rotateY: -12, y: 10 }}
-              animate={{
-                opacity: 1,
-                rotateY: 0,
-                y: 0,
-                transition: { duration: dur.slow, ease: ease.soft },
-              }}
-              exit={{
-                opacity: 0,
-                rotateY: 12,
-                transition: { duration: dur.base, ease: ease.soft },
-              }}
-              className="perspective-[1200px]"
-            >
-              <CharacterCard
-                className="max-lg:hidden"
-                card={focus.card}
-                hidden={focus.cardHidden}
-                tone={focus.isYou ? "you" : "other"}
-                label={label}
-                title={t("card.whoAreYou")}
-                meta={meta}
-                found={focus.discoveredAt !== null}
-              />
-              <FocusRow
-                focus={focus}
-                label={label}
-                title={t("card.whoAreYou")}
-                meta={meta}
-              />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        <section className="flex min-w-0 flex-[1_1_360px] flex-col gap-5 short:gap-3">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${view.phase}-${view.turn?.n}-${mode}`}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                transition: { duration: dur.slow, ease: ease.soft },
-              }}
-              exit={{ opacity: 0, transition: { duration: dur.fast } }}
-              className="flex flex-col gap-5 short:gap-3"
-            >
-              <Step mode={mode} />
-            </motion.div>
-          </AnimatePresence>
-        </section>
-      </div>
+      {tableOnly ? null : (
+        <>
+          <PlayerStrip
+            players={view.players}
+            enter={enterAt === null ? undefined : { at: enterAt }}
+          />
+          <Rise at={enterAt}>
+            {/* the card's width follows the window height, so the whole screen fits */}
+            <div className="w-full lg:w-[clamp(232px,calc((100dvh_-_330px)_*_0.66),368px)] lg:flex-none">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={focus.id}
+                  initial={{ opacity: 0, rotateY: -12, y: 10 }}
+                  animate={{
+                    opacity: 1,
+                    rotateY: 0,
+                    y: 0,
+                    transition: { duration: dur.slow, ease: ease.soft },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    rotateY: 12,
+                    transition: { duration: dur.base, ease: ease.soft },
+                  }}
+                  className="perspective-[1200px]"
+                >
+                  <CharacterCard
+                    className="max-lg:hidden"
+                    card={focus.card}
+                    hidden={focus.cardHidden}
+                    tone={focus.isYou ? "you" : "other"}
+                    label={label}
+                    title={t("card.whoAreYou")}
+                    meta={meta}
+                    found={focus.discoveredAt !== null}
+                  />
+                  <FocusRow
+                    focus={focus}
+                    label={label}
+                    title={t("card.whoAreYou")}
+                    meta={meta}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            <section className="flex min-w-0 flex-[1_1_360px] flex-col gap-5 short:gap-3">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${view.phase}-${view.turn?.n}-${mode}`}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: dur.slow, ease: ease.soft },
+                  }}
+                  exit={{ opacity: 0, transition: { duration: dur.fast } }}
+                  className="flex flex-col gap-5 short:gap-3"
+                >
+                  <Step mode={mode} />
+                </motion.div>
+              </AnimatePresence>
+            </section>
+          </Rise>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Body rise after the cast: from 0.4 s into its entrance beat (server ms `at`). */
+const RISE = { delay: 0.4, y: 24, duration: 0.6 } as const;
+
+/**
+ * The turn body (your card and the step) rising in after the cast, on the
+ * server clock; without `at` (no cast seen) it is just there.
+ */
+function Rise({ at, children }: { at: number | null; children: ReactNode }) {
+  const ref = useStageTimeline<HTMLDivElement>({
+    startsAt: at,
+    deps: [at],
+    build: (el, { reduced }) =>
+      at === null
+        ? []
+        : reduced
+          ? [[el, { opacity: [0, 1] }, { at: RISE.delay, duration: 0.2 }]]
+          : [
+              [
+                el,
+                { opacity: [0, 1], y: [RISE.y, 0] },
+                { at: RISE.delay, duration: RISE.duration, ease: gs.p3Out },
+              ],
+            ],
+  });
+  return (
+    <div
+      ref={ref}
+      className="flex flex-wrap items-stretch gap-5 lg:gap-12"
+      style={
+        at === null
+          ? undefined
+          : { opacity: 0, transform: `translateY(${RISE.y}px)` }
+      }
+    >
+      {children}
     </div>
   );
 }

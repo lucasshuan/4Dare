@@ -1,47 +1,94 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { motion } from "motion/react";
+import { type AnimationSequence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
+import { useStageTimeline } from "@/features/stage/use-stage-timeline";
 import type { PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { seatColor } from "@/lib/seats";
+
+/** The strip's entrance after the cast: each item drops in, one after the other. */
+const DROP = { y: -30, duration: 0.5, stagger: 0.06 } as const;
 
 /**
  * Everyone at the table in turn order, left to right: the first to play on the
  * left, the last on the right. Each ring has its player's seat colour. A player
  * whose card you can see opens it bigger on hover (or tap): picture, name, origin.
+ *
+ * `enter.at` (server ms): the items drop in from there (the cast's entrance
+ * beat), on the server clock, so a reload lands on the same frame.
  */
-export function PlayerStrip({ players }: { players: PlayerView[] }) {
+export function PlayerStrip({
+  players,
+  enter,
+}: {
+  players: PlayerView[];
+  enter?: { at: number };
+}) {
   const ordered = [...players].sort(
     (a, b) => (a.turnOrder ?? a.seat + 99) - (b.turnOrder ?? b.seat + 99),
   );
+  const at = enter?.at ?? null;
+  const ref = useStageTimeline<HTMLUListElement>({
+    startsAt: at,
+    deps: [at, ordered.map((p) => p.id).join()],
+    build: (scope, { reduced }) => {
+      if (at === null) return [];
+      const items = [
+        ...scope.querySelectorAll<HTMLElement>("[data-strip-item]"),
+      ];
+      return items.map((item, i): AnimationSequence[number] =>
+        reduced
+          ? [item, { opacity: [0, 1] }, { at: i * DROP.stagger, duration: 0.2 }]
+          : [
+              item,
+              { opacity: [0, 1], y: [DROP.y, 0] },
+              {
+                at: i * DROP.stagger,
+                duration: DROP.duration,
+                ease: gs.backOut(1.6),
+              },
+            ],
+      );
+    },
+  });
   return (
-    <ul className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
+    <ul ref={ref} className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
       {ordered.map((p) => (
         <motion.li
           key={p.id}
           layout
           className={cn(
-            "flex min-w-0 rounded-md bg-surface transition-shadow duration-300 sm:flex-[1_1_150px]",
+            "flex min-w-0 sm:flex-[1_1_150px]",
             p.away && "opacity-60",
           )}
-          style={{
-            boxShadow: p.isTurn
-              ? `0 0 0 2px ${seatColor(p.seat)}`
-              : "0 0 0 0 transparent",
-          }}
         >
-          {p.card && !p.cardHidden ? (
-            <CardPeek player={p} />
-          ) : (
-            <PlayerRow player={p} />
-          )}
+          {/* the entrance moves this one, so it never fights the layout animation above */}
+          <div
+            data-strip-item
+            className="flex min-w-0 flex-1 rounded-md bg-surface transition-shadow duration-300"
+            style={{
+              boxShadow: p.isTurn
+                ? `0 0 0 2px ${seatColor(p.seat)}`
+                : "0 0 0 0 transparent",
+              ...(at !== null
+                ? { opacity: 0, transform: `translateY(${DROP.y}px)` }
+                : null),
+            }}
+          >
+            {p.card && !p.cardHidden ? (
+              <CardPeek player={p} />
+            ) : (
+              <PlayerRow player={p} />
+            )}
+          </div>
         </motion.li>
       ))}
     </ul>
