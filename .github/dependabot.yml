@@ -1,0 +1,34 @@
+# Opens pull requests when a dependency has a new version: once a week, the
+# minor and patch bumps grouped in one PR, each major on its own. A version is
+# only offered a few days after its release, so a bad or hijacked publish is
+# usually pulled before it reaches us. Security fixes come at once.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    cooldown:
+      default-days: 5
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    commit-message:
+      prefix: chore
+    groups:
+      actions:
+        patterns: ["*"]

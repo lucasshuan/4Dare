@@ -6,7 +6,6 @@ import type {
   Character,
   ErrorCode,
   Identity,
-  Lang,
   Phase,
   PlayerId,
 } from "@/game/types";
@@ -84,5 +83,3 @@ export const AVATAR_COLORS = [
   "#F2E3A8",
   "#D7DDE8",
 ] as const;
-
-export type { Lang };

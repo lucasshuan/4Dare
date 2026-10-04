@@ -11,8 +11,6 @@ export class SignInUnavailable extends Error {
   }
 }
 
-export const authMode = (): "local" | "supabase" => BACKEND;
-
 /**
  * Starts the Discord/Google sign-in: /auth/sign-in sends the browser to the
  * provider. On the way back, /auth/callback hands the guest's matches (and

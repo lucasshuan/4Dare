@@ -1,10 +1,9 @@
 import "server-only";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { BACKEND } from "@/config";
 import type { ThemeSet } from "@/game/theme-sets";
 import type { Localized } from "@/game/types";
 import { fixtureExamples } from "@/server/backend/local";
-import { serviceClient } from "./backend/supabase/clients";
+import { type Db, serviceClient } from "./backend/supabase/clients";
 
 /** A few themes of each set, shown when someone hovers the set while setting up a room. */
 export type ThemeExamples = Partial<Record<ThemeSet, Localized[]>>;
@@ -28,7 +27,7 @@ export function groupExamples(rows: ExampleRow[]): ThemeExamples {
 }
 
 /** The examples marked in the themes table (`example`, 1 to 3 per set). */
-async function readExamples(db: SupabaseClient): Promise<ThemeExamples> {
+async function readExamples(db: Db): Promise<ThemeExamples> {
   const { data, error } = await db
     .from("themes")
     .select("en, pt, ja, theme_set")
@@ -45,10 +44,7 @@ async function readExamples(db: SupabaseClient): Promise<ThemeExamples> {
  * (or fails if there is none, and the next request tries again). Local mode
  * shows its own fixture themes, three per set.
  */
-export function themeExamplesSource(
-  db: () => SupabaseClient = serviceClient,
-  ttl = TTL,
-) {
+export function themeExamplesSource(db: () => Db = serviceClient, ttl = TTL) {
   let cached: { at: number; examples: ThemeExamples } | null = null;
   let loading: Promise<ThemeExamples> | null = null;
   return (): Promise<ThemeExamples> => {

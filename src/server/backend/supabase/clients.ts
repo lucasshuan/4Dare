@@ -3,6 +3,13 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/config";
+import type { Database, Json } from "./database.types";
+
+/** A client that knows every table, column and function (`pnpm db:types`). */
+export type Db = SupabaseClient<Database>;
+
+/** jsonb columns and arguments hold the game's own objects: hand them over as Json. */
+export const json = (value: unknown) => value as Json;
 
 /** Secret key (Vercel integration: SUPABASE_SECRET_KEY; older projects: SUPABASE_SERVICE_ROLE_KEY). */
 function secretKey() {
@@ -12,20 +19,20 @@ function secretKey() {
   return key;
 }
 
-let service: SupabaseClient | null = null;
+let service: Db | null = null;
 
 /** Full access, server only. The browser never talks to the tables. */
-export function serviceClient(): SupabaseClient {
-  service ??= createClient(SUPABASE_URL, secretKey(), {
+export function serviceClient(): Db {
+  service ??= createClient<Database>(SUPABASE_URL, secretKey(), {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   return service;
 }
 
 /** The caller's session, read from (and written to) the auth cookies. One per request. */
-export async function sessionClient(): Promise<SupabaseClient> {
+export async function sessionClient(): Promise<Db> {
   const jar = await cookies();
-  return createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  return createServerClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     cookies: {
       getAll: () => jar.getAll(),
       setAll: (list) => {

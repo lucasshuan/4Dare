@@ -14,7 +14,7 @@ import {
 } from "@/game/types";
 import { type Look, NO_LOOK, seatLook, type Tone } from "./stage-backdrop";
 
-export type { Glyphs, Look, Tone } from "./stage-backdrop";
+export type { Look } from "./stage-backdrop";
 
 export type StageArea = "lobby" | "match" | "result" | "closed";
 export type StageScreen = "theming" | "vote" | "pick" | "turn";

@@ -2,7 +2,8 @@ import "server-only";
 import type { ChatMessage, ChatPerson, SystemLine } from "@/game/chat";
 import { GameError } from "@/game/types";
 import type { ChatStore } from "../types";
-import { serviceClient } from "./clients";
+import { json, serviceClient } from "./clients";
+import type { Database } from "./database.types";
 
 /** A row of room_messages (supabase/migrations/0012_room_messages.sql). */
 interface Row {
@@ -29,6 +30,10 @@ const toMessage = (r: Row): ChatMessage => ({
 
 const iso = (ms: number) => new Date(ms).toISOString();
 
+type AddArgs = Database["public"]["Functions"]["add_room_message"]["Args"];
+/** add_room_message takes nulls (a system line has no author or body); generated types can't tell. */
+type AddArgsOrNull = { [K in keyof AddArgs]: AddArgs[K] | null };
+
 /**
  * Supabase: written and read by the server only (service key). Inserts go
  * through add_room_message, which holds the per-author limit across every
@@ -42,14 +47,18 @@ export function supabaseChat(): ChatStore {
       // in order: identity ids follow the inserts
       for (const item of items) {
         const text = "text" in item;
-        const { data, error } = await serviceClient().rpc("add_room_message", {
+        const args: AddArgsOrNull = {
           p_room: code,
           p_author: text ? item.by : null,
-          p_author_json: text ? item.author : null,
+          p_author_json: text ? json(item.author) : null,
           p_body: text ? item.text : null,
-          p_system: text ? null : item.system,
+          p_system: text ? null : json(item.system),
           p_show_at: item.showAt === undefined ? null : iso(item.showAt),
-        });
+        };
+        const { data, error } = await serviceClient().rpc(
+          "add_room_message",
+          args as AddArgs,
+        );
         if (error?.message?.includes("rate_limited"))
           throw new GameError("rate_limited");
         if (error) throw error;

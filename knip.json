@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "scripts/**/*.ts",
+    "src/server/backend/local/off.ts",
+    "src/test/empty.ts"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreIssues": {
+    "src/server/backend/supabase/database.types.ts": ["exports", "types"],
+    "src/features/stage/lab/scenarios/*.ts": ["exports"]
+  }
+}

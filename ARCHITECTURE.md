@@ -48,4 +48,4 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 ## Other
 
 - SEO: `generateMetadata` per page (`src/server/seo.ts`, `messages/*/meta.json`). Share images: `opengraph-image.tsx` with `src/server/og`. `SITE_URL` sets domain.
-- Tests: Vitest (engine, 300 random matches), Playwright (whole matches on a production build, two tests at a time, `@smoke` for the hub and one match; `DARE_SHOW_SCALE=0.25` speeds shows 4×, never clocks).
+- Tests: Vitest (engine, 300 random matches), Playwright (whole matches on a production build, two tests at a time, `@smoke` for the hub and one match; `DARE_SHOW_SCALE=0.25` speeds shows 4×, never clocks). CI runs them on every push with Biome, the typecheck and Knip (`.github/workflows/ci.yml`); Dependabot proposes dependency updates every Monday.
