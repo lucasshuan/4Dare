@@ -10,7 +10,7 @@ import {
 import { m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type FormEvent, type ReactNode, useId, useState } from "react";
-import { buttonClass } from "@/components/ui/button";
+import { keyClass } from "@/components/ui/button";
 import { LayoutMotion } from "@/components/ui/layout-motion";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import { cn } from "@/lib/cn";
@@ -273,8 +273,9 @@ function SetupTab({
 }
 
 /**
- * Big and bold. It only turns on when the room can be saved, and then a soft
- * light runs across it now and then.
+ * The key-shaped main action, like the hub's "Create" and the lobby's "Start".
+ * It only turns on when the room can be saved, and then it bounces now and
+ * then, its arrow nudging forward.
  */
 function SubmitButton({
   ready,
@@ -289,40 +290,34 @@ function SubmitButton({
 }) {
   const still = useReducedMotion() ?? false;
   const live = ready && !pending && !still;
-  const loop = {
-    duration: 1.2,
-    ease: ease.swap,
-    repeat: Number.POSITIVE_INFINITY,
-    repeatDelay: 2.8,
-  };
   return (
     <button
       type="submit"
       disabled={!ready || pending}
       aria-describedby={describedBy}
-      className={cn(
-        buttonClass("primary", "lg"),
-        "relative h-16 overflow-hidden px-9 font-bold font-display text-xl shadow-card sm:px-10",
-        "disabled:shadow-none",
-      )}
+      className={keyClass("sky", {
+        bounce: ready && !pending,
+        className: "min-h-16 px-9 text-xl sm:px-10",
+      })}
     >
-      {live ? (
-        <m.span
-          aria-hidden
-          initial={{ x: "-120%" }}
-          animate={{ x: "320%" }}
-          transition={loop}
-          className="pointer-events-none absolute inset-y-0 left-0 w-1/3 skew-x-[-20deg] bg-linear-to-r from-transparent via-on-ink/25 to-transparent"
-        />
-      ) : null}
-      <span className="relative">{children}</span>
+      {children}
       <m.span
         aria-hidden
-        className="relative flex"
+        className="flex"
         animate={live ? { x: [0, 4, 0] } : { x: 0 }}
-        transition={live ? { ...loop, duration: 0.8, delay: 0.5 } : undefined}
+        transition={
+          live
+            ? {
+                duration: 0.8,
+                ease: ease.swap,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatDelay: 2.8,
+                delay: 0.5,
+              }
+            : undefined
+        }
       >
-        <ArrowRight className="size-6!" strokeWidth={2.25} />
+        <ArrowRight className="size-6 shrink-0" strokeWidth={2.5} />
       </m.span>
     </button>
   );
