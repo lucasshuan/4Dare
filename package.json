@@ -19,7 +19,6 @@
     "test-rooms": "tsx --env-file-if-exists=.env.local scripts/test-rooms.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.131.0",
     "@base-ui/react": "^1.8.0",
     "@dicebear/core": "^10.7.0",
     "@dicebear/styles": "^10.6.0",

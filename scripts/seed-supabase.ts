@@ -4,8 +4,8 @@
 // Safe to rerun after rebuilding the library: characters, names and origins the
 // new files dropped are deleted, and pictures players swapped in (stored in
 // Supabase) are kept. Characters players created (ids "u-...") are never
-// touched. Themes removed from the file are turned off (active = false); the
-// AI's themes are left alone.
+// touched. Themes removed from the file are turned off (active = false); themes
+// from another source are left alone.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
