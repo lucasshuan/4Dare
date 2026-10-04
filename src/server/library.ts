@@ -2,7 +2,7 @@ import "server-only";
 import { BACKEND } from "@/config";
 import type { SearchItem } from "@/game/character-search";
 import type { Lang } from "@/game/types";
-import { fixtureLibrary } from "./backend/local/library";
+import { fixtureLibrary } from "@/server/backend/local";
 import { supabaseLibrary } from "./backend/supabase/library";
 
 // On Supabase the library lives in the database and each instance keeps the

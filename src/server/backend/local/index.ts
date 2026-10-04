@@ -1,0 +1,41 @@
+import "server-only";
+import type { Localized } from "@/game/types";
+import type { ThemeExamples } from "../../theme-examples";
+import { themes } from "../../themes";
+import type { Backend } from "../types";
+import { localAuth } from "./auth";
+import { localCharacters } from "./characters";
+import { localFiles } from "./files";
+import { LOCAL_THEMES } from "./fixtures";
+import { localMatches } from "./matches";
+import { localRooms } from "./rooms";
+import { localThemes } from "./themes";
+
+// Local mode (no Supabase keys) in one module: a build made with the keys
+// swaps it for off.ts (next.config.ts), so production ships none of it.
+export { fixtureLibrary } from "./library";
+
+/** Everything in memory and in .data/, with the fixture library and themes. */
+export function localBackend(): Backend {
+  return {
+    rooms: localRooms(),
+    matches: localMatches(),
+    characters: localCharacters(),
+    themes: themes(localThemes()),
+    files: localFiles(),
+    auth: localAuth(),
+    notify: { roomChanged: async () => {}, lobbyChanged: async () => {} },
+  };
+}
+
+/** The fixture themes are three per set: all of them are examples. */
+export function fixtureExamples(): ThemeExamples {
+  const out: ThemeExamples = {};
+  for (const { set, en, pt, ja } of LOCAL_THEMES) {
+    if (!set) continue;
+    const list: Localized[] = out[set] ?? [];
+    list.push({ en, pt, ja });
+    out[set] = list;
+  }
+  return out;
+}

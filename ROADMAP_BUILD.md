@@ -39,7 +39,7 @@ No AI theme was ever saved (0 rows with source `ai`).
 
 ## Phase 3 — Lighter server functions
 
-- [ ] Local backend never in the production bundle
+- [x] Local backend never in the production bundle: one entry (`@/server/backend/local`), swapped for a stub by `turbopack.resolveAlias` when the build has the Supabase keys (no fixture left in the server output)
 - [x] Japanese share-image font cut to the glyphs the images use (3.8 MB → 86 KB, `pnpm og:font`), with a test that checks coverage
 - [x] `getClaims()` instead of `getUser()` on every request: local JWT check, no Auth round trip
 - [x] Every function under ~3 MB of app code (checked with the build's `.nft.json` traces): pages 2.7–2.96 MB, share images 0.87 MB, API 0.3–0.6 MB. Locally the traces also hold sharp's libvips (18.7 MB); Next leaves it out on Vercel (`NOW_BUILDER`)

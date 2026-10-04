@@ -1,12 +1,8 @@
 import "server-only";
 import { BACKEND } from "@/config";
+// one entry, so a build with the Supabase keys can leave it out (next.config.ts)
+import { localBackend } from "@/server/backend/local";
 import { themes } from "../themes";
-import { localAuth } from "./local/auth";
-import { localCharacters } from "./local/characters";
-import { localFiles } from "./local/files";
-import { localMatches } from "./local/matches";
-import { localRooms } from "./local/rooms";
-import { localThemes } from "./local/themes";
 import { supabaseAuth } from "./supabase/auth";
 import { supabaseCharacters } from "./supabase/characters";
 import { supabaseFiles } from "./supabase/files";
@@ -33,14 +29,6 @@ export function getBackend(): Backend {
     };
     return backend;
   }
-  backend = {
-    rooms: localRooms(),
-    matches: localMatches(),
-    characters: localCharacters(),
-    themes: themes(localThemes()),
-    files: localFiles(),
-    auth: localAuth(),
-    notify: { roomChanged: async () => {}, lobbyChanged: async () => {} },
-  };
+  backend = localBackend();
   return backend;
 }

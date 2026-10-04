@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { BACKEND } from "@/config";
 import type { ThemeSet } from "@/game/theme-sets";
 import type { Localized } from "@/game/types";
-import { LOCAL_THEMES } from "./backend/local/fixtures";
+import { fixtureExamples } from "@/server/backend/local";
 import { serviceClient } from "./backend/supabase/clients";
 
 /** A few themes of each set, shown when someone hovers the set while setting up a room. */
@@ -73,9 +73,5 @@ export function themeExamplesSource(
 const fromDatabase = themeExamplesSource();
 
 export async function themeExamples(): Promise<ThemeExamples> {
-  return BACKEND === "supabase"
-    ? fromDatabase()
-    : groupExamples(
-        LOCAL_THEMES.map(({ set, ...t }) => ({ ...t, theme_set: set ?? "" })),
-      );
+  return BACKEND === "supabase" ? fromDatabase() : fixtureExamples();
 }
