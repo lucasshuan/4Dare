@@ -551,10 +551,8 @@ describe("random pick by theme", () => {
     // six characters picked in past matches with this theme, in any language
     const { getBackend } = await import("./backend");
     const { themeId } = await import("@/game/theme-id");
-    const library = (await import("../../data/characters.json"))
-      .default as unknown as { id: string; popularity: { pt?: number } }[];
-    const ids = library
-      .filter((c) => c.popularity.pt !== undefined)
+    const { LOCAL_CHARACTERS } = await import("./backend/local/fixtures");
+    const ids = LOCAL_CHARACTERS.filter((c) => c.popularity.pt !== undefined)
       .slice(0, 6)
       .map((c) => c.id);
     await getBackend().matches.record({

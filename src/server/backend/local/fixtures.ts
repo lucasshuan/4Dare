@@ -1,0 +1,1029 @@
+// Local mode's library and themes (no Supabase keys: dev without .env.local,
+// unit tests, e2e): a few famous characters and three themes per set, picked
+// once from the old data/ snapshot. Never read data/ at run time.
+import type { Theme } from "@/game/types";
+import type { SeedCharacter, SeedOrigin } from "../seed-format";
+
+export const LOCAL_CHARACTERS: SeedCharacter[] = [
+  {
+    id: "wd-Q11934",
+    kind: "fictional",
+    category: "cartoons",
+    origin: "wd:Q816038",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Mickey_Mouse_%28poster_version%29.svg/500px-Mickey_Mouse_%28poster_version%29.svg.png",
+    names: { en: "Mickey Mouse", pt: "Mickey Mouse", ja: "ミッキーマウス" },
+    aliases: { en: ["Mickey"] },
+    popularity: { en: 40576, pt: 33127, ja: 33009 },
+  },
+  {
+    id: "wd-Q12379",
+    kind: "fictional",
+    category: "games",
+    origin: "wd:Q20203549",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/5/5c/Mario_by_Shigehisa_Nakaue.png",
+    names: { en: "Mario", pt: "Mario", ja: "マリオ" },
+    aliases: {
+      en: ["Jumpman", "Super Mario", "Mario Mario"],
+      pt: ["Super Mario", "Mario Bros", "Jumpman"],
+      ja: ["ジャンプマン", "マリオ・マリオ", "マリオブラザーズ"],
+    },
+    popularity: { en: 38776, pt: 28746, ja: 31613 },
+  },
+  {
+    id: "wd-Q9351",
+    kind: "fictional",
+    category: "games",
+    origin: "wd:Q864",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/a/a6/Pok%C3%A9mon_Pikachu_art.png",
+    names: { en: "Pikachu", pt: "Pikachu", ja: "ピカチュウ" },
+    aliases: {
+      en: ["Pika-Pika", "ピカチュウ"],
+      pt: ["ピカチュウ"],
+      ja: ["Pikachu"],
+    },
+    popularity: { en: 39019, pt: 30232, ja: 31642 },
+  },
+  {
+    id: "wd-Q2695156",
+    kind: "fictional",
+    category: "comics",
+    origin: "wd:Q1152150",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/c/c7/Batman_Infobox.jpg",
+    names: { en: "Batman", pt: "Batman", ja: "バットマン" },
+    aliases: {
+      en: ["Caped Crusader", "Matches Malone", "Mordecai Wayne"],
+      pt: ["Homem-Morcego", "Bruce Wayne", "ブルース・ウェイン"],
+      ja: ["Bruce Wayne", "ブルース・ウェイン", "Batman"],
+    },
+    popularity: { en: 41024, pt: 32426, ja: 30636 },
+  },
+  {
+    id: "wd-Q3244512",
+    kind: "fictional",
+    category: "literature",
+    origin: "wd:Q30739117",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/9/99/Daniel_Radcliffe_as_Harry_Potter.jpg",
+    names: { en: "Harry Potter", pt: "Harry Potter", ja: "ハリー・ポッター" },
+    aliases: {
+      en: ["Harry James Potter", "The Boy Who Lived"],
+      pt: [
+        "Harry Tiago Potter",
+        "Harry James Potter",
+        "O Rapaz Que Sobriviveu",
+      ],
+      ja: ["ハリー・ジェームズ・ポッター", "生き残った男の子"],
+    },
+    popularity: { en: 37648, pt: 28475, ja: 30438 },
+  },
+  {
+    id: "wd-Q12206942",
+    kind: "fictional",
+    category: "film_tv",
+    origin: "wd:Q462",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/0/0b/Darth_Vader_in_The_Empire_Strikes_Back.jpg",
+    names: { en: "Darth Vader", pt: "Darth Vader", ja: "ダース・ベイダー" },
+    aliases: { en: ["Vader", "Anakin Skywalker", "Lord Vader"] },
+    popularity: { en: 38885, pt: 30766, ja: 31062 },
+  },
+  {
+    id: "wd-Q79037",
+    kind: "fictional",
+    category: "comics",
+    origin: "topic:marvel",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/2/21/Web_of_Spider-Man_Vol_1_129-1.png",
+    names: { en: "Spider-Man", pt: "Homem-Aranha", ja: "スパイダーマン" },
+    aliases: {
+      en: [
+        "The Amazing Spider-Man",
+        "Spidey",
+        "Your Friendly Neighborhood Spider-Man",
+      ],
+      ja: ["ピーター・パーカー"],
+    },
+    popularity: { en: 42027, pt: 33674, ja: 33489 },
+  },
+  {
+    id: "wd-Q79015",
+    kind: "fictional",
+    category: "comics",
+    origin: "wd:Q1152150",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/3/35/Supermanflying.png",
+    names: { en: "Superman", pt: "Superman", ja: "スーパーマン" },
+    aliases: {
+      en: ["Kal-El", "Clark Kent", "The Man of Steel"],
+      pt: ["Super Homem", "Homem de Aço", "Homem do Amanhã"],
+    },
+    popularity: { en: 40576, pt: 31896, ja: 29569 },
+  },
+  {
+    id: "wd-Q338430",
+    kind: "fictional",
+    category: "mythology",
+    origin: "wd:Q1152150",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/6/6b/Wonder_Woman_750.jpg",
+    names: {
+      en: "Wonder Woman",
+      pt: "Mulher-Maravilha",
+      ja: "ワンダーウーマン",
+    },
+    aliases: {
+      en: ["Wonder Women", "Princess Diana", "Diana Prince"],
+      pt: ["Wonder Woman", "Diana prince"],
+    },
+    popularity: { en: 34134, pt: 26838, ja: 24007 },
+  },
+  {
+    id: "wd-Q2142",
+    kind: "fictional",
+    category: "anime",
+    origin: "wd:Q2020",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/4/4c/GokumangaToriyama.png",
+    names: { en: "Goku", pt: "Son Goku", ja: "孫悟空" },
+    aliases: {
+      en: ["Zero", "Son Gokū", "Kakarot"],
+      pt: ["Gokuu Son", "孫悟空", "Goku Son"],
+      ja: ["カカロット", "Gokuu Son", "Goku Son"],
+    },
+    popularity: { en: 36396, pt: 29059, ja: 30199 },
+  },
+  {
+    id: "wd-Q931",
+    kind: "fictional",
+    category: "anime",
+    origin: "wd:Q642",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/9/9a/NarutoUzumaki.png",
+    names: { en: "Naruto Uzumaki", pt: "Naruto Uzumaki", ja: "うずまきナルト" },
+    aliases: {
+      en: ["Hero of Konoha", "Lord Seventh", "Namikaze Naruto"],
+      pt: ["Uzumaki Naruto", "うずまきナルト", "Nine-Tails Jinchuuriki"],
+      ja: ["渦卷鳴門", "渦巻鳴門", "Naruto Uzumaki"],
+    },
+    popularity: { en: 34449, pt: 27055, ja: 30557 },
+  },
+  {
+    id: "wd-Q477948",
+    kind: "fictional",
+    category: "anime",
+    origin: "wd:Q16682047",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/c/cb/Monkey_D_Luffy.png",
+    names: {
+      en: "Monkey D. Luffy",
+      pt: "Monkey D. Luffy",
+      ja: "モンキー・D・ルフィ",
+    },
+    aliases: {
+      en: ["Lucy", "Luffy", "Straw Hat"],
+      pt: ["Luffy", "Ruffy", "Luffy do Chapéu de Palha"],
+      ja: ["麦わら", "麦わらのルフィ", "Luffy Monkey"],
+    },
+    popularity: { en: 36526, pt: 28383, ja: 32340 },
+  },
+  {
+    id: "wd-Q4653",
+    kind: "fictional",
+    category: "literature",
+    origin: "topic:sherlock-holmes",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/c/cd/Sherlock_Holmes_Portrait_Paget.jpg",
+    names: {
+      en: "Sherlock Holmes",
+      pt: "Sherlock Holmes",
+      ja: "シャーロック・ホームズ",
+    },
+    aliases: { ja: ["ホームズ"] },
+    popularity: { en: 40898, pt: 32609, ja: 33541 },
+  },
+  {
+    id: "wd-Q174009",
+    kind: "fictional",
+    category: "literature",
+    origin: "wd:Q30739117",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/d/d3/Hermione_Granger_poster.jpg",
+    names: {
+      en: "Hermione Granger",
+      pt: "Hermione Granger",
+      ja: "ハーマイオニー・グレンジャー",
+    },
+    aliases: {
+      en: ["Hermione", "Hermy", "Hermione Jean Granger"],
+      ja: ["ハーマイオニー・ウィーズリー"],
+    },
+    popularity: { en: 37562, pt: 28154, ja: 30432 },
+  },
+  {
+    id: "wd-Q15620419",
+    kind: "fictional",
+    category: "cartoons",
+    origin: "wd:Q246283",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/5/5e/Elsa_from_Disney%27s_Frozen.png",
+    names: { en: "Elsa", pt: "Elsa", ja: "エルサ" },
+    aliases: {
+      en: ["Elsa of Arendelle", "Princess Elsa", "Princess Elsa of Arendelle"],
+      pt: ["Elsa de Arendelle", "Rainha Elsa"],
+    },
+    popularity: { en: 34897, pt: 26312, ja: 26027 },
+  },
+  {
+    id: "wd-Q52401",
+    kind: "fictional",
+    category: "cartoons",
+    origin: "wd:Q483815",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/4/4d/Shrek_%28character%29.png",
+    names: { en: "Shrek", pt: "Shrek", ja: "シュレック" },
+    aliases: { en: ["シュレック"], ja: ["Shrek"] },
+    popularity: { en: 33199, ja: 22820 },
+  },
+  {
+    id: "wd-Q7810",
+    kind: "fictional",
+    category: "film_tv",
+    origin: "wd:Q7764350",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/0/02/Homer_Simpson_2006.png",
+    names: {
+      en: "Homer Simpson",
+      pt: "Homer Simpson",
+      ja: "ホーマー・シンプソン",
+    },
+    aliases: { en: ["Homie", "Jay Simpson Homer", "Homer J. Simpson"] },
+    popularity: { en: 36801, pt: 28220 },
+  },
+  {
+    id: "wd-Q935079",
+    kind: "fictional",
+    category: "film_tv",
+    origin: "wd:Q83279",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/SpongeBob_character.svg/500px-SpongeBob_character.svg.png",
+    names: {
+      en: "SpongeBob SquarePants",
+      pt: "Bob Esponja Calça Quadrada",
+      ja: "スポンジボブ・スクエアパンツ",
+    },
+    aliases: { en: ["SpongeBob"], pt: ["Bob Esponja"] },
+    popularity: { en: 35853, pt: 30398, ja: 27402 },
+  },
+  {
+    id: "wd-Q191626",
+    kind: "fictional",
+    category: "comics",
+    origin: "wd:Q1046812",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/f/f4/Sonic_modern_and_classic_designs.png",
+    names: {
+      en: "Sonic the Hedgehog",
+      pt: "Sonic the Hedgehog",
+      ja: "ソニック・ザ・ヘッジホッグ",
+    },
+    aliases: {
+      en: ["Super Sonic", "Sonic Hedgehog", "Sonic"],
+      ja: [
+        "SONIC THE HEDGEHOG",
+        "ソニック・ザ・ウェアホッグ",
+        "メタルソニック",
+      ],
+    },
+    popularity: { en: 36234, pt: 27686, ja: 27800 },
+  },
+  {
+    id: "wd-Q568553",
+    kind: "fictional",
+    category: "games",
+    origin: "wd:Q126726085",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/9/9d/Link_%28Hyrule_Historia%29.png",
+    names: { en: "Link", pt: "Link", ja: "リンク" },
+    aliases: {
+      en: ["The Hero", "Master Link", "Ghost Hunter"],
+      pt: ["Herói de Hyrule", "Herói do Tempo", "リンク"],
+      ja: ["Link", "Grasshopper", "Fairy Boy"],
+    },
+    popularity: { en: 33204, pt: 22804, ja: 25591 },
+  },
+  {
+    id: "wd-Q223684",
+    kind: "fictional",
+    category: "comics",
+    origin: "wd:Q101204931",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/a/a8/LaraCroftInfobox.png",
+    names: { en: "Lara Croft", pt: "Lara Croft", ja: "ララ・クロフト" },
+    aliases: {},
+    popularity: { en: 35649, pt: 27788, ja: 25871 },
+  },
+  {
+    id: "wd-Q937",
+    kind: "human",
+    category: "science",
+    origin: "job:physicist",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Albert_Einstein_Head_cleaned.jpg/500px-Albert_Einstein_Head_cleaned.jpg",
+    names: {
+      en: "Albert Einstein",
+      pt: "Albert Einstein",
+      ja: "アルベルト・アインシュタイン",
+    },
+    aliases: { en: ["Einstein", "A. Einstein"], ja: ["アインシュタイン"] },
+    popularity: { en: 36922, pt: 29534, ja: 30388 },
+  },
+  {
+    id: "wd-Q517",
+    kind: "human",
+    category: "history",
+    origin: "job:military",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg/500px-Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg",
+    names: {
+      en: "Napoleon",
+      pt: "Napoleão Bonaparte",
+      ja: "ナポレオン・ボナパルト",
+    },
+    aliases: {
+      en: [
+        "The Little Corporal",
+        "Napoleon I of France",
+        "Emperador dels Francesos Napoleó I",
+      ],
+      pt: ["Napoleon Bonaparte", "Napoleon", "Napoleão"],
+      ja: [
+        "ナポレオン",
+        "ナブリオーネ・ブオナパルテ",
+        "ナポレオーネ・ディ・ブオナパルテ",
+      ],
+    },
+    popularity: { en: 36868, pt: 29551, ja: 30653 },
+  },
+  {
+    id: "wd-Q635",
+    kind: "human",
+    category: "royalty",
+    origin: "job:monarch",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Kleopatra-VII.-Altes-Museum-Berlin1.jpg/500px-Kleopatra-VII.-Altes-Museum-Berlin1.jpg",
+    names: { en: "Cleopatra", pt: "Cleópatra", ja: "クレオパトラ7世" },
+    aliases: {
+      en: ["Kleopatra", "Cleopatra Philopator", "Cleopatra VII"],
+      pt: ["Cleópatra VII"],
+    },
+    popularity: { en: 38769, pt: 31247, ja: 27685 },
+  },
+  {
+    id: "wd-Q762",
+    kind: "human",
+    category: "art",
+    origin: "job:painter",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Francesco_Melzi_-_Portrait_of_Leonardo.png/500px-Francesco_Melzi_-_Portrait_of_Leonardo.png",
+    names: {
+      en: "Leonardo da Vinci",
+      pt: "Leonardo da Vinci",
+      ja: "レオナルド・ダ・ヴィンチ",
+    },
+    aliases: {
+      en: ["Leonardo", "da Vinci", "Leonard"],
+      ja: ["ダ・ビンチ", "レオナルド・ダ・ビンチ"],
+    },
+    popularity: { en: 35059, pt: 29021, ja: 30087 },
+  },
+  {
+    id: "wd-Q12897",
+    kind: "human",
+    category: "sports",
+    origin: "job:footballer",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/5/5e/Pele_con_brasil_%28cropped%29.jpg",
+    names: { en: "Pelé", pt: "Pelé", ja: "ペレ" },
+    aliases: {
+      en: ["O Rei", "Edson Arantes do Nascimento"],
+      pt: ["Pérola Negra", "Edson Arantes do Nascimento", "O Rei"],
+      ja: ["王様", "エジソン・アランチス・ド・ナシメント", "サッカーの王様"],
+    },
+    popularity: { en: 33048, pt: 28653, ja: 26469 },
+  },
+  {
+    id: "wd-Q615",
+    kind: "human",
+    category: "sports",
+    origin: "job:footballer",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg/500px-Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg",
+    names: { en: "Lionel Messi", pt: "Lionel Messi", ja: "リオネル・メッシ" },
+    aliases: {
+      en: ["La Pulga", "D10S", "Leo Messi"],
+      ja: [
+        "リオネル・アンドレス・メッシ",
+        "リオネル・アンドレス・メッシ・クッシッティーニ",
+      ],
+    },
+    popularity: { en: 37243, pt: 30471, ja: 30820 },
+  },
+  {
+    id: "wd-Q11571",
+    kind: "human",
+    category: "sports",
+    origin: "job:footballer",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_%28cropped%29.jpg/500px-Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_%28cropped%29.jpg",
+    names: {
+      en: "Cristiano Ronaldo",
+      pt: "Cristiano Ronaldo",
+      ja: "クリスティアーノ・ロナウド",
+    },
+    aliases: {
+      en: ["Cristiano Ronaldo dos Santos Aveiro", "CR7", "El Bicho"],
+      ja: ["クリスティアーノ・ロナウド・ドス・サントス・アベイロ"],
+    },
+    popularity: { en: 38501, pt: 31878, ja: 31504 },
+  },
+  {
+    id: "wd-Q2831",
+    kind: "human",
+    category: "music",
+    origin: "job:singer",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Michael_Jackson_1983_%283x4_cropped%29_%28contrast%29.jpg/500px-Michael_Jackson_1983_%283x4_cropped%29_%28contrast%29.jpg",
+    names: {
+      en: "Michael Jackson",
+      pt: "Michael Jackson",
+      ja: "マイケル・ジャクソン",
+    },
+    aliases: {
+      en: ["Michael Joseph Jackson", "King of Pop", "Michael Joe Jackson"],
+      pt: ["Rei do Pop"],
+      ja: ["MJJ", "キング・オブ・ポップ", "ポップの王様"],
+    },
+    popularity: { en: 38289, pt: 30303, ja: 32043 },
+  },
+  {
+    id: "wd-Q1744",
+    kind: "human",
+    category: "music",
+    origin: "job:singer:f",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Madonna_Rebel_Heart_Tour_2015_-_Stockholm_%2823051472299%29_%28cropped%29.jpg/500px-Madonna_Rebel_Heart_Tour_2015_-_Stockholm_%2823051472299%29_%28cropped%29.jpg",
+    names: { en: "Madonna", pt: "Madonna", ja: "マドンナ" },
+    aliases: {
+      en: ["Madge", "Madonna Ciccone", "Madonna L. Ciccone"],
+      pt: ["Louise Ciccone"],
+    },
+    popularity: { en: 35627, pt: 26836, ja: 27454 },
+  },
+  {
+    id: "wd-Q36153",
+    kind: "human",
+    category: "music",
+    origin: "job:singer:f",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Beyonc%C3%A9_-_Tottenham_Hotspur_Stadium_-_1st_June_2023_%2810_of_118%29_%2852946364598%29_%28best_crop%29.jpg/500px-Beyonc%C3%A9_-_Tottenham_Hotspur_Stadium_-_1st_June_2023_%2810_of_118%29_%2852946364598%29_%28best_crop%29.jpg",
+    names: { en: "Beyoncé", pt: "Beyoncé", ja: "ビヨンセ" },
+    aliases: {
+      en: ["Queen B", "Third Ward Trill", "Beyoncé Giselle Knowles-Carter"],
+      ja: ["ビヨンセ・ノーウェルズ", "ビヨンセ・ノウルズ"],
+    },
+    popularity: { en: 34833, pt: 26806, ja: 25802 },
+  },
+  {
+    id: "wd-Q26876",
+    kind: "human",
+    category: "music",
+    origin: "job:singer:f",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_%283%29.png/500px-Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_%283%29.png",
+    names: {
+      en: "Taylor Swift",
+      pt: "Taylor Swift",
+      ja: "テイラー・スウィフト",
+    },
+    aliases: {
+      en: ["Nils Sjöberg", "Taylor Alison Swift"],
+      ja: ["テイラー・アリソン・スウィフト"],
+    },
+    popularity: { en: 36957, pt: 27649, ja: 28646 },
+  },
+  {
+    id: "wd-Q34201",
+    kind: "fictional",
+    category: "mythology",
+    origin: "wd:Q101609",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Zeus_Otricoli_Pio-Clementino_Inv257.jpg/500px-Zeus_Otricoli_Pio-Clementino_Inv257.jpg",
+    names: { en: "Zeus", pt: "Zeus", ja: "ゼウス" },
+    aliases: { en: ["Jupiter", "Dias", "Jove"], ja: ["ZEUS", "ゼウス神像"] },
+    popularity: { en: 36792, pt: 28921, ja: 30007 },
+  },
+  {
+    id: "wd-Q717588",
+    kind: "fictional",
+    category: "comics",
+    origin: "topic:marvel",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/1/1a/Thor_%28Marvel_Comics%29.png",
+    names: { en: "Thor", pt: "Thor", ja: "マイティ・ソー" },
+    aliases: {
+      en: ["Thor: God of Thunder", "The Mighty Thor", "Thor Odinson"],
+      ja: ["マイティー・ソー"],
+    },
+    popularity: { en: 35180, pt: 26485, ja: 27138 },
+  },
+  {
+    id: "wd-Q3266236",
+    kind: "fictional",
+    category: "mythology",
+    origin: "wd:Q41542",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/08/Bela_Lugosi_as_Dracula.jpg/500px-Bela_Lugosi_as_Dracula.jpg",
+    names: { en: "Count Dracula", pt: "Conde Drácula", ja: "ドラキュラ伯爵" },
+    aliases: {
+      en: ["Dracula", "Vlad Prince of Valaquia"],
+      pt: ["Dracula"],
+      ja: ["ドラキュラ"],
+    },
+    popularity: { en: 32542, pt: 24085, ja: 25263 },
+  },
+  {
+    id: "wd-Q1186309",
+    kind: "fictional",
+    category: "anime",
+    origin: "al:2471",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/b/bd/Doraemon_character.png",
+    names: { en: "Doraemon", pt: "Doraemon", ja: "ドラえもん" },
+    aliases: { en: ["ドラえもん", "Dora-chan"], ja: ["Doraemon", "Dora-chan"] },
+    popularity: { en: 34911, ja: 28430 },
+  },
+  {
+    id: "wd-Q191794",
+    kind: "fictional",
+    category: "other",
+    origin: null,
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_portrait.png",
+    names: { en: "Hello Kitty", pt: "Hello Kitty", ja: "ハローキティ" },
+    aliases: {
+      en: ["Kitty White"],
+      pt: ["Kitty"],
+      ja: ["キティ", "キティ・ホワイト", "キティちゃん"],
+    },
+    popularity: { en: 38637, pt: 30610, ja: 32429 },
+  },
+  {
+    id: "wd-Q51730",
+    kind: "fictional",
+    category: "film_tv",
+    origin: "wd:Q462",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/9/9b/Yoda_Empire_Strikes_Back.png",
+    names: { en: "Yoda", pt: "Yoda", ja: "ヨーダ" },
+    aliases: { en: ["Grandmaster Yoda", "Master Yoda"], pt: ["Mestre Yoda"] },
+    popularity: { en: 35759, pt: 26744, ja: 29336 },
+  },
+  {
+    id: "wd-Q180704",
+    kind: "fictional",
+    category: "comics",
+    origin: "topic:marvel",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/4/47/Iron_Man_%28circa_2018%29.png",
+    names: { en: "Iron Man", pt: "Homem de Ferro", ja: "アイアンマン" },
+    aliases: {
+      en: [
+        "Anthony Stark",
+        'Anthony Edward "Tony" Stark',
+        "Anthony Edward Stark",
+      ],
+      pt: ["Tony stark", "Vingador dourado", 'Anthony Edward "Tony" Stark'],
+      ja: ["Iron Man", "トニー・スターク"],
+    },
+    popularity: { en: 38551, pt: 29553, ja: 29125 },
+  },
+  {
+    id: "wd-Q207369",
+    kind: "fictional",
+    category: "comics",
+    origin: "wd:Q98149594",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/en/5/53/Snoopy_Peanuts.png",
+    names: { en: "Snoopy", pt: "Snoopy", ja: "スヌーピー" },
+    aliases: {},
+    popularity: { en: 36913, pt: 29885, ja: 31002 },
+  },
+  {
+    id: "wd-Q935",
+    kind: "human",
+    category: "science",
+    origin: "job:mathematician",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/GodfreyKneller-IsaacNewton-1689.jpg/500px-GodfreyKneller-IsaacNewton-1689.jpg",
+    names: {
+      en: "Isaac Newton",
+      pt: "Isaac Newton",
+      ja: "アイザック・ニュートン",
+    },
+    aliases: {
+      en: ["Newton", "I. Neutonius", "I. Newton"],
+      ja: ["ニュートン"],
+    },
+    popularity: { en: 35088, pt: 28229, ja: 27990 },
+  },
+  {
+    id: "wd-Q5588",
+    kind: "human",
+    category: "art",
+    origin: "job:painter:f",
+    imageUrl:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Frida_Kahlo%2C_by_Guillermo_Kahlo_%28cropped%29.jpg/500px-Frida_Kahlo%2C_by_Guillermo_Kahlo_%28cropped%29.jpg",
+    names: { en: "Frida Kahlo", pt: "Frida Kahlo", ja: "フリーダ・カーロ" },
+    aliases: {
+      en: ["Kahlo", "De Rivera Kahlo", "Frida Kahlo Calderon"],
+      ja: ["マグダレーナ・カルメン・フリーダ・カーロ・イ・カルデロン"],
+    },
+    popularity: { en: 33683, pt: 28005, ja: 24303 },
+  },
+  {
+    id: "wd-Q10490",
+    kind: "human",
+    category: "sports",
+    origin: "job:racing",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/9/9f/Ayrton_Senna_Pesawat_RC_Cropped.jpg",
+    names: { en: "Ayrton Senna", pt: "Ayrton Senna", ja: "アイルトン・セナ" },
+    aliases: {
+      en: ["Senna", "Ayrton Senna da Silva"],
+      pt: ["Ayrton Senna da Silva", "Senna"],
+    },
+    popularity: { en: 32900, pt: 27773, ja: 28348 },
+  },
+];
+
+export const LOCAL_ORIGINS: SeedOrigin[] = [
+  {
+    id: "al:2471",
+    labels: { en: "Doraemon", pt: "Doraemon", ja: "ドラえもん" },
+  },
+  {
+    id: "job:footballer",
+    labels: { en: "footballer", pt: "futebolista", ja: "サッカー選手" },
+  },
+  {
+    id: "job:mathematician",
+    labels: { en: "mathematician", pt: "matemático", ja: "数学者" },
+  },
+  {
+    id: "job:military",
+    labels: { en: "military leader", pt: "militar", ja: "軍人" },
+  },
+  { id: "job:monarch", labels: { en: "monarch", pt: "monarca", ja: "君主" } },
+  { id: "job:painter", labels: { en: "painter", pt: "pintor", ja: "画家" } },
+  { id: "job:painter:f", labels: { en: "painter", pt: "pintora", ja: "画家" } },
+  {
+    id: "job:physicist",
+    labels: { en: "physicist", pt: "físico", ja: "物理学者" },
+  },
+  {
+    id: "job:racing",
+    labels: { en: "racing driver", pt: "piloto", ja: "レーシングドライバー" },
+  },
+  { id: "job:singer", labels: { en: "singer", pt: "cantor", ja: "歌手" } },
+  { id: "job:singer:f", labels: { en: "singer", pt: "cantora", ja: "歌手" } },
+  {
+    id: "topic:marvel",
+    labels: { en: "Marvel", pt: "Marvel", ja: "マーベル" },
+  },
+  {
+    id: "topic:sherlock-holmes",
+    labels: {
+      en: "Sherlock Holmes",
+      pt: "Sherlock Holmes",
+      ja: "シャーロック・ホームズシリーズ",
+    },
+  },
+  { id: "wd:Q101204931", labels: { en: "Tomb Raider" } },
+  {
+    id: "wd:Q101609",
+    labels: {
+      en: "Twelve Olympians",
+      pt: "Deuses olímpicos",
+      ja: "オリュンポス十二神",
+    },
+  },
+  {
+    id: "wd:Q1046812",
+    labels: {
+      en: "Sonic the Hedgehog",
+      pt: "Sonic the Hedgehog",
+      ja: "ソニックシリーズ",
+    },
+  },
+  { id: "wd:Q1152150", labels: { en: "DC", pt: "DC", ja: "DC" } },
+  {
+    id: "wd:Q126726085",
+    labels: {
+      en: "The Legend of Zelda",
+      pt: "The Legend of Zelda",
+      ja: "ゼルダの伝説",
+    },
+  },
+  { id: "wd:Q16682047", labels: { en: "One Piece", ja: "ONE PIECEの作品" } },
+  {
+    id: "wd:Q2020",
+    labels: { en: "Dragon Ball", pt: "Dragon Ball", ja: "ドラゴンボール" },
+  },
+  { id: "wd:Q20203549", labels: { en: "Super Mario", ja: "スーパーマリオ" } },
+  {
+    id: "wd:Q246283",
+    labels: {
+      en: "Frozen",
+      pt: "Frozen: Uma Aventura Congelante",
+      ja: "アナと雪の女王",
+    },
+  },
+  {
+    id: "wd:Q30739117",
+    labels: {
+      en: "Wizarding World",
+      pt: "Wizarding World",
+      ja: "魔法ワールド",
+    },
+  },
+  {
+    id: "wd:Q41542",
+    labels: { en: "Dracula", pt: "Drácula", ja: "ドラキュラ" },
+  },
+  {
+    id: "wd:Q462",
+    labels: { en: "Star Wars", pt: "Star Wars", ja: "スター・ウォーズ" },
+  },
+  { id: "wd:Q483815", labels: { en: "Shrek", pt: "Shrek", ja: "シュレック" } },
+  {
+    id: "wd:Q642",
+    labels: { en: "Naruto", pt: "Naruto", ja: "NARUTO -ナルト-" },
+  },
+  {
+    id: "wd:Q7764350",
+    labels: { en: "The Simpsons", pt: "The Simpsons", ja: "ザ・シンプソンズ" },
+  },
+  {
+    id: "wd:Q816038",
+    labels: {
+      en: "Steamboat Willie",
+      pt: "Steamboat Willie",
+      ja: "蒸気船ウィリー",
+    },
+  },
+  {
+    id: "wd:Q83279",
+    labels: {
+      en: "SpongeBob SquarePants",
+      pt: "SpongeBob SquarePants",
+      ja: "スポンジ・ボブ",
+    },
+  },
+  {
+    id: "wd:Q864",
+    labels: { en: "Pokémon", pt: "Pokémon", ja: "ポケットモンスター" },
+  },
+  { id: "wd:Q98149594", labels: { en: "Peanuts", ja: "ピーナッツ" } },
+];
+
+export const LOCAL_THEMES: Theme[] = [
+  {
+    en: "Disney characters",
+    pt: "Personagens da Disney",
+    ja: "ディズニーのキャラクター",
+    set: "screen",
+  },
+  {
+    en: "Harry Potter characters",
+    pt: "Personagens de Harry Potter",
+    ja: "ハリー・ポッターの登場人物",
+    set: "screen",
+  },
+  {
+    en: "Horror movie characters",
+    pt: "Personagens de filmes de terror",
+    ja: "ホラー映画のキャラクター",
+    set: "screen",
+  },
+  {
+    en: "The Simpsons characters",
+    pt: "Personagens dos Simpsons",
+    ja: "シンプソンズのキャラクター",
+    set: "cartoons",
+  },
+  {
+    en: "Talking objects",
+    pt: "Objetos que falam",
+    ja: "しゃべる物や道具",
+    set: "cartoons",
+  },
+  {
+    en: "Toy characters",
+    pt: "Personagens que são brinquedos",
+    ja: "おもちゃのキャラクター",
+    set: "cartoons",
+  },
+  {
+    en: "Dragon Ball characters",
+    pt: "Personagens de Dragon Ball",
+    ja: "ドラゴンボールのキャラクター",
+    set: "anime",
+  },
+  {
+    en: "Studio Ghibli characters",
+    pt: "Personagens do Studio Ghibli",
+    ja: "ジブリのキャラクター",
+    set: "anime",
+  },
+  { en: "Magical girls", pt: "Garotas mágicas", ja: "魔法少女", set: "anime" },
+  { en: "Pokémon", pt: "Pokémon", ja: "ポケモン", set: "games" },
+  {
+    en: "Nintendo characters",
+    pt: "Personagens da Nintendo",
+    ja: "任天堂のキャラクター",
+    set: "games",
+  },
+  {
+    en: "Fighting game characters",
+    pt: "Personagens de jogos de luta",
+    ja: "格闘ゲームのキャラクター",
+    set: "games",
+  },
+  {
+    en: "Fairy tale characters",
+    pt: "Personagens de contos de fadas",
+    ja: "おとぎ話のキャラクター",
+    set: "books",
+  },
+  { en: "Princesses", pt: "Princesas", ja: "お姫様", set: "books" },
+  { en: "Writers", pt: "Escritores", ja: "作家", set: "books" },
+  {
+    en: "Superheroes",
+    pt: "Super-heróis",
+    ja: "スーパーヒーロー",
+    set: "heroes",
+  },
+  { en: "Villains", pt: "Vilões", ja: "悪役", set: "heroes" },
+  {
+    en: "Sidekicks",
+    pt: "Fiéis escudeiros",
+    ja: "主人公の相棒",
+    set: "heroes",
+  },
+  {
+    en: "Characters who can fly",
+    pt: "Personagens que voam",
+    ja: "空を飛べるキャラクター",
+    set: "powers",
+  },
+  {
+    en: "Immortal characters",
+    pt: "Personagens imortais",
+    ja: "不死身のキャラクター",
+    set: "powers",
+  },
+  { en: "Mutants", pt: "Mutantes", ja: "ミュータント", set: "powers" },
+  { en: "Vampires", pt: "Vampiros", ja: "吸血鬼", set: "myths" },
+  { en: "Dragons", pt: "Dragões", ja: "ドラゴン", set: "myths" },
+  { en: "Gods", pt: "Deuses", ja: "神様", set: "myths" },
+  { en: "Robots", pt: "Robôs", ja: "ロボット", set: "scifi" },
+  { en: "Aliens", pt: "Alienígenas", ja: "宇宙人", set: "scifi" },
+  {
+    en: "Time travelers",
+    pt: "Viajantes do tempo",
+    ja: "タイムトラベルしたキャラクター",
+    set: "scifi",
+  },
+  { en: "Pirates", pt: "Piratas", ja: "海賊", set: "warriors" },
+  { en: "Ninjas", pt: "Ninjas", ja: "忍者", set: "warriors" },
+  { en: "Knights", pt: "Cavaleiros", ja: "騎士", set: "warriors" },
+  { en: "Cats", pt: "Gatos", ja: "猫のキャラクター", set: "animals" },
+  { en: "Dinosaurs", pt: "Dinossauros", ja: "恐竜", set: "animals" },
+  {
+    en: "Talking animals",
+    pt: "Animais falantes",
+    ja: "しゃべる動物",
+    set: "animals",
+  },
+  { en: "Female singers", pt: "Cantoras", ja: "女性歌手", set: "music" },
+  { en: "Rock stars", pt: "Astros do rock", ja: "ロックスター", set: "music" },
+  {
+    en: "K-pop idols",
+    pt: "Idols de K-pop",
+    ja: "K-POPアイドル",
+    set: "music",
+  },
+  { en: "Comedians", pt: "Comediantes", ja: "お笑い芸人", set: "celebs" },
+  {
+    en: "YouTubers and streamers",
+    pt: "YouTubers e streamers",
+    ja: "YouTuberや配信者",
+    set: "celebs",
+  },
+  {
+    en: "Famous people from the 90s",
+    pt: "Famosos dos anos 90",
+    ja: "90年代の有名人",
+    set: "celebs",
+  },
+  {
+    en: "Soccer players",
+    pt: "Jogadores de futebol",
+    ja: "サッカー選手",
+    set: "sports",
+  },
+  {
+    en: "Race car drivers",
+    pt: "Pilotos de corrida",
+    ja: "レーサー",
+    set: "sports",
+  },
+  {
+    en: "Fictional athletes",
+    pt: "Atletas fictícios",
+    ja: "スポーツ漫画や映画のキャラクター",
+    set: "sports",
+  },
+  { en: "Kings", pt: "Reis", ja: "王様", set: "history" },
+  { en: "Scientists", pt: "Cientistas", ja: "科学者", set: "history" },
+  { en: "Painters", pt: "Pintores", ja: "画家", set: "history" },
+  {
+    en: "Famous Brazilians",
+    pt: "Brasileiros famosos",
+    ja: "有名なブラジル人",
+    set: "world",
+  },
+  {
+    en: "Characters who live in the sea",
+    pt: "Personagens que vivem no mar",
+    ja: "海に住むキャラクター",
+    set: "world",
+  },
+  {
+    en: "Ice and snow characters",
+    pt: "Personagens do gelo e da neve",
+    ja: "雪や氷のキャラクター",
+    set: "world",
+  },
+  { en: "Detectives", pt: "Detetives", ja: "探偵", set: "jobs" },
+  { en: "Doctors", pt: "Médicos", ja: "医者", set: "jobs" },
+  { en: "Spies", pt: "Espiões", ja: "スパイ", set: "jobs" },
+  { en: "Twins", pt: "Gêmeos", ja: "双子のキャラクター", set: "family" },
+  {
+    en: "Famous couples",
+    pt: "Casais famosos",
+    ja: "有名なカップル",
+    set: "family",
+  },
+  {
+    en: "Baby characters",
+    pt: "Personagens bebês",
+    ja: "赤ちゃんのキャラクター",
+    set: "family",
+  },
+  {
+    en: "Clumsy characters",
+    pt: "Personagens desastrados",
+    ja: "ドジなキャラクター",
+    set: "quirks",
+  },
+  {
+    en: "Characters with a catchphrase",
+    pt: "Personagens com bordão",
+    ja: "決めゼリフがあるキャラクター",
+    set: "quirks",
+  },
+  { en: "Geniuses", pt: "Gênios", ja: "天才", set: "quirks" },
+  {
+    en: "Characters who wear a hat",
+    pt: "Personagens de chapéu",
+    ja: "帽子をかぶったキャラクター",
+    set: "looks",
+  },
+  {
+    en: "Bald characters",
+    pt: "Personagens carecas",
+    ja: "ツルツル頭のキャラクター",
+    set: "looks",
+  },
+  {
+    en: "Green characters",
+    pt: "Personagens verdes",
+    ja: "緑色のキャラクター",
+    set: "looks",
+  },
+];
