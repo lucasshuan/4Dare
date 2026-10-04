@@ -39,10 +39,10 @@ No AI theme was ever saved (0 rows with source `ai`).
 
 ## Phase 3 — Lighter server functions
 
-- [ ] Local backend never in the production bundle
+- [x] Local backend never in the production bundle: one entry (`@/server/backend/local`), swapped for a stub by `turbopack.resolveAlias` when the build has the Supabase keys (no fixture left in the server output)
 - [x] Japanese share-image font cut to the glyphs the images use (3.8 MB → 86 KB, `pnpm og:font`), with a test that checks coverage
 - [x] `getClaims()` instead of `getUser()` on every request: local JWT check, no Auth round trip
-- [ ] Every function under ~3 MB of app code (checked with the build's `.nft.json` traces)
+- [x] Every function under ~3 MB of app code (checked with the build's `.nft.json` traces): pages 2.7–2.96 MB, share images 0.87 MB, API 0.3–0.6 MB. Locally the traces also hold sharp's libvips (18.7 MB); Next leaves it out on Vercel (`NOW_BUILDER`)
 
 ## Phase 4 — Lighter pages
 
@@ -63,8 +63,8 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 
 - [x] Room poll every 45 s while its realtime channel is joined, 10 s only when it drops; a join or rejoin refetches once (pings sent meanwhile are lost); one shared channel per topic
 - [x] `/api/me/match` every 60 s with no match, 30 s during one (no ping carries it; coming back to the tab refetches), was 15 s
-- [ ] Room list reads a small `listing` column, not every room's whole state
-- [ ] `player_ids` column with a GIN index for "rooms I sit in"
+- [x] Room list reads only what it shows, not every room's whole state: six JSON paths instead of a new column (`src/server/listing.ts`; a test fails if `toPublicRoom` starts reading more)
+- [x] ~~`player_ids` column with a GIN index for "rooms I sit in"~~ not needed: the query takes 1.4 ms on the `updated_at` index, and the hourly cleanup keeps the table small
 - [x] Old rooms deleted by `pg_cron` (hourly: closed a day ago, or a week without a write; migration 0013, applied)
 - [ ] The `gone` beacon no longer keeps a function alive for 5 s
 - [x] Speed Insights with a `sampleRate` (half the visits)

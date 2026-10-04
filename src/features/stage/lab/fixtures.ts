@@ -7,11 +7,11 @@ import type {
   ExampleCard,
   Identity,
   Lang,
+  Localized,
   PickDraft,
   RuleExamples,
   Theme,
 } from "@/game/types";
-import { LOCAL_THEMES } from "@/server/backend/local/fixtures";
 import type { LabParams } from "./params";
 
 /**
@@ -104,16 +104,72 @@ export function labPlayers(params: LabParams): Identity[] {
   }));
 }
 
-/**
- * Three themes from three sets: `set`'s first theme wins, the others come from the
- * next sets. They are local mode's themes (three per set).
- */
+/** One theme per set, in its three languages (the client lab can't read local mode's fixtures: builds with the Supabase keys leave them out). */
+const LAB_SET_THEMES: Record<ThemeSet, Localized> = {
+  screen: {
+    en: "Disney characters",
+    pt: "Personagens da Disney",
+    ja: "ディズニーのキャラクター",
+  },
+  cartoons: {
+    en: "The Simpsons characters",
+    pt: "Personagens dos Simpsons",
+    ja: "シンプソンズのキャラクター",
+  },
+  anime: {
+    en: "Dragon Ball characters",
+    pt: "Personagens de Dragon Ball",
+    ja: "ドラゴンボールのキャラクター",
+  },
+  games: { en: "Pokémon", pt: "Pokémon", ja: "ポケモン" },
+  books: {
+    en: "Fairy tale characters",
+    pt: "Personagens de contos de fadas",
+    ja: "おとぎ話のキャラクター",
+  },
+  heroes: { en: "Superheroes", pt: "Super-heróis", ja: "スーパーヒーロー" },
+  powers: {
+    en: "Characters who can fly",
+    pt: "Personagens que voam",
+    ja: "空を飛べるキャラクター",
+  },
+  myths: { en: "Vampires", pt: "Vampiros", ja: "吸血鬼" },
+  scifi: { en: "Robots", pt: "Robôs", ja: "ロボット" },
+  warriors: { en: "Pirates", pt: "Piratas", ja: "海賊" },
+  animals: { en: "Cats", pt: "Gatos", ja: "猫のキャラクター" },
+  music: { en: "Female singers", pt: "Cantoras", ja: "女性歌手" },
+  celebs: { en: "Comedians", pt: "Comediantes", ja: "お笑い芸人" },
+  sports: {
+    en: "Soccer players",
+    pt: "Jogadores de futebol",
+    ja: "サッカー選手",
+  },
+  history: { en: "Kings", pt: "Reis", ja: "王様" },
+  world: {
+    en: "Famous Brazilians",
+    pt: "Brasileiros famosos",
+    ja: "有名なブラジル人",
+  },
+  jobs: { en: "Detectives", pt: "Detetives", ja: "探偵" },
+  family: { en: "Twins", pt: "Gêmeos", ja: "双子のキャラクター" },
+  quirks: {
+    en: "Clumsy characters",
+    pt: "Personagens desastrados",
+    ja: "ドジなキャラクター",
+  },
+  looks: {
+    en: "Characters who wear a hat",
+    pt: "Personagens de chapéu",
+    ja: "帽子をかぶったキャラクター",
+  },
+};
+
+/** Three themes from three sets: `set`'s wins, the others come from the next sets. */
 export function labThemes(set: ThemeSet): Theme[] {
   const at = THEME_SET_KEYS.indexOf(set);
   return [0, 1, 2].map((k) => {
     const s = THEME_SET_KEYS[(at + k * 3) % THEME_SET_KEYS.length];
-    const pool = LOCAL_THEMES.filter((t) => t.set === s);
-    return pool[k % pool.length];
+    return { ...LAB_SET_THEMES[s], set: s };
   });
 }
 

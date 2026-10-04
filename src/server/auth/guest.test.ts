@@ -19,7 +19,9 @@ describe("guest cookie", () => {
     const other = { ...newGuest(), guestNumber: 1 };
     const forged = Buffer.from(JSON.stringify(other)).toString("base64url");
     expect(openGuest(`${forged}.${signature}`)).toBeNull();
-    expect(openGuest(`${payload}.x${signature.slice(1)}`)).toBeNull();
+    // another first character (a signature starting with "x" stayed the same 1 time in 64)
+    const flipped = `${signature[0] === "x" ? "y" : "x"}${signature.slice(1)}`;
+    expect(openGuest(`${payload}.${flipped}`)).toBeNull();
     expect(openGuest("garbage")).toBeNull();
     expect(openGuest(undefined)).toBeNull();
   });
