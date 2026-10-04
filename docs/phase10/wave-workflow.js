@@ -9,7 +9,7 @@
 // lead starts one run per package to build a wave in parallel. When an engineer returns,
 // the lead runs the checks and commits the package; one review per package then runs in
 // the background while the next packages build, and the lead fixes what it confirms.
-// The lead runs the full e2e once per wave.
+// The whole unit suite and the e2e run once, at the end of Phase 10 (WP12).
 export const meta = {
   name: 'phase10-packages',
   description: 'Build Phase 10 work packages from their briefs, or review committed packages once',
@@ -39,7 +39,7 @@ const build = (wp) => agent(`You are the engineer for ${wp} of Phase 10 in the 4
 Your spec is ${P}/briefs/${wp}.md: everything this package relies on, cut verbatim from the plan, the specs and the earlier packages' reports. Read it first and whole; open another doc only through its pointers or to settle a doubt. The prototype files it names are the look to match (port to React + motion/react).
 ${EXTRA[wp] ? 'From the lead: ' + EXTRA[wp] : ''}
 ${RULES(wp)}
-Build the whole package (no stubs except those the plan gives to a later package). Then verify, and only this: the package's unit tests; \`pnpm typecheck\`; \`pnpm exec biome check <your files>\`; for a package with UI, screenshots of the moments its acceptance names, at desktop 1280x800 and phone 390x844 in light, plus one dark and one names=long; look at each. No full e2e (the lead runs it once per wave) and no full screenshot matrix (WP12 runs it).
+Build the whole package (no stubs except those the plan gives to a later package). Then verify, and only this: your package's own test files (\`pnpm exec vitest run <files>\`, never the whole suite); \`pnpm typecheck\`; \`pnpm exec biome check <your files>\`; for a package with UI, a few screenshots of the moments its acceptance names (desktop 1280x800 and phone 390x844 in light, one dark, one names=long), and look at each. Never run e2e or the whole unit suite: they run once, at the end of Phase 10 (WP12), with the full screenshot matrix.
 Write ${P}/reports/${wp}.md in at most about 80 lines, with these sections: Files; What was built (the API later packages use); Deviations from the plan (each with its reason); Requests (shared files you could not edit, and what later packages must know); Verification (decisive lines only); Notes for Jean (only if any). Return a 5-line summary.`,
   { label: `build:${wp}`, phase: 'Build', effort: 'high' })
 
@@ -64,7 +64,7 @@ const REVIEW_SCHEMA = {
 }
 
 const review = (wp) => agent(`You review ${wp} of Phase 10 in the 4Dare repo (the current directory), committed as ${args.commits[wp]} (\`git show ${args.commits[wp]}\`; other packages may be building in the working tree, ignore their uncommitted files).
-Read ${P}/briefs/${wp}.md (the acceptance is under "Your package") and the engineer's report ${P}/reports/${wp}.md, then the code. Check each acceptance criterion against the code and run the package's unit tests and \`pnpm typecheck\`. Hunt for real defects: logic errors, races, server-clock sync, reload mid-scene, secrecy (a player must never learn their own character), missing i18n keys or languages, phone layout at 390x844, dark theme, reduced motion, names without avatars, the prototype's look, and anything that breaks what works today. Take screenshots only for a visual criterion you can't judge from the code (at most 4, through the dev server at http://localhost:3100; never start or stop a server).
+Read ${P}/briefs/${wp}.md (the acceptance is under "Your package") and the engineer's report ${P}/reports/${wp}.md, then the code. Check each acceptance criterion against the code; run only the package's own test files and \`pnpm typecheck\` (never e2e or the whole suite). Hunt for real defects: logic errors, races, server-clock sync, reload mid-scene, secrecy (a player must never learn their own character), missing i18n keys or languages, phone layout at 390x844, dark theme, reduced motion, names without avatars, the prototype's look, and anything that breaks what works today. Take screenshots only for a visual criterion you can't judge from the code (at most 4, through the dev server at http://localhost:3100; never start or stop a server).
 Do not edit files. Report only defects with evidence; lows only when they are real and cheap to fix; no style nits. passed = no high or medium defect. Also write the findings to ${P}/reports/${wp}-review.md.${ENV}`,
   { label: `review:${wp}`, phase: 'Review', effort: 'high', schema: REVIEW_SCHEMA })
 

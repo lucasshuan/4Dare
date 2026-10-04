@@ -45,9 +45,9 @@ How to run packages (the lean flow; the first wave-2 run took about 45 minutes p
 1. `python3 docs/phase10/briefs/make.py WP4 WP6` writes the briefs, with the reports so far.
 2. Start one dev server on 3100 with the e2e env (`NEXT_DIST_DIR=.next-e2e DARE_DATA_DIR=.data/e2e DARE_SHOW_SCALE=0.25`, Supabase variables empty). Every agent shares it; Playwright reuses it.
 3. Start one Workflow run per package (a run gets only CPUs − 2 agent slots), with `scriptPath: "docs/phase10/wave-workflow.js"` and args such as `{"mode": "build", "wps": ["WP4"], "others": ["WP6"], "env": "<machine notes>", "extra": {"WP4": "<lead notes>"}}`. Engineers run at effort high, verify only their unit tests, typecheck, lint and a few screenshots, and write a short report.
-4. When an engineer returns: run `pnpm test`, `pnpm typecheck`, `pnpm lint`, read the report, commit the package, tick its ROADMAP items, push.
+4. When an engineer returns: run `pnpm typecheck`, `pnpm lint` and the package's own test files, read the report, commit the package, tick its ROADMAP items, push.
 5. Then one review per committed package in the background: `{"mode": "review", "wps": ["WP4"], "commits": {"WP4": "<sha>"}}`. Fix what it confirms in a small `fix(...)` commit.
-6. Once per wave, the lead runs `pnpm test:e2e`.
+6. Tests (Jean's call): no e2e and no whole unit suite until the end of Phase 10. WP12 runs `pnpm test`, `pnpm test:e2e` and the screenshot matrix once, and fixes what they find.
 
 ## Decisions Jean made (do not reopen)
 
