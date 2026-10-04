@@ -21,11 +21,6 @@ export const riseIn = {
   exit: { opacity: 0, transition: { duration: dur.fast, ease: ease.soft } },
 } as const;
 
-/** Parent for staggered children (answer chips, lists): 40ms apart. */
-export const stagger = {
-  animate: { transition: { staggerChildren: 0.04 } },
-} as const;
-
 /** Shared-element moves (the character card travelling between screens). */
 export const layoutSpring = { duration: dur.slow, ease: ease.soft } as const;
 
