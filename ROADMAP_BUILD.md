@@ -24,7 +24,8 @@ After the first quick wins (same day): API functions ~2 MB, pages ~9 MB, share i
 - [ ] Tests stop importing `data/*.json`
 - [ ] `.vercelignore` leaves `data/` out of the deploy; Biome blocks `data/` imports in `src/`
 - [ ] `pnpm seed` retired for the library (it deletes rows the files lack); library changes go straight to the database, insert or update only
-- [ ] Local mode (dev and e2e without Supabase) decided: small fixtures in test code, or Supabase for dev too
+- [x] Local mode (dev and e2e without Supabase) decided: small fixtures in the local backend (Jean, 2026-10-04); with `.env.local` dev uses Supabase as before
+- [x] `themes` and `theme_starters` protected like the library in AGENTS.md (Jean, 2026-10-04)
 
 ## Phase 2 — No AI in the app
 
