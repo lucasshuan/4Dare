@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import type { Area } from "react-easy-crop";
+import { insideChat } from "@/lib/focus";
 
 /** Any picture the browser can open (JFIF, AVIF, BMP...): it is re-encoded as WebP anyway. */
 export const IMAGE_ACCEPT = "image/*,.jfif,.pjpeg,.pjp";
@@ -111,10 +112,6 @@ const editable = (el: EventTarget | null) =>
   el instanceof HTMLElement &&
   (el.isContentEditable || el.matches("input, textarea, select"));
 
-/** The chat has its own field: a paste there is never a picture for the page. */
-const inChat = (el: EventTarget | null) =>
-  el instanceof Element && !!el.closest("[data-chat]");
-
 /**
  * Takes a picture in, from a file input, a drop or a paste (also the address
  * of a picture on a web page, downloaded when its site allows it), checks it
@@ -166,7 +163,8 @@ export function useImageIntake({
   useEffect(() => {
     if (!paste) return;
     const onPaste = (e: ClipboardEvent) => {
-      if (!e.clipboardData || inChat(e.target)) return;
+      // the chat has its own field: a paste there is never a picture for the page
+      if (!e.clipboardData || insideChat(e.target)) return;
       const found = fromTransfer(e.clipboardData);
       // Text pasted into a field stays text, even a link.
       if (!found || (typeof found === "string" && editable(e.target))) return;

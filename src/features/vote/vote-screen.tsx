@@ -99,17 +99,15 @@ function Vote({ v }: { v: VoteView }) {
   const tied = v.tied.join(" ");
   const k = phone ? 0.84 : 0.7;
 
-  // the heading keeps the room of the shrunken line, so the cards sit right under it
+  // the heading keeps the room of the shrunken line, so the cards sit right under it;
+  // measured on an invisible copy of the line, so the tie title (one line) never sets it
   const title = useRef<HTMLHeadingElement>(null);
+  const titleCopy = useRef<HTMLSpanElement>(null);
   const [titleH, setTitleH] = useState(0);
-  const holdTitle = useRef(false);
-  holdTitle.current = spinning;
   useLayoutEffect(() => {
-    const el = title.current;
+    const el = titleCopy.current;
     if (!el) return;
-    const measure = () => {
-      if (!holdTitle.current) setTitleH(el.offsetHeight);
-    };
+    const measure = () => setTitleH(el.offsetHeight);
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el);
@@ -253,9 +251,19 @@ function Vote({ v }: { v: VoteView }) {
           className="flex flex-col items-center px-5 pt-2 text-center sm:pt-16 sm:short:pt-6"
         >
           <div
-            className="flex w-full justify-center"
+            className="relative flex w-full justify-center"
             style={titleH ? { height: titleH * k } : undefined}
           >
+            <span
+              ref={titleCopy}
+              aria-hidden
+              className={cn(
+                "pointer-events-none invisible absolute inset-x-0 mx-auto block h-fit max-w-[340px] text-[34px] sm:max-w-[720px] sm:text-[58px]",
+                BIG,
+              )}
+            >
+              {ts("line")}
+            </span>
             <h1
               ref={title}
               id="vote-title"
@@ -281,9 +289,22 @@ function Vote({ v }: { v: VoteView }) {
           <p
             data-sub
             style={{ opacity: 0 }}
-            className="mt-2 max-w-[340px] text-balance text-[15px] text-ink-muted sm:max-w-[560px] sm:text-[17px]"
+            className="mt-2 grid max-w-[340px] text-balance text-[15px] text-ink-muted sm:max-w-[560px] sm:text-[17px]"
           >
-            {spinning ? t("tie") : t("subtitle")}
+            {/* both lines in one cell: the taller one keeps the room, so the cards never move */}
+            <span
+              className={cn("col-start-1 row-start-1", spinning && "invisible")}
+            >
+              {t("subtitle")}
+            </span>
+            <span
+              className={cn(
+                "col-start-1 row-start-1",
+                !spinning && "invisible",
+              )}
+            >
+              {t("tie")}
+            </span>
           </p>
         </div>
 

@@ -20,7 +20,6 @@
   },
   "card": {
     "pickedBy": "{name}さんが選択",
-    "pickedSecretly": "他のプレイヤーが選択",
     "youPicked": "あなたが選択",
     "youPickedFull": "あなたが選んだキャラクター",
     "yours": "あなたのキャラクター",

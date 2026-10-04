@@ -145,7 +145,8 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
       animate={{ opacity: 1, transition: { duration: 0.4 } }}
       className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-[18px] sm:short:py-3"
     >
-      <div className="flex min-w-0 items-center gap-2.5">
+      {/* no own width (the tag truncates): the header wraps only when the tag would get under 6rem */}
+      <div className="flex min-w-24 flex-1 basis-0 items-center gap-2.5">
         <AnimatePresence initial={false}>
           {history ? (
             <motion.div

@@ -22,15 +22,17 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
 - `themes` table, cached 10 min per server; `active = false` hides one. Local: 60 fixture themes.
 - 20 sets (`src/game/theme-sets.ts`); room's `themeSets` filter vote. Set examples: `example` 1–3 (0014, `/api/themes/examples`).
-- Vote: 3 themes, 20 s, open vote. Server draws tie.
+- Vote: 3 themes, 20 s (clock starts after opening), open vote. Server draws tie (wheel).
 - Host mode (`theming`): host types theme (no set, no Random, no stats). 30 s, then vote.
 
 ## Characters and picks
 
 - Library: `characters`, `character_names` (names, aliases, popularity per language), `origins`, `origin_labels`. Hand-fed: insert or update only. Browser searches whole library of its language (`/api/characters/library`); `/api/characters` until it loads.
 - Draft: card saved quietly (`PUT /api/rooms/[code]/draft`, no ping). Timeout makes it the pick; new name creates character once. Empty card gets random.
-- Random: theme's 20 most picked, weight picks + likes, ×0.5 per dislike, minus match picks (`theme_pick_scores`, 0006, 0007).
-- `theme_starters` (~5 per theme, 0011): rule scene examples, base of hand (`/api/themes/[id]/picks`).
+- Random: theme's 20 most picked, weight picks + likes, ×0.5 per dislike, minus match picks (`theme_pick_scores`, 0006, 0007). Draw saved as draft.
+- `theme_starters` (~5 per theme, 0011, rows in `supabase/seed/theme_starters.sql`, insert only): rule scene examples, base of hand (`/api/themes/[id]/picks`, 8 per theme, 5 shown, shuffled per viewer).
+- Rule ✗: fiction-set themes get an athlete or musician, real-people sets a cartoon or game character, only when all the theme's starters are that set's kind; cross-cutting sets (world, jobs, family, quirks, looks, books) get ✓✓ only (`src/server/rule-examples.ts`).
+- Trade-off: hand and typed names can duplicate someone's secret. Refusing would leak who holds what. Random still skips match picks, so it never deals you your own secret.
 
 ## People
 

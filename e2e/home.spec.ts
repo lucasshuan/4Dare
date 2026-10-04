@@ -8,7 +8,13 @@ test("the hub leads to the game, and the language select keeps the page", async 
   await page.getByRole("link", { name: /quem sou eu\?/i }).click();
   await page.waitForURL(/\/pt\/who-am-i$/);
   await expect(page.getByRole("link", { name: "Criar sala" })).toBeVisible();
-  await page.getByRole("combobox", { name: "Idioma" }).click();
+  // a click that lands before the page hydrates opens nothing: try again
+  await expect(async () => {
+    await page.getByRole("combobox", { name: "Idioma" }).click();
+    await expect(page.getByRole("option", { name: "日本語" })).toBeVisible({
+      timeout: 2_000,
+    });
+  }).toPass({ timeout: 30_000 });
   await page.getByRole("option", { name: "日本語" }).click();
   await page.waitForURL(/\/ja\/who-am-i$/);
   await expect(page.getByRole("link", { name: "ルームを作る" })).toBeVisible();

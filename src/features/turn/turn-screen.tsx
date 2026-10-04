@@ -123,7 +123,7 @@ export function TurnScreen() {
     ? withNames((n) => t("card.pickedBy", { name: n(picker) }))
     : null;
   const meta = focus.isYou
-    ? (pickedBy ?? t("card.pickedSecretly"))
+    ? pickedBy
     : joinDot([
         focus.card?.origin,
         picker?.isYou ? t("card.youPicked") : pickedBy,

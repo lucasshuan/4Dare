@@ -524,6 +524,93 @@ describe("stageFrame: the cast", () => {
   });
 });
 
+/** Plays a first match out (everyone gives up) and starts the second one, the opening on. */
+function laterMatch(g: Game, examples?: RuleExamples[]) {
+  g.start();
+  pickAll(g);
+  g.skipShow();
+  for (const id of g.state.order)
+    if (g.state.phase !== "finished")
+      g.do({ type: "GIVE_UP", playerId: g.state.turnPlayerId ?? id });
+  expect(g.state.phase).toBe("finished");
+  g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+  g.now += 1000;
+  g.do({ type: "START", playerId: "p1", themes: THEMES, examples });
+  expect(showOf(g).first).toBe(false);
+}
+
+describe("stageFrame: later matches", () => {
+  it("the theme show has no rule beat, and the target wash comes at its later mark", () => {
+    for (const players of [2, 3, 4]) {
+      const g = new Game(players, 13);
+      laterMatch(g, EXAMPLES);
+      g.skipShow();
+      g.voteAll(0);
+      const show = showOf(g);
+      expect(show.kind).toBe("theme");
+      expect(show.first).toBe(false);
+      expect(screensByBeat(g, show)).toEqual([
+        ["settle", "vote"],
+        ["theme", "vote"],
+        ["draw", "pick"],
+        ["target", "pick"],
+        ["entrance", "pick"],
+      ]);
+      expect(frame(g, show.startsAt).clockFrom).toBe(show.until);
+      expect(g.state.stepStartsAt).toBe(show.until);
+      const target = toView(g.state, 1, "p1", g.now).pick?.targetId ?? "";
+      const targetTone = seatTone(seatOf(g, target));
+      const draw = beat(show, "draw");
+      const targetWash = markAt(draw, markOf(SHOW_MARKS.targetWash, false));
+      expect(targetWash).toBeLessThan(
+        markAt(draw, markOf(SHOW_MARKS.targetWash, true)),
+      );
+      expect(look(g, draw.startsAt).tone).toBe("brand");
+      expect(look(g, targetWash - 1).tone).toBe("brand");
+      expect(look(g, targetWash).tone).toBe(targetTone);
+      expect(frame(g, show.until + 1000)).toMatchObject({
+        screen: "pick",
+        show: null,
+      });
+    }
+  });
+
+  it("the cast: the same screens, the first player's look at the later order mark", () => {
+    for (const players of [2, 3, 4]) {
+      const g = new Game(players, 17);
+      laterMatch(g);
+      g.skipShow();
+      g.voteAll(0);
+      g.skipShow();
+      pickAll(g);
+      const show = showOf(g);
+      expect(show.kind).toBe("cast");
+      expect(show.first).toBe(false);
+      expect(screensByBeat(g, show)).toEqual([
+        ["picked", "pick"],
+        ["received", "turn"],
+        ["order", "turn"],
+        ["entrance", "turn"],
+      ]);
+      const v = toView(g.state, 1, "p1", g.now);
+      const mine = v.players.find((p) => p.isYou)?.pickedById ?? "";
+      const firstTone = seatTone(seatOf(g, g.state.turnPlayerId ?? ""));
+      const order = beat(show, "order");
+      const spot = markAt(order, markOf(SHOW_MARKS.orderSpot, false));
+      expect(spot).toBeLessThan(
+        markAt(order, markOf(SHOW_MARKS.orderSpot, true)),
+      );
+      expect(look(g, spot - 1).tone).toBe(seatTone(seatOf(g, mine)));
+      expect(look(g, spot).tone).toBe(firstTone);
+      expect(frame(g, show.until + 10)).toMatchObject({
+        screen: "turn",
+        show: null,
+        historyFrom: 0,
+      });
+    }
+  });
+});
+
 describe("stageFrame: outside the match", () => {
   it("lobby: no screen, the plain canvas, nothing coming", () => {
     const g = new Game(3);

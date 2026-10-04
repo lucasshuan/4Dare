@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { FOUR } from "@/components/ui/logo";
 import { APP_NAME } from "@/config";
 import { formatClock, isLowClock } from "@/lib/names";
 
 /** The app icon with a "!" in the 4 bubble, on a `fill` background. */
 const alertIcon = (fill: string) =>
   `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><rect width="1000" height="1000" rx="200" fill="${fill}"/><g transform="translate(174.0 170.0) scale(0.7952)"><path fill="#F6E3A1" d="M525 0L640 0Q700 0 700 60L700 489Q700 505 716 505L776 505Q820 505 820 549L820 611Q820 655 776 655L716 655Q700 655 688 665L511 809Q485 830 493 797L521 671Q525 655 509 655L70 655Q0 655 0 585L0 545Q0 465 61 414Q254 254 427 46Q465 0 525 0Z"/><g fill="${fill}" transform="rotate(-10 515 395)"><rect x="461" y="195" width="108" height="272" rx="54"/><circle cx="515" cy="545" r="58"/></g></g></svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><rect width="1000" height="1000" rx="200" fill="${fill}"/><g transform="translate(174.0 170.0) scale(0.7952)"><path fill="#F6E3A1" d="${FOUR}"/><g fill="${fill}" transform="rotate(-10 515 395)"><rect x="461" y="195" width="108" height="272" rx="54"/><circle cx="515" cy="545" r="58"/></g></g></svg>`,
   )}`;
 
 /** Apricot while it's the player's move; red in the clock's final stretch. */

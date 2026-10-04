@@ -185,4 +185,4 @@ The "4Dare em cena" proposal (https://claude.ai/artifact/XwqNSpQWeXC1rrNyKKW4or)
 - [x] Chat has only messages and system lines ("Theme: Superheroes"): no who's-in-the-room list, no emoji shortcuts; up to 280 characters, rate limited, gone when the room closes
 - [x] History only during turns: a button left of the theme opens a full-height bar on the left that pushes the screen (over a scrim on phones)
 - [x] The lobby stays as it is, plus the chat
-- [ ] Desktop and phone, light and dark, 3 languages, reduced motion; everything that works today keeps working
+- [x] Desktop and phone, light and dark, 3 languages, reduced motion; everything that works today keeps working
