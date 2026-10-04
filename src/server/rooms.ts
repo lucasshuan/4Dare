@@ -1,5 +1,6 @@
 import "server-only";
 import { createHash, randomUUID } from "node:crypto";
+import { systemLines } from "@/game/chat";
 import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
 import { presenceDue } from "@/game/helpers";
 import { matchRecord } from "@/game/record";
@@ -52,8 +53,13 @@ const ctx = () => ({
   showScale: Number(process.env.DARE_SHOW_SCALE) || 1,
 });
 
+/** A chat older than this belongs to a room that died without closing. */
+const CHAT_TTL_MS = 24 * 3600_000;
+
 export async function openRoom(host: Identity, settings: RoomSettings) {
-  const { rooms, notify } = getBackend();
+  const { rooms, notify, chat } = getBackend();
+  // one indexed delete, no cron: the chats of rooms that never closed
+  background(() => chat.prune(Date.now() - CHAT_TTL_MS));
   for (let attempt = 0; attempt < 10; attempt++) {
     const state = newRoomState(randomCode(), host, settings, ctx());
     if (await rooms.create(state)) {
@@ -82,21 +88,35 @@ const backoff = (attempt: number) =>
 /**
  * Applies one event with optimistic concurrency: load, reduce, compare-and-swap,
  * and on a lost race start over from the newer state. `quiet` writes (pick
- * drafts) change nothing anyone sees: no realtime ping, no room list check.
+ * drafts) change nothing anyone sees: no realtime ping, no room list check,
+ * no chat line. The write that wins a transition posts its system lines (the
+ * compare-and-swap lets one writer see each), and closing a room clears its
+ * chat.
  */
 export async function dispatch(
   code: string,
   build: (state: RoomState) => GameEvent | Promise<GameEvent>,
   { quiet = false }: { quiet?: boolean } = {},
 ): Promise<{ state: RoomState; version: number }> {
-  const { rooms, notify } = getBackend();
+  const { rooms, notify, chat } = getBackend();
   for (let attempt = 0; attempt < 5; attempt++) {
     if (attempt > 0) await backoff(attempt);
     const stored = await rooms.get(code);
     if (!stored) throw new GameError("not_found");
     const event = await build(stored.state);
-    const next = reduce(stored.state, event, ctx());
+    const c = ctx();
+    const next = reduce(stored.state, event, c);
     if (await rooms.compareAndSwap(code, stored.version, next)) {
+      const lines = quiet
+        ? []
+        : systemLines(stored.state, next, c.now, c.showScale);
+      if (lines.length)
+        background(async () => {
+          const newest = (await chat.add(code, lines)).at(-1);
+          if (newest) await notify.chatChanged(code, newest.id);
+        });
+      if (next.phase === "closed" && stored.state.phase !== "closed")
+        background(() => chat.clear(code));
       if (!quiet)
         background(() => notify.roomChanged(code, stored.version + 1));
       // Only the write that finished the match gets here, so it is saved once.
@@ -452,17 +472,23 @@ export async function leaveOtherRooms(id: PlayerId, code: string) {
 
 /**
  * A guest signed in: every seat they hold becomes the account's, so their
- * rooms and matches carry on wherever they signed in from. Then one room at a
- * time again: a match going on wins, else `prefer` (the room they came back to).
+ * rooms and matches carry on wherever they signed in from, and their chat
+ * lines (with the system lines naming them) move to the account, so they keep
+ * the account's name and face. Then one room at a time again: a match going
+ * on wins, else `prefer` (the room they came back to).
  */
 export async function handOverSeats(
   from: PlayerId,
   player: Identity,
   prefer: string | null,
 ) {
-  const codes = await getBackend().rooms.withPlayer(from, SEATED);
-  await Promise.all(
-    codes.map((code) =>
+  const { rooms, chat } = getBackend();
+  const codes = await rooms.withPlayer(from, SEATED);
+  await Promise.all([
+    chat
+      .reassign(from, player.id)
+      .catch((e: unknown) => console.error("[chat] reassign failed:", e)),
+    ...codes.map((code) =>
       dispatch(code, () => ({ type: "SWAP_PLAYER", from, player })).catch(
         (e: unknown) => {
           // the account already sits there, or the room is gone
@@ -470,7 +496,7 @@ export async function handOverSeats(
         },
       ),
     ),
-  );
+  ]);
   const keep = (await currentMatch(player.id))?.code ?? prefer ?? codes[0];
   if (keep) await leaveOtherRooms(player.id, keep);
 }

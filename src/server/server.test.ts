@@ -3,6 +3,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import type { ChatMessage } from "@/game/chat";
 import { themeId } from "@/game/theme-id";
 import {
   DEFAULT_SETTINGS,
@@ -1124,5 +1125,226 @@ describe("dispatch", () => {
       })),
     ).rejects.toMatchObject({ code: "conflict" });
     cas.mockRestore();
+  });
+});
+
+describe("room chat", () => {
+  const messagesRoute = () => import("@/app/api/rooms/[code]/messages/route");
+  const post = async (code: string, body: unknown, origin = "http://x") =>
+    (await messagesRoute()).POST(
+      new Request(`http://x/api/rooms/${code}/messages`, {
+        method: "POST",
+        headers: { origin, "content-type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+      { params: Promise.resolve({ code }) },
+    );
+  const read = async (code: string, since?: number) => {
+    const res = await (await messagesRoute()).GET(
+      new Request(
+        `http://x/api/rooms/${code}/messages${since === undefined ? "" : `?since=${since}`}`,
+      ),
+      { params: Promise.resolve({ code }) },
+    );
+    return {
+      status: res.status,
+      messages: ((await res.json()) as { messages?: ChatMessage[] }).messages,
+    };
+  };
+  /** A public lobby with these players seated, the first one hosting. */
+  async function lobby(players: string[], seats: 2 | 3 = 3) {
+    as(players[0]);
+    const { code } = must(
+      await A.createRoom({ ...ROOM, visibility: "public", seats, ...TIMES }),
+    );
+    for (const p of players.slice(1)) {
+      as(p);
+      must(await A.joinRoom(code));
+    }
+    return code;
+  }
+  const backend = async () => (await import("./backend")).getBackend();
+
+  it("sends and lists a room's lines, for its players only, with an id-only ping", async () => {
+    const code = await lobby(["m1", "m2"]);
+    const { notify } = await backend();
+    const ping = vi.spyOn(notify, "chatChanged");
+    as("m1");
+    const res = await post(code, { text: "  hello\n\n\n\nworld\u0007  " });
+    expect(res.status).toBe(200);
+    const sent = (await res.json()) as ChatMessage;
+    expect(sent).toMatchObject({
+      by: uidOf(jarFor("m1")),
+      author: { id: uidOf(jarFor("m1")), isGuest: true },
+      text: "hello\n\nworld",
+      system: null,
+    });
+    expect(sent.showAt).toBe(sent.at);
+    expect(ping).toHaveBeenCalledWith(code, sent.id);
+    ping.mockRestore();
+
+    as("m2");
+    expect((await read(code)).messages).toEqual([sent]);
+    expect((await read(code, sent.at - 3000)).messages).toEqual([sent]);
+    expect((await read(code, sent.at + 1)).messages).toEqual([]);
+    expect((await read(code, Number.NaN)).status).toBe(400);
+    // 280 code points fit, 281 don't; nothing left after cleaning is refused
+    const long = await post(code, { text: "🦸".repeat(280) });
+    expect(long.status).toBe(200);
+    expect(((await long.json()) as ChatMessage).text).toBe("🦸".repeat(280));
+    expect((await post(code, { text: "🦸".repeat(281) })).status).toBe(400);
+    expect((await post(code, { text: " \n " })).status).toBe(400);
+    expect((await post(code, "hi")).status).toBe(400);
+    // only our pages
+    expect((await post(code, { text: "x" }, "http://evil")).status).toBe(403);
+
+    // not seated: neither reads nor writes; a missing room is 404
+    as("m3");
+    expect((await read(code)).status).toBe(403);
+    expect((await post(code, { text: "let me in" })).status).toBe(403);
+    expect((await read("ZZZZZ")).status).toBe(404);
+  });
+
+  it("refuses the 6th line in 10 s, in the store too, per author", async () => {
+    const code = await lobby(["l1", "l2"]);
+    as("l1");
+    for (let i = 0; i < 5; i++)
+      expect((await post(code, { text: `line ${i}` })).status).toBe(200);
+    const sixth = await post(code, { text: "one more" });
+    expect(sixth.status).toBe(429);
+    expect(await sixth.json()).toEqual({ error: "rate_limited" });
+    // someone else in the room still can
+    as("l2");
+    expect((await post(code, { text: "me too" })).status).toBe(200);
+
+    // the store holds the limit by itself (on Supabase: across instances)
+    const { chat } = await backend();
+    const author = {
+      id: "store-author",
+      isGuest: true,
+      name: null,
+      guestNumber: 1,
+      avatar: { kind: "color", color: "#fff" },
+    } as const;
+    const line = { by: author.id, author, text: "hi" };
+    for (let i = 0; i < 5; i++) await chat.add("LIMIT", [line]);
+    await expect(chat.add("LIMIT", [line])).rejects.toMatchObject({
+      code: "rate_limited",
+    });
+    // system lines never count
+    await chat.add("LIMIT", [{ system: { type: "started" } }]);
+    // another room is another count
+    await chat.add("LIMT2", [line]);
+  });
+
+  it("posts the match's lines once, each waiting for its scene", async () => {
+    const code = await lobby(["v1", "v2"], 2);
+    as("v1");
+    must(await A.startGame(code));
+    skipTo((await view(code)).body);
+    as("v2");
+    expect((await read(code)).messages?.map((m) => m.system?.type)).toEqual([
+      "started",
+    ]);
+    for (const p of ["v1", "v2"]) {
+      as(p);
+      must(await A.voteTheme(code, 0));
+    }
+    const voted = (await view(code)).body;
+    const lines = (await read(code)).messages ?? [];
+    expect(lines.map((m) => m.system?.type)).toEqual(["started", "theme"]);
+    const theme = lines[1];
+    expect(theme.system).toEqual({ type: "theme", theme: voted.theme });
+    expect(theme.by).toBeNull();
+    expect(theme.showAt).toBeGreaterThan(Date.now());
+    expect(theme.showAt).toBeLessThan(voted.reveal?.until ?? 0);
+
+    skipTo(voted);
+    for (const p of ["v1", "v2"]) {
+      as(p);
+      must(await A.confirmCard(code, { name: `Chat pick ${p} ${code}` }));
+    }
+    const cast = (await view(code)).body;
+    const all = (await read(code)).messages ?? [];
+    expect(all.map((m) => m.system?.type)).toEqual([
+      "started",
+      "theme",
+      "order",
+      "firstTurn",
+    ]);
+    const [order, turn] = all.slice(2);
+    expect(order.showAt).toBeGreaterThan(Date.now());
+    expect(turn.showAt).toBeGreaterThan(cast.stepStartsAt ?? 0);
+    expect(turn.system).toMatchObject({ type: "firstTurn", n: 1 });
+  });
+
+  it("clears a room's chat when it closes", async () => {
+    const code = await lobby(["k1", "k2"]);
+    as("k1");
+    expect((await post(code, { text: "bye" })).status).toBe(200);
+    const { chat } = await backend();
+    expect(await chat.list(code, 0, 50)).toHaveLength(1);
+    must(await A.leaveRoom(code));
+    as("k2");
+    must(await A.leaveRoom(code));
+    expect(await chat.list(code, 0, 50)).toEqual([]);
+  });
+
+  it("moves a guest's lines to the account they sign in to", async () => {
+    const { handOverSeats } = await import("./rooms");
+    as("q3");
+    const account = must(await A.enterTestAccount());
+    const code = await lobby(["q1", "q2"]);
+    const guest = uidOf(jarFor("q1"));
+    as("q1");
+    expect((await post(code, { text: "before signing in" })).status).toBe(200);
+    const { chat } = await backend();
+    const [named] = await chat.add(code, [
+      {
+        system: {
+          type: "firstTurn",
+          n: 1,
+          player: {
+            id: guest,
+            isGuest: true,
+            name: null,
+            guestNumber: 3,
+            avatar: { kind: "color", color: "#fff" },
+          },
+        },
+      },
+    ]);
+    await handOverSeats(guest, { ...account, lang: "pt" }, code);
+    as("q3");
+    const lines = (await read(code)).messages ?? [];
+    expect(lines[0]).toMatchObject({
+      by: account.id,
+      author: { id: account.id },
+      text: "before signing in",
+    });
+    expect(lines.find((m) => m.id === named.id)?.system).toMatchObject({
+      player: { id: account.id, guestNumber: 3 },
+    });
+  });
+
+  it("prunes the chats of rooms that died without closing, from openRoom", async () => {
+    const { chat } = await backend();
+    const prune = vi.spyOn(chat, "prune");
+    as("u1");
+    must(
+      await A.createRoom({ ...ROOM, visibility: "public", seats: 2, ...TIMES }),
+    );
+    expect(prune).toHaveBeenCalledTimes(1);
+    const before = prune.mock.calls[0][0];
+    expect(Math.abs(Date.now() - 24 * 3600_000 - before)).toBeLessThan(5000);
+    prune.mockRestore();
+
+    await chat.add("OLDRM", [{ system: { type: "started" } }]);
+    vi.setSystemTime(Date.now() + 2000);
+    const cut = Date.now() - 1000;
+    await chat.add("NEWRM", [{ system: { type: "started" } }]);
+    await chat.prune(cut);
+    expect(await chat.list("OLDRM", 0, 50)).toEqual([]);
+    expect(await chat.list("NEWRM", 0, 50)).toHaveLength(1);
   });
 });

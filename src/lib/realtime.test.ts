@@ -4,9 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 type Status = "SUBSCRIBED" | "CHANNEL_ERROR" | "TIMED_OUT" | "CLOSED";
 
 class FakeChannel {
-  ping?: (message: { payload?: unknown }) => void;
+  filter?: unknown;
+  ping?: (message: { event: string; payload?: unknown }) => void;
   status?: (status: Status) => void;
-  on(_type: string, _filter: unknown, ping: FakeChannel["ping"]) {
+  on(_type: string, filter: unknown, ping: FakeChannel["ping"]) {
+    this.filter = filter;
     this.ping = ping;
     return this;
   }
@@ -90,7 +92,7 @@ describe("realtime topics", () => {
     realtime.subscribeRoom("WXYZ", vi.fn());
     await settle();
     expect(opened).toHaveLength(2);
-    opened[0].ping?.({ payload: { version: 3 } });
+    opened[0].ping?.({ event: "changed", payload: { version: 3 } });
     expect(a).toHaveBeenCalledWith({ version: 3 });
     expect(b).toHaveBeenCalledWith({ version: 3 });
   });
@@ -150,5 +152,39 @@ describe("realtime topics", () => {
     vi.advanceTimersByTime(10_000);
     await settle();
     expect(opened).toHaveLength(0);
+  });
+
+  it("hands each ping to its event's listeners, on the room's one channel", async () => {
+    const room = vi.fn();
+    const chat = vi.fn();
+    realtime.subscribeRoom("ABCD", room);
+    realtime.subscribeChat("ABCD", chat);
+    await settle();
+    expect(opened).toHaveLength(1);
+    expect(opened[0].filter).toEqual({ event: "*" });
+    opened[0].ping?.({ event: "chat", payload: { id: 41 } });
+    opened[0].ping?.({ event: "changed", payload: { version: 7 } });
+    opened[0].ping?.({ event: "other", payload: {} });
+    expect(chat.mock.calls).toEqual([[{ id: 41 }]]);
+    expect(room.mock.calls).toEqual([[{ version: 7 }]]);
+  });
+
+  it("keeps the room's pings when the chat stops listening", async () => {
+    const room = vi.fn();
+    realtime.subscribeRoom("ABCD", room);
+    const stopChat = realtime.subscribeChat("ABCD", vi.fn(), vi.fn());
+    await settle();
+    stopChat();
+    vi.advanceTimersByTime(10_000);
+    await settle();
+    expect(removed).toHaveLength(0);
+    opened[0].ping?.({ event: "changed", payload: { version: 2 } });
+    expect(room).toHaveBeenCalledWith({ version: 2 });
+    // and the chat joins the same channel again
+    const chat = vi.fn();
+    realtime.subscribeChat("ABCD", chat);
+    opened[0].ping?.({ event: "chat", payload: { id: 5 } });
+    expect(chat).toHaveBeenCalledWith({ id: 5 });
+    expect(opened).toHaveLength(1);
   });
 });

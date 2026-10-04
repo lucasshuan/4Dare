@@ -3,12 +3,14 @@ import { BACKEND } from "@/config";
 import { themes } from "../themes";
 import { localAuth } from "./local/auth";
 import { localCharacters } from "./local/characters";
+import { localChat } from "./local/chat";
 import { localFiles } from "./local/files";
 import { localMatches } from "./local/matches";
 import { localRooms } from "./local/rooms";
 import { localThemes } from "./local/themes";
 import { supabaseAuth } from "./supabase/auth";
 import { supabaseCharacters } from "./supabase/characters";
+import { supabaseChat } from "./supabase/chat";
 import { supabaseFiles } from "./supabase/files";
 import { supabaseMatches } from "./supabase/matches";
 import { supabaseNotify } from "./supabase/notify";
@@ -30,6 +32,7 @@ export function getBackend(): Backend {
       files: supabaseFiles(),
       auth: supabaseAuth(),
       notify: supabaseNotify(),
+      chat: supabaseChat(),
     };
     return backend;
   }
@@ -40,7 +43,13 @@ export function getBackend(): Backend {
     themes: themes(localThemes()),
     files: localFiles(),
     auth: localAuth(),
-    notify: { roomChanged: async () => {}, lobbyChanged: async () => {} },
+    // no push channel: the screens poll
+    notify: {
+      roomChanged: async () => {},
+      lobbyChanged: async () => {},
+      chatChanged: async () => {},
+    },
+    chat: localChat(),
   };
   return backend;
 }

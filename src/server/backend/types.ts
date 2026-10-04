@@ -3,6 +3,7 @@
 //   supabase → Postgres, Storage, Realtime, Auth
 // Server actions and route handlers only talk to these interfaces (via getBackend()).
 
+import type { ChatMessage, NewChatMessage } from "@/game/chat";
 import type { MatchRecord } from "@/game/record";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
@@ -133,6 +134,28 @@ export interface Notifier {
   roomChanged(code: string, version: number): Promise<void>;
   /** Tell home screens that the public room list changed. Best effort. */
   lobbyChanged(): Promise<void>;
+  /** New chat lines in the room; `id` is the newest. A ping only, never the text (topics are public). Best effort. */
+  chatChanged(code: string, id: number): Promise<void>;
+}
+
+export type { NewChatMessage };
+
+/** Room chat (src/game/chat.ts): out of RoomState, so it never races the game's compare-and-swap. */
+export interface ChatStore {
+  /**
+   * Saves lines in order and returns them with id and times. A player's line
+   * past CHAT_LIMITS (per author and room, across server instances) fails
+   * with rate_limited.
+   */
+  add(code: string, items: NewChatMessage[]): Promise<ChatMessage[]>;
+  /** Lines created at or after `since` (ms), oldest first, at most `limit` (the newest ones when cut). */
+  list(code: string, since: number, limit: number): Promise<ChatMessage[]>;
+  /** The room closed: its chat goes. */
+  clear(code: string): Promise<void>;
+  /** Chats of rooms that died without closing: every line older than `before` (ms). */
+  prune(before: number): Promise<void>;
+  /** A guest signed in: their lines, and the system lines naming them, become the account's. */
+  reassign(from: PlayerId, to: PlayerId): Promise<void>;
 }
 
 /** Finished matches, kept per player (not shown anywhere yet). */
@@ -155,4 +178,5 @@ export interface Backend {
   files: FileStore;
   auth: AuthService;
   notify: Notifier;
+  chat: ChatStore;
 }
