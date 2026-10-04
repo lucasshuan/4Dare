@@ -10,18 +10,22 @@ const COLORS = [
   "var(--seat-4)",
 ];
 
-/** Quadratic eases: in-out for each leg of the rise and fall, out for the drift and spin. */
+/** The launch slows into the hang at the top; the fall eases in and out; the drift and spin ease out. */
+const EASE_LAUNCH = "cubic-bezier(0.33, 1, 0.68, 1)";
 const EASE_IN_OUT = "cubic-bezier(0.45, 0, 0.55, 1)";
 const EASE_OUT = "cubic-bezier(0.5, 1, 0.89, 1)";
+
+/** Share of each piece's time spent going up, the rest falling. */
+const RISE = 0.3;
 
 /** A number in (-1, 1) that looks random but is fixed by n, so the pieces spread evenly. */
 const scatter = (n: number) => (Math.sin(n * 12.9898) * 43758.5453) % 1;
 
 /**
- * A burst of confetti: rounded slips, one colour after another, thrown up from
- * across the screen, hanging at the top and falling past the bottom while they
- * drift sideways and spin. "big" (a hit, the podium) throws more of them.
- * Skipped for reduced motion.
+ * A burst of confetti: rounded slips, one colour after another, shot up from
+ * below the bottom edge across the screen, hanging near the top and falling
+ * back past the bottom while they drift sideways and spin. "big" (a hit, the
+ * podium) throws more of them. Skipped for reduced motion.
  */
 export function fireConfetti(size: "small" | "big" = "small") {
   if (typeof window === "undefined") return;
@@ -62,25 +66,31 @@ export function fireConfetti(size: "small" | "big" = "small") {
     box.append(slip);
     layer.append(box);
 
-    const duration = 2200 + (k % 5) * 250;
-    const peak = h * 0.05 - (k % 7) * 18;
+    const duration = 2600 + (k % 5) * 250;
+    // not tied to the colour, so the burst doesn't leave in coloured rows
+    const delay = Math.abs(scatter(k + 0.5)) * 220;
+    const peak = h * (0.04 + (k % 7) * 0.025);
     const drift = (((k * 37) % 100) / 100 - 0.5) * w * 0.9;
     const spin = 540 + (i % 46) * 20;
     falls.push(
       box.animate(
         [
-          { transform: `translateY(${h * 0.35}px)`, easing: EASE_IN_OUT },
-          { transform: `translateY(${peak}px)`, easing: EASE_IN_OUT },
+          { transform: `translateY(${h + 40}px)`, easing: EASE_LAUNCH },
+          {
+            transform: `translateY(${peak}px)`,
+            offset: RISE,
+            easing: EASE_IN_OUT,
+          },
           { transform: `translateY(${h + 40}px)` },
         ],
-        { duration, fill: "forwards" },
+        { duration, delay, fill: "both" },
       ).finished,
       slip.animate(
         [
           { transform: "translateX(0px) rotate(0deg)" },
           { transform: `translateX(${drift}px) rotate(${spin}deg)` },
         ],
-        { duration, easing: EASE_OUT, fill: "forwards" },
+        { duration, delay, easing: EASE_OUT, fill: "both" },
       ).finished,
     );
   }
