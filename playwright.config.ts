@@ -4,12 +4,17 @@ import { defineConfig } from "@playwright/test";
 // Uses the Edge already installed on Windows; set PW_CHROMIUM to a Chromium binary
 // to use that instead (the cloud sessions do).
 const chromium = process.env.PW_CHROMIUM;
+// A production build answers at once, where `next dev` compiles each route on
+// its first visit. The stage lab (/dev/...) only exists in dev, so the stage
+// shots (STAGE_SHOTS=1) and E2E_DEV=1 start `next dev` instead.
+const dev = !!(process.env.STAGE_SHOTS || process.env.E2E_DEV);
 
 export default defineConfig({
   testDir: "./e2e",
   timeout: 120_000,
-  fullyParallel: false,
-  workers: 1,
+  // each test opens its own rooms, so two run side by side
+  fullyParallel: true,
+  workers: 2,
   use: {
     baseURL: "http://localhost:3100",
     ...(chromium
@@ -18,10 +23,12 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "pnpm exec next dev -p 3100",
+    command: dev
+      ? "pnpm exec next dev -p 3100"
+      : "pnpm exec next build && pnpm exec next start -p 3100",
     url: "http://localhost:3100/en",
     reuseExistingServer: true,
-    timeout: 180_000,
+    timeout: 300_000,
     // own build folder and data, so it can run next to `pnpm dev`;
     // the match shows play 4× faster (the step clocks keep their length).
     // A server already on 3100 is reused: stop it first if it lacks this env.

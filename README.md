@@ -18,7 +18,8 @@ To play with friends on the same network: `pnpm build && pnpm start`, and they o
 ## Commands
 
 - `pnpm test`: tests
-- `pnpm test:e2e`: whole matches in the browser (Edge)
+- `pnpm test:e2e`: whole matches in the browser (Edge), on a production build, two at a time
+- `pnpm test:e2e:smoke`: the hub and one match only
 - `pnpm lint`: lint
 - `pnpm typecheck`: types
 

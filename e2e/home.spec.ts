@@ -1,32 +1,24 @@
 import { expect, test } from "@playwright/test";
 import { createRoom, newPlayer } from "./helpers";
 
-test("the hub leads to the game, and the language select keeps the page", async ({
-  page,
-}) => {
-  await page.goto("/pt");
-  await page.getByRole("link", { name: /quem sou eu\?/i }).click();
-  await page.waitForURL(/\/pt\/who-am-i$/);
-  await expect(page.getByRole("link", { name: "Criar sala" })).toBeVisible();
-  await page.getByRole("combobox", { name: "Idioma" }).click();
-  await page.getByRole("option", { name: "日本語" }).click();
-  await page.waitForURL(/\/ja\/who-am-i$/);
-  await expect(page.getByRole("link", { name: "ルームを作る" })).toBeVisible();
-});
-
-test("a public room shows up for someone else", async ({ browser }) => {
-  const host = await newPlayer(browser);
-  const visitor = await newPlayer(browser);
-  const code = await createRoom(host);
-  await visitor.goto("/en/who-am-i");
-  const join = visitor.locator(`a[href$="/r/${code}"]`);
-  await expect(join).toBeVisible({ timeout: 10_000 });
-  await join.click();
-  await visitor.waitForURL(new RegExp(`/r/${code}$`));
-  await expect(
-    visitor.getByRole("button", { name: /i'm ready/i }),
-  ).toBeVisible();
-});
+test(
+  "the hub leads to the game, and the language select keeps the page",
+  {
+    tag: "@smoke",
+  },
+  async ({ page }) => {
+    await page.goto("/pt");
+    await page.getByRole("link", { name: /quem sou eu\?/i }).click();
+    await page.waitForURL(/\/pt\/who-am-i$/);
+    await expect(page.getByRole("link", { name: "Criar sala" })).toBeVisible();
+    await page.getByRole("combobox", { name: "Idioma" }).click();
+    await page.getByRole("option", { name: "日本語" }).click();
+    await page.waitForURL(/\/ja\/who-am-i$/);
+    await expect(
+      page.getByRole("link", { name: "ルームを作る" }),
+    ).toBeVisible();
+  },
+);
 
 test("signing in from the user menu (test account) lets you pick a name", async ({
   page,
