@@ -1,11 +1,21 @@
 "use client";
 
-import { type ComponentType, useCallback, useEffect, useState } from "react";
+import {
+  type ComponentType,
+  type PointerEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 /** What a deferred component is handed when it takes over from its stand-in. */
 export interface DeferredProps {
-  /** Pressed before it arrived: open at once. */
-  defaultOpen: boolean;
+  /**
+   * Open state, kept here so a press on the stand-in still counts when the
+   * component swaps in between pointer down and up.
+   */
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   /** Its stand-in had the focus: take it over. */
   autoFocus: boolean;
 }
@@ -40,10 +50,8 @@ export function useDeferred<P>(
   const [loaded, setLoaded] = useState<{
     Component: ComponentType<P & DeferredProps>;
   } | null>(null);
-  const [state, setState] = useState<DeferredProps>({
-    defaultOpen: false,
-    autoFocus: false,
-  });
+  const [open, onOpenChange] = useState(false);
+  const [autoFocus, setAutoFocus] = useState(false);
 
   const fetch = useCallback(() => {
     load().then(
@@ -64,16 +72,24 @@ export function useDeferred<P>(
   /** Spread on the stand-in. */
   const reach = {
     onPointerEnter: fetch,
-    onFocus: () => {
-      setState((s) => ({ ...s, autoFocus: true }));
+    // the real menus open on pointer down, so the stand-in does too
+    onPointerDown: (e: PointerEvent) => {
+      if (e.button !== 0) return;
+      onOpenChange(true);
       fetch();
     },
-    onBlur: () => setState((s) => ({ ...s, autoFocus: false })),
+    onFocus: () => {
+      setAutoFocus(true);
+      fetch();
+    },
+    onBlur: () => setAutoFocus(false),
     onClick: () => {
-      setState({ defaultOpen: true, autoFocus: true });
+      onOpenChange(true);
+      setAutoFocus(true);
       fetch();
     },
   };
 
-  return { loaded: loaded?.Component ?? null, props: state, reach };
+  const props: DeferredProps = { open, onOpenChange, autoFocus };
+  return { loaded: loaded?.Component ?? null, props, reach };
 }

@@ -9,7 +9,11 @@ import type { DeferredProps } from "@/lib/hooks/use-deferred";
 import { Flag, LANGUAGE_TRIGGER } from "./language-switch";
 
 /** The language select itself, loaded after the page (language-switch.tsx shows a stand-in until then). */
-export function LanguageSelect({ defaultOpen, autoFocus }: DeferredProps) {
+export function LanguageSelect({
+  open,
+  onOpenChange,
+  autoFocus,
+}: DeferredProps) {
   const t = useTranslations("common");
   const locale = useLocale() as Lang;
   const pathname = usePathname();
@@ -18,7 +22,8 @@ export function LanguageSelect({ defaultOpen, autoFocus }: DeferredProps) {
     <Select.Root
       items={items}
       value={locale}
-      defaultOpen={defaultOpen}
+      open={open}
+      onOpenChange={onOpenChange}
       onValueChange={(l) => {
         if (!l || l === locale) return;
         // A full load, not a client navigation: the whole app (its <html> included)

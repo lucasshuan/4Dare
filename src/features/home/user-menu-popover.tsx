@@ -24,7 +24,11 @@ import { useSignIn } from "./use-sign-in";
 import { UserMenuFace, userMenuTrigger } from "./user-menu";
 
 /** The user menu itself, loaded after the page (user-menu.tsx shows a stand-in until then). */
-export function UserMenuPopover({ defaultOpen, autoFocus }: DeferredProps) {
+export function UserMenuPopover({
+  open,
+  onOpenChange,
+  autoFocus,
+}: DeferredProps) {
   const t = useTranslations("home.user");
   const name = useDisplayName();
   const router = useRouter();
@@ -46,7 +50,7 @@ export function UserMenuPopover({ defaultOpen, autoFocus }: DeferredProps) {
 
   if (!me) return null;
   return (
-    <Popover.Root defaultOpen={defaultOpen}>
+    <Popover.Root open={open} onOpenChange={onOpenChange}>
       <Popover.Trigger autoFocus={autoFocus} className={userMenuTrigger(me)}>
         <UserMenuFace me={me} />
       </Popover.Trigger>
