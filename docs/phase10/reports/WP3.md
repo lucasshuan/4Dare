@@ -164,7 +164,7 @@ Today's screens are what you see inside the shows. For example, the vote screen 
 
 ## Requests for WP12 and WP4 (shared files I could not edit)
 
-- **`src/game/view.ts` (WP12):** `voteView` should also stay present while a theme show runs as `reveal.prev`. Today it checks only `s.reveal?.kind === "theme"`. When the cast queues behind the theme show, `view.vote` goes `null` while the vote and theme beats still play, so `VoteScreen` gets no data. `stageFrame` already routes that case.
+- ~~`src/game/view.ts` (WP12): `voteView` while the theme show runs as `reveal.prev`~~: already fixed in `3fe4f68` (WP1 re-review); nothing to do.
 - **`lab-screen.tsx` (WP4, which takes the lab over):**
   - remove `LabBackdrop` and the `backdrop` param once `RoomStage` mounts the room-level `StageBackdrop`;
   - the lab already wraps `RoomStage` in a `StageProvider` for its HUD, so a second one inside `RoomStage` is fine;
@@ -180,3 +180,7 @@ Today's screens are what you see inside the shows. For example, the vote screen 
   - It returns 404 in production.
 - **Shots:** `STAGE_SHOTS=1 pnpm exec playwright test e2e/stage-shots.spec.ts` writes the matrix to `.data/shots/stage/`.
 - **Until the scene WPs land,** the lab shows today's screens inside each show, with the new backdrops. That is the expected interim state.
+
+## Review (wave 2)
+
+One review after the commit: passed, three lows. Fixed: `StageProvider` never steps back across a boundary when a new offset estimate makes a new clock a few ms behind (`stage-context.tsx`); the stale `view.ts` request above. Left for WP12: `stage.test.ts` has no later-match theme show or cast (the `later` marks of `targetWash` and `orderSpot` and the show without a rule beat).

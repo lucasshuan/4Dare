@@ -5,6 +5,7 @@ import {
   type ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useRoomContext } from "@/features/data/room-context";
@@ -27,8 +28,14 @@ export function StageProvider({ children }: { children: ReactNode }) {
   const clock = useClock();
   // the moment the last timer was set for: reached, even if the timer fired a hair early
   const [woke, setWoke] = useState({ clock, at: 0 });
-  const now =
-    woke.clock === clock ? Math.max(woke.at, clock.now()) : clock.now();
+  let now = woke.clock === clock ? Math.max(woke.at, clock.now()) : clock.now();
+  // Each fetch re-estimates the offset and so makes a new clock, a few ms off
+  // the last one: never step back across a boundary for that (a real jump back,
+  // like the lab's scrubber, is far larger, and a frozen clock goes where it is put).
+  const last = useRef(0);
+  if (!clock.frozen && now < last.current && last.current - now < 1000)
+    now = last.current;
+  last.current = now;
   const computed = stageFrame(view, now);
   const [frame, setFrame] = useState(computed);
   // the same frame keeps its identity, so nothing under it re-renders for nothing

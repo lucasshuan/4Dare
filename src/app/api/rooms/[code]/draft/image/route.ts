@@ -31,6 +31,9 @@ export async function POST(
     if (!state || state.phase === "closed") return failure("not_found");
     if (!seated(state, me.id)) return failure("not_member");
     if (state.phase !== "picking") return failure("wrong_phase");
+    // past the clock the draft would be refused anyway: store no orphan picture
+    if (state.deadline !== null && Date.now() >= state.deadline)
+      return failure("wrong_phase");
     const mine = Object.values(state.assignments).find(
       (a) => a.pickerId === me.id,
     );

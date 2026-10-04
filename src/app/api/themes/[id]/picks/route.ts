@@ -27,7 +27,8 @@ export async function GET(
   const lang = raw as Lang;
   const { matches, characters } = getBackend();
   const [popular, starters] = await Promise.all([
-    matches.popularPicks(id, PICKS_FETCHED),
+    // the starters alone still make a hand when the history can't be read
+    matches.popularPicks(id, PICKS_FETCHED).catch(() => []),
     characters.starters(),
   ]);
   const body: HandResponse = {

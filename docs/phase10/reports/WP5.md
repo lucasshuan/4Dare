@@ -191,3 +191,7 @@ None: WP5 has no UI.
 - **How to add starters:** append rows to `supabase/seed/theme_starters.sql`, as `('theme-id', 'wd-Q…', position)`. Positions 1–2 are the clearest fits; prefer characters with a picture and names in pt, en and ja. Run the file again with the Supabase MCP `execute_sql`: it only inserts (`on conflict do nothing`). Never `pnpm seed`. The servers pick the change up within 10 minutes.
 - **✗ coverage:** 198 themes get a ✗ card, from famous athletes and musicians for fiction themes, and cartoon and game characters for real-people themes. 139 get only ✓✓: the cross-cutting sets, books, and 23 themes whose starters mix real and made-up characters (list in deviation 2). To give one of them a ✗, its starters would have to be all one kind.
 - **Clock and new characters:** a name typed when time runs out becomes a new library character only when the search showed no rows; otherwise the previewed character goes. That character is made once, even when several players' pages fire the timeout together.
+
+## Review (wave 2)
+
+One review after the commit: passed, two lows, both fixed. The hand route and the history fill of the rule examples fall back to the starters when the history read fails; the draft picture route refuses past the deadline before it stores anything.

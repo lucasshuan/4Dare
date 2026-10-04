@@ -213,7 +213,9 @@ export async function ruleExamplesFor(
       if (fits.length < 2) {
         // Too few starters: the theme's most picked fill in.
         const have = new Set(fits.map((c) => c.id));
-        const picked = (await src.popularPicks(plan.id, PICKS_FETCHED))
+        const picked = (
+          await src.popularPicks(plan.id, PICKS_FETCHED).catch(() => [])
+        )
           .filter((p) => isLibraryId(p.id) && !have.has(p.id))
           .filter((p) => drawWeight(p) > 0)
           .sort(
