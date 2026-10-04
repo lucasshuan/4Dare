@@ -111,15 +111,18 @@ export function useRoom(code: string) {
     };
   }, [client, code, refresh]);
 
-  // When the step's clock runs out the server applies the timeout on the next read.
+  // When the step's clock runs out, or a closed page's grace (a seat to free),
+  // the server settles it on the next read.
   const deadline = query.data?.view.deadline ?? null;
+  const sweepAt = query.data?.view.sweepAt ?? null;
   const offset = query.data?.offset ?? 0;
   useEffect(() => {
-    if (deadline === null) return;
-    const wait = Math.max(0, deadline - (Date.now() + offset)) + 300;
+    const due = [deadline, sweepAt].filter((t): t is number => t !== null);
+    if (!due.length) return;
+    const wait = Math.max(0, Math.min(...due) - (Date.now() + offset)) + 300;
     const id = window.setTimeout(() => void refresh(), wait);
     return () => window.clearTimeout(id);
-  }, [deadline, offset, refresh]);
+  }, [deadline, sweepAt, offset, refresh]);
 
   const error =
     query.error instanceof RoomError

@@ -1,12 +1,6 @@
-import { GameError, GONE_GRACE_MS } from "@/game/types";
+import { GameError } from "@/game/types";
 import { getBackend } from "@/server/backend";
-import { background } from "@/server/background";
-import {
-  applyDueTimeouts,
-  dispatch,
-  normalizeCode,
-  seated,
-} from "@/server/rooms";
+import { dispatch, normalizeCode, seated } from "@/server/rooms";
 
 /**
  * The player's page closed (sent as a beacon). If they don't show up again
@@ -29,10 +23,7 @@ export async function POST(
     if (e instanceof GameError) return new Response(null, { status: 204 });
     throw e;
   }
-  // Settle it right after the grace, so the others see it without waiting for a poll.
-  background(async () => {
-    await new Promise((r) => setTimeout(r, GONE_GRACE_MS + 250));
-    await applyDueTimeouts(code);
-  });
+  // The others' pages refetch when the grace ends (the view's `sweepAt`) and
+  // that read settles it, so no function waits out the grace.
   return new Response(null, { status: 204 });
 }

@@ -10,6 +10,7 @@ import {
   lastQuestionBy,
   openQuestion,
   pendingGuess,
+  presenceDue,
   stepSeconds,
   validatorOf,
 } from "./helpers";
@@ -20,6 +21,7 @@ import {
   type Character,
   DEFAULT_SETTINGS,
   GameError,
+  GONE_GRACE_MS,
   type HistoryEntryView,
   LOBBY_LISTED_MS,
   type Phase,
@@ -397,6 +399,7 @@ export function toView(
       (s.deadline !== null && s.stepStartsAt !== null
         ? s.deadline - s.stepStartsAt
         : null),
+    sweepAt: sweepAt(s),
     reveal: reveal(s, viewerId, now),
     serverNow: now,
     vote: voteView(s, viewerId, now),
@@ -440,6 +443,18 @@ export function playersOnline(
     counts[r.game] = (counts[r.game] ?? 0) + here;
   }
   return counts;
+}
+
+/**
+ * The first moment a closed page's grace ends with something to settle (a
+ * lobby seat to free, a room nobody is left in), or null. Viewers refetch
+ * then, and that read applies it.
+ */
+function sweepAt(s: RoomState): number | null {
+  const gone = s.players.flatMap((p) => (p.goneAt != null ? [p.goneAt] : []));
+  if (!gone.length) return null;
+  const at = Math.min(...gone) + GONE_GRACE_MS;
+  return presenceDue(s, at) ? at : null;
 }
 
 /**

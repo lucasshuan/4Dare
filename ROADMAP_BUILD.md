@@ -66,7 +66,7 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] Room list reads only what it shows, not every room's whole state: six JSON paths instead of a new column (`src/server/listing.ts`; a test fails if `toPublicRoom` starts reading more)
 - [x] ~~`player_ids` column with a GIN index for "rooms I sit in"~~ not needed: the query takes 1.4 ms on the `updated_at` index, and the hourly cleanup keeps the table small
 - [x] Old rooms deleted by `pg_cron` (hourly: closed a day ago, or a week without a write; migration 0013, applied)
-- [ ] The `gone` beacon no longer keeps a function alive for 5 s
+- [x] The `gone` beacon no longer keeps a function alive for 5 s: the view carries `sweepAt` and the other pages refetch then, which settles it
 - [x] Speed Insights with a `sampleRate` (half the visits)
 - [x] Vercel project checked: Node 24.x (matches `engines`), region `gru1` (next to Supabase's `sa-east-1`), Fluid compute forced on by `vercel.json`; memory is not exposed through the API, see Settings → Functions
 

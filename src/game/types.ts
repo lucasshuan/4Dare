@@ -655,6 +655,8 @@ export interface RoomView {
   stepStartsAt: number | null;
   /** The step's full length (ms). The deadline lands sooner once answers cut the clock. */
   stepMs: number | null;
+  /** When a closed page's grace runs out and the room has a seat to free (or closes): refetch then. */
+  sweepAt?: number | null;
   /** Shown to everyone until `reveal.until`; null when nothing is being revealed. */
   reveal: RevealView | null;
   /** Server clock when this view was built; use it to correct the countdown. */
