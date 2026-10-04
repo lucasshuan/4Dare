@@ -7,6 +7,7 @@ import { supabaseAuth } from "./supabase/auth";
 import { supabaseCharacters } from "./supabase/characters";
 import { supabaseChat } from "./supabase/chat";
 import { supabaseFiles } from "./supabase/files";
+import { supabaseImages } from "./supabase/images";
 import { supabaseMatches } from "./supabase/matches";
 import { supabaseNotify } from "./supabase/notify";
 import { supabaseRooms } from "./supabase/rooms";
@@ -23,6 +24,7 @@ export function getBackend(): Backend {
       rooms: supabaseRooms(),
       matches: supabaseMatches(),
       characters: supabaseCharacters(),
+      images: supabaseImages(),
       themes: themes(supabaseThemes()),
       files: supabaseFiles(),
       auth: supabaseAuth(),

@@ -76,16 +76,87 @@ export interface CharacterStore {
   getMany(ids: string[], lang: Lang): Promise<Character[]>;
   /** Inserts only. With an `id` it is idempotent: an id already there comes back as it is. */
   create(input: NewCharacter): Promise<Character>;
-  setImage(id: string, imageUrl: string): Promise<Character | null>;
   /** Used when a player lets the clock run out while picking. */
   randomPopular(lang: Lang, count: number): Promise<Character[]>;
-  /** What changed since the library files were built: characters players created, pictures they swapped (id -> url). */
+  /** What changed since the library files were built: characters players created, covers that moved to a player's picture (id -> url). */
   extras(lang: Lang): Promise<{
     created: Character[];
     images: Record<string, string>;
   }>;
   /** Every active theme's starters, by theme then position (cached; local mode has none). */
   starters(): Promise<ThemeStarter[]>;
+}
+
+/** Who sent a picture, as they looked then. */
+export type ImageAuthor = Pick<
+  Identity,
+  "name" | "isGuest" | "guestNumber" | "avatar"
+>;
+
+/**
+ * pending: the detector could not tell yet, so only its author sees it;
+ * hidden: reported by enough people.
+ */
+export type ImageStatus = "pending" | "active" | "hidden";
+
+/** A picture of a character (table character_images). */
+export interface CharacterImage {
+  id: string;
+  /** Language-free ("wd-Q302", "u-<uuid>"); null while it waits on a pick card for a new name. */
+  characterId: string | null;
+  url: string;
+  /** null for the library's own picture. */
+  createdBy: PlayerId | null;
+  author: ImageAuthor | null;
+  status: ImageStatus;
+  /** Distinct players who picked it plus its head start: the best one is the cover. */
+  score: number;
+}
+
+export interface NewImage {
+  characterId: string | null;
+  url: string;
+  createdBy: PlayerId;
+  author: ImageAuthor;
+  status: "pending" | "active";
+  /** The detector's scores or error, kept to tune it. */
+  moderation: unknown;
+}
+
+/** Pictures of characters; the cover (the character's imageUrl) is always the best active one. */
+export interface ImageStore {
+  add(input: NewImage): Promise<CharacterImage>;
+  get(id: string): Promise<CharacterImage | null>;
+  /** The picture with `url` among a character's (language-free id), or among the unattached ones (null). */
+  find(characterId: string | null, url: string): Promise<CharacterImage | null>;
+  /** What a viewer may see of a character's pictures: the active ones and their own pending ones, best first. */
+  list(
+    characterId: string,
+    viewer: PlayerId,
+    limit: number,
+  ): Promise<CharacterImage[]>;
+  /** Makes `image` a picture of `characterId` too: the same row when it waits unattached, else a copy. */
+  attach(image: CharacterImage, characterId: string): Promise<void>;
+  /** A confirmed card showed this picture: one pick per player, and the cover follows the score. */
+  recordPick(
+    characterId: string,
+    url: string,
+    playerId: PlayerId,
+  ): Promise<void>;
+  /** One report per player; a player's picture is hidden at `hideAt`. The status after it. */
+  report(
+    id: string,
+    reporterId: PlayerId,
+    hideAt: number,
+  ): Promise<ImageStatus | null>;
+  /** Pictures still waiting on the detector, oldest first. */
+  pending(limit: number): Promise<CharacterImage[]>;
+  /** The detector cleared a waiting picture: everyone sees it, and it may become the cover. */
+  approve(id: string, moderation: unknown): Promise<void>;
+  /** The row goes (not its file). */
+  remove(id: string): Promise<void>;
+  /** Pictures sent for a new name that never became a character, sent before `before` (ms). */
+  orphans(before: number, limit: number): Promise<CharacterImage[]>;
 }
 
 /** Where the theme list lives: the fixtures locally, a table on Supabase. */
@@ -112,6 +183,8 @@ export interface FileStore {
     bytes: Uint8Array,
     contentType: string,
   ): Promise<string>;
+  /** Deletes a character picture this store made (see uploadedPath); anything else is left alone. */
+  remove(url: string): Promise<void>;
 }
 
 export interface AuthService {
@@ -174,6 +247,7 @@ export interface Backend {
   rooms: RoomStore;
   matches: MatchStore;
   characters: CharacterStore;
+  images: ImageStore;
   themes: ThemeSource;
   files: FileStore;
   auth: AuthService;

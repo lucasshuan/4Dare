@@ -160,12 +160,16 @@ export function PickCardLab({
         onNewImage={async (file) => {
           note(`onNewImage ${Math.round(file.size / 1024)} KB`);
           await wait(900);
-          return failUploads ? null : URL.createObjectURL(file);
+          return failUploads
+            ? { error: "upload_failed" }
+            : { url: URL.createObjectURL(file), picture: null };
         }}
         onLibraryImage={async (id, file) => {
           note(`onLibraryImage ${id} ${Math.round(file.size / 1024)} KB`);
           await wait(900);
-          if (failUploads) throw new Error("upload failed");
+          return failUploads
+            ? { error: "upload_failed" }
+            : { url: URL.createObjectURL(file), picture: null };
         }}
       />
 

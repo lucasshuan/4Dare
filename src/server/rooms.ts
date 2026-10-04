@@ -25,8 +25,8 @@ import {
 import { toPublicRoom } from "@/game/view";
 import { getBackend } from "./backend";
 import { background } from "./background";
-import { getOrCreateCharacter } from "./characters";
 import type { CurrentMatch, ElsewhereRoom } from "./contract";
+import { countPick, nameWithPicture, wearing } from "./pictures";
 import { type ExampleSources, voteExamples } from "./rule-examples";
 import { drawPopular, PICKS_FETCHED, pickKey } from "./theme-picks";
 
@@ -293,14 +293,14 @@ async function draftedCharacters(
         if (d.characterId) {
           const shown = await characters.get(d.characterId);
           if (shown) {
-            out[a.pickerId] = shown;
+            out[a.pickerId] = wearing(shown, d);
             return;
           }
         }
         const name = draftName(d);
         if (!name) return;
         const picker = state.players.find((p) => p.id === a.pickerId);
-        out[a.pickerId] = await getOrCreateCharacter({
+        out[a.pickerId] = await nameWithPicture({
           id: d.newId ?? draftId(state, target),
           lang: picker?.lang ?? "en",
           name,
@@ -401,8 +401,11 @@ export async function applyDueTimeouts(code: string) {
   }
   for (let i = 0; i < 4; i++) {
     if (!stored || !isExpired(stored.state, Date.now())) return stored;
+    // the cards the clock settled, from the attempt that was written
+    let drafted: Record<PlayerId, Character> = {};
     try {
       stored = await dispatch(code, async (state) => {
+        drafted = {};
         if (!isExpired(state, Date.now())) throw new GameError("wrong_phase");
         if (state.phase === "theming") {
           // The host never typed it: everyone votes, on themes from every set.
@@ -416,7 +419,7 @@ export async function applyDueTimeouts(code: string) {
         }
         if (state.phase === "picking") {
           // Whatever is on a card goes; only empty cards get a fallback.
-          const drafted = await draftedCharacters(state);
+          drafted = await draftedCharacters(state);
           return {
             type: "TIMEOUT",
             drafted,
@@ -425,6 +428,11 @@ export async function applyDueTimeouts(code: string) {
         }
         return { type: "TIMEOUT" };
       });
+      const settled = Object.entries(drafted);
+      if (settled.length)
+        background(() =>
+          Promise.all(settled.map(([picker, c]) => countPick(c, picker))),
+        );
     } catch (e) {
       if (e instanceof GameError && e.code === "wrong_phase")
         return rooms.get(code);

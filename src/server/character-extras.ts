@@ -11,7 +11,7 @@ export interface Extras {
 const EXTRAS_TTL = 15_000;
 const extras = new Map<Lang, { at: number; value: Promise<Extras> }>();
 
-/** Characters players created and pictures they swapped, refreshed every 15 s per instance. */
+/** Characters players created and covers that moved to their pictures, refreshed every 15 s per instance. */
 export function characterExtras(lang: Lang): Promise<Extras> {
   const cached = extras.get(lang);
   if (cached && Date.now() - cached.at < EXTRAS_TTL) return cached.value;

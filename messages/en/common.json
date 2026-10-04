@@ -53,6 +53,7 @@
     "conflict": "Someone played at the same time. Try again.",
     "unauthorized": "Sign in again to continue.",
     "upload_failed": "Could not upload the image. Use a JPG, PNG or WebP up to 4 MB.",
+    "image_rejected": "This picture can't be used: no sex, real nudity or gore.",
     "rate_limited": "Too many tries. Wait a moment.",
     "too_early": "Hold on, the next step is about to start.",
     "not_enough_picks": "No matches with this theme yet.",

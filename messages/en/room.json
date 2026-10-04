@@ -29,7 +29,7 @@
   "pick": {
     "searchLabel": "Character for {name}",
     "changeImage": "Change picture",
-    "imageHint": "The new picture replaces the library's one: anyone who picks {name} later sees yours.",
+    "imageHint": "Yours goes on this card and joins {name}'s pictures. The one picked most becomes the main picture.",
     "random": "Random",
     "randomAgain": "Draw another",
     "randomHint": "Draws one of the characters people picked most for this theme",

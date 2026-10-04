@@ -9,7 +9,7 @@
 3. Everyone has 40 s (set per room) to vote on one of three themes, like "Superheroes", drawn from the theme sets the host turned on (movies, anime, sports...). Votes are open and can change; a tie goes to a wheel. Or the host just types the theme.
 4. The chosen theme takes the stage. On the first match, the rule follows: "Every character must be from this theme", with two characters that fit (✓) and, when the theme allows a clear one, one that doesn't (✗).
 5. The draw: every avatar hops into the 4 and a slip comes out with the player you pick for.
-6. Each player fills a card for their target: type a name (the library suggests matches), tap one of the theme's popular characters in the hand at the bottom, or draw one at random. You can change the picture or create a new character. The card is saved as you go: when time runs out, it goes as it is, and an empty card gets a random character.
+6. Each player fills a card for their target: type a name (the library suggests matches), tap one of the theme's popular characters in the hand at the bottom, or draw one at random. You can put another picture on the card (one players sent, or your own) or create a new character. The card is saved as you go: when time runs out, it goes as it is, and an empty card gets a random character.
 7. The cast: you see who picked your card, then the turn order. You see everyone's card but yours.
 8. On your turn, you ask a yes-or-no question. Everyone answers: Yes, Probably, Don't know, Probably not, No or Doesn't matter, with a comment if they want.
 9. Then you guess. The right name counts at once. If it's only close, whoever picked the character decides.
@@ -31,5 +31,6 @@ Every room has a chat, in the lobby and through the match: a panel at the bottom
 ## Extras
 
 - English, Portuguese and Japanese.
-- Character library with pictures. You can create a new one, change anyone's picture, or draw one people often picked for the theme.
+- Character library with pictures. You can create a new one, send another picture of anyone, or draw one people often picked for the theme.
+- A character's pictures: the library's own, then the ones players sent, each with who sent it. The one most players pick becomes the main picture (the library's starts 20 picks ahead). Sexual content, real nudity and gore are refused when sent; anyone can report a picture, and 3 reports hide it.
 - Light and dark. Works on phones. Reduced motion is respected: scenes keep their timing but drop the movement.

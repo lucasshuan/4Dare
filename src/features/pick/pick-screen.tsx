@@ -39,11 +39,7 @@ import { useMedia } from "@/lib/hooks/use-media";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { dur, type EaseFn, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import {
-  confirmCard,
-  randomPick,
-  replaceCharacterImage,
-} from "@/server/actions";
+import { confirmCard, randomPick } from "@/server/actions";
 import type { CharacterDTO } from "@/server/contract";
 import { DoneRow } from "./done-row";
 import { drawHand, type HandCard, uploadDraftImage } from "./draft-api";
@@ -336,22 +332,23 @@ function PickTable() {
     if (!card) return;
     rollId.current++;
     draft.pause(true);
-    // a new name's picture comes from the stored draft: make sure it is there
-    if ("name" in card) await draft.flush();
+    // the picture comes from the stored draft (a new name's, or the one
+    // chosen for a library character): make sure it is there
+    await draft.flush();
     const r = await act(() => confirmCard(code, card));
     // accepted: the card was in before the clock ran out, even if the answer came after
     if (r.ok) confirmedEarly.current = true;
     else draft.pause(false);
   };
 
-  const onLibraryImage = async (characterId: string, image: Blob) => {
+  const onLibraryImage = async (
+    characterId: string,
+    image: Blob,
+    replaces?: string,
+  ) => {
     setLibraryUploads((n) => n + 1);
     try {
-      const form = new FormData();
-      form.set("id", characterId);
-      form.set("image", image, "picture.webp");
-      const r = await replaceCharacterImage(form);
-      if (!r.ok) throw new Error(r.error);
+      return await uploadDraftImage(code, image, { characterId, replaces });
     } finally {
       setLibraryUploads((n) => n - 1);
     }
@@ -432,7 +429,9 @@ function PickTable() {
               targetName={displayName(target, false)}
               state={state}
               stamp={timeUp}
-              onNewImage={(image) => uploadDraftImage(code, image)}
+              onNewImage={(image, replaces) =>
+                uploadDraftImage(code, image, { replaces })
+              }
               onLibraryImage={onLibraryImage}
               autoFocus={autoFocus}
               onFocusChange={setFocused}

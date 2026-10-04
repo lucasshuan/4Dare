@@ -143,15 +143,6 @@ export function supabaseCharacters(): CharacterStore {
         aliases: [],
       };
     },
-    async setImage(id, imageUrl) {
-      // One picture per character: every language gets it.
-      const { error } = await db()
-        .from("characters")
-        .update({ image_url: imageUrl })
-        .eq("id", parseEntryId(id)?.id ?? id);
-      if (error) throw error;
-      return entry(id);
-    },
     async extras(lang) {
       const created: Character[] = [];
       const images: Record<string, string> = {};
@@ -165,7 +156,7 @@ export function supabaseCharacters(): CharacterStore {
       if (mine.error) throw mine.error;
       for (const row of (mine.data ?? []) as Row[])
         created.push(toCharacter(row));
-      // Player uploads live in Storage; library pictures point elsewhere.
+      // Covers that moved to a player's picture (picked enough): library pictures point elsewhere.
       const swapped = await db()
         .from("characters")
         .select("id, image_url")

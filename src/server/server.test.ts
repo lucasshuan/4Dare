@@ -1388,3 +1388,270 @@ describe("room chat", () => {
     expect(await chat.list("NEWRM", 0, 50)).toHaveLength(1);
   });
 });
+
+describe("character pictures", () => {
+  const backend = async () => (await import("./backend")).getBackend();
+  type Tray = { pictures: import("./pictures").TrayPicture[] };
+  const upload = async (code: string, characterId?: string) => {
+    const form = new FormData();
+    form.set("image", pngFile());
+    if (characterId) form.set("characterId", characterId);
+    const route = await import("@/app/api/rooms/[code]/draft/image/route");
+    return route.POST(
+      new Request(`http://x/api/rooms/${code}/draft/image`, {
+        method: "POST",
+        headers: { origin: "http://x" },
+        body: form,
+      }),
+      { params: Promise.resolve({ code }) },
+    );
+  };
+  const tray = async (id: string) => {
+    const route = await import("@/app/api/characters/[id]/pictures/route");
+    const res = await route.GET(
+      new Request(`http://x/api/characters/${id}/pictures`),
+      { params: Promise.resolve({ id }) },
+    );
+    return (await res.json()) as Tray;
+  };
+  const report = async (id: string) => {
+    const route = await import("@/app/api/pictures/[id]/report/route");
+    return route.POST(
+      new Request(`http://x/api/pictures/${id}/report`, {
+        method: "POST",
+        headers: { origin: "http://x" },
+      }),
+      { params: Promise.resolve({ id }) },
+    );
+  };
+  const putDraft = async (code: string, body: unknown) => {
+    const route = await import("@/app/api/rooms/[code]/draft/route");
+    return route.PUT(
+      new Request(`http://x/api/rooms/${code}/draft`, {
+        method: "PUT",
+        headers: { origin: "http://x", "content-type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+      { params: Promise.resolve({ code }) },
+    );
+  };
+  /** Library characters with a picture, the n-th first. */
+  const pictured = async (n: number) => {
+    const { characters } = await backend();
+    const found = (await characters.search("", "pt", 200)).filter(
+      (c) => c.imageUrl && !c.id.startsWith("u-"),
+    );
+    return found[n];
+  };
+
+  it("puts a player's picture of a library character on their card, and the cover stays", async () => {
+    const lib = await pictured(0);
+    const other = await pictured(1);
+    const { code } = await pickingRoom("i1", "i2");
+    as("i1");
+    const sent = await upload(code, lib.id);
+    expect(sent.status).toBe(200);
+    const { imageUrl, picture } = (await sent.json()) as {
+      imageUrl: string;
+      picture: Tray["pictures"][number];
+    };
+    expect(picture).toMatchObject({
+      url: imageUrl,
+      mine: true,
+      pending: false,
+    });
+    expect((await view(code)).body.pick?.draft).toEqual({
+      characterId: lib.id,
+      name: lib.name,
+      imageUrl,
+    });
+    // a picture goes only with its own character
+    expect(
+      (await putDraft(code, { characterId: other.id, name: "x", imageUrl }))
+        .status,
+    ).toBe(400);
+    expect(
+      (
+        await putDraft(code, {
+          characterId: lib.id,
+          name: lib.name,
+          imageUrl: "https://evil.test/a.png",
+        })
+      ).status,
+    ).toBe(400);
+
+    // the tray: the library's own first, then the new one, with its author
+    const seen = (await tray(lib.id)).pictures;
+    expect(seen[0]).toMatchObject({ url: lib.imageUrl, author: null });
+    expect(seen.find((p) => p.url === imageUrl)).toMatchObject({ mine: true });
+    as("i2");
+    expect(
+      (await tray(lib.id)).pictures.find((p) => p.url === imageUrl),
+    ).toMatchObject({ mine: false, author: { isGuest: true } });
+
+    // confirmed, the card wears it; one pick does not beat the head start
+    as("i1");
+    must(await A.confirmCard(code, { characterId: lib.id }));
+    const { rooms, characters } = await backend();
+    const state = (await rooms.get(code))?.state;
+    const card = Object.values(state?.assignments ?? {}).find(
+      (a) => a.pickerId === uidOf(jarFor("i1")),
+    )?.character;
+    expect(card).toMatchObject({ id: lib.id, imageUrl });
+    expect((await characters.get(lib.id))?.imageUrl).toBe(lib.imageUrl);
+  });
+
+  it("hides a picture three people reported, never the library's", async () => {
+    const lib = await pictured(2);
+    const { code } = await pickingRoom("i3", "i4");
+    as("i3");
+    const { picture } = (await (await upload(code, lib.id)).json()) as {
+      picture: { id: string; url: string };
+    };
+    // not one's own, not the library's
+    expect((await report(picture.id)).status).toBe(400);
+    as("i4");
+    const cover = (await tray(lib.id)).pictures[0];
+    expect(cover.author).toBeNull();
+    expect((await report(cover.id)).status).toBe(400);
+
+    for (const [who, hidden] of [
+      ["i4", false],
+      ["i4", false],
+      ["i5", false],
+      ["i6", true],
+    ] as const) {
+      as(who);
+      expect(await (await report(picture.id)).json()).toEqual({ hidden });
+    }
+    as("i4");
+    expect(
+      (await tray(lib.id)).pictures.some((p) => p.url === picture.url),
+    ).toBe(false);
+    expect((await report(picture.id)).status).toBe(404);
+  });
+
+  it("moves the cover to the picture most players pick, past the library's head start", async () => {
+    const { images, characters } = await backend();
+    const author = {
+      name: null,
+      isGuest: true,
+      guestNumber: 1,
+      avatar: { kind: "color" as const, color: "#DCE8FA" },
+    };
+    const add = (characterId: string, url: string) =>
+      images.add({
+        characterId,
+        url,
+        createdBy: "someone",
+        author,
+        status: "active",
+        moderation: null,
+      });
+
+    // a player's character: no head start
+    as("i7");
+    const form = new FormData();
+    form.set("name", "Cover Test Person");
+    form.set("lang", "pt");
+    form.set("image", pngFile());
+    const made = must(await A.createCharacter(form));
+    const first = made.imageUrl as string;
+    await add(made.id, "https://img.test/b.png");
+    await images.recordPick(made.id, "https://img.test/b.png", "v1");
+    expect((await characters.get(made.id))?.imageUrl).toBe(
+      "https://img.test/b.png",
+    );
+    await images.recordPick(made.id, first, "v2");
+    await images.recordPick(made.id, first, "v3");
+    // the same player twice is one pick
+    await images.recordPick(made.id, "https://img.test/b.png", "v1");
+    expect((await characters.get(made.id))?.imageUrl).toBe(first);
+
+    // the library's own picture starts 20 picks ahead and wins a tie
+    const lib = await pictured(3);
+    const id = lib.id.replace(/^(en|pt|ja)-/, "");
+    await add(id, "https://img.test/fat.png");
+    for (let i = 0; i < 20; i++)
+      await images.recordPick(id, "https://img.test/fat.png", `w${i}`);
+    expect((await characters.get(lib.id))?.imageUrl).toBe(lib.imageUrl);
+    await images.recordPick(id, "https://img.test/fat.png", "w20");
+    expect((await characters.get(lib.id))?.imageUrl).toBe(
+      "https://img.test/fat.png",
+    );
+    // in every language
+    expect(
+      (await characters.get(lib.id.replace(/^pt-/, "en-")))?.imageUrl,
+    ).toBe("https://img.test/fat.png");
+  });
+
+  it("refuses what the detector flags, and shows what it could not check only to its author", async () => {
+    const lib = await pictured(4);
+    const { code } = await pickingRoom("i8", "i9");
+    vi.stubEnv("SIGHTENGINE_API_USER", "user");
+    vi.stubEnv("SIGHTENGINE_API_SECRET", "secret");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () =>
+          Response.json({
+            status: "success",
+            nudity: { sexual_activity: 0.9, sexual_display: 0.1, erotica: 0.1 },
+            gore: {
+              classes: { body_organ: 0, serious_injury: 0, corpse: 0 },
+              type: { animated: 0 },
+            },
+          }),
+        ),
+      );
+      as("i8");
+      const refused = await upload(code, lib.id);
+      expect(refused.status).toBe(400);
+      expect(await refused.json()).toEqual({ error: "image_rejected" });
+
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => {
+          throw new TypeError("fetch failed");
+        }),
+      );
+      const waiting = (await (await upload(code, lib.id)).json()) as {
+        picture: { url: string; pending: boolean };
+      };
+      expect(waiting.picture.pending).toBe(true);
+      expect(
+        (await tray(lib.id)).pictures.find(
+          (p) => p.url === waiting.picture.url,
+        ),
+      ).toMatchObject({ pending: true });
+      as("i9");
+      expect(
+        (await tray(lib.id)).pictures.some(
+          (p) => p.url === waiting.picture.url,
+        ),
+      ).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
+  it("tidies away pictures sent for names that never became characters", async () => {
+    const { code } = await pickingRoom("i10", "i11");
+    as("i10");
+    const { imageUrl } = (await (await upload(code)).json()) as {
+      imageUrl: string;
+    };
+    const { images } = await backend();
+    const { tidyPictures } = await import("./pictures");
+    expect(await images.find(null, imageUrl)).not.toBeNull();
+    // a day is not up yet
+    await tidyPictures();
+    expect(await images.find(null, imageUrl)).not.toBeNull();
+    const done = await tidyPictures(Date.now() + 25 * 3600_000);
+    expect(done.orphans).toBeGreaterThan(0);
+    expect(await images.find(null, imageUrl)).toBeNull();
+  });
+});

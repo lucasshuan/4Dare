@@ -162,7 +162,7 @@ export const toCardView = (item: SearchItem): CardView => ({
  * - `typing`: a name being typed while the search has rows; `preview` is the
  *   highlighted row (its picture shows as a ghost), null with no highlight;
  * - `picked`: a library character (a row, a hand card, Random, an exact name
- *   on blur, or restored from the draft);
+ *   on blur, or restored from the draft), with its cover or another picture;
  * - `new`: a name the search doesn't know ("New!"), with its uploaded picture.
  */
 export type CardContent =
@@ -172,6 +172,8 @@ export type CardContent =
       kind: "picked";
       card: CardView;
       via: "list" | "hand" | "random" | "exact" | "restore";
+      /** Another picture of the character, chosen in the tray or sent for it: this match only. */
+      picture?: string;
     }
   | { kind: "new"; name: string; imageUrl: string | null; uploading: boolean };
 

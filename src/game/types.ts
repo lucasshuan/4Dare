@@ -251,7 +251,11 @@ export interface PickDraft {
   characterId: string | null;
   /** The name field as typed (0..MAX_CHARACTER_NAME). */
   name: string;
-  /** A picture uploaded for a new character (a URL the server made). */
+  /**
+   * The picture on the card when it is not the character's cover: one sent
+   * for a new name, or another picture of the library character (checked by
+   * the server against the character's pictures).
+   */
   imageUrl: string | null;
   /** Set by the server: the id ("u-<uuid>") the clock gives a new character. */
   newId: string | null;
@@ -479,6 +483,8 @@ export const ERROR_CODES = [
   "conflict",
   "unauthorized",
   "upload_failed",
+  /** The picture detector refused it: sexual content, real nudity or gore. */
+  "image_rejected",
   "rate_limited",
   /** The step has not started yet: a reveal is still on screen. */
   "too_early",

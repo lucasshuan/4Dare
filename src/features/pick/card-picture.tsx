@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Check, ImagePlus, Upload, X } from "lucide-react";
 import { AnimatePresence, m, useAnimate } from "motion/react";
 import { useTranslations } from "next-intl";
@@ -8,8 +9,11 @@ import Cropper, { type Area } from "react-easy-crop";
 import { Portrait } from "@/components/ui/portrait";
 import { cropToWebp, useImageIntake } from "@/components/ui/use-image-intake";
 import { type CardContent, thumbUrl } from "@/game/character-search";
+import { ERROR_CODES, type ErrorCode } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
+import { type PictureUpload, picturesKey, type TrayPicture } from "./draft-api";
+import { PictureGrid } from "./picture-grid";
 
 /** Character pictures are 4:5, exported at 640×800 (as `ImageDrop` does). */
 const SIZE = { w: 640, h: 800 };
@@ -23,6 +27,12 @@ const pictureKey = (value: CardContent) =>
     : value.kind === "new"
       ? "new"
       : null;
+
+/** The message key for a refused upload. */
+const uploadError = (code: string): ErrorCode =>
+  (ERROR_CODES as readonly string[]).includes(code)
+    ? (code as ErrorCode)
+    : "upload_failed";
 
 /** A crop being adjusted on the card: the original picture and where it sits. */
 interface CropSession {
@@ -38,7 +48,8 @@ interface CropSession {
 /**
  * The card's picture: the silhouette, the highlighted row's ghost, the chosen
  * picture (it flips in when picked), the drop zone of a new name, the inline
- * crop of a dropped, pasted or browsed picture, the swap pill and its tray.
+ * crop of a dropped, pasted or browsed picture, the swap pill and its tray (a
+ * library character's pictures, or a new name's own).
  */
 export function CardPicture({
   value,
@@ -53,8 +64,13 @@ export function CardPicture({
   editable: boolean;
   /** Phones while the name field has focus: the picture shrinks above the keyboard. */
   compact: boolean;
-  onNewImage: (file: Blob) => Promise<string | null>;
-  onLibraryImage: (characterId: string, file: Blob) => Promise<void>;
+  /** `replaces`: the picture this one adjusts (the same crop, moved). */
+  onNewImage: (file: Blob, replaces?: string) => Promise<PictureUpload>;
+  onLibraryImage: (
+    characterId: string,
+    file: Blob,
+    replaces?: string,
+  ) => Promise<PictureUpload>;
 }) {
   const t = useTranslations("pickCard");
   const tImage = useTranslations("common.image");
@@ -69,6 +85,9 @@ export function CardPicture({
   const [session, setSession] = useState<CropSession | null>(null);
   const [tray, setTray] = useState(false);
   const [busy, setBusy] = useState(0);
+  const queries = useQueryClient();
+  /** The picture the crop being adjusted sent last: the next send replaces it. */
+  const lastSent = useRef<{ src: string; id: string } | null>(null);
 
   // Async work and effects read the latest props and crop.
   const latest = useRef({
@@ -109,7 +128,7 @@ export function CardPicture({
         };
       });
       // Centre-cropped at once, so the card holds the picture even if nobody adjusts it.
-      void commit(() => cropToWebp(src, null, SIZE.w, SIZE.h), forKey);
+      void commit(() => cropToWebp(src, null, SIZE.w, SIZE.h), forKey, src);
     },
   });
   const { exportError, setError } = intake;
@@ -121,7 +140,7 @@ export function CardPicture({
    * `uploading` before the export starts, so Confirm waits for it.
    */
   const commit = useCallback(
-    async (make: () => Promise<Blob>, forKey: string) => {
+    async (make: () => Promise<Blob>, forKey: string, src: string) => {
       const first = latest.current;
       if (!first.editable || pictureKey(first.value) !== forKey) return;
       const seq = ++sent.current;
@@ -144,34 +163,66 @@ export function CardPicture({
         const now = latest.current;
         if (!now.editable || pictureKey(now.value) !== forKey) return settle();
         setLocal({ key: forKey, url: URL.createObjectURL(blob) });
+        const replaces =
+          lastSent.current?.src === src ? lastSent.current.id : undefined;
+        /** Refused (the detector, the network): the card goes back to what it showed. */
+        const refuse = (code: string) => {
+          if (seq !== sent.current) return;
+          setLocal(null);
+          setError(tErrors(uploadError(code)));
+        };
+        const keep = (r: { picture: TrayPicture | null }) => {
+          if (r.picture) lastSent.current = { src, id: r.picture.id };
+        };
         if (now.value.kind === "new") {
-          const uploaded = await now.onNewImage(blob).catch(() => null);
+          const r = await now
+            .onNewImage(blob, replaces)
+            .catch((): PictureUpload => ({ error: "upload_failed" }));
           const after = latest.current.value;
           if (seq !== sent.current || after.kind !== "new") return;
+          if ("error" in r) {
+            refuse(r.error);
+            return settle();
+          }
+          keep(r);
           latest.current.onChange({
             ...after,
-            imageUrl: uploaded ?? after.imageUrl,
+            imageUrl: r.url,
             uploading: false,
           });
-          if (!uploaded) {
-            setLocal(null);
-            setError(tErrors("upload_failed"));
-          }
         } else if (now.value.kind === "picked") {
-          const ok = await now
-            .onLibraryImage(now.value.card.characterId, blob)
-            .then(() => true)
-            .catch(() => false);
-          if (!ok && seq === sent.current) {
-            setLocal(null);
-            setError(tErrors("upload_failed"));
-          }
+          const id = now.value.card.characterId;
+          const r = await now
+            .onLibraryImage(id, blob, replaces)
+            .catch((): PictureUpload => ({ error: "upload_failed" }));
+          if ("error" in r) return refuse(r.error);
+          keep(r);
+          // the tray shows it from now on, in place of the one it adjusts
+          const { picture } = r;
+          if (picture)
+            queries.setQueryData<TrayPicture[]>(picturesKey(id), (list) =>
+              list
+                ? [
+                    ...list.filter(
+                      (p) => p.id !== picture.id && p.id !== replaces,
+                    ),
+                    picture,
+                  ]
+                : list,
+            );
+          const after = latest.current.value;
+          if (
+            seq === sent.current &&
+            after.kind === "picked" &&
+            after.card.characterId === id
+          )
+            latest.current.onChange({ ...after, picture: r.url });
         }
       } finally {
         setBusy((n) => n - 1);
       }
     },
-    [exportError, setError, tErrors],
+    [exportError, setError, tErrors, queries],
   );
 
   // Debounced export of an adjusted crop: once per settled area, not per render.
@@ -194,7 +245,7 @@ export function CardPicture({
     const run = () => {
       pending.current = null;
       lastArea.current = area;
-      void commit(() => cropToWebp(src, rect, SIZE.w, SIZE.h), forKey);
+      void commit(() => cropToWebp(src, rect, SIZE.w, SIZE.h), forKey, src);
     };
     const id = window.setTimeout(run, CROP_SETTLE_MS);
     pending.current = { id, run };
@@ -255,7 +306,7 @@ export function CardPicture({
     value.kind === "picked"
       ? local?.key === key
         ? local.url
-        : value.card.imageUrl
+        : (value.picture ?? value.card.imageUrl)
       : value.kind === "new"
         ? local?.key === key
           ? local.url
@@ -493,7 +544,11 @@ export function CardPicture({
           <m.div
             key="tray"
             role="dialog"
-            aria-label={tPick("changeImage")}
+            aria-label={
+              value.kind === "picked"
+                ? t("trayLabel", { name: value.card.name })
+                : tPick("changeImage")
+            }
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
             animate={{
               opacity: 1,
@@ -508,36 +563,53 @@ export function CardPicture({
             style={{ transformOrigin: "0 0" }}
             className="absolute top-[128px] left-[-6px] z-[7] flex gap-2 rounded-[20px] bg-surface p-2.5 shadow-pop sm:top-[138px] sm:left-[calc(100%-28px)]"
           >
-            {picture ? (
-              <button
-                type="button"
-                aria-pressed="true"
-                aria-label={tPick("changeImage")}
-                onClick={() => setTray(false)}
-                className="w-16 rounded-[12px] shadow-[0_0_0_3px_var(--surface),0_0_0_5px_var(--sky)]"
-              >
-                <Portrait
-                  src={thumbUrl(picture, 160)}
-                  className="rounded-[12px] text-line"
-                />
-              </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => {
-                setTray(false);
-                browse();
-              }}
-              title={
-                value.kind === "picked"
-                  ? tPick("imageHint", { name: value.card.name })
-                  : undefined
-              }
-              className="flex aspect-[4/5] w-16 flex-col items-center justify-center gap-0.5 rounded-[12px] border-2 border-line-strong border-dashed px-1 text-center font-bold text-[11px] text-ink-muted leading-[1.15]"
-            >
-              <Upload className="size-5" aria-hidden />
-              <span>{t("upload")}</span>
-            </button>
+            {value.kind === "picked" ? (
+              <PictureGrid
+                characterId={value.card.characterId}
+                cover={value.card.imageUrl}
+                current={picture}
+                onPick={(url) => {
+                  setTray(false);
+                  setLocal(null);
+                  lastSent.current = null;
+                  const { picture: _old, ...rest } = value;
+                  onChange(url ? { ...rest, picture: url } : rest);
+                }}
+                onUpload={() => {
+                  setTray(false);
+                  browse();
+                }}
+                uploadHint={tPick("imageHint", { name: value.card.name })}
+              />
+            ) : (
+              <>
+                {picture ? (
+                  <button
+                    type="button"
+                    aria-pressed="true"
+                    aria-label={tPick("changeImage")}
+                    onClick={() => setTray(false)}
+                    className="w-16 rounded-[12px] shadow-[0_0_0_3px_var(--surface),0_0_0_5px_var(--sky)]"
+                  >
+                    <Portrait
+                      src={thumbUrl(picture, 160)}
+                      className="rounded-[12px] text-line"
+                    />
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTray(false);
+                    browse();
+                  }}
+                  className="flex aspect-[4/5] w-16 flex-col items-center justify-center gap-0.5 rounded-[12px] border-2 border-line-strong border-dashed px-1 text-center font-bold text-[11px] text-ink-muted leading-[1.15]"
+                >
+                  <Upload className="size-5" aria-hidden />
+                  <span>{t("upload")}</span>
+                </button>
+              </>
+            )}
           </m.div>
         ) : null}
       </AnimatePresence>

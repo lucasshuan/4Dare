@@ -46,6 +46,24 @@ describe("toDraft", () => {
         via: "hand",
       }),
     ).toEqual({ characterId: "c-iron", name: "Iron Man", imageUrl: null });
+    // another picture chosen in the tray goes with it
+    expect(
+      toDraft({
+        kind: "picked",
+        card: {
+          characterId: "c-iron",
+          name: "Iron Man",
+          origin: "Marvel",
+          imageUrl: "x",
+        },
+        via: "hand",
+        picture: "/api/files/characters/fat.webp",
+      }),
+    ).toEqual({
+      characterId: "c-iron",
+      name: "Iron Man",
+      imageUrl: "/api/files/characters/fat.webp",
+    });
     expect(
       toDraft({
         kind: "new",
@@ -111,6 +129,11 @@ describe("fromDraft", () => {
     for (const draft of [
       { characterId: "c-iron", name: "Iron Man", imageUrl: null },
       { characterId: "c-spider", name: "Spi", imageUrl: null },
+      {
+        characterId: "c-iron",
+        name: "Iron Man",
+        imageUrl: "/api/files/characters/fat.webp",
+      },
       {
         characterId: null,
         name: "Zqxj",
