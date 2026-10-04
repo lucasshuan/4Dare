@@ -4,7 +4,8 @@ import { LANGS, type Lang } from "./types";
 // - an adjective and a noun: "WonderfulCat", "GatoMaravilhoso", "すてきなネコ";
 // - two nouns, a hybrid: "PotatoNinja", "BatataNinja", "ジャガイモ忍者";
 // - a title and a noun, the title following the noun's Portuguese gender in every
-//   language: "QueenFox", "RainhaRaposa", "キツネ女王";
+//   language: "QueenFox", "RainhaRaposa", "キツネ女王"; a title with a different word for
+//   each gender in every language also comes in the other one: "QueenCat", "RainhaGato";
 // - now and then, a legendary meme name: "TGIF", "Sextou", "花金".
 // Each row holds the same idea in every language, so the same guest number gives the
 // same name, translated, to everyone in a room (whatever language each one plays in).
@@ -702,16 +703,22 @@ const STANDALONE_TITLES = TITLES.filter(
   ([, , , , ja]) => !["さん", "ちゃん", "くん", "殿"].includes(ja),
 );
 
+/** Titles with a different word for each gender in every language ("King", "Queen"). */
+const GENDERED_TITLES = TITLES.filter(
+  ([enM, enF, ptM, ptF, jaM, jaF]) => enM !== enF && ptM !== ptF && jaM !== jaF,
+);
+
 // Guest numbers run through the shapes in order: adjective and noun, hybrids, title and
-// noun, the legendary names, then title and adjective (added last, so older numbers keep
-// their names).
+// noun, the legendary names, title and adjective, then gendered titles and nouns in the
+// other gender (each added last, so older numbers keep their names).
 const ADJECTIVE_NOUNS = ADJECTIVES.length * NOUNS.length;
 const HYBRIDS = NOUNS.length * NOUNS.length;
 const TITLED = TITLES.length * NOUNS.length;
 const LEGENDARY_START = ADJECTIVE_NOUNS + HYBRIDS + TITLED;
 const TITLED_ADJECTIVES = STANDALONE_TITLES.length * ADJECTIVES.length;
+const CROSS_TITLED = GENDERED_TITLES.length * NOUNS.length;
 export const GUEST_NAME_COUNT =
-  LEGENDARY_START + LEGENDARY.length + TITLED_ADJECTIVES;
+  LEGENDARY_START + LEGENDARY.length + TITLED_ADJECTIVES + CROSS_TITLED;
 
 /**
  * A guest's name from their guest number, written as one word.
@@ -720,6 +727,8 @@ export const GUEST_NAME_COUNT =
  * "RaposaMaravilhosa").
  * Hybrid: two nouns in the same order everywhere ("PotatoNinja", "BatataNinja").
  * Title and noun: the title first, last in Japanese ("QueenFox", "RainhaRaposa", "キツネ女王").
+ * Its gender follows the noun's; gendered titles also come in the other one ("QueenCat",
+ * "RainhaGato", "ネコ女王").
  * Title and adjective: the same order, the adjective first in Japanese ("CaptainBrave",
  * "CapitãoCorajoso", "勇敢な船長"). With no noun to give a gender, half the pairs are
  * masculine and half feminine; both would read the same in English.
@@ -757,6 +766,17 @@ export function guestName(guestNumber: number, lang: Lang): string {
     return lang === "pt" ? pt : lang === "ja" ? ja : en;
   }
   i -= LEGENDARY.length;
+  if (i >= TITLED_ADJECTIVES) {
+    i -= TITLED_ADJECTIVES;
+    const [enM, enF, ptM, ptF, jaM, jaF] =
+      GENDERED_TITLES[i % GENDERED_TITLES.length];
+    const [en, pt, gender, ja] = NOUNS[Math.floor(i / GENDERED_TITLES.length)];
+    // the other gender than the noun's
+    const f = gender === "m";
+    if (lang === "pt") return (f ? ptF : ptM) + pt;
+    if (lang === "ja") return ja + (f ? jaF : jaM);
+    return (f ? enF : enM) + en;
+  }
   const t = i % STANDALONE_TITLES.length;
   const a = Math.floor(i / STANDALONE_TITLES.length);
   const [enM, enF, ptM, ptF, jaM, jaF] = STANDALONE_TITLES[t];

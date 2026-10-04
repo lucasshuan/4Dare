@@ -48,6 +48,16 @@ describe("guest names", () => {
     expect(guestName(cat, "ja")).toBe("ネコ大王");
   });
 
+  it("gives gendered titles the other gender too", () => {
+    const cat = numberOf("QueenCat");
+    expect(guestName(cat, "pt")).toBe("RainhaGato");
+    expect(guestName(cat, "ja")).toBe("ネコ女王");
+    const fox = numberOf("KingFox");
+    expect(guestName(fox, "pt")).toBe("ReiRaposa");
+    expect(guestName(fox, "ja")).toBe("キツネ大王");
+    expect(numberOf("QueenCat")).toBeGreaterThan(numberOf("QueenBrave"));
+  });
+
   it("translates legendary names to their local twin", () => {
     const n = numberOf("TGIF");
     expect(guestName(n, "pt")).toBe("Sextou");
