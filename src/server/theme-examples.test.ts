@@ -87,7 +87,7 @@ describe("theme examples", () => {
       expect(a).toBe(b);
       expect(reads()).toBe(1);
       expect(calls).toEqual([
-        "from themes",
+        "from whoami_themes",
         "select en, pt, ja, theme_set",
         "eq active true",
         "not example is null",
