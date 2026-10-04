@@ -442,9 +442,10 @@ export function CastScene({ show }: CastSceneProps) {
   return (
     <div
       ref={ref}
-      // inert: over the strip during the entrance, and never in the way of a click
+      // inert: over the strip during the entrance, and never in the way of a click;
+      // clipped sideways, so the big "starts!" line waiting at 1.7× never widens the page
       aria-hidden={beat?.kind === "entrance" ? true : undefined}
-      className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-[calc(100dvh-9rem)] items-center justify-center"
+      className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-[calc(100dvh-9rem-var(--dock,0px))] items-center justify-center overflow-x-clip"
     >
       <div
         data-cast-box

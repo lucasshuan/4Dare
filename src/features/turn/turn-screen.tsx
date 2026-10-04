@@ -138,7 +138,7 @@ export function TurnScreen() {
       className={cn(
         "relative flex flex-col gap-6 short:gap-4 [&_.text-ink-muted]:text-[color:color-mix(in_oklab,var(--ink-muted)_80%,var(--ink))]",
         // the scene is laid over the screen: keep its height while it plays
-        cast && "min-h-[calc(100dvh-9rem)]",
+        cast && "min-h-[calc(100dvh-9rem-var(--dock,0px))]",
       )}
     >
       {cast ? <CastScene show={cast} /> : null}
