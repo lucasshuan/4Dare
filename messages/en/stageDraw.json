@@ -1,11 +1,11 @@
 {
   "draw": {
-    "line": "Everyone picks a character for someone else."
+    "line": "{count, plural, =2 {You each pick a character for the other.} other {Everyone picks a character for someone else.}}"
   },
   "target": {
     "youPickFor": "You pick for",
     "hint": "Pick a character {name} knows.",
-    "ring": "Everyone picks for someone.",
+    "ring": "{count, plural, =2 {You pick for each other.} other {Everyone picks for someone.}}",
     "ringLabel": "Who picks for whom"
   }
 }

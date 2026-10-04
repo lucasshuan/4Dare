@@ -199,7 +199,8 @@ export function PickIntro({ show }: PickIntroProps) {
             color={color}
             phone={phone}
             label={t("target.ringLabel")}
-            caption={t("target.ring")}
+            // two players pick for each other, not "for someone"
+            caption={t("target.ring", { count: order.length })}
           />
         </div>
 
@@ -213,7 +214,7 @@ export function PickIntro({ show }: PickIntroProps) {
               className="m-0 max-w-[330px] text-balance font-display font-extrabold text-[28px] leading-[1.02] tracking-[-0.03em] sm:max-w-[700px] sm:text-[46px]"
               style={{ opacity: 0, transform: "translateY(24px)" }}
             >
-              {t("draw.line")}
+              {t("draw.line", { count: order.length })}
             </h2>
             <DrawUrn />
             <div
