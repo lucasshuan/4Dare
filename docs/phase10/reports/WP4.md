@@ -39,3 +39,6 @@
 - `pnpm exec vitest run src/features/stage`: 2 files, 48 tests passed (lab params changed). WP4 has no unit tests of its own.
 - Screenshots in `.data/shots/WP4/`: `live-opening-{0.1,0.25,0.6,1.2}-{desktop,phone}-light.png` (lobby bar sliding up and content fading over the brand wash; no clock during the opening), `opening-{0.2,0.6,1.2}-desktop-light.png`, `turn-{closed,open}-{desktop,phone}.png` (push and drawer), `turn-*-desktop-theme-dark.png`, `turn-*-phone-names-long.png` (pt), `vote-clock.png`, `lobby-dark-phone.png`. On the phone, Escape closed the drawer and focus returned to the button. No page errors (only blocked external fetches).
 
+
+## Review fixes
+- Low, `src/features/turn/history-panel.tsx` (phone drawer close button refocused on every render): fixed. The inline callback ref (a new function each render, so React re-ran it every commit) is replaced by a `closeRef` and a `useEffect` keyed on `focusClose`, so the close button takes focus once when the drawer opens. Checked at 390 px in the lab (`?show=turn&at=5`): after opening, focus is on "Close history"; after clicking the "Guesses" filter, focus stays on that filter. Screenshot: `.data/shots/WP4/review-drawer-focus-phone.png`. `pnpm typecheck` passes; `pnpm exec biome check` on the file: no fixes.

@@ -169,20 +169,20 @@ The "4Dare em cena" proposal (https://claude.ai/artifact/XwqNSpQWeXC1rrNyKKW4or)
 - [x] Theme vote lasts 20 s (was 13 s)
 - [ ] "Now, choose a theme together" shows alone for a moment, rises into the title, the cards are dealt and only then the clock starts
 - [ ] Chosen theme grows in the middle, then the rule as a scene: "Every character must be from this theme", two cards that fit get ✓, one that doesn't gets ✗ and falls out; a typed theme gets only the sentence
-- [ ] Draw: the avatars hop into the yellow 4 of the logo, it shakes like a jar and spits out a slip, already straight and at its final size and place: "You pick for Leo"
-- [ ] "For whom": the slip becomes the screen (big face, name in their colour, "Pick a character Leo knows"), with a ring of who picks for whom, yours highlighted
+- [x] Draw: the avatars hop into the yellow 4 of the logo, it shakes like a jar and spits out a slip, already straight and at its final size and place: "You pick for Leo"
+- [x] "For whom": the slip becomes the screen (big face, name in their colour, "Pick a character Leo knows"), with a ring of who picks for whom, yours highlighted
 - [ ] Pick screen is one card in the middle and the card is the form: a name with autocomplete and a live preview, the picture changed right on it, no "Create character" button; a name not in the library gets a "New!" seal
 - [x] Every theme has about 5 famous, common starter characters (a table fed by a seed), apart from picks and likes; they back the ✓ examples and the hand
 - [ ] Under the card, a hand of the theme's starters and its most picked and liked characters; a tap puts one on the card
 - [ ] "Random" big beside "Confirm"
 - [ ] Out of time: whatever is on the card (picked or being created) is the pick, saved on the server while you edit; random only for an empty card
 - [ ] Confirming makes the card grow a little, straight and centred; then the avatars of who has finished show up
-- [ ] "Rafa picked yours": your "?" card falls in with who picked it, then the others turn face up
-- [ ] Turn order: the cards shuffle into the order, get numbers, "Bia starts!", then shrink into the game's player strip
-- [ ] Chat in the lobby and the match: a tab at the bottom right, slightly inset; a click on its top opens it over the screen to about 60% of the height, another click folds it
-- [ ] New messages: the tab turns blue with a count and the senders' faces, a 3 s bubble with the text, a small nudge now and then until it is opened
-- [ ] Chat on phones: a bar at the bottom with the last message, opening from the bottom the same way
-- [ ] Chat has only messages and system lines ("Theme: Superheroes"): no who's-in-the-room list, no emoji shortcuts; up to 280 characters, rate limited, gone when the room closes
+- [x] "Rafa picked yours": your "?" card falls in with who picked it, then the others turn face up
+- [x] Turn order: the cards shuffle into the order, get numbers, "Bia starts!", then shrink into the game's player strip
+- [x] Chat in the lobby and the match: a tab at the bottom right, slightly inset; a click on its top opens it over the screen to about 60% of the height, another click folds it
+- [x] New messages: the tab turns blue with a count and the senders' faces, a 3 s bubble with the text, a small nudge now and then until it is opened
+- [x] Chat on phones: a bar at the bottom with the last message, opening from the bottom the same way
+- [x] Chat has only messages and system lines ("Theme: Superheroes"): no who's-in-the-room list, no emoji shortcuts; up to 280 characters, rate limited, gone when the room closes
 - [x] History only during turns: a button left of the theme opens a full-height bar on the left that pushes the screen (over a scrim on phones)
-- [ ] The lobby stays as it is, plus the chat
+- [x] The lobby stays as it is, plus the chat
 - [ ] Desktop and phone, light and dark, 3 languages, reduced motion; everything that works today keeps working
