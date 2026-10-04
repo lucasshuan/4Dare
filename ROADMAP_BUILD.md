@@ -20,7 +20,7 @@ After the first quick wins (same day): API functions ~2 MB, pages ~9 MB, share i
 - [x] Search before the index arrives uses `search_characters` in the database
 - [x] `data/` out of every server function (`outputFileTracingExcludes`)
 - [x] Themes only from the `themes` table, no bundled list (read as a server starts; three fallback themes until it lands)
-- [ ] Theme set examples (hover) from the `themes` table, not a hand copy
+- [x] Theme set examples (hover) from the `themes` table, not a hand copy (`example` column, migration 0014 with a backup in `backup.themes_before_0014`)
 - [x] Tests stop importing `data/*.json`
 - [x] `.vercelignore` leaves `data/` out of the deploy; Biome blocks `data/` imports in `src/`
 - [x] `pnpm seed` retired (it deleted rows the files lacked); library and theme changes go straight to the database, insert or update only; `pnpm test-rooms` reads Supabase

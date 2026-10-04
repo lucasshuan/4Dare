@@ -1,18 +1,19 @@
 "use client";
 
 import { Tooltip } from "@base-ui/react/tooltip";
+import { useQuery } from "@tanstack/react-query";
 import { Check, PenLine, UsersRound } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useId, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { HintLabel } from "@/components/ui/hint-label";
-import { THEME_SET_EXAMPLES } from "@/game/theme-set-examples";
 import { THEME_SET_KEYS, THEME_SETS, type ThemeSet } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
 import type { CreateRoomInput } from "@/server/contract";
+import type { ThemeExamples } from "@/server/theme-examples";
 
 type ThemeSettings = Pick<CreateRoomInput, "themeMode" | "themeSets">;
 type SetTooltip = Tooltip.Handle<ThemeSet>;
@@ -87,26 +88,42 @@ function ModeSwitch({
   );
 }
 
+/** A set's example themes in this language, from the themes table: empty until they arrive. */
+function useExamples(set: ThemeSet): string[] {
+  const lang = useLocale() as Lang;
+  const { data } = useQuery({
+    queryKey: ["theme-examples"],
+    queryFn: async (): Promise<ThemeExamples> => {
+      const res = await fetch("/api/themes/examples");
+      if (!res.ok) throw new Error(`theme examples: ${res.status}`);
+      return ((await res.json()) as { examples: ThemeExamples }).examples;
+    },
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+  return data?.[set]?.map((example) => example[lang]) ?? [];
+}
+
 /** A few themes from the set, one per line. */
 function Examples({ set }: { set: ThemeSet }) {
   const t = useTranslations("home.createRoom");
-  const lang = useLocale() as Lang;
+  const examples = useExamples(set);
+  if (!examples.length) return null;
   return (
     <div className="flex flex-col gap-1.5">
       <span className="font-semibold text-[11px] text-ink-muted uppercase tracking-[0.08em]">
         {t("setExamples")}
       </span>
       <ul className="flex flex-col gap-1">
-        {THEME_SET_EXAMPLES[set].map((example) => (
+        {examples.map((example) => (
           <li
-            key={example.en}
+            key={example}
             className="flex items-baseline gap-2 font-semibold text-[13px] text-ink leading-4"
           >
             <span
               aria-hidden
               className="size-1.5 shrink-0 rounded-full bg-ink-muted/50"
             />
-            {example[lang]}
+            {example}
           </li>
         ))}
       </ul>
@@ -155,7 +172,7 @@ function SetCard({
 }) {
   const tSets = useTranslations("common.themeSets");
   const t = useTranslations("home.createRoom");
-  const lang = useLocale() as Lang;
+  const examples = useExamples(set.key);
   const still = useReducedMotion() ?? false;
   const examplesId = useId();
   return (
@@ -166,7 +183,7 @@ function SetCard({
       closeOnClick={false}
       type="button"
       aria-pressed={on}
-      aria-describedby={examplesId}
+      aria-describedby={examples.length ? examplesId : undefined}
       onClick={onToggle}
       // The button stays still and only its face lifts: a moving anchor makes
       // the tooltip re-measure every frame of the spring, and it stutters.
@@ -235,7 +252,7 @@ function SetCard({
       </motion.span>
       {/* the tooltip is for the eyes only; screen readers get the examples here */}
       <span id={examplesId} hidden>
-        {`${t("setExamples")}: ${THEME_SET_EXAMPLES[set.key].map((e) => e[lang]).join(", ")}`}
+        {`${t("setExamples")}: ${examples.join(", ")}`}
       </span>
     </Tooltip.Trigger>
   );
