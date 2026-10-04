@@ -59,10 +59,11 @@ type Actions = typeof import("./actions");
 let A: Actions;
 let roomRoute: typeof import("@/app/api/rooms/[code]/route");
 
-/** Moves the clock past a reveal (the theme's, here). */
-const skip = (ms: number) => vi.setSystemTime(Date.now() + ms);
+/** Moves the clock to where the step's clock starts: past the show on screen. */
+const skipTo = (v: RoomView) =>
+  vi.setSystemTime(Math.max(Date.now(), v.stepStartsAt ?? 0));
 
-/** Everyone votes for the first theme, then the theme reveal plays out. */
+/** Everyone votes for the first theme, then the theme show plays out. */
 async function voteAll(code: string, players: string[]) {
   for (const p of players) {
     as(p);
@@ -75,7 +76,7 @@ async function voteAll(code: string, players: string[]) {
   expect(v.reveal?.kind).toBe("theme");
   expect(v.vote?.chosen).toBe(0);
   expect(v.theme).toEqual(v.vote?.options[0]);
-  skip(6000);
+  skipTo(v);
 }
 
 beforeAll(async () => {
@@ -159,12 +160,20 @@ describe("server, local mode", () => {
     as("p1");
     let v = (await view(code)).body;
     expect(v.phase).toBe("asking");
+    // the cast show plays first: no question before its end
+    expect(v.reveal?.kind).toBe("cast");
+    expect(v.stepStartsAt).toBe(v.reveal?.until);
     const turnId = v.turn?.playerId as string;
     const nameOf = (id: string) =>
       [...jars.entries()].find(([, j]) => uidOf(j) === id)?.[0] as string;
     const turnName = nameOf(turnId);
 
     as(turnName);
+    expect(await A.askQuestion(code, "Sou humano?")).toEqual({
+      ok: false,
+      error: "too_early",
+    });
+    skipTo(v);
     must(await A.askQuestion(code, "Sou humano?"));
     const others = ["p1", "p2", "p3"].filter((p) => p !== turnName);
     for (const p of others) {
@@ -216,6 +225,8 @@ describe("server, local mode", () => {
       form.set("lang", "pt");
       must(await A.confirmPick(code, must(await A.createCharacter(form)).id));
     }
+    // both give up while the cast show still plays: the match is still saved
+    expect((await view(code)).body.reveal?.kind).toBe("cast");
     for (const p of ["m1", "m2"]) {
       as(p);
       must(await A.giveUp(code));

@@ -1,0 +1,12 @@
+// The draw (avatars hop into the 4, out comes the slip) and "for whom". Lengths in ms.
+
+export const DRAW = {
+  draw: { first: 5400, later: 3000 },
+  target: { first: 4600, later: 2600 },
+} as const;
+
+/** Moments inside the draw beat (ms from its start). */
+export const DRAW_MARKS = {
+  /** The wash turns to your target's seat colour. */
+  targetWash: { first: 5000, later: 2600 },
+} as const;

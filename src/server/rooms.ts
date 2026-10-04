@@ -37,7 +37,12 @@ function randomCode() {
   return code;
 }
 
-const ctx = () => ({ now: Date.now(), random: Math.random });
+// DARE_SHOW_SCALE speeds the shows up for e2e runs (the step clocks keep their length).
+const ctx = () => ({
+  now: Date.now(),
+  random: Math.random,
+  showScale: Number(process.env.DARE_SHOW_SCALE) || 1,
+});
 
 export async function openRoom(host: Identity, settings: RoomSettings) {
   const { rooms, notify } = getBackend();

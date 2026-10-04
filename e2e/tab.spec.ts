@@ -40,9 +40,12 @@ test("the tab title follows the page and its clock; the icon calls you back", as
   await expect(host).toHaveTitle(/^Lobby · .+'s room · 4Dare$/);
 
   // the guest wanders off; the match starts and the theme vote waits on them
+  // (its clock, in the title, starts once the opening has played)
   await setAway(guest, true);
   await startMatch(host);
-  await expect(guest).toHaveTitle(/^\d:\d\d · Vote for a theme! · 4Dare$/);
+  await expect(guest).toHaveTitle(/^\d:\d\d · Vote for a theme! · 4Dare$/, {
+    timeout: 15_000,
+  });
   await expect
     .poll(async () =>
       (await iconHrefs(guest)).every((h) => h.startsWith("data:")),

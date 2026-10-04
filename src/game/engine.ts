@@ -23,6 +23,8 @@ import {
   ANSWER_CUT,
   ANSWER_CUT_FLOOR_MS,
   type AnswerEntry,
+  type Assignment,
+  type BeatKind,
   type Character,
   type Ctx,
   DEFAULT_SETTINGS,
@@ -31,19 +33,25 @@ import {
   type GameEvent,
   HOST_THEME_SECONDS,
   type Identity,
+  MAX_CHARACTER_NAME,
   MAX_GUESS,
   MAX_NOTE,
   MAX_QUESTION,
   MAX_THEME,
   PICK_SECONDS,
+  type PickDraft,
   type Play,
   type PlayerId,
   RESULT_SECONDS,
   REVEAL_TIMING,
+  type Reveal,
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
   type RoomSettings,
   type RoomState,
+  type RuleExamples,
+  SHOW_TIMING,
+  type ShowKind,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
   STEP_TIMES,
@@ -124,13 +132,60 @@ function mergeSettings(
 
 // --- clock -------------------------------------------------------------------
 
+const isShow = (r: Reveal | null | undefined): r is Reveal =>
+  !!r && (r.kind === "opening" || r.kind === "theme" || r.kind === "cast");
+
+/** A beat and its length (ms) before scaling; a 0 drops it. */
+type Part = [BeatKind, number];
+
+/**
+ * Puts a show on screen: its beats back to back, from now, or from the end of
+ * a show still playing (kept as `prev` so it plays out, never nested deeper).
+ * Returns when it ends.
+ */
+function stage(
+  s: RoomState,
+  kind: ShowKind,
+  n: number,
+  first: boolean,
+  parts: Part[],
+  ctx: Ctx,
+  rule?: RuleExamples | null,
+) {
+  const scale = ctx.showScale && ctx.showScale > 0 ? ctx.showScale : 1;
+  const running =
+    isShow(s.reveal) && ctx.now < s.reveal.until
+      ? { ...s.reveal, prev: null }
+      : null;
+  const startsAt = Math.max(ctx.now, running?.until ?? 0);
+  let t = startsAt;
+  const beats = [];
+  for (const [beat, ms] of parts) {
+    if (ms <= 0) continue;
+    const until = t + Math.round(ms * scale);
+    beats.push({ kind: beat, startsAt: t, until });
+    t = until;
+  }
+  s.reveal = {
+    kind,
+    n,
+    startsAt,
+    until: t,
+    beats,
+    first,
+    prev: running,
+    ...(rule !== undefined ? { rule } : {}),
+  };
+  return t;
+}
+
 /**
  * Starts a step. Turn steps start at once, under the answers or guess reveal
- * (players close it when they like); the rest wait for the reveal on screen
- * (the theme before picking, the last guess before the podium).
+ * (players close it when they like); the rest, and any step under a show,
+ * wait for what is on screen (the shows, the last guess before the podium).
  */
 function startStep(s: RoomState, ctx: Ctx, ms: number) {
-  const waits = s.reveal?.kind === "theme" || !TURN_PHASES.has(s.phase);
+  const waits = isShow(s.reveal) || !TURN_PHASES.has(s.phase);
   const start = Math.max(ctx.now, waits ? (s.reveal?.until ?? 0) : 0);
   s.stepStartsAt = start;
   s.deadline = start + ms;
@@ -177,41 +232,76 @@ function shuffle<T>(items: T[], random: () => number): T[] {
   return a;
 }
 
-/** A new round needs a theme: the host types it, or everyone votes on `themes`. */
-function beginTheme(s: RoomState, themes: Theme[] | undefined, ctx: Ctx) {
-  if (s.settings.themeMode === "host") return beginTheming(s, themes, ctx);
-  beginVote(s, themes, ctx);
+/**
+ * A new round needs a theme: the host types it, or everyone votes on `themes`.
+ * The opening plays first: the lobby leaves, then the cold open (the room's
+ * first match) or "Round N", then the vote or the host's form comes in.
+ */
+function beginTheme(
+  s: RoomState,
+  themes: Theme[] | undefined,
+  examples: (RuleExamples | null)[] | undefined,
+  ctx: Ctx,
+) {
+  const T = SHOW_TIMING;
+  const open: Part[] = [
+    ["curtain", T.curtain],
+    s.round === 0 ? ["intro", T.intro] : ["round", T.round],
+  ];
+  if (s.settings.themeMode === "host")
+    return beginTheming(
+      s,
+      themes,
+      [...open, ["entrance", T.entrance.theming]],
+      ctx,
+    );
+  beginVote(s, themes, examples, [...open, ["entrance", T.entrance.vote]], ctx);
 }
 
 /** The host types the theme; `ideas` help them. If the clock runs out, everyone votes instead. */
-function beginTheming(s: RoomState, ideas: Theme[] | undefined, ctx: Ctx) {
+function beginTheming(
+  s: RoomState,
+  ideas: Theme[] | undefined,
+  opening: Part[],
+  ctx: Ctx,
+) {
   s.ideas = (ideas ?? []).slice(0, THEME_IDEAS).map((t) => ({ ...t }));
   s.vote = null;
   s.theme = null;
   s.reveal = null;
   s.turnPlayerId = null;
   s.phase = "theming";
+  stage(s, "opening", s.round + 1, s.round === 0, opening, ctx);
   startStep(s, ctx, HOST_THEME_SECONDS * 1000);
 }
 
-/** Puts THEME_OPTIONS themes to the vote; the match starts once it is over. */
-function beginVote(s: RoomState, themes: Theme[] | undefined, ctx: Ctx) {
+/** Puts THEME_OPTIONS themes to the vote, once the opening is over; the match starts once the vote is. */
+function beginVote(
+  s: RoomState,
+  themes: Theme[] | undefined,
+  examples: (RuleExamples | null)[] | undefined,
+  opening: Part[],
+  ctx: Ctx,
+) {
   if (!themes || themes.length !== THEME_OPTIONS) fail("invalid_input");
+  if (examples && examples.length !== THEME_OPTIONS) fail("invalid_input");
   s.vote = {
     options: (themes ?? []).map((t) => ({ ...t })),
     votes: {},
     chosen: null,
     tied: [],
+    ...(examples ? { examples: structuredClone(examples) } : {}),
   };
   s.ideas = [];
   s.theme = null;
   s.reveal = null;
   s.turnPlayerId = null;
   s.phase = "voting";
+  stage(s, "opening", s.round + 1, s.round === 0, opening, ctx);
   startStep(s, ctx, VOTE_SECONDS * 1000);
 }
 
-/** Most votes wins; a tie (or nobody voting) is drawn. Then the match starts behind the reveal. */
+/** Most votes wins; a tie (or nobody voting) is drawn. Then the match starts behind the theme show. */
 function closeVote(s: RoomState, ctx: Ctx) {
   const v = s.vote ?? fail("wrong_phase");
   const counts = v.options.map(() => 0);
@@ -223,18 +313,52 @@ function closeVote(s: RoomState, ctx: Ctx) {
   v.tied = counts.flatMap((n, i) => (n === most ? [i] : []));
   v.chosen = v.tied[Math.floor(ctx.random() * v.tied.length)];
   beginMatch(s, v.options[v.chosen], ctx);
-  const t = REVEAL_TIMING;
-  revealTheme(s, t.theme + (v.tied.length > 1 ? t.themeTieSpin : 0), ctx);
+  showTheme(
+    s,
+    {
+      tie: v.tied.length > 1,
+      typed: false,
+      rule: v.examples?.[v.chosen] ?? null,
+    },
+    ctx,
+  );
 }
 
-/** Everyone looks at the theme for `ms`; picking starts right after. */
-function revealTheme(s: RoomState, ms: number, ctx: Ctx) {
-  s.reveal = {
-    kind: "theme",
-    n: s.round,
-    startsAt: ctx.now,
-    until: ctx.now + ms,
-  };
+/**
+ * The theme show: the vote's result (a tie spins first), the theme, the rule
+ * (the room's first match), the draw and "you pick for…", then the pick table
+ * comes in. Picking starts when it ends.
+ */
+function showTheme(
+  s: RoomState,
+  o: { tie: boolean; typed: boolean; rule: RuleExamples | null },
+  ctx: Ctx,
+) {
+  const first = s.round === 1;
+  const v = first ? "first" : "later";
+  const T = SHOW_TIMING;
+  const rule = first
+    ? o.rule && !o.typed
+      ? T.rule.cards
+      : T.rule.sentence
+    : 0;
+  stage(
+    s,
+    "theme",
+    s.round,
+    first,
+    [
+      ["tie_spin", o.tie ? T.tieSpin : 0],
+      ["settle", o.typed ? 0 : T.settle[v]],
+      ["theme", rule ? T.theme.withRule : T.theme.alone],
+      ["rule", rule],
+      ["draw", T.draw[v]],
+      ["target", T.target[v]],
+      ["entrance", T.entrance.pick],
+    ],
+    ctx,
+    first ? (o.typed ? null : o.rule) : undefined,
+  );
   startStep(s, ctx, PICK_SECONDS * 1000);
 }
 
@@ -244,7 +368,7 @@ function setTheme(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
   if (playerId !== s.hostId) fail("not_host");
   const t = cleanText(text.replace(/\s+/g, " "), MAX_THEME);
   beginMatch(s, { en: t, pt: t, ja: t, set: null }, ctx);
-  revealTheme(s, REVEAL_TIMING.theme, ctx);
+  showTheme(s, { tie: false, typed: true, rule: null }, ctx);
 }
 
 const everyoneVoted = (s: RoomState) =>
@@ -260,13 +384,14 @@ function vote(s: RoomState, playerId: PlayerId, option: number, ctx: Ctx) {
   if (everyoneVoted(s)) closeVote(s, ctx);
 }
 
+/** Theme set: the turn order, who picks for whom, fresh outcomes. The theme show and the pick clock come after. */
 function beginMatch(s: RoomState, theme: Theme, ctx: Ctx) {
   s.round += 1;
   s.theme = theme;
   s.ideas = [];
   s.plays = [];
   s.turnPlayerId = null;
-  s.reveal = null;
+  // The opening may still be playing: the theme show queues after it.
   s.order = shuffle(
     s.players.map((p) => p.id),
     ctx.random,
@@ -290,7 +415,6 @@ function beginMatch(s: RoomState, theme: Theme, ctx: Ctx) {
   }
   s.playStartedAt = null;
   s.phase = "picking";
-  startStep(s, ctx, PICK_SECONDS * 1000);
 }
 
 /** Out of the match without discovering: gave up, left or timed out (`away` tells which). */
@@ -301,6 +425,8 @@ function endOutcome(s: RoomState, id: PlayerId, ctx: Ctx) {
 
 /** The podium; its clock (after the last reveal) takes everyone back to the lobby. */
 function finish(s: RoomState, ctx: Ctx) {
+  // A match that ends mid-show goes to the podium at once; a guess reveal still holds it.
+  if (isShow(s.reveal) && ctx.now < s.reveal.until) s.reveal = null;
   s.phase = "finished";
   s.turnPlayerId = null;
   startStep(s, ctx, RESULT_SECONDS * 1000);
@@ -443,9 +569,30 @@ function cleanText(text: string, max: number) {
   return t;
 }
 
-function startTurns(s: RoomState, ctx: Ctx) {
-  s.playStartedAt = ctx.now;
+/**
+ * Every card is set: the cast show (everyone picked or "Time!", whose
+ * character you got, the turn order), then the first turn's clock.
+ */
+function startTurns(s: RoomState, ctx: Ctx, how: "confirmed" | "timeout") {
+  const first = s.round === 1;
+  const v = first ? "first" : "later";
+  const T = SHOW_TIMING;
+  // The first question can come once the cast is over.
+  s.playStartedAt = stage(
+    s,
+    "cast",
+    s.round,
+    first,
+    [
+      ["picked", how === "timeout" ? T.picked.timeout : T.picked.confirmed[v]],
+      ["received", T.received[v]],
+      ["order", T.order[v]],
+      ["entrance", T.entrance.turn[v]],
+    ],
+    ctx,
+  );
   s.turnRound = 0;
+  // Its clock waits for the cast.
   goToTurn(s, ctx, s.order.at(-1) ?? null);
 }
 
@@ -562,12 +709,14 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       if (e.playerId !== s.hostId) fail("not_host");
       if (s.phase !== "lobby") fail("wrong_phase");
       if (s.players.length < 2) fail("need_two_players");
-      return beginTheme(s, e.themes, ctx);
+      return beginTheme(s, e.themes, e.examples, ctx);
     }
     case "VOTE":
       return vote(s, e.playerId, e.option, ctx);
     case "SET_THEME":
       return setTheme(s, e.playerId, e.text, ctx);
+    case "DRAFT":
+      return draft(s, e.playerId, e.draft, ctx);
     case "PICK":
       return pick(s, e.playerId, e.character, ctx);
     case "ASK":
@@ -705,6 +854,8 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
       s.phase = "lobby";
       s.vote = null;
       s.ideas = [];
+      // the opening must not play again over the lobby
+      s.reveal = null;
       stopClock(s);
       return;
     }
@@ -727,22 +878,93 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   if (MATCH_PHASES.has(s.phase) && presentCount(s) < 2) finish(s, ctx);
 }
 
+/** The card `playerId` fills, still open for edits. */
+function openCard(s: RoomState, playerId: PlayerId): Assignment {
+  if (s.phase !== "picking") fail("wrong_phase");
+  const a =
+    Object.values(s.assignments).find((x) => x.pickerId === playerId) ??
+    fail("not_member");
+  if (a.character) fail("already_done");
+  return a;
+}
+
+const clone = (c: Character): Character => ({
+  ...c,
+  aliases: [...c.aliases],
+});
+
+const DRAFT_ID_MAX = 200;
+const DRAFT_URL_MAX = 500;
+
+const optionalText = (v: unknown, max: number) =>
+  v === null || (typeof v === "string" && v.length <= max);
+
+/** Saves what is on the picker's card; null empties it. Never after the clock ran out. */
+function draft(
+  s: RoomState,
+  playerId: PlayerId,
+  d: PickDraft | null,
+  ctx: Ctx,
+) {
+  const a = openCard(s, playerId);
+  if (s.deadline !== null && ctx.now >= s.deadline) fail("wrong_phase");
+  if (d === null) {
+    a.draft = null;
+    return;
+  }
+  const ok =
+    typeof d === "object" &&
+    typeof d.name === "string" &&
+    d.name.length <= MAX_CHARACTER_NAME &&
+    optionalText(d.characterId, DRAFT_ID_MAX) &&
+    optionalText(d.imageUrl, DRAFT_URL_MAX) &&
+    optionalText(d.newId, DRAFT_ID_MAX);
+  if (!ok) fail("invalid_input");
+  a.draft = {
+    characterId: d.characterId,
+    name: d.name,
+    imageUrl: d.imageUrl,
+    newId: d.newId,
+  };
+}
+
 function pick(
   s: RoomState,
   playerId: PlayerId,
   character: Character,
   ctx: Ctx,
 ) {
-  if (s.phase !== "picking") fail("wrong_phase");
-  const target = Object.keys(s.assignments).find(
-    (t) => s.assignments[t].pickerId === playerId,
-  );
-  if (!target) return fail("not_member");
-  const a = s.assignments[target];
-  if (a.character) fail("already_done");
-  a.character = { ...character, aliases: [...character.aliases] };
+  const a = openCard(s, playerId);
+  a.character = clone(character);
+  a.draft = null;
   if (Object.values(s.assignments).every((x) => x.character))
-    startTurns(s, ctx);
+    startTurns(s, ctx, "confirmed");
+}
+
+/**
+ * A card the clock found unconfirmed but not empty: whatever is on it is the
+ * pick. The server normally hands in the real character (`drafted`); if it
+ * could not, the card still plays as typed.
+ */
+function fromDraft(
+  s: RoomState,
+  target: PlayerId,
+  a: Assignment,
+  drafted: Record<PlayerId, Character> | undefined,
+): Character | null {
+  const made = drafted?.[a.pickerId];
+  if (made) return clone(made);
+  const d = a.draft;
+  const name = d?.name.trim().replace(/\s+/g, " ");
+  if (!d || !name) return null;
+  return {
+    id: d.newId ?? `draft-${s.code}-${s.round}-${target}`,
+    lang: findPlayer(s, a.pickerId)?.lang ?? "en",
+    name,
+    origin: null,
+    imageUrl: d.imageUrl,
+    aliases: [],
+  };
 }
 
 function ask(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
@@ -861,12 +1083,25 @@ function timeout(
     case "lobby":
       return stopClock(s);
     case "theming":
-      return beginVote(s, e.themes, ctx);
+      // the host's opening already played: just the vote coming in
+      return beginVote(
+        s,
+        e.themes,
+        e.examples,
+        [["entrance", SHOW_TIMING.entrance.vote]],
+        ctx,
+      );
     case "voting":
       return closeVote(s, ctx);
     case "finished":
       return backToLobby(s);
     case "picking": {
+      // Whatever is on a card is the pick; only empty cards get a fallback.
+      for (const [target, a] of Object.entries(s.assignments)) {
+        if (a.character) continue;
+        const mine = fromDraft(s, target, a, e.drafted);
+        if (mine) a.character = mine;
+      }
       const used = new Set(
         Object.values(s.assignments).flatMap((a) =>
           a.character ? [a.character.id] : [],
@@ -875,11 +1110,11 @@ function timeout(
       const pool = (e.fallbackCharacters ?? []).filter((c) => !used.has(c.id));
       for (const a of Object.values(s.assignments)) {
         if (a.character) continue;
-        const c = pool.shift() ?? fail("invalid_input");
-        a.character = { ...c, aliases: [...c.aliases] };
+        a.character = clone(pool.shift() ?? fail("invalid_input"));
         a.auto = true;
       }
-      return startTurns(s, ctx);
+      for (const a of Object.values(s.assignments)) a.draft = null;
+      return startTurns(s, ctx, "timeout");
     }
     case "asking": {
       const p = s.turnPlayerId ? findPlayer(s, s.turnPlayerId) : undefined;

@@ -28,11 +28,14 @@ import {
   type PlayerStatus,
   type PlayerView,
   type PublicRoom,
+  type Reveal,
   type RevealView,
   type RoomPlayer,
   type RoomSettings,
   type RoomState,
   type RoomView,
+  type ShowKind,
+  type ShowView,
   type TurnView,
   type VoteView,
 } from "./types";
@@ -185,13 +188,17 @@ function turn(s: RoomState, viewer: PlayerId): TurnView | null {
   return base;
 }
 
-function pick(s: RoomState, viewer: PlayerId): PickView | null {
-  if (s.phase !== "picking") return null;
+/** Your card and the table, while picking and while the cast that follows plays (it opens on the table). */
+function pick(s: RoomState, viewer: PlayerId, now: number): PickView | null {
+  const casting = s.reveal?.kind === "cast" && now < s.reveal.until;
+  if (s.phase !== "picking" && !casting) return null;
   const target = Object.keys(s.assignments).find(
     (t) => s.assignments[t].pickerId === viewer,
   );
   if (!target) return null;
   const a = s.assignments[target];
+  // the draft only ever goes to its picker: this is their own card
+  const d = a.character ? null : a.draft;
   return {
     targetId: target,
     confirmed: !!a.character,
@@ -200,10 +207,13 @@ function pick(s: RoomState, viewer: PlayerId): PickView | null {
       .filter((x) => x.character)
       .map((x) => x.pickerId),
     total: s.players.length,
+    draft: d
+      ? { characterId: d.characterId, name: d.name, imageUrl: d.imageUrl }
+      : null,
   };
 }
 
-/** The theme vote, while it runs and while its result is on screen. */
+/** The theme vote, while it runs and while the theme show plays its result out. */
 function voteView(
   s: RoomState,
   viewer: PlayerId,
@@ -236,6 +246,32 @@ function isTied(s: RoomState, id: PlayerId) {
   );
 }
 
+const isShowKind = (kind: Reveal["kind"]): kind is ShowKind =>
+  kind === "opening" || kind === "theme" || kind === "cast";
+
+/**
+ * A show as the screens get it, with the show still playing before it while
+ * that lasts. A theme reveal saved before shows existed is one "theme" beat.
+ */
+function showView(r: Reveal, kind: ShowKind, now: number): ShowView {
+  const prev = r.prev;
+  return {
+    kind,
+    n: r.n,
+    startsAt: r.startsAt,
+    until: r.until,
+    beats: r.beats
+      ? r.beats.map((b) => ({ ...b }))
+      : [{ kind: "theme", startsAt: r.startsAt, until: r.until }],
+    first: r.first ?? false,
+    rule: r.rule ?? null,
+    prev:
+      prev && isShowKind(prev.kind) && now < prev.until
+        ? showView({ ...prev, prev: null }, prev.kind, now)
+        : null,
+  };
+}
+
 function reveal(
   s: RoomState,
   viewer: PlayerId,
@@ -243,9 +279,7 @@ function reveal(
 ): RevealView | null {
   const r = s.reveal;
   if (!r || now >= r.until) return null;
-  if (r.kind === "theme") {
-    return { kind: "theme", n: r.n, startsAt: r.startsAt, until: r.until };
-  }
+  if (isShowKind(r.kind)) return showView(r, r.kind, now);
   const play = s.plays.find((p) => p.n === r.n);
   if (!play) return null;
   if (r.kind === "answers" && play.kind === "question") {
@@ -299,7 +333,8 @@ export function toView(
 ): RoomView {
   const s = state;
   if (!findPlayer(s, viewerId)) throw new GameError("not_member");
-  const pickedOpen = CARDS_OPEN.includes(s.phase);
+  // Who picks for whom is open from picking on (the ring and the turn order give it away anyway).
+  const pickedOpen = s.phase === "picking" || CARDS_OPEN.includes(s.phase);
 
   const players: PlayerView[] = s.players.map((p, seat) => {
     const o = s.outcomes[p.id];
@@ -325,10 +360,7 @@ export function toView(
       isTurn: TURN.includes(s.phase) && p.id === s.turnPlayerId,
       card,
       cardHidden: isYou && inMatch && !visible,
-      pickedById:
-        pickedOpen && (!isYou || s.phase === "finished")
-          ? (s.assignments[p.id]?.pickerId ?? null)
-          : null,
+      pickedById: pickedOpen ? (s.assignments[p.id]?.pickerId ?? null) : null,
       discoveredAt: o?.discoveredAt ?? null,
       place: o?.place ?? null,
       gaveUp: o?.gaveUp ?? false,
@@ -364,7 +396,7 @@ export function toView(
     vote: voteView(s, viewerId, now),
     ideas:
       s.phase === "theming" && viewerId === s.hostId ? (s.ideas ?? []) : null,
-    pick: pick(s, viewerId),
+    pick: pick(s, viewerId, now),
     turn: turn(s, viewerId),
     history: history(s),
     canStart:

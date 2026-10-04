@@ -1,17 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { createRoom, isExpired, reduce } from "./engine";
 import { abandoned, presenceDue } from "./helpers";
+import { matchRecord } from "./record";
 import { char, Game, ident, THEMES } from "./test-utils";
 import {
   ANSWER_CUT_FLOOR_MS,
+  type BeatKind,
+  type Character,
   DEFAULT_SETTINGS,
+  type ExampleCard,
   GameError,
   GONE_GRACE_MS,
   HOST_THEME_SECONDS,
+  MAX_CHARACTER_NAME,
   PICK_SECONDS,
+  type PickDraft,
   RESULT_SECONDS,
   REVEAL_TIMING,
+  type Reveal,
   type RoomState,
+  type RuleExamples,
+  SHOW_TIMING,
   STEP_SECONDS_MIN,
   VOTE_SECONDS,
 } from "./types";
@@ -29,6 +38,52 @@ const code = (fn: () => unknown) => {
 
 const ASK = DEFAULT_SETTINGS.askSeconds * 1000;
 const GUESS = DEFAULT_SETTINGS.guessSeconds * 1000;
+const T = SHOW_TIMING;
+
+/** A show's beats as [kind, length]. */
+const beats = (r: Reveal | null) =>
+  (r?.beats ?? []).map((b): [BeatKind, number] => [
+    b.kind,
+    b.until - b.startsAt,
+  ]);
+const total = (parts: [BeatKind, number][]) =>
+  parts.reduce((sum, [, ms]) => sum + ms, 0);
+
+/** The beats back to back, from the show's start to its end. */
+function expectContiguous(r: Reveal | null) {
+  const list = r?.beats ?? [];
+  expect(list.length).toBeGreaterThan(0);
+  expect(list[0].startsAt).toBe(r?.startsAt);
+  for (let i = 1; i < list.length; i++)
+    expect(list[i].startsAt).toBe(list[i - 1].until);
+  expect(list.at(-1)?.until).toBe(r?.until);
+}
+
+const card = (id: string): ExampleCard => ({
+  id,
+  imageUrl: `https://img.test/${id}.webp`,
+  names: { en: `En ${id}`, pt: `Pt ${id}` },
+});
+const examples = (id: string): RuleExamples => ({
+  fits: [card(`${id}-a`), card(`${id}-b`)],
+  misfit: card(`${id}-x`),
+});
+/** Rule cards for THEMES[0] and THEMES[2]; THEMES[1] has none (the sentence alone). */
+const EXAMPLES = [examples("t0"), null, examples("t2")];
+
+const draftOf = (d: Partial<PickDraft>): PickDraft => ({
+  characterId: null,
+  name: "",
+  imageUrl: null,
+  newId: null,
+  ...d,
+});
+
+/** The player `pickerId` picks for. */
+const targetOf = (g: Game, pickerId: string) =>
+  Object.keys(g.state.assignments).find(
+    (t) => g.state.assignments[t].pickerId === pickerId,
+  ) as string;
 
 describe("lobby", () => {
   it("creates a room with the host seated and no clock, even once others join", () => {
@@ -212,26 +267,58 @@ describe("lobby", () => {
 });
 
 describe("the theme vote", () => {
+  /** The vote, once the opening is over. */
   const voting = (players: number, seed = 1) => {
     const g = new Game(players, seed);
     g.do({ type: "START", playerId: "p1", themes: THEMES });
+    g.skipShow();
     return g;
   };
   const vote = (g: Game, playerId: string, option: number) =>
     g.do({ type: "VOTE", playerId, option });
 
-  it("starts with three themes and a short clock; needs exactly three", () => {
+  it("starts with three themes after the opening, then a 20 s clock; needs exactly three", () => {
     const g = new Game(2);
     expect(
       code(() =>
         g.do({ type: "START", playerId: "p1", themes: THEMES.slice(0, 2) }),
       ),
     ).toBe("invalid_input");
+    expect(
+      code(() =>
+        g.do({
+          type: "START",
+          playerId: "p1",
+          themes: THEMES,
+          examples: [null],
+        }),
+      ),
+    ).toBe("invalid_input");
     g.do({ type: "START", playerId: "p1", themes: THEMES });
     expect(g.state.phase).toBe("voting");
     expect(g.state.theme).toBeNull();
     expect(g.state.vote?.options).toEqual(THEMES);
-    expect(g.state.deadline).toBe(g.now + VOTE_SECONDS * 1000);
+    // the room's first match: the cold open
+    const r = g.state.reveal;
+    expect(r).toMatchObject({
+      kind: "opening",
+      n: 1,
+      first: true,
+      startsAt: g.now,
+      prev: null,
+    });
+    expect(beats(r)).toEqual([
+      ["curtain", T.curtain],
+      ["intro", T.intro],
+      ["entrance", T.entrance.vote],
+    ]);
+    expectContiguous(r);
+    // the vote's clock starts once the opening is over
+    expect(g.state.stepStartsAt).toBe(r?.until);
+    expect(VOTE_SECONDS).toBe(20);
+    expect((g.state.deadline ?? 0) - (g.state.stepStartsAt ?? 0)).toBe(
+      VOTE_SECONDS * 1000,
+    );
   });
 
   it("the most voted theme wins once everyone voted; votes can change until then", () => {
@@ -246,24 +333,92 @@ describe("the theme vote", () => {
     expect(g.state.phase).toBe("picking");
     expect(g.state.theme).toEqual(THEMES[1]);
     expect(g.state.vote).toMatchObject({ chosen: 1, tied: [1] });
-    expect(g.state.reveal).toMatchObject({
+    const r = g.state.reveal;
+    expect(r).toMatchObject({
       kind: "theme",
-      until: g.now + REVEAL_TIMING.theme,
+      n: 1,
+      first: true,
+      startsAt: g.now,
+      // no rule cards for this theme: the sentence alone
+      rule: null,
+      prev: null,
     });
-    // the picking clock waits for the reveal
-    expect(g.state.stepStartsAt).toBe(g.state.reveal?.until);
+    expect(beats(r)).toEqual([
+      ["settle", T.settle.first],
+      ["theme", T.theme.withRule],
+      ["rule", T.rule.sentence],
+      ["draw", T.draw.first],
+      ["target", T.target.first],
+      ["entrance", T.entrance.pick],
+    ]);
+    expectContiguous(r);
+    // the picking clock waits for the show
+    expect(g.state.stepStartsAt).toBe(r?.until);
+    expect((g.state.deadline ?? 0) - (g.state.stepStartsAt ?? 0)).toBe(
+      PICK_SECONDS * 1000,
+    );
     expect(code(() => vote(g, "p3", 1))).toBe("wrong_phase");
   });
 
-  it("a tie is drawn among the tied themes, with a longer reveal", () => {
+  it("a tie is drawn among the tied themes; the show spins between them first", () => {
     const g = voting(2);
     vote(g, "p1", 0);
     vote(g, "p2", 2);
     expect(g.state.vote?.tied).toEqual([0, 2]);
     expect([0, 2]).toContain(g.state.vote?.chosen);
-    expect(g.state.reveal?.until).toBe(
-      g.now + REVEAL_TIMING.theme + REVEAL_TIMING.themeTieSpin,
-    );
+    const parts = beats(g.state.reveal);
+    expect(parts[0]).toEqual(["tie_spin", T.tieSpin]);
+    expect(parts[1]).toEqual(["settle", T.settle.first]);
+    expect(g.state.reveal?.until).toBe(g.now + total(parts));
+  });
+
+  it("the winner's rule cards go to the theme show, the same for everyone", () => {
+    const g = new Game(2);
+    g.do({ type: "START", playerId: "p1", themes: THEMES, examples: EXAMPLES });
+    expect(g.state.vote?.examples).toEqual(EXAMPLES);
+    g.skipShow();
+    vote(g, "p1", 2);
+    vote(g, "p2", 2);
+    expect(g.state.reveal?.rule).toEqual(EXAMPLES[2]);
+    expect(beats(g.state.reveal)).toEqual([
+      ["settle", T.settle.first],
+      ["theme", T.theme.withRule],
+      ["rule", T.rule.cards],
+      ["draw", T.draw.first],
+      ["target", T.target.first],
+      ["entrance", T.entrance.pick],
+    ]);
+    // the vote keeps its own copy
+    expect(g.state.vote?.examples?.[2]).not.toBe(EXAMPLES[2]);
+  });
+
+  it("votes during the opening count; the theme show waits for the opening to end", () => {
+    const g = new Game(2);
+    g.do({ type: "START", playerId: "p1", themes: THEMES, examples: EXAMPLES });
+    const opening = g.state.reveal as Reveal;
+    g.now += 1000;
+    vote(g, "p1", 0);
+    vote(g, "p2", 0);
+    expect(g.state.phase).toBe("picking");
+    const r = g.state.reveal;
+    expect(r?.kind).toBe("theme");
+    expect(r?.startsAt).toBe(opening.until);
+    expect(r?.beats?.[0].startsAt).toBe(opening.until);
+    // the opening plays out first
+    expect(r?.prev).toMatchObject({
+      kind: "opening",
+      startsAt: opening.startsAt,
+      until: opening.until,
+      prev: null,
+    });
+    expect(g.state.stepStartsAt).toBe(r?.until);
+    // picking during both shows: the cast queues behind the theme show, one level deep
+    g.pickAll();
+    const cast = g.state.reveal;
+    expect(cast?.kind).toBe("cast");
+    expect(cast?.startsAt).toBe(r?.until);
+    expect(cast?.prev).toMatchObject({ kind: "theme", prev: null });
+    expect(g.state.stepStartsAt).toBe(cast?.until);
   });
 
   it("when the clock runs out, the votes so far decide; no votes is a draw of all three", () => {
@@ -292,6 +447,18 @@ describe("the theme vote", () => {
     expect(h.state.phase).toBe("lobby");
     expect(h.state.vote).toBeNull();
     expect(h.state.deadline).toBeNull();
+    expect(h.state.reveal).toBeNull();
+  });
+
+  it("back in the lobby during the opening, nothing replays it", () => {
+    const g = new Game(2);
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    expect(g.state.reveal?.kind).toBe("opening");
+    g.now += 500;
+    g.do({ type: "LEAVE", playerId: "p2" });
+    expect(g.state.phase).toBe("lobby");
+    expect(g.state.reveal).toBeNull();
+    expect(toView(g.state, 1, "p1", g.now).reveal).toBeNull();
   });
 
   it("the host leaving hands the room over and the vote goes on", () => {
@@ -303,18 +470,29 @@ describe("the theme vote", () => {
 });
 
 describe("the host types the theme", () => {
+  /** The host typing, once the opening is over. */
   const theming = (players: number) => {
     const g = new Game(players, 1, { themeMode: "host" });
     g.do({ type: "START", playerId: "p1", themes: THEMES });
+    g.skipShow();
     return g;
   };
 
-  it("starts with the host typing, ideas at hand and a 30 s clock", () => {
-    const g = theming(3);
+  it("starts with the opening, then the host typing, ideas at hand and a 30 s clock", () => {
+    const g = new Game(3, 1, { themeMode: "host" });
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
     expect(g.state.phase).toBe("theming");
     expect(g.state.vote).toBeNull();
     expect(g.state.ideas).toEqual(THEMES);
-    expect(g.state.deadline).toBe(g.now + HOST_THEME_SECONDS * 1000);
+    const r = g.state.reveal;
+    expect(r).toMatchObject({ kind: "opening", n: 1, first: true });
+    expect(beats(r)).toEqual([
+      ["curtain", T.curtain],
+      ["intro", T.intro],
+      ["entrance", T.entrance.theming],
+    ]);
+    expect(g.state.stepStartsAt).toBe(r?.until);
+    expect(g.state.deadline).toBe((r?.until ?? 0) + HOST_THEME_SECONDS * 1000);
   });
 
   it("only the host sets it; it is shown to everyone, then picking starts", () => {
@@ -333,21 +511,45 @@ describe("the host types the theme", () => {
       set: null,
     });
     expect(g.state.ideas).toEqual([]);
-    expect(g.state.reveal).toMatchObject({
+    // a typed theme: no vote to settle, and the rule is the sentence alone
+    const r = g.state.reveal;
+    expect(r).toMatchObject({
       kind: "theme",
-      until: g.now + REVEAL_TIMING.theme,
+      n: 1,
+      first: true,
+      startsAt: g.now,
+      rule: null,
     });
-    expect(g.state.stepStartsAt).toBe(g.state.reveal?.until);
+    expect(beats(r)).toEqual([
+      ["theme", T.theme.withRule],
+      ["rule", T.rule.sentence],
+      ["draw", T.draw.first],
+      ["target", T.target.first],
+      ["entrance", T.entrance.pick],
+    ]);
+    expect(g.state.stepStartsAt).toBe(r?.until);
     expect(code(() => set("p1", "Again"))).toBe("wrong_phase");
   });
 
-  it("when the host runs out of time, everyone votes instead", () => {
+  it("when the host runs out of time, everyone votes instead: just the vote comes in", () => {
     const g = theming(2);
     expect(code(() => g.timeout())).toBe("invalid_input");
-    g.timeout({ themes: THEMES });
+    g.timeout({ themes: THEMES, examples: EXAMPLES });
     expect(g.state.phase).toBe("voting");
     expect(g.state.vote?.options).toEqual(THEMES);
-    expect(g.state.deadline).toBe(g.now + VOTE_SECONDS * 1000);
+    expect(g.state.vote?.examples).toEqual(EXAMPLES);
+    const r = g.state.reveal;
+    expect(r).toMatchObject({
+      kind: "opening",
+      n: 1,
+      first: true,
+      startsAt: g.now,
+    });
+    expect(beats(r)).toEqual([["entrance", T.entrance.vote]]);
+    expect(g.state.stepStartsAt).toBe(g.now + T.entrance.vote);
+    expect(g.state.deadline).toBe(
+      (g.state.stepStartsAt ?? 0) + VOTE_SECONDS * 1000,
+    );
   });
 
   it("a host who leaves hands the typing over; alone, back to the lobby", () => {
@@ -421,13 +623,157 @@ describe("the ring", () => {
 });
 
 describe("picking", () => {
-  it("starts the turns once everyone picked", () => {
+  it("starts the turns once everyone picked, behind the cast show", () => {
     const g = new Game(3);
     g.start();
     g.pickAll();
     expect(g.state.phase).toBe("asking");
     expect(g.state.turnPlayerId).toBe(g.state.order[0]);
-    expect(g.state.deadline).toBe(g.now + ASK);
+    const r = g.state.reveal;
+    expect(r).toMatchObject({
+      kind: "cast",
+      n: 1,
+      first: true,
+      startsAt: g.now,
+      prev: null,
+    });
+    expect(beats(r)).toEqual([
+      ["picked", T.picked.confirmed.first],
+      ["received", T.received.first],
+      ["order", T.order.first],
+      ["entrance", T.entrance.turn.first],
+    ]);
+    expectContiguous(r);
+    // the first question can come once the cast is over
+    expect(g.state.playStartedAt).toBe(r?.until);
+    expect(g.state.stepStartsAt).toBe(r?.until);
+    expect(g.state.deadline).toBe((r?.until ?? 0) + ASK);
+  });
+
+  it("nobody asks during the cast; the first turn's clock starts when it ends", () => {
+    const g = new Game(3);
+    g.start();
+    g.pickAll();
+    const until = g.state.reveal?.until ?? 0;
+    const first = g.turn;
+    g.now = until - 1;
+    expect(
+      code(() => g.do({ type: "ASK", playerId: first, text: "Am I real?" })),
+    ).toBe("too_early");
+    // no guess step yet either
+    expect(
+      code(() => g.do({ type: "GUESS", playerId: first, text: "Me" })),
+    ).toBe("wrong_phase");
+    g.now = until;
+    expect(
+      code(() => g.do({ type: "ASK", playerId: first, text: "Am I real?" })),
+    ).toBe("no error");
+  });
+
+  it("the first turn goes to the first player still in the match", () => {
+    const g = new Game(3);
+    g.start();
+    const [a, b] = g.state.order;
+    g.do({ type: "GIVE_UP", playerId: a });
+    g.pickAll();
+    expect(g.state.turnPlayerId).toBe(b);
+    expect(g.state.stepStartsAt).toBe(g.state.reveal?.until);
+  });
+
+  it("whoever gives up during the cast hands the turn on; the clock still waits for the cast", () => {
+    const g = new Game(3);
+    g.start();
+    g.pickAll();
+    const until = g.state.reveal?.until ?? 0;
+    const [a, b] = g.state.order;
+    g.now += 1000;
+    g.do({ type: "GIVE_UP", playerId: a });
+    expect(g.state.turnPlayerId).toBe(b);
+    expect(g.state.reveal?.kind).toBe("cast");
+    expect(g.state.stepStartsAt).toBe(until);
+    expect(g.state.deadline).toBe(until + ASK);
+  });
+
+  it("later matches get the short show versions", () => {
+    const g = new Game(2);
+    g.start();
+    g.pickAll();
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    expect(g.state.phase).toBe("finished");
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+    g.do({ type: "START", playerId: "p1", themes: THEMES, examples: EXAMPLES });
+    const opening = g.state.reveal;
+    expect(opening).toMatchObject({ kind: "opening", n: 2, first: false });
+    expect(beats(opening)).toEqual([
+      ["curtain", T.curtain],
+      ["round", T.round],
+      ["entrance", T.entrance.vote],
+    ]);
+    g.skipShow();
+    g.voteAll(0);
+    const theme = g.state.reveal;
+    expect(theme).toMatchObject({ kind: "theme", n: 2, first: false });
+    // no rule on later matches, whatever cards the server sent
+    expect(theme).not.toHaveProperty("rule");
+    expect(beats(theme)).toEqual([
+      ["settle", T.settle.later],
+      ["theme", T.theme.alone],
+      ["draw", T.draw.later],
+      ["target", T.target.later],
+      ["entrance", T.entrance.pick],
+    ]);
+    g.skipShow();
+    g.pickAll();
+    expect(g.state.reveal).toMatchObject({ kind: "cast", n: 2, first: false });
+    expect(beats(g.state.reveal)).toEqual([
+      ["picked", T.picked.confirmed.later],
+      ["received", T.received.later],
+      ["order", T.order.later],
+      ["entrance", T.entrance.turn.later],
+    ]);
+  });
+
+  it("a typed theme on a later match has no rule either", () => {
+    const g = new Game(2, 1, { themeMode: "host" });
+    g.do({ type: "START", playerId: "p1", themes: [] });
+    g.skipShow();
+    g.do({ type: "SET_THEME", playerId: "p1", text: "Pirates" });
+    g.skipShow();
+    g.pickAll();
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+    g.do({ type: "START", playerId: "p1", themes: [] });
+    expect(beats(g.state.reveal)).toEqual([
+      ["curtain", T.curtain],
+      ["round", T.round],
+      ["entrance", T.entrance.theming],
+    ]);
+    g.skipShow();
+    g.do({ type: "SET_THEME", playerId: "p1", text: "Robots" });
+    expect(beats(g.state.reveal)).toEqual([
+      ["theme", T.theme.alone],
+      ["draw", T.draw.later],
+      ["target", T.target.later],
+      ["entrance", T.entrance.pick],
+    ]);
+  });
+
+  it("the shows scale with Ctx.showScale; the clocks don't", () => {
+    const g = new Game(2);
+    g.showScale = 0.25;
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    const r = g.state.reveal;
+    expect(beats(r)).toEqual([
+      ["curtain", Math.round(T.curtain * 0.25)],
+      ["intro", Math.round(T.intro * 0.25)],
+      ["entrance", Math.round(T.entrance.vote * 0.25)],
+    ]);
+    expectContiguous(r);
+    expect((g.state.deadline ?? 0) - (g.state.stepStartsAt ?? 0)).toBe(
+      VOTE_SECONDS * 1000,
+    );
   });
 
   it("refuses a second pick and picks outside the phase", () => {
@@ -461,13 +807,125 @@ describe("picking", () => {
       .sort();
     expect(auto).toEqual(["f1", "f2"]);
     expect(g.state.phase).toBe("asking");
+    // the cast opens on the "Time!" stamp
+    expect(g.state.reveal).toMatchObject({ kind: "cast", startsAt: g.now });
+    expect(beats(g.state.reveal)[0]).toEqual(["picked", T.picked.timeout]);
   });
 });
 
+describe("pick drafts", () => {
+  const picking = (n = 3) => {
+    const g = new Game(n);
+    g.start();
+    return g;
+  };
+  const save = (g: Game, playerId: string, d: Partial<PickDraft> | null) =>
+    code(() =>
+      g.do({ type: "DRAFT", playerId, draft: d === null ? null : draftOf(d) }),
+    );
+  const draftFor = (g: Game, pickerId: string) =>
+    g.state.assignments[targetOf(g, pickerId)].draft;
+
+  it("saves the picker's card; null empties it, a pick clears it", () => {
+    const g = picking();
+    expect(save(g, "p1", { name: "Homem", characterId: "wd-Q1" })).toBe(
+      "no error",
+    );
+    expect(draftFor(g, "p1")).toEqual(
+      draftOf({ name: "Homem", characterId: "wd-Q1" }),
+    );
+    expect(save(g, "p1", null)).toBe("no error");
+    expect(draftFor(g, "p1")).toBeNull();
+    save(g, "p2", { name: "Bia" });
+    g.do({ type: "PICK", playerId: "p2", character: char("x") });
+    expect(draftFor(g, "p2")).toBeNull();
+  });
+
+  it("refuses drafts out of place", () => {
+    const g = new Game(3);
+    expect(save(g, "p1", { name: "A" })).toBe("wrong_phase");
+    g.start();
+    expect(save(g, "ghost", { name: "A" })).toBe("not_member");
+    g.do({ type: "PICK", playerId: "p1", character: char("x") });
+    expect(save(g, "p1", { name: "A" })).toBe("already_done");
+    const long = "x".repeat(MAX_CHARACTER_NAME + 1);
+    expect(save(g, "p2", { name: long })).toBe("invalid_input");
+    expect(save(g, "p2", { name: "x".repeat(MAX_CHARACTER_NAME) })).toBe(
+      "no error",
+    );
+    expect(save(g, "p2", { characterId: "x".repeat(201) })).toBe(
+      "invalid_input",
+    );
+    expect(save(g, "p2", { imageUrl: "x".repeat(501) })).toBe("invalid_input");
+    expect(save(g, "p2", { name: 7 as unknown as string })).toBe(
+      "invalid_input",
+    );
+    // the clock ran out: too late, even before the timeout is applied
+    g.now = g.state.deadline ?? 0;
+    expect(save(g, "p3", { name: "A" })).toBe("wrong_phase");
+  });
+
+  it("when time runs out, whatever is on a card is the pick; only empty cards get a fallback", () => {
+    const g = picking(4);
+    const [a, b, c, d] = g.state.order;
+    const made: Character = { ...char("u-made"), name: "Made" };
+    // a: the server resolved the draft; b: typed a new name the server could not save;
+    // c: one letter is still a name; d: an empty card
+    save(g, a, { characterId: "wd-Q1", name: "Homem" });
+    save(g, b, { name: "  Capitã   Nova ", imageUrl: "/x.webp", newId: "u-1" });
+    save(g, c, { name: "L" });
+    save(g, d, { name: "   " });
+    g.timeout({
+      drafted: { [a]: made },
+      fallbackCharacters: [char("f1"), char("f2")],
+    });
+    const of = (picker: string) => g.state.assignments[targetOf(g, picker)];
+    expect(of(a)).toMatchObject({ character: made });
+    expect(of(b).character).toEqual({
+      id: "u-1",
+      lang: "pt",
+      name: "Capitã Nova",
+      origin: null,
+      imageUrl: "/x.webp",
+      aliases: [],
+    });
+    expect(of(c).character).toMatchObject({
+      id: `draft-ABCDE-1-${targetOf(g, c)}`,
+      name: "L",
+      imageUrl: null,
+    });
+    // drafts never take a fallback: the first one goes to the empty card
+    expect(of(d)).toMatchObject({ character: { id: "f1" }, auto: true });
+    for (const p of [a, b, c]) expect(of(p).auto).toBeUndefined();
+    for (const p of [a, b, c, d]) expect(of(p).draft).toBeNull();
+    expect(g.state.phase).toBe("asking");
+
+    // drafted picks are real picks in the record
+    g.skipShow();
+    for (const id of g.state.order)
+      if (g.state.phase !== "finished") g.do({ type: "GIVE_UP", playerId: id });
+    const record = matchRecord(g.state, g.now);
+    const auto = (picker: string) =>
+      record?.players.find((p) => p.userId === targetOf(g, picker))?.autoPicked;
+    expect([a, b, c].map(auto)).toEqual([false, false, false]);
+    expect(auto(d)).toBe(true);
+  });
+
+  it("a draft follows a guest who signs in", () => {
+    const g = picking(2);
+    save(g, "p1", { name: "Bia" });
+    g.do({ type: "SWAP_PLAYER", from: "p1", player: ident("acc") });
+    expect(draftFor(g, "acc")).toEqual(draftOf({ name: "Bia" }));
+    expect(save(g, "acc", { name: "Leo" })).toBe("no error");
+  });
+});
+
+/** Picks done and the cast over: the first turn's clock is running. */
 function started(n: number, seed = 7) {
   const g = new Game(n, seed);
   g.start();
   g.pickAll();
+  g.skipShow();
   return g;
 }
 
@@ -482,6 +940,7 @@ describe("step times", () => {
     const g = new Game(n, 7, times);
     g.start();
     g.pickAll();
+    g.skipShow();
     return g;
   };
 
@@ -493,6 +952,7 @@ describe("step times", () => {
       PICK_SECONDS * 1000,
     );
     g.pickAll();
+    g.skipShow();
     expect(g.state.deadline).toBe(g.now + 40_000);
     const asker = g.turn;
     g.do({ type: "ASK", playerId: asker, text: "Is it human?" });
@@ -581,7 +1041,9 @@ describe("step times", () => {
     );
     g.start();
     g.pickAll();
-    expect(g.state.deadline).toBe(g.now + DEFAULT_SETTINGS.askSeconds * 1000);
+    expect(g.state.deadline).toBe(
+      (g.state.stepStartsAt ?? 0) + DEFAULT_SETTINGS.askSeconds * 1000,
+    );
   });
 });
 
@@ -915,6 +1377,60 @@ describe("leaving and giving up", () => {
     expect(g.state.phase).toBe("finished");
     expect(g.state.deadline).toBe(g.now + RESULT_SECONDS * 1000);
   });
+
+  it("a match that ends mid-show drops the show: the podium comes at once", () => {
+    // during the theme show (picking)
+    const g = new Game(2);
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    g.skipShow();
+    g.voteAll(0);
+    g.now += 1000;
+    g.do({ type: "LEAVE", playerId: "p2" });
+    expect(g.state.phase).toBe("finished");
+    expect(g.state.reveal).toBeNull();
+    expect(g.state.stepStartsAt).toBe(g.now);
+
+    // during the cast
+    const h = new Game(2);
+    h.start();
+    h.pickAll();
+    h.now += 1000;
+    h.do({ type: "LEAVE", playerId: "p2" });
+    expect(h.state.phase).toBe("finished");
+    expect(h.state.reveal).toBeNull();
+    expect(h.state.stepStartsAt).toBe(h.now);
+  });
+
+  it("a guest signing in during a show keeps it", () => {
+    const g = new Game(2);
+    g.start();
+    g.pickAll();
+    const cast = g.state.reveal;
+    g.do({ type: "SWAP_PLAYER", from: "p2", player: ident("acc") });
+    expect(g.state.reveal).toEqual(cast);
+  });
+
+  it("a room saved before shows (a theme reveal with no beats) still holds the clock", () => {
+    const g = new Game(2);
+    g.start();
+    const until = g.now + 2000;
+    g.state.reveal = { kind: "theme", n: 1, startsAt: g.now, until };
+    expect(toView(g.state, 1, "p1", g.now).reveal).toEqual({
+      kind: "theme",
+      n: 1,
+      startsAt: g.now,
+      until,
+      beats: [{ kind: "theme", startsAt: g.now, until }],
+      first: false,
+      rule: null,
+      prev: null,
+    });
+    g.pickAll();
+    // the cast queues behind it
+    expect(g.state.reveal?.startsAt).toBe(until);
+    expect(g.state.reveal?.prev).toMatchObject({ kind: "theme", until });
+    expect(g.state.stepStartsAt).toBe(g.state.reveal?.until);
+  });
 });
 
 function playToEnd(g: Game) {
@@ -965,13 +1481,24 @@ describe("whole matches", () => {
     expect(g.state.plays).toEqual([]);
     g.do({ type: "START", playerId: s.hostId, themes: THEMES });
     expect(g.state.phase).toBe("voting");
-    expect(g.state.reveal).toBeNull();
+    // "Round 2" instead of the cold open
+    expect(g.state.reveal).toMatchObject({
+      kind: "opening",
+      n: 2,
+      first: false,
+    });
+    expect(beats(g.state.reveal).map(([k]) => k)).toEqual([
+      "curtain",
+      "round",
+      "entrance",
+    ]);
     g.voteAll(2);
     expect(g.state.phase).toBe("picking");
     expect(g.state.theme?.en).toBe("Pirates");
     expect(g.state.round).toBe(2);
     expect(g.state.plays).toEqual([]);
-    expect(g.state.reveal?.kind).toBe("theme");
+    expect(g.state.reveal).toMatchObject({ kind: "theme", n: 2, first: false });
+    expect(beats(g.state.reveal).map(([k]) => k)).not.toContain("rule");
   });
 
   it("without the host, the podium's clock takes everyone back; whoever left loses the seat", () => {

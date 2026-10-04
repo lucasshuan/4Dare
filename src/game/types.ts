@@ -99,6 +99,8 @@ export const STEP_TIMES = [
 export type StepTime = (typeof STEP_TIMES)[number];
 /** Picking a character always gets this long. */
 export const PICK_SECONDS = 120;
+/** The longest character name, typed or saved. */
+export const MAX_CHARACTER_NAME = 60;
 /**
  * Every answer that leaves others still to answer cuts this share of the
  * answer time from the clock, so nobody waits long on the last one...
@@ -121,7 +123,7 @@ export const GONE_GRACE_MS = 5000;
 export const RESULT_SECONDS = 15;
 /** Themes offered in the vote before each match, and how long the vote lasts. */
 export const THEME_OPTIONS = 3;
-export const VOTE_SECONDS = 13;
+export const VOTE_SECONDS = 20;
 /** How long the host has to type the theme; then everyone votes instead, on themes from every set. */
 export const HOST_THEME_SECONDS = 30;
 /** Ideas shown to the host while they type the theme. */
@@ -133,9 +135,10 @@ export const MAX_GUESS = 80;
 export const MAX_NAME = 16;
 
 /**
- * How long everyone looks at a reveal before the next step's clock starts (ms).
+ * How long everyone looks at a reveal (ms). Turn steps start under it.
  * Answers: a base for the entrance and the question, plus time to read each answer and its note,
  * kept between 6 and 10 seconds. Guesses: a quick "not yet", a longer moment for a hit (card flip, confetti).
+ * The shows that present a match (opening, theme, cast) are timed by SHOW_TIMING.
  */
 export const REVEAL_TIMING = {
   answersBase: 4000,
@@ -145,10 +148,53 @@ export const REVEAL_TIMING = {
   answersMax: 10000,
   guessMiss: 4000,
   guessHit: 5000,
-  /** The theme takes the stage before picking (after a vote, with a short spotlight on the winner first); a tie first spins between the tied themes. */
-  theme: 3000,
-  themeTieSpin: 2000,
 } as const;
+
+// One file per scene in show-timing/; tests read the constants, never literals.
+export { SHOW_MARKS, SHOW_TIMING } from "./show-timing";
+
+/** The scenes a show is made of, back to back. */
+export const BEAT_KINDS = [
+  "curtain",
+  "intro",
+  "round",
+  "entrance",
+  "tie_spin",
+  "settle",
+  "theme",
+  "rule",
+  "draw",
+  "target",
+  "picked",
+  "received",
+  "order",
+] as const;
+export type BeatKind = (typeof BEAT_KINDS)[number];
+/** One scene of a show, in server ms. */
+export interface Beat {
+  kind: BeatKind;
+  startsAt: number;
+  until: number;
+}
+/**
+ * The shows that present a match, timed by the server so every screen plays them together:
+ * opening (lobby out, cold open or "Round N", the vote or the host's form coming in),
+ * theme (the result, the theme, the rule, the draw, "for whom"), cast (everyone picked,
+ * "Rafa picked yours", the turn order). Each step's clock starts when its show ends.
+ */
+export type ShowKind = "opening" | "theme" | "cast";
+
+/** A card of the rule scene: a library id (the same in every language), one picture, its names. */
+export interface ExampleCard {
+  id: string;
+  imageUrl: string;
+  names: Partial<Record<Lang, string>>;
+}
+/** ✓✓ and ✗ for the rule scene; decided by the server at START, the same for everyone. */
+export interface RuleExamples {
+  fits: [ExampleCard, ExampleCard];
+  misfit: ExampleCard | null;
+}
 
 /** One row of a language's character library. */
 export interface Character {
@@ -187,12 +233,29 @@ export interface RoomPlayer extends Identity {
   goneAt?: number | null;
 }
 
+/**
+ * What is on the picker's card while they edit it; if the clock runs out, it becomes the pick.
+ * Only the picker ever sees it.
+ */
+export interface PickDraft {
+  /** The character the card shows: picked, or the highlighted row's preview. */
+  characterId: string | null;
+  /** The name field as typed (0..MAX_CHARACTER_NAME). */
+  name: string;
+  /** A picture uploaded for a new character (a URL the server made). */
+  imageUrl: string | null;
+  /** Set by the server: the id ("u-<uuid>") the clock gives a new character. */
+  newId: string | null;
+}
+
 /** Keyed by the player who must discover the character. */
 export interface Assignment {
   pickerId: PlayerId;
   character: Character | null;
-  /** The clock picked it (the picker let the time run out). */
+  /** The clock drew it: the card was empty when the time ran out. */
   auto?: true;
+  /** The card as the picker left it; gone once the pick is set. Absent in older rooms. */
+  draft?: PickDraft | null;
 }
 
 export interface AnswerEntry {
@@ -244,15 +307,28 @@ export interface ThemeVote {
   chosen: number | null;
   /** Options that tied for the most votes; the draw picked `chosen` among them. */
   tied: number[];
+  /** The rule scene's cards for each option (first match only), aligned with `options`. */
+  examples?: (RuleExamples | null)[];
 }
 
-/** The moment everyone sees between two steps. The play itself (answers, result) lives in `plays`. */
+/**
+ * The moment everyone sees between two steps: an answers or guess reveal (the play itself
+ * lives in `plays`), or a show that presents the match.
+ */
 export interface Reveal {
-  kind: "answers" | "guess" | "theme";
-  /** Number of the jogada being revealed (the round, for a theme). */
+  kind: "answers" | "guess" | ShowKind;
+  /** The jogada revealed; for a show, the match it presents (`round`; `round + 1` for the opening). */
   n: number;
   startsAt: number;
   until: number;
+  /** Shows only: the beats, back to back from `startsAt` to `until`. Absent in rooms saved before shows. */
+  beats?: Beat[];
+  /** Shows only: the room's first match (the long versions). */
+  first?: boolean;
+  /** Theme show with a rule beat: its cards; null = the sentence alone. */
+  rule?: RuleExamples | null;
+  /** Shows only: the show still running when this one was staged; it plays out until its own `until`. */
+  prev?: Reveal | null;
 }
 
 export interface RoomState {
@@ -279,7 +355,7 @@ export interface RoomState {
   stepStartsAt: number | null;
   /** The step's full length (ms); the deadline can come sooner (answers cut it). Absent in older rooms. */
   stepMs?: number | null;
-  /** The latest reveal; only shown while it lasts. */
+  /** The latest reveal or show; only shown while it lasts. */
   reveal: Reveal | null;
   /** Counts matches played in this room. */
   round: number;
@@ -288,7 +364,7 @@ export interface RoomState {
    * 2 for the second, and so on. Absent in rooms saved before ties existed.
    */
   turnRound?: number;
-  /** Epoch ms when the first question of this match could be asked (picks done); null before. */
+  /** Epoch ms when the first question of this match can be asked (the end of the cast show); null before. */
   playStartedAt: number | null;
   createdAt: number;
   updatedAt: number;
@@ -313,11 +389,21 @@ export type GameEvent =
   | { type: "UPDATE_IDENTITY"; player: Identity }
   /** A guest signed in: the account takes the guest's seat, history and all. */
   | { type: "SWAP_PLAYER"; from: PlayerId; player: Identity }
-  /** `themes`: the THEME_OPTIONS themes put to the vote, or ideas for a host who types the theme. */
-  | { type: "START"; playerId: PlayerId; themes: Theme[] }
+  /**
+   * `themes`: the THEME_OPTIONS themes put to the vote, or ideas for a host who types the theme.
+   * `examples`: the rule scene's cards for each theme (a room's first match), aligned with `themes`.
+   */
+  | {
+      type: "START";
+      playerId: PlayerId;
+      themes: Theme[];
+      examples?: (RuleExamples | null)[];
+    }
   | { type: "VOTE"; playerId: PlayerId; option: number }
   /** The host typed the theme. */
   | { type: "SET_THEME"; playerId: PlayerId; text: string }
+  /** The picker's card as it is now (null: empty); written quietly, it becomes the pick if time runs out. */
+  | { type: "DRAFT"; playerId: PlayerId; draft: PickDraft | null }
   | { type: "PICK"; playerId: PlayerId; character: Character }
   | { type: "ASK"; playerId: PlayerId; text: string }
   | {
@@ -334,19 +420,24 @@ export type GameEvent =
   | { type: "BACK_TO_LOBBY"; playerId: PlayerId }
   /**
    * The step's clock ran out. The caller supplies what the engine cannot make up:
-   * themes to vote on or ideas (lobby auto-start, a host who never typed the theme)
-   * and popular characters (picking).
+   * themes to vote on (a host who never typed the theme) with their rule cards,
+   * and for picking, the characters the drafts became and popular characters for empty cards.
    */
   | {
       type: "TIMEOUT";
       themes?: Theme[];
+      examples?: (RuleExamples | null)[];
       fallbackCharacters?: Character[];
+      /** Picker id → the character their draft became (found or created by the server first). */
+      drafted?: Record<PlayerId, Character>;
     };
 
 export interface Ctx {
   now: number;
   /** 0..1, injectable so tests are deterministic. */
   random: () => number;
+  /** e2e only: scales every show beat (never the step clocks). */
+  showScale?: number;
 }
 
 export const ERROR_CODES = [
@@ -441,7 +532,7 @@ export interface PlayerView {
   card: CardView | null;
   /** True when it is the viewer's own card and they have not discovered it yet. */
   cardHidden: boolean;
-  /** Who picked this player's character. Null while secret (your own, before the end). */
+  /** Who picked this player's character, from picking on; your own too ("Rafa picked yours"). */
   pickedById: PlayerId | null;
   discoveredAt: number | null;
   place: number | null;
@@ -483,9 +574,25 @@ export interface TurnView {
   validatorId: PlayerId | null;
 }
 
+/** A show as everyone sees it: the screens find the beat on now with the server clock. */
+export interface ShowView {
+  kind: ShowKind;
+  /** The match it presents ("Round N"). */
+  n: number;
+  startsAt: number;
+  until: number;
+  beats: Beat[];
+  /** The room's first match: the long versions. */
+  first: boolean;
+  /** The rule scene's cards; null = the sentence alone (or no rule beat). */
+  rule: RuleExamples | null;
+  /** The show still playing when this one was staged, while it lasts; this one starts at its end. */
+  prev: ShowView | null;
+}
+
 export type RevealView =
-  /** The theme vote is over; the vote screen plays it out (see VoteView). */
-  | { kind: "theme"; n: number; startsAt: number; until: number }
+  /** The opening, the theme (the vote screen plays its result out, see VoteView) or the cast. */
+  | ShowView
   | {
       kind: "answers";
       n: number;
@@ -529,6 +636,8 @@ export interface PickView {
   character: CardView | null;
   confirmedIds: PlayerId[];
   total: number;
+  /** Your card as you left it, to restore it after a reload; null once confirmed. Only yours. */
+  draft: Omit<PickDraft, "newId"> | null;
 }
 
 export interface RoomView {
@@ -554,7 +663,7 @@ export interface RoomView {
   vote: VoteView | null;
   /** The host only, while they type the theme. */
   ideas: Theme[] | null;
-  /** Present while picking. */
+  /** Present while picking, and while the cast show that follows it plays. */
   pick: PickView | null;
   /** Present from "asking" to "validating". */
   turn: TurnView | null;

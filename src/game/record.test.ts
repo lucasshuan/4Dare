@@ -7,13 +7,14 @@ describe("match record", () => {
     const g = new Game(3, 7);
     g.start();
     expect(matchRecord(g.state, g.now)).toBeNull();
-    g.now += 30_000; // picking time is not counted
+    g.now += 30_000; // picking time is not counted, nor the cast show after it
     g.pickAll();
     const startedAt = g.state.playStartedAt as number;
-    expect(startedAt).toBe(g.now);
+    expect(startedAt).toBe(g.state.stepStartsAt);
+    expect(startedAt).toBe(g.state.reveal?.until);
 
     // first player: one question, then the right name 20 s in
-    g.now += 12_000;
+    g.now = startedAt + 12_000;
     const first = g.askAndAnswer();
     g.now += 8_000;
     g.do({ type: "GUESS", playerId: first, text: `Name ${first}` });

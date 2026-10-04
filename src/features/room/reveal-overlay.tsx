@@ -31,8 +31,9 @@ export function RevealOverlay() {
   const t = useTranslations("common");
   const { view, offset } = useRoomContext();
   const now = useServerClock(offset, 100);
-  // The theme vote plays its own result out on the vote screen.
-  const r = view.reveal?.kind === "theme" ? null : view.reveal;
+  // Answers and guesses only: the shows play on their own screens.
+  const shown = view.reveal;
+  const r = shown?.kind === "answers" || shown?.kind === "guess" ? shown : null;
   const id = r ? `${r.kind}-${r.n}` : null;
   const [closed, setClosed] = useState<string | null>(null);
   const active = r !== null && now < r.until && closed !== id;

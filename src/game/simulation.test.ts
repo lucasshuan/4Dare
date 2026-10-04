@@ -4,14 +4,95 @@ import { isExpired, reduce } from "./engine";
 import { Game, rng, THEMES } from "./test-utils";
 import {
   ANSWERS,
+  type BeatKind,
   type Character,
   GameError,
   type GameEvent,
   RESULT_SECONDS,
   REVEAL_TIMING,
+  type Reveal,
   type RoomState,
+  SHOW_TIMING,
 } from "./types";
 import { toView } from "./view";
+
+const isShow = (r: Reveal | null | undefined): r is Reveal =>
+  !!r && (r.kind === "opening" || r.kind === "theme" || r.kind === "cast");
+
+/** Each show's beats, in the order they may come. */
+const SHOW_BEATS: Record<string, BeatKind[]> = {
+  opening: ["curtain", "intro", "round", "entrance"],
+  theme: ["tie_spin", "settle", "theme", "rule", "draw", "target", "entrance"],
+  cast: ["picked", "received", "order", "entrance"],
+};
+
+/** The lengths a beat may have, for the room's first match or a later one. */
+function beatLengths(show: string, kind: BeatKind, first: boolean): number[] {
+  const T = SHOW_TIMING;
+  const v = first ? "first" : "later";
+  switch (kind) {
+    case "curtain":
+      return [T.curtain];
+    case "intro":
+      return [T.intro];
+    case "round":
+      return [T.round];
+    case "entrance":
+      return show === "opening"
+        ? [T.entrance.vote, T.entrance.theming]
+        : show === "theme"
+          ? [T.entrance.pick]
+          : [T.entrance.turn[v]];
+    case "tie_spin":
+      return [T.tieSpin];
+    case "settle":
+      return [T.settle[v]];
+    case "theme":
+      return first ? [T.theme.withRule] : [T.theme.alone];
+    case "rule":
+      return [T.rule.cards, T.rule.sentence];
+    case "draw":
+      return [T.draw[v]];
+    case "target":
+      return [T.target[v]];
+    case "picked":
+      return [T.picked.confirmed[v], T.picked.timeout];
+    case "received":
+      return [T.received[v]];
+    case "order":
+      return [T.order[v]];
+  }
+}
+
+/** Beats back to back, in their order, with their lengths; a show waiting behind another starts at its end. */
+function checkShow(r: Reveal) {
+  const beats = r.beats ?? [];
+  const order = SHOW_BEATS[r.kind];
+  expect(beats.length).toBeGreaterThan(0);
+  expect(r.first).toBe(r.n === 1);
+  expect(beats[0].startsAt).toBe(r.startsAt);
+  expect(beats.at(-1)?.until).toBe(r.until);
+  let last = -1;
+  beats.forEach((b, i) => {
+    if (i > 0) expect(b.startsAt).toBe(beats[i - 1].until);
+    const at = order.indexOf(b.kind);
+    expect(at, `${b.kind} in ${r.kind}`).toBeGreaterThan(last);
+    last = at;
+    expect(beatLengths(r.kind, b.kind, !!r.first)).toContain(
+      b.until - b.startsAt,
+    );
+  });
+  // only the first match has a rule, and every show ends on an entrance
+  expect(beats.some((b) => b.kind === "rule")).toBe(
+    r.kind === "theme" && !!r.first,
+  );
+  expect(beats.at(-1)?.kind).toBe("entrance");
+  if (r.prev) {
+    expect(isShow(r.prev)).toBe(true);
+    expect(r.prev.prev ?? null).toBeNull();
+    expect(r.startsAt).toBe(r.prev.until);
+  }
+}
 
 const secret = (id: string): Character => ({
   id: `sid-${id}-x9`,
@@ -33,15 +114,37 @@ function randomEvent(s: RoomState, r: () => number): GameEvent {
       type: "TIMEOUT",
       themes: THEMES,
       fallbackCharacters: s.players.map((p) => secret(`fb-${p.id}`)),
+      // the server found or made some drafts' characters (by picker)
+      drafted: Object.fromEntries(
+        s.players
+          .filter(() => r() < 0.3)
+          .map((p) => [p.id, secret(`dr-${p.id}`)]),
+      ),
     };
   if (roll < 0.22) return { type: "START", playerId: who, themes: THEMES };
   if (roll < 0.25)
     return { type: "VOTE", playerId: who, option: Math.floor(r() * 4) };
-  if (roll < 0.35) {
-    const target = Object.keys(s.assignments).find(
-      (t) => s.assignments[t].pickerId === who,
-    );
-    return { type: "PICK", playerId: who, character: secret(target ?? who) };
+  if (roll < 0.39) {
+    const target =
+      Object.keys(s.assignments).find(
+        (t) => s.assignments[t].pickerId === who,
+      ) ?? who;
+    if (roll < 0.35)
+      return { type: "PICK", playerId: who, character: secret(target) };
+    return {
+      type: "DRAFT",
+      playerId: who,
+      draft:
+        r() < 0.15
+          ? null
+          : {
+              characterId: r() < 0.3 ? `zq-dcid-${target}` : null,
+              name: r() < 0.2 ? "" : `zq-draft-${target}`,
+              imageUrl:
+                r() < 0.5 ? `https://zq.test/draft-${target}.png` : null,
+              newId: r() < 0.5 ? `u-zq-${target}` : null,
+            },
+    };
   }
   if (roll < 0.5)
     return { type: "ASK", playerId: who, text: r() < 0.1 ? "" : "Q?" };
@@ -85,10 +188,18 @@ function checkInvariants(s: RoomState) {
     if (s.phase === "answering")
       expect(left).toBeLessThanOrEqual(s.stepMs ?? 0);
     else expect(left).toBe(s.stepMs);
-    // turn steps start under an answers or guess reveal; only the theme holds the clock
-    if (s.reveal?.kind === "theme")
-      expect(s.stepStartsAt ?? 0).toBeGreaterThanOrEqual(s.reveal.until);
   }
+  // turn steps start under an answers or guess reveal; every show holds the clock
+  if (isShow(s.reveal) && s.stepStartsAt !== null)
+    expect(s.stepStartsAt).toBeGreaterThanOrEqual(s.reveal.until);
+  if (s.phase === "lobby") expect(s.reveal).toBeNull();
+  if (s.phase === "voting" || s.phase === "theming") {
+    expect(s.reveal?.kind).toBe("opening");
+    expect(s.stepStartsAt).toBe(s.reveal?.until);
+  }
+  // a draft only sits on a card nobody filled yet
+  for (const a of Object.values(s.assignments))
+    if (a.draft) expect(a.character).toBeNull();
   if (
     s.phase === "asking" ||
     s.phase === "guessing" ||
@@ -118,19 +229,29 @@ function checkInvariants(s: RoomState) {
     if (s.reveal.kind === "answers") {
       expect(len).toBeGreaterThanOrEqual(t.answersMin);
       expect(len).toBeLessThanOrEqual(t.answersMax);
+    } else if (s.reveal.kind === "guess") {
+      expect([t.guessHit, t.guessMiss]).toContain(len);
     } else {
-      expect([
-        t.guessHit,
-        t.guessMiss,
-        t.theme,
-        t.theme + t.themeTieSpin,
-      ]).toContain(len);
+      checkShow(s.reveal);
     }
   }
 }
 
 function checkSecrecy(s: RoomState, now: number) {
   for (const p of s.players) {
+    // what the picker has on the card for p is the picker's alone
+    const draft = s.assignments[p.id]?.draft;
+    if (draft) {
+      const json = JSON.stringify(toView(s, 1, p.id, now));
+      for (const bit of [
+        draft.name,
+        draft.imageUrl,
+        draft.characterId,
+        draft.newId,
+      ])
+        if (bit)
+          expect(json, `${p.id} sees the draft "${bit}"`).not.toContain(bit);
+    }
     const own = s.assignments[p.id]?.character;
     const o = s.outcomes[p.id];
     const mayKnow =
@@ -140,8 +261,8 @@ function checkSecrecy(s: RoomState, now: number) {
     for (const bit of [
       own.id,
       own.name,
-      own.origin ?? "-",
-      own.imageUrl ?? "-",
+      ...(own.origin ? [own.origin] : []),
+      ...(own.imageUrl ? [own.imageUrl] : []),
       ...own.aliases,
     ]) {
       if (json.includes(bit)) {
@@ -158,6 +279,8 @@ function checkSecrecy(s: RoomState, now: number) {
 describe("random play", () => {
   it("keeps every invariant and every secret", () => {
     let matchesFinished = 0;
+    let draftsSaved = 0;
+    let draftsTaken = 0;
     for (let seed = 1; seed <= 300; seed++) {
       const r = rng(seed * 7919);
       const g = new Game(2 + (seed % 3), seed);
@@ -175,6 +298,12 @@ describe("random play", () => {
           }
           if (event.type === "TIMEOUT")
             expect(isExpired(g.state, g.now)).toBe(true);
+          if (event.type === "DRAFT" && event.draft) draftsSaved++;
+          // the clock took a card someone left unconfirmed
+          if (event.type === "TIMEOUT" && input.phase === "picking")
+            draftsTaken += Object.entries(input.assignments).filter(
+              ([t, a]) => !a.character && !next.assignments[t].auto,
+            ).length;
           g.state = next;
         } catch (e) {
           if (!(e instanceof GameError)) throw e;
@@ -187,5 +316,7 @@ describe("random play", () => {
       }
     }
     expect(matchesFinished).toBeGreaterThan(0);
+    expect(draftsSaved).toBeGreaterThan(0);
+    expect(draftsTaken).toBeGreaterThan(0);
   }, 30_000); // 300 matches: give a busy machine room
 });

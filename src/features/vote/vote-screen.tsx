@@ -16,12 +16,7 @@ import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { GameFrame } from "@/features/room/game-header";
 import { type ThemeSet, themeSetEmoji } from "@/game/theme-sets";
-import {
-  type Lang,
-  type PlayerView,
-  REVEAL_TIMING,
-  type VoteView,
-} from "@/game/types";
+import type { Lang, PlayerView, VoteView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
@@ -73,9 +68,11 @@ export function VoteScreen() {
   const reveal = view.reveal?.kind === "theme" ? view.reveal : null;
 
   const resolved = v?.chosen != null && reveal !== null;
+  // The theme show opens with the spin when the vote tied.
+  const spin = reveal?.beats.find((b) => b.kind === "tie_spin");
   const spinMs =
-    resolved && v && v.tied.length > 1 && !still
-      ? REVEAL_TIMING.themeTieSpin
+    resolved && v && v.tied.length > 1 && !still && spin
+      ? spin.until - spin.startsAt
       : 0;
   const elapsed = reveal ? now - reveal.startsAt : 0;
   const stage: Stage = !resolved

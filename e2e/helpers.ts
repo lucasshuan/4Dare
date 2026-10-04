@@ -1,4 +1,10 @@
-import { type Browser, expect, type Page } from "@playwright/test";
+import {
+  type Browser,
+  type BrowserContext,
+  expect,
+  type Page,
+  test,
+} from "@playwright/test";
 import type { RoomView } from "@/game/types";
 
 export const PHONE = {
@@ -7,9 +13,21 @@ export const PHONE = {
   hasTouch: true,
 };
 
-/** A fresh browser context is a fresh guest. */
+/** Players' contexts, by the test that opened them. */
+const opened: { testId: string; ctx: BrowserContext }[] = [];
+
+/**
+ * A fresh browser context is a fresh guest. The players of earlier tests are
+ * closed first: their pages would keep polling the server for the rest of the run.
+ */
 export async function newPlayer(browser: Browser, phone = false) {
+  const testId = test.info().testId;
+  for (const old of opened.filter((o) => o.testId !== testId)) {
+    opened.splice(opened.indexOf(old), 1);
+    await old.ctx.close().catch(() => {});
+  }
   const ctx = await browser.newContext(phone ? PHONE : undefined);
+  opened.push({ testId, ctx });
   return ctx.newPage();
 }
 
@@ -40,7 +58,9 @@ export async function joinRoom(page: Page, code: string) {
  * anyway?" question never comes up.
  */
 export async function startMatch(host: Page) {
-  await expect(host.getByRole("img", { name: /^ready$/i }).first()).toBeVisible();
+  await expect(
+    host.getByRole("img", { name: /^ready$/i }).first(),
+  ).toBeVisible();
   await expect(host.getByRole("img", { name: /^not ready/i })).toHaveCount(0);
   await button(host, /start match/i).click();
 }
@@ -52,41 +72,52 @@ export async function viewOf(page: Page, code: string): Promise<RoomView> {
   return res.json();
 }
 
-/** Every player votes at once (the vote is short); the first theme wins, then the result plays out before picking. */
+/**
+ * Every player votes at once (the vote is short); the first theme wins, then
+ * the theme show plays before picking. The opening plays first: wait for the
+ * cards, never for text that lives in a single beat of a show.
+ */
 export async function voteAll(players: Page[], option = 0) {
   await Promise.all(
     players.map(async (page) => {
       const themes = page
         .getByRole("group", { name: /vote for the theme/i })
         .getByRole("button");
-      await expect(themes).toHaveCount(3);
+      await expect(themes).toHaveCount(3, { timeout: 15_000 });
+      for (let i = 0; i < 3; i++)
+        await expect(themes.nth(i)).toBeEnabled({ timeout: 15_000 });
       await themes.nth(option).click();
     }),
   );
-  for (const page of players)
-    await expect(
-      page.getByRole("heading", { name: /the theme is/i }),
-    ).toBeVisible();
 }
 
 /** Every player creates a new character named "Hero <n>" for their target and confirms it. */
 export async function pickAll(players: Page[]) {
   for (const [i, page] of players.entries()) {
-    await page
-      .getByRole("textbox")
-      .first()
-      .fill(`Hero ${i + 1}`);
+    // the theme show plays before the pick table
+    const field = page.getByRole("textbox", { name: /character for/i });
+    await expect(field).toBeVisible({ timeout: 20_000 });
+    await field.fill(`Hero ${i + 1}`);
     await button(page, /create “hero/i).click();
     await button(page, /save and pick/i).click();
     await button(page, /confirm pick/i).click();
   }
 }
 
-/** Polls until one of the pages shows the question box, or the match ends. */
-async function nextAsker(players: Page[]) {
+/**
+ * Polls until one of the pages shows the question box, or the match ends.
+ * The first turn's clock waits for the cast show: a question sent before it
+ * starts is refused, so this also waits for that.
+ */
+async function nextAsker(players: Page[], code: string) {
   for (let i = 0; i < 120; i++) {
     for (const page of players) {
-      if (await button(page, /send question/i).isVisible()) return page;
+      if (await button(page, /send question/i).isVisible()) {
+        const view = await viewOf(page, code);
+        const wait = (view.stepStartsAt ?? 0) - view.serverNow;
+        if (wait > 0) await page.waitForTimeout(wait + 100);
+        return page;
+      }
       if (await button(page, /back to rooms/i).isVisible()) return null;
     }
     await players[0].waitForTimeout(250);
@@ -105,11 +136,13 @@ export async function playToEnd(
 ) {
   let missed = !missFirst;
   for (let round = 0; round < 30; round++) {
-    const asker = await nextAsker(players);
+    const asker = await nextAsker(players, code);
     if (!asker) return;
     const others = players.filter((p) => p !== asker);
 
-    await asker.getByRole("textbox").first().fill("Is it a person?");
+    await asker
+      .getByRole("textbox", { name: /yes-or-no question/i })
+      .fill("Is it a person?");
     await button(asker, /send question/i).click();
     for (const page of others) {
       const send = button(page, /send answer/i);
@@ -135,19 +168,17 @@ export async function playToEnd(
     // ...but the asker never does
     await expect(asker.getByText(name as string)).toHaveCount(0);
 
+    const guessField = asker.getByRole("textbox", { name: /your guess/i });
     if (!missed) {
       missed = true;
-      await asker.getByRole("textbox").first().fill("Nobody at all");
+      await guessField.fill("Nobody at all");
       await button(asker, /take a guess/i).click();
       const pickerId = seenByOther?.pickedById;
       const picker = await pageOf(others, code, pickerId);
       await button(picker, /not yet/i).click();
       continue;
     }
-    await asker
-      .getByRole("textbox")
-      .first()
-      .fill(name as string);
+    await guessField.fill(name as string);
     await button(asker, /take a guess/i).click();
   }
   throw new Error("the match did not end");

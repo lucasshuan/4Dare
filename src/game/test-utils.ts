@@ -2,6 +2,7 @@
 import { createRoom, reduce } from "./engine";
 import {
   type Character,
+  type Ctx,
   DEFAULT_SETTINGS,
   type GameEvent,
   type Identity,
@@ -62,6 +63,8 @@ export class Game {
   now = 1_000_000;
   random: () => number;
   state: RoomState;
+  /** Ctx.showScale: shortens (or stretches) every show beat. */
+  showScale: number | undefined;
 
   constructor(players: number, seed = 1, settings: Partial<RoomSettings> = {}) {
     this.random = rng(seed);
@@ -75,8 +78,10 @@ export class Game {
       this.do({ type: "JOIN", player: ident(`p${i}`) });
   }
 
-  ctx() {
-    return { now: this.now, random: this.random };
+  ctx(): Ctx {
+    return this.showScale === undefined
+      ? { now: this.now, random: this.random }
+      : { now: this.now, random: this.random, showScale: this.showScale };
   }
 
   do(event: GameEvent) {
@@ -91,15 +96,23 @@ export class Game {
     }
   }
 
+  /** Moves the clock to the end of the show on screen (opening, theme or cast), if any. */
+  skipShow() {
+    const r = this.state.reveal;
+    if (r && (r.kind === "opening" || r.kind === "theme" || r.kind === "cast"))
+      this.now = Math.max(this.now, r.until);
+  }
+
   /** Moves the clock past the current deadline and fires TIMEOUT. */
   timeout(extra: Partial<Extract<GameEvent, { type: "TIMEOUT" }>> = {}) {
     if (this.state.deadline !== null) this.now = this.state.deadline;
     return this.do({ type: "TIMEOUT", ...extra });
   }
 
-  /** Starts the vote and has everyone vote for THEME, so the match begins. */
+  /** Starts the vote, lets the opening play and has everyone vote for THEME; picking starts after the theme show. */
   start() {
     this.do({ type: "START", playerId: this.state.hostId, themes: THEMES });
+    this.skipShow();
     this.voteAll(0);
     this.skipReveal();
     return this.state;

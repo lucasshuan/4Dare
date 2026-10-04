@@ -9,10 +9,12 @@ import {
 } from "./types";
 import { playersOnline, toPublicRoom, toView } from "./view";
 
+/** Picks done and the cast over. */
 function started(n: number, seed = 3) {
   const g = new Game(n, seed);
   g.start();
   g.pickAll();
+  g.skipShow();
   return g;
 }
 
@@ -28,7 +30,7 @@ describe("secrecy", () => {
     expect(() => view(g, "stranger")).toThrow(GameError);
   });
 
-  it("nobody sees their own card while playing", () => {
+  it("nobody sees their own card while playing (only who picked it)", () => {
     const g = started(3);
     for (const p of g.state.players) {
       expect(leaks(g, p.id)).toBe(false);
@@ -36,7 +38,7 @@ describe("secrecy", () => {
       expect(me).toMatchObject({
         card: null,
         cardHidden: true,
-        pickedById: null,
+        pickedById: g.state.assignments[p.id].pickerId,
       });
       const others = view(g, p.id).players.filter((x) => !x.isYou);
       expect(
@@ -286,9 +288,10 @@ describe("guess matching", () => {
 });
 
 describe("the theme vote in the view", () => {
-  it("shows the options, open votes and statuses, then the result while it is revealed", () => {
+  it("shows the options, open votes and statuses, then the result while the theme show plays", () => {
     const g = new Game(3);
     g.do({ type: "START", playerId: "p1", themes: THEMES });
+    g.skipShow();
     g.do({ type: "VOTE", playerId: "p2", option: 2 });
     const v = toView(g.state, 1, "p1", g.now);
     expect(v.vote).toMatchObject({
@@ -314,5 +317,98 @@ describe("the theme vote in the view", () => {
     const later = toView(g.state, 2, "p3", (g.state.reveal?.until ?? 0) + 1);
     expect(later.vote).toBeNull();
     expect(later.reveal).toBeNull();
+  });
+});
+
+describe("shows in the view", () => {
+  it("everyone gets the show's beats, and the one still playing before it", () => {
+    const g = new Game(2);
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    const opening = g.state.reveal;
+    const v = toView(g.state, 1, "p2", g.now);
+    expect(v.reveal).toEqual({
+      kind: "opening",
+      n: 1,
+      startsAt: opening?.startsAt,
+      until: opening?.until,
+      beats: opening?.beats,
+      first: true,
+      rule: null,
+      prev: null,
+    });
+    // everyone votes during the opening: the theme show waits behind it
+    g.voteAll(0);
+    const during = toView(g.state, 2, "p2", g.now).reveal;
+    expect(during).toMatchObject({
+      kind: "theme",
+      startsAt: opening?.until,
+      prev: { kind: "opening", until: opening?.until, prev: null },
+    });
+    // once the opening is over it is gone from the view
+    const after = toView(g.state, 2, "p2", opening?.until ?? 0).reveal;
+    expect(after).toMatchObject({ kind: "theme", prev: null });
+    expect(toView(g.state, 2, "p2", opening?.until ?? 0).vote).not.toBeNull();
+  });
+
+  it("the cast keeps the pick table in the view while it plays", () => {
+    const g = new Game(3);
+    g.start();
+    g.pickAll();
+    const until = g.state.reveal?.until ?? 0;
+    for (const p of g.state.players) {
+      const v = toView(g.state, 1, p.id, g.now);
+      expect(v.phase).toBe("asking");
+      expect(v.reveal?.kind).toBe("cast");
+      expect(v.pick).toMatchObject({ confirmed: true, total: 3, draft: null });
+      expect(v.pick?.confirmedIds).toHaveLength(3);
+      expect(toView(g.state, 1, p.id, until).pick).toBeNull();
+    }
+  });
+});
+
+describe("picking in the view", () => {
+  it("who picks for whom is open from picking on, your own picker included", () => {
+    const g = new Game(3);
+    g.start();
+    for (const p of g.state.players) {
+      for (const x of toView(g.state, 1, p.id, g.now).players)
+        expect(x.pickedById).toBe(g.state.assignments[x.id].pickerId);
+    }
+    // not before: nobody picks for anyone during the vote
+    const h = new Game(3);
+    h.do({ type: "START", playerId: "p1", themes: THEMES });
+    for (const x of toView(h.state, 1, "p1", h.now).players)
+      expect(x.pickedById).toBeNull();
+  });
+
+  it("a draft only ever reaches its picker", () => {
+    const g = new Game(3);
+    g.start();
+    const [target, a] = Object.entries(g.state.assignments)[0];
+    g.do({
+      type: "DRAFT",
+      playerId: a.pickerId,
+      draft: {
+        characterId: null,
+        name: "Zq draft",
+        imageUrl: "/api/files/characters/zq.webp",
+        newId: "u-zq-new",
+      },
+    });
+    expect(view(g, a.pickerId).pick?.draft).toEqual({
+      characterId: null,
+      name: "Zq draft",
+      imageUrl: "/api/files/characters/zq.webp",
+    });
+    for (const p of g.state.players) {
+      const json = JSON.stringify(view(g, p.id));
+      if (p.id !== a.pickerId) {
+        expect(json).not.toContain("Zq draft");
+        expect(json).not.toContain("zq.webp");
+      }
+      // the id the clock would give it never leaves the server
+      expect(json).not.toContain("u-zq-new");
+    }
+    expect(view(g, target).pick?.draft).toBeNull();
   });
 });

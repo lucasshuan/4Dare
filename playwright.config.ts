@@ -17,10 +17,13 @@ export default defineConfig({
     url: "http://localhost:3100/en",
     reuseExistingServer: true,
     timeout: 180_000,
-    // own build folder and data, so it can run next to `pnpm dev`
+    // own build folder and data, so it can run next to `pnpm dev`;
+    // the match shows play 4× faster (the step clocks keep their length).
+    // A server already on 3100 is reused: stop it first if it lacks this env.
     env: {
       NEXT_DIST_DIR: ".next-e2e",
       DARE_DATA_DIR: ".data/e2e",
+      DARE_SHOW_SCALE: "0.25",
       NEXT_PUBLIC_SUPABASE_URL: "",
       SUPABASE_URL: "",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
