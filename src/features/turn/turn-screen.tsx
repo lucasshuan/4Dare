@@ -147,11 +147,12 @@ export function TurnScreen() {
       <TurnHandoff />
       {tableOnly ? null : (
         <>
-          <TurnSteps />
+          {/* who is playing first; the steps (wide screens only) under them */}
           <PlayerStrip
             players={view.players}
             enter={enterAt === null ? undefined : { at: enterAt }}
           />
+          <TurnSteps />
           <Rise at={enterAt}>
             {/* the card's width follows the window height, so the whole screen fits */}
             <div className="w-full lg:w-[clamp(232px,calc((100dvh_-_330px)_*_0.66),368px)] lg:flex-none">
