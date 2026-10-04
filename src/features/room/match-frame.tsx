@@ -16,7 +16,7 @@ import {
   WIDE,
 } from "@/features/turn/history-panel";
 import { themeSetEmoji } from "@/game/theme-sets";
-import type { BeatKind, Lang, ShowView } from "@/game/types";
+import type { BeatKind, Lang, PlayerStatus, ShowView } from "@/game/types";
 import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease, gs } from "@/lib/motion";
 import { LeaveMatchButton } from "./leave-match-button";
@@ -120,6 +120,23 @@ export function MatchFrame({ children }: { children: ReactNode }) {
   );
 }
 
+/** Statuses that wait on this player's input. */
+const AWAITED = new Set<PlayerStatus>([
+  "theming",
+  "voting",
+  "picking",
+  "asking",
+  "answering",
+  "guessing",
+  "validating",
+]);
+
+/**
+ * The clock waits on this player: only then it turns red and ticks near the
+ * end, and the tab calls them back.
+ */
+export const isAwaited = (status: PlayerStatus) => AWAITED.has(status);
+
 /**
  * Left: the history button (turns only) and the theme tag. Right: the step
  * clock, then leave and give up (turns only). Each part pops in when it arrives live
@@ -191,7 +208,7 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
                 }
                 offset={offset}
                 totalMs={view.stepMs}
-                tick
+                alarm={isAwaited(me.status)}
               />
             </m.div>
           ) : null}

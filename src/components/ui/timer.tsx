@@ -11,8 +11,9 @@ import { useLoopSound } from "@/lib/sound";
 /**
  * The step clock. While a reveal is on screen (now < stepStartsAt) it recharges:
  * the bar refills and the digits count back up to the full step, landing exactly
- * when the step starts. Then it counts down, turning to the "no" colour near the end;
- * with `tick`, a clock ticks in a loop from then until it runs out. When the
+ * when the step starts. Then it counts down. With `alarm` (the clock waits on the
+ * viewer), it turns to the "no" colour near the end and a clock ticks in a loop
+ * from then until it runs out. When the
  * deadline comes sooner mid-step (votes and answers cut it), the lost time
  * drains off the digits and the bar in a blink and a "−18 s" drops off it.
  */
@@ -22,7 +23,7 @@ export function Timer({
   rechargeFrom,
   offset,
   compact,
-  tick,
+  alarm,
   totalMs,
 }: {
   deadline: number | null;
@@ -31,7 +32,7 @@ export function Timer({
   rechargeFrom?: number | null;
   offset: number;
   compact?: boolean;
-  tick?: boolean;
+  alarm?: boolean;
   /** The step's full length; the bar measures against it, so a cut shows as a drop. */
   totalMs?: number | null;
 }) {
@@ -45,7 +46,7 @@ export function Timer({
       : (totalMs ?? deadline - stepStartsAt);
   useLoopSound(
     "tick",
-    !!tick &&
+    !!alarm &&
       deadline !== null &&
       stepStartsAt !== null &&
       now >= stepStartsAt &&
@@ -69,7 +70,7 @@ export function Timer({
     fraction = total > 0 ? left / total : 0;
     shown = left / 1000;
   }
-  const low = !recharging && isLowClock(shown, total);
+  const low = !!alarm && !recharging && isLowClock(shown, total);
   return (
     <div
       role="timer"

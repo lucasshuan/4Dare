@@ -16,14 +16,14 @@ import { StageProvider, useStage } from "@/features/stage/stage-context";
 import { ThemeScreen } from "@/features/theme/theme-screen";
 import { TurnScreen } from "@/features/turn/turn-screen";
 import { VoteScreen } from "@/features/vote/vote-screen";
-import type { ErrorCode, Phase, PlayerStatus, RoomView } from "@/game/types";
+import type { ErrorCode, Phase, RoomView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
 import { useRoomTitle } from "@/lib/names";
 import { WHO_AM_I } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
-import { MatchFrame, useReached } from "./match-frame";
+import { isAwaited, MatchFrame, useReached } from "./match-frame";
 import { RevealOverlay } from "./reveal-overlay";
 
 /**
@@ -199,17 +199,6 @@ const TAB_PHASE: Partial<Record<Phase, string>> = {
   validating: "playing",
   finished: "finished",
 };
-/** Statuses that wait on this player: the tab calls them back when they're elsewhere. */
-const TAB_ALERT: Partial<Record<PlayerStatus, string>> = {
-  theming: "theming",
-  voting: "voting",
-  picking: "picking",
-  asking: "asking",
-  answering: "answering",
-  guessing: "guessing",
-  validating: "validating",
-};
-
 /**
  * "0:42 · Lobby · Bia's room · 4Dare", or "0:42 · Your turn! · 4Dare" on the
  * player's move. While a show holds the step, the call waits for the step.
@@ -221,7 +210,7 @@ function useRoomTab() {
   const started = useReached(view.stepStartsAt);
   const held = isShow(view.reveal) && view.stepStartsAt !== null && !started;
   const phase = TAB_PHASE[view.phase];
-  const alert = held ? undefined : TAB_ALERT[me.status];
+  const alert = held || !isAwaited(me.status) ? null : me.status;
   const title = roomTitle(
     view.settings.name,
     view.players.find((p) => p.isHost),
