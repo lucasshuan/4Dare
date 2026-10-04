@@ -347,7 +347,7 @@ export function CardPicture({
                   onError={(e) => {
                     e.currentTarget.style.visibility = "hidden";
                   }}
-                  className="size-full object-cover"
+                  className="size-full object-cover object-top"
                 />
               ) : null}
             </m.span>
