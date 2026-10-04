@@ -10,6 +10,10 @@ const SOUNDS = {
   complete: { src: "/sounds/match-complete.mp3", volume: 0.7 },
   /** Every step change of a turn: question sent, answered, guess sent, guess answered. */
   step: { src: "/sounds/step-pop.mp3", volume: 0.6 },
+  /** Someone joined the room (or came back to it). */
+  join: { src: "/sounds/player-join.mp3", volume: 0.6 },
+  /** Someone left the room. */
+  leave: { src: "/sounds/player-leave.mp3", volume: 0.6 },
 } as const;
 export type Sound = keyof typeof SOUNDS;
 

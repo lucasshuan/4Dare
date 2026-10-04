@@ -69,6 +69,23 @@ function useStepSound(phase: Phase) {
   }, [phase]);
 }
 
+/** A pluck when someone joins the room or comes back to it, another when someone leaves. */
+function usePresenceSound(view: RoomView) {
+  const here = view.players
+    .filter((p) => !p.away)
+    .map((p) => p.id)
+    .sort()
+    .join(" ");
+  const last = useRef(here);
+  useEffect(() => {
+    const before = new Set(last.current.split(" ").filter(Boolean));
+    const now = new Set(here.split(" ").filter(Boolean));
+    last.current = here;
+    if ([...now].some((id) => !before.has(id))) playSound("join");
+    else if ([...before].some((id) => !now.has(id))) playSound("leave");
+  }, [here]);
+}
+
 /** Fetches every card's picture as soon as the room knows it, so the cards show up with it. */
 function usePreloadCards(view: RoomView) {
   const urls = view.players
@@ -108,6 +125,7 @@ function Areas() {
   const { area, screen, finishedWait } = useStage();
   useRoomTab();
   useStepSound(view.phase);
+  usePresenceSound(view);
   usePreloadCards(view);
   return (
     <AnimatePresence mode="wait">
