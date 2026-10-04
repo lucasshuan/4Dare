@@ -14,7 +14,8 @@
       "!dist",
       "!build",
       "!.next-*",
-      "!.data"
+      "!.data",
+      "!docs/phase10"
     ]
   },
   "formatter": {

@@ -1,0 +1,142 @@
+<title>4Dare em cena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Mono:wght@500&family=Figtree:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="flow.css">
+<link rel="stylesheet" href="stage.css">
+
+<div class="pg">
+  <header class="pg-bar">
+    <div class="pg-brand"><span id="logo"></span><span>Fluxo da partida · proposta</span></div>
+    <div class="pg-controls">
+      <div class="seg" role="group" aria-label="Tamanho da tela">
+        <button type="button" data-device="desktop" aria-pressed="true"><span data-icon="monitor"></span>Computador</button>
+        <button type="button" data-device="phone" aria-pressed="false"><span data-icon="phone"></span>Celular</button>
+      </div>
+      <div class="seg" role="group" aria-label="Tema de cores">
+        <button type="button" data-theme-btn="light" aria-pressed="true"><span data-icon="sun"></span>Claro</button>
+        <button type="button" data-theme-btn="dark" aria-pressed="false"><span data-icon="moon"></span>Escuro</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Proposta · 3 de outubro de 2026</span>
+      <h1>A partida se <em>apresenta</em>.</h1>
+      <p>No teste com amigos, o jogo prendeu por horas, mas a primeira partida assustou: pouca gente entendeu o que fazer e muitos não sabiam pra quem estavam escolhendo. A resposta não é um tutorial escrito. É fazer cada etapa entrar em cena como num programa de auditório.</p>
+    </div>
+    <div class="rules">
+      <div class="rule"><i style="background:var(--sky-soft);color:var(--sky)">1</i><b>Uma coisa por vez</b><span>Cada cena tem uma frase e uma ação. A próxima entra quando a anterior sai.</span></div>
+      <div class="rule"><i style="background:var(--butter);color:var(--on-butter)">◎</i><b>No centro, grande</b><span>O que importa ocupa o meio da tela. O resto vai pra borda ou some.</span></div>
+      <div class="rule"><i style="background:var(--no-soft);color:var(--no)">▶</i><b>Mostrar antes de dizer</b><span>Regra vira cena: cartas que entram no tema, um papel sorteado, uma carta que chega.</span></div>
+      <div class="rule"><i style="background:var(--yes-soft);color:var(--yes)">●</i><b>A cor diz quem</b><span>Cada jogador tem a sua cor. Escolhendo para Leo, a tela fica da cor de Leo.</span></div>
+    </div>
+  </section>
+
+  <section class="player" aria-label="Fluxo animado">
+    <div class="viewer">
+      <div class="viewport" id="viewport">
+        <div class="device" id="device"><div class="device-frame" id="frame"></div></div>
+      </div>
+      <div class="transport">
+        <button class="tbtn" id="restart" type="button" aria-label="Do começo"><span data-icon="restart"></span></button>
+        <button class="tbtn" id="prev" type="button" aria-label="Cena anterior"><span data-icon="prev"></span></button>
+        <button class="tbtn play" id="play" type="button" aria-label="Tocar"></button>
+        <button class="tbtn" id="next" type="button" aria-label="Próxima cena"><span data-icon="next"></span></button>
+        <span class="clock" id="clock">0:00 / 0:00</span>
+        <div class="seg speed" role="group" aria-label="Velocidade">
+          <button type="button" data-speed="0.5" aria-pressed="false">0,5×</button>
+          <button type="button" data-speed="1" aria-pressed="true">1×</button>
+        </div>
+      </div>
+      <div class="bar" id="bar"></div>
+      <article class="notes" aria-live="polite">
+        <div>
+          <span class="k" id="n-kicker"></span>
+          <h2 id="n-title"></h2>
+          <p id="n-what"></p>
+          <div id="n-saywrap"><span class="k" style="margin:18px 0 0">Texto na tela</span><div class="say" id="n-say"></div></div>
+        </div>
+        <div>
+          <span class="k">Detalhes</span>
+          <ul id="n-list"></ul>
+        </div>
+      </article>
+    </div>
+    <nav class="rail" id="rail" aria-label="Cenas"><h3>Cenas</h3></nav>
+  </section>
+
+  <section class="sec" aria-labelledby="chat-h">
+    <div class="sec-head">
+      <div><span class="eyebrow">Chat e histórico</span><h2 id="chat-h">Cada um no seu canto</h2></div>
+      <p>O chat é uma aba no canto inferior direito, na sala e na partida. Ele sobe por cima da tela quando chamado e volta quando ninguém precisa dele. O histórico é outra coisa: só existe nos turnos e abre uma barra de altura total à esquerda.</p>
+    </div>
+    <div class="chat-grid">
+      <figure class="mock"><div class="mock-view" id="mock-shut"></div><figcaption><h3>Chat recolhido, mensagem nova</h3><p>A aba pula, fica azul, mostra quem mandou e quantas faltam ler. O balão com a mensagem fica 3 s acima dela.</p></figcaption></figure>
+      <figure class="mock"><div class="mock-view" id="mock-open"></div><figcaption><h3>Chat aberto</h3><p>Um clique no topo e ele sobe até uns 60% da altura, por cima da tela. Outro clique no topo recolhe.</p></figcaption></figure>
+    </div>
+    <div class="chat-row2">
+      <figure class="mock"><div class="mock-view" id="mock-hist"></div><figcaption><h3>Histórico aberto</h3><p>O botão à esquerda do tema abre a barra de altura total à esquerda, que empurra a tela. Filtros e jogadas como no histórico de hoje.</p></figcaption></figure>
+      <figure class="mock"><div class="mock-view" id="mock-peek"></div><figcaption><h3>Celular · recolhido</h3><p>Barra embaixo com a última mensagem e o contador. Fica azul quando tem coisa nova.</p></figcaption></figure>
+      <figure class="mock"><div class="mock-view" id="mock-sheet"></div><figcaption><h3>Celular · aberto</h3><p>Sobe de baixo, do mesmo jeito. Tocar no topo recolhe.</p></figcaption></figure>
+    </div>
+    <div class="decide">
+      <div><b>Por cima, não ao lado</b><span>O chat não reserva espaço. As telas ficam grandes e centralizadas, e o chat aberto passa na frente delas.</span></div>
+      <div><b>Mensagem nova chama</b><span>Aba azul, contador, rostos de quem mandou, balão por 3 s e um pulinho de tempos em tempos até alguém abrir.</span></div>
+      <div><b>Histórico à esquerda</b><span>Separado do chat, só durante os turnos. Botão à esquerda do tema; aberto, ocupa a altura toda.</span></div>
+      <div><b>Só a conversa</b><span>Sem lista de quem está na sala e sem atalhos de emoji. Mensagens e linhas do sistema (“Tema: Super-heróis”).</span></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="time-h">
+    <div class="sec-head">
+      <div><span class="eyebrow">Tempo</span><h2 id="time-h">Quanto a apresentação custa</h2></div>
+      <p>As cenas novas somam uns 30 s na primeira partida da sala e uns 14 s nas seguintes, quando a abertura vira um cartão curto e a regra do tema não se repete. A votação também cresce de 13 para 20 s. A escolha continua com até 2 min e acaba antes se todo mundo confirmar.</p>
+    </div>
+    <div class="tl-wrap"><div class="tl" id="tl"></div><div class="tl-legend" id="tl-legend"></div></div>
+  </section>
+
+  <section class="sec" aria-labelledby="code-h">
+    <div class="sec-head">
+      <div><span class="eyebrow">No código</span><h2 id="code-h">O que muda por baixo</h2></div>
+      <p>A tela de jogo (perguntas, respostas, palpites) não muda. O resto se encaixa no que já existe: a ordem embaralhada, o círculo de quem escolhe pra quem e o relógio do servidor que sincroniza as revelações.</p>
+    </div>
+    <div class="callout" role="note"><b>Ao implementar</b><span>A votação do tema passa de 13 para 20&nbsp;segundos: <code>VOTE_SECONDS = 20</code> em <code>src/game/types.ts</code>, e o texto de tempos do <code>PRODUCT.md</code> junto. No teste com amigos, 13&nbsp;s acabava antes de todo mundo ler os três temas.</span></div>
+    <div class="code-grid">
+      <div class="code-card"><h3>Partida</h3><ul>
+        <li><code>VOTE_SECONDS</code>: 13 → 20.</li>
+        <li><code>beginMatch</code> já embaralha <code>order</code> e cria <code>assignments</code> em círculo. As cenas só mostram isso.</li>
+        <li>Uma etapa de apresentação antes de <code>picking</code>, com o início adiado como nas revelações: completa quando <code>round === 1</code>, curta depois.</li>
+        <li>Rascunho da escolha salvo no servidor enquanto edita (nome, imagem, id). No <code>timeout</code>, o rascunho vira o <code>PICK</code>, criando o personagem se for novo. Sorteio só com a carta vazia.</li>
+      </ul></div>
+      <div class="code-card"><h3>Telas</h3><ul>
+        <li>Um palco novo para abertura, sorteio, “para quem”, “seu personagem” e ordem, guiado pelo relógio do servidor como o <code>RevealOverlay</code>.</li>
+        <li><code>PickScreen</code> sem <code>Mode</code>: campo na própria carta, prévia do primeiro resultado, bandeja de imagens e a mão de sugestões.</li>
+        <li><code>TurnBackdrop</code> generalizado: cor por etapa ou por jogador alvo, símbolos do conjunto do tema (<code>themeSetEmoji</code>).</li>
+      </ul></div>
+      <div class="code-card"><h3>Chat</h3><ul>
+        <li>Tabela <code>room_messages</code> (sala, autor, texto até 280, tipo mensagem/sistema/reação), entregue pelo Realtime no canal que a sala já usa.</li>
+        <li>Limite de envio por jogador em <code>rate-limit.ts</code>, só texto, apagado quando a sala fecha.</li>
+        <li>Chat como aba flutuante no canto, montada em <code>RoomScreen</code> para valer na sala e na partida; contador de não lidas no navegador.</li>
+        <li><code>HistorySidebar</code> passa para a esquerda e <code>HistoryButton</code> vai para a esquerda do tema no <code>GameHeader</code>.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <p class="foot">Protótipo animado: tudo é desenhado aqui mesmo, sem imagens de fora. Retratos, nomes e mensagens são exemplos.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="kit.js"></script>
+<script>
+  document.getElementById("logo").innerHTML = K.logo();
+  for (const el of document.querySelectorAll("[data-icon]")) {
+    el.outerHTML = K.icon[el.dataset.icon].replace("<svg", '<svg width="18" height="18"');
+  }
+</script>
+<script src="shell.js"></script>
+<script src="scenes-a.js"></script>
+<script src="scenes-b.js"></script>
+<script src="scenes-c.js"></script>
+<script src="player.js"></script>
