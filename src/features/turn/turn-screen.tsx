@@ -14,6 +14,7 @@ import { TextArea, TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { GameFrame } from "@/features/room/game-header";
+import { StageBackdrop, seatLook } from "@/features/stage/stage-backdrop";
 import {
   endsWithQuestionMark,
   questionMark,
@@ -47,7 +48,6 @@ import {
   WIDE,
 } from "./history-panel";
 import { PlayerStrip } from "./player-strip";
-import { TurnBackdrop } from "./turn-backdrop";
 
 type Mode =
   | "ask"
@@ -142,7 +142,7 @@ export function TurnScreen() {
         </AnimatePresence>
       }
     >
-      <TurnBackdrop seat={turnPlayer?.seat ?? null} />
+      <StageBackdrop look={seatLook(turnPlayer?.seat ?? null)} set={null} />
       <div className="flex flex-col gap-6 short:gap-4">
         <PlayerStrip players={view.players} />
         <div className="flex flex-wrap items-stretch gap-5 lg:gap-12">

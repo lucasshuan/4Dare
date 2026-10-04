@@ -13,6 +13,12 @@ export const NAMESPACES = [
   "room",
   "turn",
   "meta",
+  // the match's stage scenes, the pick card and the chat
+  "stageOpening",
+  "stageDraw",
+  "stageCast",
+  "pickCard",
+  "chat",
 ] as const;
 
 // `locale` is set when a caller names it (share images, metadata). Then the request is

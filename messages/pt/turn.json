@@ -86,7 +86,7 @@
     },
     "mineCaption": "Suas perguntas e palpites: {shown} de {total} jogadas · a mais recente em cima",
     "playerCaption": "Perguntas e palpites de {name}: {shown} de {total} jogadas · a mais recente em cima",
-    "nothing": "Nada por aqui ainda.",
+    "nothing": "Nada por aqui ainda. As perguntas aparecem aqui assim que alguém joga.",
     "question": "Pergunta · {name}",
     "guess": "Palpite · {name}"
   },

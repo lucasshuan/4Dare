@@ -5,9 +5,9 @@ import { cn } from "@/lib/cn";
 // colours, each letter a little tilted. Brand blue and butter stay the same in
 // both themes; the letters follow the theme. Static copies live in public/brand.
 
-const FOUR =
+export const FOUR =
   "M525 0L640 0Q700 0 700 60L700 489Q700 505 716 505L776 505Q820 505 820 549L820 611Q820 655 776 655L716 655Q700 655 688 665L511 809Q485 830 493 797L521 671Q525 655 509 655L70 655Q0 655 0 585L0 545Q0 465 61 414Q254 254 427 46Q465 0 525 0Z";
-const QUESTION =
+export const QUESTION =
   "M533 454L460 467Q453 443 456 426Q458 409 466 397Q474 384 485 375Q495 365 504 356Q514 346 519 335Q524 324 522 309L522 309Q518 289 505 282Q492 275 471 279L471 279Q459 281 445 287Q431 292 417 300Q403 308 391 318L391 318L373 241Q388 230 404 222Q420 214 437 208Q454 203 469 200L469 200Q495 196 517 198Q540 200 559 210Q579 220 592 238Q605 255 610 282L610 282Q614 306 609 323Q604 340 594 354Q584 367 572 379Q561 390 550 401Q540 412 535 425Q530 437 533 454L533 454M525 596L525 596Q495 602 478 592Q461 582 456 555L456 555Q452 528 464 513Q476 498 506 493L506 493Q537 487 554 497Q571 507 576 534L576 534Q585 586 525 596";
 const LETTERS = [
   [
@@ -28,7 +28,7 @@ const LETTERS = [
   ],
 ] as const;
 
-const BRAND = { blue: "#2B69C8", butter: "#F6E3A1" } as const;
+export const BRAND = { blue: "#2B69C8", butter: "#F6E3A1" } as const;
 
 /** The 4 bubble and its "?"; when a parent `group` is hovered the bubble tilts and the "?" leans the other way. */
 function Mark() {
@@ -41,6 +41,38 @@ function Mark() {
         className="origin-center transition-transform delay-75 duration-500 ease-soft [transform-box:fill-box] group-hover:rotate-12 group-focus-visible:rotate-12"
       />
     </g>
+  );
+}
+
+/**
+ * The 4 bubble alone, still (no hover tilt), in any two colours: the match's
+ * draw turns it into an urn (butter bubble, blue "?"). The "?" path carries
+ * `data-q` and turns around its own centre, so a scene can shake it inside.
+ * Decorative: size it with `className`.
+ */
+export function LogoMark({
+  bubble = BRAND.blue,
+  mark = BRAND.butter,
+  className,
+}: {
+  bubble?: string;
+  mark?: string;
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="-10 -10 840 850"
+      aria-hidden="true"
+      className={cn("block overflow-visible", className)}
+    >
+      <path fill={bubble} d={FOUR} />
+      <path
+        data-q=""
+        fill={mark}
+        d={QUESTION}
+        style={{ transformBox: "fill-box", transformOrigin: "center" }}
+      />
+    </svg>
   );
 }
 

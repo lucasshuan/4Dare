@@ -1,0 +1,17 @@
+{
+  "vote": {
+    "line": "Now, choose a theme together.",
+    "waitingEveryone": "Still voting: everyone"
+  },
+  "coldOpen": {
+    "line1": "Everyone gets a secret character.",
+    "line2": "Only you can't see yours. Ask to find out.",
+    "question": "Am I from Marvel?"
+  },
+  "round": "Round {n}",
+  "rule": {
+    "title": "Every character must be from this theme.",
+    "fits": "Fits the theme",
+    "misfit": "Doesn't fit"
+  }
+}

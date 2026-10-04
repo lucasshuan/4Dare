@@ -53,7 +53,7 @@ export function Screen({
         </div>
         <main
           className={cn(
-            "mx-auto w-full max-w-[1120px] flex-1 px-4 pt-6 pb-8 sm:px-8 sm:pt-8 sm:pb-12 sm:short:pb-6",
+            "mx-auto w-full max-w-[1120px] flex-1 px-4 pt-6 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-8 sm:pb-[calc(3rem+var(--dock))] sm:short:pb-[calc(1.5rem+var(--dock))]",
             className,
           )}
         >
@@ -63,7 +63,7 @@ export function Screen({
     );
   }
   return (
-    <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-8 sm:gap-10 sm:px-8 sm:pt-6 sm:pb-12 sm:short:gap-6 sm:short:pt-4 sm:short:pb-6">
+    <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:gap-10 sm:px-8 sm:pt-6 sm:pb-[calc(3rem+var(--dock))] sm:short:gap-6 sm:short:pt-4 sm:short:pb-[calc(1.5rem+var(--dock))]">
       <header
         className={cn(
           "mx-auto flex w-full items-center justify-between gap-3",
@@ -128,13 +128,20 @@ export function ThemeTag({
   emoji?: string | null;
 }) {
   return (
+    // a surface pill, so it reads on any step's colour behind it
     <span
       title={theme}
-      className="inline-flex min-w-0 max-w-full items-baseline gap-1.5 rounded-pill bg-butter px-4 py-1.5 text-on-butter text-sm"
+      className="inline-flex h-10 min-w-0 max-w-full items-center gap-2 rounded-pill bg-surface pr-4 pl-3 font-bold text-[15px] text-ink shadow-card"
     >
-      {emoji ? <span aria-hidden>{emoji}</span> : null}
-      <span className="shrink-0 whitespace-nowrap max-sm:sr-only">{label}</span>
-      <span className="truncate font-bold">{theme}</span>
+      {emoji ? (
+        <span aria-hidden className="shrink-0">
+          {emoji}
+        </span>
+      ) : null}
+      <span className="shrink-0 whitespace-nowrap font-semibold text-[13px] text-ink-muted max-sm:sr-only">
+        {label}
+      </span>
+      <span className="truncate">{theme}</span>
     </span>
   );
 }

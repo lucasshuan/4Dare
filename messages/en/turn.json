@@ -86,7 +86,7 @@
     },
     "mineCaption": "Your questions and guesses: {shown} of {total} plays · newest first",
     "playerCaption": "{name}'s questions and guesses: {shown} of {total} plays · newest first",
-    "nothing": "Nothing here yet.",
+    "nothing": "Nothing here yet. Questions show up here as soon as someone plays.",
     "question": "Question · {name}",
     "guess": "Guess · {name}"
   },

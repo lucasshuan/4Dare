@@ -40,11 +40,32 @@
   --seat-2: #cf7024;
   --seat-3: #0b7a75;
   --seat-4: #8a4fc4;
+  /* text on a seat colour */
+  --on-seat-1: #ffffff;
+  --on-seat-2: #2a1707;
+  --on-seat-3: #ffffff;
+  --on-seat-4: #ffffff;
+  /* a seat colour as text on its own wash ("for whom" name): deeper on the light wash */
+  --seat-1-ink: color-mix(in oklch, var(--seat-1), black 30%);
+  --seat-2-ink: color-mix(in oklch, var(--seat-2), black 30%);
+  --seat-3-ink: color-mix(in oklch, var(--seat-3), black 30%);
+  --seat-4-ink: color-mix(in oklch, var(--seat-4), black 30%);
+  /* The match stage: brand blue with butter marks (cold open, draw), the same hues in both themes. */
+  --brand-stage: #2b69c8;
+  --brand-butter: #f6e3a1;
+  --on-brand: #ffffff;
+  /* how strongly a step's colour washes the canvas (StageBackdrop) */
+  --wash-mix: 20%;
   --scrim: rgba(18, 22, 31, 0.45);
   --shadow-card-value:
     0 1px 2px rgba(30, 36, 51, 0.06), 0 10px 28px rgba(30, 36, 51, 0.08);
   --shadow-pop-value:
     0 2px 6px rgba(30, 36, 51, 0.08), 0 24px 56px rgba(30, 36, 51, 0.16);
+  /* the chat tab, lit from below */
+  --shadow-dock-value:
+    0 -2px 6px rgba(18, 22, 31, 0.06), 0 -16px 40px rgba(18, 22, 31, 0.14);
+  /* Height of whatever is docked at the bottom (the chat); pages and toasts keep clear of it. */
+  --dock: 0px;
   color-scheme: light;
 }
 
@@ -76,11 +97,23 @@
   --seat-2: #f0a566;
   --seat-3: #5ccfc6;
   --seat-4: #c39bf2;
+  --on-seat-1: #0f1b30;
+  --on-seat-2: #2a1707;
+  --on-seat-3: #06211f;
+  --on-seat-4: #1d0f2e;
+  --seat-1-ink: var(--seat-1);
+  --seat-2-ink: var(--seat-2);
+  --seat-3-ink: var(--seat-3);
+  --seat-4-ink: var(--seat-4);
+  --brand-stage: #1d4a93;
+  --wash-mix: 26%;
   --scrim: rgba(0, 0, 0, 0.6);
   --shadow-card-value:
     0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35);
   --shadow-pop-value:
     0 2px 6px rgba(0, 0, 0, 0.5), 0 24px 56px rgba(0, 0, 0, 0.5);
+  --shadow-dock-value:
+    0 -2px 6px rgba(0, 0, 0, 0.4), 0 -16px 40px rgba(0, 0, 0, 0.45);
   color-scheme: dark;
 }
 
@@ -110,6 +143,9 @@
   --color-no-soft: var(--no-soft);
   --color-on-avatar: var(--on-avatar);
   --color-scrim: var(--scrim);
+  --color-brand-stage: var(--brand-stage);
+  --color-brand-butter: var(--brand-butter);
+  --color-on-brand: var(--on-brand);
 
   --font-display:
     var(--font-bricolage), var(--font-zen-maru), system-ui, sans-serif;
@@ -125,6 +161,7 @@
 
   --shadow-card: var(--shadow-card-value);
   --shadow-pop: var(--shadow-pop-value);
+  --shadow-dock: var(--shadow-dock-value);
 
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-swap: cubic-bezier(0.65, 0, 0.35, 1);
@@ -148,6 +185,74 @@
     }
     95% {
       scale: 1.01 0.99;
+    }
+  }
+}
+
+/*
+ * The match stage's CSS loops. Every element that uses one also takes
+ * `motion-reduce:animate-none`: the reduced-motion clamp below shortens an
+ * animation to 1ms, so an infinite loop would flicker instead of stopping.
+ */
+@theme {
+  /* backdrop glows drifting (StageBackdrop) */
+  --animate-drift: drift 22s ease-in-out infinite alternate;
+  /* backdrop glyphs bobbing; each glyph sets its own duration and delay */
+  --animate-bob: bob 9s ease-in-out infinite;
+  /* the chat tab asking to be opened */
+  --animate-nudge: nudge 3.6s cubic-bezier(0.22, 1, 0.36, 1) 1.2s infinite;
+  /* typing dots */
+  --animate-dot: dot 0.9s ease-in-out infinite;
+  /* a drawn caret */
+  --animate-blink: blink 1s steps(1) infinite;
+
+  @keyframes drift {
+    from {
+      transform: translate(0, 0) scale(1);
+    }
+    to {
+      transform: translate(4%, -3%) scale(1.08);
+    }
+  }
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-8deg);
+    }
+    50% {
+      transform: translateY(-16px) rotate(8deg);
+    }
+  }
+  @keyframes nudge {
+    0%,
+    80%,
+    100% {
+      translate: 0 0;
+    }
+    86% {
+      translate: 0 -7px;
+    }
+    92% {
+      translate: 0 0;
+    }
+    96% {
+      translate: 0 -2px;
+    }
+  }
+  @keyframes dot {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.35;
+    }
+    50% {
+      transform: translateY(-4px);
+      opacity: 1;
+    }
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
     }
   }
 }

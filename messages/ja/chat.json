@@ -1,0 +1,20 @@
+{
+  "title": "チャット",
+  "empty": "ルームのチャット",
+  "placeholder": "メッセージを送る…",
+  "inputLabel": "メッセージ",
+  "send": "送信",
+  "open": "チャットを開く",
+  "fold": "チャットをたたむ",
+  "unread": "新着メッセージ{count}件",
+  "me": "あなた",
+  "line": "{name}：{text}",
+  "log": "メッセージ",
+  "failed": "送信できませんでした。タップしてもう一度。",
+  "system": {
+    "started": "▶ 試合開始",
+    "theme": "{emoji} テーマ：{theme}",
+    "order": "順番：{names}",
+    "firstTurn": "第{n}ラウンド・{name}さんの番"
+  }
+}

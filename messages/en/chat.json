@@ -1,0 +1,20 @@
+{
+  "title": "Chat",
+  "empty": "Room chat",
+  "placeholder": "Send a message…",
+  "inputLabel": "Message",
+  "send": "Send",
+  "open": "Open chat",
+  "fold": "Fold chat",
+  "unread": "{count, plural, one {# new message} other {# new messages}}",
+  "me": "You",
+  "line": "{name}: {text}",
+  "log": "Messages",
+  "failed": "Not sent. Tap to try again.",
+  "system": {
+    "started": "▶ Match started",
+    "theme": "{emoji} Theme: {theme}",
+    "order": "Order: {names}",
+    "firstTurn": "Round {n} · {name}'s turn"
+  }
+}

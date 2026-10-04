@@ -1,0 +1,22 @@
+{
+  "cardTitle": "Um personagem para {name}",
+  "placeholder": "Digite um nome…",
+  "rowPicks": "{origin} · {count, plural, one {# escolha} other {# escolhas}}",
+  "rowPicksNoOrigin": "{count, plural, one {# escolha} other {# escolhas}}",
+  "fromLibrary": "{origin} · da biblioteca",
+  "fromLibraryNoOrigin": "Da biblioteca",
+  "newCharacterLine": "Personagem novo · fica salvo no tema",
+  "notFound": "Não tem no tema ainda. Vira um personagem novo.",
+  "newSeal": "Novo!",
+  "drop": "Solte, cole ou busque uma imagem",
+  "dropOptional": "ou fica sem, tudo bem",
+  "upload": "Enviar a sua",
+  "uploading": "Enviando a imagem…",
+  "confirmCard": "Confirmar",
+  "rule": "Acabou o tempo? Vai a carta do jeito que estiver.",
+  "handLabel": "Populares em {theme}",
+  "handLikes": "{count, plural, one {Curtido por # jogador} other {Curtido por # jogadores}}",
+  "doneWaiting": "Feito! Esperando {names}",
+  "doneAll": "Todo mundo escolheu!",
+  "timeUp": "Tempo! Foi esse."
+}

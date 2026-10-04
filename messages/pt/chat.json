@@ -1,0 +1,20 @@
+{
+  "title": "Chat",
+  "empty": "Chat da sala",
+  "placeholder": "Mandar mensagem…",
+  "inputLabel": "Mensagem",
+  "send": "Enviar",
+  "open": "Abrir o chat",
+  "fold": "Recolher o chat",
+  "unread": "{count, plural, one {# mensagem nova} other {# mensagens novas}}",
+  "me": "Você",
+  "line": "{name}: {text}",
+  "log": "Mensagens",
+  "failed": "Não foi enviada. Toque para tentar de novo.",
+  "system": {
+    "started": "▶ Partida começou",
+    "theme": "{emoji} Tema: {theme}",
+    "order": "Ordem: {names}",
+    "firstTurn": "Rodada {n} · vez de {name}"
+  }
+}

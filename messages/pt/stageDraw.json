@@ -1,0 +1,11 @@
+{
+  "draw": {
+    "line": "Cada um escolhe o personagem de outra pessoa."
+  },
+  "target": {
+    "youPickFor": "Você escolhe para",
+    "hint": "Escolha um personagem que {name} conheça.",
+    "ring": "Todo mundo escolhe para alguém.",
+    "ringLabel": "Quem escolhe para quem"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "cardTitle": "{name}さんのキャラクター",
+  "placeholder": "名前を入力…",
+  "rowPicks": "{origin}・{count}回選ばれた",
+  "rowPicksNoOrigin": "{count}回選ばれた",
+  "fromLibrary": "{origin}・ライブラリから",
+  "fromLibraryNoOrigin": "ライブラリから",
+  "newCharacterLine": "新しいキャラクター・テーマに保存",
+  "notFound": "まだこのテーマにいません。新しいキャラクターになります。",
+  "newSeal": "新規！",
+  "drop": "画像をドロップ・貼り付け・選択",
+  "dropOptional": "なくても大丈夫",
+  "upload": "自分の画像",
+  "uploading": "画像を送信中…",
+  "confirmCard": "決定",
+  "rule": "時間切れなら、そのときのカードで決定。",
+  "handLabel": "{theme}で人気",
+  "handLikes": "{count}人がいいね",
+  "doneWaiting": "完了！待っている人：{names}",
+  "doneAll": "全員選び終わりました！",
+  "timeUp": "時間切れ！これで決定。"
+}
