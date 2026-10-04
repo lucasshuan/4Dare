@@ -23,7 +23,7 @@ import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { DEFAULT_GAME, GAME_KEYS, type GameKey } from "@/game/games";
+import { DEFAULT_GAME, GAME_KEYS, type GameKey, isGameKey } from "@/game/games";
 import { LANGS, type Lang } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { ease, riseIn } from "@/lib/motion";
@@ -63,23 +63,50 @@ function toSearch({ game, q, access, langs }: RoomFilters, locale: Lang) {
   return s ? `?${s}` : "";
 }
 
+/**
+ * The filters a link carries (?game=who-am-i&q=crew&access=private&lang=pt,ja),
+ * each optional. `lang` is "all" or languages separated by commas; anything
+ * else means the viewer's.
+ */
+function fromSearch(search: string, locale: Lang): RoomFilters {
+  const sp = new URLSearchParams(search);
+  const game = sp.get("game");
+  const access = sp.get("access");
+  const lang = sp.get("lang");
+  const picked = LANGS.filter((l) => lang?.split(",").includes(l));
+  return {
+    game: isGameKey(game) ? game : null,
+    q: (sp.get("q") ?? "").slice(0, 50),
+    access: access === "public" || access === "private" ? access : "all",
+    langs: lang === "all" ? null : picked.length ? picked : [locale],
+  };
+}
+
 /** /rooms: every listed room, filtered by game, a search, language and who can join. The filters live in the link. */
-export function RoomsScreen({ initial }: { initial: RoomFilters }) {
+export function RoomsScreen() {
   const t = useTranslations("home.roomsPage");
   const locale = useLocale() as Lang;
   const tr = useTranslations("home.rooms");
   const name = useDisplayName();
   const { rooms, isLoading } = usePublicRooms();
   const { match } = useCurrentMatch();
-  const [filters, setFilters] = useState(initial);
+  // The page is static: it starts with no filter, then takes the link's.
+  const [filters, setFilters] = useState(() => fromSearch("", locale));
+  const [linked, setLinked] = useState(false);
   const set = (patch: Partial<RoomFilters>) =>
     setFilters((f) => ({ ...f, ...patch }));
 
+  useEffect(() => {
+    setFilters(fromSearch(window.location.search, locale));
+    setLinked(true);
+  }, [locale]);
+
   // A reload or a shared link opens the same filters.
   useEffect(() => {
+    if (!linked) return;
     const next = `${window.location.pathname}${toSearch(filters, locale)}`;
     window.history.replaceState(null, "", next);
-  }, [filters, locale]);
+  }, [linked, filters, locale]);
 
   const shown = useMemo(() => {
     const q = fold(filters.q);

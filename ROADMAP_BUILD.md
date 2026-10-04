@@ -55,7 +55,7 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [ ] `LazyMotion` + `m`; full motion features only where `layoutId` is used
 - [ ] Guest names resolved on the server (−24 KB)
 - [ ] Each page gets only its message namespaces
-- [ ] `/new` and `/rooms` static (query read in the browser)
+- [x] `/new` and `/rooms` static (query read in the browser): served from the CDN, no function per visit
 - [x] Game sounds re-encoded mono 80 kbps (371 KB → 118 KB)
 - [ ] Home under ~250 KB gzip of JS
 
