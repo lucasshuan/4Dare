@@ -37,7 +37,7 @@ Rules:
 - Work in few, large steps: every tool call re-reads your whole context, so fewer calls are faster and cheaper. Write whole files with Write rather than many small edits; no task list (TaskCreate/TaskUpdate); pipe command output through tail or grep so only the decisive lines come back.
 - Next 16: read the guide in node_modules/next/dist/docs for any Next-specific API you touch.
 - A dev server is already running at http://localhost:3100 with the e2e env (the lead started it; it picks up your edits). Use it for the lab (/en/dev/stage) and screenshots. Never start, stop or restart a server; if it is down, say so in your report and skip the screenshots.
-- Screenshots go under .data/shots/${wp}/ (gitignored, never emptied by e2e).${ENV}${STYLE}`
+- Screenshots go under .data/shots/${wp}/ (gitignored, never emptied by e2e). Throwaway scripts go in your own folder under the scratchpad (others share it), never in the repo.${ENV}${STYLE}`
 
 const build = (wp) => agent(`You are the engineer for ${wp} of Phase 10 in the 4Dare repo (the current directory).
 Your spec is ${P}/briefs/${wp}.md: everything this package relies on, cut verbatim from the plan, the specs and the earlier packages' reports. Read it first and whole; open another doc only through its pointers or to settle a doubt. The prototype files it names are the look to match (port to React + motion/react).
