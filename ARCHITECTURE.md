@@ -16,6 +16,7 @@ Next.js 16 + React 19 + Tailwind 4, all TypeScript.
 ## Details
 
 - Clock without cron: when someone fetches the room, the server applies the timeouts already due.
+- Old rooms: on Supabase a `pg_cron` job deletes, every hour, closed rooms a day old and any room a week without a write (migration 0013).
 - Realtime: local fetches the room every 1 s. On Supabase a ping arrives through Realtime.
 - Matches: when one ends, it becomes one record per player (`src/game/record.ts`), saved after the response. A guest is only a signed cookie (`src/server/auth/guest.ts`: id, name number, critter), never a database row; the proxy makes it on the first page. Accounts are Supabase Auth users (Discord/Google; `auth.users`, `auth.identities`, `auth.sessions`) with a row in `profiles`. Signing in hands the guest's matches to the account, and their seat too when it happens in a room (`SWAP_PLAYER`).
 - Theme: a match starts with the `voting` phase: 3 themes, 8 s, open vote (players can change it until everyone voted); a tie is drawn on the server and the wheel on screen follows the server clock, so everyone sees the same spin. Then the theme stays up 3 s. All 3 come from the list (337 in `data/themes.json`). On Supabase the list is the `themes` table (`pnpm seed` loads it), read every 10 min; `active = false` turns a theme off.
