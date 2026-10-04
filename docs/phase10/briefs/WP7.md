@@ -47,16 +47,6 @@ Shared-file rules for parallel waves:
 
 Verification common to all UI WPs ("screenshot matrix"): desktop 1280×800 and phone 390×844, light and dark, at the moments listed in the WP, through `STAGE_SHOTS=1 pnpm exec playwright test e2e/stage-shots.spec.ts` (lab) plus one live run with `pnpm dev` and two or more browser contexts; reduced motion through `page.emulateMedia({ reducedMotion: "reduce" })`; pt and ja through `/pt/...`, `/ja/...` (long texts must fit); `names=long` (4 players with 16-character pt guest names, 390 px) in every scene matrix. Screenshots go to `test-results/` (gitignored); attach paths in the report.
 
-## Packages you build on, not reported yet (plan §5 entries)
-
-### WP4 — Room shell: frame, header, history, lobby exit, backdrop, guards
-- **Goal:** the tree of 1.2 with today's screens inside, header and history per 1.8/1.10, lobby exit, dock, focus guards, scene and chat stubs.
-- **ROADMAP:** "History only during turns: a button left of the theme opens a full-height bar on the left that pushes the screen (over a scrim on phones)", "The lobby stays as it is" (exit + padding), "everything that works today keeps working".
-- **Owns:** `room-stage.tsx`, `match-frame.tsx` (new), `game-header.tsx` (delete), `history-panel.tsx`, `reveal-overlay.tsx`, `timer.tsx` (if needed), `turn-backdrop.tsx` (delete), `src/lib/focus.ts`, `screen.tsx` (exit variants), `lobby-screen.tsx` (only if wiring needs it), the `GameFrame` removal in `vote-screen.tsx`, `theme-screen.tsx`, `pick-screen.tsx`, `turn-screen.tsx` (+ autofocus guard and Ask/Guess submit disabled until `stepStartsAt`), `useRoomTab` alert hold, the stub files (`cold-open.tsx`, `theme-stage.tsx`, `pick-intro.tsx`, `cast-scene.tsx`, `room-chat.tsx`) with the final props of 3.1 and a minimal placeholder (render nothing, so today's screens show), lab switch to `RoomStage`.
-- **Depends on:** WP1, WP2, WP3.
-- **Acceptance:** header never remounts across theming/vote/pick/turn; tag hidden until `themeFrom` then pops; clock hidden during shows then pops at `stepStartsAt`, recharge kept for answers/guess; history button and give up only on the turn screen from `historyFrom`; sidebar pushes header and main on ≥1024, left drawer over scrim on phones, Escape/scrim/focus behave; remembered-open waits for the button; lobby leaves with the `leave` variant, match header fades in; backdrop is room-level and crossfades across screens (vote butter → theme → brand → target → turns); `RevealOverlay` ignores shows and keys typed inside `[data-chat]` only (with the answers reveal open and the Guess field focused, a typed letter closes it and lands in the field: covered by an e2e assertion); Ask/Guess can't submit during the cast; `RoomChat` stub mounted for lobby, match and result only; full e2e passes.
-- **Verification:** typecheck, lint, `pnpm test`, full e2e; screenshots: lobby → match transition (lab `show=opening&at=0.2,0.6,1.2`), turn screen with history open/closed (desktop push, phone drawer), light/dark.
-
 ## Plan §1.1
 
 **Decision:** adopt `engine.md`'s "shows" model. `Reveal` becomes the carrier for three shows (`opening`, `theme`, `cast`). Each show is a list of back-to-back **beats** with absolute server times, computed once by the pure engine when the show is staged. No new phase. Clients derive everything from `serverTime() − beat.startsAt`, exactly like the existing tie roulette (`rouletteAt`).
@@ -1288,7 +1278,7 @@ Plan 1.3, with these mechanics:
 
 #### Requests for WP12 and WP4 (shared files I could not edit)
 
-- **`src/game/view.ts` (WP12):** `voteView` should also stay present while a theme show runs as `reveal.prev`. Today it checks only `s.reveal?.kind === "theme"`. When the cast queues behind the theme show, `view.vote` goes `null` while the vote and theme beats still play, so `VoteScreen` gets no data. `stageFrame` already routes that case.
+- ~~`src/game/view.ts` (WP12): `voteView` while the theme show runs as `reveal.prev`~~: already fixed in `3fe4f68` (WP1 re-review); nothing to do.
 - **`lab-screen.tsx` (WP4, which takes the lab over):**
   - remove `LabBackdrop` and the `backdrop` param once `RoomStage` mounts the room-level `StageBackdrop`;
   - the lab already wraps `RoomStage` in a `StageProvider` for its HUD, so a second one inside `RoomStage` is fine;
@@ -1298,7 +1288,40 @@ Plan 1.3, with these mechanics:
 
 ## Report of WP4
 
-(no report yet: WP4.md)
+### WP4 report: room tree, match frame, history, focus guards
+
+#### Files
+- New: `src/features/room/match-frame.tsx`, `src/lib/focus.ts`; stubs `src/features/stage/{cold-open,theme-stage,pick-intro,cast-scene}.tsx`, `src/features/chat/room-chat.tsx`; `e2e/reveal.spec.ts`.
+- Rewritten: `src/features/room/room-stage.tsx`, `src/features/turn/history-panel.tsx`.
+- Changed: `turn-screen.tsx`, `vote-screen.tsx`, `theme-screen.tsx`, `pick-screen.tsx` (no `GameFrame`, scene stubs mounted), `reveal-overlay.tsx` (chat key guard), `screen.tsx` (`leave` variants), `lab/lab-screen.tsx` + `lab/params.ts` (no `LabBackdrop`, no `backdrop` param).
+- Deleted: `src/features/room/game-header.tsx`, `src/features/turn/turn-backdrop.tsx`. `lobby-screen.tsx` and `timer.tsx` unchanged.
+
+#### What was built
+- `RoomStage` = `StageProvider` > room-level `StageBackdrop` (look from `useStage()`, set from `view.theme`) > `AnimatePresence mode="wait"` keyed by area > `RevealOverlay` > `RoomChat` (not on `closed`). The lobby wrapper plays `exit="leave"`; `Screen`'s plain header slides up (`y −100%`, opacity 0) and its main fades and scales to .97 (0.45 s `gs.p2In`). Match: `MatchFrame` (one instance for the match) holds an inner `AnimatePresence mode="wait"` keyed by screen, opacity only (0.2 s in, 0.15 s out). Result: `finishedWait ? null : <ResultScreen/>`. Tab alerts are held while a show holds the step (`useRoomTab`).
+- `match-frame.tsx` exports:
+  - `MatchFrame({ children })`: row `[sidebar] [column: MatchHeader + <main>]`; column padding `pb-[calc(2rem+var(--dock))]` (short 1rem). History state lives here: the button exists only on the turn screen from `historyFrom`; the remembered sidebar (`useHistorySidebar`, same key) opens only once the button exists; the phone drawer resets when the button goes.
+  - `MatchHeader({ history })`: left `[HistoryButton][ThemeTag]`, right `LeaveMatchButton · GiveUpButton · Timer`; 64 px phone, 76 px desktop (py 12/18 around 40 px pills). Pops when crossing live (`AnimatePresence initial={false}` each): history and give up 0.3→1 `backOut(2.4)` 0.5 s, tag 0.4→1 `backOut(2.2)` 0.5 s, show clock 0.6→1 `backOut(2.5)` 0.4 s; the answers/guess clock keeps its recharge and doesn't pop. The header fades in (0.4 s) only when mounted during the `curtain` beat.
+  - `useReached(at)`: true once server time `at` has passed, read from `frame.next` (no clock read, exact at the boundary because the stage wakes at every listed moment). Valid for `themeFrom`, `clockFrom`, `historyFrom`, `stepStartsAt`.
+  - `useStepStarted()`: `stepStartsAt` null or reached.
+  - `useSceneShow(kind, beats)`: the show while one of those beats runs; scene WPs mount their scene with it.
+- `history-panel.tsx`: `HistoryButton({ open, onClick, ref })` (PanelLeft icons, count pill, phone 40 px with sky corner count), `HistorySidebar({ onClose })` (sticky full-height, width 0↔360, open 0.55 s `p3Out`, close 0.4 s `p3In`, 360 px flat panel anchored right), `HistoryDrawer({ open, onClose })` (88vw, from the left, scrim 0.3 s, z-40, `role=dialog aria-modal`, Escape/scrim/X close, focus to X on open and back to the button on close), `HistoryBody` (you first then turn order, 26 px extrabold title, spec C 4.4 paddings), `WIDE`, `useHistorySidebar`.
+- `focus.ts`: `CHAT_SELECTOR`, `insideChat(target)`, `focusIsFree()`. `RevealOverlay` ignores keydowns inside `[data-chat]` only. `Ask`/`Guess` autofocus only when `focusIsFree()` at mount; their submit (and Enter) is disabled until `useStepStarted()`.
+- Stubs (final 3.1 props, render `null`): `ColdOpen({ show })`, `ThemeStage({ show, from })`, `PickIntro({ show })`, `CastScene({ show })`, `RoomChat()`. Mounted: vote/theme screens (`ColdOpen` on curtain/intro/round, `ThemeStage` on theme/rule with `from` "vote"/"typed"), pick screen (`PickIntro` on draw/target), turn screen (`CastScene` on received/order), each via a local `Scenes`/`useSceneShow`.
+
+#### Deviations from the plan
+1. `MatchFrame`'s root is a `motion.div` with an exit fade (`dur.base`), so match → result fades out as today's screens did (a plain component would vanish at once under the outer `AnimatePresence`).
+2. No `initial={false}` on the area/screen presences: in motion 13 it reaches every descendant motion component through `PresenceContext` and would kill the screens' own entrance animations. The header decides its fade from the beat instead; only the small header presences use `initial={false}`.
+3. The phone header still wraps to two rows during turns (history + tag, then leave/give up/clock), as today's header did; a one-row header would cut the theme name to about 90 px.
+4. The lab's `TimelineDemo` and HUD stay; only `LabBackdrop` and `backdrop` went.
+5. Low contrast finding fixed locally: the turn screen root mixes `--ink-muted` 80% with `--ink` for its descendant `.text-ink-muted` (one arbitrary variant, no token). Light wash: 4.44 → 5.39-5.74:1 on seats 1-4; dark 5.07-5.35 → 5.83-6.16:1. At the exact centre of a corner glow it stays under 4.5 (light 3.6, dark ~3.1), as WP2 measured for the seat ink.
+6. `e2e/reveal.spec.ts` is new (plan 6: "Reveal overlay (WP4, e2e)"): the Guess-field half. Not run (e2e waits for WP12).
+
+#### Requests
+- WP11: the chat root needs `data-chat`; the "key typed in the chat input does not close the reveal" assertion belongs in `e2e/chat.spec.ts`. `RoomChat` is mounted after `RevealOverlay` in the DOM and outside `<main>`; it sets `--dock` itself.
+- WP9a (`image-drop.tsx`) / WP9b (pick card paste listener): ignore paste targets with `insideChat(e.target)` from `src/lib/focus.ts`.
+- WP7, WP8, WP10: replace the `Scenes` helpers in your screens freely; `useSceneShow` and `useReached` are the intended hooks. WP10: `TurnScreen` no longer renders a backdrop; the strip/body entrance is yours.
+- Lead: while deleting `game-header.tsx` and `turn-backdrop.tsx` I staged the deletions by mistake (`git rm --cached`), and commit `e2ac2d0` took them in. That commit's tree doesn't compile without this package's edits; the working tree is consistent again.
+- WP12: `playToEnd`'s "Take a guess" click now also waits for the button to be enabled (step start); Playwright's actionability wait covers it. Check the history drawer/sidebar and the header pops in the matrix.
 
 ## Report of WP5
 

@@ -47,45 +47,6 @@ Shared-file rules for parallel waves:
 
 Verification common to all UI WPs ("screenshot matrix"): desktop 1280×800 and phone 390×844, light and dark, at the moments listed in the WP, through `STAGE_SHOTS=1 pnpm exec playwright test e2e/stage-shots.spec.ts` (lab) plus one live run with `pnpm dev` and two or more browser contexts; reduced motion through `page.emulateMedia({ reducedMotion: "reduce" })`; pt and ja through `/pt/...`, `/ja/...` (long texts must fit); `names=long` (4 players with 16-character pt guest names, 390 px) in every scene matrix. Screenshots go to `test-results/` (gitignored); attach paths in the report.
 
-## Packages you build on, not reported yet (plan §5 entries)
-
-### WP4 — Room shell: frame, header, history, lobby exit, backdrop, guards
-- **Goal:** the tree of 1.2 with today's screens inside, header and history per 1.8/1.10, lobby exit, dock, focus guards, scene and chat stubs.
-- **ROADMAP:** "History only during turns: a button left of the theme opens a full-height bar on the left that pushes the screen (over a scrim on phones)", "The lobby stays as it is" (exit + padding), "everything that works today keeps working".
-- **Owns:** `room-stage.tsx`, `match-frame.tsx` (new), `game-header.tsx` (delete), `history-panel.tsx`, `reveal-overlay.tsx`, `timer.tsx` (if needed), `turn-backdrop.tsx` (delete), `src/lib/focus.ts`, `screen.tsx` (exit variants), `lobby-screen.tsx` (only if wiring needs it), the `GameFrame` removal in `vote-screen.tsx`, `theme-screen.tsx`, `pick-screen.tsx`, `turn-screen.tsx` (+ autofocus guard and Ask/Guess submit disabled until `stepStartsAt`), `useRoomTab` alert hold, the stub files (`cold-open.tsx`, `theme-stage.tsx`, `pick-intro.tsx`, `cast-scene.tsx`, `room-chat.tsx`) with the final props of 3.1 and a minimal placeholder (render nothing, so today's screens show), lab switch to `RoomStage`.
-- **Depends on:** WP1, WP2, WP3.
-- **Acceptance:** header never remounts across theming/vote/pick/turn; tag hidden until `themeFrom` then pops; clock hidden during shows then pops at `stepStartsAt`, recharge kept for answers/guess; history button and give up only on the turn screen from `historyFrom`; sidebar pushes header and main on ≥1024, left drawer over scrim on phones, Escape/scrim/focus behave; remembered-open waits for the button; lobby leaves with the `leave` variant, match header fades in; backdrop is room-level and crossfades across screens (vote butter → theme → brand → target → turns); `RevealOverlay` ignores shows and keys typed inside `[data-chat]` only (with the answers reveal open and the Guess field focused, a typed letter closes it and lands in the field: covered by an e2e assertion); Ask/Guess can't submit during the cast; `RoomChat` stub mounted for lobby, match and result only; full e2e passes.
-- **Verification:** typecheck, lint, `pnpm test`, full e2e; screenshots: lobby → match transition (lab `show=opening&at=0.2,0.6,1.2`), turn screen with history open/closed (desktop push, phone drawer), light/dark.
-
-### WP9a — Pick card (the form)
-- **Goal:** the card component: name combobox with live preview, picked flip, origin line, "New!" seal, drop zone, inline picture with crop, swap pill and tray, frozen/grown/stamp states.
-- **ROADMAP:** "Pick screen is one card in the middle and the card is the form: a name with autocomplete and a live preview, the picture changed right on it, no 'Create character' button; a name not in the library gets a 'New!' seal".
-- **Owns:** `pick-card.tsx`, `card-name-field.tsx`, `card-picture.tsx`, `use-image-intake.ts` (new), `image-drop.tsx` (refactor, same behaviour), `character-search.ts` (+ `exactMatch`, test), `src/app/[locale]/dev/pick-card/page.tsx`, `messages/*/pickCard.json` (until WP9b starts).
-- **Depends on:** WP2.
-- **API (props-driven; WP9b wires data):**
-
-```ts
-export type CardContent =
-  | { kind: "empty" }
-  | { kind: "typing"; text: string; preview: SearchItem | null }
-  | { kind: "picked"; card: CardView; via: "list" | "hand" | "random" | "exact" | "restore" }
-  | { kind: "new"; name: string; imageUrl: string | null; uploading: boolean };
-export function PickCard(props: {
-  value: CardContent;
-  onChange: (next: CardContent) => void;
-  lang: Lang;
-  targetName: string;                 // for the aria-label "Character for {name}"
-  state: "editing" | "confirmed" | "timeUp";   // confirmed/timeUp: read-only, scale 1.08 from the top
-  stamp: boolean;                     // "Time! That's the one."
-  onNewImage: (file: Blob) => Promise<string | null>;               // upload for a new character → URL
-  onLibraryImage: (characterId: string, file: Blob) => Promise<void>; // replaceCharacterImage
-  className?: string;
-}): ReactNode;
-```
-
-- **Acceptance (spec B §4.2, §5.2, §6):** combobox ARIA (`role="combobox"`, `aria-expanded`, `aria-controls`, `aria-activedescendant`, listbox of options); ↑/↓, Enter, Esc, click; up to 5 rows with the matched part in `<mark>`; empty query → no dropdown; ghost preview of the highlighted row at .45; picked flip (rotateY −70→0, 0.6 s); Enter picks the highlighted row; while the search has rows the card stays "typing + preview" (no seal, as in scene 7); "New!" appears only when the search has **no rows** (the dropdown shows just the muted "Not in this theme yet…" line) or on blur with no highlighted row, and slams in (scale 2.2/−20° → 1/8°); an exact name match on blur becomes "picked"; drop/paste/browse → centre-cropped at once, then drag/zoom inline (react-easy-crop) with debounced export; swap pill on hover/focus (always on phones), tray with the current picture and "Upload yours"; paste ignored inside `[data-chat]`; image errors inline (`common.image.*`); `maxLength` 60; profile `ImageDrop` unchanged.
-- **Verification:** `character-search.test.ts`; typecheck, lint; screenshots of every state on the dev page (desktop/phone, light/dark, pt/ja).
-
 ## Plan §1.2
 
 **Decision:** no global overlay layer. Scenes live **inside the screen that follows them**, and the match frame (header + history) is hoisted to the room level so it never remounts. Reasons: hand-offs become same-tree animations (shared `layoutId`, persistent elements), the header stays still as in the prototype, and there are no stacking or `inert` problems.
@@ -1084,7 +1045,7 @@ Plan 1.3, with these mechanics:
 
 #### Requests for WP12 and WP4 (shared files I could not edit)
 
-- **`src/game/view.ts` (WP12):** `voteView` should also stay present while a theme show runs as `reveal.prev`. Today it checks only `s.reveal?.kind === "theme"`. When the cast queues behind the theme show, `view.vote` goes `null` while the vote and theme beats still play, so `VoteScreen` gets no data. `stageFrame` already routes that case.
+- ~~`src/game/view.ts` (WP12): `voteView` while the theme show runs as `reveal.prev`~~: already fixed in `3fe4f68` (WP1 re-review); nothing to do.
 - **`lab-screen.tsx` (WP4, which takes the lab over):**
   - remove `LabBackdrop` and the `backdrop` param once `RoomStage` mounts the room-level `StageBackdrop`;
   - the lab already wraps `RoomStage` in a `StageProvider` for its HUD, so a second one inside `RoomStage` is fine;
@@ -1094,7 +1055,40 @@ Plan 1.3, with these mechanics:
 
 ## Report of WP4
 
-(no report yet: WP4.md)
+### WP4 report: room tree, match frame, history, focus guards
+
+#### Files
+- New: `src/features/room/match-frame.tsx`, `src/lib/focus.ts`; stubs `src/features/stage/{cold-open,theme-stage,pick-intro,cast-scene}.tsx`, `src/features/chat/room-chat.tsx`; `e2e/reveal.spec.ts`.
+- Rewritten: `src/features/room/room-stage.tsx`, `src/features/turn/history-panel.tsx`.
+- Changed: `turn-screen.tsx`, `vote-screen.tsx`, `theme-screen.tsx`, `pick-screen.tsx` (no `GameFrame`, scene stubs mounted), `reveal-overlay.tsx` (chat key guard), `screen.tsx` (`leave` variants), `lab/lab-screen.tsx` + `lab/params.ts` (no `LabBackdrop`, no `backdrop` param).
+- Deleted: `src/features/room/game-header.tsx`, `src/features/turn/turn-backdrop.tsx`. `lobby-screen.tsx` and `timer.tsx` unchanged.
+
+#### What was built
+- `RoomStage` = `StageProvider` > room-level `StageBackdrop` (look from `useStage()`, set from `view.theme`) > `AnimatePresence mode="wait"` keyed by area > `RevealOverlay` > `RoomChat` (not on `closed`). The lobby wrapper plays `exit="leave"`; `Screen`'s plain header slides up (`y −100%`, opacity 0) and its main fades and scales to .97 (0.45 s `gs.p2In`). Match: `MatchFrame` (one instance for the match) holds an inner `AnimatePresence mode="wait"` keyed by screen, opacity only (0.2 s in, 0.15 s out). Result: `finishedWait ? null : <ResultScreen/>`. Tab alerts are held while a show holds the step (`useRoomTab`).
+- `match-frame.tsx` exports:
+  - `MatchFrame({ children })`: row `[sidebar] [column: MatchHeader + <main>]`; column padding `pb-[calc(2rem+var(--dock))]` (short 1rem). History state lives here: the button exists only on the turn screen from `historyFrom`; the remembered sidebar (`useHistorySidebar`, same key) opens only once the button exists; the phone drawer resets when the button goes.
+  - `MatchHeader({ history })`: left `[HistoryButton][ThemeTag]`, right `LeaveMatchButton · GiveUpButton · Timer`; 64 px phone, 76 px desktop (py 12/18 around 40 px pills). Pops when crossing live (`AnimatePresence initial={false}` each): history and give up 0.3→1 `backOut(2.4)` 0.5 s, tag 0.4→1 `backOut(2.2)` 0.5 s, show clock 0.6→1 `backOut(2.5)` 0.4 s; the answers/guess clock keeps its recharge and doesn't pop. The header fades in (0.4 s) only when mounted during the `curtain` beat.
+  - `useReached(at)`: true once server time `at` has passed, read from `frame.next` (no clock read, exact at the boundary because the stage wakes at every listed moment). Valid for `themeFrom`, `clockFrom`, `historyFrom`, `stepStartsAt`.
+  - `useStepStarted()`: `stepStartsAt` null or reached.
+  - `useSceneShow(kind, beats)`: the show while one of those beats runs; scene WPs mount their scene with it.
+- `history-panel.tsx`: `HistoryButton({ open, onClick, ref })` (PanelLeft icons, count pill, phone 40 px with sky corner count), `HistorySidebar({ onClose })` (sticky full-height, width 0↔360, open 0.55 s `p3Out`, close 0.4 s `p3In`, 360 px flat panel anchored right), `HistoryDrawer({ open, onClose })` (88vw, from the left, scrim 0.3 s, z-40, `role=dialog aria-modal`, Escape/scrim/X close, focus to X on open and back to the button on close), `HistoryBody` (you first then turn order, 26 px extrabold title, spec C 4.4 paddings), `WIDE`, `useHistorySidebar`.
+- `focus.ts`: `CHAT_SELECTOR`, `insideChat(target)`, `focusIsFree()`. `RevealOverlay` ignores keydowns inside `[data-chat]` only. `Ask`/`Guess` autofocus only when `focusIsFree()` at mount; their submit (and Enter) is disabled until `useStepStarted()`.
+- Stubs (final 3.1 props, render `null`): `ColdOpen({ show })`, `ThemeStage({ show, from })`, `PickIntro({ show })`, `CastScene({ show })`, `RoomChat()`. Mounted: vote/theme screens (`ColdOpen` on curtain/intro/round, `ThemeStage` on theme/rule with `from` "vote"/"typed"), pick screen (`PickIntro` on draw/target), turn screen (`CastScene` on received/order), each via a local `Scenes`/`useSceneShow`.
+
+#### Deviations from the plan
+1. `MatchFrame`'s root is a `motion.div` with an exit fade (`dur.base`), so match → result fades out as today's screens did (a plain component would vanish at once under the outer `AnimatePresence`).
+2. No `initial={false}` on the area/screen presences: in motion 13 it reaches every descendant motion component through `PresenceContext` and would kill the screens' own entrance animations. The header decides its fade from the beat instead; only the small header presences use `initial={false}`.
+3. The phone header still wraps to two rows during turns (history + tag, then leave/give up/clock), as today's header did; a one-row header would cut the theme name to about 90 px.
+4. The lab's `TimelineDemo` and HUD stay; only `LabBackdrop` and `backdrop` went.
+5. Low contrast finding fixed locally: the turn screen root mixes `--ink-muted` 80% with `--ink` for its descendant `.text-ink-muted` (one arbitrary variant, no token). Light wash: 4.44 → 5.39-5.74:1 on seats 1-4; dark 5.07-5.35 → 5.83-6.16:1. At the exact centre of a corner glow it stays under 4.5 (light 3.6, dark ~3.1), as WP2 measured for the seat ink.
+6. `e2e/reveal.spec.ts` is new (plan 6: "Reveal overlay (WP4, e2e)"): the Guess-field half. Not run (e2e waits for WP12).
+
+#### Requests
+- WP11: the chat root needs `data-chat`; the "key typed in the chat input does not close the reveal" assertion belongs in `e2e/chat.spec.ts`. `RoomChat` is mounted after `RevealOverlay` in the DOM and outside `<main>`; it sets `--dock` itself.
+- WP9a (`image-drop.tsx`) / WP9b (pick card paste listener): ignore paste targets with `insideChat(e.target)` from `src/lib/focus.ts`.
+- WP7, WP8, WP10: replace the `Scenes` helpers in your screens freely; `useSceneShow` and `useReached` are the intended hooks. WP10: `TurnScreen` no longer renders a backdrop; the strip/body entrance is yours.
+- Lead: while deleting `game-header.tsx` and `turn-backdrop.tsx` I staged the deletions by mistake (`git rm --cached`), and commit `e2ac2d0` took them in. That commit's tree doesn't compile without this package's edits; the working tree is consistent again.
+- WP12: `playToEnd`'s "Take a guess" click now also waits for the button to be enabled (step start); Playwright's actionability wait covers it. Check the history drawer/sidebar and the header pops in the matrix.
 
 ## Report of WP5
 
@@ -1243,7 +1237,68 @@ No migration. `theme_starters` was only read (read-only SQL through the MCP). No
 
 ## Report of WP9a
 
-(no report yet: WP9a.md)
+### WP9a report: the pick card (the form)
+
+#### Files
+- New: `src/features/pick/{pick-card,card-name-field,card-picture}.tsx`, `src/components/ui/use-image-intake.ts`, `src/app/[locale]/dev/pick-card/{page,pick-card-lab}.tsx`
+- Changed: `src/game/character-search.ts` (+ test), `src/components/ui/image-drop.tsx` (now uses `useImageIntake`)
+- `messages/*/pickCard.json` unchanged (WP2's strings fit en/pt/ja). No other file touched.
+
+#### What was built (API)
+- `PickCard` (`pick-card.tsx`): the plan's props, plus two optional ones: `autoFocus` (desktop, when the pick starts) and `onFocusChange(focused)` (lets WP9b hold draft echoes while the field has focus). Re-exports `CardContent`, plus `PickCardState` and `CARD_SETTLED_SCALE` (1.08). Width is 224 / `sm:` 270. Override it with `className` (`cn` merges, e.g. `w-[230px]` for the short-window clamp). `data-pick-card={kind}` sits on the root for e2e.
+- The card searches by itself: `useCharacterIndex(lang)`, and `/api/characters` until the index loads, as the old screen did. It shows 5 rows, the matched part in `<mark>`, and the origin under the name.
+- `src/game/character-search.ts`:
+  - `CardContent` (the plan's type), `cardText(content)`, `toCardView(item)`.
+  - `searchMatches(items, q, limit): SearchItem[]`; `searchItems` now wraps it.
+  - `exactMatch(items, name)`: the normalised name equals `nameKey`. Aliases and single words don't count, and the most popular of two same-name characters wins.
+  - `matchRange(name, query)`: the `<mark>` offsets, folded the same way as the search.
+  - The pure state machine: `cardStep(field, event)` / `closedField(content)` with `CardField { content, rows, highlight, open }`. Events: `input`, `rows` (late results), `move`, `hover`, `choose`, `enter`, `escape`, `blur`.
+- The rules `cardStep` implements:
+  - Rows → `typing`, previewing row 0.
+  - No rows → `new` at once. A `new` keeps its picture while its name is edited.
+  - ↓/↑ move the highlight. ↑ from row 0 clears it (no ghost).
+  - Enter or a click picks the highlighted row (`via: "list"`). Enter with no highlight: an exact name → `picked` (`"exact"`), otherwise `new`.
+  - Blur: an exact name → `picked`. No highlight → `new`. Otherwise the preview stays (`typing`).
+  - Esc only closes the list.
+- `useImageIntake({ onPicked, paste })` returns `{ accept, error, setError, over, dropHandlers, inputProps, exportError }`. Also exported: `cropToWebp`, `coverArea`, `IMAGE_ACCEPT`.
+  - Checks type, 8 MB and decodability. Downloads a pasted or dropped web picture when its site allows it.
+  - Ignores pastes inside `[data-chat]`, and a text paste into a field stays text.
+  - `onPicked` receives an object URL, which the receiver owns.
+- `CardPicture`:
+  - Layers: the silhouette, then the ghost (.45; 0.3 s in, 0.15 s out), then the picture.
+  - The flip on pick: `rotateY −70→0`, 0.6 s, `backOut(1.5)`. Not for `via: "restore"`. A new name's first picture pops (1.06→1).
+  - The drop zone is shown for a new name without a picture, and on drag-over of any picked or new card (`.hot`, scale 1.02).
+  - Drop, paste or browse: the centre crop is exported and sent at once. The card then shows react-easy-crop inline, with a zoom pill and a ✓ button. Each adjustment is exported and sent 500 ms after it settles. A press outside, Esc or ✓ ends the crop, and a pending export is flushed.
+  - `new`: `onNewImage` sets `uploading: true` while it runs, then `imageUrl`. If it fails, the picture reverts. `picked`: `onLibraryImage`, and the crop stays shown on that card.
+  - "Sending the picture…" status while an upload runs. Inline `common.image.*` errors, dismissible.
+  - Swap pill on hover or focus-within, always visible on phones and coarse pointers. Tray: the current picture (ring) + "Upload yours", with `room.pick.imageHint` as its tooltip for library characters. It is placed per spec B §4.2 and closes on an outside press or Esc.
+- Seal: shown in `new`, slams in (2.2/−20° → 1/8°, 0.45 s, `backOut(2.4)`), stays after the card freezes.
+- `confirmed` / `timeUp`: the field is read-only, there is no list, pill, tray or crop, and the card scales to 1.08 from the top (0.5 s / 0.4 s, `backOut(2)`).
+- Stamp (`stamp`): centred on the card at 42%, slams 2.4/−16° → 1/−8°.
+- Seal and stamp use `AnimatePresence initial={false}`, so a reload doesn't replay them.
+- Dev page `/[locale]/dev/pick-card` (dev only, local mode works):
+  - Buttons for every preset and state.
+  - Query parameters: `?preset=empty|typing|picked|restore|new|newPicture|uploading&state=…&stamp=1&names=long&fail=1`.
+  - Fake uploads (900 ms), and a dump of the value and callbacks.
+
+#### Deviations from the plan
+1. **Row sub-line is the origin alone.** `SearchItem` has no theme pick counts (spec B §8.3), so `rowPicks*` are not used yet. WP9b can annotate rows if it gets counts.
+2. **`new` is immediate when the search has no rows** (plan), not spec B §6's 600 ms commit. The seal can flicker in and out while letters are added and removed around a match. That follows from the plan's rule.
+3. **Until the index loads, a keystroke keeps the previous rows** (none on the first keystroke), and the server's rows replace them. The very first letters may show "New!" for a moment on a cold cache. The lobby prefetch normally avoids this.
+4. **The phone picture shrinks to 62% while the field has focus** (plan §7 / WP9b acceptance). It lives in the card (`compact`), because the card owns the picture.
+5. **The dev page has a second file** (`pick-card-lab.tsx`, its client body) next to `page.tsx`.
+6. **`ImageDrop`: two small, intended changes.** A paste inside `[data-chat]` is ignored (plan 1.11), and the file input is cleared after each choice. Its API and everything else are unchanged; `profile-screen.tsx` and `pick-screen.tsx` compile untouched.
+7. **No duplicate of the tray's picture tiles.** Spec B's pointer to "real tiles §8.4" leads nowhere. The tray holds the current picture + "Upload yours", per the acceptance.
+
+#### Requests
+- No shared file needed editing.
+- The global `:focus-visible` outline in `globals.css` is unlayered, so Tailwind's `outline-none` can't override it. The name input uses an inline `outline: none`, because its border is the ring. WP12 might move that rule into `@layer base`.
+- For WP9b:
+  - Disable Confirm/Random while `value.kind === "new" && value.uploading`.
+  - A library picture swap has no `uploading` flag in `CardContent`: `onLibraryImage`'s promise is the signal.
+  - `CardContent.typing.preview === null` (↑ past the first row) means "typed name, no library id".
+  - On restore, pass `via: "restore"` so the card doesn't flip.
+  - The card positions the stamp itself; the screen only passes `stamp`.
 
 ## Prototype (the look to match; port to React + motion/react)
 
