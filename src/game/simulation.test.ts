@@ -218,11 +218,13 @@ function checkInvariants(s: RoomState) {
     expect(s.turnPlayerId).toBeNull();
   }
   expect(s.plays.map((p) => p.n)).toEqual(s.plays.map((_, i) => i + 1));
-  const places = Object.values(s.outcomes)
-    .map((o) => o.place)
-    .filter((p): p is number => p !== null)
-    .sort((a, b) => a - b);
-  expect(places).toEqual(places.map((_, i) => i + 1));
+  const placed = Object.values(s.outcomes).filter((o) => o.place !== null);
+  const places = placed.map((o) => o.place as number).sort((a, b) => a - b);
+  // podium places: discoveries in the same turn round share one (1, 1, 3)
+  expect(places).toEqual(places.map((p) => places.indexOf(p) + 1));
+  for (const a of placed)
+    for (const b of placed)
+      if (a.place === b.place) expect(a.round).toBe(b.round);
   if (s.reveal) {
     const len = s.reveal.until - s.reveal.startsAt;
     const t = REVEAL_TIMING;
@@ -276,19 +278,35 @@ function checkSecrecy(s: RoomState, now: number) {
   }
 }
 
+/** The vote stays in the view while its theme show plays, even with the cast queued behind it. */
+function checkVoteView(s: RoomState, now: number) {
+  const r = s.reveal;
+  const theme =
+    r?.kind === "theme" ? r : r?.prev?.kind === "theme" ? r.prev : null;
+  if (!s.vote || !theme || now >= theme.until) return;
+  for (const p of s.players)
+    expect(toView(s, 1, p.id, now).vote, `vote for ${p.id}`).not.toBeNull();
+}
+
 describe("random play", () => {
   it("keeps every invariant and every secret", () => {
     let matchesFinished = 0;
     let draftsSaved = 0;
     let draftsTaken = 0;
+    // shows staged while another still plays, by kind ("theme<opening", "cast<theme")
+    const queued = new Set<string>();
     for (let seed = 1; seed <= 300; seed++) {
       const r = rng(seed * 7919);
       const g = new Game(2 + (seed % 3), seed);
+      // events sent right away, at the same time (everyone votes during the opening)
+      const burst: GameEvent[] = [];
       for (let step = 0; step < 250; step++) {
-        g.now += Math.floor(r() * 9000);
+        const follow = burst.shift();
+        // now and then only a moment passes, so things happen while a show still plays
+        if (!follow) g.now += Math.floor(r() * (r() < 0.25 ? 500 : 9000));
         const input = g.state;
         const before = JSON.stringify(input);
-        const event = randomEvent(g.state, r);
+        const event = follow ?? randomEvent(g.state, r);
         try {
           const next = reduce(input, event, g.ctx());
           if (
@@ -304,6 +322,14 @@ describe("random play", () => {
             draftsTaken += Object.entries(input.assignments).filter(
               ([t, a]) => !a.character && !next.assignments[t].auto,
             ).length;
+          // half the time, everyone votes as soon as the vote opens, during the opening
+          if (event.type === "START" && next.phase === "voting" && r() < 0.5)
+            for (const p of next.players)
+              burst.push({
+                type: "VOTE",
+                playerId: p.id,
+                option: Math.floor(r() * 3),
+              });
           g.state = next;
         } catch (e) {
           if (!(e instanceof GameError)) throw e;
@@ -311,6 +337,10 @@ describe("random play", () => {
         expect(JSON.stringify(input)).toBe(before);
         checkInvariants(g.state);
         checkSecrecy(g.state, g.now);
+        checkVoteView(g.state, g.now);
+        const shown = g.state.reveal;
+        if (isShow(shown) && shown.prev && g.now < shown.prev.until)
+          queued.add(`${shown.kind}<${shown.prev.kind}`);
         if (g.state.phase === "finished") matchesFinished++;
         if (g.state.phase === "closed") break;
       }
@@ -318,5 +348,7 @@ describe("random play", () => {
     expect(matchesFinished).toBeGreaterThan(0);
     expect(draftsSaved).toBeGreaterThan(0);
     expect(draftsTaken).toBeGreaterThan(0);
+    // shows queued behind a running one happened, so checkShow saw their `prev`
+    expect([...queued].sort()).toEqual(["cast<theme", "theme<opening"]);
   }, 30_000); // 300 matches: give a busy machine room
 });

@@ -65,7 +65,14 @@ export function VoteScreen() {
   // The click shows at once; the server's answer replaces it.
   const [optimistic, setOptimistic] = useState<number | null>(null);
   const v = view.vote;
-  const reveal = view.reveal?.kind === "theme" ? view.reveal : null;
+  // The theme show, also while the cast already waits behind it.
+  const r = view.reveal;
+  const reveal =
+    r?.kind === "theme"
+      ? r
+      : r?.kind === "cast" && r.prev?.kind === "theme"
+        ? r.prev
+        : null;
 
   const resolved = v?.chosen != null && reveal !== null;
   // The theme show opens with the spin when the vote tied.
@@ -74,14 +81,18 @@ export function VoteScreen() {
     resolved && v && v.tied.length > 1 && !still && spin
       ? spin.until - spin.startsAt
       : 0;
-  const elapsed = reveal ? now - reveal.startsAt : 0;
-  const stage: Stage = !resolved
-    ? "voting"
-    : elapsed < spinMs
-      ? "spinning"
-      : elapsed < spinMs + SPOTLIGHT_MS && !still
-        ? "spotlight"
-        : "winner";
+  // A vote that closes during the opening queues the theme show after it:
+  // the cards stay as they are until it starts.
+  const started = reveal !== null && now >= reveal.startsAt;
+  const elapsed = reveal ? Math.max(0, now - reveal.startsAt) : 0;
+  const stage: Stage =
+    !resolved || !started
+      ? "voting"
+      : spinMs > 0 && elapsed < spinMs
+        ? "spinning"
+        : elapsed < spinMs + SPOTLIGHT_MS && !still
+          ? "spotlight"
+          : "winner";
 
   const celebrated = useRef(false);
   useEffect(() => {
@@ -105,7 +116,8 @@ export function VoteScreen() {
     .filter(({ i }) => stage !== "winner" || i === v.chosen);
 
   const choose = async (i: number) => {
-    if (stage !== "voting" || i === mine) return;
+    // the vote may be over already, its theme show still to come
+    if (stage !== "voting" || v.chosen !== null || i === mine) return;
     setOptimistic(i);
     await act(() => voteTheme(code, i));
     setOptimistic(null);
