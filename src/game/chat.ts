@@ -1,6 +1,6 @@
 // Room chat, shared by the server and the screens: what players write and the
 // system lines a match posts ("▶ Match started", "🦸 Theme: Superheroes",
-// "Order: …", "Round 1 · Bia's turn"). Messages live outside RoomState (every
+// "Order: …", "Match 1 · Bia's turn"). Messages live outside RoomState (every
 // room write is a compare-and-swap, so chat would race the game); a system
 // line is stored as data and written in each viewer's language.
 import {
@@ -40,7 +40,7 @@ export type SystemLine =
   | { type: "theme"; theme: Theme }
   /** "Order: [av]Bia, [av]Rafa, [av]you, [av]Leo" */
   | { type: "order"; players: ChatPerson[] }
-  /** "Round {n} · [av]Bia's turn" (n = the match number) */
+  /** "Match {n} · [av]Bia's turn" */
   | { type: "firstTurn"; n: number; player: ChatPerson };
 
 export interface ChatMessage {

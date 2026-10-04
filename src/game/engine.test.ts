@@ -1162,6 +1162,21 @@ describe("a turn", () => {
     expect((r?.until ?? 0) - (r?.startsAt ?? 0)).toBe(REVEAL_TIMING.answersMax);
   });
 
+  it("a turn's question and guess share its number; a skipped turn still counts", () => {
+    const g = started(3);
+    const first = g.askAndAnswer();
+    g.do({ type: "GUESS", playerId: first, text: `name ${first}` });
+    g.skipReveal();
+    g.timeout();
+    expect(g.state.turnNumber).toBe(3);
+    g.askAndAnswer();
+    expect(g.state.plays.map((p) => [p.kind, p.n])).toEqual([
+      ["question", 1],
+      ["guess", 1],
+      ["question", 3],
+    ]);
+  });
+
   it("a close guess is a hit with a reveal; the same turn round ties", () => {
     const g = started(3);
     const first = g.askAndAnswer();
@@ -1169,14 +1184,14 @@ describe("a turn", () => {
     const s = g.state;
     expect(s.plays.at(-1)).toMatchObject({ kind: "guess", result: "hit" });
     expect(s.outcomes[first]).toEqual({
-      discoveredAt: 2,
+      discoveredAt: 1,
       place: 1,
       round: 1,
       gaveUp: false,
       endedAt: g.now,
     });
     expect(s.playStartedAt).not.toBeNull();
-    expect(s.reveal).toMatchObject({ kind: "guess", n: 2 });
+    expect(s.reveal).toMatchObject({ kind: "guess", n: 1 });
     expect((s.reveal?.until ?? 0) - g.now).toBe(REVEAL_TIMING.guessHit);
     expect(s.phase).toBe("asking");
     expect(s.turnPlayerId).not.toBe(first);
@@ -1498,7 +1513,7 @@ describe("whole matches", () => {
     expect(g.state.plays).toEqual([]);
     g.do({ type: "START", playerId: s.hostId, themes: THEMES });
     expect(g.state.phase).toBe("voting");
-    // "Round 2" instead of the cold open
+    // "Match 2" instead of the cold open
     expect(g.state.reveal).toMatchObject({
       kind: "opening",
       n: 2,

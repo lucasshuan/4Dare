@@ -15,6 +15,6 @@
     "started": "▶ Match started",
     "theme": "{emoji} Theme: {theme}",
     "order": "Order: {names}",
-    "firstTurn": "Round {n} · {name}'s turn"
+    "firstTurn": "Match {n} · {name}'s turn"
   }
 }

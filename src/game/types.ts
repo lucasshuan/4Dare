@@ -268,7 +268,10 @@ export interface AnswerEntry {
   note: string | null;
 }
 
-/** A "jogada". Questions and guesses share one numbering. */
+/**
+ * A question or a guess. Both carry the number of the turn they were played in
+ * (a "rodada": one player's question, answers, guess and its check).
+ */
 export type Play =
   | {
       n: number;
@@ -288,7 +291,7 @@ export type Play =
     };
 
 export interface Outcome {
-  /** Number of the jogada that discovered the character. */
+  /** Number of the turn that discovered the character. */
   discoveredAt: number | null;
   /**
    * 1 = first to discover. Players who discover in the same turn round tie and
@@ -321,7 +324,7 @@ export interface ThemeVote {
  */
 export interface Reveal {
   kind: "answers" | "guess" | ShowKind;
-  /** The jogada revealed; for a show, the match it presents (`round`; `round + 1` for the opening). */
+  /** The turn revealed; for a show, the match it presents (`round`; `round + 1` for the opening). */
   n: number;
   startsAt: number;
   until: number;
@@ -368,6 +371,12 @@ export interface RoomState {
    * 2 for the second, and so on. Absent in rooms saved before ties existed.
    */
   turnRound?: number;
+  /**
+   * Turns of the current match, one per player's turn: the number of the one
+   * under way (1 = the first). Its question and guess carry it. Absent in rooms
+   * saved before turns were numbered.
+   */
+  turnNumber?: number;
   /** Epoch ms when the first question of this match can be asked (the end of the cast show); null before. */
   playStartedAt: number | null;
   createdAt: number;
@@ -562,7 +571,7 @@ export type HistoryEntryView =
     };
 
 export interface TurnView {
-  /** Number of the jogada being played. */
+  /** Number of the turn being played. */
   n: number;
   playerId: PlayerId;
   /** Set from "answering" on. */
@@ -673,8 +682,10 @@ export interface RoomView {
   pick: PickView | null;
   /** Present from "asking" to "validating". */
   turn: TurnView | null;
-  /** Resolved jogadas, oldest first. */
+  /** Resolved questions and guesses, oldest first. */
   history: HistoryEntryView[];
+  /** Turns of this match so far, the one under way included. */
+  turns: number;
   /** Host only: the match can start (2+ players). */
   canStart: boolean;
 }

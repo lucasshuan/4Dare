@@ -27,7 +27,7 @@
     "whoAreYou": "あなたは誰？"
   },
   "ask": {
-    "kicker": "{n}手目",
+    "kicker": "{n}ラウンド目",
     "title": "あなたの質問の番です",
     "label": "自分のキャラクターについての、はい・いいえで答えられる質問",
     "hintMany": "他の全員がそれぞれ答えます。",
@@ -41,14 +41,14 @@
     "no": "続ける"
   },
   "answer": {
-    "kicker": "{n}手目 · {name}さんの質問",
+    "kicker": "{n}ラウンド目 · {name}さんの質問",
     "yourAnswer": "あなたの答え",
     "note": "補足（任意）",
     "send": "回答を送る",
     "progress": "{total}人中{done}人が回答"
   },
   "guess": {
-    "kicker": "{n}手目 · あなたの質問",
+    "kicker": "{n}ラウンド目 · あなたの質問",
     "title": "自分が誰かわかりましたか？",
     "label": "あなたの予想",
     "hint": "名前が合っていればすぐ正解になります。迷う場合は、あなたのキャラクターを選んだ人が判定します。",
@@ -56,7 +56,7 @@
     "pass": "パス"
   },
   "validate": {
-    "kicker": "{n}手目 · {name}さんの予想",
+    "kicker": "{n}ラウンド目 · {name}さんの予想",
     "title": "{name}さんは正解？",
     "bodyMany": "カードの名前と完全には一致しません。このキャラクターを選んだのはあなたなので、あなただけが判定します。{names}さんは待っています。",
     "bodyOne": "カードの名前と完全には一致しません。このキャラクターを選んだのはあなたなので、あなたが判定します。",
@@ -64,7 +64,7 @@
     "no": "まだです"
   },
   "wait": {
-    "kicker": "{n}手目",
+    "kicker": "{n}ラウンド目",
     "ask": "{name}さんが質問を考えています…",
     "answers": "回答を待っています",
     "guess": "{name}さんが予想するか考えています…",
@@ -83,15 +83,15 @@
       "question": "質問",
       "guess": "予想"
     },
-    "mineCaption": "自分の質問と予想：{total}手中{shown}手 · 新しい順",
-    "playerCaption": "{name}さんの質問と予想：{total}手中{shown}手 · 新しい順",
+    "mineCaption": "自分の質問と予想：{total}件中{shown}件 · 新しい順",
+    "playerCaption": "{name}さんの質問と予想：{total}件中{shown}件 · 新しい順",
     "nothing": "まだ何もありません。だれかがプレイすると、ここに質問が出てきます。",
     "question": "質問 · {name}",
     "guess": "予想 · {name}"
   },
   "reveal": {
-    "asked": "{n}手目 · {name}さんの質問",
-    "guessed": "{n}手目 · {name}さんの予想",
+    "asked": "{n}ラウンド目 · {name}さんの質問",
+    "guessed": "{n}ラウンド目 · {name}さんの予想",
     "hit": "正解",
     "hitPlace": "正解 · {place}位",
     "hitTie": "正解 · {place}位タイ",

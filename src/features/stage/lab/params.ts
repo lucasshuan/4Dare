@@ -26,7 +26,7 @@ export interface LabParams {
   players: 2 | 3 | 4;
   /** Whose screen it is: their seat, 0 (the host) to players − 1. */
   you: number;
-  /** The room's first match (cold open, rule) or a later one ("Round 2"). */
+  /** The room's first match (cold open, rule) or a later one ("Match 2"). */
   match: "first" | "later";
   /** First match: ✓✓✗ cards, or the sentence alone. */
   rule: "cards" | "sentence";

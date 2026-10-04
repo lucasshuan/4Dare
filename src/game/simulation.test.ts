@@ -217,7 +217,13 @@ function checkInvariants(s: RoomState) {
     expect(s.deadline).toBeNull();
     expect(s.turnPlayerId).toBeNull();
   }
-  expect(s.plays.map((p) => p.n)).toEqual(s.plays.map((_, i) => i + 1));
+  // A turn's question and guess share its number; turns only count up.
+  s.plays.forEach((p, i) => {
+    const before = s.plays[i - 1];
+    expect(p.n).toBeLessThanOrEqual(s.turnNumber ?? 0);
+    if (p.kind === "guess") expect(before).toMatchObject({ n: p.n, by: p.by });
+    else expect(p.n).toBeGreaterThan(before?.n ?? 0);
+  });
   const placed = Object.values(s.outcomes).filter((o) => o.place !== null);
   const places = placed.map((o) => o.place as number).sort((a, b) => a - b);
   // podium places: discoveries in the same turn round share one (1, 1, 3)

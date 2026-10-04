@@ -1,5 +1,5 @@
 {
-  "kicker": "End of the match · {count} plays",
+  "kicker": "End of the match · {count, plural, one {# round} other {# rounds}}",
   "winner": "{name} discovered first",
   "winnersTie": "It's a tie! {names} discovered first",
   "youTie": "It's a tie! You and {names} discovered first",
@@ -11,10 +11,10 @@
   "gaveUp": "Gave up",
   "notFound": "Didn't discover",
   "pickedBy": "picked by {name}",
-  "discoveredAt": "Discovered on play {n}",
+  "discoveredAt": "Discovered on round {n}",
   "placeShort": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
-  "youWon": "You found it on play {n}.",
-  "youFound": "You found it too, on play {n}.",
+  "youWon": "You found it on round {n}.",
+  "youFound": "You found it too, on round {n}.",
   "youGaveUp": "You gave up this time.",
   "youMissed": "You didn't find it this time.",
   "youFirst": "You discovered first"

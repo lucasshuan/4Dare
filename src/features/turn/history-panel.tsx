@@ -292,7 +292,7 @@ function HistoryBody({
               const by = playerById(e.byId);
               return (
                 <m.li
-                  key={e.n}
+                  key={`${e.kind}-${e.n}`}
                   layout="position"
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}

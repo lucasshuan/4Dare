@@ -155,7 +155,7 @@ describe("what the view says", () => {
     expect(t?.answers).toHaveLength(1);
     g.do({ type: "GUESS", playerId: asker, text: "maybe" });
     const v = view(g, asker).turn;
-    expect(v).toMatchObject({ n: 2, guess: "maybe", question: "Is it big?" });
+    expect(v).toMatchObject({ n: 1, guess: "maybe", question: "Is it big?" });
     expect(v?.validatorId).toBe(g.state.assignments[asker].pickerId);
   });
 

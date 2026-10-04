@@ -10,6 +10,7 @@ import {
   pendingGuess,
   presenceDue,
   stepSeconds,
+  turnNumber,
   validatorOf,
 } from "./helpers";
 import { isCloseMatch } from "./match";
@@ -465,6 +466,8 @@ function goToTurn(s: RoomState, ctx: Ctx, from: PlayerId | null) {
   const wrapped =
     from === null || s.order.indexOf(next) <= s.order.indexOf(from);
   if (wrapped) s.turnRound = (s.turnRound ?? 0) + 1;
+  // A room saved before turns were numbered goes on after its last play.
+  s.turnNumber = (s.turnNumber ?? Math.max(0, ...s.plays.map((p) => p.n))) + 1;
   s.phase = "asking";
   s.turnPlayerId = next;
   startStep(s, ctx, stepMs(s, "askSeconds"));
@@ -599,6 +602,7 @@ function startTurns(s: RoomState, ctx: Ctx, how: "confirmed" | "timeout") {
     ctx,
   );
   s.turnRound = 0;
+  s.turnNumber = 0;
   // Its clock waits for the cast.
   goToTurn(s, ctx, s.order.at(-1) ?? null);
 }
@@ -982,7 +986,7 @@ function ask(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
   // Nothing but question marks is no question.
   if (!withoutQuestionMark(typed).trim()) fail("invalid_input");
   const q: Question = {
-    n: s.plays.length + 1,
+    n: turnNumber(s),
     kind: "question",
     by: playerId,
     text: endsWithQuestionMark(typed)
@@ -1025,7 +1029,7 @@ function guess(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
   guardStep(s, ctx);
   if (playerId !== s.turnPlayerId) fail("not_your_turn");
   const g: Guess = {
-    n: s.plays.length + 1,
+    n: turnNumber(s),
     kind: "guess",
     by: playerId,
     text: cleanText(text, MAX_GUESS),

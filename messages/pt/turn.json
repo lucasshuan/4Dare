@@ -27,7 +27,7 @@
     "whoAreYou": "Quem é você?"
   },
   "ask": {
-    "kicker": "Jogada {n}",
+    "kicker": "Rodada {n}",
     "title": "Sua vez de perguntar",
     "label": "Pergunta de sim ou não sobre o seu personagem",
     "hintMany": "Todos os outros respondem, cada um com a sua opção.",
@@ -41,14 +41,14 @@
     "no": "Continuar"
   },
   "answer": {
-    "kicker": "Jogada {n} · {name} pergunta",
+    "kicker": "Rodada {n} · {name} pergunta",
     "yourAnswer": "Sua resposta",
     "note": "Contexto (opcional)",
     "send": "Enviar resposta",
     "progress": "{done} de {total} responderam"
   },
   "guess": {
-    "kicker": "Jogada {n} · Você perguntou",
+    "kicker": "Rodada {n} · Você perguntou",
     "title": "Já sabe quem você é?",
     "label": "Seu palpite",
     "hint": "Se o nome bater, vale na hora. Se ficar na dúvida, decide quem escolheu o seu personagem.",
@@ -56,7 +56,7 @@
     "pass": "Passar a vez"
   },
   "validate": {
-    "kicker": "Jogada {n} · Palpite de {name}",
+    "kicker": "Rodada {n} · Palpite de {name}",
     "title": "{name} acertou?",
     "bodyMany": "Não é igual ao nome da carta. Você escolheu este personagem, então só você responde. {names} esperam.",
     "bodyOne": "Não é igual ao nome da carta. Você escolheu este personagem, então a decisão é sua.",
@@ -64,7 +64,7 @@
     "no": "Ainda não"
   },
   "wait": {
-    "kicker": "Jogada {n}",
+    "kicker": "Rodada {n}",
     "ask": "{name} está pensando na pergunta…",
     "answers": "Esperando as respostas",
     "guess": "{name} está pensando se arrisca um palpite…",
@@ -83,15 +83,15 @@
       "question": "Perguntas",
       "guess": "Palpites"
     },
-    "mineCaption": "Suas perguntas e palpites: {shown} de {total} jogadas · a mais recente em cima",
-    "playerCaption": "Perguntas e palpites de {name}: {shown} de {total} jogadas · a mais recente em cima",
+    "mineCaption": "Suas perguntas e palpites: {shown} de {total} · a mais recente em cima",
+    "playerCaption": "Perguntas e palpites de {name}: {shown} de {total} · a mais recente em cima",
     "nothing": "Nada por aqui ainda. As perguntas aparecem aqui assim que alguém joga.",
     "question": "Pergunta · {name}",
     "guess": "Palpite · {name}"
   },
   "reveal": {
-    "asked": "Jogada {n} · {name} perguntou",
-    "guessed": "Jogada {n} · Palpite de {name}",
+    "asked": "Rodada {n} · {name} perguntou",
+    "guessed": "Rodada {n} · Palpite de {name}",
     "hit": "Acertou",
     "hitPlace": "Acertou · {place}º lugar",
     "hitTie": "Acertou · empate no {place}º lugar",

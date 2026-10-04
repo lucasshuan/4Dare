@@ -26,6 +26,10 @@ export function findPlayer(state: RoomState, id: PlayerId) {
   return state.players.find((p) => p.id === id);
 }
 
+/** The turn under way: its question and guess carry this number. Older rooms count plays. */
+export const turnNumber = (state: RoomState) =>
+  state.turnNumber ?? state.plays.length + 1;
+
 export function openQuestion(state: RoomState) {
   const last = state.plays.at(-1);
   return last?.kind === "question" && last.open ? last : null;

@@ -12,6 +12,7 @@ import {
   pendingGuess,
   presenceDue,
   stepSeconds,
+  turnNumber,
   validatorOf,
 } from "./helpers";
 import {
@@ -150,7 +151,7 @@ function history(s: RoomState): HistoryEntryView[] {
 function turn(s: RoomState, viewer: PlayerId): TurnView | null {
   if (!TURN.includes(s.phase) || !s.turnPlayerId) return null;
   const base: TurnView = {
-    n: s.plays.length + 1,
+    n: turnNumber(s),
     playerId: s.turnPlayerId,
     question: null,
     answeredIds: [],
@@ -288,7 +289,9 @@ function reveal(
   const r = s.reveal;
   if (!r || now >= r.until) return null;
   if (isShowKind(r.kind)) return showView(r, r.kind, now);
-  const play = s.plays.find((p) => p.n === r.n);
+  // A turn's question and guess share its number.
+  const kind = r.kind === "answers" ? "question" : "guess";
+  const play = s.plays.find((p) => p.n === r.n && p.kind === kind);
   if (!play) return null;
   if (r.kind === "answers" && play.kind === "question") {
     return {
@@ -408,6 +411,7 @@ export function toView(
     pick: pick(s, viewerId, now),
     turn: turn(s, viewerId),
     history: history(s),
+    turns: s.turnNumber ?? s.plays.length,
     canStart:
       viewerId === s.hostId && s.phase === "lobby" && s.players.length >= 2,
   };

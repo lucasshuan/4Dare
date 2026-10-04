@@ -15,6 +15,6 @@
     "started": "▶ Partida começou",
     "theme": "{emoji} Tema: {theme}",
     "order": "Ordem: {names}",
-    "firstTurn": "Rodada {n} · vez de {name}"
+    "firstTurn": "Partida {n} · vez de {name}"
   }
 }

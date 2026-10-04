@@ -45,7 +45,7 @@ describe("match record", () => {
     expect(by(first)).toMatchObject({
       result: "discovered",
       place: 1,
-      discoveredAt: 2,
+      discoveredAt: 1,
       questions: 1,
       guesses: 1,
       timeMs: discoveredAt - startedAt,

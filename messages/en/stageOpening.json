@@ -8,7 +8,7 @@
     "line2": "Only you can't see yours. Ask to find out.",
     "question": "Am I from Marvel?"
   },
-  "round": "Round {n}",
+  "round": "Match {n}",
   "rule": {
     "title": "Every character must be from this theme.",
     "fits": "Fits the theme",

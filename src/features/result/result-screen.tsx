@@ -124,7 +124,7 @@ export function ResultScreen() {
       <div className="mx-auto grid w-full max-w-[1120px] flex-1 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-12">
         <div className="flex flex-col gap-3 lg:self-center lg:pb-16">
           <span className="font-semibold text-ink-muted text-sm">
-            {t("kicker", { count: view.history.length })}
+            {t("kicker", { count: view.turns })}
           </span>
           <m.h1
             initial={{ opacity: 0, y: 16 }}
