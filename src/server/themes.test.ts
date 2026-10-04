@@ -15,17 +15,13 @@ const LIST = [t("Pirates"), t("Robots"), t("Wizards")];
 
 function store(list: () => Promise<Theme[]>) {
   let reads = 0;
-  const added: Theme[] = [];
   const s: ThemeStore = {
     list: () => {
       reads++;
       return list();
     },
-    add: async (theme) => {
-      added.push(theme);
-    },
   };
-  return { s, added, reads: () => reads };
+  return { s, reads: () => reads };
 }
 
 describe("themes", () => {

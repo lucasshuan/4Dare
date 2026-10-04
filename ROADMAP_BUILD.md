@@ -78,4 +78,4 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] Patch updates: next-intl, react-query, lucide
 - [ ] React 19.3, Biome 2.5, motion 14 and TypeScript 7 after Phase 10, changelogs first
 - [x] Unused `public/brand/logo-dark.svg` removed
-- [ ] AI leftovers in the game files after Phase 10: `ThemeStore.add`, `.data/themes-ai.json`, `THEME_SETS[].about`, old comments
+- [x] AI leftovers: `ThemeStore.add`, `.data/themes-ai.json`, `THEME_SETS[].about`, old comments (done during Phase 10: none of it was in a wave-4 file)
