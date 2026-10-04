@@ -1,480 +1,504 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { Check, Dices, ImageIcon, Plus } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { Check, Dices } from "lucide-react";
+import { type AnimationSequence, motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { CharacterCard } from "@/components/ui/character-card";
-import { ImageDrop, type ImageDropHandle } from "@/components/ui/image-drop";
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
+import { keyClass } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
-import { Portrait } from "@/components/ui/portrait";
-import { TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { useSceneShow } from "@/features/room/match-frame";
+import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
 import { PickIntro } from "@/features/stage/pick-intro";
-import { searchItems, thumbUrl } from "@/game/character-search";
-import type { Lang } from "@/game/types";
-import { cn } from "@/lib/cn";
-import { useAction } from "@/lib/hooks/use-action";
-import { dur, ease, riseIn } from "@/lib/motion";
+import { beatOf, isShow } from "@/features/stage/stage";
 import {
-  confirmPick,
-  createCharacter,
+  PHONE,
+  type TimelineInfo,
+  useStageTimeline,
+} from "@/features/stage/use-stage-timeline";
+import { PICK_TABLE } from "@/game/show-timing/pick";
+import type {
+  CardView,
+  Lang,
+  RoomView,
+  ShowKind,
+  ShowView,
+} from "@/game/types";
+import { cn } from "@/lib/cn";
+import { focusIsFree } from "@/lib/focus";
+import { useAction } from "@/lib/hooks/use-action";
+import { useMedia } from "@/lib/hooks/use-media";
+import { useClock } from "@/lib/hooks/use-server-clock";
+import { dur, type EaseFn, ease, gs } from "@/lib/motion";
+import { useDisplayName } from "@/lib/names";
+import {
+  confirmCard,
   randomPick,
   replaceCharacterImage,
 } from "@/server/actions";
-import type { CharacterDTO, CharacterSearchResponse } from "@/server/contract";
+import type { CharacterDTO } from "@/server/contract";
+import { DoneRow } from "./done-row";
+import { drawHand, type HandCard, uploadDraftImage } from "./draft-api";
 import { DrawFeedback } from "./draw-feedback";
+import { type CardContent, PickCard, type PickCardState } from "./pick-card";
+import { PickHand, usePickHand } from "./pick-hand";
 import { useCharacterIndex } from "./use-character-index";
+import { usePickDraft } from "./use-pick-draft";
 
-function useDebounced<T>(value: T, ms: number) {
-  const [v, setV] = useState(value);
-  useEffect(() => {
-    const id = window.setTimeout(() => setV(value), ms);
-    return () => window.clearTimeout(id);
-  }, [value, ms]);
-  return v;
-}
+/** The row layout (spacer, card, actions column); narrower windows stack them. */
+const WIDE = "(min-width: 1024px)";
+/** How long the picture's flip takes before the "Like this pick?" bubble may show. */
+const FLIP_MS = 650;
 
-const toCard = (c: CharacterDTO) => ({
+const toCard = (c: CharacterDTO | HandCard): CardView => ({
   characterId: c.id,
   name: c.name,
   origin: c.origin,
   imageUrl: c.imageUrl,
 });
 
-type Mode = "search" | "chosen" | "create" | "image";
-
+/**
+ * The pick step: the draw and "for whom" (PickIntro) while they play, then
+ * the table: the title, the card (the form), Confirm and Random beside it,
+ * the theme's hand at the bottom edge and, once confirmed, who has finished.
+ */
 export function PickScreen() {
-  const t = useTranslations("room.pick");
+  const { view } = useRoomContext();
+  const lang = useLocale() as Lang;
+  const show = useSceneShow("theme", ["draw", "target"]);
+  // asked for as the draw starts, so the hand is there when the table lands
+  usePickHand(view.theme, lang);
+  if (show) return <PickIntro show={show} />;
+  if (!view.pick) return null;
+  return <PickTable />;
+}
+
+/** The show of that kind the view carries (current or still playing before it). */
+function showIn(view: RoomView, kind: ShowKind): ShowView | null {
+  const r = view.reveal;
+  if (!isShow(r)) return null;
+  if (r.kind === kind) return r;
+  return r.prev?.kind === kind ? r.prev : null;
+}
+
+/** Whether server time `at` has passed; re-renders when it does. */
+function usePast(at: number | null): boolean {
+  const clock = useClock();
+  const [, bump] = useReducer((n: number) => n + 1, 0);
+  useEffect(() => {
+    if (at === null || clock.frozen) return;
+    const wait = (at - clock.now()) / clock.rate;
+    if (wait < 0) return;
+    const id = window.setTimeout(bump, wait + 15);
+    return () => window.clearTimeout(id);
+  }, [at, clock]);
+  return at !== null && clock.now() >= at;
+}
+
+/** The card's width: smaller on short windows, so the hand stays clear of it. */
+function useCardWidth(phone: boolean): number {
+  const [height, setHeight] = useState(() =>
+    typeof window === "undefined" ? 800 : window.innerHeight,
+  );
+  useEffect(() => {
+    const onResize = () => setHeight(window.innerHeight);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const scene = height - (phone ? 80 : 76);
+  const fit = (scene - 360) / 1.25 + 24;
+  return Math.round(Math.max(200, Math.min(phone ? 224 : 270, fit)));
+}
+
+interface Part {
+  els: Element[];
+  at: number;
+  duration: number;
+  ease: EaseFn;
+  from: Record<string, number>;
+  to: Record<string, number>;
+}
+
+/** The table's entrance (spec B §5.1); reduced: the same times, 0.2 s fades. */
+function buildEntrance(
+  scope: HTMLElement,
+  { reduced }: TimelineInfo,
+): AnimationSequence {
+  const all = (name: string) =>
+    Array.from(scope.querySelectorAll(`[data-t="${name}"]`));
+  const wide = window.matchMedia(WIDE).matches;
+  const s = (ms: number) => ms / 1000;
+  const parts: Part[] = [
+    {
+      els: all("title"),
+      at: s(PICK_TABLE.title),
+      duration: 0.4,
+      ease: gs.p1Out,
+      from: { opacity: 0, y: 10 },
+      to: { opacity: 1, y: 0 },
+    },
+    {
+      els: all("card"),
+      at: s(PICK_TABLE.card),
+      duration: 0.7,
+      ease: gs.backOut(1.6),
+      from: { opacity: 0, scale: 0.8, rotate: -5, y: 30 },
+      to: { opacity: 1, scale: 1, rotate: 0, y: 0 },
+    },
+    ...all("hand").map((el, i) => ({
+      els: [el],
+      at: s(PICK_TABLE.hand + i * PICK_TABLE.handStagger),
+      duration: 0.6,
+      ease: gs.backOut(1.4),
+      from: { opacity: 0, y: 160 },
+      to: { opacity: 1, y: 0 },
+    })),
+    {
+      els: all("actions"),
+      at: s(PICK_TABLE.actions),
+      duration: 0.5,
+      ease: gs.p1Out,
+      from: { opacity: 0, x: wide ? 20 : 0 },
+      to: { opacity: 1, x: 0 },
+    },
+    {
+      els: all("label"),
+      at: s(PICK_TABLE.label),
+      duration: 0.4,
+      ease: gs.p1Out,
+      from: { opacity: 0 },
+      to: { opacity: 1 },
+    },
+  ];
+  const sequence: AnimationSequence = [];
+  for (const part of parts) {
+    if (!part.els.length) continue;
+    const keyframes: Record<string, number[]> = {};
+    for (const key of Object.keys(part.to))
+      keyframes[key] =
+        reduced && key !== "opacity"
+          ? [part.to[key], part.to[key]]
+          : [part.from[key], part.to[key]];
+    sequence.push([
+      part.els,
+      keyframes,
+      reduced
+        ? { at: part.at, duration: 0.2 }
+        : { at: part.at, duration: part.duration, ease: part.ease },
+    ]);
+  }
+  return sequence;
+}
+
+const fadeOut = (scope: HTMLElement): AnimationSequence => [
+  [scope, { opacity: [1, 0] }, { at: 0, duration: PICK_TABLE.fadeOut / 1000 }],
+];
+
+function PickTable() {
+  const t = useTranslations("pickCard");
+  const tPick = useTranslations("room.pick");
   const tErrors = useTranslations("common.errors");
   const lang = useLocale() as Lang;
   const withNames = useWithNames();
+  const displayName = useDisplayName();
   const { view, code, playerById } = useRoomContext();
-  const pick = view.pick;
-  const target = playerById(pick?.targetId);
-  const { run, pending: saving } = useAction();
+  const pick = view.pick as NonNullable<RoomView["pick"]>;
+  const target = playerById(pick.targetId);
+  const phone = useMedia(PHONE);
+  const wide = useMedia(WIDE);
+  const width = useCardWidth(phone);
+  const started = useStepStarted();
+  const index = useCharacterIndex(lang, !pick.confirmed);
+  const items = index.data ?? (index.isError ? [] : undefined);
+  const typedTheme = view.theme?.set === null;
+
+  // the card, as the player left it
+  const [content, setContent] = useState<CardContent>({ kind: "empty" });
+  const [focused, setFocused] = useState(false);
+  const [libraryUploads, setLibraryUploads] = useState(0);
+  const [autoFocus] = useState(
+    () => !window.matchMedia(PHONE).matches && focusIsFree(),
+  );
+
+  // Out of time: the deadline passed while the card was still open. The view
+  // that follows (the server's TIMEOUT) confirms every card, so remember
+  // whether this one was confirmed before it.
+  const seen = useRef({ deadline: null as number | null, open: false });
+  if (view.phase === "picking" && view.deadline !== null)
+    seen.current.deadline = view.deadline;
+  const pastDeadline = usePast(seen.current.deadline);
+  const confirmedEarly = useRef(false);
+  if (pick.confirmed && !pastDeadline) confirmedEarly.current = true;
+  if (!pick.confirmed && !pastDeadline) seen.current.open = true;
+  const timeUp = pastDeadline && seen.current.open && !confirmedEarly.current;
+  const state: PickCardState = timeUp
+    ? "timeUp"
+    : pick.confirmed
+      ? "confirmed"
+      : "editing";
+  const editing = state === "editing";
+
+  const draft = usePickDraft({
+    code,
+    pick,
+    content,
+    setContent,
+    focused,
+    deadline: seen.current.deadline,
+    items,
+    active: editing && view.phase === "picking",
+  });
+
+  // Random: a draw still on its way no longer applies once the card changes
+  const { run, pending: rolling } = useAction();
   const { act, pending: confirming } = useRoomAction();
-  const pending = saving || confirming;
-  const [mode, setMode] = useState<Mode>("search");
-  const [query, setQuery] = useState("");
-  const [chosen, setChosen] = useState<CharacterDTO | null>(null);
-  const [newName, setNewName] = useState("");
-  const [origin, setOrigin] = useState("");
-  const drop = useRef<ImageDropHandle>(null);
-  // The chosen character came from the dice; `flip` plays the card's entrance
-  // once per draw; `noHistory`: the theme has too few past picks to draw from.
-  const [drawn, setDrawn] = useState(false);
-  const [flip, setFlip] = useState(false);
+  const rollId = useRef(0);
   const [rolls, setRolls] = useState(0);
   const [noHistory, setNoHistory] = useState(false);
-  const rollId = useRef(0);
-  // In-browser search: every keystroke is answered from memory. The deferred
-  // value keeps typing smooth even if the list takes a frame to re-render.
-  const index = useCharacterIndex(lang, !pick?.confirmed);
-  const typed = useDeferredValue(query);
-  const instant = useMemo(
-    () =>
-      index.data
-        ? searchItems(index.data, typed, 6).map((r) => ({ ...r, lang }))
-        : null,
-    [index.data, typed, lang],
-  );
-  // Until the index arrives (slow connection), ask the server instead.
-  const q = useDebounced(query.trim(), 150);
-  const remote = useQuery({
-    queryKey: ["characters", lang, q],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/characters?lang=${lang}&q=${encodeURIComponent(q)}`,
-      );
-      return ((await res.json()) as CharacterSearchResponse).results;
+  const change = useCallback(
+    (next: CardContent) => {
+      if (!editing) return; // a late upload or crop after the card froze
+      rollId.current++;
+      setContent(next);
     },
-    enabled: !pick?.confirmed && !index.data,
-    staleTime: 60_000,
-  });
-  const results: CharacterDTO[] = instant ?? remote.data ?? [];
-
-  if (!pick || !target) return null;
-  const typedTheme = view.theme?.set === null;
-  const waiting = view.players.filter((p) => !pick.confirmedIds.includes(p.id));
-
-  const choose = (c: CharacterDTO, fromDice = false, flip = false) => {
-    rollId.current++; // a roll still on its way no longer applies
-    setChosen(c);
-    setDrawn(fromDice);
-    setFlip(flip);
-    setMode("chosen");
-  };
+    [editing],
+  );
+  const drawnId =
+    content.kind === "picked" && content.via === "random"
+      ? content.card.characterId
+      : null;
   const roll = async () => {
     const id = ++rollId.current;
     setRolls((n) => n + 1);
-    const r = await run(() => randomPick(code, drawn ? chosen?.id : undefined));
+    const r = await run(() => randomPick(code, drawnId ?? undefined));
     if (id !== rollId.current) return;
-    if (r.ok) choose(r.data, true, true);
+    if (r.ok)
+      setContent({ kind: "picked", card: toCard(r.data), via: "random" });
     else if (r.error === "not_enough_picks") setNoHistory(true);
   };
-  const dice = (
-    <motion.span
-      aria-hidden
-      className="inline-flex"
-      animate={{ rotate: rolls * 360 }}
-      transition={{ duration: dur.slow, ease: ease.soft }}
-    >
-      <Dices strokeWidth={1.75} />
-    </motion.span>
-  );
+  // the "Like this pick?" bubble waits for the picture's flip
+  const [settled, setSettled] = useState<string | null>(null);
+  useEffect(() => {
+    if (!drawnId) return;
+    const id = window.setTimeout(() => setSettled(drawnId), FLIP_MS);
+    return () => window.clearTimeout(id);
+  }, [drawnId]);
+
+  const uploading =
+    (content.kind === "new" && content.uploading) || libraryUploads > 0;
+  const busy = !editing || !started || rolling || confirming || uploading;
+  const filled =
+    content.kind === "picked" ||
+    content.kind === "new" ||
+    (content.kind === "typing" && content.text.trim() !== "");
+
   const confirm = async () => {
-    if (chosen) await act(() => confirmPick(code, chosen.id));
+    const card =
+      content.kind === "picked"
+        ? { characterId: content.card.characterId }
+        : content.kind === "typing" && content.preview
+          ? { characterId: content.preview[0] }
+          : content.kind === "typing"
+            ? { name: content.text.trim() }
+            : content.kind === "new"
+              ? { name: content.name.trim() }
+              : null;
+    if (!card) return;
+    rollId.current++;
+    draft.pause(true);
+    // a new name's picture comes from the stored draft: make sure it is there
+    if ("name" in card) await draft.flush();
+    const r = await act(() => confirmCard(code, card));
+    // accepted: the card was in before the clock ran out, even if the answer came after
+    if (r.ok) confirmedEarly.current = true;
+    else draft.pause(false);
   };
-  const create = async () => {
-    const form = new FormData();
-    form.set("name", newName.trim());
-    form.set("origin", origin.trim());
-    form.set("lang", lang);
-    const r = await run(async () => {
-      // The crop as it is now, even if it was moved a moment ago.
-      const image = await drop.current?.exportCrop();
-      if (image) form.set("image", image, "picture.webp");
-      return createCharacter(form);
-    });
-    if (r.ok) choose(r.data);
+
+  const onLibraryImage = async (characterId: string, image: Blob) => {
+    setLibraryUploads((n) => n + 1);
+    try {
+      const form = new FormData();
+      form.set("id", characterId);
+      form.set("image", image, "picture.webp");
+      const r = await replaceCharacterImage(form);
+      if (!r.ok) throw new Error(r.error);
+    } finally {
+      setLibraryUploads((n) => n - 1);
+    }
   };
-  const changeImage = async (blob: Blob) => {
-    if (!chosen) return;
-    const form = new FormData();
-    form.set("id", chosen.id);
-    form.set("image", blob, "picture.webp");
-    const r = await run(() => replaceCharacterImage(form));
-    if (r.ok) choose(r.data, drawn);
-  };
+
+  // What the card shows. Once the server has the pick, a card left empty
+  // (the clock drew one) flips to it, and a half-typed name shows the
+  // character it became; anything else stays as the player left it.
+  const shown: CardContent =
+    pick.character && (content.kind === "empty" || content.kind === "typing")
+      ? {
+          kind: "picked",
+          card: pick.character,
+          via: content.kind === "empty" && timeUp ? "random" : "restore",
+        }
+      : content;
+
+  // the hand: 5 of the theme's 8, drawn for this viewer and this match
+  const hand = usePickHand(view.theme, lang);
+  const cards = useMemo(
+    () => drawHand(hand.data ?? [], `${view.youId}:${view.round}`),
+    [hand.data, view.youId, view.round],
+  );
+
+  // the entrance plays from the pick entrance beat; joined later, it is done
+  const entranceAt = beatOf(showIn(view, "theme"), "entrance")?.startsAt ?? 0;
+  const scope = useStageTimeline<HTMLDivElement>({
+    startsAt: entranceAt,
+    build: buildEntrance,
+    deps: [cards.length, wide, typedTheme],
+  });
+  // the cast's first beat holds the table, then it fades
+  const picked = beatOf(showIn(view, "cast"), "picked");
+  const root = useStageTimeline<HTMLDivElement>({
+    startsAt: picked ? picked.until - PICK_TABLE.fadeOut : null,
+    build: fadeOut,
+    deps: [],
+  });
+
+  if (!target) return null;
+  const targetName = withNames((n) => t("cardTitle", { name: n(target) }));
 
   return (
-    <>
-      <Scenes />
-      <div className="flex flex-wrap items-start gap-10 lg:gap-16">
-        <section className="flex min-w-0 flex-[1_1_420px] flex-col gap-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              y: 0,
-              transition: { duration: dur.reveal, ease: ease.soft },
+    <div ref={root} className="relative">
+      <div
+        ref={scope}
+        style={{ "--pick-w": `${width}px` } as CSSProperties}
+        className="flex flex-col items-center gap-4 sm:gap-[22px] sm:pt-1"
+      >
+        <h1
+          data-t="title"
+          style={{ opacity: 0, transform: "translateY(10px)" }}
+          className="max-w-full text-balance text-center font-bold font-display text-[21px] tracking-[-0.015em] sm:text-[28px]"
+        >
+          {targetName}
+        </h1>
+
+        <div className="flex flex-col items-center gap-3.5 lg:flex-row lg:gap-10">
+          <div aria-hidden className="hidden w-[210px] lg:block" />
+          <div
+            data-t="card"
+            style={{
+              opacity: 0,
+              transform: "translateY(30px) scale(0.8) rotate(-5deg)",
             }}
-            className="flex flex-col gap-2 rounded-xl bg-butter p-8 text-on-butter"
+            // over the actions: the picture's tray hangs over them
+            className="relative z-10"
           >
-            <span className="font-semibold text-sm uppercase tracking-[0.06em]">
-              {t("theme")}
-            </span>
-            <h1
-              className={cn(
-                "text-balance font-display font-extrabold tracking-[-0.03em]",
-                // after the size: tailwind-merge drops a leading-* that comes before a text-* size
-                (view.theme?.[lang].length ?? 0) > 14
-                  ? "text-[clamp(34px,4.6vw,60px)] leading-none"
-                  : "text-[clamp(48px,7vw,96px)] leading-none",
-              )}
+            <PickCard
+              value={shown}
+              onChange={change}
+              lang={lang}
+              targetName={displayName(target, false)}
+              state={state}
+              stamp={timeUp}
+              onNewImage={(image) => uploadDraftImage(code, image)}
+              onLibraryImage={onLibraryImage}
+              autoFocus={autoFocus}
+              onFocusChange={setFocused}
+              className="w-[var(--pick-w)] sm:w-[var(--pick-w)]"
+            />
+            {drawnId ? (
+              <DrawFeedback
+                key={`feedback-${drawnId}`}
+                code={code}
+                characterId={drawnId}
+                show={editing && settled === drawnId && !busy}
+                onDislike={roll}
+              />
+            ) : null}
+          </div>
+
+          <motion.div
+            initial={false}
+            animate={{ opacity: editing ? 1 : 0 }}
+            transition={{ duration: 0.3 }}
+            className={cn("lg:w-[210px]", !editing && "pointer-events-none")}
+          >
+            <div
+              data-t="actions"
+              style={{
+                opacity: 0,
+                transform: wide ? "translateX(20px)" : undefined,
+              }}
+              className="flex flex-col items-center gap-2.5 lg:items-start lg:gap-3.5"
             >
-              {view.theme?.[lang]}
-            </h1>
-          </motion.div>
-          <div className="flex flex-col gap-2">
-            <h2 className="font-semibold text-xl">
-              {pick.confirmed
-                ? withNames((n) => t("doneTitle", { name: n(target) }))
-                : withNames((n) => t("title", { name: n(target) }))}
-            </h2>
-            <p className="max-w-120 text-ink-muted">
-              {withNames((n) => t("subtitle", { name: n(target) }))}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="-space-x-1.5 flex">
-              {view.players
-                .filter((p) => pick.confirmedIds.includes(p.id))
-                .map((p) => (
-                  <Avatar
-                    key={p.id}
-                    avatar={p.avatar}
-                    isGuest={p.isGuest}
-                    name={p.name}
-                    size={28}
-                    className="ring-2 ring-canvas"
-                  />
-                ))}
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-sm">
-                {t("progress", {
-                  done: pick.confirmedIds.length,
-                  total: pick.total,
-                })}
-              </span>
-              {waiting.length ? (
-                <span className="font-medium text-[13px] text-ink-muted">
-                  {withNames((n) =>
-                    t("waitingFor", {
-                      names: waiting.map((p) => n(p, p.isYou)).join(", "),
-                    }),
-                  )}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        </section>
-
-        <section className="flex w-full flex-col gap-3 lg:max-w-120 lg:flex-[1_1_400px]">
-          <AnimatePresence mode="wait">
-            {pick.confirmed && pick.character ? (
-              <motion.div key="done" {...riseIn} className="max-w-90">
-                <CharacterCard
-                  card={pick.character}
-                  label={withNames((n) => t("cardLabel", { name: n(target) }))}
-                  layoutId="pick-card"
-                />
-              </motion.div>
-            ) : mode === "chosen" && chosen ? (
-              <motion.div
-                key="chosen"
-                {...riseIn}
-                className="flex flex-col gap-4"
-              >
-                <div className="relative max-w-90 perspective-[1000px]">
-                  <motion.div
-                    key={chosen.id}
-                    initial={
-                      flip ? { opacity: 0, rotateY: -80, scale: 0.94 } : false
-                    }
-                    animate={{ opacity: 1, rotateY: 0, scale: 1 }}
-                    transition={{ duration: dur.reveal, ease: ease.soft }}
-                    onAnimationComplete={() => setFlip(false)}
-                  >
-                    <CharacterCard
-                      card={toCard(chosen)}
-                      label={withNames((n) =>
-                        t("cardLabel", { name: n(target) }),
-                      )}
-                      layoutId="pick-card"
-                    />
-                  </motion.div>
-                  {drawn ? (
-                    <DrawFeedback
-                      key={`feedback-${chosen.id}`}
-                      code={code}
-                      characterId={chosen.id}
-                      show={!flip && !pending}
-                      onDislike={roll}
-                    />
-                  ) : null}
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    disabled={pending}
-                    onClick={confirm}
-                  >
-                    <Check strokeWidth={2} />
-                    {t("confirm")}
-                  </Button>
-                  {drawn ? (
-                    <Button disabled={pending} onClick={roll}>
-                      {dice}
-                      {t("randomAgain")}
-                    </Button>
-                  ) : null}
-                  <Button disabled={pending} onClick={() => setMode("search")}>
-                    {t("change")}
-                  </Button>
-                  <Button disabled={pending} onClick={() => setMode("image")}>
-                    <ImageIcon strokeWidth={1.75} />
-                    {t("changeImage")}
-                  </Button>
-                </div>
-                <p className="max-w-110 font-medium text-[13px] text-ink-muted">
-                  {t("imageHint", { name: chosen.name })}
-                </p>
-              </motion.div>
-            ) : mode === "image" && chosen ? (
-              <motion.div
-                key="image"
-                {...riseIn}
-                className="flex flex-col gap-4"
-              >
-                <h3 className="font-semibold text-xl">
-                  {t("changeImageTitle", { name: chosen.name })}
-                </h3>
-                <ImageDrop onDone={changeImage} busy={pending} />
-                <Button
-                  variant="ghost"
-                  className="self-start"
-                  onClick={() => setMode("chosen")}
+              <div className="flex flex-wrap items-center justify-center gap-2.5 lg:flex-col lg:items-start lg:gap-3.5">
+                <button
+                  type="button"
+                  disabled={busy || !filled}
+                  onClick={confirm}
+                  className={keyClass("yes", {
+                    className:
+                      "h-14 px-[22px] text-[19px] sm:h-16 sm:px-[30px] sm:text-[21px] [&_svg]:size-[22px]",
+                  })}
                 >
-                  {t("back")}
-                </Button>
-              </motion.div>
-            ) : mode === "create" ? (
-              <motion.form
-                key="create"
-                {...riseIn}
-                className="flex flex-col gap-4 short:gap-3"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void create();
-                }}
-              >
-                <h3 className="font-bold font-display text-3xl short:text-2xl">
-                  {t("createTitle")}
-                </h3>
-                {/* short windows: the picture sits beside the text fields, not under them */}
-                <div className="flex flex-col gap-4 short:gap-3 lg:short:grid lg:short:grid-cols-[minmax(0,1fr)_minmax(0,220px)] lg:short:items-start lg:short:gap-x-5">
-                  <div className="flex flex-col gap-4 short:gap-3">
-                    <TextField
-                      label={t("newName")}
-                      value={newName}
-                      max={60}
-                      onChange={(e) => setNewName(e.target.value)}
-                    />
-                    <TextField
-                      label={t("newOrigin")}
-                      value={origin}
-                      max={60}
-                      onChange={(e) => setOrigin(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <span className="font-semibold text-sm">
-                      {t("newImage")}
-                    </span>
-                    <ImageDrop ref={drop} />
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={pending || !newName.trim()}
+                  <Check strokeWidth={2.5} aria-hidden />
+                  {t("confirmCard")}
+                </button>
+                {/* a theme the host typed has no past picks to draw from */}
+                {typedTheme ? null : (
+                  <button
+                    type="button"
+                    disabled={busy || noHistory}
+                    title={tPick("randomHint")}
+                    onClick={roll}
+                    className="mb-1.5 inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-pill border-[1.5px] border-line-strong bg-surface px-[18px] font-semibold text-[15px] text-ink transition-[translate,opacity] duration-150 ease-soft hover:-translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:size-[18px]"
                   >
-                    {t("save")}
-                  </Button>
-                  <Button variant="ghost" onClick={() => setMode("search")}>
-                    {t("back")}
-                  </Button>
-                </div>
-              </motion.form>
-            ) : (
-              <motion.div
-                key="search"
-                {...riseIn}
-                className="flex flex-col gap-2"
-              >
-                <div className="flex items-end justify-between gap-3">
-                  <label
-                    htmlFor="pick-search"
-                    className="font-semibold text-sm"
-                  >
-                    {withNames((n) => t("searchLabel", { name: n(target) }))}
-                  </label>
-                  {/* a theme the host typed has no past picks to draw from */}
-                  {typedTheme ? null : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={pending || noHistory}
-                      title={t("randomHint")}
-                      onClick={roll}
+                    <motion.span
+                      aria-hidden
+                      className="inline-flex"
+                      animate={{ rotate: rolls * 360 }}
+                      transition={{ duration: dur.slow, ease: ease.soft }}
                     >
-                      {dice}
-                      {t("random")}
-                    </Button>
-                  )}
-                </div>
-                {noHistory && !typedTheme ? (
-                  <motion.p
-                    {...riseIn}
-                    className="font-medium text-[13px] text-ink-muted"
-                  >
-                    {tErrors("not_enough_picks")}
-                  </motion.p>
-                ) : null}
-                <input
-                  id="pick-search"
-                  value={query}
-                  autoComplete="off"
-                  maxLength={60}
-                  placeholder={t("searchPlaceholder")}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="h-13 w-full rounded-md border-[1.5px] border-line-strong bg-surface px-4 text-base focus-visible:border-sky"
-                />
-                <ul className="mt-2 flex flex-col gap-0.5 rounded-lg bg-surface p-2 shadow-pop">
-                  <AnimatePresence initial={false}>
-                    {results.map((c) => (
-                      <motion.li
-                        key={c.id}
-                        layout
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => choose(c)}
-                          className="flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-sky-soft focus-visible:bg-sky-soft"
-                        >
-                          <Portrait
-                            src={thumbUrl(c.imageUrl, 96)}
-                            className="w-12 shrink-0 rounded-sm"
-                          />
-                          <span className="flex min-w-0 flex-col">
-                            <span className="truncate font-semibold text-lg">
-                              {c.name}
-                            </span>
-                            {c.origin ? (
-                              <span className="truncate font-medium text-[13px] text-ink-muted">
-                                {c.origin}
-                              </span>
-                            ) : null}
-                          </span>
-                        </button>
-                      </motion.li>
-                    ))}
-                  </AnimatePresence>
-                  <li
-                    className={cn(
-                      results.length > 0 && "mt-1 border-line border-t pt-1",
-                    )}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setNewName(query.trim());
-                        setMode("create");
-                      }}
-                      className="flex w-full items-center gap-3 rounded-md p-3 text-left font-semibold text-sky transition-colors hover:bg-sky-soft"
-                    >
-                      <Plus className="size-5" strokeWidth={1.75} />
-                      {query.trim()
-                        ? t("createNamed", { name: query.trim() })
-                        : t("createNew")}
-                    </button>
-                  </li>
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </section>
-      </div>
-    </>
-  );
-}
+                      <Dices strokeWidth={1.75} />
+                    </motion.span>
+                    {drawnId ? tPick("randomAgain") : tPick("random")}
+                  </button>
+                )}
+              </div>
+              {noHistory && !typedTheme ? (
+                <p className="max-w-[240px] text-balance text-center font-medium text-[13px] text-ink-muted lg:max-w-[200px] lg:text-left">
+                  {tErrors("not_enough_picks")}
+                </p>
+              ) : null}
+              <small className="hidden max-w-[190px] gap-1.5 font-semibold text-[13px] text-ink-muted leading-[1.4] lg:flex">
+                <span aria-hidden>⏱</span>
+                <span>{t("rule")}</span>
+              </small>
+            </div>
+          </motion.div>
+        </div>
 
-/** The scene that plays over this screen: the draw and "for whom". */
-function Scenes() {
-  const show = useSceneShow("theme", ["draw", "target"]);
-  return show ? <PickIntro show={show} /> : null;
+        <PickHand
+          cards={cards}
+          theme={view.theme?.[lang] ?? ""}
+          phone={phone}
+          open={editing}
+          timeUp={timeUp}
+          onPick={(card) =>
+            change({ kind: "picked", card: toCard(card), via: "hand" })
+          }
+        />
+        <DoneRow
+          players={view.players}
+          confirmedIds={pick.confirmedIds}
+          show={state === "confirmed"}
+        />
+      </div>
+    </div>
+  );
 }
