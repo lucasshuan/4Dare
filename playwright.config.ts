@@ -1,7 +1,10 @@
 import { defineConfig } from "@playwright/test";
 
 // End-to-end tests run against the app in local mode (no Supabase needed).
-// Uses the Edge already installed on Windows; change `channel` if you prefer another browser.
+// Uses the Edge already installed on Windows; set PW_CHROMIUM to a Chromium binary
+// to use that instead (the cloud sessions do).
+const chromium = process.env.PW_CHROMIUM;
+
 export default defineConfig({
   testDir: "./e2e",
   timeout: 120_000,
@@ -9,7 +12,9 @@ export default defineConfig({
   workers: 1,
   use: {
     baseURL: "http://localhost:3100",
-    channel: "msedge",
+    ...(chromium
+      ? { launchOptions: { executablePath: chromium } }
+      : { channel: "msedge" }),
     trace: "retain-on-failure",
   },
   webServer: {

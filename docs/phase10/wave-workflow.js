@@ -1,5 +1,6 @@
 // Workflow script for one wave of Phase 10 (run with the Workflow tool, `scriptPath`
-// pointing here, and args like {"wave": 2, "wps": ["WP3", "WP5", "WP9a"], "e2e": true}).
+// pointing here, and args like {"wave": 2, "wps": ["WP3", "WP5", "WP9a"], "e2e": true};
+// optional "extra" (per-package notes) and "env" (machine notes every agent gets).
 // Each package: an engineer builds it, an adversarial reviewer checks it against the
 // plan's acceptance criteria, a fixer repairs medium/high defects (up to 3 reviews),
 // then one agent runs the full checks on the combined tree. The lead session commits.
@@ -18,8 +19,10 @@ const PROTO = P + '/prototype'
 const WAVE = args.wave
 const WPS = args.wps
 const EXTRA = args.extra || {}
+// notes on the machine (cloud session: node path, browser for e2e, known flaky tests)
+const ENV = args.env ? `\nEnvironment: ${args.env}` : ''
 
-const RULES = (wp) => `
+const RULES = (wp) => `${ENV}
 Rules:
 - Edit only the files your work package owns in the plan (plus files the plan explicitly allows it to touch). Other packages (${WPS.filter((w) => w !== wp).join(', ') || 'none'}) run at the same time in the same working tree and own other files: never edit, revert or reformat their files; if a check fails only because of their in-progress files, note it in your report and carry on.
 - Never run git checkout, reset, stash, clean, commit or push. Do not commit (the lead commits).
@@ -56,6 +59,7 @@ const REVIEW_SCHEMA = {
 }
 
 const review = (wp, round) => agent(`You are an adversarial reviewer of ${wp} (wave ${WAVE}) of Phase 10 in the 4Dare repo (the current directory). Review round ${round + 1}.
+${ENV}
 Read ${P}/HANDOFF.md, the plan ${P}/plan.md (header ground rules, your package's entry in section 5 and the sections it relies on), the engineer's report ${P}/reports/${wp}.md, and the actual changes: git diff plus new untracked files among the package's owned files (ignore changes that belong to other packages ${WPS.filter((w) => w !== wp).join(', ')}).
 Check every acceptance criterion one by one against the code AND by running the package's verification (unit tests, typecheck, lint; e2e or screenshots where the package requires them; look at screenshots you take). Hunt for real defects: logic errors, races, server-clock sync, reconnect/reload mid-scene, secrecy leaks (a player must never learn their own character), missing i18n keys or languages, phone layout at 390x844, dark theme, reduced motion, names without avatars, deviations from the approved prototype look in ${PROTO}/, and anything that breaks behaviour that works today. Do not edit files. Report only defects with evidence; no style nits. passed = no high or medium defects. Write your findings to ${P}/reports/${wp}-review-${round + 1}.md too.`,
   { label: `review:${wp}#${round + 1}`, phase: 'Review', schema: REVIEW_SCHEMA })
@@ -84,7 +88,7 @@ const results = await pipeline(
 )
 
 phase('Wave check')
-const check = await agent(`Wave ${WAVE} of Phase 10 (${WPS.join(', ')}) is built in the 4Dare repo (the current directory). Reports are in ${P}/reports/. Run the full checks on the combined tree: pnpm test, pnpm typecheck, pnpm lint${args.e2e ? ', and pnpm test:e2e (stop any server already on port 3100 first)' : ''}. Fix any failure caused by the interaction of this wave's packages, editing only files those packages own (see ${P}/plan.md section 5). Never run git checkout/reset/stash/commit. Write ${P}/reports/wave${WAVE}-check.md with the commands and results, and return: for each command pass/fail with the decisive lines, and the list of files changed by this wave (git status --short, marking which belong to which package).`,
+const check = await agent(`Wave ${WAVE} of Phase 10 (${WPS.join(', ')}) is built in the 4Dare repo (the current directory). Reports are in ${P}/reports/. Run the full checks on the combined tree: pnpm test, pnpm typecheck, pnpm lint${args.e2e ? ', and pnpm test:e2e (stop any server already on port 3100 first)' : ''}. Fix any failure caused by the interaction of this wave's packages, editing only files those packages own (see ${P}/plan.md section 5). Never run git checkout/reset/stash/commit. Write ${P}/reports/wave${WAVE}-check.md with the commands and results, and return: for each command pass/fail with the decisive lines, and the list of files changed by this wave (git status --short, marking which belong to which package).${ENV}`,
   { label: `wave${WAVE}:check`, phase: 'Wave check' })
 
 return { results: results.map((r) => r && { wp: r.wp, passed: r.review?.passed, open: r.review?.defects }), check }

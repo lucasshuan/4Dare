@@ -118,5 +118,7 @@ A quick re-review of WP1 before wave 2 is cheap insurance: run only the review p
 
 - **Environment:** set the variables of `.env.example` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `POSTGRES_URL_NON_POOLING`, …) in the cloud environment. Never commit them.
 - **Supabase MCP:** connect it for migrations and SQL checks.
-- **Playwright:** install it with `pnpm exec playwright install chromium` before e2e.
+- **Node:** the container ships Node 22 first on `PATH`; the repo pins 24. `nvm install 24` (nvm lives in `/opt/nvm`), then prefix commands with `export PATH=/opt/nvm/versions/node/v24.21.0/bin:$PATH`.
+- **Playwright:** don't install browsers; set `PW_CHROMIUM=/opt/pw-browsers/chromium` and `playwright.config.ts` launches that binary instead of Edge.
+- **Without Supabase env vars** the app, unit tests and e2e run in local mode; check Supabase-side SQL read-only with the MCP.
 - **e2e timing:** e2e needs a calm machine. Under heavy CPU load the timing-based tests fail for that reason alone. `DARE_SHOW_SCALE=0.25` speeds up the shows in e2e (only the shows, never the clocks).
