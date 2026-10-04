@@ -28,6 +28,7 @@
   },
   "timesLabel": "Tempos",
   "start": "Começar partida",
+  "needPlayers": "Precisa de pelo menos 2 jogadores para começar",
   "confirmStart": {
     "title": "Começar sem todo mundo pronto?",
     "waiting": "{count, plural, one {Ainda falta confirmar:} other {Ainda faltam confirmar:}}",

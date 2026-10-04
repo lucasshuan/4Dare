@@ -28,6 +28,7 @@
   },
   "timesLabel": "Times",
   "start": "Start match",
+  "needPlayers": "You need at least 2 players to start",
   "confirmStart": {
     "title": "Start before everyone is ready?",
     "waiting": "{count, plural, one {Still not ready:} other {Still not ready:}}",

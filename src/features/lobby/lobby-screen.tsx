@@ -1,5 +1,6 @@
 "use client";
 
+import { Popover } from "@base-ui/react/popover";
 import {
   Check,
   ChevronLeft,
@@ -327,19 +328,21 @@ export function LobbyScreen() {
             {/* keys like "Create room": the host's starts the match; a guest's stays pressed down once ready */}
             {me.isHost ? (
               <>
-                <button
-                  type="button"
-                  className={keyClass("yes", {
-                    bounce: true,
-                    className: "min-h-14 grow px-6 text-lg",
-                  })}
-                  disabled={!view.canStart || pending}
-                  onClick={() =>
-                    waiting.length ? setConfirming(true) : start()
-                  }
-                >
-                  {t("start")}
-                </button>
+                <NeedsPlayers show={view.players.length < 2}>
+                  <button
+                    type="button"
+                    className={keyClass("yes", {
+                      bounce: true,
+                      className: "min-h-14 w-full px-6 text-lg",
+                    })}
+                    disabled={!view.canStart || pending}
+                    onClick={() =>
+                      waiting.length ? setConfirming(true) : start()
+                    }
+                  >
+                    {t("start")}
+                  </button>
+                </NeedsPlayers>
                 <StartDialog
                   open={confirming && view.canStart}
                   onClose={() => setConfirming(false)}
@@ -419,6 +422,44 @@ export function LobbyScreen() {
         </aside>
       </div>
     </Screen>
+  );
+}
+
+/**
+ * Wraps the host's start key: while the room is short of players, hovering
+ * or tapping it says why it is off. A disabled button takes no pointer
+ * events, so the wrapper is the trigger.
+ */
+function NeedsPlayers({
+  show,
+  children,
+}: {
+  show: boolean;
+  children: ReactNode;
+}) {
+  const t = useTranslations("lobby");
+  if (!show) return <div className="grow">{children}</div>;
+  return (
+    <Popover.Root>
+      <Popover.Trigger
+        openOnHover
+        delay={80}
+        closeDelay={120}
+        nativeButton={false}
+        render={<span />}
+        aria-label={t("needPlayers")}
+        className="grow rounded-md"
+      >
+        {children}
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner side="top" sideOffset={8} className="z-50">
+          <Popover.Popup className="w-max max-w-[min(300px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface px-3 py-2 font-medium text-[13px] text-ink-muted leading-snug shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+            {t("needPlayers")}
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }
 
