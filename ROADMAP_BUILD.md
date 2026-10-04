@@ -50,7 +50,7 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 
 - [x] Zen Maru Gothic only on Japanese pages: en/pt pages link 17 KB gzip of CSS instead of 81 KB (its 245 `@font-face` are a chunk of `ja-font.tsx`, linked only where it renders)
 - [ ] Critter avatars as SVG from a cached route, no DiceBear in the browser (152 KB)
-- [ ] Browser Supabase only for realtime, loaded on demand; OAuth starts on the server (−110 KB)
+- [x] Browser Supabase only for realtime, loaded on demand; OAuth starts on the server (`/auth/sign-in`): home 457 → 391 KB gzip of JS
 - [ ] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB)
 - [ ] `LazyMotion` + `m`; full motion features only where `layoutId` is used
 - [ ] Guest names resolved on the server (−24 KB)
