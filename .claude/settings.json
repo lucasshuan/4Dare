@@ -56,9 +56,7 @@
       "mcp__github__get_job_logs",
       "mcp__claude-code-remote__read_documentation"
     ],
-    "ask": [
-      "mcp__Supabase__apply_migration"
-    ],
+    "ask": ["mcp__Supabase__apply_migration"],
     "deny": [
       "Bash(git push --force*)",
       "Bash(git push -f*)",
