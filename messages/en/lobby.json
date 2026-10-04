@@ -21,6 +21,7 @@
   "private": "Private: asks for the password",
   "seats": "Up to {seats} players",
   "times": {
+    "voteSeconds": "Vote",
     "askSeconds": "Ask",
     "answerSeconds": "Answer",
     "guessSeconds": "Guess",

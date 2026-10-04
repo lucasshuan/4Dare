@@ -117,6 +117,7 @@ const createSchema = z.object({
   visibility: z.enum(["public", "private"]),
   password: z.string().trim().max(ROOM_PASSWORD_MAX),
   seats: z.union([z.literal(2), z.literal(3), z.literal(4)]),
+  voteSeconds: seconds,
   askSeconds: seconds,
   guessSeconds: seconds,
   answerSeconds: seconds,

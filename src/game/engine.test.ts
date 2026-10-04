@@ -4,9 +4,9 @@ import { abandoned, presenceDue } from "./helpers";
 import { matchRecord } from "./record";
 import { char, Game, ident, THEMES } from "./test-utils";
 import {
-  ANSWER_CUT_FLOOR_MS,
   type BeatKind,
   type Character,
+  CLOCK_CUT_FLOOR_MS,
   DEFAULT_SETTINGS,
   type ExampleCard,
   GameError,
@@ -22,7 +22,6 @@ import {
   type RuleExamples,
   SHOW_TIMING,
   STEP_SECONDS_MIN,
-  VOTE_SECONDS,
 } from "./types";
 import { toView } from "./view";
 
@@ -315,10 +314,26 @@ describe("the theme vote", () => {
     expectContiguous(r);
     // the vote's clock starts once the opening is over
     expect(g.state.stepStartsAt).toBe(r?.until);
-    expect(VOTE_SECONDS).toBe(20);
+    expect(DEFAULT_SETTINGS.voteSeconds).toBe(40);
     expect((g.state.deadline ?? 0) - (g.state.stepStartsAt ?? 0)).toBe(
-      VOTE_SECONDS * 1000,
+      DEFAULT_SETTINGS.voteSeconds * 1000,
     );
+  });
+
+  it("each first vote cuts the vote time split among the voters; a changed vote cuts nothing", () => {
+    const g = voting(4);
+    const deadline = g.state.deadline ?? 0;
+    const quarter = (DEFAULT_SETTINGS.voteSeconds * 1000) / 4;
+    vote(g, "p1", 0);
+    expect(g.state.deadline).toBe(deadline - quarter);
+    vote(g, "p1", 1);
+    expect(g.state.deadline).toBe(deadline - quarter);
+    vote(g, "p2", 1);
+    expect(g.state.deadline).toBe(deadline - 2 * quarter);
+    // the floor holds: 15 s left, a cut would leave 5 s, so CLOCK_CUT_FLOOR_MS
+    g.now = (g.state.deadline ?? 0) - 15_000;
+    vote(g, "p3", 1);
+    expect(g.state.deadline).toBe(g.now + CLOCK_CUT_FLOOR_MS);
   });
 
   it("the most voted theme wins once everyone voted; votes can change until then", () => {
@@ -548,7 +563,7 @@ describe("the host types the theme", () => {
     expect(beats(r)).toEqual([["entrance", T.entrance.vote]]);
     expect(g.state.stepStartsAt).toBe(g.now + T.entrance.vote);
     expect(g.state.deadline).toBe(
-      (g.state.stepStartsAt ?? 0) + VOTE_SECONDS * 1000,
+      (g.state.stepStartsAt ?? 0) + DEFAULT_SETTINGS.voteSeconds * 1000,
     );
   });
 
@@ -772,7 +787,7 @@ describe("picking", () => {
     ]);
     expectContiguous(r);
     expect((g.state.deadline ?? 0) - (g.state.stepStartsAt ?? 0)).toBe(
-      VOTE_SECONDS * 1000,
+      DEFAULT_SETTINGS.voteSeconds * 1000,
     );
   });
 
@@ -967,8 +982,8 @@ describe("step times", () => {
     expect(g.state.stepMs).toBe(70_000);
   });
 
-  it("every answer that leaves others to answer cuts 20% of the answer time", () => {
-    // the user's example: 4 players, 100 s to answer
+  it("every answer that leaves others to answer cuts the answer time split among who answers", () => {
+    // 4 players, 100 s to answer: 3 answer, so each answer cuts a third
     const g = timed(4);
     const asker = g.turn;
     g.do({ type: "ASK", playerId: asker, text: "Is it human?" });
@@ -976,9 +991,9 @@ describe("step times", () => {
     const [a, b, c] = g.state.order.filter((id) => id !== asker);
     g.now += 20_000; // 80 s left
     g.do({ type: "ANSWER", playerId: a, value: "yes", note: null });
-    expect(g.state.deadline).toBe(start + 80_000); // 60 s left
+    expect(g.state.deadline).toBe(start + 66_667); // 46.667 s left
     g.do({ type: "ANSWER", playerId: b, value: "no", note: null });
-    expect(g.state.deadline).toBe(start + 60_000); // 40 s left
+    expect(g.state.deadline).toBe(start + 33_334); // 13.334 s left
     // the full length stays, so the clock can show what was cut
     expect(g.state.stepMs).toBe(100_000);
     expect(toView(g.state, 1, asker, g.now).stepMs).toBe(100_000);
@@ -992,14 +1007,14 @@ describe("step times", () => {
     ).toContainEqual(expect.objectContaining({ by: c, value: "unknown" }));
   });
 
-  it("a cut never leaves less than ANSWER_CUT_FLOOR_MS, nor adds time", () => {
+  it("a cut never leaves less than CLOCK_CUT_FLOOR_MS, nor adds time", () => {
     const g = timed(4);
     const asker = g.turn;
     g.do({ type: "ASK", playerId: asker, text: "Is it human?" });
     const [a, b] = g.state.order.filter((id) => id !== asker);
-    g.now = (g.state.deadline ?? 0) - 15_000; // 15 s left, a cut would take 20
+    g.now = (g.state.deadline ?? 0) - 15_000; // 15 s left, a cut would take 33
     g.do({ type: "ANSWER", playerId: a, value: "yes", note: null });
-    expect(g.state.deadline).toBe(g.now + ANSWER_CUT_FLOOR_MS);
+    expect(g.state.deadline).toBe(g.now + CLOCK_CUT_FLOOR_MS);
     g.now += 5_000; // 5 s left: already under the floor, nothing changes
     const before = g.state.deadline;
     g.do({ type: "ANSWER", playerId: b, value: "yes", note: null });

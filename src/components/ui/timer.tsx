@@ -4,7 +4,7 @@ import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
-import { useServerClock } from "@/lib/hooks/use-server-clock";
+import { useClock, useServerClock } from "@/lib/hooks/use-server-clock";
 import { formatClock, isLowClock } from "@/lib/names";
 import { useLoopSound } from "@/lib/sound";
 
@@ -13,7 +13,8 @@ import { useLoopSound } from "@/lib/sound";
  * the bar refills and the digits count back up to the full step, landing exactly
  * when the step starts. Then it counts down, turning to the "no" colour near the end;
  * with `tick`, a clock ticks in a loop from then until it runs out. When the
- * deadline comes sooner mid-step (answers cut it), a "−18 s" drops off it.
+ * deadline comes sooner mid-step (votes and answers cut it), the lost time
+ * drains off the digits and the bar in a blink and a "−18 s" drops off it.
  */
 export function Timer({
   deadline,
@@ -35,8 +36,9 @@ export function Timer({
   totalMs?: number | null;
 }) {
   const t = useTranslations("common");
-  const now = useServerClock(offset, 100);
-  const cut = useClockCut(deadline, stepStartsAt);
+  const cut = useClockCut(deadline, stepStartsAt, offset);
+  // every frame while a cut shows, so its drain runs smooth
+  const now = useServerClock(offset, cut ? 16 : 100);
   const full =
     deadline === null || stepStartsAt === null
       ? 0
@@ -61,7 +63,9 @@ export function Timer({
     fraction = Math.min(1, Math.max(0, p));
     shown = (total / 1000) * fraction;
   } else {
-    const left = Math.max(0, deadline - now);
+    // the time a cut took is still there for a blink, draining away (ease out)
+    const drain = cut ? Math.max(0, 1 - (now - cut.at) / CUT_DRAIN_MS) : 0;
+    const left = Math.max(0, deadline - now) + (cut ? cut.ms * drain ** 3 : 0);
     fraction = total > 0 ? left / total : 0;
     shown = left / 1000;
   }
@@ -114,8 +118,8 @@ export function Timer({
           className={cn(
             "block h-full origin-left rounded-pill transition-[transform,background-color] duration-100 ease-linear",
             low || cut ? "bg-no" : recharging ? "bg-sky" : "bg-ink",
-            // a cut slides the bar down instead of snapping it
-            cut && "duration-500 ease-soft",
+            // a cut drains the bar frame by frame, with no lag behind the digits
+            cut && "duration-0",
           )}
           style={{ transform: `scaleX(${fraction})` }}
         />
@@ -126,14 +130,30 @@ export function Timer({
 
 /** How long a cut stays on screen (ms). */
 const CUT_SHOWN_MS = 1800;
+/** How long the time a cut took takes to drain off the digits and the bar (ms). */
+const CUT_DRAIN_MS = 180;
 
 /**
- * Notices the deadline coming sooner within the same step (an answer cut the
- * clock) and reports by how much, for a moment. A new step is never a cut.
+ * Notices the deadline coming sooner within the same step (a vote or an
+ * answer cut the clock) and reports by how much and when (server time), for a
+ * moment. A new step is never a cut.
  */
-function useClockCut(deadline: number | null, stepStartsAt: number | null) {
+function useClockCut(
+  deadline: number | null,
+  stepStartsAt: number | null,
+  offset: number,
+) {
+  const clock = useClock(offset);
+  const now = useRef(clock.now);
+  useEffect(() => {
+    now.current = clock.now;
+  });
   const last = useRef({ deadline, stepStartsAt });
-  const [cut, setCut] = useState<{ ms: number; key: number } | null>(null);
+  const [cut, setCut] = useState<{
+    ms: number;
+    key: number;
+    at: number;
+  } | null>(null);
   useEffect(() => {
     const prev = last.current;
     last.current = { deadline, stepStartsAt };
@@ -143,7 +163,11 @@ function useClockCut(deadline: number | null, stepStartsAt: number | null) {
       prev.deadline !== null &&
       prev.deadline - deadline >= 500
     )
-      setCut({ ms: prev.deadline - deadline, key: deadline });
+      setCut({
+        ms: prev.deadline - deadline,
+        key: deadline,
+        at: now.current(),
+      });
   }, [deadline, stepStartsAt]);
   useEffect(() => {
     if (!cut) return;

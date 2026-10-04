@@ -135,6 +135,7 @@ export function RoomSetup({
                 tone="bg-yes-soft text-yes"
                 label={t("tabRules")}
                 summary={t("rulesSummary", {
+                  vote: value.voteSeconds,
                   ask: value.askSeconds,
                   answer: value.answerSeconds,
                   guess: value.guessSeconds,

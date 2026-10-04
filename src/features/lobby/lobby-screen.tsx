@@ -57,6 +57,7 @@ const editable = ({
   visibility,
   password,
   seats,
+  voteSeconds,
   askSeconds,
   guessSeconds,
   answerSeconds,
@@ -69,6 +70,7 @@ const editable = ({
   visibility,
   password,
   seats,
+  voteSeconds,
   askSeconds,
   guessSeconds,
   answerSeconds,
@@ -381,7 +383,7 @@ export function LobbyScreen() {
             <Setting icon={UsersRound}>{t("seats", { seats })}</Setting>
             <Setting icon={Clock}>
               <span className="sr-only">{t("timesLabel")}: </span>
-              {/* a turn's steps in order, each with its clock */}
+              {/* the match's steps in order, each with its clock */}
               <span className="flex flex-wrap gap-1.5">
                 {STEP_TIMES.map((step) => (
                   <span

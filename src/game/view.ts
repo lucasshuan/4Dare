@@ -498,6 +498,7 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
     },
     players: s.players.length,
     seats: s.settings.seats,
+    voteSeconds: stepSeconds(s.settings, "voteSeconds"),
     askSeconds: stepSeconds(s.settings, "askSeconds"),
     guessSeconds: stepSeconds(s.settings, "guessSeconds"),
     answerSeconds: stepSeconds(s.settings, "answerSeconds"),

@@ -13,7 +13,7 @@
     "tabRoom": "ルーム",
     "roomSummary": "{visibility}・{seats}人",
     "tabRules": "ルール",
-    "rulesSummary": "{ask} · {answer} · {guess} · {validate}秒",
+    "rulesSummary": "{vote} · {ask} · {answer} · {guess} · {validate}秒",
     "visibility": "参加できる人",
     "public": "公開",
     "private": "非公開",
@@ -25,13 +25,17 @@
     "seats": "人数",
     "seatsHint": "2人以上でゲームを始められます。",
     "times": {
+      "voteSeconds": {
+        "label": "投票の時間",
+        "hint": "試合の前に全員でテーマに投票します。誰かが投票するたびに、まだの人の残り時間がこの時間を人数で割った分ずつ減ります。"
+      },
       "askSeconds": {
         "label": "質問の時間",
         "hint": "手番のプレイヤーが、はい・いいえで答えられる質問を書きます。"
       },
       "answerSeconds": {
         "label": "回答の時間",
-        "hint": "ほかの全員が答えます。誰かが答えるたびに、まだの人の残り時間がこの時間の20%ずつ減ります。"
+        "hint": "ほかの全員が答えます。誰かが答えるたびに、まだの人の残り時間がこの時間を人数で割った分ずつ減ります（3人なら3分の1、2人なら半分）。"
       },
       "guessSeconds": {
         "label": "予想の時間",

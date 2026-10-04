@@ -20,12 +20,11 @@ import {
 } from "./question";
 import { isThemeSet, THEME_SET_KEYS } from "./theme-sets";
 import {
-  ANSWER_CUT,
-  ANSWER_CUT_FLOOR_MS,
   type AnswerEntry,
   type Assignment,
   type BeatKind,
   type Character,
+  CLOCK_CUT_FLOOR_MS,
   type Ctx,
   DEFAULT_SETTINGS,
   type ErrorCode,
@@ -59,7 +58,6 @@ import {
   THEME_IDEAS,
   THEME_OPTIONS,
   type Theme,
-  VOTE_SECONDS,
 } from "./types";
 
 type Question = Extract<Play, { kind: "question" }>;
@@ -202,14 +200,15 @@ function stopClock(s: RoomState) {
 }
 
 /**
- * An answer came in and others still owe theirs: the clock loses ANSWER_CUT
- * of the answer time, so the last ones don't keep everybody waiting. It never
- * goes below ANSWER_CUT_FLOOR_MS from now, nor moves later.
+ * One of the `people` who act in this step (vote, answer) did, and others
+ * still owe theirs: the clock loses the step's time divided by `people`, so
+ * each gets an even share and the last ones don't keep everybody waiting. It
+ * never goes below CLOCK_CUT_FLOOR_MS from now, nor moves later.
  */
-function cutAnswerClock(s: RoomState, ctx: Ctx) {
-  if (s.deadline === null) return;
-  const cut = stepMs(s, "answerSeconds") * ANSWER_CUT;
-  const floor = ctx.now + ANSWER_CUT_FLOOR_MS;
+function cutClock(s: RoomState, ctx: Ctx, key: StepTime, people: number) {
+  if (s.deadline === null || people < 1) return;
+  const cut = Math.round(stepMs(s, key) / people);
+  const floor = ctx.now + CLOCK_CUT_FLOOR_MS;
   s.deadline = Math.min(s.deadline, Math.max(s.deadline - cut, floor));
 }
 
@@ -298,7 +297,7 @@ function beginVote(
   s.turnPlayerId = null;
   s.phase = "voting";
   stage(s, "opening", s.round + 1, s.round === 0, opening, ctx);
-  startStep(s, ctx, VOTE_SECONDS * 1000);
+  startStep(s, ctx, stepMs(s, "voteSeconds"));
 }
 
 /** Most votes wins; a tie (or nobody voting) is drawn. Then the match starts behind the theme show. */
@@ -380,8 +379,11 @@ function vote(s: RoomState, playerId: PlayerId, option: number, ctx: Ctx) {
   const v = s.vote ?? fail("wrong_phase");
   if (!Number.isInteger(option) || option < 0 || option >= v.options.length)
     fail("invalid_input");
+  const first = v.votes[playerId] === undefined;
   v.votes[playerId] = option;
   if (everyoneVoted(s)) closeVote(s, ctx);
+  // changing a vote cuts nothing
+  else if (first) cutClock(s, ctx, "voteSeconds", s.players.length);
 }
 
 /** Theme set: the turn order, who picks for whom, fresh outcomes. The theme show and the pick clock come after. */
@@ -1015,7 +1017,7 @@ function answer(
   if (n.length > MAX_NOTE) fail("invalid_input");
   q.answers.push({ by: playerId, value, note: n || null });
   if (othersAnswered(s, q)) resolveQuestion(s, q, ctx);
-  else cutAnswerClock(s, ctx);
+  else cutClock(s, ctx, "answerSeconds", s.players.length - 1);
 }
 
 function guess(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {

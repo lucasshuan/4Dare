@@ -226,8 +226,8 @@ export function SettingsFields({
 }
 
 /**
- * The rules of the room's game: for now the seconds of each step of a turn,
- * two by two. Each game can bring its own here.
+ * The rules of the room's game: for now the seconds of each step of a match,
+ * two by two, four by four on wide screens. Each game can bring its own here.
  */
 export function RulesFields({
   value,
@@ -237,7 +237,7 @@ export function RulesFields({
   onChange: (v: CreateRoomInput) => void;
 }) {
   return (
-    <div className="grid gap-x-10 gap-y-6 sm:grid-cols-[repeat(2,max-content)] sm:tiny:gap-y-4">
+    <div className="grid gap-x-10 gap-y-6 sm:grid-cols-[repeat(2,max-content)] sm:tiny:gap-y-4 xl:grid-cols-4 xl:gap-x-6">
       {STEP_TIMES.map((step) => (
         <SecondsField
           key={step}

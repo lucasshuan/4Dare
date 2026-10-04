@@ -36,6 +36,7 @@ vi.mock("next-intl/server", () => ({ getLocale: async () => "pt" }));
 
 /** Game and theme settings for createRoom: who-am-i, everyone votes, on every set. */
 const TIMES = {
+  voteSeconds: 40,
   askSeconds: 60,
   guessSeconds: 60,
   answerSeconds: 60,

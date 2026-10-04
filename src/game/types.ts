@@ -56,11 +56,13 @@ export interface RoomSettings {
    */
   password: string;
   seats: 2 | 3 | 4;
+  /** Seconds to vote on the theme. Each vote, while others still owe theirs, cuts a share of it (see CLOCK_CUT_FLOOR_MS). */
+  voteSeconds: number;
   /** Seconds to ask a question: STEP_SECONDS_MIN..MAX, default 80. */
   askSeconds: number;
   /** Seconds to guess (or pass) once the answers are in. */
   guessSeconds: number;
-  /** Seconds to answer a question. While several answer, each answer cuts ANSWER_CUT of it from the clock. */
+  /** Seconds to answer a question. Each answer, while others still owe theirs, cuts a share of it (see CLOCK_CUT_FLOOR_MS). */
   answerSeconds: number;
   /** Seconds for the picker to check a guess that was not an obvious match. */
   validateSeconds: number;
@@ -77,6 +79,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   visibility: "public",
   password: "",
   seats: 4,
+  voteSeconds: 40,
   askSeconds: 80,
   guessSeconds: 60,
   answerSeconds: 80,
@@ -89,8 +92,9 @@ export const ROOM_NAME_MAX = 25;
 export const ROOM_PASSWORD_MAX = 20;
 export const STEP_SECONDS_MIN = 30;
 export const STEP_SECONDS_MAX = 300;
-/** The timed steps a room sets, each with its own seconds, in the order a turn plays them. */
+/** The timed steps a room sets, each with its own seconds, in the order a match plays them. */
 export const STEP_TIMES = [
+  "voteSeconds",
   "askSeconds",
   "answerSeconds",
   "guessSeconds",
@@ -102,12 +106,13 @@ export const PICK_SECONDS = 120;
 /** The longest character name, typed or saved. */
 export const MAX_CHARACTER_NAME = 60;
 /**
- * Every answer that leaves others still to answer cuts this share of the
- * answer time from the clock, so nobody waits long on the last one...
+ * Clock cuts: in a step several people act on (the theme vote, the answers),
+ * each one who acts while others still owe theirs cuts the step's time divided
+ * by how many act (a third with three, a quarter with four), so the time is
+ * shared out evenly and nobody waits long on the last one... but whoever is
+ * left keeps at least this long (ms).
  */
-export const ANSWER_CUT = 0.2;
-/** ...but whoever is left keeps at least this long (ms). */
-export const ANSWER_CUT_FLOOR_MS = 10_000;
+export const CLOCK_CUT_FLOOR_MS = 10_000;
 /**
  * A lobby has no clock: the match starts when the host starts it. One nobody
  * changed in this long leaves the room list (its pages may have died without
@@ -121,9 +126,8 @@ export const LOBBY_LISTED_MS = 15 * 60_000;
 export const GONE_GRACE_MS = 5000;
 /** The podium stays this long; then the room goes back to the lobby on its own (the host can go sooner). */
 export const RESULT_SECONDS = 15;
-/** Themes offered in the vote before each match, and how long the vote lasts. */
+/** Themes offered in the vote before each match. */
 export const THEME_OPTIONS = 3;
-export const VOTE_SECONDS = 20;
 /** How long the host has to type the theme; then everyone votes instead, on themes from every set. */
 export const HOST_THEME_SECONDS = 30;
 /** Ideas shown to the host while they type the theme. */
@@ -688,6 +692,7 @@ export interface PublicRoom {
   host: Pick<Identity, "isGuest" | "name" | "guestNumber" | "avatar" | "lang">;
   players: number;
   seats: number;
+  voteSeconds: number;
   askSeconds: number;
   guessSeconds: number;
   answerSeconds: number;

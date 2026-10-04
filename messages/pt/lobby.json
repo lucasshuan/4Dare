@@ -21,6 +21,7 @@
   "private": "Privada: pede a senha",
   "seats": "Até {seats} jogadores",
   "times": {
+    "voteSeconds": "Votar",
     "askSeconds": "Perguntar",
     "answerSeconds": "Responder",
     "guessSeconds": "Palpitar",

@@ -21,6 +21,7 @@
   "private": "非公開：パスワードが必要です",
   "seats": "最大{seats}人",
   "times": {
+    "voteSeconds": "投票",
     "askSeconds": "質問",
     "answerSeconds": "回答",
     "guessSeconds": "予想",

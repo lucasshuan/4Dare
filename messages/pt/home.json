@@ -13,7 +13,7 @@
     "tabRoom": "Sala",
     "roomSummary": "{visibility} · {seats} vagas",
     "tabRules": "Regras",
-    "rulesSummary": "{ask} · {answer} · {guess} · {validate} s",
+    "rulesSummary": "{vote} · {ask} · {answer} · {guess} · {validate} s",
     "visibility": "Quem pode entrar",
     "public": "Pública",
     "private": "Privada",
@@ -25,13 +25,17 @@
     "seats": "Vagas",
     "seatsHint": "A partida pode começar com 2 jogadores ou mais.",
     "times": {
+      "voteSeconds": {
+        "label": "Tempo para votar",
+        "hint": "Todos votam no tema antes da partida. Cada voto tira uma parte igual desse tempo de quem ainda falta."
+      },
       "askSeconds": {
         "label": "Tempo para perguntar",
         "hint": "Quem está na vez escreve uma pergunta de sim ou não."
       },
       "answerSeconds": {
         "label": "Tempo para responder",
-        "hint": "Os outros respondem. Cada resposta tira 20% desse tempo de quem ainda falta."
+        "hint": "Os outros respondem. Cada resposta tira uma parte igual desse tempo de quem ainda falta: um terço com três respondendo, metade com dois."
       },
       "guessSeconds": {
         "label": "Tempo para palpitar",
