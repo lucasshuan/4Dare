@@ -12,6 +12,7 @@ import {
   chatOrder,
   chatPerson,
   cleanChatText,
+  shown,
 } from "@/game/chat";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { subscribeChat } from "@/lib/realtime";
@@ -234,7 +235,7 @@ export function useChat(code: string): {
     if (clock.frozen) return;
     let next = Number.POSITIVE_INFINITY;
     for (const m of cache.byId.values())
-      if (m.showAt > now && m.showAt < next) next = m.showAt;
+      if (!shown(m, now) && m.showAt < next) next = m.showAt;
     if (next === Number.POSITIVE_INFINITY) return;
     const wait = (next - now) / (clock.rate || 1);
     const id = window.setTimeout(
@@ -248,7 +249,7 @@ export function useChat(code: string): {
   const messages = useMemo(() => {
     const lines: ChatLine[] = [];
     for (const m of cache.byId.values())
-      if (m.showAt <= now) lines.push({ ...m, state: "sent" });
+      if (shown(m, now)) lines.push({ ...m, state: "sent" });
     for (const o of cache.outbox)
       lines.push({
         id: o.id,

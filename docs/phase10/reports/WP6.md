@@ -60,3 +60,7 @@ Changed: `src/server/backend/types.ts` (`ChatStore`, `Backend.chat`, `Notifier.c
   - Checked in a rolled-back DO block: 5 lines inserted and the 6th `rate_limited`; reassign rewrote `author_id`, `author.id` and the `firstTurn` player; anon has no execute on `add_room_message`.
 - Dev server (3100): `GET /api/rooms/ZZZZZ/messages` → 404; a cross-origin POST → 403.
 - Screenshots: none. WP6 has no UI (the hook only); the chat UI is WP11's.
+
+## Review (wave 3)
+
+One review after the commit: passed, one low, fixed. Only system lines wait for their `showAt` (`shown()` in `src/game/chat.ts`): a player's line has the database's clock as `showAt`, which a browser's estimate can trail, so your own saved line could vanish for a moment.

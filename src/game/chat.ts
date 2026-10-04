@@ -174,7 +174,15 @@ export function visibleChat<T extends ChatMessage>(
   messages: Iterable<T>,
   now: number,
 ): T[] {
-  return [...messages].filter((m) => m.showAt <= now).sort(chatOrder);
+  return [...messages].filter((m) => shown(m, now)).sort(chatOrder);
+}
+
+/**
+ * Only a system line waits for its scene. A player's line shows at once: its
+ * `showAt` is the database's clock, which a browser's estimate can trail.
+ */
+export function shown(m: ChatMessage, now: number): boolean {
+  return m.system === null || m.showAt <= now;
 }
 
 /** Unread: visible players' lines newer than `seen` that someone else wrote. System lines never count. */
@@ -186,7 +194,7 @@ export function countUnread(
 ): number {
   let n = 0;
   for (const m of messages)
-    if (m.text !== null && m.by !== you && m.id > seen && m.showAt <= now) n++;
+    if (m.text !== null && m.by !== you && m.id > seen && shown(m, now)) n++;
   return n;
 }
 
