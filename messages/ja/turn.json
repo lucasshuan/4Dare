@@ -97,5 +97,20 @@
     "hitTie": "正解 · {place}位タイ",
     "miss": "まだです",
     "cardOf": "{name}さんのカード"
+  },
+  "turnTag": "番",
+  "steps": {
+    "label": "ラウンドの流れ",
+    "asking": "質問",
+    "answering": "回答",
+    "guessing": "予想",
+    "validating": "確認"
+  },
+  "handoff": {
+    "kicker": "次は",
+    "kickerYou": "あなたの出番",
+    "title": "{name}さんの番",
+    "titleYou": "あなたの番",
+    "round": "{n}ラウンド目"
   }
 }

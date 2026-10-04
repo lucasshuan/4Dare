@@ -44,6 +44,8 @@ import {
   validateGuess,
 } from "@/server/actions";
 import { PlayerStrip } from "./player-strip";
+import { TurnHandoff } from "./turn-handoff";
+import { TurnSteps } from "./turn-steps";
 
 type Mode =
   | "ask"
@@ -142,8 +144,10 @@ export function TurnScreen() {
       )}
     >
       {cast ? <CastScene show={cast} /> : null}
+      <TurnHandoff />
       {tableOnly ? null : (
         <>
+          <TurnSteps />
           <PlayerStrip
             players={view.players}
             enter={enterAt === null ? undefined : { at: enterAt }}

@@ -1,27 +1,44 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
+import { Check } from "lucide-react";
 import { type AnimationSequence, m } from "motion/react";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import { LayoutMotion } from "@/components/ui/layout-motion";
 import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
 import { useStageTimeline } from "@/features/stage/use-stage-timeline";
-import type { PlayerView } from "@/game/types";
+import type { PlayerStatus, PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { useClock } from "@/lib/hooks/use-server-clock";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import { seatColor, seatWash } from "@/lib/seats";
+import { onSeat, seatColor, seatWash } from "@/lib/seats";
 
 /** The strip's entrance after the cast: each item drops in, one after the other. */
 const DROP = { y: -30, duration: 0.5, stagger: 0.06 } as const;
+
+/** The statuses the step clock waits on: their ring turns into the clock. */
+const AWAITED: PlayerStatus[] = [
+  "asking",
+  "answering",
+  "guessing",
+  "validating",
+];
 
 /**
  * Everyone at the table in turn order, left to right: the first to play on the
  * left, the last on the right. Each face wears its player's colour as a ring;
  * the turn's card takes the colour whole. A player whose card you can see opens
  * it bigger on hover (or tap): picture, name, origin.
+ *
+ * Two signals tell the turn apart: the "Turn" tag (with the fill) marks whose
+ * round it is and slides to the next card when the turn passes; the ring of
+ * whoever the step clock waits on (one player, or everyone answering) drains
+ * with the clock. Phones get a row of faces and names only, to save height.
  *
  * `enter.at` (server ms): the items drop in from there (the cast's entrance
  * beat), on the server clock, so a reload lands on the same frame.
@@ -61,71 +78,170 @@ export function PlayerStrip({
     },
   });
   return (
-    <ul ref={ref} className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
-      {ordered.map((p) => (
-        <m.li
-          key={p.id}
-          layout
-          className={cn(
-            "flex min-w-0 sm:flex-[1_1_150px]",
-            p.away && "opacity-60",
-          )}
-        >
-          {/* the entrance moves this one, so it never fights the layout animation above */}
-          <div
-            data-strip-item
-            className="flex min-w-0 flex-1 rounded-md bg-surface transition-[box-shadow,background-color] duration-300"
-            style={{
-              // the turn widens the player's colour from their ring to the whole card
-              ...(p.isTurn ? seatWash(p.colorSlot) : null),
-              boxShadow: p.isTurn
-                ? `0 0 0 2px ${seatColor(p.colorSlot)}`
-                : "0 0 0 0 transparent",
-              ...(at !== null
-                ? { opacity: 0, transform: `translateY(${DROP.y}px)` }
-                : null),
-            }}
-          >
-            {p.card && !p.cardHidden ? (
-              <CardPeek player={p} />
-            ) : (
-              <PlayerRow player={p} />
+    <LayoutMotion>
+      <ul ref={ref} className="flex gap-1.5 pt-2 sm:gap-3">
+        {ordered.map((p) => (
+          <m.li
+            key={p.id}
+            layout
+            className={cn(
+              "flex min-w-0 flex-1 sm:flex-[1_1_150px]",
+              p.away && "opacity-60",
             )}
-          </div>
-        </m.li>
-      ))}
-    </ul>
+          >
+            {/* the entrance moves this one, so it never fights the layout animation above */}
+            <div
+              data-strip-item
+              className="relative flex min-w-0 flex-1 rounded-md bg-surface transition-[box-shadow,background-color] duration-300"
+              style={{
+                // the turn widens the player's colour from their ring to the whole card
+                ...(p.isTurn ? seatWash(p.colorSlot) : null),
+                boxShadow: p.isTurn
+                  ? `0 0 0 2px ${seatColor(p.colorSlot)}`
+                  : "0 0 0 0 transparent",
+                ...(at !== null
+                  ? { opacity: 0, transform: `translateY(${DROP.y}px)` }
+                  : null),
+              }}
+            >
+              {p.isTurn ? <TurnTag slot={p.colorSlot} /> : null}
+              {p.card && !p.cardHidden ? (
+                <CardPeek player={p} />
+              ) : (
+                <PlayerRow player={p} />
+              )}
+            </div>
+          </m.li>
+        ))}
+      </ul>
+    </LayoutMotion>
   );
 }
 
-/** Avatar, name and status, then the card's thumbnail ("?" for your own). */
+/** Whose round it is: a tag on their card, gliding to the next card when the turn passes. */
+function TurnTag({ slot }: { slot: number }) {
+  const t = useTranslations("turn");
+  return (
+    <m.span
+      layoutId="turn-tag"
+      transition={{ type: "spring", stiffness: 420, damping: 30 }}
+      className="absolute -top-2 left-2 z-10 rounded-[6px] px-1.5 py-0.5 font-bold text-[10px] uppercase leading-none tracking-[0.08em] max-sm:inset-x-0 max-sm:mx-auto max-sm:w-fit"
+      style={{ backgroundColor: seatColor(slot), color: onSeat(slot) }}
+    >
+      {t("turnTag")}
+    </m.span>
+  );
+}
+
+/** Ring length: r = 19 in a 40 × 40 box. */
+const RING = 2 * Math.PI * 19;
+
+/**
+ * The player's ring as the step clock: a faint track and the colour draining
+ * to the deadline, on the server clock. Full while a reveal holds the step back.
+ */
+function ClockRing({ slot }: { slot: number }) {
+  const { view, offset } = useRoomContext();
+  const clock = useClock(offset);
+  const now = useRef(clock.now);
+  now.current = clock.now;
+  const ref = useRef<SVGCircleElement>(null);
+  const { deadline, stepStartsAt } = view;
+  const total =
+    view.stepMs ??
+    (deadline !== null && stepStartsAt !== null ? deadline - stepStartsAt : 0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || deadline === null || stepStartsAt === null || total <= 0) return;
+    // a cut deadline starts the drain from less than full
+    const from = RING * (1 - Math.min(1, (deadline - stepStartsAt) / total));
+    const anim = el.animate(
+      [{ strokeDashoffset: from }, { strokeDashoffset: RING }],
+      {
+        duration: Math.max(1, deadline - stepStartsAt),
+        delay: stepStartsAt - now.current(),
+        fill: "both",
+        easing: "linear",
+      },
+    );
+    return () => anim.cancel();
+  }, [deadline, stepStartsAt, total]);
+  const color = seatColor(slot);
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 40 40"
+      className="pointer-events-none absolute -inset-1 size-[calc(100%+8px)] -rotate-90"
+    >
+      <circle
+        cx="20"
+        cy="20"
+        r="19"
+        fill="none"
+        strokeWidth="2"
+        style={{ stroke: `color-mix(in oklab, ${color} 25%, transparent)` }}
+      />
+      <circle
+        ref={ref}
+        cx="20"
+        cy="20"
+        r="19"
+        fill="none"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeDasharray={RING}
+        style={{ stroke: color }}
+      />
+    </svg>
+  );
+}
+
+/**
+ * Avatar, name and status, then the card's thumbnail ("?" for your own). On
+ * phones only the face and the name, stacked.
+ */
 function PlayerRow({ player: p }: { player: PlayerView }) {
   const t = useTranslations("turn.status");
   const name = useDisplayName();
+  const awaited = AWAITED.includes(p.status);
   return (
-    <span className="flex min-w-0 flex-1 items-center gap-2.5 p-2 text-left">
-      <Avatar
-        avatar={p.avatar}
-        isGuest={p.isGuest}
-        name={p.name}
-        size={32}
-        seat={p.colorSlot}
-        className="max-sm:size-6"
-      />
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate font-semibold text-sm">
+    <span className="flex min-w-0 flex-1 items-center gap-2.5 p-2 text-left max-sm:flex-col max-sm:gap-1.5 max-sm:px-1 max-sm:pt-2.5 max-sm:pb-1.5 max-sm:text-center">
+      <span className="relative inline-flex shrink-0">
+        <Avatar
+          avatar={p.avatar}
+          isGuest={p.isGuest}
+          name={p.name}
+          size={32}
+          // the clock takes the ring's place while it waits on them
+          seat={awaited ? null : p.colorSlot}
+          className="max-sm:size-9 max-sm:text-[15px]"
+        />
+        {awaited ? <ClockRing slot={p.colorSlot} /> : null}
+        {p.status === "answered" ? (
+          <m.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 22 }}
+            className="absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-pill bg-yes text-on-yes shadow-[0_0_0_2px_var(--ring-gap,var(--surface))]"
+          >
+            <Check className="size-2.5" strokeWidth={3.5} />
+          </m.span>
+        ) : null}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col max-sm:w-full">
+        <span className="truncate font-semibold text-sm max-sm:text-xs">
           {name(p, p.isYou)}
         </span>
         <m.span
           key={p.status}
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="truncate font-medium text-ink-muted text-xs"
+          className="truncate font-medium text-ink-muted text-xs max-sm:sr-only"
         >
           {t(p.status)}
         </m.span>
       </span>
-      <span className="w-10 shrink-0">
+      <span className="w-10 shrink-0 max-sm:hidden">
         {p.cardHidden ? (
           <span className="flex aspect-[4/5] w-10 items-center justify-center rounded-sm bg-sky-soft font-display font-extrabold text-2xl text-sky">
             ?

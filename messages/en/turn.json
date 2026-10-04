@@ -97,5 +97,20 @@
     "hitTie": "Got it · tied for {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
     "miss": "Not yet",
     "cardOf": "{name}'s card"
+  },
+  "turnTag": "Turn",
+  "steps": {
+    "label": "Round steps",
+    "asking": "Question",
+    "answering": "Answers",
+    "guessing": "Guess",
+    "validating": "Check"
+  },
+  "handoff": {
+    "kicker": "Up now",
+    "kickerYou": "It's on you",
+    "title": "{name}'s turn",
+    "titleYou": "Your turn",
+    "round": "Round {n}"
   }
 }

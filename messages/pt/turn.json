@@ -97,5 +97,20 @@
     "hitTie": "Acertou · empate no {place}º lugar",
     "miss": "Ainda não",
     "cardOf": "Carta de {name}"
+  },
+  "turnTag": "Vez",
+  "steps": {
+    "label": "Etapas da rodada",
+    "asking": "Pergunta",
+    "answering": "Respostas",
+    "guessing": "Palpite",
+    "validating": "Conferência"
+  },
+  "handoff": {
+    "kicker": "Agora é",
+    "kickerYou": "É com você",
+    "title": "Vez de {name}",
+    "titleYou": "Sua vez",
+    "round": "Rodada {n}"
   }
 }
