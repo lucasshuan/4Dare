@@ -39,6 +39,11 @@
     "rateThanks": "Valeu!",
     "rateDismiss": "Fechar"
   },
+  "found": {
+    "question": "Curtiu ser {name}?",
+    "yes": "Curti",
+    "no": "Não curti"
+  },
   "vote": {
     "kicker": "Votação do tema",
     "title": "Vote no tema",

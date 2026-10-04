@@ -164,7 +164,7 @@ export interface MatchStore {
   reassign(fromUserId: string, toUserId: string): Promise<void>;
   /** Characters people picked (not the clock) in finished matches with this theme, most picked first. */
   popularPicks(themeId: string, limit: number): Promise<PopularPick[]>;
-  /** Saves whether a player liked a character the random button drew; a new answer replaces theirs. */
+  /** Saves whether a player liked a character for a theme (drawn, or discovered); a new answer replaces theirs. */
   rateDraw(feedback: PickFeedback): Promise<void>;
 }
 
