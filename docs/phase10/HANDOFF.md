@@ -92,7 +92,9 @@ How to run packages (the lean flow; the first wave-2 run took about 45 minutes p
   - Run migrations one at a time with the Supabase MCP, project `zooqjsrhjupqghuuipon`.
 - **No AI:** no AI calls in the app or the build.
 - **`tsconfig.json`:** `next dev` with a new `NEXT_DIST_DIR` rewrites it. Reuse `.next-e2e`, or restore the file by hand.
-- **ROADMAP_BUILD.md:** that work (Supabase as the only data source, lighter bundles) lands on `main` in parallel. Merge `main` into `phase-10` now and then, and stay out of its areas.
+- **`build-roadmap`** (ROADMAP_BUILD.md: Supabase as the only data source, lighter bundles) moves in parallel. Between packages, merge it into `phase-10`, resolve the conflicts, and make phase 10's code follow its later conventions and fixes. Stay out of its areas.
+- **Caveman:** Jean uses the `caveman-pt` skill. Talk to Jean in caveman full; subagents get its full-level rules in their prompt (`STYLE` in `wave-workflow.js`). Repo text stays normal prose.
+- **Tests** (AGENTS.md "Working"): no e2e and no whole unit suite while building; once at the end of the phase.
 
 ## Cloud setup
 

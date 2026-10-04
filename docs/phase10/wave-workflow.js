@@ -25,6 +25,9 @@ const OTHERS = (wp) => [...WPS.filter((w) => w !== wp), ...(args.others || [])].
 const EXTRA = args.extra || {}
 // notes on the machine (cloud session: node path, browser for e2e, known flaky tests)
 const ENV = args.env ? `\nEnvironment: ${args.env}` : ''
+// Jean's caveman-pt skill, level full, for the agents' own words (not for what they write in the repo)
+const STYLE = `
+Style (caveman full): in your messages and your final return, no articles, filler, hedging, politeness or narration; fragments are fine; one idea per short sentence; no text between tool calls unless it clarifies a risk or an ambiguity. Keep exact: code, paths, commands, numbers, negations. Code, comments, docs, reports and commits stay normal English prose, by the repo's rules.`
 
 const RULES = (wp) => `
 Rules:
@@ -33,7 +36,7 @@ Rules:
 - Work in few, large steps: every tool call re-reads your whole context, so fewer calls are faster and cheaper. Write whole files with Write rather than many small edits; no task list (TaskCreate/TaskUpdate); pipe command output through tail or grep so only the decisive lines come back.
 - Next 16: read the guide in node_modules/next/dist/docs for any Next-specific API you touch.
 - A dev server is already running at http://localhost:3100 with the e2e env (the lead started it; it picks up your edits). Use it for the lab (/en/dev/stage) and screenshots. Never start, stop or restart a server; if it is down, say so in your report and skip the screenshots.
-- Screenshots go under .data/shots/${wp}/ (gitignored, never emptied by e2e).${ENV}`
+- Screenshots go under .data/shots/${wp}/ (gitignored, never emptied by e2e).${ENV}${STYLE}`
 
 const build = (wp) => agent(`You are the engineer for ${wp} of Phase 10 in the 4Dare repo (the current directory).
 Your spec is ${P}/briefs/${wp}.md: everything this package relies on, cut verbatim from the plan, the specs and the earlier packages' reports. Read it first and whole; open another doc only through its pointers or to settle a doubt. The prototype files it names are the look to match (port to React + motion/react).
@@ -65,7 +68,7 @@ const REVIEW_SCHEMA = {
 
 const review = (wp) => agent(`You review ${wp} of Phase 10 in the 4Dare repo (the current directory), committed as ${args.commits[wp]} (\`git show ${args.commits[wp]}\`; other packages may be building in the working tree, ignore their uncommitted files).
 Read ${P}/briefs/${wp}.md (the acceptance is under "Your package") and the engineer's report ${P}/reports/${wp}.md, then the code. Check each acceptance criterion against the code; run only the package's own test files and \`pnpm typecheck\` (never e2e or the whole suite). Hunt for real defects: logic errors, races, server-clock sync, reload mid-scene, secrecy (a player must never learn their own character), missing i18n keys or languages, phone layout at 390x844, dark theme, reduced motion, names without avatars, the prototype's look, and anything that breaks what works today. Take screenshots only for a visual criterion you can't judge from the code (at most 4, through the dev server at http://localhost:3100; never start or stop a server).
-Do not edit files. Report only defects with evidence; lows only when they are real and cheap to fix; no style nits. passed = no high or medium defect. Also write the findings to ${P}/reports/${wp}-review.md.${ENV}`,
+Do not edit files. Report only defects with evidence; lows only when they are real and cheap to fix; no style nits. passed = no high or medium defect. Also write the findings to ${P}/reports/${wp}-review.md.${ENV}${STYLE}`,
   { label: `review:${wp}`, phase: 'Review', effort: 'high', schema: REVIEW_SCHEMA })
 
 if (args.mode === 'review') {
