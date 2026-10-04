@@ -23,6 +23,7 @@ import { dur, ease, riseIn } from "@/lib/motion";
 import { useRoomTitle } from "@/lib/names";
 import { WHO_AM_I } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
+import { FoundFeedback } from "./found-feedback";
 import { isAwaited, MatchFrame, useReached } from "./match-frame";
 import { RevealOverlay } from "./reveal-overlay";
 
@@ -39,6 +40,7 @@ export function RoomStage() {
       <RoomBackdrop />
       <Areas />
       <RevealOverlay />
+      <FoundFeedback />
       <Chat />
     </StageProvider>
   );

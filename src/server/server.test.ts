@@ -208,6 +208,21 @@ describe("server, local mode", () => {
       const uid = uidOf(jarFor(p));
       expect(JSON.stringify(mine)).not.toContain(`Hero of ${uid}`);
     }
+
+    // only who discovered their character may say whether they liked it
+    as(others[0]);
+    expect(await A.rateFoundCharacter(code, true)).toEqual({
+      ok: false,
+      error: "wrong_phase",
+    });
+    as(turnName);
+    skipTo(v);
+    must(await A.submitGuess(code, `Hero of ${turnId}`));
+    expect(await A.rateFoundCharacter(code, "yes" as never)).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    must(await A.rateFoundCharacter(code, true));
   });
 
   it("saves a finished match for every player, once", async () => {

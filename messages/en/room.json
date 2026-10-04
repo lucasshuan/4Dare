@@ -39,6 +39,11 @@
     "rateThanks": "Thanks!",
     "rateDismiss": "Close"
   },
+  "found": {
+    "question": "Enjoyed being {name}?",
+    "yes": "Yes",
+    "no": "No"
+  },
   "vote": {
     "kicker": "Theme vote",
     "title": "Vote for the theme",

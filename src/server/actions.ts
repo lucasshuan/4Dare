@@ -437,6 +437,39 @@ export async function rateRandomPick(
   });
 }
 
+/**
+ * A player's verdict on the character they just discovered, once they know
+ * who they were: it counts like a verdict on a draw, for this theme's draws.
+ */
+export async function rateFoundCharacter(
+  code: string,
+  liked: boolean,
+): Promise<Result<null>> {
+  return run(async () => {
+    const who = await me();
+    if (!allow(`rate:${who.id}`, 30, 60_000))
+      throw new GameError("rate_limited");
+    if (typeof liked !== "boolean") bad();
+    const { rooms, matches } = getBackend();
+    const state = (await rooms.get(roomCode(code)))?.state;
+    if (!state) throw new GameError("not_found");
+    if (!state.players.some((p) => p.id === who.id))
+      throw new GameError("not_member");
+    if (state.outcomes[who.id]?.discoveredAt == null || !state.theme)
+      throw new GameError("wrong_phase");
+    const key = pickKey(state.assignments[who.id]?.character?.id ?? null);
+    // a stand-in character has no say in the draws
+    if (!key) return null;
+    await matches.rateDraw({
+      themeId: themeId(state.theme),
+      characterId: key,
+      userId: who.id,
+      liked,
+    });
+    return null;
+  });
+}
+
 const text = (raw: unknown, max: number) => {
   if (typeof raw !== "string") return bad();
   const t = raw.trim();

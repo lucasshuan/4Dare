@@ -39,6 +39,11 @@
     "rateThanks": "ありがとう！",
     "rateDismiss": "閉じる"
   },
+  "found": {
+    "question": "{name}、気に入った？",
+    "yes": "いいね",
+    "no": "いまいち"
+  },
   "vote": {
     "kicker": "テーマ投票",
     "title": "テーマに投票しよう",
