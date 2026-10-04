@@ -1,8 +1,9 @@
 import "server-only";
 // What players picked for each theme in finished matches, for the pick
 // screen: the "random" button draws among the characters people chose most
-// for the theme being played, and the hand under the card shows them (with
-// the theme's starters filling in while the history is thin).
+// for the theme being played (the theme's starters count as a few picks each,
+// so the draw works before the history does), and the hand under the card
+// shows them (with the starters filling in while the history is thin).
 import type { MatchRecord } from "@/game/record";
 import { themeId } from "@/game/theme-id";
 import type { Character, Lang } from "@/game/types";
@@ -32,6 +33,34 @@ export interface PopularPick {
  */
 export const drawWeight = (p: PopularPick) =>
   (p.picks + (p.likes ?? 0)) * 0.5 ** (p.dislikes ?? 0);
+
+/**
+ * How many picks a starter counts as in the draw: enough to carry the draw
+ * while the theme has little history, soon outweighed by real picks.
+ */
+export const STARTER_PICKS = 3;
+
+/**
+ * The history with the theme's starters (language-free library ids) mixed
+ * in: each counts STARTER_PICKS more picks, and one nobody picked yet joins
+ * with that many. Likes and dislikes stay as they are, so a starter players
+ * keep turning down still drops out of the draw.
+ */
+export function withStarters(
+  popular: PopularPick[],
+  starters: string[],
+): PopularPick[] {
+  const boost = new Set(starters);
+  const known = new Set(popular.map((p) => p.id));
+  return [
+    ...popular.map((p) =>
+      boost.has(p.id) ? { ...p, picks: p.picks + STARTER_PICKS } : p,
+    ),
+    ...[...boost]
+      .filter((id) => !known.has(id))
+      .map((id) => ({ id, picks: STARTER_PICKS })),
+  ];
+}
 
 /** One player's verdict on a drawn character, by theme. */
 export interface PickFeedback {

@@ -57,7 +57,12 @@ import {
   saveDraft,
   syncIdentity,
 } from "./rooms";
-import { drawPopular, PICKS_FETCHED, pickKey } from "./theme-picks";
+import {
+  drawPopular,
+  PICKS_FETCHED,
+  pickKey,
+  withStarters,
+} from "./theme-picks";
 
 async function lang(): Promise<Lang> {
   try {
@@ -321,8 +326,8 @@ async function confirmed(code: string, characterId: unknown) {
 
 /**
  * A character for the caller to pick, drawn among the ones players picked
- * most in finished matches with this theme. Fails with "not_enough_picks"
- * until the theme has enough history. `skip` is the one drawn last, so a
+ * most in finished matches with this theme and the theme's starters (see
+ * withStarters). Fails with "not_enough_picks" when the theme has neither. `skip` is the one drawn last, so a
  * second press shows someone else. The draw goes on the caller's card (its
  * draft), so it is the pick if the clock runs out; they still confirm it.
  * Never one already picked in the match, the caller's own secret included.
@@ -355,12 +360,16 @@ export async function randomPick(
         return key ? [key] : [];
       }),
     );
-    const popular = await matches.popularPicks(
-      themeId(state.theme),
-      PICKS_FETCHED,
-    );
+    const theme = themeId(state.theme);
+    const [popular, starters] = await Promise.all([
+      matches.popularPicks(theme, PICKS_FETCHED),
+      characters.starters(),
+    ]);
     const c = await drawPopular(
-      popular,
+      withStarters(
+        popular,
+        starters.filter((s) => s.themeId === theme).map((s) => s.characterId),
+      ),
       player.lang,
       taken,
       typeof skip === "string" ? pickKey(skip) : null,

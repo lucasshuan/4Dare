@@ -9,9 +9,11 @@ import {
   MIN_RANDOM_PICKS,
   pickKey,
   rankPopular,
+  STARTER_PICKS,
   tallyFeedback,
   tallyPicks,
   topPicks,
+  withStarters,
 } from "./theme-picks";
 
 const player = (
@@ -199,6 +201,37 @@ describe("drawPopular", () => {
     expect(
       (await draw("pt", { list: many, resolve: store(fewerGone) }))?.id,
     ).toBe("pt-wd-Q25");
+  });
+});
+
+describe("withStarters", () => {
+  it("lets the draw work from the starters alone", async () => {
+    const pool = withStarters([], ["wd-Q1", "wd-Q2"]);
+    expect(pool).toEqual([
+      { id: "wd-Q1", picks: STARTER_PICKS },
+      { id: "wd-Q2", picks: STARTER_PICKS },
+    ]);
+    const c = await drawPopular(
+      pool,
+      "pt",
+      new Set(),
+      null,
+      async (ids) => ids.map((id) => character(id, "pt")),
+      () => 0,
+    );
+    expect(c?.id).toBe("pt-wd-Q1");
+  });
+
+  it("adds to a starter's real picks and keeps its votes", () => {
+    const popular = [
+      { id: "wd-Q1", picks: 2, dislikes: 1 },
+      { id: "wd-Q3", picks: 5 },
+    ];
+    expect(withStarters(popular, ["wd-Q1", "wd-Q2"])).toEqual([
+      { id: "wd-Q1", picks: 2 + STARTER_PICKS, dislikes: 1 },
+      { id: "wd-Q3", picks: 5 },
+      { id: "wd-Q2", picks: STARTER_PICKS },
+    ]);
   });
 });
 
