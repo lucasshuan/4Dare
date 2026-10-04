@@ -1,7 +1,6 @@
 // What the lab's made-up room is made of: the players, the themes, the characters,
 // the rule cards. Pictures are drawn here (plain shapes and initials), so the lab
 // needs no network, no library and no art it may not show.
-import { THEME_SET_EXAMPLES } from "@/game/theme-set-examples";
 import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
 import type {
   Character,
@@ -12,6 +11,7 @@ import type {
   RuleExamples,
   Theme,
 } from "@/game/types";
+import { LOCAL_THEMES } from "@/server/backend/local/fixtures";
 import type { LabParams } from "./params";
 
 /**
@@ -104,15 +104,16 @@ export function labPlayers(params: LabParams): Identity[] {
   }));
 }
 
-/** Three themes from three sets: `set`'s first theme wins, the others come from the next sets. */
+/**
+ * Three themes from three sets: `set`'s first theme wins, the others come from the
+ * next sets. They are local mode's themes (three per set).
+ */
 export function labThemes(set: ThemeSet): Theme[] {
   const at = THEME_SET_KEYS.indexOf(set);
   return [0, 1, 2].map((k) => {
     const s = THEME_SET_KEYS[(at + k * 3) % THEME_SET_KEYS.length];
-    return {
-      ...THEME_SET_EXAMPLES[s][k % THEME_SET_EXAMPLES[s].length],
-      set: s,
-    };
+    const pool = LOCAL_THEMES.filter((t) => t.set === s);
+    return pool[k % pool.length];
   });
 }
 

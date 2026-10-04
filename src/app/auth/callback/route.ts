@@ -2,17 +2,11 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { LANGS, type Lang } from "@/game/types";
 import { GUEST_COOKIE, openGuest } from "@/server/auth/guest";
+import { safeNext } from "@/server/auth/safe-next";
 import { getBackend } from "@/server/backend";
 import { syncProfile } from "@/server/backend/supabase/auth";
 import { sessionClient } from "@/server/backend/supabase/clients";
 import { handOverSeats } from "@/server/rooms";
-
-/** Only same-site paths, so the callback can't be used to bounce people elsewhere. */
-function safeNext(raw: string | null) {
-  return raw?.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/\\")
-    ? raw
-    : "/";
-}
 
 /**
  * Discord/Google send people back here. The guest they were (a cookie, never

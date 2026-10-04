@@ -10,7 +10,7 @@ import { MatchLockPage } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import type { GameKey } from "@/game/games";
+import { DEFAULT_GAME, type GameKey, isGameKey } from "@/game/games";
 import { ROOM_NAME_MAX } from "@/game/types";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
@@ -22,11 +22,12 @@ import { loadSetup } from "./last-setup";
 import { backClass } from "./room-setup";
 
 /**
- * /new?game=…: opens a room for `game` right away and goes into it. It starts
- * with the last setup and is named after the host ("Bob123's room"); the rest
- * is changed in the lobby, under "Edit settings".
+ * /new?game=…: opens a room for that game (an unknown one falls back to the
+ * first) right away and goes into it. It starts with the last setup and is
+ * named after the host ("Bob123's room"); the rest is changed in the lobby,
+ * under "Edit settings". The page is static, so the game is read here.
  */
-export function CreateScreen({ game }: { game: GameKey }) {
+export function CreateScreen() {
   const t = useTranslations("home");
   const router = useRouter();
   const { run } = useAction();
@@ -34,21 +35,23 @@ export function CreateScreen({ game }: { game: GameKey }) {
   const displayName = useDisplayName();
   // No new room while a match is going: the screen turns into the lock.
   const { match, isLoading } = useCurrentMatch();
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<GameKey | null>(null);
   // Once only, even when the effect runs twice.
   const started = useRef(false);
 
   useEffect(() => {
     if (started.current || isLoading || match || !me) return;
     started.current = true;
+    const asked = new URLSearchParams(window.location.search).get("game");
+    const game = isGameKey(asked) ? asked : DEFAULT_GAME;
     const name = roomName(displayName(me), (n) =>
       t("rooms.roomOf", { name: n }),
     );
     void run(() => createRoom({ ...loadSetup(), game, name })).then((r) => {
       if (r.ok) router.replace(`/r/${r.data.code}`);
-      else setFailed(true);
+      else setFailed(game);
     });
-  }, [isLoading, match, me, game, displayName, t, run, router]);
+  }, [isLoading, match, me, displayName, t, run, router]);
 
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
@@ -58,7 +61,7 @@ export function CreateScreen({ game }: { game: GameKey }) {
         </motion.div>
       ) : failed ? (
         <motion.div {...riseIn}>
-          <Link href={GAME_PATHS[game]} className={backClass}>
+          <Link href={GAME_PATHS[failed]} className={backClass}>
             <ChevronLeft className="size-4" strokeWidth={2} />
             {t("createRoom.back")}
           </Link>

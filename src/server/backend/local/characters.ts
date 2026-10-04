@@ -1,18 +1,11 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { normalizeName } from "@/game/match";
 import { type Character, LANGS, type Lang } from "@/game/types";
-import {
-  entryId,
-  libraryFor,
-  parseEntryId,
-  type SeedCharacter,
-  type SeedOrigin,
-} from "../seed-format";
+import { entryId, libraryFor, parseEntryId } from "../seed-format";
 import type { CharacterStore } from "../types";
 import { processSingleton, readJson, writeJson } from "./disk";
+import { LOCAL_CHARACTERS, LOCAL_ORIGINS } from "./fixtures";
 
 interface Row extends Character {
   popularity: number;
@@ -28,17 +21,6 @@ function toRow(c: Character, popularity: number): Row {
   return { ...c, popularity, keys: [c.name, ...c.aliases].map(normalizeName) };
 }
 
-function readData<T>(name: string, fallback: T): T {
-  try {
-    const file = join(process.cwd(), "data", name);
-    return JSON.parse(
-      readFileSync(/* turbopackIgnore: true */ file, "utf8"),
-    ) as T;
-  } catch {
-    return fallback;
-  }
-}
-
 /** Swapped pictures by library id; older files keyed them per language ("pt-wd-Q302"). */
 function swappedImages(): Record<string, string> {
   const images: Record<string, string> = {};
@@ -51,12 +33,10 @@ function swappedImages(): Record<string, string> {
 
 function loadLibrary(): Map<string, Row> {
   const rows = new Map<string, Row>();
-  const characters = readData<SeedCharacter[]>("characters.json", []);
-  const origins = readData<SeedOrigin[]>("origins.json", []);
   for (const lang of LANGS) {
     for (const { character, popularity } of libraryFor(
-      characters,
-      origins,
+      LOCAL_CHARACTERS,
+      LOCAL_ORIGINS,
       lang,
     ))
       rows.set(character.id, toRow(character, popularity));

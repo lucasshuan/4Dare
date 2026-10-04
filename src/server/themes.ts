@@ -1,9 +1,9 @@
 import "server-only";
 import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
 import type { Localized, Theme } from "@/game/types";
-import bankFile from "../../data/themes.json";
 import type { ThemeSource, ThemeStore } from "./backend/types";
 
+/** Only while the store's list never arrived (a server's first moments, or the store down). */
 const FALLBACK: Theme[] = [
   { en: "Villains", pt: "Vilões", ja: "悪役", set: "heroes" },
   { en: "Robots", pt: "Robôs", ja: "ロボット", set: "scifi" },
@@ -14,12 +14,6 @@ const FALLBACK: Theme[] = [
     set: "quirks",
   },
 ];
-
-/** data/themes.json, the built-in theme list (bundled, so it ships with the server). */
-export function themeBank(): Theme[] {
-  const list = bankFile as Theme[];
-  return list.length >= 3 ? list : FALLBACK;
-}
 
 const same = (a: Localized, b: Localized) =>
   a.en.toLowerCase() === b.en.toLowerCase();
@@ -60,16 +54,16 @@ function pickFrom(
 }
 
 /**
- * Draws themes from the store's list, read at most every ten minutes per
- * server (never once per match). Until the first read, or if the store
- * fails, the bundled list is used.
+ * Draws themes from the store's list, read when the server starts and then at
+ * most every ten minutes (never once per match). Until the first read lands,
+ * or while the store fails, three fallback themes stand in.
  */
 export function themes(store: ThemeStore): ThemeSource {
   let cached: Theme[] | null = null;
   let readAt = 0;
   let reading: Promise<Theme[]> | null = null;
 
-  const current = () => (cached?.length ? cached : themeBank());
+  const current = () => (cached?.length ? cached : FALLBACK);
   const refresh = (): Promise<Theme[]> => {
     if (cached && Date.now() - readAt < LIST_TTL)
       return Promise.resolve(cached);
@@ -82,7 +76,7 @@ export function themes(store: ThemeStore): ThemeSource {
       })
       .catch((e: unknown) => {
         console.warn(
-          "[themes] could not read the list, using the bundled one:",
+          "[themes] could not read the list:",
           e instanceof Error ? e.message : e,
         );
         readAt = Date.now();
@@ -93,6 +87,8 @@ export function themes(store: ThemeStore): ThemeSource {
       });
     return reading;
   };
+  // the instant draws (a host's ideas, a round the clock starts) need it in hand
+  void refresh();
 
   return {
     drawFromBank: (count, sets) => {

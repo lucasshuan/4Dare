@@ -14,17 +14,18 @@ After the first quick wins (same day): API functions ~2 MB, pages ~9 MB, share i
 ## Phase 1 — Supabase is the law
 
 - [x] AGENTS.md: the character library is protected, `pnpm seed` is off, no AI in the app
-- [ ] The app never reads `data/*.json`: library, search, themes and local mode come from Supabase
+- [x] The app never reads `data/*.json`: library, search and themes come from Supabase, local mode from `local/fixtures.ts` (43 characters, 60 themes)
 - [x] Library index per language read from the database and cached (an hour per server, a day on the CDN), not built from the files
 - [x] `/api/characters/extras` stops pulling the library in
 - [x] Search before the index arrives uses `search_characters` in the database
 - [x] `data/` out of every server function (`outputFileTracingExcludes`)
-- [ ] Themes only from the `themes` table, no bundled list
-- [ ] Theme set examples (hover) from the `themes` table, not a hand copy
-- [ ] Tests stop importing `data/*.json`
-- [ ] `.vercelignore` leaves `data/` out of the deploy; Biome blocks `data/` imports in `src/`
-- [ ] `pnpm seed` retired for the library (it deletes rows the files lack); library changes go straight to the database, insert or update only
-- [ ] Local mode (dev and e2e without Supabase) decided: small fixtures in test code, or Supabase for dev too
+- [x] Themes only from the `themes` table, no bundled list (read as a server starts; three fallback themes until it lands)
+- [x] Theme set examples (hover) from the `themes` table, not a hand copy (`example` column, migration 0014 with a backup in `backup.themes_before_0014`)
+- [x] Tests stop importing `data/*.json`
+- [x] `.vercelignore` leaves `data/` out of the deploy; Biome blocks `data/` imports in `src/`
+- [x] `pnpm seed` retired (it deleted rows the files lacked); library and theme changes go straight to the database, insert or update only; `pnpm test-rooms` reads Supabase
+- [x] Local mode (dev and e2e without Supabase) decided: small fixtures in the local backend (Jean, 2026-10-04); with `.env.local` dev uses Supabase as before
+- [x] `themes` and `theme_starters` protected like the library in AGENTS.md (Jean, 2026-10-04)
 
 ## Phase 2 — No AI in the app
 
@@ -47,24 +48,24 @@ No AI theme was ever saved (0 rows with source `ai`).
 
 Rule: switching language or opening a menu never waits on a download; fonts swap in when ready.
 
-- [ ] Zen Maru Gothic only on Japanese pages (245 `@font-face` blocking every page today)
-- [ ] Critter avatars as SVG from a cached route, no DiceBear in the browser (152 KB)
-- [ ] Browser Supabase only for realtime, loaded on demand; OAuth starts on the server (−110 KB)
+- [x] Zen Maru Gothic only on Japanese pages: en/pt pages link 17 KB gzip of CSS instead of 81 KB (its 245 `@font-face` are a chunk of `ja-font.tsx`, linked only where it renders)
+- [x] Critter avatars as SVG from a cached route (`/api/critter/<seed>/<rrggbb>`), no DiceBear in the browser: home 391 → 361 KB gzip of JS
+- [x] Browser Supabase only for realtime, loaded on demand; OAuth starts on the server (`/auth/sign-in`): home 457 → 391 KB gzip of JS
 - [ ] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB)
 - [ ] `LazyMotion` + `m`; full motion features only where `layoutId` is used
 - [ ] Guest names resolved on the server (−24 KB)
 - [ ] Each page gets only its message namespaces
-- [ ] `/new` and `/rooms` static (query read in the browser)
+- [x] `/new` and `/rooms` static (query read in the browser): served from the CDN, no function per visit
 - [x] Game sounds re-encoded mono 80 kbps (371 KB → 118 KB)
 - [ ] Home under ~250 KB gzip of JS
 
 ## Phase 5 — Cheaper at scale
 
-- [ ] Room poll every 30–60 s while realtime is connected, 10 s only when it drops
-- [ ] `/api/me/match` polled by the same rule
+- [x] Room poll every 45 s while its realtime channel is joined, 10 s only when it drops; a join or rejoin refetches once (pings sent meanwhile are lost); one shared channel per topic
+- [x] `/api/me/match` every 60 s with no match, 30 s during one (no ping carries it; coming back to the tab refetches), was 15 s
 - [ ] Room list reads a small `listing` column, not every room's whole state
 - [ ] `player_ids` column with a GIN index for "rooms I sit in"
-- [ ] Old rooms deleted by `pg_cron`
+- [x] Old rooms deleted by `pg_cron` (hourly: closed a day ago, or a week without a write; migration 0013, applied)
 - [ ] The `gone` beacon no longer keeps a function alive for 5 s
 - [x] Speed Insights with a `sampleRate` (half the visits)
 - [ ] Vercel project checked: Fluid compute, Node version, memory
