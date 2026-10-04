@@ -49,10 +49,10 @@ Each phase ends with the game playable; the next one only improves it. Ticked it
 - [x] Instant search: the language's index downloaded once (cached), each key answered from memory in under 1 ms, no server
 - [x] Create a character with a name and your own picture (with cropping)
 - [x] Change any character's picture (it becomes the library's)
-- [x] Theme drawn by the AI; without a key, from 337 simple themes
+- [x] Theme drawn from 337 simple themes (an AI draw came and went, see ROADMAP_BUILD.md)
 - [x] Themes where the "character" is a group: duos, trios, siblings, families, bands, species (Pikmin)
-- [x] Themes in the database: turn on and off without a deploy; the AI's ones are kept
-- [x] One theme, one idea: "Angels and demons", "Butlers and maids" and 13 others became two themes each; the AI no longer joins two groups
+- [x] Themes in the database: turn on and off without a deploy
+- [x] One theme, one idea: "Angels and demons", "Butlers and maids" and 13 others became two themes each
 - [x] Theme vote: before each match 3 themes show up and everyone votes, with avatars hopping between the cards; 8 s; most votes wins, a tie goes to a synced wheel, and the winner takes the stage before picking
 
 ## Phase 4 — Looks like a finished game ✅
