@@ -34,6 +34,8 @@
   "timeLeft": "Tempo restante: {time}",
   "clockCut": "−{seconds} s",
   "clockCutLabel": "{seconds} segundos a menos no relógio",
+  "clockGain": "+{seconds} s",
+  "clockGainLabel": "{seconds} segundos de volta no relógio",
   "back": "Voltar",
   "close": "Fechar",
   "revealHint": "Clique em qualquer lugar ou aperte uma tecla para fechar",

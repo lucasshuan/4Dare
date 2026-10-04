@@ -152,6 +152,14 @@ describe("server, local mode", () => {
       ok: false,
       error: "invalid_input",
     });
+    // a vote taken back gives back the time it cut
+    const before = (await view(code)).body.deadline ?? 0;
+    must(await A.voteTheme(code, 1));
+    expect((await view(code)).body.deadline).toBeLessThan(before);
+    must(await A.voteTheme(code, null));
+    const back = (await view(code)).body;
+    expect(back.deadline).toBe(before);
+    expect(back.vote?.yourVote).toBeNull();
     await voteAll(code, ["p1", "p2", "p3"]);
 
     // everyone creates a character for their target and picks it

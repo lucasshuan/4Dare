@@ -54,7 +54,7 @@
     "progress": "{done} de {total} votaram",
     "waitingFor": "Ainda votando: {names}",
     "allVoted": "Todo mundo votou!",
-    "change": "clique em outro tema pra mudar o voto",
+    "change": "clique em outro tema pra mudar o voto, ou no seu pra desfazer",
     "tieTitle": "Deu empate!",
     "tie": "Girando a roleta entre os temas empatados…",
     "chosenTitle": "O tema é…",

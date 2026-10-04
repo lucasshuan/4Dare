@@ -54,7 +54,7 @@
     "progress": "{done} of {total} voted",
     "waitingFor": "Still voting: {names}",
     "allVoted": "Everyone voted!",
-    "change": "tap another theme to change your vote",
+    "change": "tap another theme to change your vote, or yours again to take it back",
     "tieTitle": "It's a tie!",
     "tie": "Spinning the wheel between the tied themes…",
     "chosenTitle": "The theme is…",

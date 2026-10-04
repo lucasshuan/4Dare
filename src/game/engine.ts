@@ -411,7 +411,24 @@ function vote(s: RoomState, playerId: PlayerId, option: number, ctx: Ctx) {
   v.votes[playerId] = option;
   if (everyoneVoted(s)) closeVote(s, ctx);
   // changing a vote cuts nothing
-  else if (first) cutClock(s, ctx, "voteSeconds", s.players.length);
+  else if (first) {
+    const before = s.deadline;
+    cutClock(s, ctx, "voteSeconds", s.players.length);
+    if (before !== null && s.deadline !== null)
+      v.cuts = { ...v.cuts, [playerId]: before - s.deadline };
+  }
+}
+
+/** Takes a vote back: the time it took off the clock comes back. */
+function unvote(s: RoomState, playerId: PlayerId) {
+  if (s.phase !== "voting") fail("wrong_phase");
+  requireSeated(s, playerId);
+  const v = s.vote ?? fail("wrong_phase");
+  if (v.votes[playerId] === undefined) return;
+  delete v.votes[playerId];
+  const back = v.cuts?.[playerId] ?? 0;
+  if (v.cuts) delete v.cuts[playerId];
+  if (s.deadline !== null) s.deadline += back;
 }
 
 /** Theme set: the turn order, who picks for whom, fresh outcomes. The theme show and the pick clock come after. */
@@ -763,6 +780,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     }
     case "VOTE":
       return vote(s, e.playerId, e.option, ctx);
+    case "UNVOTE":
+      return unvote(s, e.playerId);
     case "SET_THEME":
       return setTheme(s, e.playerId, e.text, ctx);
     case "DRAFT":

@@ -369,6 +369,31 @@ describe("the theme vote", () => {
     expect(g.state.deadline).toBe(g.now + CLOCK_CUT_FLOOR_MS);
   });
 
+  it("a vote taken back gives back the time it cut; voting again cuts again", () => {
+    const g = voting(4);
+    const deadline = g.state.deadline ?? 0;
+    const quarter = (DEFAULT_SETTINGS.voteSeconds * 1000) / 4;
+    vote(g, "p1", 0);
+    vote(g, "p2", 1);
+    expect(g.state.deadline).toBe(deadline - 2 * quarter);
+    g.do({ type: "UNVOTE", playerId: "p1" });
+    expect(g.state.deadline).toBe(deadline - quarter);
+    expect(g.state.vote?.votes).toEqual({ p2: 1 });
+    expect(toView(g.state, 1, "p1", g.now).vote?.yourVote).toBeNull();
+    // nothing to take back: nothing changes
+    g.do({ type: "UNVOTE", playerId: "p1" });
+    expect(g.state.deadline).toBe(deadline - quarter);
+    vote(g, "p1", 2);
+    expect(g.state.deadline).toBe(deadline - 2 * quarter);
+    // only while the vote is open
+    vote(g, "p3", 2);
+    vote(g, "p4", 2);
+    expect(g.state.phase).not.toBe("voting");
+    expect(code(() => g.do({ type: "UNVOTE", playerId: "p1" }))).toBe(
+      "wrong_phase",
+    );
+  });
+
   it("the most voted theme wins once everyone voted; votes can change until then", () => {
     const g = voting(3);
     vote(g, "p1", 2);

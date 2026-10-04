@@ -34,6 +34,8 @@
   "timeLeft": "残り時間：{time}",
   "clockCut": "−{seconds}秒",
   "clockCutLabel": "残り時間が{seconds}秒減りました",
+  "clockGain": "+{seconds}秒",
+  "clockGainLabel": "残り時間が{seconds}秒戻りました",
   "back": "戻る",
   "close": "閉じる",
   "revealHint": "どこかをクリックするか、キーを押すと閉じます",

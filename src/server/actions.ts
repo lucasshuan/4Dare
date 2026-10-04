@@ -259,11 +259,14 @@ export async function chooseTheme(
 }
 
 /** Any player, while voting: `option` is the index of the theme. They may change it until everyone has voted. */
+/** Votes for theme `option`; null takes the vote back (and the time it cut). */
 export async function voteTheme(
   code: string,
-  option: number,
+  option: number | null,
 ): Promise<Result<RoomView>> {
   return run(() => {
+    if (option === null)
+      return act(code, (id) => ({ type: "UNVOTE", playerId: id }));
     if (!Number.isInteger(option) || option < 0 || option >= THEME_OPTIONS)
       bad();
     return act(code, (id) => ({ type: "VOTE", playerId: id, option }));

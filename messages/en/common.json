@@ -34,6 +34,8 @@
   "timeLeft": "Time left: {time}",
   "clockCut": "−{seconds} s",
   "clockCutLabel": "{seconds} seconds off the clock",
+  "clockGain": "+{seconds} s",
+  "clockGainLabel": "{seconds} seconds back on the clock",
   "back": "Back",
   "close": "Close",
   "revealHint": "Click anywhere or press any key to close",

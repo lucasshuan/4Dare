@@ -319,8 +319,10 @@ export interface Outcome {
 /** The vote that picks the theme of a match. */
 export interface ThemeVote {
   options: Theme[];
-  /** Option index by voter. Players may change their vote until everyone has voted. */
+  /** Option index by voter. Players may change or take back their vote until everyone has voted. */
   votes: Record<PlayerId, number>;
+  /** What each voter's vote took off the clock (ms): it comes back if they take the vote back. */
+  cuts?: Record<PlayerId, number>;
   /** The winner, once the vote is over. */
   chosen: number | null;
   /** Options that tied for the most votes; the draw picked `chosen` among them. */
@@ -431,6 +433,7 @@ export type GameEvent =
       newcomer?: boolean;
     }
   | { type: "VOTE"; playerId: PlayerId; option: number }
+  | { type: "UNVOTE"; playerId: PlayerId }
   /** The host typed the theme. */
   | { type: "SET_THEME"; playerId: PlayerId; text: string }
   /** The picker's card as it is now (null: empty); written quietly, it becomes the pick if time runs out. */
