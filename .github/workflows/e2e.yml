@@ -1,0 +1,57 @@
+# The e2e smoke (the hub and one match) on a production build, for pushes that
+# change what the browser gets. Every spec: run this workflow by hand with "all".
+name: e2e
+
+on:
+  push:
+    paths:
+      - "src/**"
+      - "!src/**/*.test.ts"
+      - "messages/**"
+      - "public/**"
+      - "e2e/**"
+      - "next.config.ts"
+      - "playwright.config.ts"
+      - "postcss.config.mjs"
+      - "tsconfig.json"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/e2e.yml"
+  workflow_dispatch:
+    inputs:
+      all:
+        description: Every e2e spec, not just the smoke
+        type: boolean
+        default: false
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: ${{ inputs.all && 'e2e' || 'e2e smoke' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          echo "PW_CHROMIUM=$(node -e "console.log(require('@playwright/test').chromium.executablePath())")" >> "$GITHUB_ENV"
+      - run: ${{ inputs.all && 'pnpm test:e2e' || 'pnpm test:e2e:smoke' }}
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
