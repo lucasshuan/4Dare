@@ -64,18 +64,5 @@
       "Bash(git push * -f*)",
       "Bash(git push *+*)"
     ]
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "mcp__Supabase__execute_sql",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "q=$(jq -r \".tool_input.query // \\\"\\\"\"); if printf \"%s\" \"$q\" | grep -qiE \"\\b(insert|update|delete|drop|truncate|alter|create|grant|revoke|merge|comment|vacuum|reindex|call|copy|do)\\b\"; then d=ask; else d=allow; fi; printf \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"permissionDecision\\\":\\\"%s\\\",\\\"permissionDecisionReason\\\":\\\"SQL that only reads runs; writes ask\\\"}}\" \"$d\""
-          }
-        ]
-      }
-    ]
   }
 }
