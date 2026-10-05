@@ -26,8 +26,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Working
 
 - Keep the context small: read only what the task needs, and cut command output to the lines that decide.
-- Tests are slow: while working, run only the tests of what changed, plus `pnpm typecheck` and `pnpm lint`. The whole suite (`pnpm test`) and e2e (`pnpm test:e2e`) run once, at the very end of a phase, and only when really needed; a browser check mid-phase is `pnpm test:e2e:smoke` (the hub and one match).
-- CI (`.github/workflows/ci.yml`) runs lint, typecheck, `pnpm knip`, the unit tests and the e2e smoke on every push. When it fails, read the failed job's log (GitHub MCP `get_job_logs`) rather than rerunning everything locally.
+- While working, and to finish a task: `pnpm check` (Biome, types, knip; seconds) and `pnpm test:changed` (only the unit tests that import a file you changed; once it is committed, `pnpm test:changed origin/main`). One area by hand: `pnpm test src/game`.
+- Never run the whole unit suite or the e2e locally to wrap up: CI runs them. `ci.yml` runs check and every unit test on every push; `e2e.yml` runs the e2e smoke (the hub and one match, on a production build) only when a push changes the app, and every spec when started by hand with "all" (GitHub MCP `actions_run_trigger`). When CI fails, read the failed job's log (`get_job_logs`) instead of rerunning everything.
+- A local e2e only for a browser flow you changed that unit tests can't reach, and only its spec: `pnpm test:e2e e2e/<name>.spec.ts` (it builds the app; a server already on :3100 is reused). Cloud sessions point `PW_CHROMIUM` at `/opt/pw-browsers/chromium-*/chrome-linux/chrome`.
+- Vercel deploys only what changes the app: `scripts/skip-deploy.sh` (its Ignored Build Step) skips pushes of docs, tests, CI, scripts and migrations alone.
 - `pnpm knip` lists unused files, exports and dependencies: delete them, or keep a planned export with a `/** @public */` comment.
 
 ## Commits
