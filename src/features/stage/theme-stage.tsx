@@ -54,8 +54,14 @@ export const TONES = [
   },
 ] as const;
 
-/** The vote's winner card and the hero share this, so the winner flies to the centre. */
-export const THEME_CARD = "theme-card";
+/**
+ * The layoutId a vote card and the hero share, so the winner flies to the
+ * centre. A vote card has it from its first render (motion reads layoutId only
+ * then), and it is new for each match, so a hero never flies in from an
+ * earlier one.
+ */
+export const themeCardId = (code: string, match: number, option: number) =>
+  `theme-card-${code}-${match}-${option}`;
 /** The flight: 0.9 s, overshooting a little (the prototype's back.out(1.2)). */
 const FLIGHT = { layout: { duration: 0.9, ease: gs.backOut(1.2) } } as const;
 
@@ -105,7 +111,7 @@ function Hero({ beat, from }: { beat: Beat; from: "vote" | "typed" }) {
   const tt = useTranslations("room.theming");
   const lang = useLocale() as Lang;
   const withNames = useWithNames();
-  const { view, playerById } = useRoomContext();
+  const { view, code, playerById } = useRoomContext();
   const clock = useClock();
   const v = view.vote;
   const chosen = from === "vote" ? (v?.chosen ?? null) : null;
@@ -182,7 +188,11 @@ function Hero({ beat, from }: { beat: Beat; from: "vote" | "typed" }) {
           {tv("chosenTitle")}
         </h1>
         <m.div
-          layoutId={THEME_CARD}
+          layoutId={
+            flew && chosen !== null
+              ? themeCardId(code, view.round, chosen)
+              : undefined
+          }
           transition={FLIGHT}
           className="w-[330px] max-w-full sm:w-[620px]"
         >

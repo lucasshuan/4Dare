@@ -23,9 +23,9 @@ import {
 import { beatOf, markOf } from "@/features/stage/stage";
 import { useStage } from "@/features/stage/stage-context";
 import {
-  THEME_CARD,
   ThemeStage,
   TONES,
+  themeCardId,
   usePreloadRule,
 } from "@/features/stage/theme-stage";
 import {
@@ -110,6 +110,8 @@ function Vote({ v }: { v: VoteView }) {
   const spinning = beat?.kind === "tie_spin";
   const chosen = v.chosen;
   const tied = v.tied.join(" ");
+  // the match this vote is for: the room counts it once the vote has its theme
+  const match = chosen === null ? view.round + 1 : view.round;
   const k = phone ? 0.84 : 0.7;
 
   // the heading keeps the room of the shrunken line, so the cards sit right under it;
@@ -331,7 +333,7 @@ function Vote({ v }: { v: VoteView }) {
             <m.div
               // biome-ignore lint/suspicious/noArrayIndexKey: the three options never move
               key={i}
-              layoutId={result && i === chosen ? THEME_CARD : undefined}
+              layoutId={themeCardId(code, match, i)}
               className="flex min-w-0 flex-1"
             >
               <div
