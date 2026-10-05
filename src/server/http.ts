@@ -1,9 +1,17 @@
 import "server-only";
 // Small helpers for the route handlers that change something (drafts, chat):
 // Server Actions check the origin for free, routes have to do it themselves.
-import { type ErrorCode, GameError } from "@/game/types";
+import { type ErrorCode, GameError, LANGS, type Lang } from "@/game/types";
 
 export const noStore = { "Cache-Control": "no-store" };
+
+/** The reader's language from `?lang=` (their page's), English when missing or unknown. */
+export function langParam(request: Request): Lang {
+  const raw = new URL(request.url).searchParams.get("lang");
+  return (LANGS as readonly string[]).includes(raw ?? "")
+    ? (raw as Lang)
+    : "en";
+}
 
 /**
  * True when the request comes from one of our own pages. Browsers send Origin

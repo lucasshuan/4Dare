@@ -548,8 +548,8 @@ export interface PlayerView {
   isYou: boolean;
   isHost: boolean;
   isGuest: boolean;
-  name: string | null;
-  guestNumber: number;
+  /** As the viewer reads it: an account's name, or the guest name in the viewer's language. */
+  name: string;
   avatar: Avatar;
   ready: boolean;
   status: PlayerStatus;
@@ -728,7 +728,8 @@ export interface PublicRoom {
   locked: boolean;
   /** open: has a free seat; full: lobby with no seat left; playing: match under way. */
   status: "open" | "full" | "playing";
-  host: Pick<Identity, "isGuest" | "name" | "guestNumber" | "avatar" | "lang">;
+  /** The host's name in the reader's language (see PlayerView.name). */
+  host: Pick<Identity, "isGuest" | "avatar" | "lang"> & { name: string };
   players: number;
   seats: number;
   voteSeconds: number;
@@ -737,6 +738,11 @@ export interface PublicRoom {
   answerSeconds: number;
   validateSeconds: number;
 }
+
+/** A listed room as the server keeps it, before its host's name is put in the reader's language. */
+export type ListedRoom = Omit<PublicRoom, "host"> & {
+  host: Pick<Identity, "isGuest" | "name" | "guestNumber" | "avatar" | "lang">;
+};
 
 /** Just what counting the players online needs from a room. */
 export interface ActiveRoom {

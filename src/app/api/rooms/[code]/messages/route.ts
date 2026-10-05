@@ -1,8 +1,16 @@
 import { CHAT_PAGE, chatPerson, cleanChatText } from "@/game/chat";
+import { showLine } from "@/game/shown";
 import { GameError, type PlayerId } from "@/game/types";
 import { getBackend } from "@/server/backend";
 import { background } from "@/server/background";
-import { failure, handle, noStore, readJson, sameOrigin } from "@/server/http";
+import {
+  failure,
+  handle,
+  langParam,
+  noStore,
+  readJson,
+  sameOrigin,
+} from "@/server/http";
 import { allow } from "@/server/rate-limit";
 import { normalizeCode } from "@/server/rooms";
 
@@ -22,7 +30,7 @@ async function seatOf(code: string, id: Promise<PlayerId>) {
 const callerId = async () => (await getBackend().auth.identity("en")).id;
 
 /**
- * The room's chat, for its players. `?since=<ms>`: the lines created from
+ * The room's chat, for its players, names in `?lang=`. `?since=<ms>`: the lines created from
  * then on (the browser asks from its newest line's time minus a few seconds
  * and merges by id, since ids can commit out of order); without it, the last
  * CHAT_PAGE. Lines still waiting for their scene come too: the browser hides
@@ -45,7 +53,11 @@ export async function GET(
       since === null
         ? await chat.list(code, 0, CHAT_PAGE)
         : await chat.list(code, since, SINCE_LIMIT);
-    return Response.json({ messages }, { headers: noStore });
+    const lang = langParam(request);
+    return Response.json(
+      { messages: messages.map((m) => showLine(m, lang)) },
+      { headers: noStore },
+    );
   });
 }
 
@@ -83,6 +95,8 @@ export async function POST(
       { by: me, author: chatPerson(seat), text },
     ]);
     background(() => notify.chatChanged(code, message.id));
-    return Response.json(message, { headers: noStore });
+    return Response.json(showLine(message, langParam(request)), {
+      headers: noStore,
+    });
   });
 }

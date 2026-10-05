@@ -1,6 +1,6 @@
 import "server-only";
 import { DEFAULT_GAME } from "@/game/games";
-import type { ActiveRoom, PublicRoom, RoomState } from "@/game/types";
+import type { ActiveRoom, ListedRoom, RoomState } from "@/game/types";
 import { toPublicRoom } from "@/game/view";
 import type { RoomStore, StoredRoom } from "../types";
 import { processSingleton } from "./disk";
@@ -26,7 +26,7 @@ export function localRooms(): RoomStore {
     },
     async listPublic() {
       const now = Date.now();
-      const list: { at: number; room: PublicRoom }[] = [];
+      const list: { at: number; room: ListedRoom }[] = [];
       for (const { state } of rooms.values()) {
         const room = toPublicRoom(state as RoomState, now);
         if (room) list.push({ at: state.createdAt, room });

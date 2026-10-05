@@ -16,7 +16,7 @@ import { type ErrorCode, ROOM_NAME_MAX } from "@/game/types";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
-import { useDisplayName } from "@/lib/names";
+import { meNamed, useDisplayName } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
 import { createRoom } from "@/server/actions";
 import { loadSetup } from "./last-setup";
@@ -50,7 +50,7 @@ export function CreateScreen() {
     started.current = attempt;
     const asked = new URLSearchParams(window.location.search).get("game");
     const game = isGameKey(asked) ? asked : DEFAULT_GAME;
-    const name = roomName(displayName(me), (n) =>
+    const name = roomName(displayName(meNamed(me)), (n) =>
       t("rooms.roomOf", { name: n }),
     );
     void run(() => createRoom({ ...loadSetup(), game, name })).then((r) => {

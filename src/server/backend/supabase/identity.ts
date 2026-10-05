@@ -1,8 +1,8 @@
 import type { JwtPayload, User, UserAppMetadata } from "@supabase/supabase-js";
 import { MAX_NAME } from "@/game/types";
-import type { Me } from "@/server/contract";
+import type { Account } from "@/server/contract";
 
-type Provider = NonNullable<Me["provider"]>;
+type Provider = NonNullable<Account["provider"]>;
 
 const isProvider = (value: unknown): value is Provider =>
   value === "discord" || value === "google";
@@ -13,7 +13,9 @@ function oauthIdentity(user: User) {
 }
 
 /** Discord or Google among the providers Auth lists in `app_metadata`. */
-function listedProvider(meta: UserAppMetadata | undefined): Me["provider"] {
+function listedProvider(
+  meta: UserAppMetadata | undefined,
+): Account["provider"] {
   const listed: unknown[] = [meta?.provider, ...(meta?.providers ?? [])];
   return listed.find(isProvider) ?? null;
 }
@@ -22,7 +24,7 @@ function listedProvider(meta: UserAppMetadata | undefined): Me["provider"] {
  * Discord or Google, if the user has one. A guest who links an account keeps
  * `app_metadata.provider = "anonymous"`, so identities are checked first.
  */
-export function providerOf(user: User): Me["provider"] {
+export function providerOf(user: User): Account["provider"] {
   const fromIdentity = oauthIdentity(user)?.provider;
   if (isProvider(fromIdentity)) return fromIdentity;
   return listedProvider(user.app_metadata);

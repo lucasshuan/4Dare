@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ChatMessage } from "@/game/chat";
+import type { ShownLine } from "@/game/chat";
 import {
   countLabel,
   isEmojiOnly,
@@ -16,7 +16,7 @@ const person = (id: string) => ({
   avatar: { kind: "critter" as const, seed: id, color: "#fff" },
 });
 
-const say = (id: number, by: string, text = "hi"): ChatMessage => ({
+const say = (id: number, by: string, text = "hi"): ShownLine => ({
   id,
   at: id * 1000,
   showAt: id * 1000,
@@ -26,7 +26,7 @@ const say = (id: number, by: string, text = "hi"): ChatMessage => ({
   system: null,
 });
 
-const sys = (id: number): ChatMessage => ({
+const sys = (id: number): ShownLine => ({
   id,
   at: id * 1000,
   showAt: id * 1000,

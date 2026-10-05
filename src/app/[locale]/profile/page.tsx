@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ProfileScreen } from "@/features/profile/profile-screen";
+import { guestName } from "@/game/guest-names";
 import type { Lang } from "@/game/types";
 import { pageMetadata } from "@/server/seo";
 
@@ -23,5 +24,6 @@ export default async function Profile({
 }: PageProps<"/[locale]/profile">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <ProfileScreen />;
+  // the preview's other player: a guest, named in the page's language
+  return <ProfileScreen sampleGuest={guestName(27, locale as Lang)} />;
 }

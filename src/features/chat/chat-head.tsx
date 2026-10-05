@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import type { Ref } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { useRoomContext } from "@/features/data/room-context";
-import type { ChatMessage } from "@/game/chat";
+import type { ShownLine } from "@/game/chat";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
@@ -35,9 +35,9 @@ export function ChatHead({
   open: boolean;
   unread: number;
   /** The latest unread line of each sender to show, newest first. */
-  faces: ChatMessage[];
+  faces: ShownLine[];
   /** The last player's line, for the phone bar. */
-  last: ChatMessage | null;
+  last: ShownLine | null;
   phone: boolean;
   bodyId: string;
   /** Goes up on every new unread message: the count pops. */
@@ -121,7 +121,7 @@ export function ChatHead({
 }
 
 /** The phone bar's line: "[av] Bia: on my way!! 👋", or "Room chat" before any message. */
-function PhoneLine({ line }: { line: ChatMessage | null }) {
+function PhoneLine({ line }: { line: ShownLine | null }) {
   const t = useTranslations("chat");
   const name = useDisplayName();
   const { me, playerById } = useRoomContext();

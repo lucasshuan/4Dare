@@ -3,7 +3,7 @@ import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { randomGuestNumber } from "@/game/guest-names";
 import type { Avatar, Identity, Lang } from "@/game/types";
-import type { Me } from "@/server/contract";
+import type { Account } from "@/server/contract";
 import {
   ensureGuest,
   GUEST_COOKIE,
@@ -20,7 +20,7 @@ interface ProfileRow {
   name: string | null;
   guest_number: number;
   avatar: Avatar;
-  provider: Me["provider"];
+  provider: Account["provider"];
   provider_avatar_url: string | null;
 }
 
@@ -57,7 +57,7 @@ export async function syncProfile(
   return insert.data as unknown as ProfileRow;
 }
 
-const accountMe = (p: ProfileRow): Me => ({
+const accountMe = (p: ProfileRow): Account => ({
   id: p.id,
   isGuest: false,
   name: p.name,
@@ -68,7 +68,7 @@ const accountMe = (p: ProfileRow): Me => ({
   authMode: "supabase",
 });
 
-const guestMe = (g: Guest): Me => ({
+const guestMe = (g: Guest): Account => ({
   id: g.id,
   isGuest: true,
   name: null,

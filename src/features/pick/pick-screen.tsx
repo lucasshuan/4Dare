@@ -348,7 +348,11 @@ function PickTable() {
   ) => {
     setLibraryUploads((n) => n + 1);
     try {
-      return await uploadDraftImage(code, image, { characterId, replaces });
+      return await uploadDraftImage(code, image, {
+        characterId,
+        replaces,
+        lang,
+      });
     } finally {
       setLibraryUploads((n) => n - 1);
     }
@@ -432,7 +436,7 @@ function PickTable() {
               state={state}
               stamp={timeUp}
               onNewImage={(image, replaces) =>
-                uploadDraftImage(code, image, { replaces })
+                uploadDraftImage(code, image, { replaces, lang })
               }
               onLibraryImage={onLibraryImage}
               autoFocus={autoFocus}

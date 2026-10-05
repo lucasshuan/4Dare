@@ -1,11 +1,10 @@
-import { LANGS, type Lang } from "@/game/types";
 import { getBackend } from "@/server/backend";
+import { langParam, noStore } from "@/server/http";
+import { showMe } from "@/server/shown";
 
+/** The caller, their guest name in `?lang=`. */
 export async function GET(request: Request) {
-  const raw = new URL(request.url).searchParams.get("lang");
-  const lang: Lang = (LANGS as readonly string[]).includes(raw ?? "")
-    ? (raw as Lang)
-    : "en";
-  const me = await getBackend().auth.me(lang);
-  return Response.json(me, { headers: { "Cache-Control": "no-store" } });
+  const lang = langParam(request);
+  const me = showMe(await getBackend().auth.me(lang), lang);
+  return Response.json(me, { headers: noStore });
 }

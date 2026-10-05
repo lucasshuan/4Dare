@@ -119,7 +119,7 @@ describe("lobby", () => {
     join("p5", "#D9C7F4");
     expect(slots()).toMatchObject({ p5: 1 });
     expect(
-      toView(g.state, 0, "p3", g.now).players.map((p) => p.colorSlot),
+      toView(g.state, 0, "p3", g.now, "en").players.map((p) => p.colorSlot),
     ).toEqual([0, 2, 3, 1]);
   });
 
@@ -355,7 +355,7 @@ describe("the theme vote", () => {
     g.do({ type: "UNVOTE", playerId: "p1" });
     expect(g.state.deadline).toBe(deadline - quarter);
     expect(g.state.vote?.votes).toEqual({ p2: 1 });
-    expect(toView(g.state, 1, "p1", g.now).vote?.yourVote).toBeNull();
+    expect(toView(g.state, 1, "p1", g.now, "en").vote?.yourVote).toBeNull();
     // nothing to take back: nothing changes
     g.do({ type: "UNVOTE", playerId: "p1" });
     expect(g.state.deadline).toBe(deadline - quarter);
@@ -507,7 +507,7 @@ describe("the theme vote", () => {
     g.do({ type: "LEAVE", playerId: "p2" });
     expect(g.state.phase).toBe("lobby");
     expect(g.state.reveal).toBeNull();
-    expect(toView(g.state, 1, "p1", g.now).reveal).toBeNull();
+    expect(toView(g.state, 1, "p1", g.now, "en").reveal).toBeNull();
   });
 
   it("the host leaving hands the room over and the vote goes on", () => {
@@ -1064,7 +1064,7 @@ describe("step times", () => {
     expect(g.state.deadline).toBe(start + 33_334); // 13.334 s left
     // the full length stays, so the clock can show what was cut
     expect(g.state.stepMs).toBe(100_000);
-    expect(toView(g.state, 1, asker, g.now).stepMs).toBe(100_000);
+    expect(toView(g.state, 1, asker, g.now, "en").stepMs).toBe(100_000);
     // the last one still answers in time, or the clock runs out on them
     g.timeout();
     expect(g.state.phase).toBe("guessing");
@@ -1241,7 +1241,7 @@ describe("a turn", () => {
     g.do({ type: "GUESS", playerId: second, text: `Nane ${second}` }); // one typo
     expect(g.state.outcomes[second]).toMatchObject({ place: 1, round: 1 });
     expect(g.state.reveal).toMatchObject({ kind: "guess" });
-    expect(toView(g.state, 1, second, g.now).reveal).toMatchObject({
+    expect(toView(g.state, 1, second, g.now, "en").reveal).toMatchObject({
       place: 1,
       tied: true,
     });
@@ -1314,7 +1314,7 @@ describe("a turn", () => {
     expect((r?.until ?? 0) - g.now).toBe(REVEAL_TIMING.pass);
     expect(g.state.stepStartsAt).toBe(r?.until);
     for (const viewer of g.state.order)
-      expect(toView(g.state, 1, viewer, g.now).reveal).toEqual({
+      expect(toView(g.state, 1, viewer, g.now, "en").reveal).toEqual({
         kind: "pass",
         n: 1,
         byId: asker,

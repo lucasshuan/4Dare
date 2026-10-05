@@ -159,14 +159,18 @@ export type PictureUpload =
 export async function uploadDraftImage(
   code: string,
   image: Blob,
-  { characterId, replaces }: { characterId?: string; replaces?: string } = {},
+  {
+    characterId,
+    replaces,
+    lang,
+  }: { characterId?: string; replaces?: string; lang: string },
 ): Promise<PictureUpload> {
   const form = new FormData();
   form.set("image", image, "picture.webp");
   if (characterId) form.set("characterId", characterId);
   if (replaces) form.set("replaces", replaces);
   try {
-    const res = await fetch(`/api/rooms/${code}/draft/image`, {
+    const res = await fetch(`/api/rooms/${code}/draft/image?lang=${lang}`, {
       method: "POST",
       body: form,
     });
@@ -187,11 +191,13 @@ export async function uploadDraftImage(
 export const picturesKey = (characterId: string) =>
   ["character-pictures", characterId] as const;
 
+/** A character's tray, who sent each picture named in `lang`. */
 export async function fetchPictures(
   characterId: string,
+  lang: string,
 ): Promise<TrayPicture[]> {
   const res = await fetch(
-    `/api/characters/${encodeURIComponent(characterId)}/pictures`,
+    `/api/characters/${encodeURIComponent(characterId)}/pictures?lang=${lang}`,
   );
   if (!res.ok) throw new Error(`pictures: ${res.status}`);
   return ((await res.json()) as { pictures: TrayPicture[] }).pictures;

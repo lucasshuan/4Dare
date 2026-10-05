@@ -1,17 +1,16 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import { BACKEND } from "@/config";
 import { useRoomContext } from "@/features/data/room-context";
 import {
   CHAT_OVERLAP_MS,
-  type ChatMessage,
   chatOrder,
-  chatPerson,
   cleanChatText,
+  type ShownLine,
   shown,
 } from "@/game/chat";
 import { useClock } from "@/lib/hooks/use-server-clock";
@@ -19,7 +18,7 @@ import { subscribeChat } from "@/lib/realtime";
 import { type ChatCache, chatKey, EMPTY, type Outgoing } from "./chat-cache";
 
 /** A line as the chat draws it: saved, or one of yours still on its way (negative id) or refused. */
-export interface ChatLine extends ChatMessage {
+export interface ChatLine extends ShownLine {
   state: "sent" | "sending" | "failed";
 }
 
@@ -38,20 +37,22 @@ const KEEP = 500;
 /** Temporary ids of lines on their way: negative, never a server id. */
 let lastTempId = 0;
 
+/** Lines from `since` on (the last page without it), names in `lang`. */
 async function fetchLines(
   code: string,
   since: number | null,
-): Promise<ChatMessage[]> {
-  const query = since === null ? "" : `?since=${Math.floor(since)}`;
+  lang: string,
+): Promise<ShownLine[]> {
+  const query = since === null ? "" : `&since=${Math.floor(since)}`;
   const res = await fetch(
-    `/api/rooms/${encodeURIComponent(code)}/messages${query}`,
+    `/api/rooms/${encodeURIComponent(code)}/messages?lang=${lang}${query}`,
     { cache: "no-store" },
   );
   if (!res.ok) throw new Error(`chat: ${res.status}`);
-  return ((await res.json()) as { messages: ChatMessage[] }).messages;
+  return ((await res.json()) as { messages: ShownLine[] }).messages;
 }
 
-function merge(cache: ChatCache | undefined, lines: ChatMessage[]): ChatCache {
+function merge(cache: ChatCache | undefined, lines: ShownLine[]): ChatCache {
   const byId = new Map(cache?.byId);
   for (const m of lines) byId.set(m.id, m);
   if (byId.size > KEEP)
@@ -79,6 +80,7 @@ export function useChat(code: string): {
 } {
   const client = useQueryClient();
   const { serverTime, me } = useRoomContext();
+  const lang = useLocale();
   const clock = useClock();
   const t = useTranslations("common.errors");
   const toast = useToast();
@@ -94,6 +96,7 @@ export function useChat(code: string): {
       const lines = await fetchLines(
         code,
         newest === null ? null : newest - CHAT_OVERLAP_MS,
+        lang,
       );
       // merged into what is there now: a send may have landed meanwhile
       return merge(client.getQueryData<ChatCache>(key), lines);
@@ -149,7 +152,7 @@ export function useChat(code: string): {
       let error: string | null = null;
       try {
         const res = await fetch(
-          `/api/rooms/${encodeURIComponent(code)}/messages`,
+          `/api/rooms/${encodeURIComponent(code)}/messages?lang=${lang}`,
           {
             method: "POST",
             headers: { "content-type": "application/json" },
@@ -157,7 +160,7 @@ export function useChat(code: string): {
           },
         );
         if (res.ok) {
-          const saved = (await res.json()) as ChatMessage;
+          const saved = (await res.json()) as ShownLine;
           update((c) => {
             const byId = new Map(c.byId);
             byId.set(saved.id, saved);
@@ -177,7 +180,7 @@ export function useChat(code: string): {
       }));
       if (error === "rate_limited") toast(t("rate_limited"));
     },
-    [code, update, toast, t],
+    [code, lang, update, toast, t],
   );
 
   const send = useCallback(
@@ -231,7 +234,15 @@ export function useChat(code: string): {
     return () => window.clearTimeout(id);
   }, [cache, now, clock.frozen, clock.rate]);
 
-  const author = useMemo(() => chatPerson(me), [me]);
+  const author = useMemo(
+    () => ({
+      id: me.id,
+      isGuest: me.isGuest,
+      name: me.name,
+      avatar: me.avatar,
+    }),
+    [me],
+  );
   const messages = useMemo(() => {
     const lines: ChatLine[] = [];
     for (const m of cache.byId.values())

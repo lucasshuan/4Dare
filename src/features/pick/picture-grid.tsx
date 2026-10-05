@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Flag, Hourglass, Upload } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Portrait } from "@/components/ui/portrait";
@@ -21,9 +21,10 @@ const chip =
 
 /** A character's pictures for the tray, asked for when the tray opens. */
 export function useCharacterPictures(characterId: string | null) {
+  const lang = useLocale();
   return useQuery({
     queryKey: picturesKey(characterId ?? ""),
-    queryFn: () => fetchPictures(characterId as string),
+    queryFn: () => fetchPictures(characterId as string, lang),
     enabled: characterId !== null,
     staleTime: 30_000,
   });

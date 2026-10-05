@@ -18,7 +18,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
 import type { DeferredProps } from "@/lib/hooks/use-deferred";
 import { dur, ease } from "@/lib/motion";
-import { useDisplayName } from "@/lib/names";
+import { meNamed, useDisplayName } from "@/lib/names";
 import { rerollGuest, signOut } from "@/server/actions";
 import { useSignIn } from "./use-sign-in";
 import { UserMenuFace, userMenuTrigger } from "./user-menu";
@@ -61,7 +61,7 @@ export function UserMenuPopover({
               {/* a new name and critter swap in */}
               <AnimatePresence initial={false} mode="popLayout">
                 <m.span
-                  key={`${me.guestNumber}-${me.avatar.kind === "critter" ? me.avatar.seed : ""}`}
+                  key={`${me.guestName}-${me.avatar.kind === "critter" ? me.avatar.seed : ""}`}
                   className="flex shrink-0"
                   initial={{ opacity: 0, scale: 0.6, rotate: -20 }}
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -77,14 +77,14 @@ export function UserMenuPopover({
                   <Popover.Title className="min-w-0 truncate font-semibold">
                     <AnimatePresence initial={false} mode="wait">
                       <m.span
-                        key={me.guestNumber}
+                        key={me.guestName}
                         className="block truncate"
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: dur.fast, ease: ease.soft }}
                       >
-                        {name(me)}
+                        {name(meNamed(me))}
                       </m.span>
                     </AnimatePresence>
                   </Popover.Title>

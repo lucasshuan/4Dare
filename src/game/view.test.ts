@@ -18,7 +18,7 @@ function started(n: number, seed = 3) {
   return g;
 }
 
-const view = (g: Game, id: string) => toView(g.state, 1, id, g.now);
+const view = (g: Game, id: string) => toView(g.state, 1, id, g.now, "en");
 const leaks = (g: Game, id: string) => {
   const json = JSON.stringify(view(g, id));
   return json.includes(`c-${id}`) || json.includes(`Name ${id}`);
@@ -252,8 +252,10 @@ describe("what the view says", () => {
       locked: true,
       game: "who-am-i",
     });
-    expect(toView(g.state, 1, "p1", g.now).settings.password).toBe("pizza");
-    expect(toView(g.state, 1, "p2", g.now).settings.password).toBe("");
+    expect(toView(g.state, 1, "p1", g.now, "en").settings.password).toBe(
+      "pizza",
+    );
+    expect(toView(g.state, 1, "p2", g.now, "en").settings.password).toBe("");
     // a private room without a password stays hidden
     g.state.settings.password = "";
     expect(toPublicRoom(g.state, g.now)).toBeNull();
@@ -293,7 +295,7 @@ describe("the theme vote in the view", () => {
     g.do({ type: "START", playerId: "p1", themes: THEMES });
     g.skipShow();
     g.do({ type: "VOTE", playerId: "p2", option: 2 });
-    const v = toView(g.state, 1, "p1", g.now);
+    const v = toView(g.state, 1, "p1", g.now, "en");
     expect(v.vote).toMatchObject({
       options: THEMES,
       votes: [{ byId: "p2", option: 2 }],
@@ -310,11 +312,17 @@ describe("the theme vote in the view", () => {
 
     g.do({ type: "VOTE", playerId: "p1", option: 2 });
     g.do({ type: "VOTE", playerId: "p3", option: 0 });
-    const shown = toView(g.state, 2, "p3", g.now);
+    const shown = toView(g.state, 2, "p3", g.now, "en");
     expect(shown.phase).toBe("picking");
     expect(shown.reveal?.kind).toBe("theme");
     expect(shown.vote).toMatchObject({ chosen: 2, yourVote: 0 });
-    const later = toView(g.state, 2, "p3", (g.state.reveal?.until ?? 0) + 1);
+    const later = toView(
+      g.state,
+      2,
+      "p3",
+      (g.state.reveal?.until ?? 0) + 1,
+      "en",
+    );
     expect(later.vote).toBeNull();
     expect(later.reveal).toBeNull();
   });
@@ -336,12 +344,12 @@ describe("the theme vote in the view", () => {
       prev: { kind: "theme", until },
     });
     for (const p of g.state.players) {
-      expect(toView(g.state, 1, p.id, g.now).vote).toMatchObject({
+      expect(toView(g.state, 1, p.id, g.now, "en").vote).toMatchObject({
         chosen: 2,
         yourVote: 2,
       });
-      expect(toView(g.state, 1, p.id, until - 1).vote).not.toBeNull();
-      expect(toView(g.state, 1, p.id, until).vote).toBeNull();
+      expect(toView(g.state, 1, p.id, until - 1, "en").vote).not.toBeNull();
+      expect(toView(g.state, 1, p.id, until, "en").vote).toBeNull();
     }
   });
 });
@@ -351,7 +359,7 @@ describe("shows in the view", () => {
     const g = new Game(2);
     g.do({ type: "START", playerId: "p1", themes: THEMES });
     const opening = g.state.reveal;
-    const v = toView(g.state, 1, "p2", g.now);
+    const v = toView(g.state, 1, "p2", g.now, "en");
     expect(v.reveal).toEqual({
       kind: "opening",
       n: 1,
@@ -364,16 +372,18 @@ describe("shows in the view", () => {
     });
     // everyone votes during the opening: the theme show waits behind it
     g.voteAll(0);
-    const during = toView(g.state, 2, "p2", g.now).reveal;
+    const during = toView(g.state, 2, "p2", g.now, "en").reveal;
     expect(during).toMatchObject({
       kind: "theme",
       startsAt: opening?.until,
       prev: { kind: "opening", until: opening?.until, prev: null },
     });
     // once the opening is over it is gone from the view
-    const after = toView(g.state, 2, "p2", opening?.until ?? 0).reveal;
+    const after = toView(g.state, 2, "p2", opening?.until ?? 0, "en").reveal;
     expect(after).toMatchObject({ kind: "theme", prev: null });
-    expect(toView(g.state, 2, "p2", opening?.until ?? 0).vote).not.toBeNull();
+    expect(
+      toView(g.state, 2, "p2", opening?.until ?? 0, "en").vote,
+    ).not.toBeNull();
   });
 
   it("the cast keeps the pick table in the view while it plays", () => {
@@ -382,12 +392,12 @@ describe("shows in the view", () => {
     g.pickAll();
     const until = g.state.reveal?.until ?? 0;
     for (const p of g.state.players) {
-      const v = toView(g.state, 1, p.id, g.now);
+      const v = toView(g.state, 1, p.id, g.now, "en");
       expect(v.phase).toBe("asking");
       expect(v.reveal?.kind).toBe("cast");
       expect(v.pick).toMatchObject({ confirmed: true, total: 3, draft: null });
       expect(v.pick?.confirmedIds).toHaveLength(3);
-      expect(toView(g.state, 1, p.id, until).pick).toBeNull();
+      expect(toView(g.state, 1, p.id, until, "en").pick).toBeNull();
     }
   });
 });
@@ -397,13 +407,13 @@ describe("picking in the view", () => {
     const g = new Game(3);
     g.start();
     for (const p of g.state.players) {
-      for (const x of toView(g.state, 1, p.id, g.now).players)
+      for (const x of toView(g.state, 1, p.id, g.now, "en").players)
         expect(x.pickedById).toBe(g.state.assignments[x.id].pickerId);
     }
     // not before: nobody picks for anyone during the vote
     const h = new Game(3);
     h.do({ type: "START", playerId: "p1", themes: THEMES });
-    for (const x of toView(h.state, 1, "p1", h.now).players)
+    for (const x of toView(h.state, 1, "p1", h.now, "en").players)
       expect(x.pickedById).toBeNull();
   });
 

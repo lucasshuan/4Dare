@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocale } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { BACKEND } from "@/config";
 import type { RoomView } from "@/game/types";
@@ -33,11 +34,13 @@ const pollMs = (connected: boolean) =>
 
 export const roomKey = (code: string) => ["room", code] as const;
 
-async function fetchRoom(code: string): Promise<RoomData> {
+/** The room, names in `lang` (the page's). */
+async function fetchRoom(code: string, lang: string): Promise<RoomData> {
   const sentAt = Date.now();
-  const res = await fetch(`/api/rooms/${encodeURIComponent(code)}`, {
-    cache: "no-store",
-  });
+  const res = await fetch(
+    `/api/rooms/${encodeURIComponent(code)}?lang=${lang}`,
+    { cache: "no-store" },
+  );
   const receivedAt = Date.now();
   if (res.status === 404) throw new RoomError("not_found");
   if (res.status === 403) {
@@ -54,11 +57,12 @@ async function fetchRoom(code: string): Promise<RoomData> {
 /** The room as the current player sees it, kept fresh by realtime pings, polling and the step clock. */
 export function useRoom(code: string) {
   const client = useQueryClient();
+  const lang = useLocale();
   const [connected, setConnected] = useState(false);
   const query = useQuery({
     queryKey: roomKey(code),
     queryFn: async () => {
-      const next = await fetchRoom(code);
+      const next = await fetchRoom(code, lang);
       // A slow response must never replace a newer state.
       const current = client.getQueryData<RoomData>(roomKey(code));
       return current && current.view.version > next.view.version

@@ -26,12 +26,12 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
-import { useDisplayName } from "@/lib/names";
 import { GAMES } from "@/lib/routes";
 import { updateProfile } from "@/server/actions";
 import { AVATAR_COLORS, type Me } from "@/server/contract";
 
-export function ProfileScreen() {
+/** `sampleGuest`: the name of the guest the preview shows next to you. */
+export function ProfileScreen({ sampleGuest }: { sampleGuest: string }) {
   const t = useTranslations("profile");
   const tc = useTranslations("common");
   const { me } = useMe();
@@ -51,7 +51,7 @@ export function ProfileScreen() {
         ) : me.isGuest ? (
           <GuestProfile />
         ) : (
-          <AccountForm key={me.id} me={me} />
+          <AccountForm key={me.id} me={me} sampleGuest={sampleGuest} />
         )}
       </div>
     </Screen>
@@ -91,7 +91,7 @@ function initialKind(me: Me): Kind {
 }
 
 /** Name, avatar (provider picture, an upload or a critter) and background colour. */
-function AccountForm({ me }: { me: Me }) {
+function AccountForm({ me, sampleGuest }: { me: Me; sampleGuest: string }) {
   const t = useTranslations("profile");
   const toast = useToast();
   const { setMe } = useMe();
@@ -327,7 +327,11 @@ function AccountForm({ me }: { me: Me }) {
         </Button>
       </m.form>
 
-      <Preview name={trimmed} avatar={preview} guestNumber={me.guestNumber} />
+      <Preview
+        name={trimmed || me.guestName}
+        avatar={preview}
+        sampleGuest={sampleGuest}
+      />
     </div>
   );
 }
@@ -361,18 +365,16 @@ function Tile({
 
 /** How the chosen name and avatar show up in a list and in the player strip, next to a guest. */
 function Preview({
-  name,
+  name: shown,
   avatar,
-  guestNumber,
+  sampleGuest,
 }: {
   name: string;
   avatar: AvatarData;
-  guestNumber: number;
+  sampleGuest: string;
 }) {
   const t = useTranslations("profile");
   const tc = useTranslations("common");
-  const display = useDisplayName();
-  const shown = name || display({ isGuest: true, name: null, guestNumber });
   return (
     <aside className="flex flex-col gap-4 rounded-xl bg-surface p-6">
       <h2 className="font-semibold text-xl">{t("preview")}</h2>
@@ -403,9 +405,7 @@ function Preview({
       <div className="flex items-center gap-3">
         <Avatar avatar={{ kind: "critter", seed: "27", color: "#BFE3EA" }} />
         <div className="flex min-w-0 flex-col">
-          <span className="truncate font-semibold">
-            {display({ isGuest: true, name: null, guestNumber: 27 })}
-          </span>
+          <span className="truncate font-semibold">{sampleGuest}</span>
           <span className="font-medium text-[13px] text-ink-muted">
             {t("guestNote")}
           </span>

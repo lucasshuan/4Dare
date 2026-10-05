@@ -94,10 +94,12 @@ beforeAll(async () => {
   roomRoute = await import("@/app/api/rooms/[code]/route");
 });
 
+/** The room as the caller sees it, in Portuguese like the actions (getLocale is mocked to "pt"). */
 async function view(code: string): Promise<{ status: number; body: RoomView }> {
-  const res = await roomRoute.GET(new Request(`http://x/api/rooms/${code}`), {
-    params: Promise.resolve({ code }),
-  });
+  const res = await roomRoute.GET(
+    new Request(`http://x/api/rooms/${code}?lang=pt`),
+    { params: Promise.resolve({ code }) },
+  );
   return { status: res.status, body: (await res.json()) as RoomView };
 }
 
@@ -413,7 +415,7 @@ describe("server, local mode", () => {
     as("n2");
     const seen = (await view(code)).body;
     expect(seen.players.find((p) => p.id === me.id)).toMatchObject({
-      guestNumber: me.guestNumber,
+      name: me.guestName,
       avatar: me.avatar,
     });
     expect(seen.settings.name).toBe("Sala de Fulano");
@@ -536,7 +538,9 @@ describe("server, local mode", () => {
       ...TIMES,
     } as const;
     as("s3");
-    const account = must(await A.enterTestAccount());
+    must(await A.enterTestAccount());
+    const { getBackend } = await import("./backend");
+    const account = await getBackend().auth.identity("pt");
     const lobby = must(await A.createRoom(settings)).code;
     as("s1");
     const match = must(await A.createRoom(settings)).code;
@@ -545,7 +549,7 @@ describe("server, local mode", () => {
     as("s1");
     must(await A.startGame(match));
 
-    await handOverSeats(uidOf(jarFor("s1")), { ...account, lang: "pt" }, null);
+    await handOverSeats(uidOf(jarFor("s1")), account, null);
     as("s3");
     const seen = (await view(match)).body;
     expect(seen.phase).toBe("voting");
@@ -1343,7 +1347,9 @@ describe("room chat", () => {
   it("moves a guest's lines to the account they sign in to", async () => {
     const { handOverSeats } = await import("./rooms");
     as("q3");
-    const account = must(await A.enterTestAccount());
+    must(await A.enterTestAccount());
+    const { getBackend } = await import("./backend");
+    const account = await getBackend().auth.identity("pt");
     const code = await lobby(["q1", "q2"]);
     const guest = uidOf(jarFor("q1"));
     as("q1");
@@ -1364,7 +1370,7 @@ describe("room chat", () => {
         },
       },
     ]);
-    await handOverSeats(guest, { ...account, lang: "pt" }, code);
+    await handOverSeats(guest, account, code);
     as("q3");
     const lines = (await read(code)).messages ?? [];
     expect(lines[0]).toMatchObject({
@@ -1373,7 +1379,7 @@ describe("room chat", () => {
       text: "before signing in",
     });
     expect(lines.find((m) => m.id === named.id)?.system).toMatchObject({
-      player: { id: account.id, guestNumber: 3 },
+      player: { id: account.id, isGuest: true },
     });
   });
 
@@ -1497,7 +1503,7 @@ describe("character pictures", () => {
     as("i2");
     expect(
       (await tray(lib.id)).pictures.find((p) => p.url === imageUrl),
-    ).toMatchObject({ mine: false, author: { isGuest: true } });
+    ).toMatchObject({ mine: false, author: { name: expect.any(String) } });
 
     // confirmed, the card wears it; one pick does not beat the head start
     as("i1");

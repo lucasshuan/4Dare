@@ -9,6 +9,7 @@
 import { chatCache, chatKey } from "@/features/chat/chat-cache";
 import { seenKey } from "@/features/chat/chat-ui";
 import { type ChatMessage, chatPerson, systemLines } from "@/game/chat";
+import { showLine } from "@/game/shown";
 import type { Lang } from "@/game/types";
 import type { SceneFixtures } from "../fixtures";
 import { labPlayers } from "../fixtures";
@@ -158,5 +159,6 @@ function demoChat(params: LabParams): SceneFixtures {
     // no browser (tests) or no storage: the chat starts all read
   }
 
-  return { queries: [{ key: chatKey(code), data: chatCache(saved) }] };
+  const shown = saved.map((m) => showLine(m, params.lang));
+  return { queries: [{ key: chatKey(code), data: chatCache(shown) }] };
 }

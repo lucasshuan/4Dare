@@ -59,6 +59,7 @@ import {
   saveDraft,
   syncIdentity,
 } from "./rooms";
+import { showMe } from "./shown";
 import {
   drawPopular,
   PICKS_FETCHED,
@@ -106,7 +107,7 @@ async function act(
   const code = roomCode(rawCode);
   const who = await me();
   const { state, version } = await dispatch(code, () => build(who.id));
-  return toView(state, version, who.id, Date.now());
+  return toView(state, version, who.id, Date.now(), await lang());
 }
 
 // --- rooms ------------------------------------------------------------------
@@ -675,8 +676,9 @@ export async function updateProfile(form: FormData): Promise<Result<Me>> {
       avatar = bad();
     }
     const updated = await auth.updateProfile({ name, avatar });
-    await syncIdentity(await auth.identity(await lang()));
-    return updated;
+    const l = await lang();
+    await syncIdentity(await auth.identity(l));
+    return showMe(updated, l);
   });
 }
 
@@ -698,7 +700,10 @@ export async function rerollGuest(): Promise<Result<Me>> {
       avatar: guest.avatar,
       lang: l,
     });
-    return { ...current, guestNumber: guest.guestNumber, avatar: guest.avatar };
+    return showMe(
+      { ...current, guestNumber: guest.guestNumber, avatar: guest.avatar },
+      l,
+    );
   });
 }
 
@@ -714,6 +719,6 @@ export async function enterTestAccount(
     const auth = getBackend().auth;
     if (!auth.enterTestAccount) throw new GameError("unauthorized");
     if (provider !== "discord" && provider !== "google") bad();
-    return auth.enterTestAccount(provider);
+    return showMe(await auth.enterTestAccount(provider), await lang());
   });
 }

@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { systemLines } from "@/game/chat";
 import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
+import { displayName } from "@/game/guest-names";
 import { presenceDue } from "@/game/helpers";
 import { matchRecord } from "@/game/record";
 import { themeId } from "@/game/theme-id";
@@ -516,10 +517,11 @@ export async function handOverSeats(
   if (keep) await leaveOtherRooms(player.id, keep);
 }
 
-/** Another room `id` sits in and has not left, if any: where their seat in `code` went. */
+/** Another room `id` sits in and has not left, if any: where their seat in `code` went (its host named in `lang`). */
 export async function seatedElsewhere(
   id: PlayerId,
   code: string,
+  lang: Lang,
 ): Promise<ElsewhereRoom | null> {
   const { rooms } = getBackend();
   for (const c of await rooms.withPlayer(id, SEATED)) {
@@ -530,12 +532,8 @@ export async function seatedElsewhere(
     if (!state || !me || me.away || !host) continue;
     return {
       code: c,
-      name: state.settings.name ?? "",
-      host: {
-        isGuest: host.isGuest,
-        name: host.name,
-        guestNumber: host.guestNumber,
-      },
+      name: state.settings.name,
+      host: { isGuest: host.isGuest, name: displayName(host, lang) },
     };
   }
   return null;

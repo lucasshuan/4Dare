@@ -32,18 +32,24 @@ export type ChatPerson = Pick<
   "id" | "isGuest" | "name" | "guestNumber" | "avatar"
 >;
 
-/** A system line: only the prototype's four. */
-export type SystemLine =
+/** Someone in a line as the browser gets them: the name ready, in the reader's language. */
+export type ShownPerson = Pick<Identity, "id" | "isGuest" | "avatar"> & {
+  name: string;
+};
+
+/** A system line: only the prototype's four. Kept with ChatPerson, read with ShownPerson. */
+export type SystemLine<P = ChatPerson> =
   /** "▶ Match started" */
   | { type: "started" }
   /** "{emoji} Theme: {theme}" (✍️ for a typed theme) */
   | { type: "theme"; theme: Theme }
   /** "Order: [av]Bia, [av]Rafa, [av]you, [av]Leo" */
-  | { type: "order"; players: ChatPerson[] }
+  | { type: "order"; players: P[] }
   /** "Match {n} · [av]Bia's turn" */
-  | { type: "firstTurn"; n: number; player: ChatPerson };
+  | { type: "firstTurn"; n: number; player: P };
 
-export interface ChatMessage {
+/** A line as it is kept (ChatPerson) or as the browser gets it (ShownPerson, see ShownLine). */
+export interface ChatMessage<P = ChatPerson> {
   /** Identity id; per-room order is (max(at, showAt), id). */
   id: number;
   /** Created, server ms. */
@@ -53,10 +59,16 @@ export interface ChatMessage {
   /** null = system line. */
   by: PlayerId | null;
   /** Snapshot of the writer; the UI prefers the live player with the same id. */
-  author: ChatPerson | null;
+  author: P | null;
   text: string | null;
-  system: SystemLine | null;
+  system: SystemLine<P> | null;
 }
+
+/** A line as the browser gets it: names ready. */
+export type ShownLine = ChatMessage<ShownPerson>;
+
+/** Either kind: what ordering and counting lines need. */
+type AnyLine = ChatMessage<ChatPerson | ShownPerson>;
 
 /** A line to save: a player's text, or a system line. */
 export type NewChatMessage =
@@ -166,11 +178,11 @@ export function systemLines(
 }
 
 /** Where a line sits in the chat: when it shows (a scene's line lands at the bottom then), then its id. */
-export const chatOrder = (a: ChatMessage, b: ChatMessage) =>
+export const chatOrder = (a: AnyLine, b: AnyLine) =>
   Math.max(a.at, a.showAt) - Math.max(b.at, b.showAt) || a.id - b.id;
 
 /** The lines that may show at server time `now`, in chat order. */
-export function visibleChat<T extends ChatMessage>(
+export function visibleChat<T extends AnyLine>(
   messages: Iterable<T>,
   now: number,
 ): T[] {
@@ -181,13 +193,13 @@ export function visibleChat<T extends ChatMessage>(
  * Only a system line waits for its scene. A player's line shows at once: its
  * `showAt` is the database's clock, which a browser's estimate can trail.
  */
-export function shown(m: ChatMessage, now: number): boolean {
+export function shown(m: AnyLine, now: number): boolean {
   return m.system === null || m.showAt <= now;
 }
 
 /** Unread: visible players' lines newer than `seen` that someone else wrote. System lines never count. */
 export function countUnread(
-  messages: Iterable<ChatMessage>,
+  messages: Iterable<AnyLine>,
   seen: number,
   you: PlayerId,
   now: number,

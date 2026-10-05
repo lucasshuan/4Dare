@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { RoomScreen } from "@/features/room/room-screen";
-import { guestName } from "@/game/guest-names";
+import { displayName } from "@/game/guest-names";
 import type { Lang } from "@/game/types";
 import { loadRoom } from "@/server/rooms";
 import { pageMetadata } from "@/server/seo";
@@ -17,9 +17,7 @@ async function roomTitle(code: string, lang: Lang, fallback: string) {
   const host = state.players.find((p) => p.id === state.hostId);
   if (!host) return fallback;
   const t = await getTranslations({ locale: lang, namespace: "home.rooms" });
-  const name =
-    !host.isGuest && host.name ? host.name : guestName(host.guestNumber, lang);
-  return t("roomOf", { name });
+  return t("roomOf", { name: displayName(host, lang) });
 }
 
 /** A room link pasted in a chat shows up as an invite; rooms stay out of search. */

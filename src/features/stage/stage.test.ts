@@ -33,12 +33,13 @@ const EXAMPLES: RuleExamples[] = THEMES.map((_, i) => ({
 
 /** The view `viewer` fetched at `builtAt`, read at `now` (a view lives on until the next fetch). */
 const frame = (g: Game, now: number, viewer = "p1", builtAt = now) =>
-  stageFrame(toView(g.state, 1, viewer, builtAt), now);
+  stageFrame(toView(g.state, 1, viewer, builtAt, "en"), now);
 const look = (g: Game, now: number, viewer = "p1") =>
-  stageLook(toView(g.state, 1, viewer, now), now).look;
+  stageLook(toView(g.state, 1, viewer, now, "en"), now).look;
 
 /** The show the state holds now, as a view shows it. */
-const showOf = (g: Game) => toView(g.state, 1, "p1", g.now).reveal as ShowView;
+const showOf = (g: Game) =>
+  toView(g.state, 1, "p1", g.now, "en").reveal as ShowView;
 const beat = (show: ShowView, kind: Beat["kind"]) => {
   const b = beatOf(show, kind);
   if (!b) throw new Error(`no ${kind} beat`);
@@ -55,7 +56,7 @@ const pickAll = (g: Game) => g.pickAll();
 
 /** Every frame from `from` to `to`, one per change, following `next` on a view fetched at `from`. */
 function walk(g: Game, from: number, to: number, viewer = "p1") {
-  const v = toView(g.state, 1, viewer, from);
+  const v = toView(g.state, 1, viewer, from, "en");
   const frames: (StageFrame & { at: number })[] = [];
   let at: number | null = from;
   while (at !== null && at < to) {
@@ -261,7 +262,7 @@ describe("stageFrame: the theme show", () => {
       expect(g.state.stepStartsAt).toBe(show.until);
 
       // backdrops: butter, theme from the wash, brand for the draw, then my target's seat
-      const target = toView(g.state, 1, "p1", g.now).pick?.targetId ?? "";
+      const target = toView(g.state, 1, "p1", g.now, "en").pick?.targetId ?? "";
       const targetTone = seatTone(seatOf(g, target));
       const wash = markAt(themeBeat, SHOW_MARKS.themeWash);
       expect(look(g, beat(show, "settle").startsAt).tone).toBe("butter");
@@ -301,7 +302,7 @@ describe("stageFrame: the theme show", () => {
     const g = new Game(4, 2);
     g.start();
     const tones = g.state.players.map((p) => {
-      const target = toView(g.state, 1, p.id, g.now).pick?.targetId ?? "";
+      const target = toView(g.state, 1, p.id, g.now, "en").pick?.targetId ?? "";
       return [look(g, g.now, p.id).tone, seatTone(seatOf(g, target))];
     });
     for (const [got, want] of tones) expect(got).toBe(want);
@@ -431,11 +432,11 @@ describe("stageFrame: the cast", () => {
   it("the backdrop: my target, who picked mine, then the first player", () => {
     const g = new Game(4, 11);
     g.start();
-    const v0 = toView(g.state, 1, "p1", g.now);
+    const v0 = toView(g.state, 1, "p1", g.now, "en");
     const target = v0.pick?.targetId ?? "";
     pickAll(g);
     const show = showOf(g);
-    const v = toView(g.state, 1, "p1", g.now);
+    const v = toView(g.state, 1, "p1", g.now, "en");
     const mine = v.players.find((p) => p.isYou)?.pickedById ?? "";
     const firstId = v.turn?.playerId ?? "";
     expect(firstId).toBe(g.state.turnPlayerId);
@@ -537,7 +538,7 @@ describe("stageFrame: later matches", () => {
       ]);
       expect(frame(g, show.startsAt).clockFrom).toBe(show.until);
       expect(g.state.stepStartsAt).toBe(show.until);
-      const target = toView(g.state, 1, "p1", g.now).pick?.targetId ?? "";
+      const target = toView(g.state, 1, "p1", g.now, "en").pick?.targetId ?? "";
       const targetTone = seatTone(seatOf(g, target));
       const draw = beat(show, "draw");
       const targetWash = markAt(draw, markOf(SHOW_MARKS.targetWash, false));
@@ -571,7 +572,7 @@ describe("stageFrame: later matches", () => {
         ["order", "turn"],
         ["entrance", "turn"],
       ]);
-      const v = toView(g.state, 1, "p1", g.now);
+      const v = toView(g.state, 1, "p1", g.now, "en");
       const mine = v.players.find((p) => p.isYou)?.pickedById ?? "";
       const firstTone = seatTone(seatOf(g, g.state.turnPlayerId ?? ""));
       const order = beat(show, "order");

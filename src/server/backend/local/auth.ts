@@ -1,7 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import type { Avatar, Identity, Lang } from "@/game/types";
-import type { Me } from "@/server/contract";
+import type { Account } from "@/server/contract";
 import { ensureGuest, type Guest } from "../../auth/guest";
 import type { AuthService } from "../types";
 import { processSingleton, readJson, writeJson } from "./disk";
@@ -12,7 +12,7 @@ const ACCOUNTS_FILE = "test-accounts.json";
 interface TestAccount {
   name: string | null;
   avatar: Avatar;
-  provider: NonNullable<Me["provider"]>;
+  provider: NonNullable<Account["provider"]>;
 }
 
 /**
@@ -21,7 +21,7 @@ interface TestAccount {
  * Discord/Google account (same id) so the profile screen can be tried.
  */
 export function localAuth(): AuthService & {
-  enterTestAccount(provider: "discord" | "google"): Promise<Me>;
+  enterTestAccount(provider: "discord" | "google"): Promise<Account>;
 } {
   const accounts = processSingleton(
     "test-accounts",
@@ -35,7 +35,7 @@ export function localAuth(): AuthService & {
   const save = () => writeJson(ACCOUNTS_FILE, Object.fromEntries(accounts));
   const guest = async () => ensureGuest(await cookies());
 
-  const toMe = (g: Guest): Me => {
+  const toMe = (g: Guest): Account => {
     const a = accounts.get(g.id);
     return {
       id: g.id,

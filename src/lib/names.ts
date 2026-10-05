@@ -1,27 +1,29 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useCallback } from "react";
-import { guestName } from "@/game/guest-names";
-import type { Lang } from "@/game/types";
+import type { Me } from "@/server/contract";
 
+/**
+ * Someone as the server sends them: `name` is ready, an account's own or a
+ * guest's in the page's language ("GatoMaravilhoso" / "WonderfulCat" / "すてきなネコ").
+ */
 export interface Named {
-  isGuest: boolean;
-  name: string | null;
-  guestNumber: number;
+  name: string;
 }
 
-/** "Bia", or for guests a random name in the viewer's language: "GatoMaravilhoso" / "WonderfulCat" / "すてきなネコ". */
+/** The signed-in person by name: an account's own, else their guest name. */
+export const meNamed = (me: Me): Named => ({
+  name: !me.isGuest && me.name ? me.name : me.guestName,
+});
+
+/** Their name, with "(you)" when it is the reader. */
 export function useDisplayName() {
   const t = useTranslations("common");
-  const lang = useLocale() as Lang;
   return useCallback(
-    (p: Named, isYou = false) => {
-      const base =
-        !p.isGuest && p.name ? p.name : guestName(p.guestNumber, lang);
-      return isYou ? t("youSuffix", { name: base }) : base;
-    },
-    [t, lang],
+    (p: Named, isYou = false) =>
+      isYou ? t("youSuffix", { name: p.name }) : p.name,
+    [t],
   );
 }
 

@@ -787,6 +787,15 @@ export function guestName(guestNumber: number, lang: Lang): string {
   return (f ? enF : enM) + en;
 }
 
+/**
+ * The name a reader sees: an account's own, else the guest name in the
+ * reader's language. Only the server calls it: the browser gets names ready.
+ */
+export const displayName = (
+  p: { isGuest: boolean; name: string | null; guestNumber: number },
+  lang: Lang,
+) => (!p.isGuest && p.name ? p.name : guestName(p.guestNumber, lang));
+
 /** Longest name allowed per language (in characters), so names fit the player strip. */
 export const GUEST_NAME_MAX: Record<Lang, number> = { en: 18, pt: 18, ja: 10 };
 

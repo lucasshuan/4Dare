@@ -129,7 +129,7 @@ export function WhoRing({
           return (
             <span
               // biome-ignore lint/suspicious/noArrayIndexKey: a face is its seat (the scenes animate data-ring-face={i}); the name remounts it when someone else sits there
-              key={`${i}-${p.name ?? p.guestNumber}`}
+              key={`${i}-${p.name}`}
               data-ring-face={i}
               className="absolute flex rounded-pill"
               style={{

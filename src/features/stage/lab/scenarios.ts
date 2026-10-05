@@ -273,7 +273,8 @@ export function labRoom(params: LabParams): LabRoom {
     start: marks.lobby,
     end: run.state.deadline ?? marks.result + 15_000,
     state: (now) => snaps[at(now)].state,
-    view: (now) => toView(snaps[at(now)].state, at(now) + 1, viewer, now),
+    view: (now) =>
+      toView(snaps[at(now)].state, at(now) + 1, viewer, now, params.lang),
     queries: fx.queries,
   };
 }

@@ -11,14 +11,14 @@ import type {
   Character,
   Identity,
   Lang,
+  ListedRoom,
   Localized,
   Phase,
   PlayerId,
-  PublicRoom,
   RoomState,
   Theme,
 } from "@/game/types";
-import type { Me } from "../contract";
+import type { Account } from "../contract";
 import type { PickFeedback, PopularPick } from "../theme-picks";
 
 export interface StoredRoom {
@@ -38,7 +38,7 @@ export interface RoomStore {
     next: RoomState,
   ): Promise<boolean>;
   /** Rooms to list (public and private, see toPublicRoom), newest first. */
-  listPublic(): Promise<PublicRoom[]>;
+  listPublic(): Promise<ListedRoom[]>;
   /** Rooms not closed and written since `since` (ms), for counting the players online. */
   listActive(since: number): Promise<ActiveRoom[]>;
   /** Codes of the recent rooms in one of `phases` where `playerId` has a seat. */
@@ -189,15 +189,15 @@ export interface FileStore {
 
 export interface AuthService {
   /** The current person. Creates a guest on first contact. May set cookies. */
-  me(lang: Lang): Promise<Me>;
+  me(lang: Lang): Promise<Account>;
   identity(lang: Lang): Promise<Identity>;
   updateProfile(patch: {
     name?: string;
     avatar?: Identity["avatar"];
-  }): Promise<Me>;
+  }): Promise<Account>;
   signOut(): Promise<void>;
   /** Local mode only: turns the current guest into a fake account so the profile screen can be tried. */
-  enterTestAccount?(provider: "discord" | "google"): Promise<Me>;
+  enterTestAccount?(provider: "discord" | "google"): Promise<Account>;
 }
 
 export interface Notifier {

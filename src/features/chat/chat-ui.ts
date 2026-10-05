@@ -1,7 +1,7 @@
 // The chat tab's rules that need no React: sizes, timings, what counts as
 // unread, which faces show, when a message is only emoji, and where the last
 // read line is remembered.
-import type { ChatMessage } from "@/game/chat";
+import type { ShownLine } from "@/game/chat";
 import type { PlayerId } from "@/game/types";
 
 /** Folded height of the tab (desktop) and the bar (phone, plus the safe area). */
@@ -27,14 +27,14 @@ export const MAX_FACES = 3;
 export const countLabel = (n: number) => (n > 99 ? "99+" : String(n));
 
 /** The newest saved line's id (yours on their way have negative ids), 0 when none. */
-export function newestId(messages: Iterable<ChatMessage>): number {
+export function newestId(messages: Iterable<ShownLine>): number {
   let id = 0;
   for (const m of messages) if (m.id > id) id = m.id;
   return id;
 }
 
 /** A line that counts as unread: someone else's text, newer than `seen`. */
-export const isUnread = (m: ChatMessage, seen: number, you: PlayerId) =>
+export const isUnread = (m: ShownLine, seen: number, you: PlayerId) =>
   m.text !== null && m.by !== null && m.by !== you && m.id > seen;
 
 /**
@@ -42,11 +42,11 @@ export const isUnread = (m: ChatMessage, seen: number, you: PlayerId) =>
  * newest first: their faces on the tab. `messages` are in chat order.
  */
 export function unreadSenders(
-  messages: readonly ChatMessage[],
+  messages: readonly ShownLine[],
   seen: number,
   you: PlayerId,
-): ChatMessage[] {
-  const out: ChatMessage[] = [];
+): ShownLine[] {
+  const out: ShownLine[] = [];
   for (let i = messages.length - 1; i >= 0 && out.length < MAX_FACES; i--) {
     const m = messages[i];
     if (isUnread(m, seen, you) && !out.some((o) => o.by === m.by)) out.push(m);
@@ -55,9 +55,7 @@ export function unreadSenders(
 }
 
 /** The last player's line (yours included): the phone bar shows it. */
-export function lastTextLine(
-  messages: readonly ChatMessage[],
-): ChatMessage | null {
+export function lastTextLine(messages: readonly ShownLine[]): ShownLine | null {
   for (let i = messages.length - 1; i >= 0; i--)
     if (messages[i].text !== null) return messages[i];
   return null;

@@ -50,9 +50,11 @@ describe("the lab's room", () => {
   });
 
   it("long names are 16-character guests", () => {
-    const room = labRoom({ ...LAB_DEFAULTS, names: "long" });
+    const room = labRoom({ ...LAB_DEFAULTS, names: "long", lang: "pt" });
     expect(
-      room.view(room.start).players.every((p) => p.isGuest && !p.name),
+      room
+        .view(room.start)
+        .players.every((p) => p.isGuest && [...p.name].length === 16),
     ).toBe(true);
   });
 

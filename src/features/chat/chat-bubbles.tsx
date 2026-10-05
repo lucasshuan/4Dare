@@ -4,14 +4,14 @@ import { AnimatePresence, m } from "motion/react";
 import { Avatar } from "@/components/ui/avatar";
 import { LayoutMotion } from "@/components/ui/layout-motion";
 import { useRoomContext } from "@/features/data/room-context";
-import type { ChatMessage } from "@/game/chat";
+import type { ShownLine } from "@/game/chat";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { seatInk } from "@/lib/seats";
 
 /** A message popped above the folded tab until `until` (server ms). */
 export interface Bubble {
-  line: ChatMessage;
+  line: ShownLine;
   until: number;
 }
 

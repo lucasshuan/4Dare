@@ -1,8 +1,9 @@
 import { getBackend } from "@/server/backend";
-import { failure, handle, noStore, sameOrigin } from "@/server/http";
+import { failure, handle, langParam, noStore, sameOrigin } from "@/server/http";
 import { readImage } from "@/server/images";
 import {
   sendPicture,
+  showAuthor,
   type TrayPicture,
   withdrawPicture,
 } from "@/server/pictures";
@@ -80,7 +81,7 @@ export async function POST(
       picture: {
         id: picture.id,
         url: picture.url,
-        author: picture.author,
+        author: showAuthor(picture.author, langParam(request)),
         mine: true,
         pending: picture.status === "pending",
       },

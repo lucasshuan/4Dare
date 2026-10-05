@@ -6,7 +6,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
-import type { ChatPerson, SystemLine } from "@/game/chat";
+import type { ShownPerson, SystemLine } from "@/game/chat";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -204,12 +204,12 @@ function Line({
 }
 
 /** A system line in the viewer's language, players with their faces. */
-function SystemText({ line }: { line: SystemLine }) {
+function SystemText({ line }: { line: SystemLine<ShownPerson> }) {
   const t = useTranslations("chat.system");
   const lang = useLocale() as Lang;
   const withNames = useWithNames();
   const { me, playerById } = useRoomContext();
-  const live = (p: ChatPerson) => playerById(p.id) ?? p;
+  const live = (p: ShownPerson) => playerById(p.id) ?? p;
   switch (line.type) {
     case "started":
       return t("started");

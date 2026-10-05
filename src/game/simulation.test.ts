@@ -253,7 +253,7 @@ function checkSecrecy(s: RoomState, now: number) {
     // what the picker has on the card for p is the picker's alone
     const draft = s.assignments[p.id]?.draft;
     if (draft) {
-      const json = JSON.stringify(toView(s, 1, p.id, now));
+      const json = JSON.stringify(toView(s, 1, p.id, now, "en"));
       for (const bit of [
         draft.name,
         draft.imageUrl,
@@ -268,7 +268,7 @@ function checkSecrecy(s: RoomState, now: number) {
     const mayKnow =
       s.phase === "finished" || o?.discoveredAt != null || o?.gaveUp;
     if (!own || mayKnow) continue;
-    const json = JSON.stringify(toView(s, 1, p.id, now));
+    const json = JSON.stringify(toView(s, 1, p.id, now, "en"));
     for (const bit of [
       own.id,
       own.name,
@@ -294,7 +294,10 @@ function checkVoteView(s: RoomState, now: number) {
     r?.kind === "theme" ? r : r?.prev?.kind === "theme" ? r.prev : null;
   if (!s.vote || !theme || now >= theme.until) return;
   for (const p of s.players)
-    expect(toView(s, 1, p.id, now).vote, `vote for ${p.id}`).not.toBeNull();
+    expect(
+      toView(s, 1, p.id, now, "en").vote,
+      `vote for ${p.id}`,
+    ).not.toBeNull();
 }
 
 describe("random play", () => {

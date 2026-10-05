@@ -17,8 +17,8 @@ export type Result<T = void> =
 export const ok = <T>(data: T): Result<T> => ({ ok: true, data });
 export const fail = (error: ErrorCode): Result<never> => ({ ok: false, error });
 
-/** The signed-in person (guest or account), as the UI needs it. */
-export interface Me {
+/** The signed-in person (guest or account), as the server keeps them. */
+export interface Account {
   id: PlayerId;
   isGuest: boolean;
   name: string | null;
@@ -32,6 +32,12 @@ export interface Me {
   authMode: "local" | "supabase";
 }
 
+/**
+ * The signed-in person as the UI gets them: `guestName` is their guest name
+ * in the page's language (a guest's name, and an account's while it has none).
+ */
+export type Me = Omit<Account, "guestNumber"> & { guestName: string };
+
 /** The match a player is in and has not left, while it is going (from the theme to the last guess). */
 export interface CurrentMatch {
   code: string;
@@ -44,7 +50,8 @@ export interface ElsewhereRoom {
   code: string;
   /** Empty when the host left it unnamed. */
   name: string;
-  host: Pick<Identity, "isGuest" | "name" | "guestNumber">;
+  /** The host's name in the reader's language. */
+  host: Pick<Identity, "isGuest"> & { name: string };
 }
 
 /** A character as the autocomplete shows it. */

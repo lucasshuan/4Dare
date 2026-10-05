@@ -1,6 +1,7 @@
 // What each player is allowed to see. This is the only place that decides secrecy.
 
 import type { GameKey } from "./games";
+import { displayName } from "./guest-names";
 import {
   abandoned,
   findPlayer,
@@ -20,6 +21,8 @@ import {
   GameError,
   GONE_GRACE_MS,
   type HistoryEntryView,
+  type Lang,
+  type ListedRoom,
   LOBBY_LISTED_MS,
   type Phase,
   type PickView,
@@ -325,12 +328,16 @@ function reveal(
   return null;
 }
 
-/** The room as `viewerId` may see it. Throws GameError("not_member") for outsiders. */
+/**
+ * The room as `viewerId` may see it, names in `lang` (the viewer's page).
+ * Throws GameError("not_member") for outsiders.
+ */
 export function toView(
   state: RoomState,
   version: number,
   viewerId: PlayerId,
   now: number,
+  lang: Lang,
 ): RoomView {
   const s = state;
   if (!findPlayer(s, viewerId)) throw new GameError("not_member");
@@ -350,8 +357,7 @@ export function toView(
       isYou,
       isHost: p.id === s.hostId,
       isGuest: p.isGuest,
-      name: p.name,
-      guestNumber: p.guestNumber,
+      name: displayName(p, lang),
       avatar: p.avatar,
       ready: p.ready,
       status: statusOf(s, p),
@@ -449,7 +455,7 @@ function sweepAt(s: RoomState): number | null {
  * The room list's summary, or null when the room should not be listed. Private
  * rooms are listed too, locked; a private room without a password stays hidden.
  */
-export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
+export function toPublicRoom(state: RoomState, now: number): ListedRoom | null {
   const s = state;
   const host = findPlayer(s, s.hostId);
   const locked = s.settings.visibility === "private";
@@ -493,3 +499,14 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
     validateSeconds: s.settings.validateSeconds,
   };
 }
+
+/** A listed room for a reader: its host's name in their language. */
+export const showRoom = (r: ListedRoom, lang: Lang): PublicRoom => ({
+  ...r,
+  host: {
+    isGuest: r.host.isGuest,
+    name: displayName(r.host, lang),
+    avatar: r.host.avatar,
+    lang: r.host.lang,
+  },
+});

@@ -6,7 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { useMe } from "@/features/data/use-me";
 import { cn } from "@/lib/cn";
 import { deferred, useDeferred } from "@/lib/hooks/use-deferred";
-import { useDisplayName } from "@/lib/names";
+import { meNamed, useDisplayName } from "@/lib/names";
 import type { Me } from "@/server/contract";
 
 /** A guest's trigger looks unfinished on purpose: dashed outline, faded avatar, muted name and a "Guest" tag. */
@@ -29,7 +29,9 @@ export function UserMenuFace({ me }: { me: Me }) {
         className={cn(me.isGuest && "opacity-60 grayscale")}
       />
       {/* phones keep only the avatar, so the bar fits next to the language and theme */}
-      <span className="min-w-0 truncate max-sm:sr-only">{name(me)}</span>
+      <span className="min-w-0 truncate max-sm:sr-only">
+        {name(meNamed(me))}
+      </span>
       {me.isGuest ? (
         <span className="shrink-0 rounded-pill bg-line px-2 py-0.5 font-bold text-[11px] text-ink-muted uppercase tracking-wide">
           {t("guestBadge")}

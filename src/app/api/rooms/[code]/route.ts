@@ -1,6 +1,7 @@
 import { GameError } from "@/game/types";
 import { toView } from "@/game/view";
 import { getBackend } from "@/server/backend";
+import { langParam } from "@/server/http";
 import {
   applyDueTimeouts,
   dispatch,
@@ -10,9 +11,9 @@ import {
 
 const noStore = { "Cache-Control": "no-store" };
 
-/** The room as the caller may see it. Fires any clock timeouts that are due first. */
+/** The room as the caller may see it, names in `?lang=`. Fires any clock timeouts that are due first. */
 export async function GET(
-  _request: Request,
+  request: Request,
   ctx: RouteContext<"/api/rooms/[code]">,
 ) {
   const code = normalizeCode((await ctx.params).code);
@@ -36,7 +37,7 @@ export async function GET(
   const mine = stored.state.players.find((p) => p.id === me.id);
   if (!mine) {
     // A seat given up for another room (one room at a time) says which one.
-    const elsewhere = await seatedElsewhere(me.id, code);
+    const elsewhere = await seatedElsewhere(me.id, code, langParam(request));
     return Response.json(
       { error: "not_member", elsewhere },
       { status: 403, headers: noStore },
@@ -51,7 +52,8 @@ export async function GET(
       if (!(e instanceof GameError)) throw e;
     }
   }
-  return Response.json(toView(room.state, room.version, me.id, Date.now()), {
-    headers: noStore,
-  });
+  return Response.json(
+    toView(room.state, room.version, me.id, Date.now(), langParam(request)),
+    { headers: noStore },
+  );
 }

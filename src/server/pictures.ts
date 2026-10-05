@@ -4,10 +4,12 @@ import "server-only";
 // may go on a pick card for one match. Every confirmed card counts a pick for
 // the picture it showed; the cover (the character's imageUrl) is the best
 // active picture, the library's own with a head start.
+import { displayName } from "@/game/guest-names";
 import {
   type Character,
   GameError,
   type Identity,
+  type Lang,
   type PickDraft,
   type PlayerId,
 } from "@/game/types";
@@ -44,8 +46,8 @@ const authorOf = (who: Identity): ImageAuthor => ({
 export interface TrayPicture {
   id: string;
   url: string;
-  /** null for the library's own picture. */
-  author: ImageAuthor | null;
+  /** Who sent it, named in the viewer's language; null for the library's own picture. */
+  author: (Pick<ImageAuthor, "avatar"> & { name: string }) | null;
   /** The viewer sent it. */
   mine: boolean;
   /** Waiting on the detector: only its author sees it. */
@@ -142,10 +144,15 @@ export async function countPick(c: Character, pickerId: PlayerId) {
   }
 }
 
-/** A character's tray for a viewer: its active pictures and their own waiting ones, best first. */
+/** Who sent a picture, as a reader in `lang` sees them. */
+export const showAuthor = (a: ImageAuthor | null, lang: Lang) =>
+  a && { name: displayName(a, lang), avatar: a.avatar };
+
+/** A character's tray for a viewer (names in `lang`): its active pictures and their own waiting ones, best first. */
 export async function trayOf(
   characterId: string,
   viewer: PlayerId,
+  lang: Lang,
 ): Promise<TrayPicture[]> {
   const list = await getBackend().images.list(
     baseId(characterId),
@@ -155,7 +162,7 @@ export async function trayOf(
   return list.map((i) => ({
     id: i.id,
     url: i.url,
-    author: i.author,
+    author: showAuthor(i.author, lang),
     mine: i.createdBy === viewer,
     pending: i.status === "pending",
   }));
