@@ -53,11 +53,11 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] Browser Supabase only for realtime, loaded on demand; OAuth starts on the server (`/auth/sign-in`): home 457 → 391 KB gzip of JS
 - [x] Menus, dialogs and selects loaded on demand (Base UI + floating-ui, ~240 KB): the header's (language, user menu, match badge) load when idle or when reached for, behind look-alikes (`useDeferred`); the game's name and thumbnail left the game select's module. Home 361 → 297 KB gzip of JS, no Base UI. Screens built around one (rooms filters, lobby, settings) keep theirs
 - [x] `LazyMotion` + `m`; full motion features only where `layoutId` is used: one strict `LazyMotion` with `domAnimation` in `Providers`, `m.*` everywhere, and `LayoutMotion` around the few `layout`/`layoutId` subtrees fetches `domMax` (14 KB gzip) when one mounts. `motion/react` points at framer-motion's own barrel (`next.config.ts`), else its `fm.motion` read keeps everything. Home 291 → 281 KB gzip of JS
-- [ ] Guest names resolved on the server (−24 KB)
+- [x] Guest names resolved on the server: every name the browser gets comes ready in the reader's language (`?lang=` on the routes, the request locale in actions) and `guestNumber` stays on the server; the lists were 12 KB gzip, not 24, and now load only in the stage lab
 - [x] Each page gets only its message namespaces: hub pages leave the room's and `meta` out (`src/i18n/scopes.ts`); the `r/` and `dev/` layouts hand theirs every one. `/en/who-am-i` HTML 13.8 KB gzip
 - [x] `/new` and `/rooms` static (query read in the browser): served from the CDN, no function per visit
 - [x] Game sounds re-encoded mono 80 kbps (371 KB → 118 KB)
-- [ ] Home under ~250 KB gzip of JS
+- [x] Home under ~250 KB gzip of JS: 230 KB, every script the HTML loads at start; 268 KB counting the 38 KB `noModule` polyfills that only browsers without modules fetch (the earlier figures counted them: 280 before the guest names)
 
 ## Phase 5 — Cheaper at scale
 
@@ -79,3 +79,9 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 - [x] React 19.3, Biome 2.5, motion 14 and TypeScript 7 after Phase 10, changelogs first (motion 14 only drops internal APIs; the `motion/react` alias holds). Biome 2.5.15, lucide 1.52; `@types/node` stays on 24 with `engines`
 - [x] Unused `public/brand/logo-dark.svg` removed
 - [x] AI leftovers: `ThemeStore.add`, `.data/themes-ai.json`, `THEME_SETS[].about`, old comments (done during Phase 10: none of it was in a wave-4 file)
+
+## Phase 7 — A shorter loop
+
+- [x] `pnpm check` (Biome, types, knip) and `pnpm test:changed` (only the unit tests that import a changed file) while working; AGENTS.md: the whole suite and the e2e are CI's, never a local wrap-up
+- [x] CI split: `ci.yml` (check and every unit test, ~35 s) on every push, `e2e.yml` (smoke on a production build) only when a push changes the app, every spec by hand ("all")
+- [x] Vercel skips deploys that change nothing the app is built from (`scripts/skip-deploy.sh` as the Ignored Build Step): docs, tests, CI, scripts, migrations
