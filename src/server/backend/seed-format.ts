@@ -9,7 +9,10 @@ import { type Character, LANGS, type Lang } from "../../game/types";
 export type ByLang<T> = Partial<Record<Lang, T>>;
 
 export interface SeedCharacter {
-  /** Stable id: "wd-Q302" (Wikidata) or "al-40" (AniList). */
+  /**
+   * Stable id: "wd-Q302" (Wikidata), "al-40" (AniList) or "hand-fox-mccloud"
+   * (added by hand, for characters neither source gave).
+   */
   id: string;
   kind: "fictional" | "human";
   category: Category;
@@ -49,7 +52,8 @@ export const entryId = (lang: Lang, id: string) => `${lang}-${id}`;
 
 /** The library id and language behind an app-facing id, or null for others. */
 export function parseEntryId(id: string): { lang: Lang; id: string } | null {
-  const match = /^(en|pt|ja)-((?:wd-Q|al-)\d+)$/.exec(id);
+  const match =
+    /^(en|pt|ja)-((?:wd-Q|al-)\d+|hand-[a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(id);
   return match ? { lang: match[1] as Lang, id: match[2] } : null;
 }
 
