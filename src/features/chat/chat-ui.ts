@@ -54,6 +54,23 @@ export function unreadSenders(
   return out;
 }
 
+/** A pause longer than this starts a new run of one player's lines (ms). */
+export const RUN_GAP_MS = 5 * 60_000;
+
+/**
+ * Whether `a` and `b`, one after the other, belong to one run: the same
+ * player's text lines, close in time. A run shows the name once on top and
+ * the face once at the bottom.
+ */
+export const sameRun = (a: ShownLine | undefined, b: ShownLine | undefined) =>
+  !!a &&
+  !!b &&
+  a.text !== null &&
+  b.text !== null &&
+  a.by !== null &&
+  a.by === b.by &&
+  Math.abs(b.at - a.at) <= RUN_GAP_MS;
+
 /** The last player's line (yours included): the phone bar shows it. */
 export function lastTextLine(messages: readonly ShownLine[]): ShownLine | null {
   for (let i = messages.length - 1; i >= 0; i--)

@@ -13,7 +13,7 @@ import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { seatInk } from "@/lib/seats";
-import { isEmojiOnly } from "./chat-ui";
+import { isEmojiOnly, sameRun } from "./chat-ui";
 import type { ChatLine } from "./use-chat";
 
 /** Within this many px of the bottom, a new line scrolls the list down. */
@@ -82,11 +82,13 @@ export function ChatList({
       className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-3.5 py-3"
     >
       <div className="mt-auto flex flex-col gap-2.5">
-        {messages.map((m) => (
+        {messages.map((m, i) => (
           <Line
             key={m.id}
             line={m}
             mine={m.by === me.id}
+            first={!sameRun(messages[i - 1], m)}
+            last={!sameRun(m, messages[i + 1])}
             enter={!still.current?.has(m.id)}
             onRetry={onRetry}
           />
@@ -99,11 +101,17 @@ export function ChatList({
 function Line({
   line,
   mine,
+  first,
+  last,
   enter,
   onRetry,
 }: {
   line: ChatLine;
   mine: boolean;
+  /** Opens a run of the same player's lines: their name above it. */
+  first: boolean;
+  /** Closes the run: their face beside it. */
+  last: boolean;
   enter: boolean;
   onRetry: (id: number) => void;
 }) {
@@ -134,8 +142,14 @@ function Line({
           : "px-3 py-[7px] text-[14.5px] leading-[1.35]",
         !big &&
           (mine
-            ? "rounded-[16px_16px_5px_16px] bg-sky text-on-sky"
-            : "rounded-[16px_16px_16px_5px] bg-sunken"),
+            ? cn(
+                "rounded-[16px_16px_5px_16px] bg-sky text-on-sky",
+                !first && "rounded-tr-[5px]",
+              )
+            : cn(
+                "rounded-[16px_16px_16px_5px] bg-sunken",
+                !first && "rounded-tl-[5px]",
+              )),
         mine ? "justify-self-end" : "justify-self-start",
         line.state === "sending" && "opacity-70",
       )}
@@ -154,7 +168,7 @@ function Line({
       <m.div
         {...entrance}
         style={{ transformOrigin: "100% 100%" }}
-        className="flex flex-col items-end"
+        className={cn("flex flex-col items-end", !first && "-mt-2")}
       >
         {line.state === "failed" ? (
           <button
@@ -180,24 +194,29 @@ function Line({
     <m.div
       {...entrance}
       style={{ transformOrigin: "0% 100%" }}
-      className="grid grid-cols-[28px_minmax(0,1fr)] items-end gap-x-2 gap-y-0.5"
+      className={cn(
+        "grid grid-cols-[28px_minmax(0,1fr)] items-end gap-x-2 gap-y-0.5",
+        !first && "-mt-2",
+      )}
     >
-      {p ? (
+      {p && last ? (
         <Avatar
           avatar={p.avatar}
           size={28}
           seat={slot}
-          className="row-span-2 self-end"
+          className={cn("self-end", first && "row-span-2")}
         />
       ) : (
-        <span className="row-span-2" />
+        <span className={cn(first && "row-span-2")} />
       )}
-      <small
-        style={slot === null ? undefined : { color: seatInk(slot) }}
-        className="truncate pl-1 font-bold text-[12px] text-ink-muted"
-      >
-        {p ? name(p) : ""}
-      </small>
+      {first ? (
+        <small
+          style={slot === null ? undefined : { color: seatInk(slot) }}
+          className="truncate pl-1 font-bold text-[12px] text-ink-muted"
+        >
+          {p ? name(p) : ""}
+        </small>
+      ) : null}
       {bubble}
     </m.div>
   );

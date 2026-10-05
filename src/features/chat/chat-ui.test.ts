@@ -5,6 +5,8 @@ import {
   isEmojiOnly,
   lastTextLine,
   newestId,
+  RUN_GAP_MS,
+  sameRun,
   unreadSenders,
 } from "./chat-ui";
 
@@ -37,6 +39,16 @@ const sys = (id: number): ShownLine => ({
 });
 
 describe("chat tab rules", () => {
+  it("runs a player's lines together until someone else, a system line or a pause", () => {
+    expect(sameRun(say(1, "a"), say(2, "a"))).toBe(true);
+    expect(sameRun(say(1, "a"), say(2, "b"))).toBe(false);
+    expect(sameRun(say(1, "a"), sys(2))).toBe(false);
+    expect(sameRun(sys(1), sys(2))).toBe(false);
+    expect(sameRun(undefined, say(1, "a"))).toBe(false);
+    const late = { ...say(2, "a"), at: 1000 + RUN_GAP_MS + 1 };
+    expect(sameRun(say(1, "a"), late)).toBe(false);
+  });
+
   it("caps the count at 99+", () => {
     expect(countLabel(1)).toBe("1");
     expect(countLabel(99)).toBe("99");
