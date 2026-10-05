@@ -370,12 +370,12 @@ from (values
   ('wd-Q10933490', 'pt', 'Mr. Big', 'mrbig', array['Big', 'John Preston']::text[], array['big', 'johnpreston']::text[]),
   ('wd-Q10949054', 'pt', 'Nigihayahi', 'nigihayahi', '{}'::text[], '{}'::text[]),
   ('wd-Q109536771', 'pt', 'Historia Reiss', 'historiareiss', array['Historia', 'Krista Lenz', 'Christa']::text[], array['historia', 'kristalenz', 'christa']::text[]),
-  ('wd-Q1096984', 'pt', 'Plankton e Karen', 'planktonekaren', array['Karen e Plankton']::text[], array['kareneplankton']::text[]),
+  ('wd-Q1096984', 'pt', 'Plankton e Karen', 'planktonekaren', array['Karen e Plankton', 'Plankton e Karen']::text[], array['kareneplankton', 'planktonekaren']::text[]),
   ('wd-Q109767984', 'pt', 'Nezuko Kamado', 'nezukokamado', array['Nezuko']::text[], array['nezuko']::text[]),
   ('wd-Q110177681', 'pt', 'Anya Forger', 'anyaforger', array['Anya']::text[], array['anya']::text[]),
   ('wd-Q110192761', 'pt', 'Legoshi', 'legoshi', array['Legosi']::text[], array['legosi']::text[]),
   ('wd-Q110221212', 'pt', 'Jeff, o Tubarão Terrestre', 'jeffotubaraoterrestre', array['Jeff', 'Jeff the Land Shark']::text[], array['jeff', 'jeffthelandshark']::text[]),
-  ('wd-Q1105407', 'pt', 'George, o Curioso', 'georgeocurioso', array['George']::text[], array['george']::text[]),
+  ('wd-Q1105407', 'pt', 'George, o Curioso', 'georgeocurioso', array['George', 'George']::text[], array['george', 'george']::text[]),
   ('wd-Q110588584', 'pt', 'Seong Gi-hun', 'seonggihun', array['Gi-hun', 'Jogador 456']::text[], array['gihun', 'jogador456']::text[]),
   ('wd-Q110713922', 'pt', 'Ai Hoshino', 'aihoshino', array['Ai']::text[], array['ai']::text[]),
   ('wd-Q110713997', 'pt', 'Mahiru Shiina', 'mahirushiina', array['Mahiru']::text[], array['mahiru']::text[]),
@@ -452,7 +452,7 @@ from (values
   ('wd-Q124793122', 'pt', 'Suzune Horikita', 'suzunehorikita', array['Horikita']::text[], array['horikita']::text[]),
   ('wd-Q1248616', 'pt', 'Puck', 'puck', '{}'::text[], '{}'::text[]),
   ('wd-Q125400', 'pt', 'Takamimusubi', 'takamimusubi', '{}'::text[], '{}'::text[]),
-  ('wd-Q1261586', 'pt', 'Pedro Coelho', 'pedrocoelho', array['Peter Rabbit']::text[], array['peterrabbit']::text[]),
+  ('wd-Q1261586', 'pt', 'Pedro Coelho', 'pedrocoelho', array['Peter Rabbit', 'Peter Rabbit']::text[], array['peterrabbit', 'peterrabbit']::text[]),
   ('wd-Q1287363', 'pt', 'May', 'may', '{}'::text[], '{}'::text[]),
   ('wd-Q128947', 'pt', 'Konan', 'konan', '{}'::text[], '{}'::text[]),
   ('wd-Q131807405', 'pt', 'Front Man', 'frontman', array['O Líder']::text[], array['lider']::text[]),
@@ -596,7 +596,7 @@ from (values
   ('wd-Q2550840', 'pt', 'Makoto Shishio', 'makotoshishio', array['Shishio']::text[], array['shishio']::text[]),
   ('wd-Q2550924', 'pt', 'Ritsuko Akagi', 'ritsukoakagi', '{}'::text[], '{}'::text[]),
   ('wd-Q2557030', 'pt', 'Bobby Baccalieri', 'bobbybaccalieri', array['Bobby Bacala']::text[], array['bobbybacala']::text[]),
-  ('wd-Q2558762', 'pt', 'Kayako Saeki', 'kayakosaeki', array['Kayako']::text[], array['kayako']::text[]),
+  ('wd-Q2558762', 'pt', 'Kayako Saeki', 'kayakosaeki', array['Kayako', 'Kayako']::text[], array['kayako', 'kayako']::text[]),
   ('wd-Q2559231', 'pt', 'Van Hohenheim', 'vanhohenheim', array['Hohenheim']::text[], array['hohenheim']::text[]),
   ('wd-Q2567137', 'pt', 'Livia Soprano', 'liviasoprano', '{}'::text[], '{}'::text[]),
   ('wd-Q2567153', 'pt', 'Janice Soprano', 'janicesoprano', '{}'::text[], '{}'::text[]),
@@ -763,6 +763,7 @@ from (values
   ('wd-Q5484893', 'pt', 'Taiga Aisaka', 'taigaaisaka', array['Taiga']::text[], array['taiga']::text[]),
   ('wd-Q5516180', 'pt', 'Gachapin', 'gachapin', '{}'::text[], '{}'::text[]),
   ('wd-Q5548417', 'pt', 'Rias Gremory', 'riasgremory', array['Rias']::text[], array['rias']::text[]),
+  ('wd-Q55692981', 'pt', 'Dom Pixote', 'dompixote', '{}'::text[], '{}'::text[]),
   ('wd-Q55695982', 'pt', 'Charlotte Katakuri', 'charlottekatakuri', array['Katakuri']::text[], array['katakuri']::text[]),
   ('wd-Q55718817', 'pt', 'Kurumi Tokisaki', 'kurumitokisaki', array['Kurumi']::text[], array['kurumi']::text[]),
   ('wd-Q56345992', 'pt', 'Kaguya Luna', 'kaguyaluna', '{}'::text[], '{}'::text[]),
@@ -776,9 +777,9 @@ from (values
   ('wd-Q60062', 'pt', 'Rostam', 'rostam', array['Rustam']::text[], array['rustam']::text[]),
   ('wd-Q601978', 'pt', 'Kyon', 'kyon', '{}'::text[], '{}'::text[]),
   ('wd-Q603292', 'pt', 'João Pequeno', 'joaopequeno', array['Little John']::text[], array['littlejohn']::text[]),
-  ('wd-Q6057965', 'pt', 'Senhora Puff', 'senhorapuff', array['Sra. Puff']::text[], array['srapuff']::text[]),
+  ('wd-Q6057965', 'pt', 'Senhora Puff', 'senhorapuff', array['Sra. Puff', 'Senhora Puff']::text[], array['srapuff', 'senhorapuff']::text[]),
   ('wd-Q60649413', 'pt', 'Tokino Sora', 'tokinosora', '{}'::text[], '{}'::text[]),
-  ('wd-Q608166', 'pt', 'Shinnosuke Nohara', 'shinnosukenohara', array['Shin-chan']::text[], array['shinchan']::text[]),
+  ('wd-Q608166', 'pt', 'Shinnosuke Nohara', 'shinnosukenohara', array['Shin-chan', 'Shin Chan']::text[], array['shinchan', 'shinchan']::text[]),
   ('wd-Q6109370', 'pt', 'Robbie Rotten', 'robbierotten', '{}'::text[], '{}'::text[]),
   ('wd-Q616454', 'pt', 'SpaceGodzilla', 'spacegodzilla', '{}'::text[], '{}'::text[]),
   ('wd-Q6175066', 'pt', 'Úrsula', 'ursula', '{}'::text[], '{}'::text[]),
@@ -970,6 +971,7 @@ from (values
   ('wd-Q17652148', 'en', null, null, null, array['White Canary']::text[], array['whitecanary']::text[]),
   ('wd-Q21193709', 'en', null, null, null, array['Euphie']::text[], array['euphie']::text[]),
   ('wd-Q2401972', 'en', null, null, null, array['Vegetto']::text[], array['vegetto']::text[]),
+  ('wd-Q240679', 'en', null, null, null, array['Heracles']::text[], array['heracles']::text[]),
   ('wd-Q2574607', 'en', null, null, null, array['Kizaru']::text[], array['kizaru']::text[]),
   ('wd-Q2708674', 'en', null, null, null, array['Android 20']::text[], array['android20']::text[]),
   ('wd-Q2712789', 'en', null, null, null, array['Bakura', 'Ryou Bakura']::text[], array['bakura', 'ryoubakura']::text[]),
@@ -987,6 +989,7 @@ from (values
   ('wd-Q9011722', 'en', null, null, null, array['Bonney']::text[], array['bonney']::text[]),
   ('wd-Q92181505', 'en', null, null, null, array['Haachama']::text[], array['haachama']::text[]),
   ('wd-Q954820', 'en', 'Yael', 'Jael', 'jael', array['Yael']::text[], array['yael']::text[]),
+  ('al-13784', 'ja', null, null, null, array['ニャンコ先生']::text[], array['にゃんこ先生']::text[]),
   ('al-187525', 'ja', '温迪', 'ウェンティ', 'うぇんてぃ', array['温迪']::text[], array['温迪']::text[]),
   ('al-3331', 'ja', null, null, null, array['黒ひげ', 'ティーチ']::text[], array['黒ひげ', 'てぃーち']::text[]),
   ('al-4883', 'ja', 'ゴールド・ロジャー', 'ゴール・D・ロジャー', 'ごーるdろじゃー', array['ゴールド・ロジャー', 'ロジャー']::text[], array['ごーるどろじゃー', 'ろじゃー']::text[]),
@@ -1074,6 +1077,7 @@ from (values
   ('wd-Q7823740', 'pt', 'Tony The Tiger', 'Tigre Tony', 'tigretony', array['Tony', 'Tony The Tiger']::text[], array['tony', 'tonythetiger']::text[]),
   ('wd-Q804542', 'pt', 'Baku-youkai', 'Baku', 'baku', array['Baku-youkai']::text[], array['bakuyoukai']::text[]),
   ('wd-Q819198', 'pt', null, null, null, array['Arthas']::text[], array['arthas']::text[]),
+  ('wd-Q848673', 'pt', null, null, null, array['Salsicha']::text[], array['salsicha']::text[]),
   ('wd-Q874924', 'pt', null, null, null, array['Professor Farnsworth']::text[], array['professorfarnsworth']::text[])
 ) as v(id, lang, old_name, name, norm, aliases, alias_norms)
 where n.character_id = v.id and n.lang = v.lang
@@ -1825,6 +1829,7 @@ with v(id, lang, norm) as (values
   ('wd-Q5484893', 'pt', 'taigaaisaka'),
   ('wd-Q5516180', 'pt', 'gachapin'),
   ('wd-Q5548417', 'pt', 'riasgremory'),
+  ('wd-Q55692981', 'pt', 'dompixote'),
   ('wd-Q55695982', 'pt', 'charlottekatakuri'),
   ('wd-Q55718817', 'pt', 'kurumitokisaki'),
   ('wd-Q56345992', 'pt', 'kaguyaluna'),
@@ -2222,6 +2227,7 @@ with v(id, lang, popularity) as (values
   ('wd-Q2344743', 'en', 28443),
   ('wd-Q2349973', 'en', 28443),
   ('wd-Q2401972', 'en', 28443),
+  ('wd-Q240679', 'en', 33377),
   ('wd-Q2450317', 'en', 28443),
   ('wd-Q2456753', 'en', 28443),
   ('wd-Q2468534', 'en', 28443),
@@ -2279,6 +2285,7 @@ with v(id, lang, popularity) as (values
   ('wd-Q846982', 'en', 33377),
   ('wd-Q88387033', 'en', 28443),
   ('wd-Q9011722', 'en', 28443),
+  ('wd-Q901809', 'en', 28443),
   ('wd-Q92181505', 'en', 28443),
   ('wd-Q937569', 'en', 28443),
   ('wd-Q948488', 'en', 28443),
@@ -2287,6 +2294,7 @@ with v(id, lang, popularity) as (values
   ('wd-Q99413618', 'en', 28443),
   ('al-124138', 'ja', 22053),
   ('al-129928', 'ja', 22053),
+  ('al-13784', 'ja', 23555),
   ('al-138789', 'ja', 22053),
   ('al-145722', 'ja', 22053),
   ('al-180887', 'ja', 22053),
@@ -2387,6 +2395,7 @@ with v(id, lang, popularity) as (values
   ('wd-Q24050133', 'ja', 22053),
   ('wd-Q2405147', 'ja', 22053),
   ('wd-Q2460531', 'ja', 22053),
+  ('wd-Q249081', 'ja', 22053),
   ('wd-Q24944284', 'ja', 22053),
   ('wd-Q24951568', 'ja', 22053),
   ('wd-Q249898', 'ja', 22053),
@@ -2622,7 +2631,7 @@ with v(id, lang, popularity) as (values
   ('wd-Q10924557', 'pt', 19271),
   ('wd-Q10933490', 'pt', 19271),
   ('wd-Q109536771', 'pt', 19271),
-  ('wd-Q1096984', 'pt', 19271),
+  ('wd-Q1096984', 'pt', 20940),
   ('wd-Q109767984', 'pt', 20940),
   ('wd-Q110177681', 'pt', 19271),
   ('wd-Q110192761', 'pt', 19271),
@@ -2807,6 +2816,7 @@ with v(id, lang, popularity) as (values
   ('wd-Q2550840', 'pt', 19271),
   ('wd-Q2558762', 'pt', 19271),
   ('wd-Q2559231', 'pt', 19271),
+  ('wd-Q2559802', 'pt', 20940),
   ('wd-Q2570349', 'pt', 19271),
   ('wd-Q2587090', 'pt', 19271),
   ('wd-Q2593408', 'pt', 19271),
@@ -2864,7 +2874,7 @@ with v(id, lang, popularity) as (values
   ('wd-Q3227386', 'pt', 19271),
   ('wd-Q323807', 'pt', 19271),
   ('wd-Q324430', 'pt', 19271),
-  ('wd-Q3257965', 'pt', 19271),
+  ('wd-Q3257965', 'pt', 20940),
   ('wd-Q3267089', 'pt', 19271),
   ('wd-Q3272719', 'pt', 19271),
   ('wd-Q3274305', 'pt', 19271),
@@ -2878,12 +2888,13 @@ with v(id, lang, popularity) as (values
   ('wd-Q3704333', 'pt', 19271),
   ('wd-Q3725237', 'pt', 19271),
   ('wd-Q3784954', 'pt', 20940),
-  ('wd-Q3806262', 'pt', 20940),
+  ('wd-Q3806262', 'pt', 24894),
   ('wd-Q3809728', 'pt', 19271),
   ('wd-Q3809847', 'pt', 19271),
   ('wd-Q3810375', 'pt', 19271),
   ('wd-Q3815697', 'pt', 19271),
   ('wd-Q3817446', 'pt', 19271),
+  ('wd-Q3835867', 'pt', 19271),
   ('wd-Q3839048', 'pt', 19271),
   ('wd-Q3843626', 'pt', 19271),
   ('wd-Q384512', 'pt', 19271),
@@ -2929,7 +2940,7 @@ with v(id, lang, popularity) as (values
   ('wd-Q499126', 'pt', 19271),
   ('wd-Q4991940', 'pt', 19271),
   ('wd-Q500471', 'pt', 20940),
-  ('wd-Q5116253', 'pt', 20940),
+  ('wd-Q5116253', 'pt', 24894),
   ('wd-Q51297', 'pt', 19271),
   ('wd-Q51331', 'pt', 19271),
   ('wd-Q51332', 'pt', 19271),
@@ -2945,6 +2956,7 @@ with v(id, lang, popularity) as (values
   ('wd-Q5484893', 'pt', 19271),
   ('wd-Q5548417', 'pt', 19271),
   ('wd-Q5560816', 'pt', 19271),
+  ('wd-Q55692981', 'pt', 19271),
   ('wd-Q55695982', 'pt', 19271),
   ('wd-Q55718817', 'pt', 19271),
   ('wd-Q5648063', 'pt', 19271),
@@ -2996,11 +3008,12 @@ with v(id, lang, popularity) as (values
   ('wd-Q767120', 'pt', 24894),
   ('wd-Q7743454', 'pt', 20940),
   ('wd-Q7821701', 'pt', 19271),
-  ('wd-Q7823740', 'pt', 19271),
+  ('wd-Q7823740', 'pt', 20940),
   ('wd-Q819198', 'pt', 19271),
   ('wd-Q8238809', 'pt', 19271),
   ('wd-Q838560', 'pt', 19271),
   ('wd-Q84354502', 'pt', 19271),
+  ('wd-Q848673', 'pt', 24894),
   ('wd-Q85743168', 'pt', 19271),
   ('wd-Q857599', 'pt', 19271),
   ('wd-Q85786022', 'pt', 19271),
@@ -3045,3 +3058,46 @@ update public.character_names n
 set popularity = j.popularity
 from joining j
 where n.character_id = j.id and n.lang = j.lang and n.popularity is null;
+
+-- 5. Works the import got wrong: Garfield the cat is not from Magic: The
+-- Gathering, Damien Thorn not from South Park, Sarah Kerrigan not from Warcraft.
+insert into public.origins (id) values ('topic:theomen'), ('topic:starcraft')
+on conflict (id) do nothing;
+insert into public.origin_labels (origin_id, lang, label) values
+  ('topic:theomen', 'en', 'The Omen'),
+  ('topic:theomen', 'pt', 'A Profecia'),
+  ('topic:theomen', 'ja', 'オーメン'),
+  ('topic:starcraft', 'en', 'StarCraft'),
+  ('topic:starcraft', 'pt', 'StarCraft'),
+  ('topic:starcraft', 'ja', 'スタークラフト')
+on conflict (origin_id, lang) do nothing;
+update public.characters c
+set origin_id = v.origin
+from (values
+  ('wd-Q767120', 'wd:Q207302', 'wd:Q99395666'),
+  ('wd-Q166150', 'wd:Q101199114', 'topic:theomen'),
+  ('wd-Q286359', 'wd:Q26181639', 'topic:starcraft')
+) as v(id, was, origin)
+where c.id = v.id and c.origin_id = v.was
+  and exists (select 1 from public.origins o where o.id = v.origin);
+
+-- 6. Namesakes step 4 held back: another character by that name is shown,
+-- but this one is a different character (Finn of Adventure Time, not of
+-- Star Wars; Jessie of Pokémon, not of Toy Story).
+with v(lang, name, origin, popularity) as (values
+  ('ja', 'フィン', 'Adventure Time', 22053),
+  ('ja', 'アラジン', 'One Thousand and One Nights', 27014),
+  ('ja', 'イグリット', 'World of Ice and Fire', 22053),
+  ('ja', 'ネメシス', 'Resident Evil', 22053),
+  ('pt', 'Iago', 'Aladdin', 19271),
+  ('pt', 'Jessie', 'Pokémon', 19271),
+  ('pt', 'Lucy', 'Elfen Lied', 19271),
+  ('pt', 'Rem', 'Death Note', 19271),
+  ('pt', 'Buffalo Bill', 'Hannibal Lecter', 19271)
+)
+update public.character_names n
+set popularity = v.popularity
+from v, public.characters c, public.origin_labels o
+where n.lang = v.lang and n.name = v.name and n.popularity is null
+  and c.id = n.character_id and o.origin_id = c.origin_id and o.lang = 'en'
+  and o.label = v.origin;
