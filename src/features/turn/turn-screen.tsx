@@ -434,7 +434,7 @@ function Answer() {
           name: asker ? name(asker) : "",
         })}
       >
-        <p className="font-bold font-display text-2xl leading-[30px] [text-wrap:balance] tiny:text-xl tiny:leading-7">
+        <p className="font-bold font-display text-2xl leading-[30px] wrap-anywhere [text-wrap:balance] tiny:text-xl tiny:leading-7">
           {view.turn?.question}
         </p>
       </Bubble>
@@ -509,7 +509,11 @@ function AnswersList({
               {p ? name(p, p.isYou) : ""}
             </span>
             <AnswerChip value={a.value} small />
-            {a.note ? <span className="text-sm">“{a.note}”</span> : null}
+            {a.note ? (
+              <span className="min-w-0 whitespace-pre-line text-sm wrap-anywhere">
+                “{a.note}”
+              </span>
+            ) : null}
           </li>
         );
       })}
@@ -538,7 +542,7 @@ function Guess() {
       }}
     >
       <Bubble you kicker={t("kicker", { n: view.turn?.n ?? 1 })}>
-        <p className="text-lg">{view.turn?.question}</p>
+        <p className="text-lg wrap-anywhere">{view.turn?.question}</p>
         {view.turn?.answers ? (
           <AnswersList answers={view.turn.answers} />
         ) : null}
@@ -593,7 +597,7 @@ function Validate() {
           name: guesser ? name(guesser) : "",
         })}
       >
-        <p className="font-display font-extrabold text-[clamp(32px,4vw,44px)] leading-tight">
+        <p className="font-display font-extrabold text-[clamp(32px,4vw,44px)] leading-tight wrap-anywhere">
           “{view.turn?.guess}”
         </p>
       </Bubble>
@@ -660,7 +664,7 @@ function Waiting({ mode }: { mode: Mode }) {
           who={turnPlayer}
           kicker={t("question", { name: who })}
         >
-          <p className="text-lg">{view.turn.question}</p>
+          <p className="text-lg wrap-anywhere">{view.turn.question}</p>
           {view.turn.yourAnswer ? (
             <div className="flex items-center gap-2 text-sm">
               <span>{t("youAnswered")}</span>

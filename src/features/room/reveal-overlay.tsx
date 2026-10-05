@@ -177,23 +177,28 @@ function AnswersReveal({
         }}
         className="text-balance font-bold font-display text-[clamp(24px,3.2vw,32px)] leading-tight"
       >
-        {words.map((w, i) => (
-          <m.span
-            // biome-ignore lint/suspicious/noArrayIndexKey: words of a fixed sentence
-            key={i}
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              shown: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, ease: ease.soft },
-              },
-            }}
-            className="inline-block whitespace-pre"
-          >
-            {w}
-          </m.span>
-        ))}
+        {words.map((w, i) =>
+          // spaces stay plain text, so a line never starts with one
+          /^\s+$/.test(w) ? (
+            " "
+          ) : (
+            <m.span
+              // biome-ignore lint/suspicious/noArrayIndexKey: words of a fixed sentence
+              key={i}
+              variants={{
+                hidden: { opacity: 0, y: 10 },
+                shown: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.4, ease: ease.soft },
+                },
+              }}
+              className="inline-block max-w-full wrap-anywhere"
+            >
+              {w}
+            </m.span>
+          ),
+        )}
       </m.p>
       <m.ul
         initial="hidden"
@@ -248,7 +253,11 @@ function AnswersReveal({
                   />
                 </m.span>
               </div>
-              {a.note ? <p className="pl-11 text-ink">“{a.note}”</p> : null}
+              {a.note ? (
+                <p className="whitespace-pre-line pl-11 text-ink wrap-anywhere">
+                  “{a.note}”
+                </p>
+              ) : null}
             </m.li>
           );
         })}

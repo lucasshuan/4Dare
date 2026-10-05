@@ -323,7 +323,9 @@ function HistoryBody({
                         }),
                       )}
                     </span>
-                    <p className="text-base leading-[1.35]">{summary(e)}</p>
+                    <p className="text-base leading-[1.35] wrap-anywhere">
+                      {summary(e)}
+                    </p>
                     {e.kind === "guess" ? (
                       <ResultChip result={e.result} />
                     ) : (
@@ -352,7 +354,7 @@ function HistoryBody({
                             return (
                               <p
                                 key={a.byId}
-                                className="text-ink-muted text-sm"
+                                className="whitespace-pre-line text-ink-muted text-sm wrap-anywhere"
                               >
                                 {p ? (
                                   <>
