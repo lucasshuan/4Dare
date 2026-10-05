@@ -16,9 +16,11 @@ interface Row {
   origin: string | null;
   image_url: string | null;
   aliases: string[] | null;
+  other_names: string[] | null;
 }
 
-const COLUMNS = "character_id, lang, name, origin, image_url, aliases";
+const COLUMNS =
+  "character_id, lang, name, origin, image_url, aliases, other_names";
 
 // Library characters live once in the database but once per language in the
 // app ("pt-wd-Q302"); characters players made keep their own id.
@@ -30,7 +32,8 @@ const toCharacter = (r: Row): Character => ({
   name: r.name,
   origin: r.origin,
   imageUrl: r.image_url,
-  aliases: r.aliases ?? [],
+  // the names in the other languages too: "Spider-Man" in a Portuguese room
+  aliases: [...(r.aliases ?? []), ...(r.other_names ?? [])],
 });
 
 export function supabaseCharacters(): CharacterStore {

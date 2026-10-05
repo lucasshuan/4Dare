@@ -536,6 +536,7 @@ export type Database = {
           name: string | null;
           norm: string | null;
           origin: string | null;
+          other_names: string[] | null;
           popularity: number | null;
         };
         Relationships: [
@@ -717,6 +718,7 @@ export type Database = {
           name: string | null;
           norm: string | null;
           origin: string | null;
+          other_names: string[] | null;
           popularity: number | null;
         }[];
         SetofOptions: {
