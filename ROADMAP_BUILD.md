@@ -72,10 +72,10 @@ Rule: switching language or opening a menu never waits on a download; fonts swap
 
 ## Phase 6 — Cleanup
 
-- [ ] Old-data compatibility removed: `withoutLegacy`, initial/person avatars, "absent in older rooms" fields, old room list defaults, old picture keys, `ANON_KEY`/`SERVICE_ROLE_KEY` fallbacks (rooms reset and old avatars migrated first)
+- [x] Old-data compatibility removed: `withoutLegacy`, initial/person avatars, "absent in older rooms" fields, old room list defaults, old picture keys, `ANON_KEY`/`SERVICE_ROLE_KEY` fallbacks. Rooms were brought to the current shape instead of reset (migration 0020, applied, run again after the deploy); no profile, chat line or picture author had an old avatar; Vercel has the publishable and secret keys. A private room without a password still stays off the list, as a guard
 - [x] Unused packages removed: `nanoid`, `@iconify-json/circle-flags`, `@iconify-json/logos`
 - [x] `engines.node` set to Vercel's Node (24.x), `@types/node` to match
 - [x] Patch updates: next-intl, react-query, lucide
-- [ ] React 19.3, Biome 2.5, motion 14 and TypeScript 7 after Phase 10, changelogs first
+- [x] React 19.3, Biome 2.5, motion 14 and TypeScript 7 after Phase 10, changelogs first (motion 14 only drops internal APIs; the `motion/react` alias holds). Biome 2.5.15, lucide 1.52; `@types/node` stays on 24 with `engines`
 - [x] Unused `public/brand/logo-dark.svg` removed
 - [x] AI leftovers: `ThemeStore.add`, `.data/themes-ai.json`, `THEME_SETS[].about`, old comments (done during Phase 10: none of it was in a wave-4 file)
