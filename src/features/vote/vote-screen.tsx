@@ -49,6 +49,7 @@ import { voteTheme } from "@/server/actions";
 const TILT = [-7, 0, 7];
 const spring = { type: "spring", stiffness: 320, damping: 32 } as const;
 const OPENING_BEATS = ["curtain", "intro", "round"] as const;
+const RESULT_BEATS = ["tie_spin", "settle"] as const;
 const THEME_BEATS = ["theme", "rule"] as const;
 
 /** A card lit by the roulette or left as the winner, and one dimmed beside it. */
@@ -71,8 +72,13 @@ const from = (a: Look, b: Look) => ({
  */
 export function VoteScreen() {
   const opening = useSceneShow("opening", OPENING_BEATS);
+  const result = useSceneShow("theme", RESULT_BEATS);
   const theme = useSceneShow("theme", THEME_BEATS);
   const { view } = useRoomContext();
+  // once the vote has its theme, the cards stay only for the roulette and the
+  // winner settling: after the rule the screen fades out to the pick, and cards
+  // mounted again there would fly the winner back from the hero
+  const vote = view.vote?.chosen === null || result ? view.vote : null;
   usePreloadRule(showOf(view, "theme"));
   // layoutId: voters land on cards, the winner flies to the theme stage; the
   // layout features start loading during the cold open
@@ -82,8 +88,8 @@ export function VoteScreen() {
         <ColdOpen show={opening} />
       ) : theme ? (
         <ThemeStage show={theme} from="vote" />
-      ) : view.vote ? (
-        <Vote v={view.vote} />
+      ) : vote ? (
+        <Vote v={vote} />
       ) : null}
     </LayoutMotion>
   );
