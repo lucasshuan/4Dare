@@ -21,7 +21,6 @@ import {
   type RoomState,
   type RuleExamples,
   SHOW_TIMING,
-  STEP_SECONDS_MIN,
 } from "./types";
 import { toView } from "./view";
 
@@ -104,7 +103,7 @@ describe("lobby", () => {
     const join = (id: string, color: string) =>
       g.do({
         type: "JOIN",
-        player: { ...ident(id), avatar: { kind: "color", color } },
+        player: { ...ident(id), avatar: { kind: "critter", seed: "x", color } },
       });
     const slots = () =>
       Object.fromEntries(g.state.players.map((p) => [p.id, p.colorSlot]));
@@ -122,14 +121,6 @@ describe("lobby", () => {
     expect(
       toView(g.state, 0, "p3", g.now).players.map((p) => p.colorSlot),
     ).toEqual([0, 2, 3, 1]);
-  });
-
-  it("an older room without colours goes by seat", () => {
-    const g = new Game(3);
-    for (const p of g.state.players) delete p.colorSlot;
-    expect(
-      toView(g.state, 0, "p1", g.now).players.map((p) => p.colorSlot),
-    ).toEqual([0, 1, 2]);
   });
 
   it("rejects invalid settings", () => {
@@ -171,21 +162,6 @@ describe("lobby", () => {
   it("keeps each theme set once, in the screens' order", () => {
     const g = new Game(1, 1, { themeSets: ["music", "games", "music"] });
     expect(g.state.settings.themeSets).toEqual(["games", "music"]);
-  });
-
-  it("rooms saved before the theme settings get the defaults when edited", () => {
-    const g = new Game(1);
-    const { themeMode: _, themeSets: __, ...old } = g.state.settings;
-    g.state = { ...g.state, settings: old as RoomState["settings"] };
-    g.do({
-      type: "UPDATE_SETTINGS",
-      playerId: "p1",
-      settings: { askSeconds: STEP_SECONDS_MIN },
-    });
-    expect(g.state.settings).toMatchObject({
-      themeMode: "vote",
-      themeSets: DEFAULT_SETTINGS.themeSets,
-    });
   });
 
   it("joining twice refreshes the identity instead of failing", () => {
@@ -1122,36 +1098,6 @@ describe("step times", () => {
     expect(g.state.phase).toBe("guessing");
     expect(g.state.deadline).toBe(g.now + 50_000);
   });
-
-  it("rooms saved with the old single time get the defaults and lose the old key", () => {
-    const g = new Game(2);
-    const {
-      askSeconds: _a,
-      guessSeconds: _g,
-      answerSeconds: _n,
-      validateSeconds: _v,
-      ...rest
-    } = g.state.settings;
-    g.state = {
-      ...g.state,
-      settings: {
-        ...rest,
-        stepSeconds: 120,
-      } as unknown as RoomState["settings"],
-    };
-    expect(toView(g.state, 1, "p1", g.now).settings).toMatchObject({
-      askSeconds: DEFAULT_SETTINGS.askSeconds,
-      validateSeconds: DEFAULT_SETTINGS.validateSeconds,
-    });
-    expect(toView(g.state, 1, "p1", g.now).settings).not.toHaveProperty(
-      "stepSeconds",
-    );
-    g.start();
-    g.pickAll();
-    expect(g.state.deadline).toBe(
-      (g.state.stepStartsAt ?? 0) + DEFAULT_SETTINGS.askSeconds * 1000,
-    );
-  });
 });
 
 describe("a turn", () => {
@@ -1299,19 +1245,6 @@ describe("a turn", () => {
       place: 1,
       tied: true,
     });
-  });
-
-  it("a match saved before ties existed keeps counting places up", () => {
-    const g = started(3);
-    const [a, b] = g.state.order;
-    expect(g.askAndAnswer()).toBe(a);
-    g.do({ type: "GUESS", playerId: a, text: `name ${a}` });
-    // what an older save looks like: no turn rounds anywhere
-    delete g.state.turnRound;
-    for (const o of Object.values(g.state.outcomes)) delete o.round;
-    expect(g.askAndAnswer()).toBe(b);
-    g.do({ type: "GUESS", playerId: b, text: `name ${b}` });
-    expect(g.state.outcomes[b].place).toBe(2);
   });
 
   it("whoever already had their turn in that round does not tie", () => {
@@ -1561,28 +1494,6 @@ describe("leaving and giving up", () => {
     const cast = g.state.reveal;
     g.do({ type: "SWAP_PLAYER", from: "p2", player: ident("acc") });
     expect(g.state.reveal).toEqual(cast);
-  });
-
-  it("a room saved before shows (a theme reveal with no beats) still holds the clock", () => {
-    const g = new Game(2);
-    g.start();
-    const until = g.now + 2000;
-    g.state.reveal = { kind: "theme", n: 1, startsAt: g.now, until };
-    expect(toView(g.state, 1, "p1", g.now).reveal).toEqual({
-      kind: "theme",
-      n: 1,
-      startsAt: g.now,
-      until,
-      beats: [{ kind: "theme", startsAt: g.now, until }],
-      first: false,
-      rule: null,
-      prev: null,
-    });
-    g.pickAll();
-    // the cast queues behind it
-    expect(g.state.reveal?.startsAt).toBe(until);
-    expect(g.state.reveal?.prev).toMatchObject({ kind: "theme", until });
-    expect(g.state.stepStartsAt).toBe(g.state.reveal?.until);
   });
 });
 

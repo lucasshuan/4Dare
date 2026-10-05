@@ -346,14 +346,7 @@ function Bubble({
       }
     >
       <div className="flex items-center gap-2 font-medium text-[13px]">
-        {who ? (
-          <Avatar
-            avatar={who.avatar}
-            isGuest={who.isGuest}
-            name={who.name}
-            size={28}
-          />
-        ) : null}
+        {who ? <Avatar avatar={who.avatar} size={28} /> : null}
         <span>{kicker}</span>
       </div>
       {children}
@@ -511,14 +504,7 @@ function AnswersList({
         const p = playerById(a.byId);
         return (
           <li key={a.byId} className="flex flex-wrap items-center gap-2">
-            {p ? (
-              <Avatar
-                avatar={p.avatar}
-                isGuest={p.isGuest}
-                name={p.name}
-                size={28}
-              />
-            ) : null}
+            {p ? <Avatar avatar={p.avatar} size={28} /> : null}
             <span className="w-28 truncate font-semibold text-sm">
               {p ? name(p, p.isYou) : ""}
             </span>

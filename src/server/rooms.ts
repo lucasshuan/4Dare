@@ -1,5 +1,5 @@
 import "server-only";
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { systemLines } from "@/game/chat";
 import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
 import { presenceDue } from "@/game/helpers";
@@ -262,17 +262,6 @@ const draftName = (d: PickDraft | null | undefined) =>
   (d?.name ?? "").trim().replace(/\s+/g, " ").slice(0, MAX_CHARACTER_NAME);
 
 /**
- * A fixed "u-<uuid>" for a draft saved without one (older rooms): the same for
- * the room, match and card, so timeouts that race still make one character.
- */
-function draftId(state: RoomState, target: PlayerId) {
-  const h = createHash("sha256")
-    .update(`draft:${state.code}:${state.round}:${target}`)
-    .digest("hex");
-  return `u-${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
-}
-
-/**
  * What the unconfirmed cards become when the clock runs out, by picker:
  * whatever is on the card. The character it shows (picked, or the preview
  * while typing), else the name typed, found in the library or added to it
@@ -286,7 +275,7 @@ async function draftedCharacters(
   const { characters } = getBackend();
   const out: Record<PlayerId, Character> = {};
   await Promise.all(
-    Object.entries(state.assignments).map(async ([target, a]) => {
+    Object.values(state.assignments).map(async (a) => {
       const d = a.draft;
       if (a.character || !d) return;
       try {
@@ -301,7 +290,7 @@ async function draftedCharacters(
         if (!name) return;
         const picker = state.players.find((p) => p.id === a.pickerId);
         out[a.pickerId] = await nameWithPicture({
-          id: d.newId ?? draftId(state, target),
+          id: d.newId ?? undefined,
           lang: picker?.lang ?? "en",
           name,
           origin: null,

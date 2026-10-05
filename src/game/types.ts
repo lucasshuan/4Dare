@@ -24,10 +24,9 @@ export type AnswerValue = (typeof ANSWERS)[number];
 
 export type PlayerId = string;
 
-/** `color` is always set: the pastel behind a critter or an image. `color` alone is the older look (initial or person icon). */
+/** `color` is always set: the pastel behind a critter or an image. */
 export type Avatar =
   | { kind: "critter"; seed: string; color: string }
-  | { kind: "color"; color: string }
   | { kind: "image"; url: string; color: string };
 
 /** Seeds for DiceBear critters: short, URL-safe. */
@@ -235,13 +234,10 @@ export interface RoomPlayer extends Identity {
   strikes: number;
   /** Left the match (or struck out). Never asked to act again; answers default to "unknown". */
   away: boolean;
-  /** When their page closed (tab or window), until they show up again. Absent in older rooms. */
-  goneAt?: number | null;
-  /**
-   * Their colour (0-based, --seat-1..4), given on joining and theirs until they
-   * leave the room. Absent in older rooms, where the seat gives it.
-   */
-  colorSlot?: number;
+  /** When their page closed (tab or window), until they show up again. */
+  goneAt: number | null;
+  /** Their colour (0-based, --seat-1..4), given on joining and theirs until they leave the room. */
+  colorSlot: number;
 }
 
 /**
@@ -269,8 +265,8 @@ export interface Assignment {
   character: Character | null;
   /** The clock drew it: the card was empty when the time ran out. */
   auto?: true;
-  /** The card as the picker left it; gone once the pick is set. Absent in older rooms. */
-  draft?: PickDraft | null;
+  /** The card as the picker left it; gone once the pick is set. */
+  draft: PickDraft | null;
 }
 
 export interface AnswerEntry {
@@ -309,8 +305,8 @@ export interface Outcome {
    * share the place (1, 1, 3): the later ones in the order had no earlier turn.
    */
   place: number | null;
-  /** The turn round of the discovery; absent in rooms saved before ties existed. */
-  round?: number | null;
+  /** The turn round of the discovery. */
+  round: number | null;
   gaveUp: boolean;
   /** Epoch ms when the player discovered, gave up, left or timed out. */
   endedAt: number | null;
@@ -322,7 +318,7 @@ export interface ThemeVote {
   /** Option index by voter. Players may change or take back their vote until everyone has voted. */
   votes: Record<PlayerId, number>;
   /** What each voter's vote took off the clock (ms): it comes back if they take the vote back. */
-  cuts?: Record<PlayerId, number>;
+  cuts: Record<PlayerId, number>;
   /** The winner, once the vote is over. */
   chosen: number | null;
   /** Options that tied for the most votes; the draw picked `chosen` among them. */
@@ -341,7 +337,7 @@ export interface Reveal {
   n: number;
   startsAt: number;
   until: number;
-  /** Shows only: the beats, back to back from `startsAt` to `until`. Absent in rooms saved before shows. */
+  /** Shows only: the beats, back to back from `startsAt` to `until`. */
   beats?: Beat[];
   /** Shows only: the room's first match (the long versions). */
   first?: boolean;
@@ -373,28 +369,27 @@ export interface RoomState {
   deadline: number | null;
   /** Epoch ms when the current step's clock starts: later than "now" while a reveal is showing. */
   stepStartsAt: number | null;
-  /** The step's full length (ms); the deadline can come sooner (answers cut it). Absent in older rooms. */
-  stepMs?: number | null;
+  /** The step's full length (ms); the deadline can come sooner (answers cut it). */
+  stepMs: number | null;
   /** The latest reveal or show; only shown while it lasts. */
   reveal: Reveal | null;
   /** Counts matches played in this room. */
   round: number;
   /**
    * Someone seated when the match started had never finished one: the match
-   * plays the long shows, as on the room's first. Absent in older rooms.
+   * plays the long shows, as on the room's first.
    */
-  newcomer?: boolean;
+  newcomer: boolean;
   /**
    * Turn rounds of the current match: 1 while everyone takes their first turn,
-   * 2 for the second, and so on. Absent in rooms saved before ties existed.
+   * 2 for the second, and so on.
    */
-  turnRound?: number;
+  turnRound: number;
   /**
    * Turns of the current match, one per player's turn: the number of the one
-   * under way (1 = the first). Its question and guess carry it. Absent in rooms
-   * saved before turns were numbered.
+   * under way (1 = the first). Its question and guess carry it.
    */
-  turnNumber?: number;
+  turnNumber: number;
   /** Epoch ms when the first question of this match can be asked (the end of the cast show); null before. */
   playStartedAt: number | null;
   createdAt: number;

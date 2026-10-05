@@ -180,8 +180,6 @@ function Band({
       >
         <Avatar
           avatar={p.avatar}
-          isGuest={p.isGuest}
-          name={p.name}
           size={64}
           className="sm:size-24 sm:text-[38px]"
         />

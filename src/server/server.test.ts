@@ -341,7 +341,8 @@ describe("server, local mode", () => {
     const form = new FormData();
     form.set("name", "Jean");
     form.set("color", "#DCE8FA");
-    form.set("avatar", "color");
+    form.set("avatar", "critter");
+    form.set("seed", "x");
     expect(await A.updateProfile(form)).toEqual({
       ok: false,
       error: "unauthorized",
@@ -351,7 +352,7 @@ describe("server, local mode", () => {
     expect(me).toMatchObject({
       isGuest: false,
       name: "Jean",
-      avatar: { kind: "color", color: "#DCE8FA" },
+      avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
     });
   });
 
@@ -437,12 +438,13 @@ describe("server, local mode", () => {
     const form = new FormData();
     form.set("name", "Renamed");
     form.set("color", "#DCE8FA");
-    form.set("avatar", "color");
+    form.set("avatar", "critter");
+    form.set("seed", "x");
     must(await A.updateProfile(form));
     as("n4");
     expect((await view(code)).body.players[0]).toMatchObject({
       name: "Renamed",
-      avatar: { kind: "color", color: "#DCE8FA" },
+      avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
     });
   });
 
@@ -1272,7 +1274,7 @@ describe("room chat", () => {
       isGuest: true,
       name: null,
       guestNumber: 1,
-      avatar: { kind: "color", color: "#fff" },
+      avatar: { kind: "critter", seed: "x", color: "#fff" },
     } as const;
     const line = { by: author.id, author, text: "hi" };
     for (let i = 0; i < 5; i++) await chat.add("LIMIT", [line]);
@@ -1357,7 +1359,7 @@ describe("room chat", () => {
             isGuest: true,
             name: null,
             guestNumber: 3,
-            avatar: { kind: "color", color: "#fff" },
+            avatar: { kind: "critter", seed: "x", color: "#fff" },
           },
         },
       },
@@ -1545,7 +1547,7 @@ describe("character pictures", () => {
       name: null,
       isGuest: true,
       guestNumber: 1,
-      avatar: { kind: "color" as const, color: "#DCE8FA" },
+      avatar: { kind: "critter" as const, seed: "x", color: "#DCE8FA" },
     };
     const add = (characterId: string, url: string) =>
       images.add({

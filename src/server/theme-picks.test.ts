@@ -88,12 +88,6 @@ describe("tallyPicks", () => {
       { id: "wd-Q1", picks: 1 },
     ]);
   });
-  it("reads the theme of records saved before themeId existed", () => {
-    const tally = tallyPicks([
-      match("Famous duos", [player("pt-wd-Q1")], false),
-    ]);
-    expect(tally.get("famous-duos")?.get("wd-Q1")).toBe(1);
-  });
   it("keeps adding to an existing tally", () => {
     const tally = tallyPicks([match("Villains", [player("pt-wd-Q1")])]);
     tallyPicks([match("Villains", [player("pt-wd-Q1")])], tally);

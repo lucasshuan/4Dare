@@ -36,7 +36,7 @@ const hueGap = (a: number, b: number) => {
 /**
  * The colour for someone joining: among the ones nobody holds, the closest to
  * their avatar's colour (the first free one for a grey avatar). With all four
- * held, which only an older room can reach, the first one.
+ * held, the first one.
  */
 export function pickColorSlot(
   taken: Iterable<number>,

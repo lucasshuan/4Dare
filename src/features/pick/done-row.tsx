@@ -59,12 +59,7 @@ export function DoneRow({
                   transition={{ duration: 0.2 }}
                   className="relative flex"
                 >
-                  <Avatar
-                    avatar={p.avatar}
-                    isGuest={p.isGuest}
-                    name={p.name}
-                    size={36}
-                  />
+                  <Avatar avatar={p.avatar} size={36} />
                   <AnimatePresence initial={false}>
                     {done ? (
                       <m.span

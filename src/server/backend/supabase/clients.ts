@@ -11,10 +11,9 @@ export type Db = SupabaseClient<Database>;
 /** jsonb columns and arguments hold the game's own objects: hand them over as Json. */
 export const json = (value: unknown) => value as Json;
 
-/** Secret key (Vercel integration: SUPABASE_SECRET_KEY; older projects: SUPABASE_SERVICE_ROLE_KEY). */
+/** Secret key, as the Supabase integration on Vercel sets it. */
 function secretKey() {
-  const key =
-    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SECRET_KEY;
   if (!key) throw new Error("SUPABASE_SECRET_KEY is not set");
   return key;
 }

@@ -94,7 +94,7 @@ const profile = (): Row => ({
   id: ACCOUNT,
   name: "Bia",
   guest_number: 7,
-  avatar: { kind: "color", color: "#ffd6e0" },
+  avatar: { kind: "critter", seed: "x", color: "#ffd6e0" },
   provider: "google",
   provider_avatar_url: null,
 });

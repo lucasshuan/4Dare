@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { normalizeName } from "@/game/match";
 import { type Character, LANGS, type Lang } from "@/game/types";
-import { entryId, libraryFor, parseEntryId } from "../seed-format";
+import { entryId, libraryFor } from "../seed-format";
 import type { CharacterStore } from "../types";
 import { processSingleton, readJson, writeJson } from "./disk";
 import { LOCAL_CHARACTERS, LOCAL_ORIGINS } from "./fixtures";
@@ -21,15 +21,9 @@ function toRow(c: Character, popularity: number): Row {
   return { ...c, popularity, keys: [c.name, ...c.aliases].map(normalizeName) };
 }
 
-/** Moved covers by library id; older files keyed them per language ("pt-wd-Q302"). */
-function swappedImages(): Record<string, string | null> {
-  const images: Record<string, string | null> = {};
-  for (const [id, url] of Object.entries(
-    readJson<Record<string, string | null>>(IMAGES_FILE, {}),
-  ))
-    images[parseEntryId(id)?.id ?? id] = url;
-  return images;
-}
+/** Moved covers by library id. */
+const swappedImages = () =>
+  readJson<Record<string, string | null>>(IMAGES_FILE, {});
 
 function loadLibrary(): Map<string, Row> {
   const rows = new Map<string, Row>();

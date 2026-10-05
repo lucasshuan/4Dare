@@ -25,8 +25,6 @@ export function UserMenuFace({ me }: { me: Me }) {
     <>
       <Avatar
         avatar={me.avatar}
-        isGuest={me.isGuest}
-        name={me.name}
         size={32}
         className={cn(me.isGuest && "opacity-60 grayscale")}
       />

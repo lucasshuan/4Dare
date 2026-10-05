@@ -185,8 +185,6 @@ function Line({
       {p ? (
         <Avatar
           avatar={p.avatar}
-          isGuest={p.isGuest}
-          name={p.name}
           size={28}
           seat={slot}
           className="row-span-2 self-end"

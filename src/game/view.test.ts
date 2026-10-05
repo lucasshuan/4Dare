@@ -254,7 +254,7 @@ describe("what the view says", () => {
     });
     expect(toView(g.state, 1, "p1", g.now).settings.password).toBe("pizza");
     expect(toView(g.state, 1, "p2", g.now).settings.password).toBe("");
-    // a private room from before passwords existed stays hidden
+    // a private room without a password stays hidden
     g.state.settings.password = "";
     expect(toPublicRoom(g.state, g.now)).toBeNull();
   });

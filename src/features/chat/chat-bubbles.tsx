@@ -54,15 +54,7 @@ export function ChatBubbles({ bubbles }: { bubbles: Bubble[] }) {
                 style={{ transformOrigin: "85% 100%" }}
                 className="flex max-w-[300px] items-end gap-2"
               >
-                {p ? (
-                  <Avatar
-                    avatar={p.avatar}
-                    isGuest={p.isGuest}
-                    name={p.name}
-                    size={30}
-                    seat={slot}
-                  />
-                ) : null}
+                {p ? <Avatar avatar={p.avatar} size={30} seat={slot} /> : null}
                 <p className="min-w-0 rounded-[18px_18px_6px_18px] bg-surface px-3.5 py-[9px] text-[15px] text-ink leading-[1.35] shadow-pop">
                   <small
                     style={slot === null ? undefined : { color: seatInk(slot) }}

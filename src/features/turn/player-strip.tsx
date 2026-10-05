@@ -209,8 +209,6 @@ function PlayerRow({ player: p }: { player: PlayerView }) {
       <span className="relative inline-flex shrink-0">
         <Avatar
           avatar={p.avatar}
-          isGuest={p.isGuest}
-          name={p.name}
           size={32}
           // the clock takes the ring's place while it waits on them
           seat={awaited ? null : p.colorSlot}

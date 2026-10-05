@@ -20,10 +20,7 @@ export interface Guest {
 }
 
 function secret() {
-  const key =
-    process.env.GUEST_SECRET ||
-    process.env.SUPABASE_SECRET_KEY ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.GUEST_SECRET || process.env.SUPABASE_SECRET_KEY;
   // Local mode has no secret: the cookie is only a convenience there.
   return key || "dare-local-guests";
 }

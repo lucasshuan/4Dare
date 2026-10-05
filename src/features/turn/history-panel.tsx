@@ -336,12 +336,7 @@ function HistoryBody({
                               className="inline-flex items-center gap-1.5"
                             >
                               {p ? (
-                                <Avatar
-                                  avatar={p.avatar}
-                                  isGuest={p.isGuest}
-                                  name={p.name}
-                                  size={20}
-                                />
+                                <Avatar avatar={p.avatar} size={20} />
                               ) : null}
                               <AnswerChip value={a.value} small />
                             </span>

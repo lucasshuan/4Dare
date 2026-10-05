@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { buttonClass } from "@/components/ui/button";
 import { GameThumb, useGameName } from "@/features/create/game-info";
-import { DEFAULT_SETTINGS, type PublicRoom, STEP_TIMES } from "@/game/types";
+import { type PublicRoom, STEP_TIMES } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
@@ -31,9 +31,9 @@ export function sortRooms(rooms: PublicRoom[]) {
     .map(({ room }) => room);
 }
 
-/** "80", or "40–80" when the steps differ. A room listed by an older server has no times: the defaults. */
+/** "80", or "40–80" when the steps differ. */
 function secondsRange(r: PublicRoom) {
-  const all = STEP_TIMES.map((k) => r[k] ?? DEFAULT_SETTINGS[k]);
+  const all = STEP_TIMES.map((k) => r[k]);
   const min = Math.min(...all);
   const max = Math.max(...all);
   return min === max ? String(min) : `${min}–${max}`;
@@ -84,11 +84,7 @@ export function RoomRow({
           showGame && "max-md:col-span-2",
         )}
       >
-        <Avatar
-          avatar={r.host.avatar}
-          isGuest={r.host.isGuest}
-          name={r.host.name}
-        />
+        <Avatar avatar={r.host.avatar} />
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="flex min-w-0 items-center gap-1.5 font-semibold">
             <span className="truncate">{title}</span>

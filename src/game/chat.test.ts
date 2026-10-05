@@ -124,7 +124,7 @@ describe("system lines", () => {
       isGuest: false,
       name: g.state.order[0],
       guestNumber: 10,
-      avatar: { kind: "color", color: "#DCE8FA" },
+      avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
     });
     expect(orderLine.showAt).toBe(order.startsAt + SHOW_MARKS.orderLine.first);
     expect(turnLine).toEqual({
@@ -274,7 +274,7 @@ describe("chat order and unread", () => {
       isGuest: true,
       name: null,
       guestNumber: 7,
-      avatar: { kind: "color", color: "#fff" } as const,
+      avatar: { kind: "critter", seed: "x", color: "#fff" } as const,
     };
     const other = { ...person, id: "x" };
     expect(

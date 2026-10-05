@@ -29,8 +29,6 @@ export function PlayerName({
       {/* sized in em of the text around it (text-[1em] undoes the avatar's own font size); sits on the baseline, nudged down to centre on the letters */}
       <Avatar
         avatar={player.avatar}
-        isGuest={player.isGuest}
-        name={player.name}
         size={20}
         className="size-[1.4em] translate-y-[0.3em] text-[1em]"
       />

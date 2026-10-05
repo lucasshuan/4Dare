@@ -1,39 +1,22 @@
 // Small lookups shared by the engine and the view.
-import { SEAT_COLORS } from "./seat-colors";
 import {
-  DEFAULT_SETTINGS,
   GONE_GRACE_MS,
   type Play,
   type PlayerId,
   type RoomPlayer,
-  type RoomSettings,
   type RoomState,
-  type StepTime,
 } from "./types";
 
 export const isPresent = (p: RoomPlayer) => !p.away;
-
-/** A step's seconds; rooms saved before the setting existed get its default. */
-export function stepSeconds(settings: RoomSettings, key: StepTime): number {
-  return settings[key] ?? DEFAULT_SETTINGS[key];
-}
 
 export function isActive(state: RoomState, id: PlayerId): boolean {
   const o = state.outcomes[id];
   return !o || (o.discoveredAt === null && !o.gaveUp);
 }
 
-/** A player's colour (0-based); rooms saved before colours were kept go by seat. */
-export const colorSlotOf = (state: RoomState, p: RoomPlayer) =>
-  p.colorSlot ?? state.players.indexOf(p) % SEAT_COLORS;
-
 export function findPlayer(state: RoomState, id: PlayerId) {
   return state.players.find((p) => p.id === id);
 }
-
-/** The turn under way: its question and guess carry this number. Older rooms count plays. */
-export const turnNumber = (state: RoomState) =>
-  state.turnNumber ?? state.plays.length + 1;
 
 export function openQuestion(state: RoomState) {
   const last = state.plays.at(-1);

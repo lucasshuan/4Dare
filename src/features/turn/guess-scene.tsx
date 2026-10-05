@@ -137,7 +137,7 @@ function Kicker({ player: p, text }: { player: PlayerView; text: string }) {
           boxShadow: `0 0 0 3px color-mix(in oklab, ${onSeat(p.colorSlot)} 70%, transparent)`,
         }}
       >
-        <Avatar avatar={p.avatar} isGuest={p.isGuest} name={p.name} size={36} />
+        <Avatar avatar={p.avatar} size={36} />
       </span>
       <span className="font-semibold text-sm uppercase tracking-[0.1em] opacity-90">
         {text}

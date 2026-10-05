@@ -208,8 +208,6 @@ function AccountForm({ me }: { me: Me }) {
                     url: me.providerAvatarUrl,
                     color,
                   }}
-                  isGuest={false}
-                  name={trimmed}
                   size={64}
                 />
               </Tile>
@@ -222,8 +220,6 @@ function AccountForm({ me }: { me: Me }) {
               {uploadUrl ? (
                 <Avatar
                   avatar={{ kind: "image", url: uploadUrl, color }}
-                  isGuest={false}
-                  name={trimmed}
                   size={64}
                 />
               ) : (
@@ -246,12 +242,7 @@ function AccountForm({ me }: { me: Me }) {
                   transition={{ type: "spring", stiffness: 420, damping: 22 }}
                   className="flex"
                 >
-                  <Avatar
-                    avatar={{ kind: "critter", seed, color }}
-                    isGuest={false}
-                    name={trimmed}
-                    size={64}
-                  />
+                  <Avatar avatar={{ kind: "critter", seed, color }} size={64} />
                 </m.span>
               </AnimatePresence>
             </Tile>
@@ -386,7 +377,7 @@ function Preview({
     <aside className="flex flex-col gap-4 rounded-xl bg-surface p-6">
       <h2 className="font-semibold text-xl">{t("preview")}</h2>
       <div className="flex items-center gap-3">
-        <Avatar avatar={avatar} isGuest={false} name={shown} />
+        <Avatar avatar={avatar} />
         <div className="flex min-w-0 flex-col">
           <span className="truncate font-semibold">{shown}</span>
           <span className="font-medium text-[13px] text-ink-muted">
@@ -395,7 +386,7 @@ function Preview({
         </div>
       </div>
       <div className="flex items-center gap-2.5 rounded-lg bg-sunken p-2 pl-2.5">
-        <Avatar avatar={avatar} isGuest={false} name={shown} size={32} />
+        <Avatar avatar={avatar} size={32} />
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate font-semibold text-sm">
             {tc("youSuffix", { name: shown })}
@@ -410,11 +401,7 @@ function Preview({
       </div>
       <hr className="border-line" />
       <div className="flex items-center gap-3">
-        <Avatar
-          avatar={{ kind: "critter", seed: "27", color: "#BFE3EA" }}
-          isGuest
-          name={null}
-        />
+        <Avatar avatar={{ kind: "critter", seed: "27", color: "#BFE3EA" }} />
         <div className="flex min-w-0 flex-col">
           <span className="truncate font-semibold">
             {display({ isGuest: true, name: null, guestNumber: 27 })}

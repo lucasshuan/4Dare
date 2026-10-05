@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { colorSlotOf } from "@/game/helpers";
 import { char, Game, THEMES } from "@/game/test-utils";
 import {
   type Beat,
   type ExampleCard,
-  type RoomState,
   type RuleExamples,
   SHOW_MARKS,
   SHOW_TIMING,
@@ -49,7 +47,7 @@ const beat = (show: ShowView, kind: Beat["kind"]) => {
 /** The player's colour slot. */
 const seatOf = (g: Game, id: string) => {
   const p = g.state.players.find((x) => x.id === id);
-  return p ? colorSlotOf(g.state, p) : -1;
+  return p ? p.colorSlot : -1;
 };
 const seatTone = (slot: number) => `seat-${(slot % 4) + 1}`;
 /** Everyone picks for their target (the theme show may still be on). */
@@ -373,29 +371,6 @@ describe("stageFrame: the theme show", () => {
     const draw = beat(show, "draw");
     expect(look(g, draw.until - 1).tone).toBe("brand");
     expect(markAt(draw, -50)).toBe(draw.startsAt);
-  });
-
-  it("a theme reveal saved before shows: one theme beat on the vote screen", () => {
-    const g = new Game(2);
-    g.start();
-    const s: RoomState = g.state;
-    s.reveal = {
-      kind: "theme",
-      n: s.round,
-      startsAt: g.now,
-      until: g.now + 3000,
-    };
-    const f = frame(g, g.now + 100);
-    expect(f).toMatchObject({
-      area: "match",
-      screen: "vote",
-      show: { kind: "theme", beats: [{ kind: "theme" }] },
-      beat: { kind: "theme" },
-    });
-    expect(f.themeFrom).toBe(g.now + SHOW_MARKS.themeTag);
-    expect(look(g, g.now + 100).tone).toBe("butter");
-    expect(look(g, g.now + SHOW_MARKS.themeWash).tone).toBe("theme");
-    expect(frame(g, g.now + 3000).screen).toBe("pick");
   });
 
   it("just before a queued show starts (clock skew): its first screen, no beat", () => {

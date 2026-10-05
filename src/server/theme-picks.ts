@@ -5,7 +5,6 @@ import "server-only";
 // so the draw works before the history does), and the hand under the card
 // shows them (with the starters filling in while the history is thin).
 import type { MatchRecord } from "@/game/record";
-import { themeId } from "@/game/theme-id";
 import type { Character, Lang } from "@/game/types";
 import { entryId, parseEntryId } from "./backend/seed-format";
 import type { CharacterDTO } from "./contract";
@@ -108,9 +107,8 @@ export function tallyPicks(
   into = new Map<string, Map<string, number>>(),
 ) {
   for (const m of records) {
-    // Records saved before themeId existed only have the theme itself; a typed one has no themeId at all.
-    const theme =
-      m.themeId ?? (m.theme && m.theme.set !== null ? themeId(m.theme) : null);
+    // A theme the host typed has no themeId.
+    const theme = m.themeId;
     if (!theme) continue;
     for (const p of m.players) {
       const key = p.autoPicked ? null : pickKey(p.characterId);

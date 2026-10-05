@@ -1,4 +1,3 @@
-import { UserRound } from "lucide-react";
 import type { Avatar as AvatarData } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { seatColor } from "@/lib/seats";
@@ -33,18 +32,14 @@ function seatRing(slot: number, size: number) {
   return `0 0 0 ${gap}px var(--ring-gap, var(--surface)), 0 0 0 ${ring}px ${seatColor(slot)}`;
 }
 
-/** A critter on a pastel, a picture, or (older avatars) an initial / person icon on a pastel. */
+/** A critter or a picture on a pastel. */
 export function Avatar({
   avatar,
-  isGuest,
-  name,
   size = 44,
   seat,
   className,
 }: {
   avatar: AvatarData;
-  isGuest: boolean;
-  name: string | null;
   size?: keyof typeof SIZE;
   /** In a room: the player's colour slot, drawn as a ring. */
   seat?: number | null;
@@ -70,13 +65,9 @@ export function Avatar({
           alt=""
           className="size-full"
         />
-      ) : avatar.kind === "image" ? (
+      ) : (
         // biome-ignore lint/performance/noImgElement: remote avatar pictures
         <img src={avatar.url} alt="" className="size-full object-cover" />
-      ) : isGuest || !name ? (
-        <UserRound className="size-[55%]" strokeWidth={1.75} />
-      ) : (
-        name.trim().charAt(0).toUpperCase()
       )}
     </span>
   );

@@ -166,8 +166,6 @@ export function PickIntro({ show }: PickIntroProps) {
               >
                 <Avatar
                   avatar={person.avatar}
-                  isGuest={person.isGuest}
-                  name={person.name}
                   size={64}
                   className="size-[120px] text-[48px] sm:size-[150px] sm:text-[60px]"
                 />
@@ -231,8 +229,6 @@ export function PickIntro({ show }: PickIntroProps) {
                 >
                   <Avatar
                     avatar={p.avatar}
-                    isGuest={p.isGuest}
-                    name={p.name}
                     size={52}
                     className="sm:size-17 sm:text-[28px]"
                   />

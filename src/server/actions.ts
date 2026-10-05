@@ -631,7 +631,7 @@ export async function createCharacter(
 
 // --- identity -----------------------------------------------------------------
 
-/** FormData: name, color, avatar ("critter" | "color" | "provider" | "upload" | "keep"), seed (critter), image (upload). Accounts only. */
+/** FormData: name, color, avatar ("critter" | "provider" | "upload" | "keep"), seed (critter), image (upload). Accounts only. */
 export async function updateProfile(form: FormData): Promise<Result<Me>> {
   return run(async () => {
     const { auth, files } = getBackend();
@@ -647,7 +647,7 @@ export async function updateProfile(form: FormData): Promise<Result<Me>> {
     )
       bad();
     const kind = form.get("avatar");
-    let avatar: Identity["avatar"] = { kind: "color", color: color as string };
+    let avatar: Identity["avatar"];
     if (kind === "provider" && current.providerAvatarUrl) {
       avatar = {
         kind: "image",
@@ -671,8 +671,8 @@ export async function updateProfile(form: FormData): Promise<Result<Me>> {
       };
     } else if (kind === "keep" && current.avatar.kind === "image") {
       avatar = { ...current.avatar, color: color as string };
-    } else if (kind !== "color") {
-      bad();
+    } else {
+      avatar = bad();
     }
     const updated = await auth.updateProfile({ name, avatar });
     await syncIdentity(await auth.identity(await lang()));

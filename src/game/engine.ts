@@ -2,7 +2,6 @@
 
 import { isGameKey } from "./games";
 import {
-  colorSlotOf,
   findPlayer,
   goneFor,
   isActive,
@@ -10,8 +9,6 @@ import {
   openQuestion,
   pendingGuess,
   presenceDue,
-  stepSeconds,
-  turnNumber,
   validatorOf,
 } from "./helpers";
 import { isCloseMatch } from "./match";
@@ -29,7 +26,6 @@ import {
   type Character,
   CLOCK_CUT_FLOOR_MS,
   type Ctx,
-  DEFAULT_SETTINGS,
   type ErrorCode,
   GameError,
   type GameEvent,
@@ -89,11 +85,7 @@ function mergeSettings(
     "themeSets",
   ]);
   if (Object.keys(patch).some((k) => !allowed.has(k))) fail("invalid_input");
-  // Rooms made before a setting existed get its default; one "stepSeconds" became three.
-  const { stepSeconds: _old, ...current } = base as RoomSettings & {
-    stepSeconds?: number;
-  };
-  const next = { ...DEFAULT_SETTINGS, ...current, ...patch };
+  const next = { ...base, ...patch };
   const sets: unknown = next.themeSets;
   const name: unknown = next.name;
   const password: unknown = next.password;
@@ -214,8 +206,7 @@ function startStep(s: RoomState, ctx: Ctx, ms: number) {
   s.stepMs = ms;
 }
 
-const stepMs = (s: RoomState, key: StepTime) =>
-  stepSeconds(s.settings, key) * 1000;
+const stepMs = (s: RoomState, key: StepTime) => s.settings[key] * 1000;
 
 function stopClock(s: RoomState) {
   s.deadline = null;
@@ -256,8 +247,7 @@ function shuffle<T>(items: T[], random: () => number): T[] {
 }
 
 /** Match `round` plays the long shows: the room's first, or someone's first ever. */
-const longShows = (s: RoomState, round: number) =>
-  round === 1 || s.newcomer === true;
+const longShows = (s: RoomState, round: number) => round === 1 || s.newcomer;
 
 /**
  * A new round needs a theme: the host types it, or everyone votes on `themes`.
@@ -315,6 +305,7 @@ function beginVote(
   s.vote = {
     options: (themes ?? []).map((t) => ({ ...t })),
     votes: {},
+    cuts: {},
     chosen: null,
     tied: [],
     ...(examples ? { examples: structuredClone(examples) } : {}),
@@ -415,7 +406,7 @@ function vote(s: RoomState, playerId: PlayerId, option: number, ctx: Ctx) {
     const before = s.deadline;
     cutClock(s, ctx, "voteSeconds", s.players.length);
     if (before !== null && s.deadline !== null)
-      v.cuts = { ...v.cuts, [playerId]: before - s.deadline };
+      v.cuts[playerId] = before - s.deadline;
   }
 }
 
@@ -426,8 +417,8 @@ function unvote(s: RoomState, playerId: PlayerId) {
   const v = s.vote ?? fail("wrong_phase");
   if (v.votes[playerId] === undefined) return;
   delete v.votes[playerId];
-  const back = v.cuts?.[playerId] ?? 0;
-  if (v.cuts) delete v.cuts[playerId];
+  const back = v.cuts[playerId] ?? 0;
+  delete v.cuts[playerId];
   if (s.deadline !== null) s.deadline += back;
 }
 
@@ -447,7 +438,11 @@ function beginMatch(s: RoomState, theme: Theme, ctx: Ctx) {
   s.outcomes = {};
   const n = s.order.length;
   s.order.forEach((picker, i) => {
-    s.assignments[s.order[(i + 1) % n]] = { pickerId: picker, character: null };
+    s.assignments[s.order[(i + 1) % n]] = {
+      pickerId: picker,
+      character: null,
+      draft: null,
+    };
   });
   for (const p of s.players) {
     s.outcomes[p.id] = {
@@ -509,9 +504,8 @@ function goToTurn(s: RoomState, ctx: Ctx, from: PlayerId | null) {
   // Back at (or before) where the last turn was in the order: a new turn round.
   const wrapped =
     from === null || s.order.indexOf(next) <= s.order.indexOf(from);
-  if (wrapped) s.turnRound = (s.turnRound ?? 0) + 1;
-  // A room saved before turns were numbered goes on after its last play.
-  s.turnNumber = (s.turnNumber ?? Math.max(0, ...s.plays.map((p) => p.n))) + 1;
+  if (wrapped) s.turnRound += 1;
+  s.turnNumber += 1;
   s.phase = "asking";
   s.turnPlayerId = next;
   startStep(s, ctx, stepMs(s, "askSeconds"));
@@ -569,16 +563,10 @@ function placeIn(s: RoomState, round: number) {
 function hit(s: RoomState, g: Guess, ctx: Ctx) {
   g.result = "hit";
   const round = s.turnRound;
-  // A match saved before ties existed has no rounds yet: places just count up.
-  const place =
-    round === undefined
-      ? Object.values(s.outcomes).filter((o) => o.discoveredAt !== null)
-          .length + 1
-      : placeIn(s, round);
   s.outcomes[g.by] = {
     discoveredAt: g.n,
-    place,
-    round: round ?? null,
+    place: placeIn(s, round),
+    round,
     gaveUp: false,
     endedAt: ctx.now,
   };
@@ -594,7 +582,7 @@ function miss(s: RoomState, g: Guess, ctx: Ctx) {
 
 /** The turn player let the guess go (or its clock ran out): a short scene says so. */
 function pass(s: RoomState, ctx: Ctx) {
-  guessScene(s, "pass", turnNumber(s), REVEAL_TIMING.pass, ctx);
+  guessScene(s, "pass", s.turnNumber, REVEAL_TIMING.pass, ctx);
   nextTurn(s, ctx);
 }
 
@@ -677,6 +665,7 @@ export function createRoom(
         joinedAt: ctx.now,
         strikes: 0,
         away: false,
+        goneAt: null,
         colorSlot: pickColorSlot([], host.avatar.color),
       },
     ],
@@ -690,8 +679,12 @@ export function createRoom(
     outcomes: {},
     deadline: null,
     stepStartsAt: null,
+    stepMs: null,
     reveal: null,
     round: 0,
+    newcomer: false,
+    turnRound: 0,
+    turnNumber: 0,
     playStartedAt: null,
     createdAt: ctx.now,
     updatedAt: ctx.now,
@@ -887,8 +880,9 @@ function join(
     joinedAt: ctx.now,
     strikes: 0,
     away: false,
+    goneAt: null,
     colorSlot: pickColorSlot(
-      s.players.map((p) => colorSlotOf(s, p)),
+      s.players.map((p) => p.colorSlot),
       player.avatar.color,
     ),
   });
@@ -1048,7 +1042,7 @@ function ask(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
   // Nothing but question marks is no question.
   if (!withoutQuestionMark(typed).trim()) fail("invalid_input");
   const q: Question = {
-    n: turnNumber(s),
+    n: s.turnNumber,
     kind: "question",
     by: playerId,
     text: endsWithQuestionMark(typed)
@@ -1091,7 +1085,7 @@ function guess(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
   guardStep(s, ctx);
   if (playerId !== s.turnPlayerId) fail("not_your_turn");
   const g: Guess = {
-    n: turnNumber(s),
+    n: s.turnNumber,
     kind: "guess",
     by: playerId,
     text: cleanText(text, MAX_GUESS),

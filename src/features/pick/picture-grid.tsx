@@ -103,8 +103,6 @@ export function PictureGrid({
             {p.author ? (
               <Avatar
                 avatar={p.author.avatar}
-                isGuest={p.author.isGuest}
-                name={p.author.name}
                 size={18}
                 className="pointer-events-none absolute bottom-1 left-1 shadow-[0_0_0_2px_var(--surface)]"
               />

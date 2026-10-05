@@ -320,8 +320,6 @@ function HostAtWork({ host }: { host: PlayerView }) {
           ))}
       <Avatar
         avatar={host.avatar}
-        isGuest={host.isGuest}
-        name={host.name}
         size={64}
         className="relative ring-4 ring-surface/70"
       />

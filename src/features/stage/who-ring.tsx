@@ -138,12 +138,7 @@ export function WhoRing({
                 transform: "scale(0)",
               }}
             >
-              <Avatar
-                avatar={p.avatar}
-                isGuest={p.isGuest}
-                name={p.name}
-                size={phone ? 34 : 40}
-              />
+              <Avatar avatar={p.avatar} size={phone ? 34 : 40} />
               {lit ? (
                 <span
                   data-ring-lit={lit}

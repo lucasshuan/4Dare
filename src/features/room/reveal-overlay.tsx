@@ -161,14 +161,7 @@ function AnswersReveal({
         }}
         className="flex items-center gap-2 font-medium text-[13px] text-ink-muted"
       >
-        {asker ? (
-          <Avatar
-            avatar={asker.avatar}
-            isGuest={asker.isGuest}
-            name={asker.name}
-            size={28}
-          />
-        ) : null}
+        {asker ? <Avatar avatar={asker.avatar} size={28} /> : null}
         <span>
           {t("asked", {
             n: reveal.n,
@@ -230,14 +223,7 @@ function AnswersReveal({
               )}
             >
               <div className="flex flex-wrap items-center gap-3">
-                {p ? (
-                  <Avatar
-                    avatar={p.avatar}
-                    isGuest={p.isGuest}
-                    name={p.name}
-                    size={32}
-                  />
-                ) : null}
+                {p ? <Avatar avatar={p.avatar} size={32} /> : null}
                 <span className="min-w-24 flex-1 truncate font-semibold">
                   {p ? name(p, p.isYou) : ""}
                 </span>

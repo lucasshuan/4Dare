@@ -29,7 +29,7 @@ export const ident = (id: string, guestNumber = 10): Identity => ({
   isGuest: false,
   name: id,
   guestNumber,
-  avatar: { kind: "color", color: "#DCE8FA" },
+  avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
   lang: "pt",
 });
 

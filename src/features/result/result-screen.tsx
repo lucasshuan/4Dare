@@ -250,8 +250,6 @@ export function ResultScreen() {
                 >
                   <Avatar
                     avatar={p.avatar}
-                    isGuest={p.isGuest}
-                    name={p.name}
                     size={48}
                     seat={p.colorSlot}
                     className="max-sm:size-8 [--ring-gap:var(--canvas)]"

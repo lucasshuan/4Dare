@@ -68,11 +68,7 @@ export function UserMenuPopover({
                   exit={{ opacity: 0, scale: 0.6, rotate: 20 }}
                   transition={{ duration: dur.base, ease: ease.soft }}
                 >
-                  <Avatar
-                    avatar={me.avatar}
-                    isGuest={me.isGuest}
-                    name={me.name}
-                  />
+                  <Avatar avatar={me.avatar} />
                 </m.span>
               </AnimatePresence>
               <div className="flex min-w-0 flex-col">

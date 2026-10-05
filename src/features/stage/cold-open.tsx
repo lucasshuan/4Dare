@@ -264,8 +264,6 @@ function Person({
       <span className="-mt-1.5 h-2.5 w-[3px] rounded-[3px] bg-white/50 sm:h-4" />
       <Avatar
         avatar={player.avatar}
-        isGuest={player.isGuest}
-        name={player.name}
         size={44}
         className="size-[46px] sm:size-16 sm:text-[26px]"
       />

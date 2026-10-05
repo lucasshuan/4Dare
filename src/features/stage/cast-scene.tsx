@@ -467,8 +467,6 @@ export function CastScene({ show }: CastSceneProps) {
               <span className="inline-flex max-w-full items-center gap-3 whitespace-nowrap align-middle">
                 <Avatar
                   avatar={picker.avatar}
-                  isGuest={picker.isGuest}
-                  name={picker.name}
                   size={48}
                   className="max-sm:size-8.5"
                 />
@@ -506,8 +504,6 @@ export function CastScene({ show }: CastSceneProps) {
               <span className="inline-flex max-w-full items-center gap-3.5 whitespace-nowrap align-middle">
                 <Avatar
                   avatar={first.avatar}
-                  isGuest={first.isGuest}
-                  name={first.name}
                   size={64}
                   className="max-sm:size-11"
                 />
@@ -635,13 +631,7 @@ function Column({
         style={{ opacity: p.isYou ? 0 : 1, maxWidth: width + gap }}
         className="flex w-max items-center gap-1.5 whitespace-nowrap font-bold text-[15px] max-sm:text-xs"
       >
-        <Avatar
-          avatar={p.avatar}
-          isGuest={p.isGuest}
-          name={p.name}
-          size={26}
-          className="max-sm:size-5"
-        />
+        <Avatar avatar={p.avatar} size={26} className="max-sm:size-5" />
         <span className="min-w-0 truncate">{p.isYou ? you : name(p)}</span>
       </span>
     </div>
@@ -664,12 +654,7 @@ function Sub({
   return (
     <span className="flex min-w-0 items-center gap-0.75">
       {before.trim() ? <span className="shrink-0">{before.trim()}</span> : null}
-      <Avatar
-        avatar={person.avatar}
-        isGuest={person.isGuest}
-        name={person.name}
-        size={16}
-      />
+      <Avatar avatar={person.avatar} size={16} />
       <span className="min-w-0 truncate">{name(person)}</span>
       {after.trim() ? <span className="shrink-0">{after.trim()}</span> : null}
     </span>

@@ -83,8 +83,6 @@ export function ChatHead({
                   <Avatar
                     key={m.by}
                     avatar={p.avatar}
-                    isGuest={p.isGuest}
-                    name={p.name}
                     size={24}
                     className="-mr-[7px] shadow-[0_0_0_2px_var(--sky)]"
                   />
@@ -146,8 +144,6 @@ function PhoneLine({ line }: { line: ChatMessage | null }) {
             <span key={i}>
               <Avatar
                 avatar={p.avatar}
-                isGuest={p.isGuest}
-                name={p.name}
                 size={18}
                 className="mr-1 align-[-4px]"
               />

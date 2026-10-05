@@ -236,8 +236,6 @@ function Hero({ beat, from }: { beat: Beat; from: "vote" | "typed" }) {
                     <Avatar
                       key={p.id}
                       avatar={p.avatar}
-                      isGuest={p.isGuest}
-                      name={p.name}
                       size={30}
                       className="ring-2 ring-surface/80"
                     />

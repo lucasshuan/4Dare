@@ -1,10 +1,8 @@
 // What each player is allowed to see. This is the only place that decides secrecy.
 
 import type { GameKey } from "./games";
-import { DEFAULT_GAME } from "./games";
 import {
   abandoned,
-  colorSlotOf,
   findPlayer,
   goneFor,
   isPresent,
@@ -12,8 +10,6 @@ import {
   openQuestion,
   pendingGuess,
   presenceDue,
-  stepSeconds,
-  turnNumber,
   validatorOf,
 } from "./helpers";
 import {
@@ -21,7 +17,6 @@ import {
   type AnswerEntry,
   type CardView,
   type Character,
-  DEFAULT_SETTINGS,
   GameError,
   GONE_GRACE_MS,
   type HistoryEntryView,
@@ -35,7 +30,6 @@ import {
   type Reveal,
   type RevealView,
   type RoomPlayer,
-  type RoomSettings,
   type RoomState,
   type RoomView,
   type ShowKind,
@@ -152,7 +146,7 @@ function history(s: RoomState): HistoryEntryView[] {
 function turn(s: RoomState, viewer: PlayerId): TurnView | null {
   if (!TURN.includes(s.phase) || !s.turnPlayerId) return null;
   const base: TurnView = {
-    n: turnNumber(s),
+    n: s.turnNumber,
     playerId: s.turnPlayerId,
     question: null,
     answeredIds: [],
@@ -259,10 +253,7 @@ function isTied(s: RoomState, id: PlayerId) {
 const isShowKind = (kind: Reveal["kind"]): kind is ShowKind =>
   kind === "opening" || kind === "theme" || kind === "cast";
 
-/**
- * A show as the screens get it, with the show still playing before it while
- * that lasts. A theme reveal saved before shows existed is one "theme" beat.
- */
+/** A show as the screens get it, with the show still playing before it while that lasts. */
 function showView(r: Reveal, kind: ShowKind, now: number): ShowView {
   const prev = r.prev;
   return {
@@ -270,9 +261,7 @@ function showView(r: Reveal, kind: ShowKind, now: number): ShowView {
     n: r.n,
     startsAt: r.startsAt,
     until: r.until,
-    beats: r.beats
-      ? r.beats.map((b) => ({ ...b }))
-      : [{ kind: "theme", startsAt: r.startsAt, until: r.until }],
+    beats: (r.beats ?? []).map((b) => ({ ...b })),
     first: r.first ?? false,
     rule: r.rule ?? null,
     prev:
@@ -337,14 +326,6 @@ function reveal(
 }
 
 /** The room as `viewerId` may see it. Throws GameError("not_member") for outsiders. */
-/** Settings minus keys older rooms still carry (one "stepSeconds" became three times). */
-function withoutLegacy(settings: RoomSettings) {
-  const { stepSeconds: _old, ...rest } = settings as RoomSettings & {
-    stepSeconds?: number;
-  };
-  return rest;
-}
-
 export function toView(
   state: RoomState,
   version: number,
@@ -375,7 +356,7 @@ export function toView(
       ready: p.ready,
       status: statusOf(s, p),
       seat,
-      colorSlot: colorSlotOf(s, p),
+      colorSlot: p.colorSlot,
       turnOrder:
         inMatch && s.order.includes(p.id) ? s.order.indexOf(p.id) : null,
       isTurn: TURN.includes(s.phase) && p.id === s.turnPlayerId,
@@ -392,12 +373,10 @@ export function toView(
   return {
     code: s.code,
     phase: s.phase,
-    // Rooms saved before a setting existed show its default.
     // The password only goes to the host, who shares it.
     settings: {
-      ...DEFAULT_SETTINGS,
-      ...withoutLegacy(s.settings),
-      password: viewerId === s.hostId ? (s.settings.password ?? "") : "",
+      ...s.settings,
+      password: viewerId === s.hostId ? s.settings.password : "",
     },
     round: s.round,
     version,
@@ -407,21 +386,16 @@ export function toView(
     theme: s.theme,
     deadline: s.deadline,
     stepStartsAt: s.stepStartsAt,
-    stepMs:
-      s.stepMs ??
-      (s.deadline !== null && s.stepStartsAt !== null
-        ? s.deadline - s.stepStartsAt
-        : null),
+    stepMs: s.stepMs,
     sweepAt: sweepAt(s),
     reveal: reveal(s, viewerId, now),
     serverNow: now,
     vote: voteView(s, viewerId, now),
-    ideas:
-      s.phase === "theming" && viewerId === s.hostId ? (s.ideas ?? []) : null,
+    ideas: s.phase === "theming" && viewerId === s.hostId ? s.ideas : null,
     pick: pick(s, viewerId, now),
     turn: turn(s, viewerId),
     history: history(s),
-    turns: s.turnNumber ?? s.plays.length,
+    turns: s.turnNumber,
     canStart:
       viewerId === s.hostId && s.phase === "lobby" && s.players.length >= 2,
   };
@@ -473,7 +447,7 @@ function sweepAt(s: RoomState): number | null {
 
 /**
  * The room list's summary, or null when the room should not be listed. Private
- * rooms are listed too, locked; older private rooms without a password stay hidden.
+ * rooms are listed too, locked; a private room without a password stays hidden.
  */
 export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
   const s = state;
@@ -499,8 +473,8 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
   }
   return {
     code: s.code,
-    game: s.settings.game ?? DEFAULT_GAME,
-    name: s.settings.name ?? "",
+    game: s.settings.game,
+    name: s.settings.name,
     locked,
     status,
     host: {
@@ -512,10 +486,10 @@ export function toPublicRoom(state: RoomState, now: number): PublicRoom | null {
     },
     players: s.players.length,
     seats: s.settings.seats,
-    voteSeconds: stepSeconds(s.settings, "voteSeconds"),
-    askSeconds: stepSeconds(s.settings, "askSeconds"),
-    guessSeconds: stepSeconds(s.settings, "guessSeconds"),
-    answerSeconds: stepSeconds(s.settings, "answerSeconds"),
-    validateSeconds: stepSeconds(s.settings, "validateSeconds"),
+    voteSeconds: s.settings.voteSeconds,
+    askSeconds: s.settings.askSeconds,
+    guessSeconds: s.settings.guessSeconds,
+    answerSeconds: s.settings.answerSeconds,
+    validateSeconds: s.settings.validateSeconds,
   };
 }

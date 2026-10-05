@@ -264,12 +264,7 @@ export function LobbyScreen() {
                       style={seatWash(p.colorSlot)}
                       className="flex items-center gap-3 rounded-md p-3"
                     >
-                      <Avatar
-                        avatar={p.avatar}
-                        isGuest={p.isGuest}
-                        name={p.name}
-                        seat={p.colorSlot}
-                      />
+                      <Avatar avatar={p.avatar} seat={p.colorSlot} />
                       <div className="flex min-w-0 flex-col">
                         <span className="truncate font-semibold">
                           {name(p, p.isYou)}

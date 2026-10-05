@@ -500,13 +500,7 @@ function OptionCard({
                 transition={{ duration: 0.45, ease: gs.backOut(2.2) }}
                 className="rounded-pill"
               >
-                <Avatar
-                  avatar={p.avatar}
-                  isGuest={p.isGuest}
-                  name={p.name}
-                  size={32}
-                  seat={p.colorSlot}
-                />
+                <Avatar avatar={p.avatar} size={32} seat={p.colorSlot} />
               </m.span>
             ))}
           </AnimatePresence>
