@@ -66,9 +66,9 @@ export function fireConfetti(size: "small" | "big" = "small") {
     box.append(swing);
     layer.append(box);
 
-    const duration = 2600 + (k % 5) * 300;
+    const duration = 1700 + (k % 5) * 200;
     // not tied to the colour, so the pieces don't arrive in coloured rows
-    const delay = Math.abs(scatter(k + 0.5)) * 1000;
+    const delay = Math.abs(scatter(k + 0.5)) * 400;
     const above = (k % 6) * 20;
     const sway = (18 + (k % 4) * 10) * (k % 2 ? 1 : -1);
     const drift = scatter(k + 0.25) * w * 0.1;
