@@ -11,7 +11,7 @@ import {
 } from "next-intl/server";
 import { JaFontLoader } from "@/components/ja-font-loader";
 import { Providers } from "@/components/providers";
-import { APP_NAME } from "@/config";
+import { appName } from "@/config";
 import { routing } from "@/i18n/routing";
 import { hubMessages } from "@/i18n/scopes";
 import { pageMetadata, SITE_URL } from "@/server/seo";
@@ -33,19 +33,20 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) return {};
   const t = await getTranslations({ locale, namespace: "meta" });
+  const name = appName(locale);
   return {
     metadataBase: new URL(SITE_URL),
-    applicationName: APP_NAME,
+    applicationName: name,
     keywords: t("keywords").split(", "),
-    creator: APP_NAME,
-    publisher: APP_NAME,
+    creator: name,
+    publisher: name,
     category: "games",
     formatDetection: { telephone: false, email: false, address: false },
-    appleWebApp: { title: APP_NAME, capable: true },
+    appleWebApp: { title: name, capable: true },
     ...pageMetadata({
       lang: locale,
       path: "/",
-      title: { default: t("title"), template: `%s · ${APP_NAME}` },
+      title: { default: t("title"), template: `%s · ${name}` },
       description: t("description"),
       shareTitle: t("title"),
     }),

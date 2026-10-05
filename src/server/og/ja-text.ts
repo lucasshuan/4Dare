@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { APP_NAME } from "@/config";
+import { appName } from "@/config";
 import common from "../../../messages/ja/common.json";
 import home from "../../../messages/ja/home.json";
 import meta from "../../../messages/ja/meta.json";
@@ -27,7 +27,7 @@ export function jaShareText(): string {
     ...strings(meta),
     ...strings(home.games.whoAmI),
     ...strings(common.answers),
-    APP_NAME,
+    appName("ja"),
     art,
   ].join("");
   return [...new Set(text)].filter((c) => c >= " ").join("");

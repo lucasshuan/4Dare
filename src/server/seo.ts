@@ -1,7 +1,7 @@
 import "server-only";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { APP_NAME } from "@/config";
+import { appName } from "@/config";
 import type { Lang } from "@/game/types";
 import { routing } from "@/i18n/routing";
 import type { OgText } from "./og/art";
@@ -47,15 +47,17 @@ export function pageMetadata({
   path,
   title,
   description,
-  shareTitle = typeof title === "string" ? `${title} · ${APP_NAME}` : title,
+  shareTitle = typeof title === "string"
+    ? `${title} · ${appName(lang)}`
+    : title,
   index = true,
 }: {
   lang: Lang;
   path: string;
-  /** The tab title; the layout adds " · 4Dare". */
+  /** The tab title; the layout adds " · 4Dare" (" · 4だれ" in Japanese). */
   title: Metadata["title"];
   description: string;
-  /** The title in embeds; by default the tab title with " · 4Dare". */
+  /** The title in embeds; by default the tab title with the site's name. */
   shareTitle?: Metadata["title"];
   /** Rooms and the profile stay out of search results, but still embed. */
   index?: boolean;
@@ -69,7 +71,7 @@ export function pageMetadata({
     },
     openGraph: {
       type: "website",
-      siteName: APP_NAME,
+      siteName: appName(lang),
       locale: OG_LOCALE[lang],
       alternateLocale: routing.locales
         .filter((l) => l !== lang)

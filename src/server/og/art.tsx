@@ -2,7 +2,7 @@ import "server-only";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ReactNode } from "react";
-import { APP_NAME } from "@/config";
+import { appName } from "@/config";
 import type { Lang } from "@/game/types";
 import { critterDataUri } from "../critter-art";
 import { FONT } from "./fonts";
@@ -644,7 +644,7 @@ export function InviteArt({
               color: "#FFFFFF",
             }}
           >
-            {`${text.game} · ${APP_NAME}`}
+            {`${text.game} · ${appName(lang)}`}
           </div>
         </div>
       </div>

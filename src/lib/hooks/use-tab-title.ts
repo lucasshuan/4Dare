@@ -1,8 +1,9 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { useEffect } from "react";
 import { FOUR } from "@/components/ui/logo";
-import { APP_NAME } from "@/config";
+import { appName } from "@/config";
 import { formatClock, isLowClock } from "@/lib/names";
 
 /** The app icon with a "!" in the 4 bubble, on a `fill` background. */
@@ -57,6 +58,7 @@ export function useTabTitle(
   alert: string | null,
   { deadline, stepStartsAt, stepMs, offset }: TabClock,
 ) {
+  const name = appName(useLocale());
   useEffect(() => {
     let icon: string | null = null;
     let undoIcon: (() => void) | null = null;
@@ -76,9 +78,7 @@ export function useTabTitle(
       const low =
         running && isLowClock(left ?? 0, stepMs ?? deadline - stepStartsAt);
       const clock = left === null ? null : formatClock(left);
-      const next = [clock, alert ?? title, APP_NAME]
-        .filter(Boolean)
-        .join(" · ");
+      const next = [clock, alert ?? title, name].filter(Boolean).join(" · ");
       if (document.title !== next) document.title = next;
       setIcon(alert && isAway() ? (low ? LOW_ICON : ALERT_ICON) : null);
     };
@@ -95,5 +95,5 @@ export function useTabTitle(
       window.removeEventListener("blur", tick);
       setIcon(null);
     };
-  }, [title, alert, deadline, stepStartsAt, stepMs, offset]);
+  }, [title, alert, name, deadline, stepStartsAt, stepMs, offset]);
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { APP_NAME } from "@/config";
+import { appName } from "@/config";
 import { HomeScreen } from "@/features/home/home-screen";
 import type { Lang } from "@/game/types";
 import {
@@ -31,7 +31,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   const site = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: APP_NAME,
+    name: appName(locale),
     url: `${SITE_URL}${localePath(locale, "/")}`,
     description: t("description"),
     inLanguage: HREFLANG[locale],
