@@ -5,6 +5,7 @@ import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import { CardBack, frameStyle } from "@/components/ui/card-frame";
 import { fireConfetti } from "@/components/ui/confetti";
 import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
@@ -226,7 +227,11 @@ function GuessResult({
   );
 }
 
-/** The guesser's card: "?" on the front, the character on the back. */
+/** A white ring and a lift: the card stands off a scene in its own colour. */
+const LIFT =
+  "shadow-[inset_0_0_0_2px_rgba(255,255,255,0.5),0_0_0_3px_rgba(255,255,255,0.75),0_24px_56px_rgba(30,36,51,0.3)]";
+
+/** The guesser's card: its back first, then the character turning up. */
 function FlipCard({
   flipped,
   card,
@@ -255,29 +260,30 @@ function FlipCard({
         transition={{ duration: dur.reveal, ease: ease.swap }}
         className="relative transform-3d"
       >
+        {/* face down: the back, ringed in white so it stands off the scene in the same colour */}
+        <CardBack
+          seat={seat}
+          logo
+          className={cn("rounded-xl backface-hidden", LIFT)}
+        />
+        {/* face up: the collectible, in the guesser's frame */}
         <div
-          className="flex aspect-4/5 items-center justify-center rounded-xl font-display font-extrabold text-[96px] shadow-pop backface-hidden"
-          style={{
-            backgroundColor: `color-mix(in oklab, ${onSeat(seat)} 16%, ${seatColor(seat)})`,
-            boxShadow: `inset 0 0 0 3px color-mix(in oklab, ${onSeat(seat)} 40%, transparent)`,
-          }}
-        >
-          ?
-        </div>
-        <div
+          style={frameStyle(seat)}
           className={cn(
-            "absolute inset-0 flex flex-col gap-2 rounded-xl bg-surface p-2 text-ink shadow-pop backface-hidden rotate-y-180",
+            "q-marks absolute inset-0 flex flex-col rounded-xl p-2 backface-hidden rotate-y-180",
+            LIFT,
             hit && "outline-[3px] outline-yes outline-solid",
           )}
         >
-          <Portrait
-            src={card?.imageUrl ?? null}
-            tone="other"
-            className="flex-1"
-          />
-          <span className="truncate px-1 font-bold font-display text-lg">
-            {card?.name}
-          </span>
+          <div className="flex min-h-0 flex-1 flex-col gap-1.5 rounded-[14px] bg-surface p-1.5 text-ink">
+            <Portrait
+              src={card?.imageUrl ?? null}
+              className="aspect-auto min-h-0 flex-1 rounded-[10px]"
+            />
+            <span className="truncate px-1 font-bold font-display text-lg leading-tight">
+              {card?.name}
+            </span>
+          </div>
         </div>
       </m.div>
     </m.div>

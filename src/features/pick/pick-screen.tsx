@@ -13,7 +13,7 @@ import {
   useState,
 } from "react";
 import { keyClass } from "@/components/ui/button";
-import { useWithNames } from "@/components/ui/player-name";
+import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
@@ -427,6 +427,8 @@ function PickTable() {
               onChange={change}
               lang={lang}
               targetName={displayName(target, false)}
+              owner={<PlayerName player={target} />}
+              seat={target.colorSlot}
               state={state}
               stamp={timeUp}
               onNewImage={(image, replaces) =>
@@ -515,6 +517,7 @@ function PickTable() {
           phone={phone}
           open={editing}
           timeUp={timeUp}
+          seat={target.colorSlot}
           onPick={(card) =>
             change({ kind: "picked", card: toCard(card), via: "hand" })
           }

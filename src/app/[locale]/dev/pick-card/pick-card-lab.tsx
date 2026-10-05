@@ -155,6 +155,8 @@ export function PickCardLab({
         }}
         lang={lang}
         targetName={target}
+        owner={target}
+        seat={1}
         state={state}
         stamp={stamp}
         onNewImage={async (file) => {

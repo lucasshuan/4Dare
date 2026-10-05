@@ -3,6 +3,7 @@
 import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
+import { FrameSeal, frameStyle } from "@/components/ui/card-frame";
 import type { CardContent } from "@/game/character-search";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -24,14 +25,18 @@ const sticker =
 /**
  * The pick card, which is the form: the picture (ghost preview, flip, drop,
  * inline crop, swap tray), the name field with its list, the origin line and
- * the "New!" seal. Props-driven: the screen owns the content and saves it.
- * Width 224 on phones, 270 from `sm` (override with `className`).
+ * the "New!" seal, on a white panel in the collectible's frame: the target's
+ * colour, with their avatar and name. Props-driven: the screen owns the
+ * content and saves it. Width 224 on phones, 270 from `sm` (override with
+ * `className`).
  */
 export function PickCard({
   value,
   onChange,
   lang,
   targetName,
+  owner,
+  seat,
   state,
   stamp,
   onNewImage,
@@ -45,6 +50,10 @@ export function PickCard({
   lang: Lang;
   /** The target's display name, for the field's label "Character for {name}". */
   targetName: string;
+  /** The target on the frame (their avatar and name). */
+  owner: ReactNode;
+  /** The target's colour slot: the frame's colour. */
+  seat: number | null;
   /** confirmed / timeUp: read-only, scale 1.08 from the top. */
   state: PickCardState;
   /** "Time! That's the one." slammed over the card. */
@@ -86,35 +95,41 @@ export function PickCard({
         duration: state === "timeUp" ? 0.4 : 0.5,
         ease: gs.backOut(2),
       }}
-      style={{ transformOrigin: "50% 0%" }}
+      style={{ transformOrigin: "50% 0%", ...frameStyle(seat) }}
       className={cn(
-        "relative z-[5] flex w-[224px] flex-col gap-2.5 rounded-[28px] bg-surface px-3 pt-3 pb-4 shadow-pop sm:w-[270px]",
+        "q-marks relative z-[5] flex w-[224px] flex-col gap-2 rounded-[26px] px-2.5 pt-2 pb-2.5 shadow-pop sm:w-[270px]",
         className,
       )}
     >
-      <CardPicture
-        value={value}
-        onChange={onChange}
-        editable={editing}
-        compact={focused && editing}
-        onNewImage={onNewImage}
-        onLibraryImage={onLibraryImage}
-      />
-      <CardNameField
-        value={value}
-        onChange={onChange}
-        lang={lang}
-        label={tPick("searchLabel", { name: targetName })}
-        readOnly={!editing}
-        autoFocus={autoFocus}
-        onFocusChange={(on) => {
-          setFocused(on);
-          onFocusChange?.(on);
-        }}
-      />
-      <span className="mx-1 min-h-[18px] text-balance font-medium text-[13px] text-ink-muted leading-[18px]">
-        {origin}
-      </span>
+      <div className="flex min-h-7 items-center justify-between gap-2 px-1.5 font-bold text-[14px] leading-tight">
+        <span className="min-w-0 truncate">{owner}</span>
+        <FrameSeal />
+      </div>
+      <div className="flex flex-col gap-2.5 rounded-[18px] bg-surface px-2 pt-2 pb-3.5 text-ink">
+        <CardPicture
+          value={value}
+          onChange={onChange}
+          editable={editing}
+          compact={focused && editing}
+          onNewImage={onNewImage}
+          onLibraryImage={onLibraryImage}
+        />
+        <CardNameField
+          value={value}
+          onChange={onChange}
+          lang={lang}
+          label={tPick("searchLabel", { name: targetName })}
+          readOnly={!editing}
+          autoFocus={autoFocus}
+          onFocusChange={(on) => {
+            setFocused(on);
+            onFocusChange?.(on);
+          }}
+        />
+        <span className="mx-1 min-h-[18px] text-balance font-medium text-[13px] text-ink-muted leading-[18px]">
+          {origin}
+        </span>
+      </div>
 
       <AnimatePresence initial={false}>
         {value.kind === "new" ? (

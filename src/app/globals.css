@@ -78,6 +78,8 @@
   --on-brand: #ffffff;
   /* how strongly a step's colour washes the canvas (StageBackdrop) */
   --wash-mix: 20%;
+  /* the bands around a wide picture: its own hue at this lightness (Portrait) */
+  --pic-band-l: 0.86;
   --scrim: rgba(18, 22, 31, 0.45);
   --shadow-card-value:
     0 1px 2px rgba(30, 36, 51, 0.06), 0 10px 28px rgba(30, 36, 51, 0.08);
@@ -130,6 +132,7 @@
   --seat-soft-mix: 24%;
   --brand-stage: #1d4a93;
   --wash-mix: 26%;
+  --pic-band-l: 0.4;
   --scrim: rgba(0, 0, 0, 0.6);
   --shadow-card-value:
     0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35);
@@ -339,3 +342,10 @@ body {
   }
 }
 /* biome-ignore-end lint/complexity/noImportantStyles: see above */
+
+/* The game's "?" marks scattered over a coloured ground: card frames, a wide picture's bands. */
+@utility q-marks {
+  background-image: url("/patterns/q-marks.svg");
+  background-size: 72px 72px;
+  background-position: center;
+}

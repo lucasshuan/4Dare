@@ -1,12 +1,15 @@
 import type { ComponentProps, ReactNode } from "react";
 import { thumbUrl } from "@/game/character-search";
 import { cn } from "@/lib/cn";
+import { frameStyle } from "./card-frame";
 import { Portrait } from "./portrait";
 
 /**
- * A small character card: picture, name, an optional line under it. The
- * stage's cards (cold open, the rule's ✓✓✗, the pick hand, the cast table)
- * share it; each scene sets the width and moves it around.
+ * A small character card: picture, name, an optional line under it, in the
+ * collectible's frame (the colour of the player whose card it is, the brand
+ * blue for a card nobody holds). The stage's cards (cold open, the rule's
+ * ✓✓✗, the pick hand, the cast table) share it; each scene sets the width
+ * and moves it around.
  */
 export function MiniCard({
   image,
@@ -14,6 +17,7 @@ export function MiniCard({
   name,
   sub,
   width,
+  seat,
   badge,
   className,
   style,
@@ -28,29 +32,36 @@ export function MiniCard({
   sub?: ReactNode;
   /** Card width in px. */
   width: number;
+  /** The colour slot of the player whose card it is: the frame's colour. */
+  seat?: number | null;
   /** Pinned over the top right corner (the rule's ✓ and ✗). */
   badge?: ReactNode;
 } & Omit<ComponentProps<"div">, "children">) {
   return (
     <div
       {...rest}
-      style={{ width, ...style }}
+      style={{ width, ...frameStyle(seat), ...style }}
       className={cn(
-        "relative flex shrink-0 flex-col gap-1.25 rounded-md bg-surface px-1.5 pt-1.5 pb-2 shadow-card",
+        "q-marks relative flex shrink-0 flex-col rounded-[14px] p-[5px] shadow-card",
         className,
       )}
     >
-      {face ?? (
-        <Portrait src={thumbUrl(image, width * 2)} className="rounded-[11px]" />
-      )}
-      <b className="truncate px-0.75 font-bold text-[12.5px] leading-[1.15]">
-        {name}
-      </b>
-      {sub ? (
-        <small className="flex items-center gap-0.75 px-0.75 font-semibold text-[11px] text-ink-muted leading-normal">
-          {sub}
-        </small>
-      ) : null}
+      <div className="flex min-w-0 flex-1 flex-col gap-1.25 rounded-[10px] bg-surface px-1 pt-1 pb-2 text-ink">
+        {face ?? (
+          <Portrait
+            src={thumbUrl(image, width * 2)}
+            className="rounded-[7px]"
+          />
+        )}
+        <b className="truncate px-0.75 font-bold text-[12.5px] leading-[1.15]">
+          {name}
+        </b>
+        {sub ? (
+          <small className="flex items-center gap-0.75 px-0.75 font-semibold text-[11px] text-ink-muted leading-normal">
+            {sub}
+          </small>
+        ) : null}
+      </div>
       {badge ? (
         <span className="absolute -top-2.5 -right-2.5">{badge}</span>
       ) : null}

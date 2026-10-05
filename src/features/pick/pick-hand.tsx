@@ -38,6 +38,7 @@ export function PickHand({
   phone,
   open,
   timeUp,
+  seat,
   onPick,
 }: {
   /** The cards to show (already drawn for this viewer). */
@@ -49,6 +50,8 @@ export function PickHand({
   open: boolean;
   /** Out of time: it leaves a little quicker. */
   timeUp: boolean;
+  /** The target's colour slot: the cards are framed as theirs. */
+  seat: number;
   onPick: (card: HandCard) => void;
 }) {
   const t = useTranslations("pickCard");
@@ -104,6 +107,7 @@ export function PickHand({
                   image={card.imageUrl}
                   name={card.name}
                   width={width}
+                  seat={seat}
                   className="text-left"
                   sub={
                     likes ? (

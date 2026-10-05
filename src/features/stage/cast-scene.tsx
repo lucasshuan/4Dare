@@ -4,6 +4,7 @@ import type { AnimationSequence } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import { CardBack } from "@/components/ui/card-frame";
 import { MiniCard } from "@/components/ui/mini-card";
 import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
@@ -571,20 +572,16 @@ function Column({
   sub: ReactNode;
 }) {
   const name = useDisplayName();
-  const radius = phone ? 10 : 16;
   const face = p.cardHidden ? (
-    <span
+    <CardBack
       data-cast-face
-      className="flex aspect-4/5 w-full items-center justify-center bg-sky-soft font-display font-extrabold text-sky leading-none"
-      style={{ fontSize: phone ? 46 : 84, borderRadius: radius }}
-    >
-      ?
-    </span>
+      seat={p.colorSlot}
+      className={phone ? "rounded-[7px]" : "rounded-[10px]"}
+    />
   ) : (
     <Portrait
       src={thumbUrl(p.card?.imageUrl ?? null, width * 2)}
-      tone="other"
-      className={phone ? "rounded-[10px]" : "rounded-[16px]"}
+      className={phone ? "rounded-[7px]" : "rounded-[10px]"}
     />
   );
   return (
@@ -606,6 +603,7 @@ function Column({
         data-cast-card
         image={null}
         width={width}
+        seat={p.colorSlot}
         face={
           <>
             {face}
@@ -613,7 +611,7 @@ function Column({
             <span
               data-cast-ring
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 rounded-[inherit]"
+              className="pointer-events-none absolute inset-0 rounded-[14px]"
               style={{
                 opacity: 0,
                 boxShadow: `0 0 0 4px color-mix(in oklab, ${seatColor(p.colorSlot)} 90%, transparent), 0 24px 56px rgba(30,36,51,.2)`,

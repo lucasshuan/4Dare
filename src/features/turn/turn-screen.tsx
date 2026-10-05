@@ -7,8 +7,9 @@ import { Fragment, type ReactNode, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { CardBack, frameStyle } from "@/components/ui/card-frame";
 import { CharacterCard } from "@/components/ui/character-card";
-import { useWithNames } from "@/components/ui/player-name";
+import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { TextArea, TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
@@ -130,9 +131,8 @@ export function TurnScreen() {
         focus.card?.origin,
         picker?.isYou ? t("card.youPicked") : pickedBy,
       ]);
-  const label = focus.isYou
-    ? t("card.yours")
-    : withNames((n) => t("card.theirs", { name: n(focus) }));
+  // the frame says whose card it is: their avatar and name
+  const owner = <PlayerName player={focus} isYou={focus.isYou} />;
 
   return (
     // small muted text sits on the seat's wash here: a touch darker (lighter in dark) keeps it at 4.5:1
@@ -177,15 +177,15 @@ export function TurnScreen() {
                     className="max-lg:hidden"
                     card={focus.card}
                     hidden={focus.cardHidden}
-                    tone={focus.isYou ? "you" : "other"}
-                    label={label}
+                    owner={owner}
+                    seat={focus.colorSlot}
                     title={t("card.whoAreYou")}
                     meta={meta}
                     found={focus.discoveredAt !== null}
                   />
                   <FocusRow
                     focus={focus}
-                    label={label}
+                    owner={owner}
                     title={t("card.whoAreYou")}
                     meta={meta}
                   />
@@ -258,39 +258,33 @@ function Rise({ at, children }: { at: number | null; children: ReactNode }) {
 /** Phones: the focus card as one compact row, so the action stays on screen. */
 function FocusRow({
   focus,
-  label,
+  owner,
   title,
   meta,
 }: {
   focus: PlayerView;
-  label: ReactNode;
+  owner: ReactNode;
   title: string;
   meta: ReactNode;
 }) {
   return (
     <div className="flex items-center gap-3 rounded-lg bg-surface p-2 shadow-card lg:hidden">
-      <span className="w-20 shrink-0">
+      {/* the card, small, in its frame */}
+      <span
+        style={frameStyle(focus.colorSlot)}
+        className="q-marks w-20 shrink-0 rounded-[14px] p-1"
+      >
         {focus.cardHidden ? (
-          <span className="flex aspect-4/5 items-center justify-center rounded-md bg-sky-soft font-display font-extrabold text-5xl text-sky">
-            ?
-          </span>
+          <CardBack seat={focus.colorSlot} className="rounded-[10px]" />
         ) : (
           <Portrait
             src={focus.card?.imageUrl ?? null}
-            tone={focus.isYou ? "you" : "other"}
-            className="rounded-md"
+            className="rounded-[10px]"
           />
         )}
       </span>
       <span className="flex min-w-0 flex-col gap-1">
-        <span
-          className={cn(
-            "self-start rounded-pill px-2.5 py-0.5 font-semibold text-xs",
-            focus.isYou ? "bg-sky-soft" : "bg-apricot-soft",
-          )}
-        >
-          {label}
-        </span>
+        <span className="truncate font-semibold text-[13px]">{owner}</span>
         <span className="truncate font-bold font-display text-xl">
           {focus.cardHidden ? title : focus.card?.name}
         </span>
