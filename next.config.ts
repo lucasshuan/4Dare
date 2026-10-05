@@ -9,8 +9,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 // never runs in local mode, so the build leaves local mode out.
 const supabaseKeys = !!(
   (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) &&
-  (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 );
 
 // "motion/react" is `export * from "framer-motion"` plus `const motion = fm.motion`:
