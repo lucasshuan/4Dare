@@ -10,6 +10,7 @@ import {
   Link as LinkIcon,
   Lock,
   PenLine,
+  Settings,
   UsersRound,
   Vote,
   X,
@@ -421,8 +422,9 @@ export function LobbyScreen() {
                 setDraft(editable(view.settings));
                 setEditing(true);
               }}
-              className="self-start font-semibold text-sky text-sm underline underline-offset-2"
+              className="inline-flex items-center gap-1.5 self-start font-semibold text-sky text-sm underline underline-offset-2"
             >
+              <Settings className="size-4" strokeWidth={2} />
               {t("editSettings")}
             </button>
           ) : null}
