@@ -1,6 +1,8 @@
+import { useLocale } from "next-intl";
 import type { ComponentProps, CSSProperties } from "react";
 import { cn } from "@/lib/cn";
 import { onSeat, seatColor } from "@/lib/seats";
+import { logoFile } from "./logo";
 
 /**
  * A character card's frame: the colour of the player whose card it is (the
@@ -47,6 +49,7 @@ export function CardBack({
   logo?: boolean;
 } & Omit<ComponentProps<"span">, "children">) {
   const frame = frameStyle(seat);
+  const locale = useLocale();
   return (
     <span
       {...rest}
@@ -66,7 +69,7 @@ export function CardBack({
       {logo ? (
         <span className="mt-[7cqw] flex rounded-pill bg-white px-[5cqw] py-[2.4cqw] shadow-[0_6px_16px_rgba(15,30,70,0.25)]">
           {/* biome-ignore lint/performance/noImgElement: the static brand file, in its own colours on any theme */}
-          <img src="/brand/logo.svg" alt="" className="h-[6.5cqw] w-auto" />
+          <img src={logoFile(locale)} alt="" className="h-[6.5cqw] w-auto" />
         </span>
       ) : null}
     </span>

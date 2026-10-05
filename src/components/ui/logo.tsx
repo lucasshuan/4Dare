@@ -1,9 +1,12 @@
+import { useLocale } from "next-intl";
 import { cn } from "@/lib/cn";
 
 // The 4Dare logo, drawn from Bricolage Grotesque ExtraBold. The 4 is a speech
 // bubble: its leg is the bubble's tail and a "?" sits inside, then "Dare" in four
-// colours, each letter a little tilted. Brand blue and butter stay the same in
-// both themes; the letters follow the theme. Static copies live in public/brand.
+// colours, each letter a little tilted. In Japanese the name is だれ ("who"),
+// from Zen Maru Gothic Black, thickened by a stroke of its own colour to match.
+// Brand blue and butter stay the same in both themes; the letters follow the
+// theme. Static copies live in public/brand (logo.svg, logo-ja.svg).
 
 export const FOUR =
   "M525 0L640 0Q700 0 700 60L700 489Q700 505 716 505L776 505Q820 505 820 549L820 611Q820 655 776 655L716 655Q700 655 688 665L511 809Q485 830 493 797L521 671Q525 655 509 655L70 655Q0 655 0 585L0 545Q0 465 61 414Q254 254 427 46Q465 0 525 0Z";
@@ -27,6 +30,29 @@ const LETTERS = [
     "var(--sky)",
   ],
 ] as const;
+
+/** だれ: た, its dakuten, れ. */
+const LETTERS_JA = [
+  [
+    "M961 690Q942 680 936 660Q929 639 938 621Q970 556 991 476Q1012 396 1020 314Q1001 317 983 320Q966 323 951 324Q930 327 913 315Q896 303 893 281Q891 260 904 244Q916 227 938 225Q960 222 981 219Q1003 216 1025 212Q1025 173 1022 140Q1019 118 1032 102Q1045 85 1066 83Q1087 80 1104 93Q1121 106 1122 128Q1124 143 1125 158Q1126 174 1125 191Q1144 186 1160 183Q1180 176 1199 186Q1217 196 1223 216Q1229 237 1219 255Q1209 273 1188 279Q1174 283 1157 287Q1140 290 1121 295Q1116 360 1104 428Q1091 495 1073 557Q1055 619 1030 667Q1020 685 1000 692Q980 699 961 690ZM1441 643Q1335 676 1259 656Q1183 637 1148 578Q1137 560 1141 539Q1146 518 1163 507Q1181 496 1202 500Q1223 505 1234 522Q1252 550 1296 558Q1340 566 1413 544Q1433 538 1452 548Q1471 559 1476 580Q1483 600 1472 618Q1462 636 1441 643ZM1389 387Q1367 382 1338 383Q1308 383 1278 386Q1247 389 1222 395Q1202 400 1184 390Q1166 380 1162 360Q1156 341 1166 323Q1177 304 1197 299Q1229 291 1266 287Q1303 283 1340 283Q1377 283 1405 288Q1426 291 1438 308Q1450 325 1446 345Q1443 365 1426 377Q1409 389 1389 387Z",
+    "var(--apricot)",
+  ],
+  [
+    "M1428 230Q1419 241 1404 242Q1389 243 1378 232Q1371 225 1355 211Q1340 197 1330 187Q1322 179 1322 167Q1322 154 1330 144Q1338 135 1350 133Q1362 131 1373 137Q1385 145 1401 157Q1417 169 1427 180Q1437 191 1437 205Q1438 218 1428 230ZM1440 162Q1431 155 1415 143Q1399 131 1388 122Q1380 115 1378 103Q1376 90 1383 79Q1390 69 1402 66Q1413 63 1425 69Q1438 75 1455 85Q1472 96 1483 106Q1494 116 1496 129Q1498 143 1489 155Q1481 167 1466 169Q1451 171 1440 162Z",
+    "var(--yes)",
+  ],
+  [
+    "M1708 691Q1688 690 1674 674Q1660 659 1661 639L1667 523Q1659 535 1652 545Q1645 555 1639 563Q1627 581 1606 585Q1585 588 1567 576Q1551 563 1548 542Q1545 521 1559 504Q1581 475 1612 436Q1642 397 1676 357L1680 287Q1671 289 1657 292Q1643 296 1630 299Q1618 302 1613 303Q1592 307 1575 294Q1558 282 1554 261Q1550 240 1563 223Q1576 206 1596 202Q1604 200 1618 198Q1633 196 1647 194Q1662 191 1671 190Q1675 189 1678 189Q1682 188 1685 188L1690 100Q1691 79 1706 65Q1722 52 1742 53Q1762 54 1777 69Q1791 84 1789 105L1784 206Q1796 215 1804 230Q1806 232 1806 233Q1807 234 1808 236Q1838 215 1869 203Q1900 192 1931 193Q2011 197 2041 251Q2072 304 2048 410Q2037 457 2032 484Q2027 511 2026 525Q2025 538 2027 543Q2030 548 2034 550Q2047 559 2062 553Q2077 547 2097 531Q2114 517 2136 522Q2157 526 2169 543Q2182 560 2179 581Q2176 603 2159 616Q2109 658 2055 663Q2002 667 1962 641Q1926 616 1921 568Q1916 520 1937 437Q1953 377 1954 347Q1955 316 1945 304Q1935 293 1917 292Q1899 291 1875 304Q1852 318 1827 340Q1801 363 1774 392L1761 644Q1760 664 1745 678Q1729 692 1708 691Z",
+    "var(--sky)",
+  ],
+] as const;
+
+/** Width of each logo's viewBox (both are 838 tall). */
+export const LOGO_WIDTH = { en: 2880, ja: 2201 } as const;
+
+/** The static logo for a language: the Japanese one spells だれ. */
+export const logoFile = (lang: string) =>
+  lang === "ja" ? "/brand/logo-ja.svg" : "/brand/logo.svg";
 
 export const BRAND = { blue: "#2B69C8", butter: "#F6E3A1" } as const;
 
@@ -76,19 +102,29 @@ export function LogoMark({
   );
 }
 
-/** Full logo. Size it by height (`h-9 w-auto`); it shrinks to fit a narrower parent. */
+/** Full logo, だれ on Japanese pages. Size it by height (`h-9 w-auto`); it shrinks to fit a narrower parent. */
 export function Logo({ className }: { className?: string }) {
+  const ja = useLocale() === "ja";
   return (
     <svg
-      viewBox="-4 -4 2880 838"
+      viewBox={`-4 -4 ${ja ? LOGO_WIDTH.ja : LOGO_WIDTH.en} 838`}
       role="img"
-      aria-label="4Dare"
+      aria-label={ja ? "4だれ" : "4Dare"}
       className={cn("max-w-full overflow-visible", className)}
     >
       <Mark />
-      {LETTERS.map(([d, fill]) => (
-        <path key={fill} fill={fill} d={d} />
-      ))}
+      {ja
+        ? LETTERS_JA.map(([d, fill]) => (
+            <path
+              key={fill}
+              fill={fill}
+              stroke={fill}
+              strokeWidth={22}
+              strokeLinejoin="round"
+              d={d}
+            />
+          ))
+        : LETTERS.map(([d, fill]) => <path key={fill} fill={fill} d={d} />)}
     </svg>
   );
 }

@@ -34,10 +34,13 @@ const SHADOW = "0 2px 6px rgba(30,36,51,0.08), 0 24px 56px rgba(30,36,51,0.16)";
 
 const brand = (file: string) =>
   `data:image/svg+xml;base64,${readFileSync(join(process.cwd(), "public/brand", file)).toString("base64")}`;
-const LOGO = brand("logo.svg");
 const ICON = brand("icon.svg");
-/** logo.svg's viewBox is 2880×838. */
-const LOGO_RATIO = 2880 / 838;
+/** The logo for the image's language (だれ in Japanese), and its viewBox's width over height. */
+const LOGO = {
+  en: { src: brand("logo.svg"), ratio: 2880 / 838 },
+  ja: { src: brand("logo-ja.svg"), ratio: 2201 / 838 },
+};
+const logoOf = (lang: Lang) => (lang === "ja" ? LOGO.ja : LOGO.en);
 
 const critter = critterDataUri;
 
@@ -397,8 +400,8 @@ export function HomeArt({ text }: { text: OgText }) {
       >
         {/* biome-ignore lint/performance/noImgElement: satori only knows <img> */}
         <img
-          src={LOGO}
-          width={logoHeight * LOGO_RATIO}
+          src={logoOf(lang).src}
+          width={logoHeight * logoOf(lang).ratio}
           height={logoHeight}
           alt=""
         />
@@ -439,7 +442,12 @@ export function GameArt({ text }: { text: OgText }) {
         }}
       >
         {/* biome-ignore lint/performance/noImgElement: satori only knows <img> */}
-        <img src={LOGO} width={64 * LOGO_RATIO} height={64} alt="" />
+        <img
+          src={logoOf(lang).src}
+          width={64 * logoOf(lang).ratio}
+          height={64}
+          alt=""
+        />
         <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
           <div
             style={{
