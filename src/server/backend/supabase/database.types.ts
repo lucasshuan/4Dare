@@ -16,16 +16,19 @@ export type Database = {
     Tables: {
       character_image_picks: {
         Row: {
+          chosen: boolean;
           created_at: string;
           image_id: string;
           player_id: string;
         };
         Insert: {
+          chosen?: boolean;
           created_at?: string;
           image_id: string;
           player_id: string;
         };
         Update: {
+          chosen?: boolean;
           created_at?: string;
           image_id?: string;
           player_id?: string;
@@ -74,8 +77,11 @@ export type Database = {
           created_at: string;
           created_by: string | null;
           id: string;
+          keeps: number;
           moderation: Json | null;
           picks: number;
+          reports: number;
+          score: number | null;
           status: string;
           url: string;
         };
@@ -86,8 +92,11 @@ export type Database = {
           created_at?: string;
           created_by?: string | null;
           id?: string;
+          keeps?: number;
           moderation?: Json | null;
           picks?: number;
+          reports?: number;
+          score?: number | null;
           status?: string;
           url: string;
         };
@@ -98,8 +107,11 @@ export type Database = {
           created_at?: string;
           created_by?: string | null;
           id?: string;
+          keeps?: number;
           moderation?: Json | null;
           picks?: number;
+          reports?: number;
+          score?: number | null;
           status?: string;
           url?: string;
         };
@@ -423,6 +435,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      whoami_fit_votes: {
+        Row: {
+          character_id: string;
+          fits: boolean;
+          lang: string;
+          theme_id: string;
+          voted_at: string;
+          voter_id: string;
+        };
+        Insert: {
+          character_id: string;
+          fits: boolean;
+          lang: string;
+          theme_id: string;
+          voted_at?: string;
+          voter_id: string;
+        };
+        Update: {
+          character_id?: string;
+          fits?: boolean;
+          lang?: string;
+          theme_id?: string;
+          voted_at?: string;
+          voter_id?: string;
+        };
+        Relationships: [];
+      };
       whoami_pick_feedback: {
         Row: {
           character_id: string;
@@ -447,19 +486,49 @@ export type Database = {
         };
         Relationships: [];
       };
+      whoami_theme_pickers: {
+        Row: {
+          character_id: string;
+          lang: string;
+          picked_at: string;
+          picker_id: string;
+          suggested: boolean;
+          theme_id: string;
+        };
+        Insert: {
+          character_id: string;
+          lang: string;
+          picked_at?: string;
+          picker_id: string;
+          suggested?: boolean;
+          theme_id: string;
+        };
+        Update: {
+          character_id?: string;
+          lang?: string;
+          picked_at?: string;
+          picker_id?: string;
+          suggested?: boolean;
+          theme_id?: string;
+        };
+        Relationships: [];
+      };
       whoami_theme_starters: {
         Row: {
           character_id: string;
+          lang: string;
           position: number;
           theme_id: string;
         };
         Insert: {
           character_id: string;
+          lang?: string;
           position: number;
           theme_id: string;
         };
         Update: {
           character_id?: string;
+          lang?: string;
           position?: number;
           theme_id?: string;
         };
@@ -693,10 +762,20 @@ export type Database = {
         Args: { p_from: string; p_to: string };
         Returns: undefined;
       };
-      record_image_pick: {
-        Args: { p_character: string; p_player: string; p_url: string };
-        Returns: undefined;
-      };
+      record_image_pick:
+        | {
+            Args: { p_character: string; p_player: string; p_url: string };
+            Returns: undefined;
+          }
+        | {
+            Args: {
+              p_character: string;
+              p_chosen: boolean;
+              p_player: string;
+              p_url: string;
+            };
+            Returns: undefined;
+          };
       record_match: { Args: { m: Json }; Returns: undefined };
       refresh_character_cover: {
         Args: { p_character: string };
@@ -735,6 +814,18 @@ export type Database = {
           id: string;
           likes: number;
           picks: number;
+        }[];
+      };
+      whoami_pick_key: { Args: { p_id: string }; Returns: string };
+      whoami_theme_stats: {
+        Args: { p_limit: number; p_theme: string };
+        Returns: {
+          character_id: string;
+          fits: number;
+          lang: string;
+          misfits: number;
+          picks: number;
+          suggested: number;
         }[];
       };
     };
