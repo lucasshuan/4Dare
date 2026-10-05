@@ -21,7 +21,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
 ## Themes
 
-- `themes` table, cached 10 min per server; `active = false` hides one. Local: 60 fixture themes.
+- `whoami_themes` table (0018), cached 10 min per server; `active = false` hides one. Local: 60 fixture themes.
 - 20 sets (`src/game/theme-sets.ts`); room's `themeSets` filter vote. Set examples: `example` 1–3 (0014, `/api/themes/examples`).
 - Vote: 3 themes, 40 s by default (set per room; clock starts after opening), open vote; each first vote cuts the time split among the voters. Server draws tie (wheel).
 - Host mode (`theming`): host types theme (no set, no Random, no stats). 30 s, then vote.
@@ -32,7 +32,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 - Draft: card saved quietly (`PUT /api/rooms/[code]/draft`, no ping). Timeout makes it the pick; new name creates character once. Empty card gets random.
 - Pictures: `character_images` (0017), many per character. Sent from the card (`POST /api/rooms/[code]/draft/image`), checked by Sightengine first (`src/server/moderation.ts`: sex in any style, nudity in photos, gore unless drawn), kept as `pending` when it can't tell (only its author sees it). The card's draft carries the chosen picture; the pick wears it for that match. One pick per player per picture; `characters.image_url` is the best active one (picks + `bonus`, 20 for the library's own). Tray: `/api/characters/[id]/pictures`; 3 reports hide one (`/api/pictures/[id]/report`). Daily Vercel cron (`/api/cron/pictures`): checks `pending` again, deletes pictures of names that never became characters.
 - Random: theme's 20 most picked, weight picks + likes, ×0.5 per dislike, minus match picks (`theme_pick_scores`, 0006, 0007). Draw saved as draft.
-- `theme_starters` (~5 per theme, 0011, rows in `supabase/seed/theme_starters.sql`, insert only): rule scene examples, base of hand (`/api/themes/[id]/picks`, 8 per theme, 5 shown, shuffled per viewer).
+- `whoami_theme_starters` (~5 per theme, 0011/0018, rows in `supabase/seed/whoami_theme_starters.sql`, insert only): rule scene examples, base of hand (`/api/themes/[id]/picks`, 8 per theme, 5 shown, shuffled per viewer).
 - Rule ✗: fiction-set themes get an athlete or musician, real-people sets a cartoon or game character, only when all the theme's starters are that set's kind; cross-cutting sets (world, jobs, family, quirks, looks, books) get ✓✓ only (`src/server/rule-examples.ts`).
 - Trade-off: hand and typed names can duplicate someone's secret. Refusing would leak who holds what. Random still skips match picks, so it never deals you your own secret.
 
@@ -40,6 +40,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
 - Guest: signed cookie (`src/server/auth/guest.ts`), no DB row. Proxy makes it.
 - Account: Supabase Auth (Discord, Google; started server-side at `/auth/sign-in`) plus `profiles` row. Sign-in moves guest's matches, and seat (`SWAP_PLAYER`), to account.
+- Names: server sends them ready in reader's language (`?lang=` on routes, request locale in actions; `displayName`). `guestNumber` never leaves server; guest name lists load only in stage lab.
 - Match end: one record per player (`src/game/record.ts`), saved after response.
 
 ## Chat
@@ -49,4 +50,4 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 ## Other
 
 - SEO: `generateMetadata` per page (`src/server/seo.ts`, `messages/*/meta.json`). Share images: `opengraph-image.tsx` with `src/server/og`. `SITE_URL` sets domain.
-- Tests: Vitest (engine, 300 random matches), Playwright (whole matches on a production build, two tests at a time, `@smoke` for the hub and one match; `DARE_SHOW_SCALE=0.25` speeds shows 4×, never clocks). CI runs them on every push with Biome, the typecheck and Knip (`.github/workflows/ci.yml`); Dependabot proposes dependency updates every Monday.
+- Tests: Vitest (engine, 300 random matches), Playwright (whole matches on a production build, two tests at a time, `@smoke` for the hub and one match; `DARE_SHOW_SCALE=0.25` speeds shows 4×, never clocks). CI: `ci.yml` every push (Biome, types, Knip, all unit tests); `e2e.yml` smoke only when a push changes the app, every spec by hand ("all"). Vercel skips deploys of pushes touching only docs, tests, CI, scripts or migrations (`scripts/skip-deploy.sh`). Dependabot proposes dependency updates every Monday.

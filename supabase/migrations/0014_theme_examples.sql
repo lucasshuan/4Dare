@@ -1,6 +1,6 @@
 -- Three themes per set are its examples, shown when someone hovers the set
 -- while setting up a room (1 = first line). Picked by hand, like the themes
--- themselves: change them with update only (AGENTS.md).
+-- themselves: change them with update only (CLAUDE.md).
 
 -- the theme list is hand-fed: a copy before touching it
 create schema if not exists backup;
