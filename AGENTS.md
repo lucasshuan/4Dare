@@ -10,32 +10,23 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Database
 
-- Supabase is the source of truth. `data/*.json` is an old snapshot: the app, the build and the tests never read it.
-- Hand-fed tables: the library (`characters`, `character_names`, `origins`, `origin_labels`, the library's own rows of `character_images` (`created_by` null), its storage pictures) and the "Who am I?" themes (`whoami_themes`, `whoami_theme_starters`). Never reset, truncate or bulk-delete them; back them up before a migration that touches them; change them by insert or update only (`active = false` turns a theme off). `characters.image_url` is the best picture of `character_images` and moves with players' picks (0017): change a cover by adding or hiding pictures, not by writing it.
-- No seed, ever (`pnpm seed` once rewrote the library from `data/` and deleted what it lacked).
-- Local mode (no Supabase keys: dev, unit tests, e2e) runs on the local backend's fixtures, never on `data/`.
-- Everything else (rooms, matches, profiles, pick stats) may be lost; keep what you can.
-- Migrations are the agent's job: run them when needed, without asking.
-- After a migration: refresh the types (`pnpm db:types`, or the Supabase MCP `generate_typescript_types` written to `src/server/backend/supabase/database.types.ts` and formatted with Biome) and run the Supabase advisors (security and performance).
+- Supabase is the source of truth. `data/*.json` is an old snapshot nothing reads; local mode (no keys: dev, unit tests, e2e) uses the local backend's fixtures.
+- Hand-fed, so insert or update only, never reset, truncate or bulk-delete, and back up before a migration touching them: the library (`characters`, `character_names`, `origins`, `origin_labels`, the library's own `character_images` rows (`created_by` null) and their storage pictures) and the themes (`whoami_themes`, `whoami_theme_starters`; `active = false` turns one off). `characters.image_url` follows picks (0017): add or hide pictures, never write it.
+- No seed, ever. Rooms, matches, profiles and pick stats may be lost; keep what you can.
+- Migrations are yours, without asking. After one: `pnpm db:types` (or MCP `generate_typescript_types` into `src/server/backend/supabase/database.types.ts`, Biome-formatted) and the Supabase advisors.
 
 ## AI
 
-- No AI calls in the app or the build: no generated text, no API cost at runtime.
-- One exception: pictures players send go through Sightengine's image moderation (`src/server/moderation.ts`), on its free plan or a paid plan the owner chose. Nothing else calls it.
+- No AI calls in the app or the build. Only exception: Sightengine checks pictures players send (`src/server/moderation.ts`).
 
 ## Working
 
-- Keep the context small: read only what the task needs, and cut command output to the lines that decide.
-- While working, and to finish a task: `pnpm check` (Biome, types, knip; seconds) and `pnpm test:changed` (only the unit tests that import a file you changed; once it is committed, `pnpm test:changed origin/main`). One area by hand: `pnpm test src/game`.
-- Never run the whole unit suite or the e2e locally to wrap up: CI runs them. `ci.yml` runs check and every unit test on every push; `e2e.yml` runs the e2e smoke (the hub and one match, on a production build) only when a push changes the app, and every spec when started by hand with "all" (GitHub MCP `actions_run_trigger`). When CI fails, read the failed job's log (`get_job_logs`) instead of rerunning everything.
-- A local e2e only for a browser flow you changed that unit tests can't reach, and only its spec: `pnpm test:e2e e2e/<name>.spec.ts` (it builds the app; a server already on :3100 is reused). Cloud sessions point `PW_CHROMIUM` at `/opt/pw-browsers/chromium-*/chrome-linux/chrome`.
-- Vercel deploys only what changes the app: `scripts/skip-deploy.sh` (its Ignored Build Step) skips pushes of docs, tests, CI, scripts and migrations alone.
-- `pnpm knip` lists unused files, exports and dependencies: delete them, or keep a planned export with a `/** @public */` comment.
+- Small context: read only what the task needs, cut output to what decides.
+- Locally: `pnpm check` (Biome, types, knip: delete what it lists, or mark a planned export `/** @public */`) and `pnpm test:changed` (`origin/main` once committed). Never the whole suite or the e2e to wrap up: CI runs them (`ci.yml` every push; `e2e.yml` smoke when the app changes, every spec by hand with "all"). Red CI: read `get_job_logs`.
+- A local e2e only for a changed browser flow unit tests can't reach, one spec: `pnpm test:e2e e2e/<name>.spec.ts` (cloud: `PW_CHROMIUM=/opt/pw-browsers/chromium-*/chrome-linux/chrome`).
+- Vercel skips pushes of docs, tests, CI, scripts or migrations alone (`scripts/skip-deploy.sh`).
 
 ## Commits
 
-Conventional Commits, in English: `type(scope): short imperative summary`.
-
-- type: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`, `perf`; scope (optional): `game`, `server`, `ui`, `app`, `data`, `i18n`
-- lowercase, no final period, at most 72 characters; a body only when the why is not obvious
-- one commit per coherent piece of work; never commit `.env` files or secrets
+- Conventional Commits in English: `type(scope): summary`, lowercase, no final period, at most 72 characters. Types `feat fix refactor test docs chore style perf`; optional scopes `game server ui app data i18n`. A body only when the why is not obvious.
+- One commit per coherent piece of work; never `.env` files or secrets.
