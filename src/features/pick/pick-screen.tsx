@@ -321,9 +321,9 @@ function PickTable() {
   const confirm = async () => {
     const card =
       content.kind === "picked"
-        ? { characterId: content.card.characterId }
+        ? { characterId: content.card.characterId, name: content.card.name }
         : content.kind === "typing" && content.preview
-          ? { characterId: content.preview[0] }
+          ? { characterId: content.preview[0], name: content.preview[1] }
           : content.kind === "typing"
             ? { name: content.text.trim() }
             : content.kind === "new"

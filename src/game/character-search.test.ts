@@ -6,10 +6,12 @@ import {
   cardStep,
   closedField,
   exactMatch,
+  knownAs,
   matchRange,
   type SearchItem,
   searchItems,
   searchMatches,
+  shownName,
   thumbUrl,
   toSearchItem,
 } from "./character-search";
@@ -35,13 +37,14 @@ describe("character search", () => {
   it("ranks exact, then name prefix, then word or alias prefix, then contains", () => {
     expect(names("dart")).toEqual(["Dart", "Darth Vader", "Darth Maul"]);
     expect(names("vader")).toEqual(["Darth Vader"]);
-    expect(names("bruce")).toEqual(["Batman"]);
+    expect(names("bruce")).toEqual(["Bruce Wayne"]);
     expect(names("arth")).toEqual(["Darth Vader", "Darth Maul"]);
   });
 
   it("folds accents, case, kana and articles like guesses do", () => {
     expect(names("POKEMON")).toEqual(["Pokémon Trainer"]);
-    expect(names("なると")).toEqual(["うずまきナルト"]);
+    expect(names("ナルト")).toEqual(["ナルト"]);
+    expect(names("うずまき")).toEqual(["うずまきナルト"]);
     expect(names("rei leao")).toEqual(["O Rei Leão"]);
   });
 
@@ -122,6 +125,59 @@ describe("character search", () => {
   });
 });
 
+describe("aliases", () => {
+  const bloody = item("m", "Maria Sangrenta", [
+    "Lenda da loira do banheiro",
+    "Loira do Banheiro",
+    "Loira do Barbeador",
+    "Bloody Mary",
+  ]);
+  const goku = item("g", "Son Goku", ["Goku", "Kakarotto"]);
+  const rows = (q: string) =>
+    searchItems([bloody, goku], q, 6).map((r) => r.name);
+
+  it("shows the alias typed, once per character", () => {
+    expect(rows("loira do banheiro")).toEqual(["Loira do Banheiro"]);
+    expect(rows("loira")).toEqual(["Loira do Banheiro"]);
+    expect(rows("loira do bar")).toEqual(["Loira do Barbeador"]);
+    expect(rows("lenda")).toEqual(["Lenda da loira do banheiro"]);
+    expect(rows("bloody")).toEqual(["Bloody Mary"]);
+    expect(rows("kakarotto")).toEqual(["Kakarotto"]);
+  });
+
+  it("keeps the name when the query finds it as well", () => {
+    expect(rows("maria")).toEqual(["Maria Sangrenta"]);
+    expect(rows("sangrenta")).toEqual(["Maria Sangrenta"]);
+    expect(rows("son")).toEqual(["Son Goku"]);
+    expect(rows("gok")).toEqual(["Son Goku"]);
+    expect(rows("")).toEqual(["Maria Sangrenta", "Son Goku"]);
+  });
+
+  it("lets a whole alias beat the start of a word of the name", () => {
+    expect(rows("goku")).toEqual(["Goku"]);
+    expect(shownName("Son Goku", ["Goku"], "GOKU")).toBe("Goku");
+    expect(shownName("Son Goku", ["Goku"], "")).toBe("Son Goku");
+  });
+
+  it("names a pick after the alias shown, keeping the others for guesses", () => {
+    const c = {
+      id: "m",
+      lang: "pt" as const,
+      name: "Maria Sangrenta",
+      origin: null,
+      imageUrl: null,
+      aliases: ["Loira do Banheiro", "Bloody Mary"],
+    };
+    expect(knownAs(c, "loira")).toEqual({
+      ...c,
+      name: "Loira do Banheiro",
+      aliases: ["Maria Sangrenta", "Bloody Mary"],
+    });
+    expect(knownAs(c, "Maria Sangrenta")).toBe(c);
+    expect(knownAs(c, "Someone Else")).toBe(c);
+  });
+});
+
 describe("exact match", () => {
   it("folds accents, case, kana and a leading article", () => {
     expect(exactMatch(library, "darth vader")?.[0]).toBe("1");
@@ -131,9 +187,18 @@ describe("exact match", () => {
     expect(exactMatch(library, "ウズマキナルト")?.[0]).toBe("6");
   });
 
-  it("ignores aliases, single words and blanks", () => {
-    expect(exactMatch(library, "Bruce Wayne")).toBeNull();
-    expect(exactMatch(library, "ナルト")).toBeNull();
+  it("takes a whole alias under that alias, after every name", () => {
+    expect(exactMatch(library, "bruce wayne")?.slice(0, 2)).toEqual([
+      "2",
+      "Bruce Wayne",
+    ]);
+    expect(exactMatch(library, "なると")?.slice(0, 2)).toEqual(["6", "ナルト"]);
+    const shared = [item("a", "Mary Jane", ["Robin"]), item("b", "Robin")];
+    expect(exactMatch(shared, "robin")?.slice(0, 2)).toEqual(["b", "Robin"]);
+  });
+
+  it("ignores single words and blanks", () => {
+    expect(exactMatch(library, "Anakin")).toBeNull();
     expect(exactMatch(library, "Vader")).toBeNull();
     expect(exactMatch(library, "Darth")).toBeNull();
     expect(exactMatch(library, "   ")).toBeNull();

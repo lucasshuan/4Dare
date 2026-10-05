@@ -963,6 +963,37 @@ describe("pick drafts", () => {
     must(await A.confirmCard(next, { characterId: other.id }));
     expect((await view(next)).body.pick?.confirmed).toBe(true);
   });
+
+  it("confirms a library character under the alias its card shows", async () => {
+    const { code } = await pickingRoom("c5", "c6");
+    as("c5");
+    must(
+      await A.confirmCard(code, {
+        characterId: "pt-wd-Q12379",
+        name: "jumpman",
+      }),
+    );
+    // a name that is none of its names keeps its own
+    as("c6");
+    must(
+      await A.confirmCard(code, {
+        characterId: "pt-wd-Q12379",
+        name: "Bowser",
+      }),
+    );
+    const { getBackend } = await import("./backend");
+    const state = (await getBackend().rooms.get(code))?.state;
+    const pickOf = (id: string) =>
+      Object.values(state?.assignments ?? {}).find(
+        (a) => a.pickerId === uidOf(jarFor(id)),
+      )?.character;
+    expect(pickOf("c5")).toMatchObject({
+      id: "pt-wd-Q12379",
+      name: "Jumpman",
+      aliases: expect.arrayContaining(["Mario"]),
+    });
+    expect(pickOf("c6")).toMatchObject({ name: "Mario" });
+  });
 });
 
 describe("rule examples and the hand", () => {

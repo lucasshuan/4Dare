@@ -1,3 +1,4 @@
+import { knownAs } from "@/game/character-search";
 import { LANGS, type Lang } from "@/game/types";
 import { getBackend } from "@/server/backend";
 import type { CharacterSearchResponse } from "@/server/contract";
@@ -23,7 +24,8 @@ export async function GET(request: Request) {
   const body: CharacterSearchResponse = {
     results: found.map((c) => ({
       id: c.id,
-      name: c.name,
+      // the alias typed, as the browser's search shows it
+      name: knownAs(c, q).name,
       origin: c.origin,
       imageUrl: c.imageUrl,
       lang,

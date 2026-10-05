@@ -26,9 +26,10 @@ async function loadIndex(lang: Lang): Promise<SearchItem[]> {
   ]);
   const items = library.map((item): SearchItem => {
     const swapped = extras.images[item[0]];
-    return swapped
-      ? [item[0], item[1], item[2], swapped, item[4], item[5]]
-      : item;
+    if (!swapped) return item;
+    const copy: SearchItem = [...item];
+    copy[3] = swapped;
+    return copy;
   });
   return [...items, ...extras.created];
 }

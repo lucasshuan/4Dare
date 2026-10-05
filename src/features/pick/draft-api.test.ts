@@ -8,10 +8,10 @@ import {
   toDraft,
 } from "./draft-api";
 
-const item = (id: string, name: string): SearchItem =>
-  toSearchItem({ id, name, origin: "Marvel", imageUrl: null, aliases: [] });
+const item = (id: string, name: string, aliases: string[] = []): SearchItem =>
+  toSearchItem({ id, name, origin: "Marvel", imageUrl: null, aliases });
 const IRON = item("c-iron", "Iron Man");
-const SPIDER = item("c-spider", "Spider-Man");
+const SPIDER = item("c-spider", "Spider-Man", ["Peter Parker"]);
 const ITEMS = [IRON, SPIDER];
 
 describe("toDraft", () => {
@@ -102,6 +102,29 @@ describe("fromDraft", () => {
     expect(
       fromDraft({ characterId: "c-iron", name: "Iro", imageUrl: null }, ITEMS),
     ).toEqual({ kind: "typing", text: "Iro", preview: IRON });
+  });
+
+  it("restores a character picked under an alias, or typed toward one", () => {
+    expect(
+      fromDraft(
+        { characterId: "c-spider", name: "Peter Parker", imageUrl: null },
+        ITEMS,
+      ),
+    ).toEqual({
+      kind: "picked",
+      card: {
+        characterId: "c-spider",
+        name: "Peter Parker",
+        origin: "Marvel",
+        imageUrl: null,
+      },
+      via: "restore",
+    });
+    const typed = fromDraft(
+      { characterId: "c-spider", name: "Pete", imageUrl: null },
+      ITEMS,
+    );
+    expect(typed?.kind === "typing" && typed.preview?.[1]).toBe("Peter Parker");
   });
 
   it("waits for the index for a library id, not for a new name", () => {

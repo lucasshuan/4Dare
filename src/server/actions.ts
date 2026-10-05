@@ -4,6 +4,7 @@
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
+import { knownAs } from "@/game/character-search";
 import { GAME_KEYS } from "@/game/games";
 import { themeId } from "@/game/theme-id";
 import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
@@ -285,19 +286,21 @@ export async function confirmPick(
 
 /**
  * Confirms what is on the caller's pick card in one call: a character of the
- * library (`characterId`), or a name, found in the library or added to it
- * (insert only). A new character's picture is the one the card's draft holds
+ * library (`characterId`, under the name the card shows when that is one of
+ * its aliases), or a name, found in the library or added to it (insert
+ * only). A new character's picture is the one the card's draft holds
  * (uploaded through /api/rooms/[code]/draft/image), never a URL from the
  * browser; its id is the draft's, so a clock running out at the same moment
  * makes the same character.
  */
 export async function confirmCard(
   code: string,
-  card: { characterId: string } | { name: string },
+  card: { characterId: string; name?: string } | { name: string },
 ): Promise<Result<RoomView>> {
   return run(async () => {
     if (!card || typeof card !== "object") bad();
-    if ("characterId" in card) return confirmed(code, card.characterId);
+    if ("characterId" in card)
+      return confirmed(code, card.characterId, card.name);
     const name = text(
       (card as { name: unknown }).name,
       MAX_CHARACTER_NAME,
@@ -334,8 +337,12 @@ export async function confirmCard(
   });
 }
 
-/** PICK with a character the library has, wearing the picture the caller's card shows for it. */
-async function confirmed(code: string, characterId: unknown) {
+/**
+ * PICK with a character the library has, under the name the caller's card
+ * shows when it is one of its aliases (any other name keeps its own), wearing
+ * the picture the card shows for it.
+ */
+async function confirmed(code: string, characterId: unknown, name?: unknown) {
   if (typeof characterId !== "string" || characterId.length > 200) bad();
   const room = roomCode(code);
   const who = await me();
@@ -347,7 +354,11 @@ async function confirmed(code: string, characterId: unknown) {
   const draft = Object.values(stored?.state.assignments ?? {}).find(
     (a) => a.pickerId === who.id,
   )?.draft;
-  const character = wearing(found ?? bad(), draft);
+  const shown =
+    typeof name === "string" && name.length <= MAX_CHARACTER_NAME
+      ? knownAs(found ?? bad(), name)
+      : (found ?? bad());
+  const character = wearing(shown, draft);
   const view = await act(room, (id) => ({
     type: "PICK",
     playerId: id,

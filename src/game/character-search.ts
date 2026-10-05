@@ -2,13 +2,15 @@
 // language (cached), then every keystroke is a scan over pre-normalised keys,
 // well under a millisecond for ~8k characters. No server round trip per key.
 import { normalizeName } from "./match";
-import type { CardView } from "./types";
+import type { CardView, Character } from "./types";
 
 /**
  * One searchable character, as compact arrays to keep the download small:
- * [id, name, origin, imageUrl, nameKey, otherKeys]. `nameKey` is the
+ * [id, name, origin, imageUrl, nameKey, otherKeys, aliases]. `nameKey` is the
  * normalised name; `otherKeys` holds the name's words and the aliases,
- * normalised, each preceded by a space (" darth vader lordvader").
+ * normalised, each preceded by a space (" darth vader lordvader"); `aliases`
+ * are the aliases as written, one per key, for the row to show the one typed.
+ * A search hit carries the name it shows in `name` (see `shownName`).
  */
 export type SearchItem = [
   id: string,
@@ -17,6 +19,8 @@ export type SearchItem = [
   imageUrl: string | null,
   nameKey: string,
   otherKeys: string,
+  /** Missing in a library downloaded before aliases were shown. */
+  aliases?: string[],
 ];
 
 export interface SearchResult {
@@ -39,11 +43,95 @@ export function toSearchItem(c: {
   const nameKey = normalizeName(c.name);
   const others = new Set<string>();
   for (const word of c.name.split(WORDS)) others.add(normalizeName(word));
-  for (const alias of c.aliases) others.add(normalizeName(alias));
+  const aliases: string[] = [];
+  const seen = new Set([nameKey]);
+  for (const alias of c.aliases) {
+    const key = normalizeName(alias);
+    others.add(key);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    aliases.push(alias);
+  }
   others.delete("");
   others.delete(nameKey);
   const otherKeys = [...others].map((key) => ` ${key}`).join("");
-  return [c.id, c.name, c.origin, c.imageUrl, nameKey, otherKeys];
+  return [c.id, c.name, c.origin, c.imageUrl, nameKey, otherKeys, aliases];
+}
+
+/**
+ * How well the normalised query `q` finds `name`, lower is better: exact,
+ * start, start of a word, inside. Null when it doesn't. Words count only
+ * for the character's own name.
+ */
+function nameRank(name: string, key: string, q: string, words: boolean) {
+  if (key === q) return 0;
+  if (key.startsWith(q)) return 2;
+  if (words && name.split(WORDS).some((w) => normalizeName(w).startsWith(q)))
+    return 3;
+  if (key.includes(q)) return 5;
+  return null;
+}
+
+/** `shownName` for a query already normalised. */
+function shownFor(name: string, aliases: readonly string[], q: string) {
+  const own = nameRank(name, normalizeName(name), q, true);
+  let best = name;
+  let rank = own ?? Number.POSITIVE_INFINITY;
+  for (const alias of aliases) {
+    const found = nameRank(alias, normalizeName(alias), q, false);
+    // after the name at each level: exact 1, start 4, inside 7
+    const r = found === null ? null : found === 0 ? 1 : found + 2;
+    if (r !== null && r < rank) {
+      best = alias;
+      rank = r;
+    }
+  }
+  return best;
+}
+
+/**
+ * The name a character shows for `query`: the one of its names the query
+ * fits best (exact, start, a word's start, inside), its own on a tie, the
+ * first listed among aliases. A whole alias beats the start of the name
+ * ("goku" shows "Goku", not "Son Goku"). So "Loira do Banheiro" shows
+ * itself, not "Maria Sangrenta", and "vader" still shows "Darth Vader".
+ * One name per character, never a row per alias.
+ */
+export function shownName(
+  name: string,
+  aliases: readonly string[],
+  query: string,
+): string {
+  const q = normalizeName(query);
+  return q ? shownFor(name, aliases, q) : name;
+}
+
+/** The item under the name it shows for `query` (see `shownName`). */
+export const shownItem = (item: SearchItem, query: string): SearchItem =>
+  shown(item, normalizeName(query));
+
+/** `shownItem` for a query already normalised. */
+function shown(item: SearchItem, q: string): SearchItem {
+  const name = shownFor(item[1], item[6] ?? [], q);
+  if (name === item[1]) return item;
+  const copy: SearchItem = [...item];
+  copy[1] = name;
+  return copy;
+}
+
+/**
+ * `c` under the name the search shows for `query` (one of its aliases, or
+ * its own), so a pick keeps the name the player chose. Its own name joins
+ * the aliases, so guesses still hit it.
+ */
+export function knownAs(c: Character, query: string): Character {
+  const name = shownName(c.name, c.aliases, query);
+  if (name === c.name) return c;
+  return {
+    ...c,
+    name,
+    aliases: [c.name, ...c.aliases.filter((alias) => alias !== name)],
+  };
 }
 
 /** 0 exact name, 1 name starts with q, 2 a word or alias starts with q, 3 contains q, -1 no match. */
@@ -94,7 +182,10 @@ export function searchMatches(
   if (candidates) for (const index of candidates) visit(index);
   else for (let index = 0; index < items.length; index++) visit(index);
   narrowing.set(items, { q, hits });
-  return tiers.flat().slice(0, limit);
+  return tiers
+    .flat()
+    .slice(0, limit)
+    .map((item) => shown(item, q));
 }
 
 /** Best `limit` matches for `query` (see `searchMatches`). */
@@ -108,8 +199,9 @@ export function searchItems(
 
 /**
  * The character whose name is `name` once normalised (accents, case, kana,
- * a leading article), the most popular one when several share it. Aliases
- * and single words of a longer name don't count: "Vader" is not Darth Vader.
+ * a leading article), the most popular one when several share it; else the
+ * one with that alias, under it. Single words of a longer name don't count:
+ * "Vader" is not Darth Vader.
  */
 export function exactMatch(
   items: readonly SearchItem[],
@@ -117,13 +209,21 @@ export function exactMatch(
 ): SearchItem | null {
   const key = normalizeName(name);
   if (!key) return null;
-  return items.find((item) => item[4] === key) ?? null;
+  const named = items.find((item) => item[4] === key);
+  if (named) return named;
+  const spaced = ` ${key}`;
+  for (const item of items) {
+    if (!item[5].includes(spaced)) continue;
+    const alias = item[6]?.find((a) => normalizeName(a) === key);
+    if (alias) return shown(item, key);
+  }
+  return null;
 }
 
 /**
  * Where the typed `query` sits in `name` (UTF-16 offsets, end excluded), with
  * the same folding as the search, so "homem" marks "Homem" and "leao" marks
- * "Leão". Null when the name matched through an alias or a word elsewhere.
+ * "Leão". Null when the row matched through an alias it doesn't show.
  */
 export function matchRange(
   name: string,

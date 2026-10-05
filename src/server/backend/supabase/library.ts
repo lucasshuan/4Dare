@@ -10,23 +10,25 @@ export interface LibraryRow {
   name: string;
   origin: string | null;
   image_url: string | null;
-  /** The language's aliases plus the names in the other languages, normalised. */
-  alias_norms: string[] | null;
+  /** The language's aliases, as written. */
+  aliases: string[] | null;
+  /** The names in the other languages, as written. */
+  other_names: string[] | null;
 }
 
-const COLUMNS = "character_id, name, origin, image_url, alias_norms";
+const COLUMNS = "character_id, name, origin, image_url, aliases, other_names";
 /** Rows asked for per request; PostgREST may hand out fewer (its "max rows"). */
 const PAGE = 1000;
 const TTL = 60 * 60_000;
 
-/** The same item the starter files give: normalising the aliases again changes nothing. */
+/** The same item the starter files give: the language's aliases, then the other languages' names. */
 export const toLibraryItem = (lang: Lang, r: LibraryRow): SearchItem =>
   toSearchItem({
     id: entryId(lang, r.character_id),
     name: r.name,
     origin: r.origin,
     imageUrl: r.image_url,
-    aliases: r.alias_norms ?? [],
+    aliases: [...(r.aliases ?? []), ...(r.other_names ?? [])],
   });
 
 /**

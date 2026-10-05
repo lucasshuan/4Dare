@@ -12,7 +12,8 @@ const row = (n: number): LibraryRow => ({
   name: `Hero ${n}`,
   origin: null,
   image_url: null,
-  alias_norms: [],
+  aliases: [],
+  other_names: [],
 });
 
 /**
@@ -68,7 +69,7 @@ describe("library from Supabase", () => {
     expect(await readLibrary(db, "pt")).toEqual([]);
     expect(calls).toEqual([
       "from character_entries",
-      "select character_id, name, origin, image_url, alias_norms",
+      "select character_id, name, origin, image_url, aliases, other_names",
       "eq lang pt",
       "not popularity is null",
       "not character_id like u-%",
@@ -117,7 +118,8 @@ describe("library from Supabase", () => {
         name: "Homem-Aranha",
         origin: "Marvel",
         image_url: "https://example.com/spider.png",
-        alias_norms: ["spiderman", "peterparker"],
+        aliases: ["Peter Parker"],
+        other_names: ["Spider-Man", "スパイダーマン"],
       }),
     ).toEqual([
       "pt-wd-Q79037",
@@ -125,11 +127,17 @@ describe("library from Supabase", () => {
       "Marvel",
       "https://example.com/spider.png",
       "homemaranha",
-      " homem aranha spiderman peterparker",
+      " homem aranha peterparker spiderman すぱいだーまん",
+      ["Peter Parker", "Spider-Man", "スパイダーマン"],
     ]);
     expect(
-      toLibraryItem("ja", { ...row(7), alias_norms: null, name: "マリオ" }),
-    ).toEqual(["ja-wd-Q7", "マリオ", null, null, "まりお", ""]);
+      toLibraryItem("ja", {
+        ...row(7),
+        aliases: null,
+        other_names: null,
+        name: "マリオ",
+      }),
+    ).toEqual(["ja-wd-Q7", "マリオ", null, null, "まりお", "", []]);
   });
 
   it("keeps each language an hour, and loads it once for requests that meet", async () => {

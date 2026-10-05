@@ -5,6 +5,7 @@
 import {
   type CardContent,
   type SearchItem,
+  shownItem,
   toCardView,
 } from "@/game/character-search";
 import type { Lang } from "@/game/types";
@@ -53,8 +54,9 @@ export const draftKey = (draft: DraftCard | null | undefined): string =>
 /**
  * The card a saved draft stands for (a reload, a rejoin). A library id needs
  * the character index to show its picture: undefined until it has loaded.
- * The full name is the picked character; anything else was being typed over
- * that row's preview.
+ * One of the character's names in full (its own or an alias) is the picked
+ * character under that name; anything else was being typed over that row's
+ * preview.
  */
 export function fromDraft(
   draft: DraftCard | null,
@@ -85,9 +87,10 @@ export function fromDraft(
       via: "restore",
       ...picture,
     };
-  return item[1] === draft.name
-    ? { kind: "picked", card: toCardView(item), via: "restore", ...picture }
-    : { kind: "typing", text: draft.name, preview: item };
+  const preview = shownItem(item, draft.name);
+  return preview[1] === draft.name
+    ? { kind: "picked", card: toCardView(preview), via: "restore", ...picture }
+    : { kind: "typing", text: draft.name, preview };
 }
 
 export type DraftSave = {

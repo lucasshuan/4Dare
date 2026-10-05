@@ -1,5 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { knownAs } from "@/game/character-search";
 import { systemLines } from "@/game/chat";
 import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
 import { displayName } from "@/game/guest-names";
@@ -265,9 +266,9 @@ const draftName = (d: PickDraft | null | undefined) =>
 /**
  * What the unconfirmed cards become when the clock runs out, by picker:
  * whatever is on the card. The character it shows (picked, or the preview
- * while typing), else the name typed, found in the library or added to it
- * (insert only; idempotent by the draft's id, so timeouts fired by several
- * readers at once make one row). A card the server can't settle here is left
+ * while typing; under the alias the card shows), else the name typed, found
+ * in the library or added to it (insert only; idempotent by the draft's id,
+ * so timeouts fired by several readers at once make one row). A card the server can't settle here is left
  * to the engine, which plays it as typed.
  */
 async function draftedCharacters(
@@ -283,7 +284,7 @@ async function draftedCharacters(
         if (d.characterId) {
           const shown = await characters.get(d.characterId);
           if (shown) {
-            out[a.pickerId] = wearing(shown, d);
+            out[a.pickerId] = wearing(knownAs(shown, d.name), d);
             return;
           }
         }
