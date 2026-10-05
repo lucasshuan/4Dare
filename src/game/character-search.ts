@@ -274,6 +274,8 @@ export type CardContent =
       via: "list" | "hand" | "random" | "exact" | "restore";
       /** Another picture of the character, chosen in the tray or sent for it: this match only. */
       picture?: string;
+      /** Restored from a draft the hand or the dice had filled (via says how otherwise). */
+      suggested?: true;
     }
   | { kind: "new"; name: string; imageUrl: string | null; uploading: boolean };
 

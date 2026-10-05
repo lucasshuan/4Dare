@@ -21,7 +21,7 @@
   "confirmCard": "Confirmar",
   "rule": "Acabou o tempo? Vai a carta do jeito que estiver.",
   "handLabel": "Populares em {theme}",
-  "handLikes": "{count, plural, one {Curtido por # jogador} other {Curtido por # jogadores}}",
+  "handFits": "{count, plural, one {# jogador disse que combina} other {# jogadores disseram que combina}}",
   "doneWaiting": "Feito! Esperando {names}",
   "doneAll": "Todo mundo escolheu!",
   "timeUp": "Tempo! Foi esse."

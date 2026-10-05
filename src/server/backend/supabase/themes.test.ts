@@ -5,6 +5,7 @@ import { readStarters, supabaseStarters } from "./themes";
 interface Row {
   theme_id: string;
   character_id: string;
+  lang: string;
   position: number;
   characters: { kind: "fictional" | "human" | null } | null;
   themes: { theme_set: string | null; active: boolean } | null;
@@ -13,6 +14,7 @@ interface Row {
 const row = (n: number, active = true): Row => ({
   theme_id: `theme-${String(Math.floor(n / 5)).padStart(4, "0")}`,
   character_id: `wd-Q${n}`,
+  lang: n % 10 < 5 ? "all" : "pt",
   position: (n % 5) + 1,
   characters: { kind: n % 2 ? "human" : "fictional" },
   themes: { theme_set: "heroes", active },
@@ -49,7 +51,7 @@ function fakeDb(rows: Row[], cap = 1000, fail = () => false) {
 }
 
 describe("theme starters from Supabase", () => {
-  it("reads every page, by theme then position, with kinds and sets", async () => {
+  it("reads every page, by theme, language then position, with kinds and sets", async () => {
     const rows = Array.from({ length: 1700 }, (_, i) => row(i));
     const { db, calls } = fakeDb(rows, 600);
     const starters = await readStarters(db);
@@ -58,13 +60,15 @@ describe("theme starters from Supabase", () => {
       themeId: "theme-0000",
       set: "heroes",
       characterId: "wd-Q1",
+      lang: "all",
       position: 2,
       kind: "human",
     });
-    expect(calls.slice(0, 4)).toEqual([
+    expect(calls.slice(0, 5)).toEqual([
       "from whoami_theme_starters",
-      "select theme_id, character_id, position, characters(kind), themes:whoami_themes(theme_set, active)",
+      "select theme_id, character_id, lang, position, characters(kind), themes:whoami_themes(theme_set, active)",
       "order theme_id asc",
+      "order lang asc",
       "order position asc",
     ]);
     // a server capping pages at 600 still gives them all, then one empty page ends it

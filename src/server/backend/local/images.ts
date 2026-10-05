@@ -4,34 +4,47 @@ import type { CharacterImage, ImageStore, NewImage } from "../types";
 import type { LocalCharacterStore } from "./characters";
 import { processSingleton, readJson, writeJson } from "./disk";
 
-// The local copy of table character_images (0017), with its rules: one pick
-// per player, a head start for the library's own picture, the cover always
-// the best active one.
+// The local copy of table character_images (0017, 0022), with its rules: one
+// pick per player, chosen or kept, a head start for the library's own
+// picture, the cover always the best active one.
 
 const FILE = "character-pictures.json";
 /** The library picture's head start, as in the migration. */
 const LIBRARY_BONUS = 20;
 
 interface Row extends Omit<CharacterImage, "score"> {
+  /** Players who chose it. */
   picks: string[];
+  /** Players who kept it as the card showed it (missing in older files). */
+  keeps?: string[];
   reporters: string[];
   bonus: number;
   createdAt: number;
   moderation: unknown;
 }
 
-const toImage = ({
-  picks,
-  reporters: _r,
-  bonus,
-  createdAt: _c,
-  moderation: _m,
-  ...image
-}: Row): CharacterImage => ({ ...image, score: picks.length + bonus });
+/** As character_images.score: head start, choosers, the square root of keepers, two off per report. */
+const score = (r: Row) =>
+  r.bonus +
+  r.picks.length +
+  Math.sqrt(r.keeps?.length ?? 0) -
+  2 * r.reporters.length;
+
+const toImage = (r: Row): CharacterImage => {
+  const {
+    picks: _p,
+    keeps: _k,
+    reporters: _r,
+    bonus: _b,
+    createdAt: _c,
+    moderation: _m,
+    ...image
+  } = r;
+  return { ...image, score: score(r) };
+};
 
 const best = (a: Row, b: Row) =>
-  b.picks.length + b.bonus - (a.picks.length + a.bonus) ||
-  a.createdAt - b.createdAt;
+  score(b) - score(a) || a.createdAt - b.createdAt;
 
 export function localImages(characters: LocalCharacterStore): ImageStore {
   const rows = processSingleton(
@@ -66,6 +79,7 @@ export function localImages(characters: LocalCharacterStore): ImageStore {
       author: null,
       status: "active",
       picks: [],
+      keeps: [],
       reporters: [],
       bonus: characterId.startsWith("u-") ? 0 : LIBRARY_BONUS,
       createdAt: 0,
@@ -90,6 +104,7 @@ export function localImages(characters: LocalCharacterStore): ImageStore {
     author: input.author,
     status: input.status,
     picks: [],
+    keeps: [],
     reporters: [],
     bonus: 0,
     createdAt: Date.now(),
@@ -140,11 +155,17 @@ export function localImages(characters: LocalCharacterStore): ImageStore {
       save();
       refresh(characterId);
     },
-    async recordPick(characterId, url, playerId) {
+    async recordPick(characterId, url, playerId, chosen) {
       seed(characterId);
       const r = of(characterId).find((x) => x.url === url);
       if (!r || r.picks.includes(playerId)) return;
-      r.picks.push(playerId);
+      const keeps = r.keeps ?? [];
+      const kept = keeps.includes(playerId);
+      if (kept && !chosen) return;
+      // choosing a picture once kept moves the player over
+      r.keeps = keeps.filter((id) => id !== playerId);
+      if (chosen) r.picks.push(playerId);
+      else r.keeps.push(playerId);
       save();
       refresh(characterId);
     },
@@ -156,11 +177,11 @@ export function localImages(characters: LocalCharacterStore): ImageStore {
         r.status !== "hidden" &&
         r.createdBy !== null &&
         r.reporters.length >= hideAt
-      ) {
+      )
         r.status = "hidden";
-        if (r.characterId) refresh(r.characterId);
-      }
       save();
+      // every report lowers the score: the cover may move
+      if (r.characterId) refresh(r.characterId);
       return r.status;
     },
     async pending(limit) {

@@ -8,10 +8,21 @@ import type {
 import { json, serviceClient } from "./clients";
 import type { Database } from "./database.types";
 
-type Row = Database["public"]["Tables"]["character_images"]["Row"];
+type Row = Pick<
+  Database["public"]["Tables"]["character_images"]["Row"],
+  | "id"
+  | "character_id"
+  | "url"
+  | "created_by"
+  | "author"
+  | "status"
+  | "score"
+  | "created_at"
+  | "moderation"
+>;
 
 const COLUMNS =
-  "id, character_id, url, created_by, author, status, picks, bonus, created_at, moderation";
+  "id, character_id, url, created_by, author, status, score, created_at, moderation";
 
 const toImage = (r: Row): CharacterImage => ({
   id: r.id,
@@ -20,7 +31,7 @@ const toImage = (r: Row): CharacterImage => ({
   createdBy: r.created_by,
   author: (r.author as ImageAuthor | null) ?? null,
   status: r.status as ImageStatus,
-  score: r.picks + r.bonus,
+  score: r.score ?? 0,
 });
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -87,7 +98,12 @@ export function supabaseImages(): ImageStore {
           .select(COLUMNS)
           .eq("character_id", characterId);
       const [active, mine] = await Promise.all([
-        of().eq("status", "active").limit(200),
+        // the best first, straight from the index (character_images_best)
+        of()
+          .eq("status", "active")
+          .order("score", { ascending: false })
+          .order("created_at", { ascending: true })
+          .limit(limit),
         of().eq("status", "pending").eq("created_by", viewer).limit(20),
       ]);
       if (active.error) throw active.error;
@@ -95,7 +111,7 @@ export function supabaseImages(): ImageStore {
       return [...(active.data ?? []), ...(mine.data ?? [])]
         .sort(
           (a, b) =>
-            b.picks + b.bonus - (a.picks + a.bonus) ||
+            (b.score ?? 0) - (a.score ?? 0) ||
             a.created_at.localeCompare(b.created_at),
         )
         .slice(0, limit)
@@ -126,11 +142,12 @@ export function supabaseImages(): ImageStore {
         );
       if (error) throw error;
     },
-    async recordPick(characterId, url, playerId) {
+    async recordPick(characterId, url, playerId, chosen) {
       const { error } = await db().rpc("record_image_pick", {
         p_character: characterId,
         p_url: url,
         p_player: playerId,
+        p_chosen: chosen,
       });
       if (error) throw error;
     },

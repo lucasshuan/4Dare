@@ -30,11 +30,11 @@ function markAsked(key: string) {
 }
 
 /**
- * "Enjoyed being Darth Vader?": once a player discovers their character and
- * the hit's reveal is over, a bubble at the bottom asks, once per match. It
- * steps aside while the game waits on them (an answer to give), so it never
- * covers what they must do. The answer counts for the theme's draws, like a
- * verdict on a drawn character.
+ * "Did Darth Vader fit the theme?": once a player discovers their character
+ * and the hit's reveal is over, a bubble at the bottom asks, once per match.
+ * It steps aside while the game waits on them (an answer to give), so it
+ * never covers what they must do. The answer counts for the theme's hand and
+ * draws, like a verdict on a drawn character.
  */
 export function FoundFeedback() {
   const t = useTranslations("room.found");
@@ -70,9 +70,9 @@ export function FoundFeedback() {
           thanks: tp("rateThanks"),
           dismiss: tp("rateDismiss"),
         }}
-        onAnswer={(liked) => {
+        onAnswer={(fits) => {
           // Fire and forget, like the draw's verdict.
-          void rateFoundCharacter(code, liked);
+          void rateFoundCharacter(code, fits);
           markAsked(key);
         }}
         onDismiss={() => markAsked(key)}

@@ -32,17 +32,17 @@
     "imageHint": "あなたの画像はこのカードに使われ、{name}の画像に加わります。いちばん選ばれた画像がメインになります。",
     "random": "ランダム",
     "randomAgain": "もう一度",
-    "randomHint": "このテーマでよく選ばれたキャラクターから1人を選びます",
-    "rateQuestion": "この結果はどう？",
-    "rateYes": "いいね",
-    "rateNo": "いまいち、もう一度",
+    "randomHint": "このテーマに合うキャラクターから1人を選びます",
+    "rateQuestion": "テーマに合ってる？",
+    "rateYes": "合ってる",
+    "rateNo": "合ってない、もう一度",
     "rateThanks": "ありがとう！",
     "rateDismiss": "閉じる"
   },
   "found": {
-    "question": "{name}、気に入った？",
-    "yes": "いいね",
-    "no": "いまいち"
+    "question": "{name}はテーマに合ってた？",
+    "yes": "合ってた",
+    "no": "合ってなかった"
   },
   "vote": {
     "kicker": "テーマ投票",

@@ -21,7 +21,7 @@
   "confirmCard": "Confirm",
   "rule": "Out of time? The card goes as it is.",
   "handLabel": "Popular in {theme}",
-  "handLikes": "{count, plural, one {Liked by # player} other {Liked by # players}}",
+  "handFits": "{count, plural, one {# player says it fits} other {# players say it fits}}",
   "doneWaiting": "Done! Waiting for {names}",
   "doneAll": "Everyone has picked!",
   "timeUp": "Time! That's the one."

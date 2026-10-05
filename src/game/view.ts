@@ -209,7 +209,12 @@ function pick(s: RoomState, viewer: PlayerId, now: number): PickView | null {
       .map((x) => x.pickerId),
     total: s.players.length,
     draft: d
-      ? { characterId: d.characterId, name: d.name, imageUrl: d.imageUrl }
+      ? {
+          characterId: d.characterId,
+          name: d.name,
+          imageUrl: d.imageUrl,
+          ...(d.suggested ? { suggested: true as const } : {}),
+        }
       : null,
   };
 }

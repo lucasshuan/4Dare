@@ -8,7 +8,7 @@ import {
   ruleExamplesFor,
   voteExamples,
 } from "./rule-examples";
-import type { PopularPick } from "./theme-picks";
+import type { PickStat } from "./theme-picks";
 
 // A small made-up library: every id has a picture and names in en, pt and ja
 // unless listed below.
@@ -56,6 +56,7 @@ const starters = (
     themeId,
     set,
     characterId,
+    lang: "all",
     position: i + 1,
     kind: Array.isArray(kind) ? kind[i] : kind,
   }));
@@ -96,14 +97,14 @@ const STARTERS: ThemeStarter[] = [
 ];
 
 function sources(
-  history: Record<string, PopularPick[]> = {},
+  history: Record<string, PickStat[]> = {},
   rows: ThemeStarter[] = STARTERS,
 ): ExampleSources & { lookups: string[][] } {
   const lookups: string[][] = [];
   return {
     lookups,
     starters: async () => rows,
-    popularPicks: async (id) => history[id] ?? [],
+    themeStats: async (id) => history[id] ?? [],
     getMany: async (ids, lang) => {
       lookups.push(ids);
       return ids.flatMap((id) => {
@@ -171,16 +172,41 @@ describe("ruleExamples", () => {
   });
 
   it("fills in from the theme's history when it has too few starters, best first", async () => {
+    const picked = (id: string, lang: Lang, picks: number): PickStat => ({
+      id,
+      lang,
+      picks,
+      suggested: 0,
+      fits: 0,
+      misfits: 0,
+    });
     const history = {
       dragons: [
-        { id: "u-made-up", picks: 9 }, // a player's character: one language only
-        { id: "wd-Q91", picks: 1 },
-        { id: "wd-Q92", picks: 3 },
-        { id: "wd-Q90", picks: 5 }, // already a starter
+        picked("u-made-up", "pt", 9), // a player's character: one language only
+        picked("wd-Q91", "pt", 1),
+        picked("wd-Q92", "ja", 3), // every language counts alike here
+        picked("wd-Q90", "en", 5), // already a starter
       ],
     };
     const r = await ruleExamples(theme("Dragons", "myths"), sources(history));
     expect(r?.fits.map((c) => c.id)).toEqual(["wd-Q90", "wd-Q92"]);
+  });
+
+  it("leaves a language's own starters out: the whole room sees the same cards", async () => {
+    const own = starters("superheroes", "heroes", "fictional", [
+      "wd-Q93",
+      "wd-Q94",
+    ]).map((s) => ({ ...s, lang: "pt" as const }));
+    const r = await ruleExamples(
+      theme("Superheroes", "heroes"),
+      sources({}, [...own, ...STARTERS]),
+    );
+    expect(r?.fits.map((c) => c.id)).toEqual(
+      (await ruleExamples(theme("Superheroes", "heroes"), sources()))?.fits.map(
+        (c) => c.id,
+      ),
+    );
+    expect(r?.fits.map((c) => c.id)).not.toContain("wd-Q93");
   });
 
   it("shows only the sentence when even the history can't give two", async () => {

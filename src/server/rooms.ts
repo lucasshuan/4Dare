@@ -30,7 +30,13 @@ import { background } from "./background";
 import type { CurrentMatch, ElsewhereRoom } from "./contract";
 import { countPick, nameWithPicture, wearing } from "./pictures";
 import { type ExampleSources, voteExamples } from "./rule-examples";
-import { drawPopular, PICKS_FETCHED, pickKey } from "./theme-picks";
+import {
+  drawFit,
+  pickKey,
+  rankTheme,
+  STATS_FETCHED,
+  type ThemeFit,
+} from "./theme-picks";
 
 const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 export const CODE_PATTERN = /^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5}$/;
@@ -151,8 +157,32 @@ export async function roundThemes(
     : themes.draw(avoid, THEME_OPTIONS, themeSets);
 }
 
+/**
+ * The theme's characters ranked for `lang`'s players (null: every language
+ * alike), from its history and starters read now (see rankTheme). History
+ * that can't be read leaves the starters to rank.
+ */
+export async function themeRanking(
+  themeId: string,
+  lang: Lang | null,
+): Promise<ThemeFit[]> {
+  const { matches, characters } = getBackend();
+  const [stats, starters] = await Promise.all([
+    matches.themeStats(themeId, STATS_FETCHED).catch(() => []),
+    characters.starters(),
+  ]);
+  return rankTheme(
+    stats,
+    starters.filter((s) => s.themeId === themeId),
+    lang,
+  );
+}
+
 /** What a picker's card shows, as the browser saves it (the server adds the newId). */
-export type DraftCard = Pick<PickDraft, "characterId" | "name" | "imageUrl">;
+export type DraftCard = Pick<
+  PickDraft,
+  "characterId" | "name" | "imageUrl" | "suggested"
+>;
 
 /**
  * Saves what is on the caller's pick card (null: an empty card), quietly: a
@@ -182,6 +212,7 @@ export function saveDraft(
           name: next.name,
           imageUrl: next.imageUrl,
           newId: current?.newId ?? `u-${randomUUID()}`,
+          ...(next.suggested ? { suggested: true as const } : {}),
         },
       };
     },
@@ -194,7 +225,7 @@ const exampleSources = (): ExampleSources => {
   const { characters, matches } = getBackend();
   return {
     starters: () => characters.starters(),
-    popularPicks: (id, limit) => matches.popularPicks(id, limit),
+    themeStats: (id, limit) => matches.themeStats(id, limit),
     getMany: (ids, lang) => characters.getMany(ids, lang),
   };
 };
@@ -310,14 +341,15 @@ async function draftedCharacters(
 /**
  * Characters for the cards that are still empty when the clock runs out
  * (nothing picked, nothing typed), in the order the engine fills them: for
- * each, one the theme's players picked (when it has history), else a popular
- * one of the library, else a well-known name. Spares follow, in case.
+ * each, one of the theme's best fits for the picker's language (its history
+ * and starters), else a popular one of the library, else a well-known name.
+ * Spares follow, in case.
  */
 async function fallbackCharacters(
   state: RoomState,
   drafted: Record<PlayerId, Character>,
 ): Promise<Character[]> {
-  const { characters, matches } = getBackend();
+  const { characters } = getBackend();
   const empty = Object.values(state.assignments).filter(
     (a) => !a.character && !drafted[a.pickerId] && !draftName(a.draft),
   );
@@ -337,24 +369,29 @@ async function fallbackCharacters(
     !used.has(c.id) && !taken.has(pickKey(c.id) ?? c.id);
   const theme =
     state.theme && state.theme.set !== null ? themeId(state.theme) : null;
-  const popular = theme
-    ? await matches.popularPicks(theme, PICKS_FETCHED).catch(() => [])
-    : [];
+  // one ranking per language, read once
+  const rankings = new Map<Lang, Promise<ThemeFit[]>>();
+  const ranking = (lang: Lang) => {
+    let r = rankings.get(lang);
+    if (!r && theme) {
+      r = themeRanking(theme, lang).catch(() => []);
+      rankings.set(lang, r);
+    }
+    return r ?? Promise.resolve([]);
+  };
   const first: Character[] = [];
   const spare: Character[] = [];
   for (const a of empty) {
     const picker = state.players.find((p) => p.id === a.pickerId);
     const lang: Lang = picker?.lang ?? "en";
-    const fromTheme = popular.length
-      ? await drawPopular(
-          popular,
-          lang,
-          taken,
-          null,
-          (ids) => characters.getMany(ids, lang),
-          Math.random,
-        )
-      : null;
+    const fromTheme = await drawFit(
+      await ranking(lang),
+      lang,
+      taken,
+      null,
+      (ids) => characters.getMany(ids, lang),
+      Math.random,
+    );
     const options = [
       ...(fromTheme ? [fromTheme] : []),
       ...(await characters.randomPopular(lang, 4)),
@@ -392,11 +429,13 @@ export async function applyDueTimeouts(code: string) {
   }
   for (let i = 0; i < 4; i++) {
     if (!stored || !isExpired(stored.state, Date.now())) return stored;
-    // the cards the clock settled, from the attempt that was written
+    // the cards the clock settled, and their drafts, from the attempt that was written
     let drafted: Record<PlayerId, Character> = {};
+    let drafts: Record<PlayerId, PickDraft | null> = {};
     try {
       stored = await dispatch(code, async (state) => {
         drafted = {};
+        drafts = {};
         if (!isExpired(state, Date.now())) throw new GameError("wrong_phase");
         if (state.phase === "theming") {
           // The host never typed it: everyone votes, on themes from every set.
@@ -411,6 +450,8 @@ export async function applyDueTimeouts(code: string) {
         if (state.phase === "picking") {
           // Whatever is on a card goes; only empty cards get a fallback.
           drafted = await draftedCharacters(state);
+          for (const a of Object.values(state.assignments))
+            drafts[a.pickerId] = a.draft;
           return {
             type: "TIMEOUT",
             drafted,
@@ -422,7 +463,9 @@ export async function applyDueTimeouts(code: string) {
       const settled = Object.entries(drafted);
       if (settled.length)
         background(() =>
-          Promise.all(settled.map(([picker, c]) => countPick(c, picker))),
+          Promise.all(
+            settled.map(([picker, c]) => countPick(c, picker, drafts[picker])),
+          ),
         );
     } catch (e) {
       if (e instanceof GameError && e.code === "wrong_phase")

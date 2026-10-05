@@ -8,17 +8,47 @@ import {
 } from "node:fs";
 import { dirname } from "node:path";
 import type { MatchRecord } from "@/game/record";
-import {
-  type PickFeedback,
-  tallyFeedback,
-  tallyPicks,
-  topPicks,
-} from "../../theme-picks";
+import type { Lang } from "@/game/types";
+import { type PickStat, pickKey } from "../../theme-picks";
 import type { MatchStore } from "../types";
 import { dataPath, processSingleton, readJson, writeJson } from "./disk";
 
-/** Verdicts on random draws: { "theme|character|user": liked }. */
-const FEEDBACK_FILE = "pick-feedback.json";
+/** Fit votes: { "theme|character|voter": { lang, fits } }. */
+const VOTES_FILE = "fit-votes.json";
+
+/** One picker of a character for a theme, as table whoami_theme_pickers keeps them. */
+interface Picker {
+  id: string;
+  lang: Lang;
+  suggested: boolean;
+}
+
+/**
+ * Each player once per theme and character, by theme ("character|picker"),
+ * as record_match does: the clock's picks left out, a pick of their own
+ * replacing one the hand or the dice offered.
+ */
+function tallyPickers(
+  records: Iterable<MatchRecord>,
+  into = new Map<string, Map<string, Picker>>(),
+) {
+  for (const m of records) {
+    // A theme the host typed has no themeId.
+    if (!m.themeId) continue;
+    for (const p of m.players) {
+      const id = p.autoPicked ? null : pickKey(p.characterId);
+      if (!id || !p.pickedById) continue;
+      const theme = into.get(m.themeId) ?? new Map<string, Picker>();
+      const key = `${id}|${p.pickedById}`;
+      const suggested = p.suggested ?? false;
+      const known = theme.get(key);
+      if (!known || (known.suggested && !suggested))
+        theme.set(key, { id, lang: p.pickerLang ?? p.lang, suggested });
+      into.set(m.themeId, theme);
+    }
+  }
+  return into;
+}
 
 /** Local mode: one JSON line per finished match, appended to .data/matches.jsonl. */
 export function localMatches(): MatchStore {
@@ -37,19 +67,19 @@ export function localMatches(): MatchStore {
     "saved-matches",
     () => new Set(read().map((m) => m.id)),
   );
-  const picks = processSingleton("theme-picks", () => tallyPicks(read()));
-  const answers = processSingleton(
-    "pick-feedback",
+  const pickers = processSingleton("theme-pickers", () => tallyPickers(read()));
+  const votes = processSingleton(
+    "fit-votes",
     () =>
       new Map(
-        Object.entries(readJson<Record<string, boolean>>(FEEDBACK_FILE, {})),
+        Object.entries(
+          readJson<Record<string, { lang: Lang; fits: boolean }>>(
+            VOTES_FILE,
+            {},
+          ),
+        ),
       ),
   );
-  const feedback = (): PickFeedback[] =>
-    [...answers].map(([key, liked]) => {
-      const [themeId, characterId, userId] = key.split("|");
-      return { themeId, characterId, userId, liked };
-    });
 
   return {
     async record(match) {
@@ -60,7 +90,7 @@ export function localMatches(): MatchStore {
         `${JSON.stringify(match)}\n`,
       );
       saved.add(match.id);
-      tallyPicks([match], picks);
+      tallyPickers([match], pickers);
     },
     async played(userIds) {
       const all = new Set(
@@ -88,16 +118,44 @@ export function localMatches(): MatchStore {
       );
       renameSync(/* turbopackIgnore: true */ tmp, path);
     },
-    async popularPicks(themeId, limit) {
-      const verdicts = tallyFeedback(feedback()).get(themeId);
-      return topPicks(picks.get(themeId), limit).map((p) => ({
-        ...p,
-        ...(verdicts?.get(p.id) ?? { likes: 0, dislikes: 0 }),
-      }));
+    async themeStats(themeId, limit) {
+      const out = new Map<string, PickStat>();
+      const stat = (id: string, lang: Lang) => {
+        const key = `${id}|${lang}`;
+        const known = out.get(key);
+        if (known) return known;
+        const made = { id, lang, picks: 0, suggested: 0, fits: 0, misfits: 0 };
+        out.set(key, made);
+        return made;
+      };
+      for (const p of pickers.get(themeId)?.values() ?? []) {
+        const s = stat(p.id, p.lang);
+        if (p.suggested) s.suggested += 1;
+        else s.picks += 1;
+      }
+      for (const [key, v] of votes) {
+        const [theme, id] = key.split("|");
+        if (theme !== themeId) continue;
+        const s = stat(id, v.lang);
+        if (v.fits) s.fits += 1;
+        else s.misfits += 1;
+      }
+      const busy = (s: PickStat) => s.picks + s.suggested + s.fits;
+      return [...out.values()]
+        .sort(
+          (a, b) =>
+            busy(b) - busy(a) ||
+            a.id.localeCompare(b.id) ||
+            a.lang.localeCompare(b.lang),
+        )
+        .slice(0, limit);
     },
-    async rateDraw(f) {
-      answers.set(`${f.themeId}|${f.characterId}|${f.userId}`, f.liked);
-      writeJson(FEEDBACK_FILE, Object.fromEntries(answers));
+    async voteFit(v) {
+      votes.set(`${v.themeId}|${v.characterId}|${v.voterId}`, {
+        lang: v.lang,
+        fits: v.fits,
+      });
+      writeJson(VOTES_FILE, Object.fromEntries(votes));
     },
   };
 }

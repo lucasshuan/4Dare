@@ -780,7 +780,7 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     case "DRAFT":
       return draft(s, e.playerId, e.draft, ctx);
     case "PICK":
-      return pick(s, e.playerId, e.character, ctx);
+      return pick(s, e.playerId, e.character, e.suggested === true, ctx);
     case "ASK":
       return ask(s, e.playerId, e.text, ctx);
     case "ANSWER":
@@ -985,13 +985,15 @@ function draft(
     d.name.length <= MAX_CHARACTER_NAME &&
     optionalText(d.characterId, DRAFT_ID_MAX) &&
     optionalText(d.imageUrl, DRAFT_URL_MAX) &&
-    optionalText(d.newId, DRAFT_ID_MAX);
+    optionalText(d.newId, DRAFT_ID_MAX) &&
+    (d.suggested === undefined || d.suggested === true);
   if (!ok) fail("invalid_input");
   a.draft = {
     characterId: d.characterId,
     name: d.name,
     imageUrl: d.imageUrl,
     newId: d.newId,
+    ...(d.suggested ? { suggested: true as const } : {}),
   };
 }
 
@@ -999,10 +1001,12 @@ function pick(
   s: RoomState,
   playerId: PlayerId,
   character: Character,
+  suggested: boolean,
   ctx: Ctx,
 ) {
   const a = openCard(s, playerId);
   a.character = clone(character);
+  if (suggested) a.suggested = true;
   a.draft = null;
   if (Object.values(s.assignments).every((x) => x.character))
     startTurns(s, ctx, "confirmed");
@@ -1168,6 +1172,7 @@ function timeout(
         if (a.character) continue;
         const mine = fromDraft(s, target, a, e.drafted);
         if (mine) a.character = mine;
+        if (mine && a.draft?.suggested) a.suggested = true;
       }
       const used = new Set(
         Object.values(s.assignments).flatMap((a) =>

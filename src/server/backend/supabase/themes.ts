@@ -1,6 +1,6 @@
 import "server-only";
 import type { ThemeSet } from "@/game/theme-sets";
-import type { Theme } from "@/game/types";
+import type { Lang, Theme } from "@/game/types";
 import type { ThemeStarter, ThemeStore } from "../types";
 import { type Db, serviceClient } from "./clients";
 
@@ -28,22 +28,24 @@ export function supabaseThemes(): ThemeStore {
 interface StarterRow {
   theme_id: string;
   character_id: string;
+  lang: string;
   position: number;
   characters: { kind: ThemeStarter["kind"] } | null;
   themes: { theme_set: string | null; active: boolean } | null;
 }
 
 const STARTER_COLUMNS =
-  "theme_id, character_id, position, characters(kind), themes:whoami_themes(theme_set, active)";
+  "theme_id, character_id, lang, position, characters(kind), themes:whoami_themes(theme_set, active)";
 /** Rows asked for per request; PostgREST may hand out fewer (its "max rows"). */
 const PAGE = 1000;
 /** As long as the theme list is kept (src/server/themes.ts). */
 const STARTERS_TTL = 10 * 60_000;
 
 /**
- * Every active theme's starters (supabase/migrations/0011_theme_starters.sql),
- * by theme then position, a page at a time until an empty page: the table
- * outgrows one page (about 1700 rows).
+ * Every active theme's starters (supabase/migrations/0011_theme_starters.sql,
+ * per language since 0022), by theme, language then position (unique, so
+ * pages never skip or repeat a row), a page at a time until an empty page:
+ * the table outgrows one page (about 2200 rows).
  */
 export async function readStarters(db: Db): Promise<ThemeStarter[]> {
   const out: ThemeStarter[] = [];
@@ -52,6 +54,7 @@ export async function readStarters(db: Db): Promise<ThemeStarter[]> {
       .from("whoami_theme_starters")
       .select(STARTER_COLUMNS)
       .order("theme_id", { ascending: true })
+      .order("lang", { ascending: true })
       .order("position", { ascending: true })
       .range(from, from + PAGE - 1);
     if (error) throw error;
@@ -64,6 +67,7 @@ export async function readStarters(db: Db): Promise<ThemeStarter[]> {
         themeId: r.theme_id,
         set: (r.themes?.theme_set ?? null) as ThemeSet | null,
         characterId: r.character_id,
+        lang: r.lang as Lang | "all",
         position: r.position,
         kind: r.characters?.kind ?? null,
       });

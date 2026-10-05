@@ -257,6 +257,8 @@ export interface PickDraft {
   imageUrl: string | null;
   /** Set by the server: the id ("u-<uuid>") the clock gives a new character. */
   newId: string | null;
+  /** The hand or the dice offered the character: its pick counts less for the theme. */
+  suggested?: true;
 }
 
 /** Keyed by the player who must discover the character. */
@@ -265,6 +267,8 @@ export interface Assignment {
   character: Character | null;
   /** The clock drew it: the card was empty when the time ran out. */
   auto?: true;
+  /** The hand or the dice offered it to the picker (see PickDraft). */
+  suggested?: true;
   /** The card as the picker left it; gone once the pick is set. */
   draft: PickDraft | null;
 }
@@ -433,7 +437,13 @@ export type GameEvent =
   | { type: "SET_THEME"; playerId: PlayerId; text: string }
   /** The picker's card as it is now (null: empty); written quietly, it becomes the pick if time runs out. */
   | { type: "DRAFT"; playerId: PlayerId; draft: PickDraft | null }
-  | { type: "PICK"; playerId: PlayerId; character: Character }
+  | {
+      type: "PICK";
+      playerId: PlayerId;
+      character: Character;
+      /** The hand or the dice offered it. */
+      suggested?: boolean;
+    }
   | { type: "ASK"; playerId: PlayerId; text: string }
   | {
       type: "ANSWER";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Heart } from "lucide-react";
+import { Check, Heart } from "lucide-react";
 import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { MiniCard } from "@/components/ui/mini-card";
@@ -85,14 +85,14 @@ export function PickHand({
       <div className="flex items-start justify-center">
         {cards.map((card, i) => {
           const k = i - mid;
-          const likes =
-            card.likes > 0 ? t("handLikes", { count: card.likes }) : null;
+          const fits =
+            card.fits > 0 ? t("handFits", { count: card.fits }) : null;
           return (
             <button
               key={card.id}
               type="button"
               disabled={!open}
-              aria-label={likes ? `${card.name}, ${likes}` : card.name}
+              aria-label={fits ? `${card.name}, ${fits}` : card.name}
               onClick={() => onPick(card)}
               style={{
                 transform: `rotate(${k * 6}deg) translateY(${Math.abs(k) * 8}px)`,
@@ -110,14 +110,14 @@ export function PickHand({
                   seat={seat}
                   className="text-left"
                   sub={
-                    likes ? (
+                    fits ? (
                       <>
-                        <Heart
+                        <Check
                           aria-hidden
-                          className="size-[11px] fill-current text-no"
-                          strokeWidth={0}
+                          className="size-[11px] text-yes"
+                          strokeWidth={3}
                         />
-                        {card.likes}
+                        {card.fits}
                       </>
                     ) : undefined
                   }

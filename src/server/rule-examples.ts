@@ -1,8 +1,9 @@
 import "server-only";
 // The rule scene's cards ("Every character must be from this theme"): two
 // characters that fit the theme get ✓, one that clearly doesn't gets ✗. They
-// come from the theme's starters (supabase/seed/whoami_theme_starters.sql), then its
-// history; decided once by the server at START, so everyone sees the same.
+// come from the theme's shared starters (supabase/seed/whoami_theme_starters.sql),
+// then its history in every language; decided once by the server at START,
+// so everyone sees the same, whatever their language.
 import { themeId } from "@/game/theme-id";
 import type { ThemeSet } from "@/game/theme-sets";
 import {
@@ -17,7 +18,7 @@ import {
 } from "@/game/types";
 import { entryId, parseEntryId } from "./backend/seed-format";
 import type { ThemeStarter } from "./backend/types";
-import { drawWeight, PICKS_FETCHED, type PopularPick } from "./theme-picks";
+import { type PickStat, rankTheme, STATS_FETCHED } from "./theme-picks";
 
 /** Sets of made-up characters: a theme of one gets a real person as its ✗. */
 const FICTION: readonly ThemeSet[] = [
@@ -57,7 +58,7 @@ const MISFIT_TRIES = 8;
 /** What the examples are read from: the backend's stores (see rooms.ts), fixtures in tests. */
 export interface ExampleSources {
   starters(): Promise<ThemeStarter[]>;
-  popularPicks(themeId: string, limit: number): Promise<PopularPick[]>;
+  themeStats(themeId: string, limit: number): Promise<PickStat[]>;
   getMany(ids: string[], lang: Lang): Promise<Character[]>;
 }
 
@@ -149,8 +150,9 @@ function toCard(
 /**
  * The ✓✓✗ cards for each theme, aligned with `themes`; null where the theme
  * has fewer than two characters to show (the scene then shows only the
- * sentence) and for a typed theme. ✓: the first two starters (by position)
- * that have a picture and their names, then the theme's most picked. ✗: a
+ * sentence) and for a typed theme. ✓: the first two shared starters (by
+ * position) that have a picture and their names, then the theme's best fits
+ * in every language. ✗: a
  * starter of a contrasting set, the same for the theme every time, or none
  * when the theme could take almost anyone. Ids the library lacks are skipped.
  */
@@ -158,7 +160,8 @@ export async function ruleExamplesFor(
   themes: Theme[],
   src: ExampleSources,
 ): Promise<(RuleExamples | null)[]> {
-  const all = await src.starters();
+  // the shared ones: a language's own would show one room the wrong names
+  const all = (await src.starters()).filter((s) => s.lang === "all");
   const byTheme = new Map<string, ThemeStarter[]>();
   for (const s of all)
     byTheme.set(s.themeId, [...(byTheme.get(s.themeId) ?? []), s]);
@@ -213,14 +216,11 @@ export async function ruleExamplesFor(
       if (fits.length < 2) {
         // Too few starters: the theme's most picked fill in.
         const have = new Set(fits.map((c) => c.id));
-        const picked = (
-          await src.popularPicks(plan.id, PICKS_FETCHED).catch(() => [])
-        )
+        const stats = await src
+          .themeStats(plan.id, STATS_FETCHED)
+          .catch(() => []);
+        const picked = rankTheme(stats, [], null)
           .filter((p) => isLibraryId(p.id) && !have.has(p.id))
-          .filter((p) => drawWeight(p) > 0)
-          .sort(
-            (a, b) => drawWeight(b) - drawWeight(a) || a.id.localeCompare(b.id),
-          )
           .map((p) => p.id);
         const more = await lookUp(src, picked);
         for (const id of picked) {

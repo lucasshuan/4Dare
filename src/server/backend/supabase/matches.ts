@@ -1,4 +1,5 @@
 import "server-only";
+import type { Lang } from "@/game/types";
 import type { MatchStore } from "../types";
 import { json, serviceClient } from "./clients";
 
@@ -33,36 +34,30 @@ export function supabaseMatches(): MatchStore {
       });
       if (error) throw error;
     },
-    async popularPicks(themeId, limit) {
-      const { data, error } = await serviceClient().rpc("theme_pick_scores", {
+    async themeStats(themeId, limit) {
+      const { data, error } = await serviceClient().rpc("whoami_theme_stats", {
         p_theme: themeId,
         p_limit: limit,
       });
       if (error) throw error;
-      return (
-        (data ?? []) as {
-          id: string;
-          picks: number;
-          likes: number;
-          dislikes: number;
-        }[]
-      ).map((r) => ({
-        id: r.id,
-        picks: Number(r.picks),
-        likes: Number(r.likes),
-        dislikes: Number(r.dislikes),
+      return (data ?? []).map((r) => ({
+        id: r.character_id,
+        lang: r.lang as Lang,
+        picks: r.picks,
+        suggested: r.suggested,
+        fits: r.fits,
+        misfits: r.misfits,
       }));
     },
-    async rateDraw(f) {
-      const { error } = await serviceClient()
-        .from("whoami_pick_feedback")
-        .upsert({
-          theme_id: f.themeId,
-          character_id: f.characterId,
-          user_id: f.userId,
-          liked: f.liked,
-          created_at: new Date().toISOString(),
-        });
+    async voteFit(v) {
+      const { error } = await serviceClient().from("whoami_fit_votes").upsert({
+        theme_id: v.themeId,
+        character_id: v.characterId,
+        voter_id: v.voterId,
+        lang: v.lang,
+        fits: v.fits,
+        voted_at: new Date().toISOString(),
+      });
       if (error) throw error;
     },
   };

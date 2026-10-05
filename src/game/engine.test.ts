@@ -994,6 +994,37 @@ describe("pick drafts", () => {
     expect(auto(d)).toBe(true);
   });
 
+  it("marks a pick the hand or the dice offered, confirmed or left on the card", () => {
+    const g = picking(3);
+    const [a, b, c] = g.state.order;
+    expect(
+      save(g, a, {
+        characterId: "wd-Q1",
+        name: "Homem",
+        suggested: false as unknown as true,
+      }),
+    ).toBe("invalid_input");
+    save(g, a, { characterId: "wd-Q1", name: "Homem", suggested: true });
+    expect(draftFor(g, a)?.suggested).toBe(true);
+    g.do({ type: "PICK", playerId: b, character: char("x"), suggested: true });
+    save(g, c, { characterId: "wd-Q2", name: "Mulher" });
+    g.timeout({
+      drafted: { [a]: char("wd-Q1"), [c]: char("wd-Q2") },
+      fallbackCharacters: [],
+    });
+    g.skipShow();
+    for (const id of g.state.order)
+      if (g.state.phase !== "finished") g.do({ type: "GIVE_UP", playerId: id });
+    const record = matchRecord(g.state, g.now);
+    const of = (picker: string) =>
+      record?.players.find((p) => p.userId === targetOf(g, picker));
+    expect([a, b, c].map((p) => of(p)?.suggested)).toEqual([true, true, false]);
+    // the picker's language rides along: their pick counts most for its players
+    expect(of(a)?.pickerLang).toBe(
+      g.state.players.find((p) => p.id === a)?.lang,
+    );
+  });
+
   it("a draft follows a guest who signs in", () => {
     const g = picking(2);
     save(g, "p1", { name: "Bia" });

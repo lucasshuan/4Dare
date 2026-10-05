@@ -25,8 +25,8 @@ const LIBRARY: [string, string | null][] = [
   ["Chapolin Colorado", null],
 ];
 
-/** Likes and picks of the hand's cards, in the route's order (best first). */
-const HAND_STATS: [likes: number, picks: number][] = [
+/** Fit votes and picks of the hand's cards, in the route's order (best first). */
+const HAND_STATS: [fits: number, picks: number][] = [
   [42, 51],
   [37, 40],
   [31, 33],
@@ -53,7 +53,7 @@ export function scenario(params: LabParams): SceneFixtures {
       name: c.name,
       origin: c.origin,
       imageUrl: c.imageUrl,
-      likes: HAND_STATS[i][0],
+      fits: HAND_STATS[i][0],
       picks: HAND_STATS[i][1],
     }));
   return {

@@ -51,7 +51,7 @@ import { usePickDraft } from "./use-pick-draft";
 
 /** The row layout (spacer, card, actions column); narrower windows stack them. */
 const WIDE = "(min-width: 1024px)";
-/** How long the picture's flip takes before the "Like this pick?" bubble may show. */
+/** How long the picture's flip takes before the "Fits the theme?" bubble may show. */
 const FLIP_MS = 650;
 
 const toCard = (c: CharacterDTO | HandCard): CardView => ({
@@ -302,7 +302,7 @@ function PickTable() {
       setContent({ kind: "picked", card: toCard(r.data), via: "random" });
     else if (r.error === "not_enough_picks") setNoHistory(true);
   };
-  // the "Like this pick?" bubble waits for the picture's flip
+  // the "Fits the theme?" bubble waits for the picture's flip
   const [settled, setSettled] = useState<string | null>(null);
   useEffect(() => {
     if (!drawnId) return;
@@ -449,7 +449,7 @@ function PickTable() {
                 code={code}
                 characterId={drawnId}
                 show={editing && settled === drawnId && !busy}
-                onDislike={roll}
+                onMisfit={roll}
               />
             ) : null}
           </div>

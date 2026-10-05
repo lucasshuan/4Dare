@@ -7,7 +7,8 @@ import { type DraftCard, normalizeCode, saveDraft } from "@/server/rooms";
 
 /**
  * The card as the browser sends it, or null for an empty card:
- * `{ characterId: string | null, name: string, imageUrl: string | null }`.
+ * `{ characterId: string | null, name: string, imageUrl: string | null,
+ * suggested?: boolean }` (suggested: the hand or the dice offered it).
  * A picture must be one of the character's the player can see or, for a new
  * name, one they sent (see draft/image).
  */
@@ -18,7 +19,10 @@ async function parseCard(
   if (body === null) return null;
   if (typeof body !== "object" || Array.isArray(body))
     throw new GameError("invalid_input");
-  const { characterId, name, imageUrl } = body as Record<string, unknown>;
+  const { characterId, name, imageUrl, suggested } = body as Record<
+    string,
+    unknown
+  >;
   const ok =
     typeof name === "string" &&
     name.length <= MAX_CHARACTER_NAME &&
@@ -27,7 +31,8 @@ async function parseCard(
         characterId.length > 0 &&
         characterId.length <= 200)) &&
     (imageUrl === null ||
-      (typeof imageUrl === "string" && imageUrl.length <= 500));
+      (typeof imageUrl === "string" && imageUrl.length <= 500)) &&
+    (suggested === undefined || typeof suggested === "boolean");
   if (!ok) throw new GameError("invalid_input");
   if (
     typeof imageUrl === "string" &&
@@ -38,6 +43,9 @@ async function parseCard(
     characterId: characterId as string | null,
     name: name as string,
     imageUrl: imageUrl as string | null,
+    ...(suggested === true && characterId !== null
+      ? { suggested: true as const }
+      : {}),
   };
 }
 

@@ -134,11 +134,25 @@ export async function nameWithPicture(input: NewCharacter): Promise<Character> {
   return { ...c, imageUrl: picture.url };
 }
 
-/** Counts the picture a confirmed card showed toward its character's cover. Best effort. */
-export async function countPick(c: Character, pickerId: PlayerId) {
+/**
+ * Counts the picture a confirmed card showed toward its character's cover:
+ * chosen when the card's draft put it there (a tray choice, an upload),
+ * else kept as the cover it showed. Best effort.
+ */
+export async function countPick(
+  c: Character,
+  pickerId: PlayerId,
+  draft: PickDraft | null | undefined,
+) {
   if (!c.imageUrl || c.id.startsWith("emergency-")) return;
+  const chosen = !!draft?.imageUrl && draft.imageUrl === c.imageUrl;
   try {
-    await getBackend().images.recordPick(baseId(c.id), c.imageUrl, pickerId);
+    await getBackend().images.recordPick(
+      baseId(c.id),
+      c.imageUrl,
+      pickerId,
+      chosen,
+    );
   } catch (e) {
     console.warn("[pictures] pick not counted:", e);
   }

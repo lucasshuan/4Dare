@@ -43,9 +43,28 @@ describe("toDraft", () => {
           origin: "Marvel",
           imageUrl: "x",
         },
-        via: "hand",
+        via: "list",
       }),
     ).toEqual({ characterId: "c-iron", name: "Iron Man", imageUrl: null });
+    // one the hand or the dice offered says so: its pick counts less
+    for (const via of ["hand", "random"] as const)
+      expect(
+        toDraft({
+          kind: "picked",
+          card: {
+            characterId: "c-iron",
+            name: "Iron Man",
+            origin: "Marvel",
+            imageUrl: "x",
+          },
+          via,
+        }),
+      ).toEqual({
+        characterId: "c-iron",
+        name: "Iron Man",
+        imageUrl: null,
+        suggested: true,
+      });
     // another picture chosen in the tray goes with it
     expect(
       toDraft({
@@ -56,7 +75,7 @@ describe("toDraft", () => {
           origin: "Marvel",
           imageUrl: "x",
         },
-        via: "hand",
+        via: "list",
         picture: "/api/files/characters/fat.webp",
       }),
     ).toEqual({
@@ -80,6 +99,18 @@ describe("toDraft", () => {
 });
 
 describe("fromDraft", () => {
+  it("keeps a draft the hand or the dice filled marked as offered", () => {
+    const draft = {
+      characterId: "c-iron",
+      name: "Iron Man",
+      imageUrl: null,
+      suggested: true as const,
+    };
+    const card = fromDraft(draft, ITEMS);
+    expect(card).toMatchObject({ kind: "picked", via: "restore" });
+    expect(card && toDraft(card)).toEqual(draft);
+  });
+
   it("restores a picked character without flipping it", () => {
     expect(
       fromDraft(

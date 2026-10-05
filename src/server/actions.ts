@@ -59,14 +59,10 @@ import {
   roundThemes,
   saveDraft,
   syncIdentity,
+  themeRanking,
 } from "./rooms";
 import { showMe } from "./shown";
-import {
-  drawPopular,
-  PICKS_FETCHED,
-  pickKey,
-  withStarters,
-} from "./theme-picks";
+import { drawFit, pickKey } from "./theme-picks";
 
 async function lang(): Promise<Lang> {
   try {
@@ -332,7 +328,7 @@ export async function confirmCard(
       playerId: id,
       character,
     }));
-    background(() => countPick(character, who.id));
+    background(() => countPick(character, who.id, draft));
     return view;
   });
 }
@@ -359,20 +355,23 @@ async function confirmed(code: string, characterId: unknown, name?: unknown) {
       ? knownAs(found ?? bad(), name)
       : (found ?? bad());
   const character = wearing(shown, draft);
+  const suggested =
+    draft?.characterId === character.id && draft.suggested === true;
   const view = await act(room, (id) => ({
     type: "PICK",
     playerId: id,
     character,
+    suggested,
   }));
-  background(() => countPick(character, who.id));
+  background(() => countPick(character, who.id, draft));
   return view;
 }
 
 /**
- * A character for the caller to pick, drawn among the ones players picked
- * most in finished matches with this theme and the theme's starters (see
- * withStarters). Fails with "not_enough_picks" when the theme has neither. `skip` is the one drawn last, so a
- * second press shows someone else. The draw goes on the caller's card (its
+ * A character for the caller to pick, drawn among the theme's best fits for
+ * their language (its history and starters, see rankTheme). Fails with
+ * "not_enough_picks" when the theme has neither. `skip` is the one drawn
+ * last, so a second press shows someone else. The draw goes on the caller's card (its
  * draft), so it is the pick if the clock runs out; they still confirm it.
  * Never one already picked in the match, the caller's own secret included.
  */
@@ -384,7 +383,7 @@ export async function randomPick(
     const who = await me();
     if (!allow(`random:${who.id}`, 30, 60_000))
       throw new GameError("rate_limited");
-    const { rooms, matches, characters } = getBackend();
+    const { rooms, characters } = getBackend();
     const state = (await rooms.get(roomCode(code)))?.state;
     if (!state) throw new GameError("not_found");
     if (state.phase !== "picking") throw new GameError("wrong_phase");
@@ -404,16 +403,8 @@ export async function randomPick(
         return key ? [key] : [];
       }),
     );
-    const theme = themeId(state.theme);
-    const [popular, starters] = await Promise.all([
-      matches.popularPicks(theme, PICKS_FETCHED),
-      characters.starters(),
-    ]);
-    const c = await drawPopular(
-      withStarters(
-        popular,
-        starters.filter((s) => s.themeId === theme).map((s) => s.characterId),
-      ),
+    const c = await drawFit(
+      await themeRanking(themeId(state.theme), player.lang),
       player.lang,
       taken,
       typeof skip === "string" ? pickKey(skip) : null,
@@ -426,6 +417,7 @@ export async function randomPick(
         characterId: c.id,
         name: c.name,
         imageUrl: null,
+        suggested: true,
       });
     } catch (e) {
       // the card was confirmed or the clock ran out meanwhile: the draw still shows
@@ -436,13 +428,14 @@ export async function randomPick(
 }
 
 /**
- * The picker's verdict on a character the random button just drew: "no"
- * makes it less likely to be drawn for this theme again, "yes" more.
+ * The picker's verdict on a character the random button just drew: did it
+ * fit the theme? "No" makes it less likely to be drawn or shown for the
+ * theme again, "yes" more; most for players of the picker's language.
  */
 export async function rateRandomPick(
   code: string,
   characterId: string,
-  liked: boolean,
+  fits: boolean,
 ): Promise<Result<null>> {
   return run(async () => {
     const who = await me();
@@ -452,23 +445,24 @@ export async function rateRandomPick(
       typeof characterId === "string" && characterId.length <= 200
         ? pickKey(characterId)
         : null;
-    if (!key || typeof liked !== "boolean") bad();
+    if (!key || typeof fits !== "boolean") bad();
     const { rooms, matches } = getBackend();
     const state = (await rooms.get(roomCode(code)))?.state;
     if (!state) throw new GameError("not_found");
-    if (!state.players.some((p) => p.id === who.id))
-      throw new GameError("not_member");
+    const player = state.players.find((p) => p.id === who.id);
+    if (!player) throw new GameError("not_member");
     if (state.phase !== "picking" || !state.theme)
       throw new GameError("wrong_phase");
     const theme = themeId(state.theme);
     // Only characters the button can draw for this theme get a say.
-    const known = await matches.popularPicks(theme, PICKS_FETCHED);
-    if (!known.some((p) => p.id === key)) bad();
-    await matches.rateDraw({
+    const ranked = await themeRanking(theme, player.lang);
+    if (!ranked.some((f) => f.id === key)) bad();
+    await matches.voteFit({
       themeId: theme,
       characterId: key as string,
-      userId: who.id,
-      liked,
+      voterId: who.id,
+      lang: player.lang,
+      fits,
     });
     return null;
   });
@@ -476,32 +470,33 @@ export async function rateRandomPick(
 
 /**
  * A player's verdict on the character they just discovered, once they know
- * who they were: it counts like a verdict on a draw, for this theme's draws.
+ * who they were: did it fit the theme? It counts like a verdict on a draw.
  */
 export async function rateFoundCharacter(
   code: string,
-  liked: boolean,
+  fits: boolean,
 ): Promise<Result<null>> {
   return run(async () => {
     const who = await me();
     if (!allow(`rate:${who.id}`, 30, 60_000))
       throw new GameError("rate_limited");
-    if (typeof liked !== "boolean") bad();
+    if (typeof fits !== "boolean") bad();
     const { rooms, matches } = getBackend();
     const state = (await rooms.get(roomCode(code)))?.state;
     if (!state) throw new GameError("not_found");
-    if (!state.players.some((p) => p.id === who.id))
-      throw new GameError("not_member");
+    const player = state.players.find((p) => p.id === who.id);
+    if (!player) throw new GameError("not_member");
     if (state.outcomes[who.id]?.discoveredAt == null || !state.theme)
       throw new GameError("wrong_phase");
     const key = pickKey(state.assignments[who.id]?.character?.id ?? null);
-    // a stand-in character has no say in the draws
+    // a stand-in character has no say in the theme
     if (!key) return null;
-    await matches.rateDraw({
+    await matches.voteFit({
       themeId: themeId(state.theme),
       characterId: key,
-      userId: who.id,
-      liked,
+      voterId: who.id,
+      lang: player.lang,
+      fits,
     });
     return null;
   });

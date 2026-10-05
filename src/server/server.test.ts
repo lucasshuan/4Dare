@@ -565,6 +565,7 @@ async function recordPicks(
   theme: Theme,
   characterIds: string[],
   room = "SEEDS",
+  lang: Lang = "pt",
 ) {
   const { getBackend } = await import("./backend");
   await getBackend().matches.record({
@@ -578,12 +579,14 @@ async function recordPicks(
     players: characterIds.map((characterId, i) => ({
       userId: `seed-${i}`,
       wasGuest: true,
-      lang: "en",
-      pickedById: null,
+      lang,
+      pickedById: `seed-picker-${i}`,
+      pickerLang: lang,
       characterId,
       characterName: characterId,
       characterOrigin: null,
       autoPicked: false,
+      suggested: false,
       result: "discovered",
       place: 1,
       discoveredAt: 1,
@@ -683,16 +686,18 @@ describe("random pick by theme", () => {
     expect(drawn.lang).toBe("pt");
     expect(ids).toContain(drawn.id);
     // the draw is on the card now: if the clock runs out, it is the pick
+    // the dice offered it: its pick will count less for the theme
     expect((await view(code)).body.pick?.draft).toEqual({
       characterId: drawn.id,
       name: drawn.name,
       imageUrl: null,
+      suggested: true,
     });
     // another press shows someone else
     const again = must(await A.randomPick(code, drawn.id));
     expect(again.id).not.toBe(drawn.id);
 
-    // a "no" is saved for this theme and lowers that character's chance
+    // a "no, it doesn't fit" is saved for this theme, in the voter's language
     expect(await A.rateRandomPick(code, "pt-wd-Q999999999", false)).toEqual({
       ok: false,
       error: "invalid_input",
@@ -700,21 +705,15 @@ describe("random pick by theme", () => {
     must(await A.rateRandomPick(code, drawn.id, false));
     must(await A.rateRandomPick(code, again.id, true));
     const { getBackend } = await import("./backend");
-    const scores = await getBackend().matches.popularPicks(themeId(theme), 100);
-    expect(scores.find((p) => p.id === drawn.id)).toMatchObject({
-      dislikes: 1,
-      likes: 0,
-    });
-    expect(scores.find((p) => p.id === again.id)).toMatchObject({
-      likes: 1,
-    });
+    const votes = async (id: string) =>
+      (await getBackend().matches.themeStats(themeId(theme), 100)).find(
+        (s) => s.id === id && s.lang === "pt",
+      );
+    expect(await votes(drawn.id)).toMatchObject({ misfits: 1, fits: 0 });
+    expect(await votes(again.id)).toMatchObject({ fits: 1 });
     // answering again replaces the earlier answer
     must(await A.rateRandomPick(code, drawn.id, true));
-    expect(
-      (await getBackend().matches.popularPicks(themeId(theme), 100)).find(
-        (p) => p.id === drawn.id,
-      ),
-    ).toMatchObject({ dislikes: 0, likes: 1 });
+    expect(await votes(drawn.id)).toMatchObject({ misfits: 0, fits: 1 });
     must(await A.confirmPick(code, again.id));
     expect(await A.randomPick(code)).toEqual({
       ok: false,
@@ -1020,6 +1019,7 @@ describe("rule examples and the hand", () => {
     themeId: themeId(theme),
     set: theme.set,
     characterId,
+    lang: "all" as const,
     position,
     kind,
   });
@@ -1135,7 +1135,7 @@ describe("rule examples and the hand", () => {
       return {
         res,
         body: (await res.json()) as {
-          hand: { id: string; picks: number; likes: number }[];
+          hand: { id: string; picks: number; fits: number }[];
         },
       };
     };
@@ -1147,17 +1147,19 @@ describe("rule examples and the hand", () => {
     const [often, once, liked] = await makeCharacters(`Hand ${id}`, 3, true);
     await recordPicks(theme, [often.id, often.id, often.id, once.id, liked.id]);
     const { getBackend } = await import("./backend");
-    await getBackend().matches.rateDraw({
+    await getBackend().matches.voteFit({
       themeId: id,
       characterId: liked.id,
-      userId: "k1",
-      liked: true,
+      voterId: "k1",
+      lang: "pt",
+      fits: true,
     });
     const starters = [
       {
         themeId: id,
         set: theme.set,
         characterId: "wd-Q9000031",
+        lang: "all" as const,
         position: 1,
         kind: "fictional" as const,
       },
@@ -1167,13 +1169,14 @@ describe("rule examples and the hand", () => {
       return hand(id);
     });
     expect(res.headers.get("cache-control")).toContain("s-maxage=60");
-    // a single pick with no like is not enough to beat the starters
+    // a young theme: the starter leads, then picks and votes
     expect(body.hand.map((c) => c.id)).toEqual([
+      "pt-wd-Q9000031",
       often.id,
       liked.id,
-      "pt-wd-Q9000031",
+      once.id,
     ]);
-    expect(body.hand[1]).toMatchObject({ picks: 1, likes: 1 });
+    expect(body.hand[2]).toMatchObject({ picks: 1, fits: 1 });
   });
 });
 
@@ -1605,14 +1608,14 @@ describe("character pictures", () => {
     const made = must(await A.createCharacter(form));
     const first = made.imageUrl as string;
     await add(made.id, "https://img.test/b.png");
-    await images.recordPick(made.id, "https://img.test/b.png", "v1");
+    await images.recordPick(made.id, "https://img.test/b.png", "v1", true);
     expect((await characters.get(made.id))?.imageUrl).toBe(
       "https://img.test/b.png",
     );
-    await images.recordPick(made.id, first, "v2");
-    await images.recordPick(made.id, first, "v3");
+    await images.recordPick(made.id, first, "v2", true);
+    await images.recordPick(made.id, first, "v3", true);
     // the same player twice is one pick
-    await images.recordPick(made.id, "https://img.test/b.png", "v1");
+    await images.recordPick(made.id, "https://img.test/b.png", "v1", true);
     expect((await characters.get(made.id))?.imageUrl).toBe(first);
 
     // the library's own picture starts 20 picks ahead and wins a tie
@@ -1620,9 +1623,9 @@ describe("character pictures", () => {
     const id = lib.id.replace(/^(en|pt|ja)-/, "");
     await add(id, "https://img.test/fat.png");
     for (let i = 0; i < 20; i++)
-      await images.recordPick(id, "https://img.test/fat.png", `w${i}`);
+      await images.recordPick(id, "https://img.test/fat.png", `w${i}`, true);
     expect((await characters.get(lib.id))?.imageUrl).toBe(lib.imageUrl);
-    await images.recordPick(id, "https://img.test/fat.png", "w20");
+    await images.recordPick(id, "https://img.test/fat.png", "w20", true);
     expect((await characters.get(lib.id))?.imageUrl).toBe(
       "https://img.test/fat.png",
     );
@@ -1630,6 +1633,51 @@ describe("character pictures", () => {
     expect(
       (await characters.get(lib.id.replace(/^pt-/, "en-")))?.imageUrl,
     ).toBe("https://img.test/fat.png");
+  });
+
+  it("weighs a cover kept as shown less than a picture chosen, and every report against it", async () => {
+    const { images, characters } = await backend();
+    const lib = await pictured(5);
+    const id = lib.id.replace(/^(en|pt|ja)-/, "");
+    const fan = "https://img.test/fan.png";
+    await images.add({
+      characterId: id,
+      url: fan,
+      createdBy: "someone",
+      author: {
+        name: null,
+        isGuest: true,
+        guestNumber: 1,
+        avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
+      },
+      status: "active",
+      moderation: null,
+    });
+    const cover = async () => (await characters.get(lib.id))?.imageUrl;
+    // 16 kept the cover as the card showed it: 20 + √16 = 24
+    for (let i = 0; i < 16; i++)
+      await images.recordPick(id, lib.imageUrl as string, `k${i}`, false);
+    for (let i = 0; i < 24; i++)
+      await images.recordPick(id, fan, `c${i}`, true);
+    // a tie: the older one stays
+    expect(await cover()).toBe(lib.imageUrl);
+    // one who chose it already adds nothing by keeping it
+    await images.recordPick(id, fan, "c0", false);
+    expect(await cover()).toBe(lib.imageUrl);
+    // one who kept the cover, then chose it: a pick instead of a keep (21 + √15)
+    await images.recordPick(id, lib.imageUrl as string, "k0", true);
+    await images.recordPick(id, fan, "c24", true);
+    expect(await cover()).toBe(fan);
+    // two reports take four off: the library's own is never hidden, but it sinks
+    const [, theirs] = await images.list(id, "c0", 2);
+    expect(theirs.url).toBe(lib.imageUrl);
+    expect(theirs.score).toBeCloseTo(21 + Math.sqrt(15));
+    await images.report(theirs.id, "r1", 3);
+    await images.report(theirs.id, "r2", 3);
+    const after = await images.list(id, "c0", 2);
+    expect(after.map((p) => p.url)).toEqual([fan, lib.imageUrl]);
+    expect(after[1].score).toBeCloseTo(17 + Math.sqrt(15));
+    expect(after[1].status).toBe("active");
   });
 
   it("refuses what the detector flags, and shows what it could not check only to its author", async () => {

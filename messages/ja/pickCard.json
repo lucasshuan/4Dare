@@ -21,7 +21,7 @@
   "confirmCard": "決定",
   "rule": "時間切れなら、そのときのカードで決定。",
   "handLabel": "{theme}で人気",
-  "handLikes": "{count}人がいいね",
+  "handFits": "{count}人が「テーマに合う」と回答",
   "doneWaiting": "完了！待っている人：{names}",
   "doneAll": "全員選び終わりました！",
   "timeUp": "時間切れ！これで決定。"

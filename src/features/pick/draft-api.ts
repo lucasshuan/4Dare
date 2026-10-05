@@ -20,9 +20,9 @@ export type { HandCard } from "@/server/theme-picks";
 /**
  * What the card saves, "whatever is on the card is the pick":
  * empty → null; a library character (picked, or the highlighted row while
- * typing) → its id with the name as shown, and the picture chosen for it
- * when it is not the cover; a name the search doesn't know → the name and
- * its uploaded picture.
+ * typing) → its id with the name as shown, the picture chosen for it when it
+ * is not the cover, and whether the hand or the dice offered it; a name the
+ * search doesn't know → the name and its uploaded picture.
  */
 export function toDraft(card: CardContent): DraftCard | null {
   switch (card.kind) {
@@ -40,6 +40,9 @@ export function toDraft(card: CardContent): DraftCard | null {
         characterId: card.card.characterId,
         name: card.card.name,
         imageUrl: card.picture ?? null,
+        ...(card.via === "hand" || card.via === "random" || card.suggested
+          ? { suggested: true as const }
+          : {}),
       };
     case "new":
       if (!card.name.trim() && !card.imageUrl) return null;
@@ -49,7 +52,14 @@ export function toDraft(card: CardContent): DraftCard | null {
 
 /** One string per draft, to compare a card with what the server holds. */
 export const draftKey = (draft: DraftCard | null | undefined): string =>
-  draft ? JSON.stringify([draft.characterId, draft.name, draft.imageUrl]) : "";
+  draft
+    ? JSON.stringify([
+        draft.characterId,
+        draft.name,
+        draft.imageUrl,
+        draft.suggested === true,
+      ])
+    : "";
 
 /**
  * The card a saved draft stands for (a reload, a rejoin). A library id needs
@@ -74,7 +84,10 @@ export function fromDraft(
       : { kind: "empty" };
   if (!items) return undefined;
   const item = items.find((i) => i[0] === draft.characterId);
-  const picture = draft.imageUrl ? { picture: draft.imageUrl } : {};
+  const picture = {
+    ...(draft.imageUrl ? { picture: draft.imageUrl } : {}),
+    ...(draft.suggested ? { suggested: true as const } : {}),
+  };
   if (!item)
     return {
       kind: "picked",

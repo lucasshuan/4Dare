@@ -32,15 +32,15 @@
     "imageHint": "Yours goes on this card and joins {name}'s pictures. The one picked most becomes the main picture.",
     "random": "Random",
     "randomAgain": "Draw another",
-    "randomHint": "Draws one of the characters people picked most for this theme",
-    "rateQuestion": "Like this pick?",
-    "rateYes": "Yes",
+    "randomHint": "Draws one of the characters that best fit this theme",
+    "rateQuestion": "Fits the theme?",
+    "rateYes": "It fits",
     "rateNo": "No, draw another",
     "rateThanks": "Thanks!",
     "rateDismiss": "Close"
   },
   "found": {
-    "question": "Enjoyed being {name}?",
+    "question": "Did {name} fit the theme?",
     "yes": "Yes",
     "no": "No"
   },

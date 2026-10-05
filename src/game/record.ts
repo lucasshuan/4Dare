@@ -11,11 +11,15 @@ export interface PlayerRecord {
   wasGuest: boolean;
   lang: Lang;
   pickedById: PlayerId | null;
+  /** The picker's language: their pick counts most for its players. Null when they left. */
+  pickerLang: Lang | null;
   characterId: string | null;
   characterName: string | null;
   characterOrigin: string | null;
   /** The clock picked the character, not a person: left out of what players pick for a theme. */
   autoPicked: boolean;
+  /** The hand or the dice offered it to the picker: it counts less for the theme. */
+  suggested: boolean;
   result: PlayerResult;
   /** 1 = first to discover. */
   place: number | null;
@@ -63,10 +67,12 @@ export function matchRecord(s: RoomState, now: number): MatchRecord | null {
         wasGuest: p.isGuest,
         lang: p.lang,
         pickedById: a.pickerId,
+        pickerLang: s.players.find((q) => q.id === a.pickerId)?.lang ?? null,
         characterId: a.character?.id ?? null,
         characterName: a.character?.name ?? null,
         characterOrigin: a.character?.origin ?? null,
         autoPicked: !!a.auto,
+        suggested: !!a.suggested,
         result,
         place: o?.place ?? null,
         discoveredAt: o?.discoveredAt ?? null,

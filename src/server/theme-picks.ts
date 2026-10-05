@@ -1,90 +1,155 @@
 import "server-only";
-// What players picked for each theme in finished matches, for the pick
-// screen: the "random" button draws among the characters people chose most
-// for the theme being played (the theme's starters count as a few picks each,
-// so the draw works before the history does), and the hand under the card
-// shows them (with the starters filling in while the history is thin).
-import type { MatchRecord } from "@/game/record";
+// How well each character fits a theme for one language's players: the pick
+// screen's hand, the dice and the clock's fills all draw on this ranking.
+// Three signals, each kept in the language it came from:
+// - starters: picked by hand per theme (shared ones, plus a language's own
+//   ranked among them); a head start that fades as the theme gathers history;
+// - pickers: players who chose the character for the theme, each once; one
+//   the hand or the dice offered counts half, since what is shown gets picked;
+// - votes: "did it fit the theme?", asked after a draw and after a discovery.
+// Another language's history counts a quarter: a cartoon travels, a
+// country's celebrities don't, and each language's starters say whose are.
 import type { Character, Lang } from "@/game/types";
 import { entryId, parseEntryId } from "./backend/seed-format";
+import type { ThemeStarter } from "./backend/types";
 import type { CharacterDTO } from "./contract";
 
-/** One saved pick for the theme is enough to draw from. */
-export const MIN_RANDOM_PICKS = 1;
-/** The draw is among this many of the most picked characters. */
-export const RANDOM_POOL = 20;
-/** How many to read from the history: some drop out (other language, deleted). */
-export const PICKS_FETCHED = 100;
-
-export interface PopularPick {
+/** What a theme knows of one character in one language (table whoami_theme_stats). */
+export interface PickStat {
   /** The same in every language: "wd-Q302", "al-40", "u-<uuid>". */
   id: string;
+  lang: Lang;
+  /** Players who chose it on their own. */
   picks: number;
-  /** Players who drew it with the random button and said it fits the theme, or not. */
-  likes?: number;
-  dislikes?: number;
+  /** Players who chose it from the hand or the dice. */
+  suggested: number;
+  /** Players who said it fits the theme, or doesn't. */
+  fits: number;
+  misfits: number;
 }
 
-/**
- * How likely a character is to be drawn: picks and likes push it up, and
- * every "no" halves it, so a character that doesn't fit the theme soon drops
- * out of the pool.
- */
-export const drawWeight = (p: PopularPick) =>
-  (p.picks + (p.likes ?? 0)) * 0.5 ** (p.dislikes ?? 0);
-
-/**
- * How many picks a starter counts as in the draw: enough to carry the draw
- * while the theme has little history, soon outweighed by real picks.
- */
-export const STARTER_PICKS = 3;
-
-/**
- * The history with the theme's starters (language-free library ids) mixed
- * in: each counts STARTER_PICKS more picks, and one nobody picked yet joins
- * with that many. Likes and dislikes stay as they are, so a starter players
- * keep turning down still drops out of the draw.
- */
-export function withStarters(
-  popular: PopularPick[],
-  starters: string[],
-): PopularPick[] {
-  const boost = new Set(starters);
-  const known = new Set(popular.map((p) => p.id));
-  return [
-    ...popular.map((p) =>
-      boost.has(p.id) ? { ...p, picks: p.picks + STARTER_PICKS } : p,
-    ),
-    ...[...boost]
-      .filter((id) => !known.has(id))
-      .map((id) => ({ id, picks: STARTER_PICKS })),
-  ];
-}
-
-/** One player's verdict on a drawn character, by theme. */
-export interface PickFeedback {
+/** One player's verdict: did the character fit the theme? */
+export interface FitVote {
   themeId: string;
   /** Language-free key (see pickKey). */
   characterId: string;
-  userId: string;
-  liked: boolean;
+  voterId: string;
+  /** The voter's language: the vote counts most for its players. */
+  lang: Lang;
+  fits: boolean;
 }
 
-/** Likes and dislikes per theme and character, the last answer of each player counting once. */
-export function tallyFeedback(answers: Iterable<PickFeedback>) {
-  const out = new Map<
-    string,
-    Map<string, { likes: number; dislikes: number }>
-  >();
-  for (const a of answers) {
-    const theme = out.get(a.themeId) ?? new Map();
-    const counts = theme.get(a.characterId) ?? { likes: 0, dislikes: 0 };
-    if (a.liked) counts.likes += 1;
-    else counts.dislikes += 1;
-    theme.set(a.characterId, counts);
-    out.set(a.themeId, theme);
-  }
+/** A pick or a vote from another language, against one from the players' own. */
+export const OTHER_LANGUAGE = 0.25;
+/** A pick the hand or the dice offered, against one a player found on their own. */
+export const SUGGESTED = 0.5;
+/** The first starter's head start, in picks; the next ones get less (see headStart). */
+export const HEAD_START = 8;
+/** History (weighted picks) at which the starters' head start is halved. */
+export const HEAD_START_FADE = 40;
+/** A shared starter next to the language's own: these lead, those follow close. */
+export const SHARED_STARTER = 0.8;
+/** What a vote count starts from: [fits, misfits]. A starter is trusted more. */
+const STARTER_FIT: [number, number] = [4, 1];
+const OTHER_FIT: [number, number] = [2, 1];
+/** Out of the hand and the dice: this many "no"s and a fit chance under a third. */
+const VOTED_OUT = 3;
+
+/** The head start of the starter at `position` (1 is the clearest fit): 8, 6.4, 5.3, 4.6... */
+export const headStart = (position: number) =>
+  HEAD_START / (1 + (position - 1) / 4);
+
+/**
+ * The starters' head starts for `lang` (null: every language alike, the
+ * shared ones alone). A language with its own starters for the theme ranks
+ * them first and the shared ones close behind, interleaved by position.
+ */
+export function startersFor(
+  starters: readonly ThemeStarter[],
+  lang: Lang | null,
+): Map<string, number> {
+  const own = lang ? starters.filter((s) => s.lang === lang) : [];
+  const shared = starters.filter((s) => s.lang === "all");
+  const out = new Map<string, number>();
+  const add = (s: ThemeStarter, factor: number) => {
+    const head = headStart(s.position) * factor;
+    out.set(s.characterId, Math.max(out.get(s.characterId) ?? 0, head));
+  };
+  for (const s of own) add(s, 1);
+  for (const s of shared) add(s, own.length ? SHARED_STARTER : 1);
   return out;
+}
+
+/** A character's standing in a theme for one language. */
+export interface ThemeFit {
+  /** Language-free key. */
+  id: string;
+  /** Its weight in the hand and the dice: higher fits better. */
+  score: number;
+  /** Players who chose it, in every language (shown on the hand). */
+  picks: number;
+  /** Players who said it fits, in every language (shown on the hand). */
+  fits: number;
+}
+
+/**
+ * The theme's characters for `lang`'s players, best first (ties by id, so
+ * the order is stable); null weighs every language alike. A character's
+ * score is how much it is chosen (picks, suggested ones at half, fits, the
+ * starter's head start) times the square of its chance of fitting, a vote
+ * count that starts from a prior: every "no" bites, every "yes" helps. The
+ * starters' head start fades as the theme's history grows, so a character
+ * players keep choosing and approving overtakes them. Characters voted out
+ * (VOTED_OUT "no"s, a fit chance under a third) are left out.
+ */
+export function rankTheme(
+  stats: readonly PickStat[],
+  starters: readonly ThemeStarter[],
+  lang: Lang | null,
+): ThemeFit[] {
+  const heads = startersFor(starters, lang);
+  const sum = new Map<
+    string,
+    { picks: number; fits: number; misfits: number; shown: ThemeFit }
+  >();
+  let history = 0;
+  for (const s of stats) {
+    const w = lang === null || s.lang === lang ? 1 : OTHER_LANGUAGE;
+    const picks = (s.picks + s.suggested * SUGGESTED) * w;
+    history += picks;
+    const into = sum.get(s.id) ?? {
+      picks: 0,
+      fits: 0,
+      misfits: 0,
+      shown: { id: s.id, score: 0, picks: 0, fits: 0 },
+    };
+    into.picks += picks;
+    into.fits += s.fits * w;
+    into.misfits += s.misfits * w;
+    into.shown.picks += s.picks + s.suggested;
+    into.shown.fits += s.fits;
+    sum.set(s.id, into);
+  }
+  for (const id of heads.keys())
+    if (!sum.has(id))
+      sum.set(id, {
+        picks: 0,
+        fits: 0,
+        misfits: 0,
+        shown: { id, score: 0, picks: 0, fits: 0 },
+      });
+  const fade = HEAD_START_FADE / (HEAD_START_FADE + history);
+  const out: ThemeFit[] = [];
+  for (const [id, s] of sum) {
+    const head = heads.get(id);
+    const [a, b] = head === undefined ? OTHER_FIT : STARTER_FIT;
+    const fit = (s.fits + a) / (s.fits + s.misfits + a + b);
+    if (s.misfits >= VOTED_OUT && fit < 1 / 3) continue;
+    const weight = s.picks + s.fits + (head ?? 0) * fade;
+    if (weight <= 0) continue;
+    out.push({ ...s.shown, score: weight * fit * fit });
+  }
+  return out.sort((x, y) => y.score - x.score || x.id.localeCompare(y.id));
 }
 
 /**
@@ -101,97 +166,72 @@ export function pickKey(characterId: string | null): string | null {
   return parseEntryId(characterId)?.id ?? characterId;
 }
 
-/** Picks per theme, from match records (local mode keeps this in memory). */
-export function tallyPicks(
-  records: Iterable<MatchRecord>,
-  into = new Map<string, Map<string, number>>(),
-) {
-  for (const m of records) {
-    // A theme the host typed has no themeId.
-    const theme = m.themeId;
-    if (!theme) continue;
-    for (const p of m.players) {
-      const key = p.autoPicked ? null : pickKey(p.characterId);
-      if (!key) continue;
-      const counts = into.get(theme) ?? new Map<string, number>();
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-      into.set(theme, counts);
-    }
-  }
-  return into;
-}
+/** How many of a theme's characters to read: plenty for the hand, the dice and their misses. */
+export const STATS_FETCHED = 500;
+/** How many of the ranking to look up in a language: some drop out (other language, deleted). */
+export const RANKED_FETCHED = 100;
+/** The draw is among this many of the best fits. */
+export const RANDOM_POOL = 20;
 
-/** The most picked first, ties by id so the order is stable. */
-export function topPicks(
-  counts: Map<string, number> | undefined,
-  limit: number,
-): PopularPick[] {
-  return [...(counts ?? [])]
-    .map(([id, picks]) => ({ id, picks }))
-    .sort((a, b) => b.picks - a.picks || a.id.localeCompare(b.id))
-    .slice(0, limit);
-}
-
-/** A history pick and the character it is in one language. */
-export interface RankedPick {
-  pick: PopularPick;
+/** A ranked character and the character it is in one language. */
+export interface RankedCharacter {
+  fit: ThemeFit;
   character: Character;
 }
 
 /**
- * The theme's history resolved into `lang`, heaviest first (ties by id, so
- * the order is stable). Characters missing in that language, and ones voted
- * out (weight 0), drop out. `resolveMany` turns app ids into the characters
- * that still exist in `lang`.
+ * The ranking's head (RANKED_FETCHED) as characters of `lang`, in order;
+ * ones missing in that language drop out. `resolveMany` turns app ids into
+ * the characters that still exist in `lang`.
  */
-export async function rankPopular(
-  popular: PopularPick[],
+export async function resolveRanked(
+  ranked: readonly ThemeFit[],
   lang: Lang,
   resolveMany: (ids: string[]) => Promise<Character[]>,
-): Promise<RankedPick[]> {
+): Promise<RankedCharacter[]> {
+  const head = ranked.slice(0, RANKED_FETCHED);
+  if (head.length === 0) return [];
   // Library characters exist in every language; players' ones in one.
-  const ids = popular.map((p) =>
-    p.id.startsWith("u-") ? p.id : entryId(lang, p.id),
+  const ids = head.map((f) =>
+    f.id.startsWith("u-") ? f.id : entryId(lang, f.id),
   );
   const found = new Map<string, Character>();
   for (const c of await resolveMany(ids)) {
     const key = pickKey(c.id);
     if (key && c.lang === lang) found.set(key, c);
   }
-  return popular
-    .filter((p) => found.has(p.id) && drawWeight(p) > 0)
-    .sort((a, b) => drawWeight(b) - drawWeight(a) || a.id.localeCompare(b.id))
-    .map((pick) => ({ pick, character: found.get(pick.id) as Character }));
+  return head.flatMap((fit) => {
+    const character = found.get(fit.id);
+    return character ? [{ fit, character }] : [];
+  });
 }
 
 /**
- * One character for `lang`, drawn among the RANDOM_POOL most picked that
- * exist in that language, weighted by how often each was picked. `taken`
- * (language-free keys already picked in this match) and `skip` (the one
- * drawn last) are left out of the draw but still count as history, so
- * "draw another" works whenever the first draw did. Null when the theme
- * has fewer than MIN_RANDOM_PICKS such characters, or none is free.
+ * One character for `lang`, drawn among the RANDOM_POOL best fits that exist
+ * in that language, weighted by score. `taken` (language-free keys already
+ * picked in this match) and `skip` (the one drawn last) are left out of the
+ * draw, so "draw another" works whenever the first draw did. Null when the
+ * theme has no such character, or none is free.
  */
-export async function drawPopular(
-  popular: PopularPick[],
+export async function drawFit(
+  ranked: readonly ThemeFit[],
   lang: Lang,
   taken: Set<string>,
   skip: string | null,
   resolveMany: (ids: string[]) => Promise<Character[]>,
   random: () => number,
 ): Promise<Character | null> {
-  const eligible = (await rankPopular(popular, lang, resolveMany)).slice(
+  const eligible = (await resolveRanked(ranked, lang, resolveMany)).slice(
     0,
     RANDOM_POOL,
   );
-  if (eligible.length < MIN_RANDOM_PICKS) return null;
-  const free = eligible.filter((e) => !taken.has(e.pick.id));
-  const fresh = free.filter((e) => e.pick.id !== skip);
+  const free = eligible.filter((e) => !taken.has(e.fit.id));
+  const fresh = free.filter((e) => e.fit.id !== skip);
   const pool = fresh.length > 0 ? fresh : free;
   if (pool.length === 0) return null;
-  let roll = random() * pool.reduce((sum, e) => sum + drawWeight(e.pick), 0);
+  let roll = random() * pool.reduce((sum, e) => sum + e.fit.score, 0);
   for (const e of pool) {
-    roll -= drawWeight(e.pick);
+    roll -= e.fit.score;
     if (roll < 0) return e.character;
   }
   return pool[pool.length - 1].character;
@@ -200,68 +240,38 @@ export async function drawPopular(
 /** How many cards the hand route gives; the pick screen shows 5 of them. */
 export const HAND_SIZE = 8;
 
-/** A card of the pick screen's hand: how often it was picked for the theme, and liked. */
-export type HandCard = CharacterDTO & { picks: number; likes: number };
+/** A card of the pick screen's hand: how many chose it for the theme, and said it fits. */
+export type HandCard = CharacterDTO & { picks: number; fits: number };
 
 /** GET /api/themes/[id]/picks?lang= */
 export interface HandResponse {
   hand: HandCard[];
 }
 
-/** History worth showing over the hand-picked starters: picked twice or more, or liked. */
-const hasSignal = (p: PopularPick) => p.picks >= 2 || (p.likes ?? 0) >= 1;
-
 /**
- * The hand of suggestions under the pick card, in `lang`: what players really
- * picked and liked for the theme first, then the theme's starters (language-
- * free library ids, by position) to fill it; each character once, pictures
- * first, at most HAND_SIZE. Never mind what this match already picked: that
- * would hint who holds what, and the hand is the same for every viewer.
+ * The hand of suggestions under the pick card, in `lang`: the best fits,
+ * pictures first, at most HAND_SIZE. Never mind what this match already
+ * picked: that would hint who holds what, and the hand is the same for every
+ * viewer.
  */
 export async function buildHand(
-  popular: PopularPick[],
-  starters: string[],
+  ranked: readonly ThemeFit[],
   lang: Lang,
   resolveMany: (ids: string[]) => Promise<Character[]>,
 ): Promise<HandCard[]> {
-  const [ranked, named] = await Promise.all([
-    rankPopular(popular, lang, resolveMany),
-    starters.length
-      ? resolveMany(starters.map((id) => entryId(lang, id)))
-      : Promise.resolve([]),
-  ]);
-  const starter = new Map<string, Character>();
-  for (const c of named) {
-    const key = pickKey(c.id);
-    if (key && c.lang === lang) starter.set(key, c);
-  }
-  const ordered = [
-    ...ranked.filter((r) => hasSignal(r.pick)).map((r) => r.character),
-    ...starters.flatMap((id) => starter.get(id) ?? []),
-  ];
-  const seen = new Set<string>();
-  const unique = ordered.filter((c) => {
-    const key = pickKey(c.id) ?? c.id;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-  const counts = new Map(popular.map((p) => [p.id, p]));
+  const found = await resolveRanked(ranked, lang, resolveMany);
   return [
-    ...unique.filter((c) => c.imageUrl),
-    ...unique.filter((c) => !c.imageUrl),
+    ...found.filter((r) => r.character.imageUrl),
+    ...found.filter((r) => !r.character.imageUrl),
   ]
     .slice(0, HAND_SIZE)
-    .map((c) => {
-      const p = counts.get(pickKey(c.id) ?? c.id);
-      return {
-        id: c.id,
-        lang: c.lang,
-        name: c.name,
-        origin: c.origin,
-        imageUrl: c.imageUrl,
-        picks: p?.picks ?? 0,
-        likes: p?.likes ?? 0,
-      };
-    });
+    .map(({ fit, character: c }) => ({
+      id: c.id,
+      lang: c.lang,
+      name: c.name,
+      origin: c.origin,
+      imageUrl: c.imageUrl,
+      picks: fit.picks,
+      fits: fit.fits,
+    }));
 }

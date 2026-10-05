@@ -19,7 +19,7 @@ import type {
   Theme,
 } from "@/game/types";
 import type { Account } from "../contract";
-import type { PickFeedback, PopularPick } from "../theme-picks";
+import type { FitVote, PickStat } from "../theme-picks";
 
 export interface StoredRoom {
   state: RoomState;
@@ -62,7 +62,9 @@ export interface ThemeStarter {
   set: ThemeSet | null;
   /** Language-free library id: "wd-Q302", "al-40". */
   characterId: string;
-  /** 1 and 2 are the clearest fits. */
+  /** "all": shared; a language: one of its own, ranked among the shared ones for its players. */
+  lang: Lang | "all";
+  /** 1 and 2 are the clearest fits (counted within the starter's language). */
   position: number;
   /** A real person or a made-up character, as the library knows it. */
   kind: "fictional" | "human" | null;
@@ -83,7 +85,7 @@ export interface CharacterStore {
     created: Character[];
     images: Record<string, string>;
   }>;
-  /** Every active theme's starters, by theme then position (cached; local mode has none). */
+  /** Every active theme's starters, by theme, language then position (cached; local mode has none). */
   starters(): Promise<ThemeStarter[]>;
 }
 
@@ -109,7 +111,7 @@ export interface CharacterImage {
   createdBy: PlayerId | null;
   author: ImageAuthor | null;
   status: ImageStatus;
-  /** Distinct players who picked it plus its head start: the best one is the cover. */
+  /** Head start, players who chose it, the square root of those who kept it as shown, two off per report: the best one is the cover. */
   score: number;
 }
 
@@ -137,11 +139,16 @@ export interface ImageStore {
   ): Promise<CharacterImage[]>;
   /** Makes `image` a picture of `characterId` too: the same row when it waits unattached, else a copy. */
   attach(image: CharacterImage, characterId: string): Promise<void>;
-  /** A confirmed card showed this picture: one pick per player, and the cover follows the score. */
+  /**
+   * A confirmed card showed this picture, `chosen` on purpose (a tray choice,
+   * their upload) or kept as the cover the card showed: once per player
+   * (choosing it later upgrades a keep), and the cover follows the score.
+   */
   recordPick(
     characterId: string,
     url: string,
     playerId: PlayerId,
+    chosen: boolean,
   ): Promise<void>;
   /** One report per player; a player's picture is hidden at `hideAt`. The status after it. */
   report(
@@ -237,10 +244,14 @@ export interface MatchStore {
   played(userIds: string[]): Promise<Set<string>>;
   /** A guest signed in to an account that already existed: their matches move to it. */
   reassign(fromUserId: string, toUserId: string): Promise<void>;
-  /** Characters people picked (not the clock) in finished matches with this theme, most picked first. */
-  popularPicks(themeId: string, limit: number): Promise<PopularPick[]>;
-  /** Saves whether a player liked a character for a theme (drawn, or discovered); a new answer replaces theirs. */
-  rateDraw(feedback: PickFeedback): Promise<void>;
+  /**
+   * What a theme knows per character and language: players who picked it in
+   * finished matches (once each, the clock's picks left out) and votes on
+   * whether it fits. The busiest first, at most `limit`.
+   */
+  themeStats(themeId: string, limit: number): Promise<PickStat[]>;
+  /** Saves whether a character fit a theme for a player (drawn, or discovered); a new answer replaces theirs. */
+  voteFit(vote: FitVote): Promise<void>;
 }
 
 export interface Backend {
