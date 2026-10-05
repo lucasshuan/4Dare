@@ -91,7 +91,7 @@ export function LobbyScreen() {
   const { view, me, code } = useRoomContext();
   const { act, pending } = useRoomAction();
   const leaving = useAction();
-  // "I'm ready" flips at once; the server confirms in the background.
+  // "Ready" flips at once; the server confirms in the background.
   const [readyGuess, setReadyGuess] = useState<boolean | null>(null);
   const myReady = readyGuess ?? me.ready;
   const toggleReady = async () => {
@@ -370,7 +370,8 @@ export function LobbyScreen() {
                 onClick={toggleReady}
               >
                 <Check className="size-5 shrink-0" strokeWidth={2.5} />
-                {myReady ? t("readyDone") : t("imReady")}
+                {/* the same word either way, so the button keeps its size */}
+                {t("readyButton")}
               </button>
             )}
           </div>

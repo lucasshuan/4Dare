@@ -8,6 +8,7 @@ import { localCharacters } from "./characters";
 import { localChat } from "./chat";
 import { localFiles } from "./files";
 import { LOCAL_THEMES } from "./fixtures";
+import { localImages } from "./images";
 import { localMatches } from "./matches";
 import { localRooms } from "./rooms";
 import { localThemes } from "./themes";
@@ -18,10 +19,12 @@ export { fixtureLibrary } from "./library";
 
 /** Everything in memory and in .data/, with the fixture library and themes. */
 export function localBackend(): Backend {
+  const characters = localCharacters();
   return {
     rooms: localRooms(),
     matches: localMatches(),
-    characters: localCharacters(),
+    characters,
+    images: localImages(characters),
     themes: themes(localThemes()),
     files: localFiles(),
     auth: localAuth(),

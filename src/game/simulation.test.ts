@@ -189,8 +189,9 @@ function checkInvariants(s: RoomState) {
       expect(left).toBeLessThanOrEqual(s.stepMs ?? 0);
     else expect(left).toBe(s.stepMs);
   }
-  // turn steps start under an answers or guess reveal; every show holds the clock
-  if (isShow(s.reveal) && s.stepStartsAt !== null)
+  // the guessing step starts under the answers reveal; every show, and a
+  // guess's or a pass's scene, holds the clock
+  if (s.reveal && s.reveal.kind !== "answers" && s.stepStartsAt !== null)
     expect(s.stepStartsAt).toBeGreaterThanOrEqual(s.reveal.until);
   if (s.phase === "lobby") expect(s.reveal).toBeNull();
   if (s.phase === "voting" || s.phase === "theming") {
@@ -239,6 +240,8 @@ function checkInvariants(s: RoomState) {
       expect(len).toBeLessThanOrEqual(t.answersMax);
     } else if (s.reveal.kind === "guess") {
       expect([t.guessHit, t.guessMiss]).toContain(len);
+    } else if (s.reveal.kind === "pass") {
+      expect(len).toBe(t.pass);
     } else {
       checkShow(s.reveal);
     }

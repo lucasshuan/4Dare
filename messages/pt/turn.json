@@ -96,7 +96,11 @@
     "hitPlace": "Acertou · {place}º lugar",
     "hitTie": "Acertou · empate no {place}º lugar",
     "miss": "Ainda não",
-    "cardOf": "Carta de {name}"
+    "cardOf": "Carta de {name}",
+    "passRound": "Rodada {n} · Sem palpite",
+    "passed": "{name} passou a vez",
+    "passedYou": "Você passou a vez",
+    "passedNote": "Fica pra próxima rodada."
   },
   "turnTag": "Vez",
   "steps": {

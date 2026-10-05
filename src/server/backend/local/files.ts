@@ -1,6 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { uploadedPath } from "../../images";
 import type { FileStore } from "../types";
 import { dataPath } from "./disk";
 
@@ -25,6 +26,16 @@ export function localFiles(): FileStore {
         bytes,
       );
       return `/api/files/${folder}/${name}`;
+    },
+    async remove(url) {
+      const path = uploadedPath(url);
+      if (!path) return;
+      rmSync(
+        /* turbopackIgnore: true */ dataPath("uploads", ...path.split("/")),
+        {
+          force: true,
+        },
+      );
     },
   };
 }

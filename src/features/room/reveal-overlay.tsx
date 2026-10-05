@@ -6,11 +6,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
-import { fireConfetti } from "@/components/ui/confetti";
-import { useWithNames } from "@/components/ui/player-name";
-import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
-import type { AnswerValue, CardView, RevealView } from "@/game/types";
+import type { AnswerValue, RevealView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { insideChat } from "@/lib/focus";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
@@ -24,17 +21,17 @@ const FIELD =
   "main textarea:not([disabled]), main input:not([type]):not([disabled]), main input[type=text]:not([disabled])";
 
 /**
- * What just happened, shown to everyone while the next step already runs.
- * It closes by itself, or earlier with its button, a click outside it, or any
- * key (except in the chat); a typed letter goes on into the step's text field.
+ * A question's answers, shown to everyone while the guessing step already
+ * runs. It closes by itself, or earlier with its button, a click outside it,
+ * or any key (except in the chat); a typed letter goes on into the step's
+ * text field. A guess's result has its own scene (GuessScene).
  */
 export function RevealOverlay() {
   const t = useTranslations("common");
   const { view, offset } = useRoomContext();
   const now = useServerClock(offset, 100);
-  // Answers and guesses only: the shows play on their own screens.
-  const shown = view.reveal;
-  const r = shown?.kind === "answers" || shown?.kind === "guess" ? shown : null;
+  // Answers only: the shows and a guess's scene play on their own.
+  const r = view.reveal?.kind === "answers" ? view.reveal : null;
   const id = r ? `${r.kind}-${r.n}` : null;
   const [closed, setClosed] = useState<string | null>(null);
   const active = r !== null && now < r.until && closed !== id;
@@ -101,11 +98,7 @@ export function RevealOverlay() {
             >
               <X className="size-5" strokeWidth={2} />
             </button>
-            {r.kind === "answers" ? (
-              <AnswersReveal reveal={r} />
-            ) : (
-              <GuessReveal reveal={r} />
-            )}
+            <AnswersReveal reveal={r} />
             <p className="mt-4 text-center font-medium text-[13px] text-ink-muted max-sm:hidden">
               {t("revealHint")}
             </p>
@@ -279,142 +272,3 @@ function AnswersReveal({
 }
 
 /** Suspense, then the result: on a hit the card flips over and confetti falls. */
-function GuessReveal({
-  reveal,
-}: {
-  reveal: Extract<RevealView, { kind: "guess" }>;
-}) {
-  const t = useTranslations("turn.reveal");
-  const withNames = useWithNames();
-  const { playerById } = useRoomContext();
-  const guesser = playerById(reveal.byId);
-  const hit = reveal.result === "hit";
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      setShown(true);
-      if (hit) fireConfetti("big");
-    }, 800);
-    return () => window.clearTimeout(id);
-  }, [hit]);
-
-  return (
-    <div className="flex flex-col items-center gap-5 pb-2 text-center">
-      <span className="font-medium text-[13px] text-ink-muted">
-        {withNames((n) =>
-          t("guessed", {
-            n: reveal.n,
-            name: guesser ? n(guesser, guesser.isYou) : "",
-          }),
-        )}
-      </span>
-      <m.p
-        initial={{ opacity: 0, scale: 0.85 }}
-        animate={{
-          opacity: 1,
-          scale: 1,
-          transition: { delay: 0.1, duration: 0.5, ease: ease.soft },
-        }}
-        className="font-display font-extrabold text-[clamp(32px,5vw,52px)] leading-none"
-      >
-        “{reveal.guess}”
-      </m.p>
-
-      <FlipCard
-        flipped={shown && reveal.card !== null}
-        card={reveal.card}
-        hit={hit}
-      />
-
-      <div className="flex h-12 items-center">
-        <AnimatePresence mode="wait">
-          {shown ? (
-            <m.span
-              key="result"
-              initial={{ opacity: 0, scale: hit ? 1.4 : 0.9 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                transition: { duration: 0.5, ease: ease.soft },
-              }}
-              className={cn(
-                "rounded-pill px-6 py-2 font-bold font-display text-2xl",
-                hit ? "bg-yes text-on-yes shadow-card" : "bg-sunken text-ink",
-              )}
-            >
-              {hit
-                ? reveal.place
-                  ? t(reveal.tied ? "hitTie" : "hitPlace", {
-                      place: reveal.place,
-                    })
-                  : t("hit")
-                : t("miss")}
-            </m.span>
-          ) : (
-            <m.span
-              key="dots"
-              exit={{ opacity: 0 }}
-              aria-hidden="true"
-              className="flex gap-2"
-            >
-              {[0, 1, 2].map((i) => (
-                <m.span
-                  key={i}
-                  className="size-3 rounded-pill bg-line-strong"
-                  animate={{ opacity: [0.25, 1, 0.25], scale: [0.8, 1, 0.8] }}
-                  transition={{
-                    duration: 0.8,
-                    repeat: Number.POSITIVE_INFINITY,
-                    delay: i * 0.15,
-                  }}
-                />
-              ))}
-            </m.span>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
-  );
-}
-
-/** The guesser's card: "?" on the front, the character on the back. */
-function FlipCard({
-  flipped,
-  card,
-  hit,
-}: {
-  flipped: boolean;
-  card: CardView | null;
-  hit: boolean;
-}) {
-  return (
-    <div className="w-44 perspective-[1000px] sm:w-52">
-      <m.div
-        initial={false}
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: dur.reveal, ease: ease.swap }}
-        className="relative transform-3d"
-      >
-        <div className="flex aspect-4/5 items-center justify-center rounded-xl bg-sky-soft font-display font-extrabold text-[96px] text-sky shadow-card backface-hidden">
-          ?
-        </div>
-        <div
-          className={cn(
-            "absolute inset-0 flex flex-col gap-2 rounded-xl bg-surface p-2 shadow-card backface-hidden rotate-y-180",
-            hit && "outline-[3px] outline-yes outline-solid",
-          )}
-        >
-          <Portrait
-            src={card?.imageUrl ?? null}
-            tone="other"
-            className="flex-1"
-          />
-          <span className="truncate px-1 font-bold font-display text-lg">
-            {card?.name}
-          </span>
-        </div>
-      </m.div>
-    </div>
-  );
-}

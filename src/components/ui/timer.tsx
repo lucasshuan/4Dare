@@ -37,7 +37,10 @@ export function Timer({
   totalMs?: number | null;
 }) {
   const t = useTranslations("common");
-  const cut = useClockCut(deadline, stepStartsAt, offset);
+  const change = useClockCut(deadline, stepStartsAt, offset);
+  // a cut (a vote, an answer) or time given back (a vote taken back)
+  const cut = change && !change.gain ? change : null;
+  const gain = change?.gain ? change : null;
   // every frame while a cut shows, so its drain runs smooth
   const now = useServerClock(offset, cut ? 16 : 100);
   const full =
@@ -81,14 +84,15 @@ export function Timer({
         "relative inline-flex h-10 items-center gap-3 rounded-pill border bg-surface px-4 font-medium font-mono text-lg tabular-nums transition-[color,border-color,box-shadow] duration-500",
         low || cut ? "border-no text-no" : "border-line text-ink",
         recharging && "border-sky/50",
-        // the cut lands with a short red glow
+        // the cut lands with a short red glow, time given back with a green one
         cut && "shadow-[0_0_0_4px_var(--no-soft)] duration-200",
+        gain && "border-yes shadow-[0_0_0_4px_var(--yes-soft)] duration-200",
       )}
     >
       <AnimatePresence>
-        {cut ? (
+        {change ? (
           <m.span
-            key={cut.key}
+            key={change.key}
             aria-hidden="true"
             initial={{ opacity: 0, y: -6, scale: 0.85 }}
             animate={{
@@ -98,15 +102,24 @@ export function Timer({
               transition: { type: "spring", stiffness: 520, damping: 26 },
             }}
             exit={{ opacity: 0, y: 10, transition: { duration: 0.35 } }}
-            className="pointer-events-none absolute top-full right-3 mt-1.5 whitespace-nowrap rounded-pill bg-no px-2 py-0.5 font-semibold text-[13px] text-on-no shadow-card"
+            className={cn(
+              "pointer-events-none absolute top-full right-3 mt-1.5 whitespace-nowrap rounded-pill px-2 py-0.5 font-semibold text-[13px] shadow-card",
+              change.gain ? "bg-yes text-on-yes" : "bg-no text-on-no",
+            )}
           >
-            {t("clockCut", { seconds: Math.round(cut.ms / 1000) })}
+            {t(change.gain ? "clockGain" : "clockCut", {
+              seconds: Math.round(change.ms / 1000),
+            })}
           </m.span>
         ) : null}
       </AnimatePresence>
-      {/* always mounted, so screen readers hear the cut when the text arrives */}
+      {/* always mounted, so screen readers hear the change when the text arrives */}
       <output className="sr-only">
-        {cut ? t("clockCutLabel", { seconds: Math.round(cut.ms / 1000) }) : ""}
+        {change
+          ? t(change.gain ? "clockGainLabel" : "clockCutLabel", {
+              seconds: Math.round(change.ms / 1000),
+            })
+          : ""}
       </output>
       <span>{formatClock(shown)}</span>
       <span
@@ -135,9 +148,10 @@ const CUT_SHOWN_MS = 1800;
 const CUT_DRAIN_MS = 180;
 
 /**
- * Notices the deadline coming sooner within the same step (a vote or an
- * answer cut the clock) and reports by how much and when (server time), for a
- * moment. A new step is never a cut.
+ * Notices the deadline moving within the same step, sooner (a vote or an
+ * answer cut the clock) or later (a vote taken back gave its time back), and
+ * reports by how much (`ms`, always positive) and when (server time), for a
+ * moment. A new step is never a change.
  */
 function useClockCut(
   deadline: number | null,
@@ -152,6 +166,7 @@ function useClockCut(
   const last = useRef({ deadline, stepStartsAt });
   const [cut, setCut] = useState<{
     ms: number;
+    gain: boolean;
     key: number;
     at: number;
   } | null>(null);
@@ -159,13 +174,12 @@ function useClockCut(
     const prev = last.current;
     last.current = { deadline, stepStartsAt };
     if (stepStartsAt !== prev.stepStartsAt) return setCut(null);
-    if (
-      deadline !== null &&
-      prev.deadline !== null &&
-      prev.deadline - deadline >= 500
-    )
+    if (deadline === null || prev.deadline === null) return;
+    const moved = deadline - prev.deadline;
+    if (Math.abs(moved) >= 500)
       setCut({
-        ms: prev.deadline - deadline,
+        ms: Math.abs(moved),
+        gain: moved > 0,
         key: deadline,
         at: now.current(),
       });

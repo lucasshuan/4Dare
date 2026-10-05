@@ -15,7 +15,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
 - Phases: lobby, voting or theming, picking, turns, finished.
 - No cron: fetching a room applies due timeouts.
-- Shows: scenes between steps (opening, theme and rule, draw, "for whom", cast) are beats with server times on `reveal` (`src/game/show-timing/`). Step clocks wait for show end, so every screen plays same frame. Client: `stageFrame` picks screen and backdrop, `useStageTimeline` seeks motion to server time. Lab: `/[locale]/dev/stage` (dev only).
+- Shows: scenes between steps (opening, theme and rule, draw, "for whom", cast) are beats with server times on `reveal` (`src/game/show-timing/`). Step clocks wait for show end, so every screen plays same frame. A guess's result and a pass are scenes too (`reveal` kinds `guess`, `pass`; `GuessScene`, full screen in the guesser's colour, no close): the next turn waits for them, and its handoff band covers their end. Only the answers reveal is a closable modal over a running step. Client: `stageFrame` picks screen and backdrop, `useStageTimeline` seeks motion to server time. Lab: `/[locale]/dev/stage` (dev only).
 - Sync: local polls 1 s. Supabase: Realtime ping (`src/lib/realtime.ts`, one channel per room, loaded on demand); poll 45 s joined, 10 s down.
 - Cleanup: hourly `pg_cron` drops closed rooms after a day, idle ones after a week (0013).
 
@@ -30,6 +30,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
 - Library: `characters`, `character_names` (names, aliases, popularity per language), `origins`, `origin_labels`. Hand-fed: insert or update only. Browser searches whole library of its language (`/api/characters/library`); `/api/characters` until it loads.
 - Draft: card saved quietly (`PUT /api/rooms/[code]/draft`, no ping). Timeout makes it the pick; new name creates character once. Empty card gets random.
+- Pictures: `character_images` (0017), many per character. Sent from the card (`POST /api/rooms/[code]/draft/image`), checked by Sightengine first (`src/server/moderation.ts`: sex in any style, nudity in photos, gore unless drawn), kept as `pending` when it can't tell (only its author sees it). The card's draft carries the chosen picture; the pick wears it for that match. One pick per player per picture; `characters.image_url` is the best active one (picks + `bonus`, 20 for the library's own). Tray: `/api/characters/[id]/pictures`; 3 reports hide one (`/api/pictures/[id]/report`). Daily Vercel cron (`/api/cron/pictures`): checks `pending` again, deletes pictures of names that never became characters.
 - Random: theme's 20 most picked, weight picks + likes, ×0.5 per dislike, minus match picks (`theme_pick_scores`, 0006, 0007). Draw saved as draft.
 - `theme_starters` (~5 per theme, 0011, rows in `supabase/seed/theme_starters.sql`, insert only): rule scene examples, base of hand (`/api/themes/[id]/picks`, 8 per theme, 5 shown, shuffled per viewer).
 - Rule ✗: fiction-set themes get an athlete or musician, real-people sets a cartoon or game character, only when all the theme's starters are that set's kind; cross-cutting sets (world, jobs, family, quirks, looks, books) get ✓✓ only (`src/server/rule-examples.ts`).

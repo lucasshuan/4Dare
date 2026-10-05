@@ -8,17 +8,20 @@ import {
   toCardView,
 } from "@/game/character-search";
 import type { Lang } from "@/game/types";
+import type { TrayPicture } from "@/server/pictures";
 import type { DraftCard } from "@/server/rooms";
 import type { HandCard, HandResponse } from "@/server/theme-picks";
 
+export type { TrayPicture } from "@/server/pictures";
 export type { DraftCard } from "@/server/rooms";
 export type { HandCard } from "@/server/theme-picks";
 
 /**
  * What the card saves, "whatever is on the card is the pick":
  * empty → null; a library character (picked, or the highlighted row while
- * typing) → its id with the name as shown; a name the search doesn't know →
- * the name and its uploaded picture.
+ * typing) → its id with the name as shown, and the picture chosen for it
+ * when it is not the cover; a name the search doesn't know → the name and
+ * its uploaded picture.
  */
 export function toDraft(card: CardContent): DraftCard | null {
   switch (card.kind) {
@@ -35,7 +38,7 @@ export function toDraft(card: CardContent): DraftCard | null {
       return {
         characterId: card.card.characterId,
         name: card.card.name,
-        imageUrl: null,
+        imageUrl: card.picture ?? null,
       };
     case "new":
       if (!card.name.trim() && !card.imageUrl) return null;
@@ -69,6 +72,7 @@ export function fromDraft(
       : { kind: "empty" };
   if (!items) return undefined;
   const item = items.find((i) => i[0] === draft.characterId);
+  const picture = draft.imageUrl ? { picture: draft.imageUrl } : {};
   if (!item)
     return {
       kind: "picked",
@@ -79,9 +83,10 @@ export function fromDraft(
         imageUrl: null,
       },
       via: "restore",
+      ...picture,
     };
   return item[1] === draft.name
-    ? { kind: "picked", card: toCardView(item), via: "restore" }
+    ? { kind: "picked", card: toCardView(item), via: "restore", ...picture }
     : { kind: "typing", text: draft.name, preview: item };
 }
 
@@ -139,25 +144,68 @@ export function saveOutcome(r: DraftSave): "saved" | "closed" | "retry" {
   return r.status === 403 || r.status === 404 ? "closed" : "retry";
 }
 
+/** What a picture sent from the card came to: its URL and how the tray shows it, or the refusal. */
+export type PictureUpload =
+  | { url: string; picture: TrayPicture | null }
+  | { error: string };
+
 /**
- * Uploads a new character's picture; the server keeps it on the draft
- * (the card becomes a new character, its name kept). The URL, or null.
+ * Sends a picture for the card; the server keeps it on the draft. With a
+ * library character's id it becomes one more picture of that character,
+ * without one it is the new name's (the card becomes a new character, its
+ * name kept). `replaces`: the picture this one adjusts (a moved crop). The
+ * detector may refuse it (image_rejected).
  */
 export async function uploadDraftImage(
   code: string,
   image: Blob,
-): Promise<string | null> {
+  { characterId, replaces }: { characterId?: string; replaces?: string } = {},
+): Promise<PictureUpload> {
   const form = new FormData();
   form.set("image", image, "picture.webp");
+  if (characterId) form.set("characterId", characterId);
+  if (replaces) form.set("replaces", replaces);
   try {
     const res = await fetch(`/api/rooms/${code}/draft/image`, {
       method: "POST",
       body: form,
     });
-    if (!res.ok) return null;
-    return ((await res.json()) as { imageUrl?: string }).imageUrl ?? null;
+    const body = (await res.json().catch(() => ({}))) as {
+      imageUrl?: string;
+      picture?: TrayPicture;
+      error?: string;
+    };
+    if (!res.ok || !body.imageUrl)
+      return { error: body.error ?? "upload_failed" };
+    return { url: body.imageUrl, picture: body.picture ?? null };
   } catch {
-    return null;
+    return { error: "upload_failed" };
+  }
+}
+
+/** React Query key of a character's pictures (the tray). */
+export const picturesKey = (characterId: string) =>
+  ["character-pictures", characterId] as const;
+
+export async function fetchPictures(
+  characterId: string,
+): Promise<TrayPicture[]> {
+  const res = await fetch(
+    `/api/characters/${encodeURIComponent(characterId)}/pictures`,
+  );
+  if (!res.ok) throw new Error(`pictures: ${res.status}`);
+  return ((await res.json()) as { pictures: TrayPicture[] }).pictures;
+}
+
+/** Reports another player's picture. True when the server took it. */
+export async function reportPicture(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/pictures/${encodeURIComponent(id)}/report`, {
+      method: "POST",
+    });
+    return res.ok;
+  } catch {
+    return false;
   }
 }
 

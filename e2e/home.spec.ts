@@ -63,6 +63,6 @@ test("typing a room code joins it, or says why not", async ({ browser }) => {
   await box.pressSequentially(code.toLowerCase());
   await visitor.waitForURL(new RegExp(`/r/${code}$`));
   await expect(
-    visitor.getByRole("button", { name: /i'm ready/i }),
+    visitor.getByRole("button", { name: /^ready$/i, pressed: false }),
   ).toBeVisible();
 });

@@ -290,10 +290,18 @@ function reveal(
   const r = s.reveal;
   if (!r || now >= r.until) return null;
   if (isShowKind(r.kind)) return showView(r, r.kind, now);
-  // A turn's question and guess share its number.
-  const kind = r.kind === "answers" ? "question" : "guess";
+  // A turn's question and guess share its number; a pass is told by its question.
+  const kind = r.kind === "guess" ? "guess" : "question";
   const play = s.plays.find((p) => p.n === r.n && p.kind === kind);
   if (!play) return null;
+  if (r.kind === "pass" && play.kind === "question")
+    return {
+      kind: "pass",
+      n: play.n,
+      byId: play.by,
+      startsAt: r.startsAt,
+      until: r.until,
+    };
   if (r.kind === "answers" && play.kind === "question") {
     return {
       kind: "answers",

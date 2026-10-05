@@ -29,7 +29,7 @@
   "pick": {
     "searchLabel": "Personagem para {name}",
     "changeImage": "Trocar imagem",
-    "imageHint": "A imagem nova substitui a da biblioteca: quem escolher {name} depois já vê a sua.",
+    "imageHint": "A sua vai nesta carta e entra nas imagens de {name}. A mais escolhida vira a principal.",
     "random": "Sortear",
     "randomAgain": "Sortear outro",
     "randomHint": "Sorteia um dos personagens mais escolhidos neste tema",
@@ -54,7 +54,7 @@
     "progress": "{done} de {total} votaram",
     "waitingFor": "Ainda votando: {names}",
     "allVoted": "Todo mundo votou!",
-    "change": "clique em outro tema pra mudar o voto",
+    "change": "clique em outro tema pra mudar o voto, ou no seu pra desfazer",
     "tieTitle": "Deu empate!",
     "tie": "Girando a roleta entre os temas empatados…",
     "chosenTitle": "O tema é…",

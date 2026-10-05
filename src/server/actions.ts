@@ -34,7 +34,7 @@ import {
 import { toView } from "@/game/view";
 import { rerollGuest as rerollGuestCookie } from "./auth/guest";
 import { getBackend } from "./backend";
-import { findSameName, getOrCreateCharacter } from "./characters";
+import { background } from "./background";
 import {
   AVATAR_COLORS,
   type CharacterDTO,
@@ -45,6 +45,7 @@ import {
   type Result,
 } from "./contract";
 import { readImage } from "./images";
+import { countPick, nameWithPicture, sendPicture, wearing } from "./pictures";
 import { allow } from "./rate-limit";
 import {
   currentMatch,
@@ -258,11 +259,14 @@ export async function chooseTheme(
 }
 
 /** Any player, while voting: `option` is the index of the theme. They may change it until everyone has voted. */
+/** Votes for theme `option`; null takes the vote back (and the time it cut). */
 export async function voteTheme(
   code: string,
-  option: number,
+  option: number | null,
 ): Promise<Result<RoomView>> {
   return run(() => {
+    if (option === null)
+      return act(code, (id) => ({ type: "UNVOTE", playerId: id }));
     if (!Number.isInteger(option) || option < 0 || option >= THEME_OPTIONS)
       bad();
     return act(code, (id) => ({ type: "VOTE", playerId: id, option }));
@@ -311,7 +315,7 @@ export async function confirmCard(
     if (!allow(`upload:${who.id}`, 30, 60_000))
       throw new GameError("rate_limited");
     const draft = mine.draft ?? null;
-    const character = await getOrCreateCharacter({
+    const character = await nameWithPicture({
       id: draft?.newId ?? undefined,
       lang: player.lang,
       name,
@@ -319,16 +323,37 @@ export async function confirmCard(
       imageUrl: draft && draft.characterId === null ? draft.imageUrl : null,
       createdBy: who.id,
     });
-    return act(room, (id) => ({ type: "PICK", playerId: id, character }));
+    const view = await act(room, (id) => ({
+      type: "PICK",
+      playerId: id,
+      character,
+    }));
+    background(() => countPick(character, who.id));
+    return view;
   });
 }
 
-/** PICK with a character the library has. */
+/** PICK with a character the library has, wearing the picture the caller's card shows for it. */
 async function confirmed(code: string, characterId: unknown) {
   if (typeof characterId !== "string" || characterId.length > 200) bad();
-  const character =
-    (await getBackend().characters.get(characterId as string)) ?? bad();
-  return act(code, (id) => ({ type: "PICK", playerId: id, character }));
+  const room = roomCode(code);
+  const who = await me();
+  const { characters, rooms } = getBackend();
+  const [found, stored] = await Promise.all([
+    characters.get(characterId as string),
+    rooms.get(room),
+  ]);
+  const draft = Object.values(stored?.state.assignments ?? {}).find(
+    (a) => a.pickerId === who.id,
+  )?.draft;
+  const character = wearing(found ?? bad(), draft);
+  const view = await act(room, (id) => ({
+    type: "PICK",
+    playerId: id,
+    character,
+  }));
+  background(() => countPick(character, who.id));
+  return view;
 }
 
 /**
@@ -590,42 +615,17 @@ export async function createCharacter(
       ? (rawLang as Lang)
       : await lang();
     const image = await readImage(form.get("image"));
-    const { files, characters } = getBackend();
-    const imageUrl = image
-      ? await files.put("characters", image.bytes, image.type)
-      : null;
-    // same name (and origin, when given) as a library entry: reuse it instead of a duplicate
-    const same = await findSameName(name, l, origin);
-    if (same) {
-      if (!imageUrl) return toDTO(same);
-      return toDTO((await characters.setImage(same.id, imageUrl)) ?? same);
-    }
-    const c = await characters.create({
-      lang: l,
-      name,
-      origin,
-      imageUrl,
-      createdBy: who.id,
-    });
-    return toDTO(c);
-  });
-}
-
-/** FormData: id, image (File). The new image becomes the library's image for that character. */
-export async function replaceCharacterImage(
-  form: FormData,
-): Promise<Result<CharacterDTO>> {
-  return run(async () => {
-    const who = await me();
-    if (!allow(`upload:${who.id}`, 30, 60_000))
-      throw new GameError("rate_limited");
-    const id = text(form.get("id"), 200);
-    const image = (await readImage(form.get("image"))) ?? bad();
-    const { files, characters } = getBackend();
-    if (!(await characters.get(id))) throw new GameError("not_found");
-    const url = await files.put("characters", image.bytes, image.type);
-    const c = (await characters.setImage(id, url)) ?? bad();
-    return toDTO(c);
+    // a name the library has is reused, and the picture becomes one of its
+    const picture = image ? await sendPicture(who, null, image) : null;
+    return toDTO(
+      await nameWithPicture({
+        lang: l,
+        name,
+        origin,
+        imageUrl: picture?.url ?? null,
+        createdBy: who.id,
+      }),
+    );
   });
 }
 

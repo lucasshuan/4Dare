@@ -152,6 +152,8 @@ export const REVEAL_TIMING = {
   answersMax: 10000,
   guessMiss: 4000,
   guessHit: 5000,
+  /** The turn player passed instead of guessing. */
+  pass: 2600,
 } as const;
 
 // One file per scene in show-timing/; tests read the constants, never literals.
@@ -251,7 +253,11 @@ export interface PickDraft {
   characterId: string | null;
   /** The name field as typed (0..MAX_CHARACTER_NAME). */
   name: string;
-  /** A picture uploaded for a new character (a URL the server made). */
+  /**
+   * The picture on the card when it is not the character's cover: one sent
+   * for a new name, or another picture of the library character (checked by
+   * the server against the character's pictures).
+   */
   imageUrl: string | null;
   /** Set by the server: the id ("u-<uuid>") the clock gives a new character. */
   newId: string | null;
@@ -313,8 +319,10 @@ export interface Outcome {
 /** The vote that picks the theme of a match. */
 export interface ThemeVote {
   options: Theme[];
-  /** Option index by voter. Players may change their vote until everyone has voted. */
+  /** Option index by voter. Players may change or take back their vote until everyone has voted. */
   votes: Record<PlayerId, number>;
+  /** What each voter's vote took off the clock (ms): it comes back if they take the vote back. */
+  cuts?: Record<PlayerId, number>;
   /** The winner, once the vote is over. */
   chosen: number | null;
   /** Options that tied for the most votes; the draw picked `chosen` among them. */
@@ -328,7 +336,7 @@ export interface ThemeVote {
  * lives in `plays`), or a show that presents the match.
  */
 export interface Reveal {
-  kind: "answers" | "guess" | ShowKind;
+  kind: "answers" | "guess" | "pass" | ShowKind;
   /** The turn revealed; for a show, the match it presents (`round`; `round + 1` for the opening). */
   n: number;
   startsAt: number;
@@ -425,6 +433,7 @@ export type GameEvent =
       newcomer?: boolean;
     }
   | { type: "VOTE"; playerId: PlayerId; option: number }
+  | { type: "UNVOTE"; playerId: PlayerId }
   /** The host typed the theme. */
   | { type: "SET_THEME"; playerId: PlayerId; text: string }
   /** The picker's card as it is now (null: empty); written quietly, it becomes the pick if time runs out. */
@@ -479,6 +488,8 @@ export const ERROR_CODES = [
   "conflict",
   "unauthorized",
   "upload_failed",
+  /** The picture detector refused it: sexual content, real nudity or gore. */
+  "image_rejected",
   "rate_limited",
   /** The step has not started yet: a reveal is still on screen. */
   "too_early",
@@ -641,6 +652,14 @@ export type RevealView =
       place: number | null;
       /** Someone else discovered in the same turn round and shares the place. */
       tied: boolean;
+      startsAt: number;
+      until: number;
+    }
+  /** The turn player let the guess go (or its clock ran out). */
+  | {
+      kind: "pass";
+      n: number;
+      byId: PlayerId;
       startsAt: number;
       until: number;
     };

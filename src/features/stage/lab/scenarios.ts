@@ -224,7 +224,8 @@ export function labRoom(params: LabParams): LabRoom {
   marks.cast = run.state.reveal?.startsAt ?? run.now;
   marks.turn = run.revealUntil;
 
-  // the first turn: a question, the answers, a hit; then everyone else gives up
+  // the first turn: a question, the answers, the guess (a hit, a miss the
+  // picker turns down, or a pass); then everyone else gives up
   const asker = run.state.turnPlayerId ?? host;
   run.to(marks.turn + 3000);
   run.do({ type: "ASK", playerId: asker, text: fx.question });
@@ -243,7 +244,16 @@ export function labRoom(params: LabParams): LabRoom {
   run.to(run.revealUntil + 1000);
   const mine: Character | null =
     run.state.assignments[asker]?.character ?? null;
-  run.do({ type: "GUESS", playerId: asker, text: mine?.name ?? "?" });
+  if (params.guess === "pass") run.do({ type: "PASS", playerId: asker });
+  else if (params.guess === "miss") {
+    run.do({ type: "GUESS", playerId: asker, text: "Batman" });
+    run.to(run.now + 2500);
+    run.do({
+      type: "VALIDATE",
+      playerId: run.state.assignments[asker]?.pickerId ?? host,
+      correct: false,
+    });
+  } else run.do({ type: "GUESS", playerId: asker, text: mine?.name ?? "?" });
   run.to(run.revealUntil + 1000);
   while (!run.finished) {
     run.do({ type: "GIVE_UP", playerId: run.state.turnPlayerId ?? host });

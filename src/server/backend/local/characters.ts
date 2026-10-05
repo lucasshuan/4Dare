@@ -14,18 +14,18 @@ interface Row extends Character {
 }
 
 const CREATED_FILE = "characters.json";
-/** Pictures players swapped on library characters: { "wd-Q302": url }, every language. */
+/** Library covers that moved off the fixture's picture: { "wd-Q302": url | null }, every language. */
 const IMAGES_FILE = "character-images.json";
 
 function toRow(c: Character, popularity: number): Row {
   return { ...c, popularity, keys: [c.name, ...c.aliases].map(normalizeName) };
 }
 
-/** Swapped pictures by library id; older files keyed them per language ("pt-wd-Q302"). */
-function swappedImages(): Record<string, string> {
-  const images: Record<string, string> = {};
+/** Moved covers by library id; older files keyed them per language ("pt-wd-Q302"). */
+function swappedImages(): Record<string, string | null> {
+  const images: Record<string, string | null> = {};
   for (const [id, url] of Object.entries(
-    readJson<Record<string, string>>(IMAGES_FILE, {}),
+    readJson<Record<string, string | null>>(IMAGES_FILE, {}),
   ))
     images[parseEntryId(id)?.id ?? id] = url;
   return images;
@@ -63,7 +63,15 @@ function rank(row: Row, q: string): number {
 
 const strip = ({ keys: _k, popularity: _p, ...c }: Row): Character => c;
 
-export function localCharacters(): CharacterStore {
+/** The local store, plus what the local picture store needs to move covers. */
+export type LocalCharacterStore = CharacterStore & {
+  /** The cover now: a language-free library id ("wd-Q302") or a player's "u-…". */
+  cover(id: string): string | null;
+  /** Moves the cover, in every language. */
+  setCover(id: string, url: string | null): void;
+};
+
+export function localCharacters(): LocalCharacterStore {
   const rows = processSingleton("characters", loadLibrary);
   const saveCreated = () =>
     writeJson(
@@ -111,33 +119,13 @@ export function localCharacters(): CharacterStore {
       saveCreated();
       return c;
     },
-    async setImage(id, imageUrl) {
-      const r = rows.get(id);
-      if (!r) return null;
-      const entry = parseEntryId(id);
-      if (!entry) {
-        r.imageUrl = imageUrl;
-        saveCreated();
-        return strip(r);
-      }
-      // One picture per character: every language gets it.
-      for (const lang of LANGS) {
-        const row = rows.get(entryId(lang, entry.id));
-        if (row) row.imageUrl = imageUrl;
-      }
-      writeJson(IMAGES_FILE, { ...swappedImages(), [entry.id]: imageUrl });
-      return strip(r);
-    },
     async extras(lang) {
       const created = [...rows.values()]
         .filter((r) => r.lang === lang && r.id.startsWith("u-"))
         .map(strip);
-      const images = Object.fromEntries(
-        Object.entries(swappedImages()).map(([id, url]) => [
-          entryId(lang, id),
-          url,
-        ]),
-      );
+      const images: Record<string, string> = {};
+      for (const [id, url] of Object.entries(swappedImages()))
+        if (url) images[entryId(lang, id)] = url;
       return { created, images };
     },
     async randomPopular(lang: Lang, count) {
@@ -159,6 +147,28 @@ export function localCharacters(): CharacterStore {
     // The starters live only in Supabase (whoami_theme_starters); the dev lab has fixtures.
     async starters() {
       return [];
+    },
+    cover(id) {
+      if (id.startsWith("u-")) return rows.get(id)?.imageUrl ?? null;
+      for (const lang of LANGS) {
+        const r = rows.get(entryId(lang, id));
+        if (r) return r.imageUrl;
+      }
+      return null;
+    },
+    setCover(id, url) {
+      if (id.startsWith("u-")) {
+        const r = rows.get(id);
+        if (!r) return;
+        r.imageUrl = url;
+        saveCreated();
+        return;
+      }
+      for (const lang of LANGS) {
+        const r = rows.get(entryId(lang, id));
+        if (r) r.imageUrl = url;
+      }
+      writeJson(IMAGES_FILE, { ...swappedImages(), [id]: url });
     },
   };
 }

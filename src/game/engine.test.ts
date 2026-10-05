@@ -369,6 +369,31 @@ describe("the theme vote", () => {
     expect(g.state.deadline).toBe(g.now + CLOCK_CUT_FLOOR_MS);
   });
 
+  it("a vote taken back gives back the time it cut; voting again cuts again", () => {
+    const g = voting(4);
+    const deadline = g.state.deadline ?? 0;
+    const quarter = (DEFAULT_SETTINGS.voteSeconds * 1000) / 4;
+    vote(g, "p1", 0);
+    vote(g, "p2", 1);
+    expect(g.state.deadline).toBe(deadline - 2 * quarter);
+    g.do({ type: "UNVOTE", playerId: "p1" });
+    expect(g.state.deadline).toBe(deadline - quarter);
+    expect(g.state.vote?.votes).toEqual({ p2: 1 });
+    expect(toView(g.state, 1, "p1", g.now).vote?.yourVote).toBeNull();
+    // nothing to take back: nothing changes
+    g.do({ type: "UNVOTE", playerId: "p1" });
+    expect(g.state.deadline).toBe(deadline - quarter);
+    vote(g, "p1", 2);
+    expect(g.state.deadline).toBe(deadline - 2 * quarter);
+    // only while the vote is open
+    vote(g, "p3", 2);
+    vote(g, "p4", 2);
+    expect(g.state.phase).not.toBe("voting");
+    expect(code(() => g.do({ type: "UNVOTE", playerId: "p1" }))).toBe(
+      "wrong_phase",
+    );
+  });
+
   it("the most voted theme wins once everyone voted; votes can change until then", () => {
     const g = voting(3);
     vote(g, "p1", 2);
@@ -1262,7 +1287,8 @@ describe("a turn", () => {
     expect((s.reveal?.until ?? 0) - g.now).toBe(REVEAL_TIMING.guessHit);
     expect(s.phase).toBe("asking");
     expect(s.turnPlayerId).not.toBe(first);
-    expect(s.stepStartsAt).toBe(g.now);
+    // the next turn waits for the guess's scene
+    expect(s.stepStartsAt).toBe(s.reveal?.until);
 
     // the next player had no turn before the first one hit: same round, same place
     const second = g.askAndAnswer();
@@ -1346,13 +1372,41 @@ describe("a turn", () => {
     expect(g.state.outcomes[guesser].place).toBe(1);
   });
 
-  it("a pass makes no new reveal", () => {
+  it("a pass plays a short scene, and the next turn waits for it", () => {
     const g = started(2);
     const asker = g.askAndAnswer();
-    const before = g.state.reveal;
     g.do({ type: "PASS", playerId: asker });
-    expect(g.state.reveal).toEqual(before);
-    expect(g.state.stepStartsAt).toBe(g.now);
+    const r = g.state.reveal;
+    expect(r).toMatchObject({ kind: "pass", n: 1, startsAt: g.now });
+    expect((r?.until ?? 0) - g.now).toBe(REVEAL_TIMING.pass);
+    expect(g.state.stepStartsAt).toBe(r?.until);
+    for (const viewer of g.state.order)
+      expect(toView(g.state, 1, viewer, g.now).reveal).toEqual({
+        kind: "pass",
+        n: 1,
+        byId: asker,
+        startsAt: g.now,
+        until: r?.until,
+      });
+    // the question waits for it
+    const next = g.state.turnPlayerId as string;
+    expect(() =>
+      reduce(g.state, { type: "ASK", playerId: next, text: "Q?" }, g.ctx()),
+    ).toThrow("too_early");
+  });
+
+  it("scales a guess's scene with the shows", () => {
+    const g = started(2);
+    const asker = g.askAndAnswer();
+    g.state = reduce(
+      g.state,
+      { type: "GUESS", playerId: asker, text: `name ${asker}` },
+      { ...g.ctx(), showScale: 0.25 },
+    );
+    const r = g.state.reveal;
+    expect((r?.until ?? 0) - (r?.startsAt ?? 0)).toBe(
+      REVEAL_TIMING.guessHit * 0.25,
+    );
   });
 });
 

@@ -135,6 +135,26 @@ function mergeSettings(
 
 const isShow = (r: Reveal | null | undefined): r is Reveal =>
   !!r && (r.kind === "opening" || r.kind === "theme" || r.kind === "cast");
+/** A guess's result, or a pass, on the whole screen: the next turn waits for it. */
+const isGuessScene = (r: Reveal | null | undefined): r is Reveal =>
+  !!r && (r.kind === "guess" || r.kind === "pass");
+
+/** Puts a guess's result (or a pass) on screen for `ms`, scaled like the shows. */
+function guessScene(
+  s: RoomState,
+  kind: "guess" | "pass",
+  n: number,
+  ms: number,
+  ctx: Ctx,
+) {
+  const scale = ctx.showScale && ctx.showScale > 0 ? ctx.showScale : 1;
+  s.reveal = {
+    kind,
+    n,
+    startsAt: ctx.now,
+    until: ctx.now + Math.round(ms * scale),
+  };
+}
 
 /** A beat and its length (ms) before scaling; a 0 drops it. */
 type Part = [BeatKind, number];
@@ -181,12 +201,13 @@ function stage(
 }
 
 /**
- * Starts a step. Turn steps start at once, under the answers or guess reveal
- * (players close it when they like); the rest, and any step under a show,
- * wait for what is on screen (the shows, the last guess before the podium).
+ * Starts a step. The guessing step starts at once, under the answers reveal
+ * (players close it when they like); the rest, and any step under a show or
+ * a guess's scene, wait for what is on screen.
  */
 function startStep(s: RoomState, ctx: Ctx, ms: number) {
-  const waits = isShow(s.reveal) || !TURN_PHASES.has(s.phase);
+  const waits =
+    isShow(s.reveal) || isGuessScene(s.reveal) || !TURN_PHASES.has(s.phase);
   const start = Math.max(ctx.now, waits ? (s.reveal?.until ?? 0) : 0);
   s.stepStartsAt = start;
   s.deadline = start + ms;
@@ -390,7 +411,24 @@ function vote(s: RoomState, playerId: PlayerId, option: number, ctx: Ctx) {
   v.votes[playerId] = option;
   if (everyoneVoted(s)) closeVote(s, ctx);
   // changing a vote cuts nothing
-  else if (first) cutClock(s, ctx, "voteSeconds", s.players.length);
+  else if (first) {
+    const before = s.deadline;
+    cutClock(s, ctx, "voteSeconds", s.players.length);
+    if (before !== null && s.deadline !== null)
+      v.cuts = { ...v.cuts, [playerId]: before - s.deadline };
+  }
+}
+
+/** Takes a vote back: the time it took off the clock comes back. */
+function unvote(s: RoomState, playerId: PlayerId) {
+  if (s.phase !== "voting") fail("wrong_phase");
+  requireSeated(s, playerId);
+  const v = s.vote ?? fail("wrong_phase");
+  if (v.votes[playerId] === undefined) return;
+  delete v.votes[playerId];
+  const back = v.cuts?.[playerId] ?? 0;
+  if (v.cuts) delete v.cuts[playerId];
+  if (s.deadline !== null) s.deadline += back;
 }
 
 /** Theme set: the turn order, who picks for whom, fresh outcomes. The theme show and the pick clock come after. */
@@ -544,15 +582,19 @@ function hit(s: RoomState, g: Guess, ctx: Ctx) {
     gaveUp: false,
     endedAt: ctx.now,
   };
-  const until = ctx.now + REVEAL_TIMING.guessHit;
-  s.reveal = { kind: "guess", n: g.n, startsAt: ctx.now, until };
+  guessScene(s, "guess", g.n, REVEAL_TIMING.guessHit, ctx);
   nextTurn(s, ctx);
 }
 
 function miss(s: RoomState, g: Guess, ctx: Ctx) {
   g.result = "miss";
-  const until = ctx.now + REVEAL_TIMING.guessMiss;
-  s.reveal = { kind: "guess", n: g.n, startsAt: ctx.now, until };
+  guessScene(s, "guess", g.n, REVEAL_TIMING.guessMiss, ctx);
+  nextTurn(s, ctx);
+}
+
+/** The turn player let the guess go (or its clock ran out): a short scene says so. */
+function pass(s: RoomState, ctx: Ctx) {
+  guessScene(s, "pass", turnNumber(s), REVEAL_TIMING.pass, ctx);
   nextTurn(s, ctx);
 }
 
@@ -738,6 +780,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     }
     case "VOTE":
       return vote(s, e.playerId, e.option, ctx);
+    case "UNVOTE":
+      return unvote(s, e.playerId);
     case "SET_THEME":
       return setTheme(s, e.playerId, e.text, ctx);
     case "DRAFT":
@@ -754,7 +798,7 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       if (s.phase !== "guessing") fail("wrong_phase");
       guardStep(s, ctx);
       if (e.playerId !== s.turnPlayerId) fail("not_your_turn");
-      return nextTurn(s, ctx);
+      return pass(s, ctx);
     }
     case "VALIDATE": {
       if (s.phase !== "validating") fail("wrong_phase");
@@ -1163,7 +1207,7 @@ function timeout(
       return resolveQuestion(s, q, ctx);
     }
     case "guessing":
-      return nextTurn(s, ctx);
+      return pass(s, ctx);
     case "validating": {
       const g = pendingGuess(s) ?? fail("wrong_phase");
       return miss(s, g, ctx);

@@ -11,7 +11,14 @@ import { useDisplayName } from "@/lib/names";
 import { onSeat, seatColor } from "@/lib/seats";
 
 /** How long the band stays on screen (ms): in, a hold, out. */
-const HANDOFF_MS = 2100;
+const HANDOFF_MS = 2730;
+/** The share of that time after which the band covers the whole screen, and when it starts to leave. */
+const COVERED = 0.42;
+const LEAVES = 0.58;
+/** Each sweep, in and out, eases on its own (the times above stay exact). */
+const SWEEP = "cubic-bezier(0.7, 0, 0.3, 1)";
+/** When the band covers the whole screen (ms after it starts): what was under it can go. */
+export const HANDOFF_COVERED_MS = Math.round(HANDOFF_MS * COVERED);
 
 /**
  * The turn passing: when a player's question step starts, a band in their
@@ -34,7 +41,8 @@ export function TurnHandoff() {
     elapsed: number;
   } | null>(null);
   useEffect(() => {
-    if (startsAt === null || playerId === null) return;
+    // the first turn needs none: the cast's last beat just said who starts
+    if (startsAt === null || playerId === null || n === 1) return;
     const wait = startsAt - now.current();
     if (wait < -HANDOFF_MS) return;
     const id = window.setTimeout(
@@ -103,18 +111,22 @@ function Band({
       : [
           band.current.animate(
             [
-              { clipPath: "polygon(0 0, 0 0, -20% 100%, -20% 100%)" },
               {
-                clipPath: "polygon(0 0, 120% 0, 100% 100%, -20% 100%)",
-                offset: 0.28,
+                clipPath: "polygon(0 0, 0 0, -20% 100%, -20% 100%)",
+                easing: SWEEP,
               },
               {
                 clipPath: "polygon(0 0, 120% 0, 100% 100%, -20% 100%)",
-                offset: 0.72,
+                offset: COVERED,
+              },
+              {
+                clipPath: "polygon(0 0, 120% 0, 100% 100%, -20% 100%)",
+                offset: LEAVES,
+                easing: SWEEP,
               },
               { clipPath: "polygon(120% 0, 120% 0, 100% 100%, 100% 100%)" },
             ],
-            { ...timing, easing: "cubic-bezier(0.7, 0, 0.3, 1)" },
+            timing,
           ),
           face.current.animate(
             [
@@ -155,7 +167,8 @@ function Band({
     <div
       ref={band}
       role="status"
-      className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center gap-4 px-6 sm:gap-6"
+      // over a guess's scene (z-36), under the match header and history (z-38)
+      className="pointer-events-none fixed inset-0 z-[37] flex items-center justify-center gap-4 px-6 sm:gap-6"
       style={{ backgroundColor: seatColor(slot), color: onSeat(slot) }}
     >
       <span

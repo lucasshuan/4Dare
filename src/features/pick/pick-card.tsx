@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
 import { CardNameField } from "./card-name-field";
 import { CardPicture } from "./card-picture";
+import type { PictureUpload } from "./draft-api";
 
 export type { CardContent } from "@/game/character-search";
 
@@ -48,10 +49,14 @@ export function PickCard({
   state: PickCardState;
   /** "Time! That's the one." slammed over the card. */
   stamp: boolean;
-  /** Uploads a new character's picture; resolves to its URL, or null when it failed. */
-  onNewImage: (file: Blob) => Promise<string | null>;
-  /** Replaces a library character's picture (`replaceCharacterImage`). */
-  onLibraryImage: (characterId: string, file: Blob) => Promise<void>;
+  /** Sends a new character's picture (`replaces`: the one it adjusts). */
+  onNewImage: (file: Blob, replaces?: string) => Promise<PictureUpload>;
+  /** Sends one more picture of a library character; it goes on this card. */
+  onLibraryImage: (
+    characterId: string,
+    file: Blob,
+    replaces?: string,
+  ) => Promise<PictureUpload>;
   className?: string;
   /** Focus the name field on mount (desktop, when the pick starts). */
   autoFocus?: boolean;

@@ -99,7 +99,10 @@ function Vote({ v }: { v: VoteView }) {
   const phone = useMedia(PHONE);
   const { act } = useRoomAction();
   // The click shows at once; the server's answer replaces it.
-  const [optimistic, setOptimistic] = useState<number | null>(null);
+  // the vote as the player just made it (null: taken back), until the server answers
+  const [optimistic, setOptimistic] = useState<{ vote: number | null } | null>(
+    null,
+  );
   const entrance = beatOf(showOf(view, "opening"), "entrance");
   const show = showOf(view, "theme");
   // the vote has its theme (its show may still wait behind the opening): clicks do nothing
@@ -240,13 +243,15 @@ function Vote({ v }: { v: VoteView }) {
     },
   });
 
-  const mine = optimistic ?? v.yourVote;
+  const mine = optimistic ? optimistic.vote : v.yourVote;
   const voterIds = new Set(v.votes.map((x) => x.byId));
   const waiting = view.players.filter((p) => !voterIds.has(p.id));
+  // a tap on the theme already chosen takes the vote back
   const choose = async (i: number) => {
-    if (result || !started || i === mine) return;
-    setOptimistic(i);
-    await act(() => voteTheme(code, i));
+    if (result || !started) return;
+    const next = i === mine ? null : i;
+    setOptimistic({ vote: next });
+    await act(() => voteTheme(code, next));
     setOptimistic(null);
   };
 

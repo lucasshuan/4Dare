@@ -4,7 +4,7 @@
   "titleGuest": "{name}さんのルームにいます。",
   "subtitleGuest": "{name}さんがゲームを始めます。準備ができたら知らせましょう。",
   "titleHostAgain": "もう一戦やる？",
-  "subtitleHostAgain": "必要なら設定を変えて、好きなときに始めましょう。みんなはもう一度「準備できた」を押します。",
+  "subtitleHostAgain": "必要なら設定を変えて、好きなときに始めましょう。みんなはもう一度「準備OK」を押します。",
   "titleGuestAgain": "{name}さんのルームに戻りました。",
   "codeLabel": "ルームコード：{code}",
   "linkCopied": "リンクをコピーしました",
@@ -39,8 +39,7 @@
     "start": "ゲームを始める",
     "wait": "待つ"
   },
-  "readyDone": "準備OK",
-  "imReady": "準備できた",
+  "readyButton": "準備OK",
   "leave": "ルームを出る",
   "editSettings": "設定を変更",
   "settingsTitle": "ルームの設定",

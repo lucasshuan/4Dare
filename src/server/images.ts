@@ -26,17 +26,16 @@ const UPLOADED = /^characters\/[0-9a-f-]{36}\.(webp|jpg|png)$/;
 const literal = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
- * True for a character picture the files store made: /api/files/characters/…
- * locally, the public "characters" bucket on Supabase. Anything else (another
- * site, an avatar, a library picture) is not a player's upload.
+ * Where a character picture the files store made sits ("characters/<uuid>.png"):
+ * /api/files/characters/… locally, the public "characters" bucket on Supabase.
+ * Null for anything else (another site, an avatar, a library picture).
  */
-export function isUploadedPicture(url: string): boolean {
-  if (BACKEND === "local") {
-    const local = /^\/api\/files\/(.+)$/.exec(url);
-    return !!local && UPLOADED.test(local[1]);
-  }
-  const hosted = new RegExp(
-    `^${literal(SUPABASE_URL.replace(/\/+$/, ""))}/storage/v1/object/public/(.+)$`,
-  ).exec(url);
-  return !!hosted && UPLOADED.test(hosted[1]);
+export function uploadedPath(url: string): string | null {
+  const path =
+    BACKEND === "local"
+      ? /^\/api\/files\/(.+)$/.exec(url)?.[1]
+      : new RegExp(
+          `^${literal(SUPABASE_URL.replace(/\/+$/, ""))}/storage/v1/object/public/(.+)$`,
+        ).exec(url)?.[1];
+  return path && UPLOADED.test(path) ? path : null;
 }

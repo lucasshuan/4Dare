@@ -243,11 +243,14 @@ export function usePickDraft({
     window.clearTimeout(s.timer);
     if (!s.restored || !active) return;
     const key = draftKey(toDraft(content));
-    // a restored card is what the server holds (a draw: see drawn)
-    if (content.kind === "picked" && content.via === "restore") {
-      s.known.add(key);
+    // a restored card is what the server holds (a draw: see drawn), until
+    // another picture is chosen on it
+    if (
+      content.kind === "picked" &&
+      content.via === "restore" &&
+      s.known.has(key)
+    )
       return;
-    }
     if (key === s.accepted || s.paused) return;
     const { deadline: end, clock: now } = latest.current;
     // in the last moments a debounce would outlast the clock

@@ -4,7 +4,7 @@
   "titleGuest": "Você está na sala de {name}.",
   "subtitleGuest": "{name} começa a partida. Avise quando estiver pronto.",
   "titleHostAgain": "Mais uma partida?",
-  "subtitleHostAgain": "Mude a configuração se quiser e comece quando quiser. Todo mundo marca “Estou pronto” de novo.",
+  "subtitleHostAgain": "Mude a configuração se quiser e comece quando quiser. Todo mundo marca “Pronto” de novo.",
   "titleGuestAgain": "De volta à sala de {name}.",
   "codeLabel": "Código da sala: {code}",
   "linkCopied": "Link copiado",
@@ -39,8 +39,7 @@
     "start": "Começar partida",
     "wait": "Esperar"
   },
-  "readyDone": "Pronto",
-  "imReady": "Estou pronto",
+  "readyButton": "Pronto",
   "leave": "Sair da sala",
   "editSettings": "Editar configuração",
   "settingsTitle": "Configuração da sala",

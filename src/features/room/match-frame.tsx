@@ -160,7 +160,8 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
     <m.header
       initial={arrives ? { opacity: 0 } : false}
       animate={{ opacity: 1, transition: { duration: 0.4 } }}
-      className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-[18px] sm:short:py-3"
+      // over the turn band and a guess's scene: the clock, the theme and the buttons stay
+      className="relative z-[38] flex w-full flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-[18px] sm:short:py-3"
     >
       {/* no own width (the tag truncates): the header wraps only when the tag would get under 6rem */}
       <div className="flex min-w-24 flex-1 basis-0 items-center gap-2.5">
@@ -193,7 +194,7 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
             <m.div
               key="clock"
               {...CLOCK_POP}
-              // only a show's clock pops; the one under an answers or guess reveal recharges as ever
+              // a show's or a guess scene's clock pops; the one under the answers reveal recharges as ever
               initial={frame.clockPops ? CLOCK_POP.initial : false}
               className="flex"
             >
