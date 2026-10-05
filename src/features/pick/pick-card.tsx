@@ -38,6 +38,7 @@ export function PickCard({
   owner,
   seat,
   state,
+  settledScale = CARD_SETTLED_SCALE,
   stamp,
   onNewImage,
   onLibraryImage,
@@ -54,8 +55,10 @@ export function PickCard({
   owner: ReactNode;
   /** The target's colour slot: the frame's colour. */
   seat: number | null;
-  /** confirmed / timeUp: read-only, scale 1.08 from the top. */
+  /** confirmed / timeUp: read-only, grown from the top by `settledScale`. */
   state: PickCardState;
+  /** The settled card's scale; less than 1.08 when the window has no room for it. */
+  settledScale?: number;
   /** "Time! That's the one." slammed over the card. */
   stamp: boolean;
   /** Sends a new character's picture (`replaces`: the one it adjusts). */
@@ -90,7 +93,7 @@ export function PickCard({
     <m.div
       data-pick-card={value.kind}
       initial={false}
-      animate={{ scale: editing ? 1 : CARD_SETTLED_SCALE }}
+      animate={{ scale: editing ? 1 : settledScale }}
       transition={{
         duration: state === "timeUp" ? 0.4 : 0.5,
         ease: gs.backOut(2),

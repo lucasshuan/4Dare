@@ -3,7 +3,7 @@
 import { Check } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { type Ref, useMemo } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { useWithNames } from "@/components/ui/player-name";
 import type { PlayerView } from "@/game/types";
@@ -19,11 +19,14 @@ export function DoneRow({
   players,
   confirmedIds,
   show,
+  ref,
 }: {
   /** In turn order. */
   players: PlayerView[];
   confirmedIds: string[];
   show: boolean;
+  /** The row while it is shown (the table keeps the grown card above it). */
+  ref?: Ref<HTMLDivElement>;
 }) {
   const t = useTranslations("pickCard");
   const locale = useLocale();
@@ -38,6 +41,7 @@ export function DoneRow({
     <AnimatePresence initial={false}>
       {show ? (
         <m.div
+          ref={ref}
           key="done"
           initial={{ opacity: 0, y: 16 }}
           animate={{
@@ -46,7 +50,7 @@ export function DoneRow({
             transition: { duration: 0.4, delay: 0.35, ease: gs.p1Out },
           }}
           exit={{ opacity: 0, transition: { duration: 0.15 } }}
-          className="pointer-events-none fixed inset-x-0 bottom-[calc(78px+var(--dock))] z-[2] flex flex-col items-center gap-2.5 px-4 sm:bottom-[34px]"
+          className="pointer-events-none fixed inset-x-0 bottom-[calc(24px+var(--dock))] z-[2] flex flex-col items-center gap-2.5 px-4 sm:bottom-[34px]"
         >
           <div className="flex items-center gap-2.5" aria-hidden>
             {players.map((p) => {

@@ -7,6 +7,7 @@ import {
   type CSSProperties,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useReducer,
   useRef,
@@ -44,7 +45,12 @@ import type { CharacterDTO } from "@/server/contract";
 import { DoneRow } from "./done-row";
 import { drawHand, type HandCard, uploadDraftImage } from "./draft-api";
 import { DrawFeedback } from "./draw-feedback";
-import { type CardContent, PickCard, type PickCardState } from "./pick-card";
+import {
+  CARD_SETTLED_SCALE,
+  type CardContent,
+  PickCard,
+  type PickCardState,
+} from "./pick-card";
 import { PickHand, usePickHand } from "./pick-hand";
 import { useCharacterIndex } from "./use-character-index";
 import { usePickDraft } from "./use-pick-draft";
@@ -112,6 +118,52 @@ function useCardWidth(phone: boolean): number {
   const scene = height - (phone ? 80 : 76);
   const fit = (scene - 360) / 1.25 + 24;
   return Math.round(Math.max(200, Math.min(phone ? 224 : 270, fit)));
+}
+
+/** Least room between the grown card and the done row under it. */
+const DONE_ROW_GAP = 16;
+/** The settled card never shrinks below this, however short the window. */
+const MIN_SETTLED_SCALE = 0.8;
+
+/**
+ * The confirmed card's scale: CARD_SETTLED_SCALE, or less when growing that
+ * much would reach the done row fixed under it (short windows, an origin on
+ * two lines). Measured from the card's layout box, so the entrance's
+ * transform doesn't count.
+ */
+function useSettledScale(
+  card: HTMLElement | null,
+  row: HTMLElement | null,
+): number {
+  const [scale, setScale] = useState(CARD_SETTLED_SCALE);
+  useLayoutEffect(() => {
+    if (!card || !row) return;
+    const measure = () => {
+      const top =
+        (card.offsetParent?.getBoundingClientRect().top ?? 0) + card.offsetTop;
+      const rowTop =
+        document.documentElement.clientHeight -
+        Number.parseFloat(getComputedStyle(row).bottom) -
+        row.offsetHeight;
+      const room = rowTop - DONE_ROW_GAP - top;
+      setScale(
+        Math.max(
+          MIN_SETTLED_SCALE,
+          Math.min(CARD_SETTLED_SCALE, room / card.offsetHeight),
+        ),
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(card);
+    observer.observe(row);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [card, row]);
+  return row ? scale : CARD_SETTLED_SCALE;
 }
 
 /** Whether the server's pick is another character than the card holds. */
@@ -224,6 +276,9 @@ function PickTable() {
   const phone = useMedia(PHONE);
   const wide = useMedia(WIDE);
   const width = useCardWidth(phone);
+  const [cardBox, setCardBox] = useState<HTMLDivElement | null>(null);
+  const [doneRow, setDoneRow] = useState<HTMLDivElement | null>(null);
+  const settledScale = useSettledScale(cardBox, doneRow);
   const started = useStepStarted();
   const index = useCharacterIndex(lang, !pick.confirmed);
   const items = index.data ?? (index.isError ? [] : undefined);
@@ -418,6 +473,7 @@ function PickTable() {
         <div className="flex flex-col items-center gap-3.5 lg:flex-row lg:gap-10">
           <div aria-hidden className="hidden w-[210px] lg:block" />
           <div
+            ref={setCardBox}
             data-t="card"
             style={{
               opacity: 0,
@@ -434,6 +490,7 @@ function PickTable() {
               owner={<PlayerName player={target} />}
               seat={target.colorSlot}
               state={state}
+              settledScale={settledScale}
               stamp={timeUp}
               onNewImage={(image, replaces) =>
                 uploadDraftImage(code, image, { replaces, lang })
@@ -527,6 +584,7 @@ function PickTable() {
           }
         />
         <DoneRow
+          ref={setDoneRow}
           players={view.players}
           confirmedIds={pick.confirmedIds}
           show={state === "confirmed"}
