@@ -15,6 +15,10 @@
       "title": "Essa partida já começou",
       "body": "Você pode entrar na próxima nesta sala ou criar a sua."
     },
+    "kicked": {
+      "title": "O anfitrião tirou você da sala",
+      "body": "Dá para voltar daqui a 2 minutos. Enquanto isso, entre em outra sala ou crie a sua."
+    },
     "other": {
       "title": "Algo deu errado",
       "body": "Tente de novo daqui a pouco."

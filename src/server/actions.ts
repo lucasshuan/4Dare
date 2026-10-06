@@ -213,6 +213,17 @@ export async function setReady(
   );
 }
 
+/** Host only, lobby only: takes `targetId` out of the room for KICK_MS. */
+export async function kickPlayer(
+  code: string,
+  targetId: string,
+): Promise<Result<RoomView>> {
+  return run(async () => {
+    if (typeof targetId !== "string" || !targetId) bad();
+    return act(code, (id) => ({ type: "KICK", playerId: id, targetId }));
+  });
+}
+
 /**
  * Host only, 2+ players. Draws the themes everyone votes on (or the host's
  * ideas, when they type the theme), avoiding the last vote's. A room's first

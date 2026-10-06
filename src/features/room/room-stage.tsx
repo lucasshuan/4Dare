@@ -199,7 +199,12 @@ function MatchScreen({ screen }: { screen: StageScreen | null }) {
 /** The room can't be shown: gone, full, already playing, or another problem. */
 export function RoomProblem({ code }: { code: ErrorCode }) {
   const t = useTranslations("room");
-  const known = ["not_found", "room_full", "already_started"].includes(code);
+  const known = [
+    "not_found",
+    "room_full",
+    "already_started",
+    "kicked",
+  ].includes(code);
   return (
     <Screen>
       <m.div {...riseIn} className="flex max-w-lg flex-col gap-6 pt-10">

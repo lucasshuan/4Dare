@@ -15,6 +15,10 @@
       "title": "This match already started",
       "body": "You can join the next one in this room, or create your own."
     },
+    "kicked": {
+      "title": "The host removed you from the room",
+      "body": "You can come back in 2 minutes. Meanwhile, join another room or make your own."
+    },
     "other": {
       "title": "Something went wrong",
       "body": "Try again in a moment."

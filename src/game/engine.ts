@@ -1,6 +1,6 @@
 // The rules. Pure functions: same input, same output; no clock, no randomness, no I/O of their own.
 
-import { isGameKey } from "./games";
+import { GAME_SEATS, isGameKey } from "./games";
 import {
   findPlayer,
   goneFor,
@@ -31,6 +31,7 @@ import {
   type GameEvent,
   HOST_THEME_SECONDS,
   type Identity,
+  KICK_MS,
   MAX_CHARACTER_NAME,
   MAX_GUESS,
   MAX_NOTE,
@@ -98,7 +99,9 @@ function mergeSettings(
     password.trim().length <= ROOM_PASSWORD_MAX &&
     // a private room needs a password to ask for
     (next.visibility === "public" || password.trim().length > 0) &&
-    [2, 3, 4].includes(next.seats) &&
+    Number.isInteger(next.seats) &&
+    next.seats >= GAME_SEATS[next.game].min &&
+    next.seats <= GAME_SEATS[next.game].max &&
     next.seats >= seated &&
     STEP_TIMES.every(
       (k) =>
@@ -779,6 +782,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       p.ready = e.ready;
       return;
     }
+    case "KICK":
+      return kick(s, e.playerId, e.targetId, ctx);
     case "UPDATE_SETTINGS": {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
@@ -898,6 +903,7 @@ function join(
     Object.assign(seated, identityFields(player));
     return;
   }
+  if ((s.kicked?.[player.id] ?? 0) > ctx.now) fail("kicked");
   if (s.phase !== "lobby") fail("already_started");
   if (s.players.length >= s.settings.seats) fail("room_full");
   // Only newcomers are asked: whoever already has a seat comes back freely.
@@ -918,6 +924,21 @@ function join(
       player.avatar.color,
     ),
   });
+}
+
+/** The host takes someone out of the lobby; they can't come back for KICK_MS. */
+function kick(s: RoomState, hostId: PlayerId, targetId: PlayerId, ctx: Ctx) {
+  requireSeated(s, hostId);
+  if (hostId !== s.hostId) fail("not_host");
+  if (s.phase !== "lobby") fail("wrong_phase");
+  if (targetId === hostId) fail("invalid_input");
+  requireSeated(s, targetId);
+  s.players = s.players.filter((p) => p.id !== targetId);
+  const kicked = Object.entries(s.kicked ?? {}).filter(
+    ([, until]) => until > ctx.now,
+  );
+  s.kicked = Object.fromEntries([...kicked, [targetId, ctx.now + KICK_MS]]);
+  if (s.players.length < 2) stopClock(s);
 }
 
 /** When the host is gone (or away mid-match), the room goes to whoever joined first. */

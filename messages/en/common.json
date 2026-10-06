@@ -64,6 +64,7 @@
     "password_required": "This room asks for a password.",
     "wrong_password": "Wrong password.",
     "in_match": "You are in a match. Finish it or leave it first.",
+    "kicked": "The host removed you from this room. Come back in 2 minutes.",
     "unknown": "Something went wrong. Try again."
   },
   "image": {

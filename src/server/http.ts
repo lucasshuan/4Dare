@@ -39,6 +39,7 @@ export function sameOrigin(request: Request): boolean {
 const STATUS: Partial<Record<ErrorCode, number>> = {
   not_found: 404,
   not_member: 403,
+  kicked: 403,
   unauthorized: 403,
   invalid_input: 400,
   upload_failed: 400,

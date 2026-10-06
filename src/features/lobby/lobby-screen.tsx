@@ -31,6 +31,7 @@ import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
+import { GAME_SEATS } from "@/game/games";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import { type Lang, STEP_TIMES } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
@@ -41,12 +42,14 @@ import { formatClock, useDisplayName, useRoomTitle } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
 import { seatWash } from "@/lib/seats";
 import {
+  kickPlayer,
   leaveRoom,
   setReady,
   startGame,
   updateSettings,
 } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
+import { PlayerMenu, SeatToggle } from "./host-controls";
 import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
 import { StartDialog } from "./start-dialog";
@@ -125,6 +128,12 @@ export function LobbyScreen() {
     themeSets,
   } = view.settings;
   const gameName = useGameName();
+  // The host sees every seat the game allows: open ones they can close, closed ones they can open.
+  const range = GAME_SEATS[game];
+  const closed = me.isHost ? range.max - seats : 0;
+  const canClose = seats > Math.max(range.min, view.players.length);
+  const setSeats = (n: number) =>
+    act(() => updateSettings(code, { seats: n as typeof seats }));
 
   const copy = async (text: string, done: string) => {
     try {
@@ -290,27 +299,38 @@ export function LobbyScreen() {
                               </span>
                             </div>
                             {p.isHost ? null : (
-                              <span
-                                role="img"
-                                aria-label={
-                                  p.ready ? t("ready") : t("notReady")
-                                }
-                                className={cn(
-                                  "ml-auto flex size-7 shrink-0 items-center justify-center rounded-pill transition-colors duration-300",
-                                  p.ready
-                                    ? "bg-yes-soft text-yes"
-                                    : "bg-no-soft text-no",
-                                )}
-                              >
-                                {p.ready ? (
-                                  <Check
-                                    className="size-4"
-                                    strokeWidth={2.25}
+                              <div className="ml-auto flex shrink-0 items-center gap-1">
+                                <span
+                                  role="img"
+                                  aria-label={
+                                    p.ready ? t("ready") : t("notReady")
+                                  }
+                                  className={cn(
+                                    "flex size-7 shrink-0 items-center justify-center rounded-pill transition-colors duration-300",
+                                    p.ready
+                                      ? "bg-yes-soft text-yes"
+                                      : "bg-no-soft text-no",
+                                  )}
+                                >
+                                  {p.ready ? (
+                                    <Check
+                                      className="size-4"
+                                      strokeWidth={2.25}
+                                    />
+                                  ) : (
+                                    <X className="size-4" strokeWidth={2.25} />
+                                  )}
+                                </span>
+                                {me.isHost ? (
+                                  <PlayerMenu
+                                    name={p.name}
+                                    pending={pending}
+                                    onKick={() =>
+                                      act(() => kickPlayer(code, p.id))
+                                    }
                                   />
-                                ) : (
-                                  <X className="size-4" strokeWidth={2.25} />
-                                )}
-                              </span>
+                                ) : null}
+                              </div>
                             )}
                           </m.li>
                         );
@@ -327,6 +347,36 @@ export function LobbyScreen() {
                             ?
                           </span>
                           <span className="font-medium">{t("emptySeat")}</span>
+                          {/* seats close from the end: the button sits on the one that changes */}
+                          {me.isHost && canClose && i === empty - 1 ? (
+                            <SeatToggle
+                              closed={false}
+                              pending={pending}
+                              onClick={() => setSeats(seats - 1)}
+                            />
+                          ) : null}
+                        </m.li>
+                      ))}
+                      {/* only the host sees closed seats */}
+                      {Array.from({ length: closed }, (_, i) => (
+                        <m.li
+                          // biome-ignore lint/suspicious/noArrayIndexKey: closed seats have no identity
+                          key={`closed-${i}`}
+                          layout
+                          {...riseIn}
+                          className="flex items-center gap-3 rounded-md border-[1.5px] border-line bg-[repeating-linear-gradient(-45deg,transparent_0_9px,var(--line)_9px_10.5px)] p-3 text-ink-muted"
+                        >
+                          <span className="flex size-11 items-center justify-center rounded-pill bg-sunken">
+                            <Lock className="size-4.5" strokeWidth={2} />
+                          </span>
+                          <span className="font-medium">{t("closedSeat")}</span>
+                          {i === 0 ? (
+                            <SeatToggle
+                              closed
+                              pending={pending}
+                              onClick={() => setSeats(seats + 1)}
+                            />
+                          ) : null}
                         </m.li>
                       ))}
                     </AnimatePresence>

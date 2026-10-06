@@ -12,6 +12,7 @@ import {
   GameError,
   GONE_GRACE_MS,
   HOST_THEME_SECONDS,
+  KICK_MS,
   MAX_CHARACTER_NAME,
   PICK_SECONDS,
   type PickDraft,
@@ -271,6 +272,55 @@ describe("lobby", () => {
     const g = new Game(3);
     g.do({ type: "LEAVE", playerId: "p1" });
     expect(g.state.hostId).toBe("p2");
+  });
+});
+
+describe("the host's lobby", () => {
+  it("removes a player, who stays out for two minutes", () => {
+    const g = new Game(3);
+    g.do({ type: "KICK", playerId: "p1", targetId: "p2" });
+    expect(g.state.players.map((p) => p.id)).toEqual(["p1", "p3"]);
+    g.now += KICK_MS - 1;
+    expect(code(() => g.do({ type: "JOIN", player: ident("p2") }))).toBe(
+      "kicked",
+    );
+    g.now += 1;
+    g.do({ type: "JOIN", player: ident("p2") });
+    expect(g.state.players.map((p) => p.id)).toEqual(["p1", "p3", "p2"]);
+    // the next kick drops the one that ran out
+    g.do({ type: "KICK", playerId: "p1", targetId: "p3" });
+    expect(Object.keys(g.state.kicked ?? {})).toEqual(["p3"]);
+  });
+
+  it("only the host kicks, never themselves, only in the lobby", () => {
+    const g = new Game(3);
+    const kick = (playerId: string, targetId: string) =>
+      code(() => g.do({ type: "KICK", playerId, targetId }));
+    expect(kick("p2", "p3")).toBe("not_host");
+    expect(kick("p1", "p1")).toBe("invalid_input");
+    expect(kick("p1", "nobody")).toBe("not_member");
+    g.start();
+    expect(kick("p1", "p2")).toBe("wrong_phase");
+  });
+
+  it("opens and closes seats within the game's range, never under who is seated", () => {
+    const g = new Game(3);
+    const seats = (n: number) =>
+      code(() =>
+        g.do({
+          type: "UPDATE_SETTINGS",
+          playerId: "p1",
+          settings: { seats: n as 2 | 3 | 4 },
+        }),
+      );
+    expect(seats(4)).toBe("no error");
+    expect(seats(3)).toBe("no error");
+    expect(g.state.settings.seats).toBe(3);
+    expect(seats(2)).toBe("invalid_input");
+    expect(seats(5)).toBe("invalid_input");
+    expect(code(() => g.do({ type: "JOIN", player: ident("p4") }))).toBe(
+      "room_full",
+    );
   });
 });
 

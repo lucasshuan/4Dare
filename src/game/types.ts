@@ -123,6 +123,9 @@ export const LOBBY_LISTED_MS = 15 * 60_000;
  * player go, and a match whose players have all closed their pages ends.
  */
 export const GONE_GRACE_MS = 5000;
+
+/** How long a player the host removed from the lobby stays out (ms). */
+export const KICK_MS = 2 * 60_000;
 /** The podium stays this long; then the room goes back to the lobby on its own (the host can go sooner). */
 export const RESULT_SECONDS = 15;
 /** Themes offered in the vote before each match. */
@@ -411,6 +414,8 @@ export interface RoomState {
   turnNumber: number;
   /** Epoch ms when the first question of this match can be asked (the end of the cast show); null before. */
   playStartedAt: number | null;
+  /** Players the host removed: until when (epoch ms) they can't come back. Missing in older rooms. */
+  kicked?: Record<PlayerId, number>;
   /** The room's latest finished matches, newest first. Missing in rooms made before it was kept. */
   matches?: PastMatch[];
   createdAt: number;
@@ -427,6 +432,8 @@ export type GameEvent =
   /** Settles players whose page has been closed for longer than GONE_GRACE_MS. */
   | { type: "SWEEP" }
   | { type: "SET_READY"; playerId: PlayerId; ready: boolean }
+  /** The host removes someone from the lobby; they stay out for KICK_MS. */
+  | { type: "KICK"; playerId: PlayerId; targetId: PlayerId }
   | {
       type: "UPDATE_SETTINGS";
       playerId: PlayerId;
@@ -522,6 +529,8 @@ export const ERROR_CODES = [
   "wrong_password",
   /** The player is in a match that is still going: they finish or leave it first. */
   "in_match",
+  /** The host removed the player from this room a moment ago (KICK_MS). */
+  "kicked",
   "unknown",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
