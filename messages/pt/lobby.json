@@ -58,6 +58,8 @@
   "readyButton": "Pronto",
   "leave": "Sair da sala",
   "editSettings": "Editar configuração",
+  "rename": "Renomear sala",
+  "editVisibility": "Mudar quem pode entrar",
   "settingsTitle": "Configuração da sala",
   "saveSettings": "Salvar",
   "settingsSaved": "Configuração salva",

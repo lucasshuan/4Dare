@@ -5,9 +5,8 @@ import {
   Check,
   ChevronLeft,
   Clock,
-  Globe,
+  type Globe,
   Link as LinkIcon,
-  Lock,
   PenLine,
   Settings,
   UsersRound,
@@ -36,7 +35,6 @@ import { GAME_SEATS } from "@/game/games";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import { type Lang, STEP_TIMES } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
-import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
 import { formatClock, useDisplayName, useRoomTitle } from "@/lib/names";
@@ -51,6 +49,7 @@ import {
 import type { CreateRoomInput } from "@/server/contract";
 import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
+import { RoomTitle, VisibilityRow } from "./room-edits";
 import { SeatGrid } from "./seat-grid";
 import { StartDialog } from "./start-dialog";
 
@@ -118,14 +117,7 @@ export function LobbyScreen() {
   const [draft, setDraft] = useState<CreateRoomInput>(() =>
     editable(view.settings),
   );
-  const {
-    game,
-    name: roomName,
-    visibility,
-    seats,
-    themeMode,
-    themeSets,
-  } = view.settings;
+  const { game, name: roomName, seats, themeMode, themeSets } = view.settings;
   const gameName = useGameName();
   // The host sees every seat the game allows, and their changes show at once;
   // the server confirms in the background (a refusal puts things back).
@@ -160,7 +152,14 @@ export function LobbyScreen() {
     }
   };
 
-  const title = roomTitle(roomName, host);
+  // A new name shows at once; the server confirms in the background.
+  const [nameGuess, setNameGuess] = useState<string | null>(null);
+  const title = roomTitle(nameGuess ?? roomName, host);
+  const rename = async (next: string) => {
+    setNameGuess(next);
+    await act(() => updateSettings(code, { name: next }));
+    setNameGuess(null);
+  };
   // after a match the room is not new any more
   const greeting = me.isHost
     ? t(view.round > 0 ? "titleHostAgain" : "titleHost")
@@ -225,7 +224,13 @@ export function LobbyScreen() {
                 {t("leave")}
               </button>
               {/* the room leads with its name; the greeting drops to a line under it */}
-              <h1 className={cn(titleClass, "wrap-break-word")}>{title}</h1>
+              <RoomTitle
+                title={title}
+                name={nameGuess ?? roomName}
+                editable={me.isHost}
+                className={titleClass}
+                onRename={rename}
+              />
               {/* the QR code sits right of the greeting and the description (not on phones) */}
               <div className="flex items-center gap-6">
                 <div className="flex min-w-0 flex-1 flex-col gap-3">
@@ -367,15 +372,14 @@ export function LobbyScreen() {
           </div>
           <aside className="flex flex-col gap-4 rounded-lg bg-surface p-6">
             <ul className="flex flex-col gap-3">
-              <Setting icon={visibility === "public" ? Globe : Lock}>
-                {t(visibility === "public" ? "public" : "private")}
-                {/* the host shares the password; nobody else gets it */}
-                {visibility === "private" && view.settings.password ? (
-                  <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
-                    {view.settings.password}
-                  </span>
-                ) : null}
-              </Setting>
+              <VisibilityRow
+                settings={view.settings}
+                editable={me.isHost}
+                pending={pending}
+                onSave={async (v) =>
+                  (await act(() => updateSettings(code, v))).ok
+                }
+              />
               <Setting icon={UsersRound}>
                 {t("seats", { seats: shownSeats })}
               </Setting>

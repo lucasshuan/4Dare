@@ -58,6 +58,8 @@
   "readyButton": "準備OK",
   "leave": "ルームを出る",
   "editSettings": "設定を変更",
+  "rename": "ルーム名を変える",
+  "editVisibility": "入れる人を変える",
   "settingsTitle": "ルームの設定",
   "saveSettings": "保存",
   "settingsSaved": "設定を保存しました",

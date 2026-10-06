@@ -19,7 +19,8 @@ import {
 import { cn } from "@/lib/cn";
 import type { CreateRoomInput } from "@/server/contract";
 
-function Segmented<T extends string | number>({
+/** Options on a pill track, the chosen one raised. */
+export function Segmented<T extends string | number>({
   label,
   options,
   value,

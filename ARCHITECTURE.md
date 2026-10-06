@@ -15,7 +15,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
 - Phases: lobby, voting or theming, picking, turns, finished.
 - No cron: fetching a room applies due timeouts.
-- Host in the lobby: removes a player (`KICK`; back only after 2 min, `kicked` in state), opens and closes seats within the game's range (`GAME_SEATS`); closed seats show to the host only.
+- Host in the lobby: renames the room and makes it public or private in place, switches the game, removes a player (`KICK`; back only after 2 min, `kicked` in state), opens and closes seats within the game's range (`GAME_SEATS`); closed seats show to the host only.
 - Past matches: room state keeps its last 5 (theme, players by place), saved at the podium; only the lobby view lists them.
 - Shows: scenes between steps (opening, theme and rule, draw (skipped with 2 players), "for whom", cast) are beats with server times on `reveal` (`src/game/show-timing/`). Step clocks wait for show end, so every screen plays same frame. A guess's result and a pass are scenes too (`reveal` kinds `guess`, `pass`; `GuessScene`, full screen in the guesser's colour, no close): the next turn waits for them, and its handoff band covers their end. Only the answers reveal is a closable modal over a running step. Client: `stageFrame` picks screen and backdrop, `useStageTimeline` seeks motion to server time. Lab: `/[locale]/dev/stage` (dev only).
 - Sync: local polls 1 s. Supabase: Realtime ping (`src/lib/realtime.ts`, one channel per room, loaded on demand); poll 45 s joined, 10 s down.

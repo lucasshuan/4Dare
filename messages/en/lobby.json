@@ -58,6 +58,8 @@
   "readyButton": "Ready",
   "leave": "Leave room",
   "editSettings": "Edit settings",
+  "rename": "Rename room",
+  "editVisibility": "Change who can join",
   "settingsTitle": "Room settings",
   "saveSettings": "Save",
   "settingsSaved": "Settings saved",
