@@ -44,7 +44,7 @@
     "validateSeconds": "判定"
   },
   "timesLabel": "時間",
-  "start": "ゲームを始める",
+  "start": "始める",
   "needPlayers": "始めるには2人以上必要です",
   "confirmStart": {
     "title": "全員そろう前に始めますか？",

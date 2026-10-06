@@ -1,7 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, type LucideIcon } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -21,6 +21,7 @@ const swap = {
 
 export interface SeatAction {
   label: string;
+  icon: LucideIcon;
   danger?: boolean;
   /** Asked once more, in the same popup, before `run`. */
   confirm?: { title: string; body: string; yes: string };
@@ -117,12 +118,19 @@ export function SeatMenu({
                         action.confirm ? setAsking(action) : done(action)
                       }
                       className={cn(
-                        "w-full rounded-sm px-3 py-2.5 text-left font-semibold text-sm transition-colors duration-150",
+                        "flex w-full items-center gap-2.5 rounded-sm px-3 py-2.5 text-left font-semibold text-sm transition-colors duration-150",
                         action.danger
                           ? "text-no hover:bg-no-soft"
                           : "text-ink hover:bg-sunken",
                       )}
                     >
+                      <action.icon
+                        className={cn(
+                          "size-4.5 shrink-0",
+                          !action.danger && "text-ink-muted",
+                        )}
+                        strokeWidth={2}
+                      />
                       {action.label}
                     </button>
                   ))}

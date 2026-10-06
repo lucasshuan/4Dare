@@ -44,7 +44,7 @@
     "validateSeconds": "Conferir"
   },
   "timesLabel": "Tempos",
-  "start": "Começar partida",
+  "start": "Começar",
   "needPlayers": "Precisa de pelo menos 2 jogadores para começar",
   "confirmStart": {
     "title": "Começar sem todo mundo pronto?",

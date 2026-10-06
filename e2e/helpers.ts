@@ -62,7 +62,7 @@ export async function startMatch(host: Page) {
     host.getByRole("img", { name: /^ready$/i }).first(),
   ).toBeVisible();
   await expect(host.getByRole("img", { name: /^not ready/i })).toHaveCount(0);
-  await button(host, /start match/i).click();
+  await button(host, /^start$/i).click();
 }
 
 /** The room as this player is allowed to see it (same API the UI uses). */

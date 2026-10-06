@@ -4,6 +4,7 @@ import { Select } from "@base-ui/react/select";
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { GAME_KEYS, type GameKey } from "@/game/games";
+import { cn } from "@/lib/cn";
 import { GAME_INFO, GameThumb, useGameName } from "./game-info";
 
 export { GAME_INFO, GameThumb, useGameName };
@@ -16,9 +17,11 @@ export { GAME_INFO, GameThumb, useGameName };
 export function GameField({
   value,
   onChange,
+  className,
 }: {
   value: GameKey;
   onChange: (game: GameKey) => void;
+  className?: string;
 }) {
   const t = useTranslations("home.createRoom");
   const tg = useTranslations("home.games");
@@ -34,7 +37,10 @@ export function GameField({
     >
       <Select.Trigger
         aria-label={t("game")}
-        className="flex h-16 w-full shrink-0 sm:w-72 items-center gap-3 rounded-pill border-[1.5px] border-line bg-surface py-1.5 pr-5 pl-3 text-left transition-[border-color,box-shadow] duration-200 ease-soft hover:border-line-strong data-popup-open:border-ink data-popup-open:shadow-card"
+        className={cn(
+          "flex h-16 w-full shrink-0 items-center gap-3 rounded-pill border-[1.5px] border-line bg-surface py-1.5 pr-5 pl-3 text-left transition-[border-color,box-shadow] duration-200 ease-soft hover:border-line-strong data-popup-open:border-ink data-popup-open:shadow-card sm:w-72",
+          className,
+        )}
       >
         <GameThumb game={value} size="sm" />
         <span className="flex min-w-0 flex-1 flex-col">

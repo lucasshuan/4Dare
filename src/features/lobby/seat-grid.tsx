@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, Crown, X } from "lucide-react";
+import {
+  Check,
+  CircleDashed,
+  CircleSlash,
+  Crown,
+  UserRoundX,
+  X,
+} from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
@@ -62,6 +69,7 @@ export function SeatGrid({
     if (p) {
       const kick: SeatAction = {
         label: t("kick"),
+        icon: UserRoundX,
         danger: true,
         confirm: {
           title: t("kickTitle", { name: p.name }),
@@ -122,9 +130,17 @@ export function SeatGrid({
       ? null
       : open
         ? canClose
-          ? { label: t("closeSeat"), run: () => onSeats(seats - 1) }
+          ? {
+              label: t("closeSeat"),
+              icon: CircleSlash,
+              run: () => onSeats(seats - 1),
+            }
           : null
-        : { label: t("openSeat"), run: () => onSeats(seats + 1) };
+        : {
+            label: t("openSeat"),
+            icon: CircleDashed,
+            run: () => onSeats(seats + 1),
+          };
     return (
       <m.div
         key={open ? "open" : "closed"}
