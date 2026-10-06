@@ -5110,3 +5110,15 @@ insert into public.origin_labels (origin_id, lang, label) values
   ('wd:Q99415917', 'es', 'Final Fantasy'),
   ('wd:Q99671372', 'es', 'Borat: Siguiente película documental')
 on conflict (origin_id, lang) do nothing;
+
+-- 7. Hand-added namesakes step 5 held back (the Grinch's Max, not Goofy's son;
+-- Steven Universe's Pearl, not Mr. Krabs' daughter).
+update public.character_names n
+set popularity = v.popularity
+from (values
+  ('hand-grumpy', 26000),
+  ('hand-max-the-grinch', 22000),
+  ('hand-pearl-steven-universe', 22000),
+  ('hand-po-teletubbies', 22000)
+) as v(id, popularity)
+where n.character_id = v.id and n.lang = 'es' and n.popularity is null;
