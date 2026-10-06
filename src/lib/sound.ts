@@ -8,7 +8,7 @@ const SOUNDS = {
   tick: { src: "/sounds/clock-ticking.mp3", volume: 0.5 },
   /** The podium, with its confetti. */
   complete: { src: "/sounds/match-complete.mp3", volume: 0.7 },
-  /** Every step change of a turn: question sent, answered, guess sent, guess answered. */
+  /** A turn step that waits on you starts: your question, your answer, your guess, the check of a guess on your pick. */
   step: { src: "/sounds/step-pop.mp3", volume: 0.6 },
   /** Someone joined the room (or came back to it). */
   join: { src: "/sounds/player-join.mp3", volume: 0.6 },

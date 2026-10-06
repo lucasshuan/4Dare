@@ -25,8 +25,14 @@ import { useRoomTitle } from "@/lib/names";
 import { WHO_AM_I } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
 import { FoundFeedback } from "./found-feedback";
-import { isAwaited, MatchFrame, useReached } from "./match-frame";
+import {
+  isAwaited,
+  MatchFrame,
+  useReached,
+  useStepStarted,
+} from "./match-frame";
 import { RevealOverlay } from "./reveal-overlay";
+import { stepCall } from "./step-call";
 
 /**
  * Everything a room shows once the player is seated (plan 1.2): one backdrop
@@ -61,16 +67,20 @@ function Chat() {
   return area === "closed" ? null : <RoomChat />;
 }
 
-const TURN_STEPS: Phase[] = ["asking", "answering", "guessing", "validating"];
-
-/** A pop on every step change of a turn: question sent, answered, guess sent, guess answered. */
-function useStepSound(phase: Phase) {
-  const last = useRef(phase);
+/**
+ * A pop when a turn step that waits on this player starts (stepCall): their
+ * question, their answer, their guess, the check of a guess on their pick.
+ * Never for a step they only watch.
+ */
+function useStepSound() {
+  const { view, me } = useRoomContext();
+  const started = useStepStarted();
+  const call = stepCall(me.status, view.stepStartsAt, started);
+  const last = useRef(call);
   useEffect(() => {
-    if (phase !== last.current && TURN_STEPS.includes(last.current))
-      playSound("step");
-    last.current = phase;
-  }, [phase]);
+    if (call !== null && call !== last.current) playSound("step");
+    last.current = call;
+  }, [call]);
 }
 
 /** A pluck when someone joins the room or comes back to it, another when someone leaves. */
@@ -128,7 +138,7 @@ function Areas() {
   const { view } = useRoomContext();
   const { area, screen, finishedWait } = useStage();
   useRoomTab();
-  useStepSound(view.phase);
+  useStepSound();
   usePresenceSound(view);
   usePreloadCards(view);
   return (
