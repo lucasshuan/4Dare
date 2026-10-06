@@ -18,6 +18,7 @@ export const SHOW_TIMING = {
   rule: THEME.rule,
   draw: DRAW.draw,
   target: DRAW.target,
+  targetLead: DRAW.lead,
   picked: PICK.picked,
   received: CAST.received,
   order: CAST.order,

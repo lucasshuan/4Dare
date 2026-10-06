@@ -40,9 +40,12 @@ const PAPER_X = { desktop: 44, phone: 30 };
  * again. At the target beat only its paper dissolves; the hint and the ring
  * of who picks for whom come in under it.
  *
- * Mounted after the draw (a reload mid-target), there is no slip: the header
- * comes in on its own. The stage lab's stopped clock always shows the slip's
- * frames, what a player who watched the draw sees.
+ * Two players have no draw (they can only pick for each other): the header
+ * comes in on its own at the start of a longer target beat, and the hint and
+ * the ring wait for it. Mounted after the draw (a reload mid-target), there
+ * is no slip either: the header comes in on its own. The stage lab's stopped
+ * clock always shows the slip's frames, what a player who watched the draw
+ * sees.
  */
 export function PickIntro({ show }: PickIntroProps) {
   const t = useTranslations("stageDraw");
@@ -91,7 +94,12 @@ export function PickIntro({ show }: PickIntroProps) {
       const kD = draw
         ? Math.min(1, (draw.until - draw.startsAt) / DRAW.draw[v])
         : 1;
-      const kT = Math.min(1, (target.until - target.startsAt) / DRAW.target[v]);
+      // no draw: the target beat opens with the header's own entrance
+      const lead = draw ? 0 : DRAW.lead;
+      const kT = Math.min(
+        1,
+        (target.until - target.startsAt) / (DRAW.target[v] + lead),
+      );
       const t0 = draw?.startsAt ?? target.startsAt;
       const td = (target.startsAt - t0) / 1000;
       const seq: AnimationSequence = [];
@@ -109,7 +117,8 @@ export function PickIntro({ show }: PickIntroProps) {
           slip,
           first,
           n: order.length,
-          length: DRAW.target[v] / 1000,
+          lead: lead / 1000,
+          length: (DRAW.target[v] + lead) / 1000,
           map: { at: (s) => td + s * kT, d: (s) => s * kT },
         }),
       );
@@ -264,6 +273,7 @@ function fitName(scope: HTMLElement, phone: boolean) {
  * "For whom" (spec B §3.3): the slip's paper dissolves (or, without a slip,
  * the header comes in), the hint rises, the ring builds itself, and the
  * whole scene fades out 0.4 s before the beat ends, as the pick table lands.
+ * `lead` holds the hint and the ring back while the header comes in.
  */
 function targetSequence(
   scope: HTMLElement,
@@ -272,12 +282,16 @@ function targetSequence(
     slip: boolean;
     first: boolean;
     n: number;
+    /** Seconds the header has to itself before the hint and the ring. */
+    lead: number;
     /** The beat's length in the scene's own seconds. */
     length: number;
     map: TimeMap;
   },
 ): AnimationSequence {
   const { at, d } = o.map;
+  // the hint and the ring, after the lead
+  const ring = { ...o.map, at: (s: number) => at(o.lead + s) };
   const q = (s: string) => scope.querySelector<HTMLElement>(s);
   const scene = q("[data-scene]");
   const paper = q("[data-paper]");
@@ -287,7 +301,7 @@ function targetSequence(
   const hint = q("[data-hint]");
   if (!scene || !pre || !face || !name || !hint) return [];
   const seq: AnimationSequence = [];
-  const hintAt = o.first ? 0.65 : 0.3;
+  const hintAt = o.lead + (o.first ? 0.65 : 0.3);
   const exit = o.length - 0.4;
 
   if (info.reduced) {
@@ -309,7 +323,7 @@ function targetSequence(
       );
     seq.push(
       [hint, { opacity: [0, 1], y: [0, 0] }, { at: at(hintAt), duration: 0.2 }],
-      ...ringSequence(scope, { first: o.first, reduced: true, map: o.map }),
+      ...ringSequence(scope, { first: o.first, reduced: true, map: ring }),
       [scene, { opacity: [1, 0] }, { at: at(exit), duration: d(0.4) }],
     );
     return seq;
@@ -349,7 +363,7 @@ function targetSequence(
         ease: gs.p3Out,
       },
     ],
-    ...ringSequence(scope, { first: o.first, reduced: false, map: o.map }),
+    ...ringSequence(scope, { first: o.first, reduced: false, map: ring }),
     [
       scene,
       { opacity: [1, 0], scaleX: [1, 0.94], scaleY: [1, 0.94] },

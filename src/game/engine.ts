@@ -345,7 +345,8 @@ function closeVote(s: RoomState, ctx: Ctx) {
 /**
  * The theme show: the vote's result (a tie spins first), the theme, the rule
  * (a long match), the draw and "you pick for…", then the pick table
- * comes in. Picking starts when it ends.
+ * comes in. Picking starts when it ends. Two players can only pick for each
+ * other, so they skip the draw: "you pick for…" comes in on its own.
  */
 function showTheme(
   s: RoomState,
@@ -360,6 +361,7 @@ function showTheme(
       ? T.rule.cards
       : T.rule.sentence
     : 0;
+  const drawn = s.players.length > 2;
   stage(
     s,
     "theme",
@@ -370,8 +372,8 @@ function showTheme(
       ["settle", o.typed ? 0 : T.settle[v]],
       ["theme", rule ? T.theme.withRule : T.theme.alone],
       ["rule", rule],
-      ["draw", T.draw[v]],
-      ["target", T.target[v]],
+      ["draw", drawn ? T.draw[v] : 0],
+      ["target", T.target[v] + (drawn ? 0 : T.targetLead)],
       ["entrance", T.entrance.pick],
     ],
     ctx,

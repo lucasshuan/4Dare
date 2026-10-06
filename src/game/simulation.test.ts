@@ -54,7 +54,8 @@ function beatLengths(show: string, kind: BeatKind, first: boolean): number[] {
     case "draw":
       return [T.draw[v]];
     case "target":
-      return [T.target[v]];
+      // two players: no draw, so "for whom" opens a moment longer
+      return [T.target[v], T.target[v] + T.targetLead];
     case "picked":
       return [T.picked.confirmed[v], T.picked.timeout];
     case "received":

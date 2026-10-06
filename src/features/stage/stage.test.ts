@@ -244,12 +244,14 @@ describe("stageFrame: the theme show", () => {
       g.skipShow();
       g.voteAll(0);
       const show = showOf(g);
+      // two players pick for each other: no draw
+      const drawn = players > 2;
       expect(show.rule).toEqual(EXAMPLES[0]);
       expect(screensByBeat(g, show)).toEqual([
         ["settle", "vote"],
         ["theme", "vote"],
         ["rule", "vote"],
-        ["draw", "pick"],
+        ...(drawn ? [["draw", "pick"]] : []),
         ["target", "pick"],
         ["entrance", "pick"],
       ]);
@@ -261,7 +263,7 @@ describe("stageFrame: the theme show", () => {
       expect(f.historyFrom).toBeNull();
       expect(g.state.stepStartsAt).toBe(show.until);
 
-      // backdrops: butter, theme from the wash, brand for the draw, then my target's seat
+      // backdrops: butter, theme from the wash, brand for the draw (if any), then my target's seat
       const target = toView(g.state, 1, "p1", g.now, "en").pick?.targetId ?? "";
       const targetTone = seatTone(seatOf(g, target));
       const wash = markAt(themeBeat, SHOW_MARKS.themeWash);
@@ -274,19 +276,26 @@ describe("stageFrame: the theme show", () => {
         fade: 1.1,
       } satisfies Look);
       expect(look(g, beat(show, "rule").startsAt).tone).toBe("theme");
-      const draw = beat(show, "draw");
-      const targetWash = markAt(
-        draw,
-        markOf(SHOW_MARKS.targetWash, show.first),
-      );
-      expect(look(g, draw.startsAt).tone).toBe("brand");
-      expect(look(g, targetWash - 1).tone).toBe("brand");
-      expect(look(g, targetWash)).toMatchObject({
+      if (drawn) {
+        const draw = beat(show, "draw");
+        const targetWash = markAt(
+          draw,
+          markOf(SHOW_MARKS.targetWash, show.first),
+        );
+        expect(look(g, draw.startsAt).tone).toBe("brand");
+        expect(look(g, targetWash - 1).tone).toBe("brand");
+        expect(look(g, targetWash)).toMatchObject({
+          tone: targetTone,
+          glyphs: "set",
+          fade: 0.8,
+        });
+      } else
+        expect(look(g, beat(show, "target").startsAt - 1).tone).toBe("theme");
+      expect(look(g, beat(show, "target").startsAt)).toMatchObject({
         tone: targetTone,
         glyphs: "set",
         fade: 0.8,
       });
-      expect(look(g, beat(show, "target").startsAt).tone).toBe(targetTone);
       expect(look(g, beat(show, "entrance").startsAt).tone).toBe(targetTone);
       // picking, after the show
       expect(look(g, show.until + 1000).tone).toBe(targetTone);
@@ -344,7 +353,6 @@ describe("stageFrame: the theme show", () => {
     expect(screensByBeat(g, show)).toEqual([
       ["theme", "theming"],
       ["rule", "theming"],
-      ["draw", "pick"],
       ["target", "pick"],
       ["entrance", "pick"],
     ]);
@@ -358,7 +366,7 @@ describe("stageFrame: the theme show", () => {
   });
 
   it("marks are kept inside beats an e2e run shortens", () => {
-    const g = new Game(2);
+    const g = new Game(3);
     g.showScale = 0.25;
     g.do({ type: "START", playerId: "p1", themes: THEMES });
     g.skipShow();
@@ -529,10 +537,11 @@ describe("stageFrame: later matches", () => {
       const show = showOf(g);
       expect(show.kind).toBe("theme");
       expect(show.first).toBe(false);
+      const drawn = players > 2;
       expect(screensByBeat(g, show)).toEqual([
         ["settle", "vote"],
         ["theme", "vote"],
-        ["draw", "pick"],
+        ...(drawn ? [["draw", "pick"]] : []),
         ["target", "pick"],
         ["entrance", "pick"],
       ]);
@@ -540,14 +549,17 @@ describe("stageFrame: later matches", () => {
       expect(g.state.stepStartsAt).toBe(show.until);
       const target = toView(g.state, 1, "p1", g.now, "en").pick?.targetId ?? "";
       const targetTone = seatTone(seatOf(g, target));
-      const draw = beat(show, "draw");
-      const targetWash = markAt(draw, markOf(SHOW_MARKS.targetWash, false));
-      expect(targetWash).toBeLessThan(
-        markAt(draw, markOf(SHOW_MARKS.targetWash, true)),
-      );
-      expect(look(g, draw.startsAt).tone).toBe("brand");
-      expect(look(g, targetWash - 1).tone).toBe("brand");
-      expect(look(g, targetWash).tone).toBe(targetTone);
+      if (drawn) {
+        const draw = beat(show, "draw");
+        const targetWash = markAt(draw, markOf(SHOW_MARKS.targetWash, false));
+        expect(targetWash).toBeLessThan(
+          markAt(draw, markOf(SHOW_MARKS.targetWash, true)),
+        );
+        expect(look(g, draw.startsAt).tone).toBe("brand");
+        expect(look(g, targetWash - 1).tone).toBe("brand");
+        expect(look(g, targetWash).tone).toBe(targetTone);
+      } else
+        expect(look(g, beat(show, "target").startsAt).tone).toBe(targetTone);
       expect(frame(g, show.until + 1000)).toMatchObject({
         screen: "pick",
         show: null,

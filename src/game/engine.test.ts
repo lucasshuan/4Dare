@@ -409,6 +409,23 @@ describe("the theme vote", () => {
     expect(code(() => vote(g, "p3", 1))).toBe("wrong_phase");
   });
 
+  it("two players skip the draw (they can only pick for each other); the target beat comes in on its own", () => {
+    for (const players of [2, 3, 4]) {
+      const g = voting(players);
+      g.voteAll(0);
+      const kinds = beats(g.state.reveal).map(([kind]) => kind);
+      const target = beats(g.state.reveal).find(([kind]) => kind === "target");
+      if (players === 2) {
+        expect(kinds).not.toContain("draw");
+        expect(target?.[1]).toBe(T.target.first + T.targetLead);
+      } else {
+        expect(kinds).toContain("draw");
+        expect(target?.[1]).toBe(T.target.first);
+      }
+      expectContiguous(g.state.reveal);
+    }
+  });
+
   it("a tie is drawn among the tied themes; the show spins between them first", () => {
     const g = voting(2);
     vote(g, "p1", 0);
@@ -433,8 +450,7 @@ describe("the theme vote", () => {
       ["settle", T.settle.first],
       ["theme", T.theme.withRule],
       ["rule", T.rule.cards],
-      ["draw", T.draw.first],
-      ["target", T.target.first],
+      ["target", T.target.first + T.targetLead],
       ["entrance", T.entrance.pick],
     ]);
     // the vote keeps its own copy
@@ -573,8 +589,7 @@ describe("the host types the theme", () => {
     expect(beats(r)).toEqual([
       ["theme", T.theme.withRule],
       ["rule", T.rule.sentence],
-      ["draw", T.draw.first],
-      ["target", T.target.first],
+      ["target", T.target.first + T.targetLead],
       ["entrance", T.entrance.pick],
     ]);
     expect(g.state.stepStartsAt).toBe(r?.until);
@@ -769,8 +784,7 @@ describe("picking", () => {
     expect(beats(theme)).toEqual([
       ["settle", T.settle.later],
       ["theme", T.theme.alone],
-      ["draw", T.draw.later],
-      ["target", T.target.later],
+      ["target", T.target.later + T.targetLead],
       ["entrance", T.entrance.pick],
     ]);
     g.skipShow();
@@ -806,7 +820,10 @@ describe("picking", () => {
     const theme = g.state.reveal;
     expect(theme).toMatchObject({ kind: "theme", n: 2, first: true });
     expect(theme).toHaveProperty("rule");
-    expect(beats(theme)).toContainEqual(["draw", T.draw.first]);
+    expect(beats(theme)).toContainEqual([
+      "target",
+      T.target.first + T.targetLead,
+    ]);
     g.skipShow();
     g.pickAll();
     expect(g.state.reveal).toMatchObject({ kind: "cast", n: 2, first: true });
@@ -838,8 +855,7 @@ describe("picking", () => {
     g.do({ type: "SET_THEME", playerId: "p1", text: "Robots" });
     expect(beats(g.state.reveal)).toEqual([
       ["theme", T.theme.alone],
-      ["draw", T.draw.later],
-      ["target", T.target.later],
+      ["target", T.target.later + T.targetLead],
       ["entrance", T.entrance.pick],
     ]);
   });
