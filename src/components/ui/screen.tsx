@@ -36,7 +36,6 @@ export function Screen({
   right,
   banner,
   children,
-  wide,
   className,
 }: {
   left?: ReactNode;
@@ -44,7 +43,6 @@ export function Screen({
   /** Full width, right under the top bar; it should start with UNDER_TOPBAR. */
   banner?: ReactNode;
   children: ReactNode;
-  wide?: boolean;
   className?: string;
 }) {
   const bar = (
@@ -65,14 +63,12 @@ export function Screen({
         <div className="-mt-[72px] sm:-mt-[88px] sm:short:-mt-[72px]">
           {banner}
         </div>
-        <main
-          className={cn(
-            "mx-auto w-full max-w-[1120px] flex-1 px-4 pt-6 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-8 sm:pb-[calc(3rem+var(--dock))] sm:short:pb-[calc(1.5rem+var(--dock))]",
-            className,
-          )}
-        >
-          {children}
-        </main>
+        {/* the padding sits outside the column, so it lines up with the bar's */}
+        <div className="flex-1 px-4 pt-6 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-8 sm:pb-[calc(3rem+var(--dock))] sm:short:pb-[calc(1.5rem+var(--dock))]">
+          <main className={cn("mx-auto w-full max-w-page", className)}>
+            {children}
+          </main>
+        </div>
       </div>
     );
   }
@@ -80,16 +76,13 @@ export function Screen({
     <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:gap-10 sm:px-8 sm:pt-6 sm:pb-[calc(3rem+var(--dock))] sm:short:gap-6 sm:short:pt-4 sm:short:pb-[calc(1.5rem+var(--dock))]">
       <m.header
         variants={BAR_LEAVES}
-        className={cn(
-          "mx-auto flex w-full items-center justify-between gap-3",
-          wide ? "max-w-[1120px]" : "max-w-[1120px]",
-        )}
+        className="mx-auto flex w-full max-w-page items-center justify-between gap-3"
       >
         {bar}
       </m.header>
       <m.main
         variants={CONTENT_LEAVES}
-        className={cn("mx-auto w-full max-w-[1120px] flex-1", className)}
+        className={cn("mx-auto w-full max-w-page flex-1", className)}
       >
         {children}
       </m.main>
@@ -119,7 +112,7 @@ function TopBar({ children }: { children: ReactNode }) {
           : "border-transparent bg-transparent",
       )}
     >
-      <div className="mx-auto flex w-full max-w-[1120px] items-center justify-between gap-3">
+      <div className="mx-auto flex w-full max-w-page items-center justify-between gap-3">
         {children}
       </div>
     </header>

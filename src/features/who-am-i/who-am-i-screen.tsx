@@ -29,7 +29,7 @@ export function WhoAmIScreen() {
       right={<HubActions />}
       banner={<WhoAmIBanner />}
     >
-      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,500px)_minmax(0,472px)] lg:justify-between">
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,500px)_minmax(0,560px)] lg:justify-between">
         <m.section
           initial={{ opacity: 0, y: 12 }}
           animate={{
