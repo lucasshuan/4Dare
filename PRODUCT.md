@@ -30,7 +30,7 @@ Every room has a chat, in the lobby and through the match: a panel at the bottom
 
 ## Extras
 
-- English, Portuguese and Japanese.
+- English, Spanish, Japanese and Portuguese.
 - Character library with pictures. You can create a new one, send another picture of anyone, or draw one people often picked for the theme.
 - A character's pictures: the library's own, then the ones players sent, each with who sent it. The one most players pick becomes the main picture (the library's starts 20 picks ahead). Sexual content, real nudity and gore are refused when sent; anyone can report a picture, and 3 reports hide it.
 - Light and dark. Works on phones. Reduced motion is respected: scenes keep their timing but drop the movement.

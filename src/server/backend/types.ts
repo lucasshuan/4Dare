@@ -173,7 +173,7 @@ export interface ThemeStore {
 }
 
 export interface ThemeSource {
-  /** `count` different themes in the three languages, from `sets` (every set when left out) while they have enough. Never throws: falls back to the list in hand. */
+  /** `count` different themes in every language, from `sets` (every set when left out) while they have enough. Never throws: falls back to the list in hand. */
   draw(
     avoid: Localized[],
     count: number,

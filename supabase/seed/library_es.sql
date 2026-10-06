@@ -3,8 +3,8 @@
 -- name there ("El Guasón", "Pájaro Loco", "Cristóbal Colón"), aliases (Spain's
 -- names among them) and how well known it is (A icon, B famous, C known to
 -- fans; unknown stays hidden). A, B and C start at 30000, 26000 and 22000,
--- moved up to 1500 by how far above or below its lists' medians the character
--- reads in the other languages. Insert or update only: safe to run again.
+-- moved up to 1500 (an eighth of the gap) by how far above or below its lists'
+-- medians the character reads in the other languages. Insert or update only: safe to run again.
 
 -- 1. Names that differ from the English one, or carry Spanish aliases.
 insert into public.character_names (character_id, lang, name, norm, aliases, alias_norms) values
@@ -3193,7 +3193,7 @@ with t(id) as (
 scored as (
   select t.id, 30000 + coalesce((
     select least(1500, greatest(-1500, round(max(o.popularity - case o.lang
-      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 3.0)))::integer
+      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 8.0)))::integer
     from public.character_names o
     where o.character_id = t.id and o.lang in ('en', 'ja', 'pt') and o.popularity is not null
   ), 0) as p
@@ -3228,7 +3228,7 @@ with t(id) as (
 scored as (
   select t.id, 26000 + coalesce((
     select least(1500, greatest(-1500, round(max(o.popularity - case o.lang
-      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 3.0)))::integer
+      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 8.0)))::integer
     from public.character_names o
     where o.character_id = t.id and o.lang in ('en', 'ja', 'pt') and o.popularity is not null
   ), 0) as p
@@ -3263,7 +3263,7 @@ with t(id) as (
 scored as (
   select t.id, 22000 + coalesce((
     select least(1500, greatest(-1500, round(max(o.popularity - case o.lang
-      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 3.0)))::integer
+      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 8.0)))::integer
     from public.character_names o
     where o.character_id = t.id and o.lang in ('en', 'ja', 'pt') and o.popularity is not null
   ), 0) as p
@@ -3298,7 +3298,7 @@ with t(id) as (
 scored as (
   select t.id, 22000 + coalesce((
     select least(1500, greatest(-1500, round(max(o.popularity - case o.lang
-      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 3.0)))::integer
+      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 8.0)))::integer
     from public.character_names o
     where o.character_id = t.id and o.lang in ('en', 'ja', 'pt') and o.popularity is not null
   ), 0) as p
@@ -3333,7 +3333,7 @@ with t(id) as (
 scored as (
   select t.id, 22000 + coalesce((
     select least(1500, greatest(-1500, round(max(o.popularity - case o.lang
-      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 3.0)))::integer
+      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 8.0)))::integer
     from public.character_names o
     where o.character_id = t.id and o.lang in ('en', 'ja', 'pt') and o.popularity is not null
   ), 0) as p
@@ -3368,7 +3368,7 @@ with t(id) as (
 scored as (
   select t.id, 22000 + coalesce((
     select least(1500, greatest(-1500, round(max(o.popularity - case o.lang
-      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 3.0)))::integer
+      when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 8.0)))::integer
     from public.character_names o
     where o.character_id = t.id and o.lang in ('en', 'ja', 'pt') and o.popularity is not null
   ), 0) as p
@@ -5122,3 +5122,37 @@ from (values
   ('hand-po-teletubbies', 22000)
 ) as v(id, popularity)
 where n.character_id = v.id and n.lang = 'es' and n.popularity is null;
+
+-- 8. The same spread for rows set before the eighth replaced a third (which
+-- left every icon at 30000 + 1500): the tier read back from the value.
+update public.character_names n
+set popularity = s.p
+from (
+  select e.character_id,
+    case when e.popularity >= 28500 then 30000 when e.popularity >= 24500 then 26000 else 22000 end
+    + coalesce((
+      select least(1500, greatest(-1500, round(max(o.popularity - case o.lang
+        when 'en' then 29968 when 'pt' then 20940 else 23555 end) / 8.0)))::integer
+      from public.character_names o
+      where o.character_id = e.character_id and o.lang in ('en', 'ja', 'pt') and o.popularity is not null
+    ), 0) as p
+  from public.character_names e
+  where e.lang = 'es' and e.popularity is not null and e.character_id not like 'u-%'
+) s
+where n.character_id = s.character_id and n.lang = 'es' and n.popularity is distinct from s.p;
+
+-- 9. Descriptors of people read like the other languages': lower case, and
+-- masculine unless the id says ":f" (the feminine one has its own id).
+update public.origin_labels l
+set label = case l.origin_id
+    when 'job:explorer' then 'explorador'
+    when 'job:rapper' then 'rapero'
+    when 'job:swimmer' then 'nadador'
+    else lower(left(l.label, 1)) || substr(l.label, 2)
+  end
+from public.origin_labels e
+where e.origin_id = l.origin_id and e.lang = 'en' and l.lang = 'es'
+  and l.origin_id ~ '^(job|group):'
+  and left(e.label, 1) = lower(left(e.label, 1))
+  and (left(l.label, 1) <> lower(left(l.label, 1))
+    or l.origin_id in ('job:explorer', 'job:rapper', 'job:swimmer'));
