@@ -302,63 +302,7 @@ export function LobbyScreen() {
         </section>
 
         <div className="flex w-full flex-col gap-4 lg:max-w-[416px] lg:flex-[1_1_360px]">
-          <aside className="flex flex-col gap-4 rounded-lg bg-surface p-6">
-            <ul className="flex flex-col gap-3">
-              <Setting icon={visibility === "public" ? Globe : Lock}>
-                {t(visibility === "public" ? "public" : "private")}
-                {/* the host shares the password; nobody else gets it */}
-                {visibility === "private" && view.settings.password ? (
-                  <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
-                    {view.settings.password}
-                  </span>
-                ) : null}
-              </Setting>
-              <Setting icon={UsersRound}>
-                {t("seats", { seats: shownSeats })}
-              </Setting>
-              <Setting icon={Clock}>
-                <span className="sr-only">{t("timesLabel")}: </span>
-                {/* the match's steps in order, each with its clock */}
-                <span className="flex flex-wrap gap-1.5">
-                  {STEP_TIMES.map((step) => (
-                    <span
-                      key={step}
-                      className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm"
-                    >
-                      {t(`times.${step}`)}
-                      <span className="font-medium font-mono text-[13px] tabular-nums">
-                        {formatClock(view.settings[step])}
-                      </span>
-                    </span>
-                  ))}
-                </span>
-              </Setting>
-              <Setting icon={themeMode === "host" ? PenLine : Vote}>
-                {themeMode === "host"
-                  ? t("themeHost")
-                  : themeSets.length === THEME_SET_KEYS.length
-                    ? t("themeVoteAll")
-                    : t("themeVote", {
-                        on: themeSets.length,
-                        total: THEME_SET_KEYS.length,
-                      })}
-              </Setting>
-            </ul>
-            {me.isHost ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setDraft(editable(view.settings));
-                  setEditing(true);
-                }}
-                className="inline-flex items-center gap-1.5 self-start font-semibold text-sky text-sm underline underline-offset-2"
-              >
-                <Settings className="size-4" strokeWidth={2} />
-                {t("editSettings")}
-              </button>
-            ) : null}
-          </aside>
-          {/* the game and the main action, under the room's settings; the host can switch the game there */}
+          {/* the game and the main action, above the room's settings; the host can switch the game there */}
           <div className="flex flex-wrap items-center gap-3">
             {me.isHost ? (
               <GameField
@@ -421,6 +365,62 @@ export function LobbyScreen() {
               </button>
             )}
           </div>
+          <aside className="flex flex-col gap-4 rounded-lg bg-surface p-6">
+            <ul className="flex flex-col gap-3">
+              <Setting icon={visibility === "public" ? Globe : Lock}>
+                {t(visibility === "public" ? "public" : "private")}
+                {/* the host shares the password; nobody else gets it */}
+                {visibility === "private" && view.settings.password ? (
+                  <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
+                    {view.settings.password}
+                  </span>
+                ) : null}
+              </Setting>
+              <Setting icon={UsersRound}>
+                {t("seats", { seats: shownSeats })}
+              </Setting>
+              <Setting icon={Clock}>
+                <span className="sr-only">{t("timesLabel")}: </span>
+                {/* the match's steps in order, each with its clock */}
+                <span className="flex flex-wrap gap-1.5">
+                  {STEP_TIMES.map((step) => (
+                    <span
+                      key={step}
+                      className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm"
+                    >
+                      {t(`times.${step}`)}
+                      <span className="font-medium font-mono text-[13px] tabular-nums">
+                        {formatClock(view.settings[step])}
+                      </span>
+                    </span>
+                  ))}
+                </span>
+              </Setting>
+              <Setting icon={themeMode === "host" ? PenLine : Vote}>
+                {themeMode === "host"
+                  ? t("themeHost")
+                  : themeSets.length === THEME_SET_KEYS.length
+                    ? t("themeVoteAll")
+                    : t("themeVote", {
+                        on: themeSets.length,
+                        total: THEME_SET_KEYS.length,
+                      })}
+              </Setting>
+            </ul>
+            {me.isHost ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setDraft(editable(view.settings));
+                  setEditing(true);
+                }}
+                className="inline-flex items-center gap-1.5 self-start font-semibold text-sky text-sm underline underline-offset-2"
+              >
+                <Settings className="size-4" strokeWidth={2} />
+                {t("editSettings")}
+              </button>
+            ) : null}
+          </aside>
         </div>
       </div>
     </Screen>

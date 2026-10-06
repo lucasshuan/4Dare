@@ -44,7 +44,7 @@
     "validateSeconds": "Check"
   },
   "timesLabel": "Times",
-  "start": "Start",
+  "start": "Start match",
   "needPlayers": "You need at least 2 players to start",
   "confirmStart": {
     "title": "Start before everyone is ready?",
