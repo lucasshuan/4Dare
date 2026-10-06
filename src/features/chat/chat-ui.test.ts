@@ -3,6 +3,7 @@ import type { ShownLine } from "@/game/chat";
 import {
   countLabel,
   isEmojiOnly,
+  isUnread,
   lastTextLine,
   newestId,
   RUN_GAP_MS,
@@ -47,6 +48,13 @@ describe("chat tab rules", () => {
     expect(sameRun(undefined, say(1, "a"))).toBe(false);
     const late = { ...say(2, "a"), at: 1000 + RUN_GAP_MS + 1 };
     expect(sameRun(say(1, "a"), late)).toBe(false);
+  });
+
+  it("counts only other players' lines as unread, never system lines", () => {
+    expect(isUnread(say(2, "a"), 1, "me")).toBe(true);
+    expect(isUnread(say(2, "me"), 1, "me")).toBe(false);
+    expect(isUnread(say(1, "a"), 1, "me")).toBe(false);
+    expect(isUnread(sys(2), 1, "me")).toBe(false);
   });
 
   it("caps the count at 99+", () => {
