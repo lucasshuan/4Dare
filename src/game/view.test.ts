@@ -466,3 +466,58 @@ describe("sweep time", () => {
     expect(view(g, "p1").sweepAt).toBeNull();
   });
 });
+
+describe("past matches", () => {
+  it("the lobby lists finished matches, newest first, the winner ahead", () => {
+    const g = started(2);
+    expect(view(g, "p1").matches).toEqual([]);
+    const winner = g.askAndAnswer();
+    g.do({ type: "GUESS", playerId: winner, text: `Name ${winner}` });
+    g.skipReveal();
+    const loser = winner === "p1" ? "p2" : "p1";
+    g.do({ type: "GIVE_UP", playerId: loser });
+    expect(g.state.phase).toBe("finished");
+    // only the lobby shows them
+    expect(view(g, "p1").matches).toEqual([]);
+    const theme = g.state.theme;
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+
+    const [match] = view(g, loser).matches;
+    expect(match.round).toBe(1);
+    expect(match.theme).toEqual(theme);
+    expect(match.players.map((p) => [p.id, p.place, p.isYou])).toEqual([
+      [winner, 1, false],
+      [loser, null, true],
+    ]);
+
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    g.skipShow();
+    g.voteAll(1);
+    g.skipShow();
+    g.pickAll();
+    g.skipShow();
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+    expect(view(g, "p1").matches.map((m) => m.round)).toEqual([2, 1]);
+  });
+
+  it("follows a guest who signs in", () => {
+    const g = started(2);
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "GIVE_UP", playerId: g.turn });
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+    g.do({
+      type: "SWAP_PLAYER",
+      from: "p2",
+      player: {
+        ...g.state.players[1],
+        id: "acct",
+        isGuest: false,
+        name: "Ana",
+      },
+    });
+    const [match] = view(g, "acct").matches;
+    expect(match.players.find((p) => p.isYou)?.name).toBe("Ana");
+  });
+});

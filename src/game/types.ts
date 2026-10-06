@@ -351,6 +351,21 @@ export interface Reveal {
   prev?: Reveal | null;
 }
 
+/** A finished match, as the lobby lists it. */
+export interface PastMatch {
+  /** Which of the room's matches it was (1 = the first). */
+  round: number;
+  theme: Theme | null;
+  finishedAt: number;
+  /** Everyone who played it, as they were then: best place first, those who never discovered last. */
+  players: PastPlayer[];
+}
+
+export type PastPlayer = Pick<
+  Identity,
+  "id" | "isGuest" | "name" | "guestNumber" | "avatar"
+> & { colorSlot: number; place: number | null };
+
 export interface RoomState {
   code: string;
   hostId: PlayerId;
@@ -396,6 +411,8 @@ export interface RoomState {
   turnNumber: number;
   /** Epoch ms when the first question of this match can be asked (the end of the cast show); null before. */
   playStartedAt: number | null;
+  /** The room's latest finished matches, newest first. Missing in rooms made before it was kept. */
+  matches?: PastMatch[];
   createdAt: number;
   updatedAt: number;
 }
@@ -724,8 +741,24 @@ export interface RoomView {
   history: HistoryEntryView[];
   /** Turns of this match so far, the one under way included. */
   turns: number;
+  /** The lobby only: the room's latest finished matches, newest first. */
+  matches: PastMatchView[];
   /** Host only: the match can start (2+ players). */
   canStart: boolean;
+}
+
+export interface PastMatchView {
+  round: number;
+  theme: Theme | null;
+  /** Best place first. Someone still seated shows as they are now. */
+  players: {
+    id: PlayerId;
+    isYou: boolean;
+    name: string;
+    avatar: Avatar;
+    colorSlot: number;
+    place: number | null;
+  }[];
 }
 
 /** A waiting public room, as listed on the home screen. */
