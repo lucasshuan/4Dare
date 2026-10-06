@@ -13,6 +13,14 @@ import { useClock } from "@/lib/hooks/use-server-clock";
 export const SCENE_MIN_H =
   "min-h-[calc(100dvh-7rem-var(--dock))] short:min-h-[calc(100dvh-5.5rem-var(--dock))] sm:min-h-[calc(100dvh-7.5rem-var(--dock))] sm:short:min-h-[calc(100dvh-5.5rem-var(--dock))]";
 
+/**
+ * Fixed over the game's area: the window but the history sidebar on its left
+ * (wide windows, `--sidebar`). The scenes over the screen (a guess's, the turn
+ * band, the answers) sit here, under the chat (z-35) and under the match
+ * header and the sidebar (z-38), so those never go.
+ */
+export const GAME_AREA = "fixed inset-y-0 right-0 left-[var(--sidebar)]";
+
 /** The prototype's `.s-big`: the stage's big display lines. */
 export const BIG =
   "font-display font-extrabold leading-[1.02] tracking-[-0.03em] text-balance";

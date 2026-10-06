@@ -54,8 +54,9 @@ export function FoundFeedback() {
   }, [key]);
   if (!card) return null;
 
+  // centred on the game, right of the history sidebar
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(1.5rem+var(--dock))] z-20 flex justify-center px-4">
+    <div className="pointer-events-none fixed right-0 bottom-[calc(1.5rem+var(--dock))] left-[var(--sidebar)] z-20 flex justify-center px-4">
       <RateBubble
         key={key}
         show={

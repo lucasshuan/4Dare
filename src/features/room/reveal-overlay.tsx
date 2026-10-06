@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { useRoomContext } from "@/features/data/room-context";
+import { GAME_AREA } from "@/features/stage/scene-kit";
 import type { AnswerValue, RevealView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { insideChat } from "@/lib/focus";
@@ -72,7 +73,10 @@ export function RevealOverlay() {
             backdropFilter: "blur(0px)",
             transition: { duration: dur.slow, ease: ease.soft },
           }}
-          className="fixed inset-0 z-30 flex items-center justify-center bg-scrim p-4"
+          className={cn(
+            GAME_AREA,
+            "z-30 flex items-center justify-center bg-scrim p-4",
+          )}
         >
           <m.div
             initial={{ opacity: 0, y: 40, scale: 0.94 }}

@@ -9,6 +9,7 @@ import { CardBack, frameStyle } from "@/components/ui/card-frame";
 import { fireConfetti } from "@/components/ui/confetti";
 import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
+import { GAME_AREA } from "@/features/stage/scene-kit";
 import type { CardView, PlayerView, RevealView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
@@ -70,8 +71,11 @@ export function GuessScene() {
             opacity: handoff ? 1 : 0,
             transition: { duration: handoff ? 0 : dur.slow, ease: ease.soft },
           }}
-          // over the chat (z-35), under the handoff band (z-37) and the match header (z-38)
-          className="fixed inset-0 z-[36] flex flex-col items-center justify-center overflow-hidden px-6 py-10"
+          // over the answers (z-30), under the handoff band (z-33); see GAME_AREA
+          className={cn(
+            GAME_AREA,
+            "z-[32] flex flex-col items-center justify-center overflow-hidden px-6 py-10 max-sm:pb-[calc(2.5rem+var(--dock))]",
+          )}
           style={{
             backgroundColor: seatColor(player.colorSlot),
             color: onSeat(player.colorSlot),
@@ -353,7 +357,11 @@ function Progress({
 }) {
   const left = Math.max(0, Math.min(1, (until - now) / (until - startsAt)));
   return (
-    <span aria-hidden className="absolute inset-x-0 bottom-0 h-1.5 opacity-60">
+    // above the phone's chat bar
+    <span
+      aria-hidden
+      className="absolute inset-x-0 bottom-0 h-1.5 opacity-60 max-sm:bottom-[var(--dock)]"
+    >
       <span
         className="block h-full origin-left bg-current transition-transform duration-100 ease-linear"
         style={{ transform: `scaleX(${left})` }}

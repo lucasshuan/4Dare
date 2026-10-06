@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { useRoomContext } from "@/features/data/room-context";
+import { GAME_AREA } from "@/features/stage/scene-kit";
 import type { PlayerView } from "@/game/types";
+import { cn } from "@/lib/cn";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { useDisplayName } from "@/lib/names";
 import { onSeat, seatColor } from "@/lib/seats";
@@ -22,7 +24,7 @@ export const HANDOFF_COVERED_MS = Math.round(HANDOFF_MS * COVERED);
 
 /**
  * The turn passing: when a player's question step starts, a band in their
- * colour sweeps across the whole screen ("Leo's turn", or "Your turn"), holds
+ * colour sweeps across the game's area ("Leo's turn", or "Your turn"), holds
  * and leaves the other way. It runs on the server clock from the step's start,
  * so a reload during it lands on the same frame, and a later one skips it.
  */
@@ -167,8 +169,11 @@ function Band({
     <div
       ref={band}
       role="status"
-      // over a guess's scene (z-36), under the match header and history (z-38)
-      className="pointer-events-none fixed inset-0 z-[37] flex items-center justify-center gap-4 px-6 sm:gap-6"
+      // over a guess's scene (z-32), under the chat, the match header and history; see GAME_AREA
+      className={cn(
+        GAME_AREA,
+        "pointer-events-none z-[33] flex items-center justify-center gap-4 px-6 max-sm:pb-[var(--dock)] sm:gap-6",
+      )}
       style={{ backgroundColor: seatColor(slot), color: onSeat(slot) }}
     >
       <span

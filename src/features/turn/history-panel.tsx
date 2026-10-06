@@ -98,8 +98,24 @@ export function HistoryButton({
  */
 export function HistorySidebar({ onClose }: { onClose: () => void }) {
   const t = useTranslations("turn.history");
+  const bar = useRef<HTMLDivElement>(null);
+  // its live width, as it opens and closes: the game's overlays keep right of it (GAME_AREA)
+  useEffect(() => {
+    const el = bar.current;
+    if (!el) return;
+    const root = document.documentElement.style;
+    const observer = new ResizeObserver(() =>
+      root.setProperty("--sidebar", `${el.offsetWidth}px`),
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      root.removeProperty("--sidebar");
+    };
+  }, []);
   return (
     <m.div
+      ref={bar}
       initial={{ width: 0 }}
       animate={{
         width: SIDEBAR_WIDTH,

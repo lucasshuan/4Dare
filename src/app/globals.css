@@ -90,6 +90,8 @@
     0 -2px 6px rgba(18, 22, 31, 0.06), 0 -16px 40px rgba(18, 22, 31, 0.14);
   /* Height of whatever is docked at the bottom (the chat); pages and toasts keep clear of it. */
   --dock: 0px;
+  /* Width of the match's history sidebar (wide windows); the game's overlays start right of it. */
+  --sidebar: 0px;
   color-scheme: light;
 }
 
