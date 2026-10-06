@@ -18,6 +18,7 @@ import { useMedia } from "@/lib/hooks/use-media";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
+import { playSound } from "@/lib/sound";
 import { type Bubble, ChatBubbles } from "./chat-bubbles";
 import { ChatCompose } from "./chat-compose";
 import { ChatHead } from "./chat-head";
@@ -99,8 +100,8 @@ export function RoomChat() {
     setSeen(newest);
   }, [open, seen, newest, code]);
 
-  // New lines from others while folded: the tab hops, the count pops, a
-  // bubble shows (desktop) and the live region says it.
+  // New lines from others while folded: a sound plays, the tab hops, the
+  // count pops, a bubble shows (desktop) and the live region says it.
   const known = useRef<Set<number> | null>(null);
   useEffect(() => {
     if (seen === null) return;
@@ -124,6 +125,7 @@ export function RoomChat() {
     const arrivals = open ? [] : fresh.filter((m) => isUnread(m, seen, me.id));
     const latest = arrivals[arrivals.length - 1];
     if (!latest) return;
+    playSound("chat");
     setPop((n) => n + 1);
     if (!reduced && hop.current)
       animate(

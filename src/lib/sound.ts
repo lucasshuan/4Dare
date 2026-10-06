@@ -14,6 +14,8 @@ const SOUNDS = {
   join: { src: "/sounds/player-join.mp3", volume: 0.6 },
   /** Someone left the room. */
   leave: { src: "/sounds/player-leave.mp3", volume: 0.6 },
+  /** Someone else wrote in the chat while it was folded. */
+  chat: { src: "/sounds/chat-message.mp3", volume: 0.6 },
 } as const;
 export type Sound = keyof typeof SOUNDS;
 
