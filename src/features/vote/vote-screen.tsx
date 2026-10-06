@@ -45,8 +45,8 @@ import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease, gs } from "@/lib/motion";
 import { voteTheme } from "@/server/actions";
 
-/** Cards are dealt like a hand: each starts tilted its own way. */
-const TILT = [-7, 0, 7];
+/** Cards are dealt like a hand: each starts tilted its own way (on desktop, the left column one way and the right the other). */
+const TILT = [-7, 5, -5, 7];
 const spring = { type: "spring", stiffness: 320, damping: 32 } as const;
 const OPENING_BEATS = ["curtain", "intro", "round"] as const;
 const RESULT_BEATS = ["tie_spin", "settle"] as const;
@@ -333,11 +333,11 @@ function Vote({ v }: { v: VoteView }) {
 
         <fieldset
           aria-label={t("title")}
-          className="mt-[22px] flex min-w-0 flex-col gap-2.5 sm:mt-9 sm:flex-row sm:gap-4"
+          className="mt-[22px] flex min-w-0 flex-col gap-2 sm:mx-auto sm:mt-9 sm:grid sm:w-full sm:max-w-[920px] sm:grid-cols-2 sm:gap-4"
         >
           {v.options.map((option, i) => (
             <m.div
-              // biome-ignore lint/suspicious/noArrayIndexKey: the three options never move
+              // biome-ignore lint/suspicious/noArrayIndexKey: the options never move
               key={i}
               layoutId={themeCardId(code, match, i)}
               className="flex min-w-0 flex-1"
@@ -430,10 +430,10 @@ function OptionCard({
       onClick={onChoose}
       animate={{ y: mine && open ? -6 : 0 }}
       transition={{ y: { duration: 0.3, ease: gs.backOut(2) } }}
-      whileHover={live ? { y: -8, rotate: (index - 1) * 0.8 } : undefined}
+      whileHover={live ? { y: -8, rotate: index % 2 ? 0.8 : -0.8 } : undefined}
       whileTap={live ? { scale: 0.97 } : undefined}
       className={cn(
-        "group relative flex min-h-[118px] min-w-0 flex-1 flex-col overflow-hidden rounded-[26px] p-4 text-left outline-offset-4 sm:min-h-[250px] sm:rounded-xl sm:p-6 sm:short:min-h-52",
+        "group relative flex min-h-[104px] min-w-0 flex-1 flex-col overflow-hidden rounded-[26px] px-4 py-3 text-left outline-offset-4 sm:min-h-[200px] sm:rounded-xl sm:p-6 sm:short:min-h-40",
         tone.card,
         open ? "shadow-card" : "cursor-default",
         disabled && "cursor-default",
@@ -478,7 +478,7 @@ function OptionCard({
 
       <span
         className={cn(
-          "relative my-1.5 flex flex-1 items-center text-balance font-display font-extrabold tracking-[-0.02em] sm:my-2.5",
+          "relative my-1 flex flex-1 items-center text-balance font-display font-extrabold tracking-[-0.02em] sm:my-2.5",
           theme.length > 18
             ? "text-[24px] leading-[1.1] sm:text-[clamp(24px,2.4vw,32px)]"
             : "text-[27px] leading-[1.06] sm:text-[clamp(30px,3vw,38px)]",

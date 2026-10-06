@@ -288,18 +288,19 @@ describe("voteExamples", () => {
     theme("Superheroes", "heroes"),
     theme("Presidents", "history"),
     theme("Dragons", "myths"),
+    theme("Pirates", "warriors"),
   ];
 
   it("sends cards only on a room's first match", async () => {
     const first = await voteExamples(room(0), themes, sources());
-    expect(first).toHaveLength(3);
+    expect(first).toHaveLength(4);
     expect(first?.[2]).toBeNull();
     expect(await voteExamples(room(1), themes, sources())).toBeUndefined();
   });
 
   it("sends cards on a later match when a newcomer is seated", async () => {
     expect(await voteExamples(room(1), themes, sources(), true)).toHaveLength(
-      3,
+      4,
     );
   });
 

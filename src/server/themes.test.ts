@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
-import type { Theme } from "@/game/types";
+import { THEME_OPTIONS, type Theme } from "@/game/types";
 import { LOCAL_THEMES } from "./backend/local/fixtures";
 import type { ThemeStore } from "./backend/types";
 import { themes } from "./themes";
@@ -12,7 +12,7 @@ const t = (en: string, set: Theme["set"] = "heroes"): Theme => ({
   ja: en,
   set,
 });
-const LIST = [t("Pirates"), t("Robots"), t("Wizards")];
+const LIST = [t("Pirates"), t("Robots"), t("Wizards"), t("Ninjas")];
 
 function store(list: () => Promise<Theme[]>) {
   let reads = 0;
@@ -30,8 +30,10 @@ describe("themes", () => {
     const { s, reads } = store(async () => LIST);
     const source = themes(s);
     for (let i = 0; i < 20; i++) {
-      const drawn = await source.draw([], 3);
-      expect(drawn.map((x) => x.en).sort()).toEqual(LIST.map((x) => x.en));
+      const drawn = await source.draw([], THEME_OPTIONS);
+      expect(drawn.map((x) => x.en).sort()).toEqual(
+        LIST.map((x) => x.en).sort(),
+      );
     }
     expect(reads()).toBe(1);
   });
@@ -40,8 +42,8 @@ describe("themes", () => {
     const { s } = store(async () => LIST);
     const source = themes(s);
     for (let i = 0; i < 20; i++) {
-      const [first] = await source.draw([LIST[0], LIST[1]], 1);
-      expect(first.en).toBe("Wizards");
+      const [first] = await source.draw(LIST.slice(0, 3), 1);
+      expect(first.en).toBe("Ninjas");
     }
   });
 
@@ -73,10 +75,12 @@ describe("themes", () => {
     }
   });
 
-  it("local mode has three themes in every set", () => {
+  it("local mode has a vote's themes in every set", () => {
     for (const set of THEME_SET_KEYS)
-      expect(LOCAL_THEMES.filter((x) => x.set === set)).toHaveLength(3);
-    expect(LOCAL_THEMES).toHaveLength(THEME_SET_KEYS.length * 3);
+      expect(LOCAL_THEMES.filter((x) => x.set === set)).toHaveLength(
+        THEME_OPTIONS,
+      );
+    expect(LOCAL_THEMES).toHaveLength(THEME_SET_KEYS.length * THEME_OPTIONS);
   });
 
   it("reads the list as it starts, so instant draws come from it", async () => {
@@ -87,22 +91,24 @@ describe("themes", () => {
     for (let i = 0; i < 20; i++)
       expect(
         source
-          .drawFromBank(3)
+          .drawFromBank(THEME_OPTIONS)
           .map((x) => x.en)
           .sort(),
-      ).toEqual(LIST.map((x) => x.en));
+      ).toEqual(LIST.map((x) => x.en).sort());
     expect(reads()).toBe(1);
   });
 
-  it("has three themes in hand before the first read and when the store fails", async () => {
+  it("has a vote's themes in hand before the first read and when the store fails", async () => {
     const pending = themes(store(() => new Promise(() => {})).s);
-    expect(new Set(pending.drawFromBank(3).map((x) => x.en)).size).toBe(3);
+    expect(
+      new Set(pending.drawFromBank(THEME_OPTIONS).map((x) => x.en)).size,
+    ).toBe(THEME_OPTIONS);
     const failing = themes(
       store(async () => {
         throw new Error("database down");
       }).s,
     );
-    const drawn = await failing.draw([], 3);
-    expect(new Set(drawn.map((x) => x.en)).size).toBe(3);
+    const drawn = await failing.draw([], THEME_OPTIONS);
+    expect(new Set(drawn.map((x) => x.en)).size).toBe(THEME_OPTIONS);
   });
 });

@@ -193,10 +193,10 @@ const LAB_SET_THEMES: Record<ThemeSet, Localized> = {
   },
 };
 
-/** Three themes from three sets: `set`'s wins, the others come from the next sets. */
+/** Four themes from four sets: `set`'s wins, the others come from the next sets. */
 export function labThemes(set: ThemeSet): Theme[] {
   const at = THEME_SET_KEYS.indexOf(set);
-  return [0, 1, 2].map((k) => {
+  return [0, 1, 2, 3].map((k) => {
     const s = THEME_SET_KEYS[(at + k * 3) % THEME_SET_KEYS.length];
     return { ...LAB_SET_THEMES[s], set: s };
   });
@@ -210,7 +210,7 @@ export const LAB_CHARACTERS: Character[] = [
   labCharacter("lab-c4", "Batgirl", "DC", 3),
 ];
 
-/** ✓✓ and ✗, the same for the three themes. */
+/** ✓✓ and ✗, the same for every theme. */
 export const LAB_EXAMPLES: RuleExamples = {
   fits: [
     exampleCard("lab-e1", "Spider-Man", 0),

@@ -83,8 +83,8 @@ export async function voteAll(players: Page[], option = 0) {
       const themes = page
         .getByRole("group", { name: /vote for the theme/i })
         .getByRole("button");
-      await expect(themes).toHaveCount(3, { timeout: 15_000 });
-      for (let i = 0; i < 3; i++)
+      await expect(themes).toHaveCount(4, { timeout: 15_000 });
+      for (let i = 0; i < 4; i++)
         await expect(themes.nth(i)).toBeEnabled({ timeout: 15_000 });
       await themes.nth(option).click();
     }),

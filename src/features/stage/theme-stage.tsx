@@ -52,6 +52,7 @@ export const TONES = [
     bar: "bg-apricot/30",
     fill: "bg-apricot",
   },
+  { card: "bg-yes-soft text-ink", bar: "bg-yes/30", fill: "bg-yes" },
 ] as const;
 
 /**

@@ -65,7 +65,7 @@ test("the vote only offers themes from the sets turned on", async ({
   const themes = guest
     .getByRole("group", { name: /vote for the theme/i })
     .getByRole("button");
-  await expect(themes).toHaveCount(3, { timeout: 15_000 });
-  for (let i = 0; i < 3; i++)
+  await expect(themes).toHaveCount(4, { timeout: 15_000 });
+  for (let i = 0; i < 4; i++)
     await expect(themes.nth(i)).toContainText(/sports/i);
 });

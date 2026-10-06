@@ -11,7 +11,7 @@ test("a vote taken back gives back the seconds it cut", async ({ browser }) => {
   const themes = host
     .getByRole("group", { name: /vote for the theme/i })
     .getByRole("button");
-  await expect(themes).toHaveCount(3, { timeout: 15_000 });
+  await expect(themes).toHaveCount(4, { timeout: 15_000 });
   await expect(themes.nth(0)).toBeEnabled({ timeout: 15_000 });
   const deadline = (await viewOf(host, code)).deadline ?? 0;
 

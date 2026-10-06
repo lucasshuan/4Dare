@@ -23,7 +23,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
 - `whoami_themes` table (0018), cached 10 min per server; `active = false` hides one. Local: 60 fixture themes.
 - 20 sets (`src/game/theme-sets.ts`); room's `themeSets` filter vote. Set examples: `example` 1–3 (0014, `/api/themes/examples`).
-- Vote: 3 themes, 40 s by default (set per room; clock starts after opening), open vote; each first vote cuts the time split among the voters. Server draws tie (wheel).
+- Vote: 4 themes, 40 s by default (set per room; clock starts after opening), open vote; each first vote cuts the time split among the voters. Server draws tie (wheel).
 - Host mode (`theming`): host types theme (no set, no Random, no stats). 30 s, then vote.
 
 ## Characters and picks

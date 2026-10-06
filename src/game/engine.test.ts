@@ -67,7 +67,7 @@ const examples = (id: string): RuleExamples => ({
   misfit: card(`${id}-x`),
 });
 /** Rule cards for THEMES[0] and THEMES[2]; THEMES[1] has none (the sentence alone). */
-const EXAMPLES = [examples("t0"), null, examples("t2")];
+const EXAMPLES = [examples("t0"), null, examples("t2"), examples("t3")];
 
 const draftOf = (d: Partial<PickDraft>): PickDraft => ({
   characterId: null,
@@ -285,11 +285,11 @@ describe("the theme vote", () => {
   const vote = (g: Game, playerId: string, option: number) =>
     g.do({ type: "VOTE", playerId, option });
 
-  it("starts with three themes after the opening, then a 20 s clock; needs exactly three", () => {
+  it("starts with four themes after the opening, then a 20 s clock; needs exactly four", () => {
     const g = new Game(2);
     expect(
       code(() =>
-        g.do({ type: "START", playerId: "p1", themes: THEMES.slice(0, 2) }),
+        g.do({ type: "START", playerId: "p1", themes: THEMES.slice(0, 3) }),
       ),
     ).toBe("invalid_input");
     expect(
@@ -376,7 +376,7 @@ describe("the theme vote", () => {
     vote(g, "p1", 1);
     vote(g, "p2", 1);
     expect(g.state.phase).toBe("voting");
-    expect(code(() => vote(g, "p3", 3))).toBe("invalid_input");
+    expect(code(() => vote(g, "p3", 4))).toBe("invalid_input");
     expect(code(() => vote(g, "ghost", 0))).toBe("not_member");
     vote(g, "p3", 0);
     expect(g.state.phase).toBe("picking");
@@ -470,7 +470,7 @@ describe("the theme vote", () => {
     expect(g.state.stepStartsAt).toBe(cast?.until);
   });
 
-  it("when the clock runs out, the votes so far decide; no votes is a draw of all three", () => {
+  it("when the clock runs out, the votes so far decide; no votes is a draw of all four", () => {
     const g = voting(3);
     vote(g, "p2", 2);
     g.timeout();
@@ -479,7 +479,7 @@ describe("the theme vote", () => {
     const quiet = voting(2, 7);
     quiet.timeout();
     expect(quiet.state.phase).toBe("picking");
-    expect(quiet.state.vote?.tied).toEqual([0, 1, 2]);
+    expect(quiet.state.vote?.tied).toEqual([0, 1, 2, 3]);
   });
 
   it("someone leaving drops their vote; alone, the room goes back to the lobby", () => {

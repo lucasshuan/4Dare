@@ -1,6 +1,6 @@
 // Local mode's library and themes (no Supabase keys: dev without .env.local,
-// unit tests, e2e): a few famous characters and three themes per set, picked
-// once from the old data/ snapshot. Never read data/ at run time.
+// unit tests, e2e): a few famous characters and four themes per set (a vote's
+// worth), mostly picked once from the old data/ snapshot. Never read data/ at run time.
 import type { Theme } from "@/game/types";
 import type { SeedCharacter, SeedOrigin } from "../seed-format";
 
@@ -971,6 +971,13 @@ export const LOCAL_THEMES: Theme[] = [
     set: "screen",
   },
   {
+    en: "Star Wars characters",
+    es: "Personajes de Star Wars",
+    pt: "Personagens de Star Wars",
+    ja: "スター・ウォーズのキャラクター",
+    set: "screen",
+  },
+  {
     en: "The Simpsons characters",
     es: "Personajes de Los Simpson",
     pt: "Personagens dos Simpsons",
@@ -989,6 +996,13 @@ export const LOCAL_THEMES: Theme[] = [
     es: "Personajes que son juguetes",
     pt: "Personagens que são brinquedos",
     ja: "おもちゃのキャラクター",
+    set: "cartoons",
+  },
+  {
+    en: "Looney Tunes characters",
+    es: "Personajes de los Looney Tunes",
+    pt: "Personagens dos Looney Tunes",
+    ja: "ルーニー・テューンズのキャラクター",
     set: "cartoons",
   },
   {
@@ -1012,6 +1026,13 @@ export const LOCAL_THEMES: Theme[] = [
     ja: "魔法少女",
     set: "anime",
   },
+  {
+    en: "One Piece characters",
+    es: "Personajes de One Piece",
+    pt: "Personagens de One Piece",
+    ja: "ワンピースのキャラクター",
+    set: "anime",
+  },
   { en: "Pokémon", es: "Pokémon", pt: "Pokémon", ja: "ポケモン", set: "games" },
   {
     en: "Nintendo characters",
@@ -1025,6 +1046,13 @@ export const LOCAL_THEMES: Theme[] = [
     es: "Personajes de juegos de pelea",
     pt: "Personagens de jogos de luta",
     ja: "格闘ゲームのキャラクター",
+    set: "games",
+  },
+  {
+    en: "Sonic characters",
+    es: "Personajes de Sonic",
+    pt: "Personagens de Sonic",
+    ja: "ソニックのキャラクター",
     set: "games",
   },
   {
@@ -1049,6 +1077,13 @@ export const LOCAL_THEMES: Theme[] = [
     set: "books",
   },
   {
+    en: "Witches and wizards",
+    es: "Brujas y magos",
+    pt: "Bruxas e magos",
+    ja: "魔女や魔法使い",
+    set: "books",
+  },
+  {
     en: "Superheroes",
     es: "Superhéroes",
     pt: "Super-heróis",
@@ -1061,6 +1096,13 @@ export const LOCAL_THEMES: Theme[] = [
     es: "Fieles escuderos",
     pt: "Fiéis escudeiros",
     ja: "主人公の相棒",
+    set: "heroes",
+  },
+  {
+    en: "Antiheroes",
+    es: "Antihéroes",
+    pt: "Anti-heróis",
+    ja: "アンチヒーロー",
     set: "heroes",
   },
   {
@@ -1085,6 +1127,13 @@ export const LOCAL_THEMES: Theme[] = [
     set: "powers",
   },
   {
+    en: "Shapeshifters",
+    es: "Cambiaformas",
+    pt: "Metamorfos",
+    ja: "変身できるキャラクター",
+    set: "powers",
+  },
+  {
     en: "Vampires",
     es: "Vampiros",
     pt: "Vampiros",
@@ -1099,6 +1148,13 @@ export const LOCAL_THEMES: Theme[] = [
     set: "myths",
   },
   { en: "Gods", es: "Dioses", pt: "Deuses", ja: "神様", set: "myths" },
+  {
+    en: "Ghosts",
+    es: "Fantasmas",
+    pt: "Fantasmas",
+    ja: "おばけ",
+    set: "myths",
+  },
   { en: "Robots", es: "Robots", pt: "Robôs", ja: "ロボット", set: "scifi" },
   {
     en: "Aliens",
@@ -1114,6 +1170,13 @@ export const LOCAL_THEMES: Theme[] = [
     ja: "タイムトラベルしたキャラクター",
     set: "scifi",
   },
+  {
+    en: "Astronauts",
+    es: "Astronautas",
+    pt: "Astronautas",
+    ja: "宇宙飛行士",
+    set: "scifi",
+  },
   { en: "Pirates", es: "Piratas", pt: "Piratas", ja: "海賊", set: "warriors" },
   { en: "Ninjas", es: "Ninjas", pt: "Ninjas", ja: "忍者", set: "warriors" },
   {
@@ -1121,6 +1184,13 @@ export const LOCAL_THEMES: Theme[] = [
     es: "Caballeros",
     pt: "Cavaleiros",
     ja: "騎士",
+    set: "warriors",
+  },
+  {
+    en: "Samurai",
+    es: "Samuráis",
+    pt: "Samurais",
+    ja: "侍",
     set: "warriors",
   },
   {
@@ -1145,6 +1215,13 @@ export const LOCAL_THEMES: Theme[] = [
     set: "animals",
   },
   {
+    en: "Dogs",
+    es: "Perros",
+    pt: "Cachorros",
+    ja: "犬のキャラクター",
+    set: "animals",
+  },
+  {
     en: "Female singers",
     es: "Cantantes femeninas",
     pt: "Cantoras",
@@ -1163,6 +1240,13 @@ export const LOCAL_THEMES: Theme[] = [
     es: "Idols de K-pop",
     pt: "Idols de K-pop",
     ja: "K-POPアイドル",
+    set: "music",
+  },
+  {
+    en: "Rappers",
+    es: "Raperos",
+    pt: "Rappers",
+    ja: "ラッパー",
     set: "music",
   },
   {
@@ -1187,6 +1271,13 @@ export const LOCAL_THEMES: Theme[] = [
     set: "celebs",
   },
   {
+    en: "Movie stars",
+    es: "Estrellas de cine",
+    pt: "Astros do cinema",
+    ja: "映画スター",
+    set: "celebs",
+  },
+  {
     en: "Soccer players",
     es: "Futbolistas",
     pt: "Jogadores de futebol",
@@ -1207,6 +1298,13 @@ export const LOCAL_THEMES: Theme[] = [
     ja: "スポーツ漫画や映画のキャラクター",
     set: "sports",
   },
+  {
+    en: "Basketball players",
+    es: "Jugadores de baloncesto",
+    pt: "Jogadores de basquete",
+    ja: "バスケットボール選手",
+    set: "sports",
+  },
   { en: "Kings", es: "Reyes", pt: "Reis", ja: "王様", set: "history" },
   {
     en: "Scientists",
@@ -1220,6 +1318,13 @@ export const LOCAL_THEMES: Theme[] = [
     es: "Pintores",
     pt: "Pintores",
     ja: "画家",
+    set: "history",
+  },
+  {
+    en: "Explorers",
+    es: "Exploradores",
+    pt: "Exploradores",
+    ja: "探検家",
     set: "history",
   },
   {
@@ -1244,6 +1349,13 @@ export const LOCAL_THEMES: Theme[] = [
     set: "world",
   },
   {
+    en: "Characters from Japan",
+    es: "Personajes de Japón",
+    pt: "Personagens do Japão",
+    ja: "日本生まれのキャラクター",
+    set: "world",
+  },
+  {
     en: "Detectives",
     es: "Detectives",
     pt: "Detetives",
@@ -1252,6 +1364,13 @@ export const LOCAL_THEMES: Theme[] = [
   },
   { en: "Doctors", es: "Médicos", pt: "Médicos", ja: "医者", set: "jobs" },
   { en: "Spies", es: "Espías", pt: "Espiões", ja: "スパイ", set: "jobs" },
+  {
+    en: "Chefs",
+    es: "Cocineros",
+    pt: "Cozinheiros",
+    ja: "料理人",
+    set: "jobs",
+  },
   {
     en: "Twins",
     es: "Gemelos",
@@ -1274,6 +1393,13 @@ export const LOCAL_THEMES: Theme[] = [
     set: "family",
   },
   {
+    en: "Best friends",
+    es: "Mejores amigos",
+    pt: "Melhores amigos",
+    ja: "親友同士のキャラクター",
+    set: "family",
+  },
+  {
     en: "Clumsy characters",
     es: "Personajes torpes",
     pt: "Personagens desastrados",
@@ -1288,6 +1414,13 @@ export const LOCAL_THEMES: Theme[] = [
     set: "quirks",
   },
   { en: "Geniuses", es: "Genios", pt: "Gênios", ja: "天才", set: "quirks" },
+  {
+    en: "Grumpy characters",
+    es: "Personajes gruñones",
+    pt: "Personagens rabugentos",
+    ja: "不機嫌なキャラクター",
+    set: "quirks",
+  },
   {
     en: "Characters who wear a hat",
     es: "Personajes que usan sombrero",
@@ -1307,6 +1440,13 @@ export const LOCAL_THEMES: Theme[] = [
     es: "Personajes verdes",
     pt: "Personagens verdes",
     ja: "緑色のキャラクター",
+    set: "looks",
+  },
+  {
+    en: "Characters with glasses",
+    es: "Personajes con gafas",
+    pt: "Personagens de óculos",
+    ja: "メガネのキャラクター",
     set: "looks",
   },
 ];

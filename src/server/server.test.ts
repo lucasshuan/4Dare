@@ -150,7 +150,7 @@ describe("server, local mode", () => {
     expect(await A.startGame(code)).toEqual({ ok: false, error: "not_host" });
     as("p1");
     must(await A.startGame(code));
-    expect(await A.voteTheme(code, 3)).toEqual({
+    expect(await A.voteTheme(code, 4)).toEqual({
       ok: false,
       error: "invalid_input",
     });
@@ -652,7 +652,7 @@ describe("random pick by theme", () => {
     const { getBackend } = await import("./backend");
     const n = ++unplayed;
     const draw = vi.spyOn(getBackend().themes, "draw").mockResolvedValue(
-      [1, 2, 3].map((i) => ({
+      [1, 2, 3, 4].map((i) => ({
         en: `Unplayed ${n}.${i}`,
         es: `Inédito ${n}.${i}`,
         pt: `Inédito ${n}.${i}`,
@@ -1028,6 +1028,13 @@ describe("rule examples and the hand", () => {
       pt: "Óculos",
       set: "looks",
     },
+    {
+      en: "Fixture pirates",
+      es: "Piratas",
+      ja: "海賊",
+      pt: "Piratas",
+      set: "warriors",
+    },
   ];
   const row = (
     theme: Theme,
@@ -1049,6 +1056,8 @@ describe("rule examples and the hand", () => {
     row(THEMES[1], "wd-Q9000012", 2, "human"),
     row(THEMES[2], "wd-Q9000021", 1, "fictional"),
     row(THEMES[2], "wd-Q9000022", 2, "fictional"),
+    row(THEMES[3], "wd-Q9000031", 1, "fictional"),
+    row(THEMES[3], "wd-Q9000032", 2, "fictional"),
   ];
 
   /** Serves the fixture starters and characters (the rest of the library as it is). */

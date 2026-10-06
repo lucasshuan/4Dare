@@ -1,6 +1,8 @@
 // Lab fixtures for the theme show's first part: the hero and the rule (cards or sentence).
 // The rule cards are drawn portraits (no art); the ✗ card has no Japanese name, as a
 // library card may not, so the lab shows the English fallback in /ja.
+
+import { THEME_OPTIONS } from "@/game/types";
 import { exampleCard, type SceneFixtures } from "../fixtures";
 import type { LabParams } from "../params";
 
@@ -28,5 +30,5 @@ export function scenario(params: LabParams): SceneFixtures {
       misfit: rule.misfit,
     },
   ];
-  return { examples: [examples[0], examples[0], examples[0]] };
+  return { examples: Array.from({ length: THEME_OPTIONS }, () => examples[0]) };
 }

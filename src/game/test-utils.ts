@@ -23,6 +23,13 @@ export const THEMES: Theme[] = [
   THEME,
   { en: "Robots", es: "Robots", ja: "ロボット", pt: "Robôs", set: "scifi" },
   { en: "Pirates", es: "Piratas", ja: "海賊", pt: "Piratas", set: "warriors" },
+  {
+    en: "Cats",
+    es: "Gatos",
+    ja: "猫のキャラクター",
+    pt: "Gatos",
+    set: "animals",
+  },
 ];
 
 export const ident = (id: string, guestNumber = 10): Identity => ({

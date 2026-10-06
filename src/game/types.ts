@@ -126,7 +126,7 @@ export const GONE_GRACE_MS = 5000;
 /** The podium stays this long; then the room goes back to the lobby on its own (the host can go sooner). */
 export const RESULT_SECONDS = 15;
 /** Themes offered in the vote before each match. */
-export const THEME_OPTIONS = 3;
+export const THEME_OPTIONS = 4;
 /** How long the host has to type the theme; then everyone votes instead, on themes from every set. */
 export const HOST_THEME_SECONDS = 30;
 /** Ideas shown to the host while they type the theme. */
@@ -216,7 +216,7 @@ export type Phase =
   | "lobby"
   /** The host types the theme (theme mode "host"). */
   | "theming"
-  /** Everyone votes for one of three themes. */
+  /** Everyone votes for one of four themes. */
   | "voting"
   | "picking"
   | "asking"

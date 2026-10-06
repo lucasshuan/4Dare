@@ -38,13 +38,13 @@ export function localBackend(): Backend {
   };
 }
 
-/** The fixture themes are three per set: all of them are examples. */
+/** The first three fixture themes of each set are its examples. */
 export function fixtureExamples(): ThemeExamples {
   const out: ThemeExamples = {};
   for (const { set, en, es, ja, pt } of LOCAL_THEMES) {
     if (!set) continue;
     const list: Localized[] = out[set] ?? [];
-    list.push({ en, es, ja, pt });
+    if (list.length < 3) list.push({ en, es, ja, pt });
     out[set] = list;
   }
   return out;

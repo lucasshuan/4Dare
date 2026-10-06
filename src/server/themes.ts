@@ -1,6 +1,6 @@
 import "server-only";
 import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
-import type { Localized, Theme } from "@/game/types";
+import { type Localized, THEME_OPTIONS, type Theme } from "@/game/types";
 import type { ThemeSource, ThemeStore } from "./backend/types";
 
 /** Only while the store's list never arrived (a server's first moments, or the store down). */
@@ -14,6 +14,7 @@ const FALLBACK: Theme[] = [
     ja: "お金持ちのキャラクター",
     set: "quirks",
   },
+  { en: "Pirates", es: "Piratas", ja: "海賊", pt: "Piratas", set: "warriors" },
 ];
 
 const same = (a: Localized, b: Localized) =>
@@ -57,7 +58,7 @@ function pickFrom(
 /**
  * Draws themes from the store's list, read when the server starts and then at
  * most every ten minutes (never once per match). Until the first read lands,
- * or while the store fails, three fallback themes stand in.
+ * or while the store fails, a vote's worth of fallback themes stands in.
  */
 export function themes(store: ThemeStore): ThemeSource {
   let cached: Theme[] | null = null;
@@ -71,7 +72,7 @@ export function themes(store: ThemeStore): ThemeSource {
     reading ??= store
       .list()
       .then((list) => {
-        if (list.length >= 3) cached = list;
+        if (list.length >= THEME_OPTIONS) cached = list;
         readAt = Date.now();
         return current();
       })

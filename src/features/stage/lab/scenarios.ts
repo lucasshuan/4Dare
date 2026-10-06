@@ -60,7 +60,7 @@ export const labTime = (room: LabRoom, show: LabShow, at: number) =>
 export function labFixtures(params: LabParams): Required<SceneFixtures> {
   const fx: Required<SceneFixtures> = {
     themes: labThemes(params.set),
-    examples: [LAB_EXAMPLES, LAB_EXAMPLES, LAB_EXAMPLES],
+    examples: labThemes(params.set).map(() => LAB_EXAMPLES),
     typedTheme: "Space pirates",
     characters: LAB_CHARACTERS,
     draft: {
