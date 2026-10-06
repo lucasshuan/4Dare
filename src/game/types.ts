@@ -742,6 +742,8 @@ export interface PublicRoom {
   host: Pick<Identity, "isGuest" | "avatar" | "lang"> & { name: string };
   players: number;
   seats: number;
+  /** When the room was made (server ms): the game page lists the oldest first. */
+  createdAt: number;
   voteSeconds: number;
   askSeconds: number;
   guessSeconds: number;

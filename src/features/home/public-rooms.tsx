@@ -2,23 +2,29 @@
 
 import { ArrowRight } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { LayoutMotion } from "@/components/ui/layout-motion";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
-import { RoomRow, sortRooms } from "@/features/rooms/room-row";
+import { gameRooms } from "@/features/home/game-rooms";
+import { RoomRow } from "@/features/rooms/room-row";
 import type { GameKey } from "@/game/games";
+import type { Lang } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { roomsOf } from "@/lib/routes";
 
 /** Rooms shown here: only ones with a free seat. The rest are on /rooms. */
 const SHOWN = 4;
 
-/** A game's rooms with a free seat; "See all" opens /rooms for that game. The list refreshes by itself. */
+/**
+ * A game's rooms in the page's language with a free seat, the oldest first
+ * (see gameRooms); "See all" opens /rooms for that game, which starts on the
+ * same language. The list refreshes by itself.
+ */
 export function PublicRooms({ game }: { game: GameKey }) {
   const t = useTranslations("home.rooms");
+  const lang = useLocale() as Lang;
   const { rooms, isLoading } = usePublicRooms();
-  const mine = sortRooms(rooms.filter((r) => r.game === game));
-  const open = mine.filter((r) => r.status === "open");
+  const { mine, open } = gameRooms(rooms, game, lang);
   const shown = open.slice(0, SHOWN);
 
   return (
