@@ -5,7 +5,6 @@ import {
   Check,
   ChevronLeft,
   Clock,
-  Crown,
   Globe,
   Link as LinkIcon,
   Lock,
@@ -13,12 +12,10 @@ import {
   Settings,
   UsersRound,
   Vote,
-  X,
 } from "lucide-react";
-import { AnimatePresence, m } from "motion/react";
+import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { type ReactNode, useState } from "react";
-import { Avatar } from "@/components/ui/avatar";
+import { type ReactNode, useRef, useState } from "react";
 import { Button, keyClass } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
 import { RoomQr } from "@/components/ui/room-qr";
@@ -40,7 +37,6 @@ import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
 import { formatClock, useDisplayName, useRoomTitle } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
-import { seatWash } from "@/lib/seats";
 import {
   kickPlayer,
   leaveRoom,
@@ -49,9 +45,9 @@ import {
   updateSettings,
 } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
-import { PlayerMenu, SeatToggle } from "./host-controls";
 import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
+import { SeatGrid } from "./seat-grid";
 import { StartDialog } from "./start-dialog";
 
 const titleClass =
@@ -89,7 +85,7 @@ const editable = ({
 export function LobbyScreen() {
   const t = useTranslations("lobby");
   const tCreate = useTranslations("home.createRoom");
-  const name = useDisplayName();
+  const _name = useDisplayName();
   const roomTitle = useRoomTitle();
   const withNames = useWithNames();
   const toast = useToast();
@@ -109,7 +105,6 @@ export function LobbyScreen() {
   // Picking comes next: fetch the character index while people gather.
   usePrefetchCharacterIndex(useLocale() as Lang);
   const host = view.players.find((p) => p.isHost);
-  const empty = Math.max(0, view.settings.seats - view.players.length);
   const others = view.players.filter((p) => !p.isHost);
   const waiting = others.filter((p) => !p.ready);
   // asks first only when someone has not confirmed yet
@@ -128,12 +123,29 @@ export function LobbyScreen() {
     themeSets,
   } = view.settings;
   const gameName = useGameName();
-  // The host sees every seat the game allows: open ones they can close, closed ones they can open.
+  // The host sees every seat the game allows, and their changes show at once;
+  // the server confirms in the background (a refusal puts things back).
   const range = GAME_SEATS[game];
-  const closed = me.isHost ? range.max - seats : 0;
-  const canClose = seats > Math.max(range.min, view.players.length);
-  const setSeats = (n: number) =>
-    act(() => updateSettings(code, { seats: n as typeof seats }));
+  const [seatsGuess, setSeatsGuess] = useState<number | null>(null);
+  const [kicking, setKicking] = useState<string[]>([]);
+  const inFlight = useRef(0);
+  const shownSeats = seatsGuess ?? seats;
+  const shownPlayers = view.players
+    .filter((p) => !kicking.includes(p.id))
+    .map((p) => (p.isYou ? { ...p, ready: myReady } : p));
+  const canClose = shownSeats > Math.max(range.min, shownPlayers.length);
+  const setSeats = async (n: number) => {
+    setSeatsGuess(n);
+    inFlight.current += 1;
+    await act(() => updateSettings(code, { seats: n as typeof seats }));
+    inFlight.current -= 1;
+    if (inFlight.current === 0) setSeatsGuess(null);
+  };
+  const kick = async (id: string) => {
+    setKicking((ids) => [...ids, id]);
+    await act(() => kickPlayer(code, id));
+    setKicking((ids) => ids.filter((x) => x !== id));
+  };
 
   const copy = async (text: string, done: string) => {
     try {
@@ -262,125 +274,17 @@ export function LobbyScreen() {
               {
                 key: "players",
                 label: t("players"),
-                count: `${view.players.length}/${view.settings.seats}`,
+                count: `${shownPlayers.length}/${shownSeats}`,
                 panel: (
-                  <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <AnimatePresence initial={false}>
-                      {view.players.map((player) => {
-                        const p = player.isYou
-                          ? { ...player, ready: myReady }
-                          : player;
-                        return (
-                          <m.li
-                            key={p.id}
-                            layout
-                            {...riseIn}
-                            // the seat shows the colour that is theirs while they stay
-                            style={seatWash(p.colorSlot)}
-                            className="flex items-center gap-3 rounded-md p-3"
-                          >
-                            <Avatar avatar={p.avatar} seat={p.colorSlot} />
-                            <div className="flex min-w-0 flex-col">
-                              <span className="truncate font-semibold text-sm">
-                                {name(p, p.isYou)}
-                              </span>
-                              <span className="inline-flex items-center gap-1 font-medium text-[13px] text-ink-muted">
-                                {p.isHost ? (
-                                  <Crown
-                                    className="size-3.5"
-                                    strokeWidth={1.75}
-                                  />
-                                ) : null}
-                                {p.isHost
-                                  ? t("host")
-                                  : p.ready
-                                    ? t("ready")
-                                    : t("notReady")}
-                              </span>
-                            </div>
-                            {p.isHost ? null : (
-                              <div className="ml-auto flex shrink-0 items-center gap-1">
-                                <span
-                                  role="img"
-                                  aria-label={
-                                    p.ready ? t("ready") : t("notReady")
-                                  }
-                                  className={cn(
-                                    "flex size-7 shrink-0 items-center justify-center rounded-pill transition-colors duration-300",
-                                    p.ready
-                                      ? "bg-yes-soft text-yes"
-                                      : "bg-no-soft text-no",
-                                  )}
-                                >
-                                  {p.ready ? (
-                                    <Check
-                                      className="size-4"
-                                      strokeWidth={2.25}
-                                    />
-                                  ) : (
-                                    <X className="size-4" strokeWidth={2.25} />
-                                  )}
-                                </span>
-                                {me.isHost ? (
-                                  <PlayerMenu
-                                    name={p.name}
-                                    pending={pending}
-                                    onKick={() =>
-                                      act(() => kickPlayer(code, p.id))
-                                    }
-                                  />
-                                ) : null}
-                              </div>
-                            )}
-                          </m.li>
-                        );
-                      })}
-                      {Array.from({ length: empty }, (_, i) => (
-                        <m.li
-                          // biome-ignore lint/suspicious/noArrayIndexKey: empty seats have no identity
-                          key={`empty-${i}`}
-                          layout
-                          {...riseIn}
-                          className="flex items-center gap-3 rounded-md border-[1.5px] border-line border-dashed p-3 text-ink-muted"
-                        >
-                          <span className="flex size-11 items-center justify-center rounded-pill border-[1.5px] border-line-strong border-dashed font-bold font-display">
-                            ?
-                          </span>
-                          <span className="font-medium">{t("emptySeat")}</span>
-                          {/* seats close from the end: the button sits on the one that changes */}
-                          {me.isHost && canClose && i === empty - 1 ? (
-                            <SeatToggle
-                              closed={false}
-                              pending={pending}
-                              onClick={() => setSeats(seats - 1)}
-                            />
-                          ) : null}
-                        </m.li>
-                      ))}
-                      {/* only the host sees closed seats */}
-                      {Array.from({ length: closed }, (_, i) => (
-                        <m.li
-                          // biome-ignore lint/suspicious/noArrayIndexKey: closed seats have no identity
-                          key={`closed-${i}`}
-                          layout
-                          {...riseIn}
-                          className="flex items-center gap-3 rounded-md border-[1.5px] border-line bg-[repeating-linear-gradient(-45deg,transparent_0_9px,var(--line)_9px_10.5px)] p-3 text-ink-muted"
-                        >
-                          <span className="flex size-11 items-center justify-center rounded-pill bg-sunken">
-                            <Lock className="size-4.5" strokeWidth={2} />
-                          </span>
-                          <span className="font-medium">{t("closedSeat")}</span>
-                          {i === 0 ? (
-                            <SeatToggle
-                              closed
-                              pending={pending}
-                              onClick={() => setSeats(seats + 1)}
-                            />
-                          ) : null}
-                        </m.li>
-                      ))}
-                    </AnimatePresence>
-                  </ul>
+                  <SeatGrid
+                    players={shownPlayers}
+                    seats={shownSeats}
+                    slots={me.isHost ? range.max : shownSeats}
+                    host={me.isHost}
+                    canClose={canClose}
+                    onSeats={setSeats}
+                    onKick={kick}
+                  />
                 ),
               },
               {
@@ -454,7 +358,9 @@ export function LobbyScreen() {
                 </span>
               ) : null}
             </Setting>
-            <Setting icon={UsersRound}>{t("seats", { seats })}</Setting>
+            <Setting icon={UsersRound}>
+              {t("seats", { seats: shownSeats })}
+            </Setting>
             <Setting icon={Clock}>
               <span className="sr-only">{t("timesLabel")}: </span>
               {/* the match's steps in order, each with its clock */}

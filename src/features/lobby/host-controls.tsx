@@ -1,7 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { Ellipsis, Lock, LockOpen, UserRoundX } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -19,39 +19,55 @@ const swap = {
   exit: { opacity: 0, transition: { duration: 0.08 } },
 } as const;
 
+export interface SeatAction {
+  label: string;
+  danger?: boolean;
+  /** Asked once more, in the same popup, before `run`. */
+  confirm?: { title: string; body: string; yes: string };
+  run: () => void;
+}
+
 /**
- * The host's "⋯" on another player's seat. The seat itself stays free for
- * what clicking a player will do (their profile); this holds what the host
- * can do to them. Removing asks once more, in the same popup.
+ * The host's one control on a seat: the same quiet button on every seat it
+ * fits, opening a dropdown of what the host can do there. The seat itself
+ * stays free for what clicking a player will do (their profile).
  */
-export function PlayerMenu({
-  name,
-  pending,
-  onKick,
+export function SeatMenu({
+  label,
+  actions,
 }: {
-  name: string;
-  pending: boolean;
-  onKick: () => Promise<unknown>;
+  label: string;
+  actions: SeatAction[];
 }) {
   const t = useTranslations("lobby");
   const [open, setOpen] = useState(false);
-  const [confirming, setConfirming] = useState(false);
+  const [asking, setAsking] = useState<SeatAction | null>(null);
+  const done = (action: SeatAction) => {
+    setOpen(false);
+    action.run();
+  };
   return (
     <Popover.Root
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (!next) setConfirming(false);
+        if (!next) setAsking(null);
       }}
     >
       <Popover.Trigger
-        aria-label={t("playerActions", { name })}
+        aria-label={label}
         className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-pill text-ink-muted transition-colors duration-200 ease-soft hover:bg-surface/70 hover:text-ink",
+          "ml-auto flex size-8 shrink-0 items-center justify-center rounded-pill text-ink-muted transition-colors duration-200 ease-soft hover:bg-surface/70 hover:text-ink",
           open && "bg-surface/70 text-ink",
         )}
       >
-        <Ellipsis className="size-5" strokeWidth={2} />
+        <ChevronDown
+          className={cn(
+            "size-4.5 transition-transform duration-200 ease-soft",
+            open && "rotate-180",
+          )}
+          strokeWidth={2.25}
+        />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner
@@ -60,51 +76,56 @@ export function PlayerMenu({
           sideOffset={6}
           className="z-50"
         >
-          <Popover.Popup className="w-[min(260px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface p-1.5 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+          <Popover.Popup className="w-[min(240px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface p-1.5 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
             <AnimatePresence mode="wait" initial={false}>
-              {confirming ? (
+              {asking?.confirm ? (
                 <m.div
                   key="confirm"
                   {...swap}
                   className="flex flex-col gap-1 p-2.5"
                 >
                   <p className="font-semibold leading-snug">
-                    {t("kickTitle", { name })}
+                    {asking.confirm.title}
                   </p>
                   <p className="text-[13px] text-ink-muted leading-snug">
-                    {t("kickBody")}
+                    {asking.confirm.body}
                   </p>
                   <div className="mt-2.5 flex gap-2">
                     <Button
-                      variant="danger"
+                      variant={asking.danger ? "danger" : "primary"}
                       size="sm"
-                      disabled={pending}
-                      onClick={async () => {
-                        await onKick();
-                        setOpen(false);
-                      }}
+                      onClick={() => done(asking)}
                     >
-                      {t("kickYes")}
+                      {asking.confirm.yes}
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setConfirming(false)}
+                      onClick={() => setAsking(null)}
                     >
-                      {t("kickNo")}
+                      {t("cancel")}
                     </Button>
                   </div>
                 </m.div>
               ) : (
-                <m.div key="menu" {...swap}>
-                  <button
-                    type="button"
-                    onClick={() => setConfirming(true)}
-                    className="flex w-full items-center gap-2.5 rounded-sm px-3 py-2.5 text-left font-semibold text-no text-sm transition-colors duration-150 hover:bg-no-soft"
-                  >
-                    <UserRoundX className="size-4.5 shrink-0" strokeWidth={2} />
-                    {t("kick")}
-                  </button>
+                <m.div key="menu" {...swap} className="flex flex-col">
+                  {actions.map((action) => (
+                    <button
+                      key={action.label}
+                      type="button"
+                      onClick={() =>
+                        action.confirm ? setAsking(action) : done(action)
+                      }
+                      className={cn(
+                        "w-full rounded-sm px-3 py-2.5 text-left font-semibold text-sm transition-colors duration-150",
+                        action.danger
+                          ? "text-no hover:bg-no-soft"
+                          : "text-ink hover:bg-sunken",
+                      )}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
                 </m.div>
               )}
             </AnimatePresence>
@@ -112,31 +133,5 @@ export function PlayerMenu({
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>
-  );
-}
-
-/** The host's pill on a seat: closes an empty one, opens a closed one. */
-export function SeatToggle({
-  closed,
-  pending,
-  onClick,
-}: {
-  closed: boolean;
-  pending: boolean;
-  onClick: () => void;
-}) {
-  const t = useTranslations("lobby");
-  const Icon = closed ? LockOpen : Lock;
-  return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={onClick}
-      aria-label={t(closed ? "openSeatLabel" : "closeSeatLabel")}
-      className="ml-auto inline-flex h-8 shrink-0 items-center gap-1.5 rounded-pill bg-surface px-3 font-semibold text-[13px] text-ink-muted shadow-card transition-[color,translate] duration-200 ease-soft hover:-translate-y-px hover:text-ink disabled:pointer-events-none disabled:opacity-45"
-    >
-      <Icon className="size-3.5" strokeWidth={2.25} />
-      {t(closed ? "openSeat" : "closeSeat")}
-    </button>
   );
 }
