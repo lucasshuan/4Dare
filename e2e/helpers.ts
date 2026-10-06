@@ -160,7 +160,18 @@ export async function playToEnd(
         .catch(() => false);
       if (!asked) continue;
       await button(page, /^yes$/i).click();
-      await send.click();
+      if (round > 0 || page !== others[0]) {
+        await send.click();
+        continue;
+      }
+      // the first answer goes with Enter; Shift+Enter breaks the note's line
+      const note = page.getByRole("textbox", { name: /context/i });
+      await note.fill("A famous one");
+      await note.press("Shift+Enter");
+      await note.pressSequentially("really");
+      await expect(note).toHaveValue("A famous one\nreally");
+      await note.press("Enter");
+      await expect(send).toBeHidden();
     }
 
     await expect(button(asker, /take a guess/i)).toBeVisible({

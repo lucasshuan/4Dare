@@ -472,7 +472,15 @@ function Answer() {
         label={t("note")}
         value={note}
         max={MAX_NOTE}
+        enterKeyHint="send"
         onChange={(e) => setNote(e.target.value)}
+        // Enter sends, as in the question field; Shift+Enter breaks the line
+        onKeyDown={(e) => {
+          if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing)
+            return;
+          e.preventDefault();
+          if (value && !pending) e.currentTarget.form?.requestSubmit();
+        }}
       />
       <div className="flex flex-wrap items-center gap-3">
         <Button
