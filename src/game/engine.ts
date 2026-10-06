@@ -479,6 +479,34 @@ function finish(s: RoomState, ctx: Ctx) {
   s.phase = "finished";
   s.turnPlayerId = null;
   startStep(s, ctx, RESULT_SECONDS * 1000);
+  keepMatch(s, ctx);
+}
+
+/** How many finished matches the lobby lists. */
+const PAST_MATCHES = 5;
+
+/** Puts the match that just finished on top of the room's list, if it got to the questions. */
+function keepMatch(s: RoomState, ctx: Ctx) {
+  if (s.playStartedAt === null) return;
+  const players = s.players
+    .filter((p) => s.assignments[p.id])
+    .map((p) => ({
+      id: p.id,
+      isGuest: p.isGuest,
+      name: p.name,
+      guestNumber: p.guestNumber,
+      avatar: p.avatar,
+      colorSlot: p.colorSlot,
+      place: s.outcomes[p.id]?.place ?? null,
+    }))
+    .sort((a, b) => (a.place ?? Infinity) - (b.place ?? Infinity));
+  const match = {
+    round: s.round,
+    theme: s.theme,
+    finishedAt: ctx.now,
+    players,
+  };
+  s.matches = [match, ...(s.matches ?? [])].slice(0, PAST_MATCHES);
 }
 
 const presentCount = (s: RoomState) => s.players.filter(isPresent).length;
@@ -854,6 +882,8 @@ function swapPlayer(s: RoomState, from: PlayerId, player: Identity) {
     s.vote.votes[to] = s.vote.votes[from];
     delete s.vote.votes[from];
   }
+  for (const m of s.matches ?? [])
+    for (const p of m.players) if (p.id === from) p.id = to;
 }
 
 function join(

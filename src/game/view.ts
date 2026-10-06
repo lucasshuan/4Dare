@@ -24,6 +24,7 @@ import {
   type Lang,
   type ListedRoom,
   LOBBY_LISTED_MS,
+  type PastMatchView,
   type Phase,
   type PickView,
   type PlayerId,
@@ -407,9 +408,33 @@ export function toView(
     turn: turn(s, viewerId),
     history: history(s),
     turns: s.turnNumber,
+    matches: s.phase === "lobby" ? pastMatches(s, viewerId, lang) : [],
     canStart:
       viewerId === s.hostId && s.phase === "lobby" && s.players.length >= 2,
   };
+}
+
+/** The lobby's list of finished matches; whoever is still seated shows as they are now. */
+function pastMatches(
+  s: RoomState,
+  viewerId: PlayerId,
+  lang: Lang,
+): PastMatchView[] {
+  return (s.matches ?? []).map((m) => ({
+    round: m.round,
+    theme: m.theme,
+    players: m.players.map((then) => {
+      const p = findPlayer(s, then.id) ?? then;
+      return {
+        id: then.id,
+        isYou: then.id === viewerId,
+        name: displayName(p, lang),
+        avatar: p.avatar,
+        colorSlot: p.colorSlot,
+        place: then.place,
+      };
+    }),
+  }));
 }
 
 /** A match nobody has touched for this long is not shown as being played. */

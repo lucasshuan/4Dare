@@ -47,6 +47,7 @@ import {
   updateSettings,
 } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
+import { PastMatches } from "./past-matches";
 import { StartDialog } from "./start-dialog";
 
 const titleClass =
@@ -242,81 +243,93 @@ export function LobbyScreen() {
             </Button>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <h2 className="font-semibold text-xl">
-              {t("players", {
-                count: view.players.length,
-                seats: view.settings.seats,
-              })}
-            </h2>
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <AnimatePresence initial={false}>
-                {view.players.map((player) => {
-                  const p = player.isYou
-                    ? { ...player, ready: myReady }
-                    : player;
-                  return (
-                    <m.li
-                      key={p.id}
-                      layout
-                      {...riseIn}
-                      // the seat shows the colour that is theirs while they stay
-                      style={seatWash(p.colorSlot)}
-                      className="flex items-center gap-3 rounded-md p-3"
-                    >
-                      <Avatar avatar={p.avatar} seat={p.colorSlot} />
-                      <div className="flex min-w-0 flex-col">
-                        <span className="truncate font-semibold">
-                          {name(p, p.isYou)}
-                        </span>
-                        <span className="inline-flex items-center gap-1 font-medium text-[13px] text-ink-muted">
-                          {p.isHost ? (
-                            <Crown className="size-3.5" strokeWidth={1.75} />
-                          ) : null}
-                          {p.isHost
-                            ? t("host")
-                            : p.ready
-                              ? t("ready")
-                              : t("notReady")}
-                        </span>
-                      </div>
-                      {p.isHost ? null : (
-                        <span
-                          role="img"
-                          aria-label={p.ready ? t("ready") : t("notReady")}
-                          className={cn(
-                            "ml-auto flex size-7 shrink-0 items-center justify-center rounded-pill transition-colors duration-300",
-                            p.ready
-                              ? "bg-yes-soft text-yes"
-                              : "bg-no-soft text-no",
-                          )}
+          {/* players and the room's past matches side by side, when the column is wide enough */}
+          <div className="@container">
+            <div className="grid grid-cols-1 gap-8 @xl:grid-cols-2 @xl:gap-6">
+              <div className="flex min-w-0 flex-col gap-4">
+                <h2 className="font-semibold text-xl">
+                  {t("players", {
+                    count: view.players.length,
+                    seats: view.settings.seats,
+                  })}
+                </h2>
+                <ul className="flex flex-col gap-3">
+                  <AnimatePresence initial={false}>
+                    {view.players.map((player) => {
+                      const p = player.isYou
+                        ? { ...player, ready: myReady }
+                        : player;
+                      return (
+                        <m.li
+                          key={p.id}
+                          layout
+                          {...riseIn}
+                          // the seat shows the colour that is theirs while they stay
+                          style={seatWash(p.colorSlot)}
+                          className="flex items-center gap-3 rounded-md p-3"
                         >
-                          {p.ready ? (
-                            <Check className="size-4" strokeWidth={2.25} />
-                          ) : (
-                            <X className="size-4" strokeWidth={2.25} />
+                          <Avatar avatar={p.avatar} seat={p.colorSlot} />
+                          <div className="flex min-w-0 flex-col">
+                            <span className="truncate font-semibold">
+                              {name(p, p.isYou)}
+                            </span>
+                            <span className="inline-flex items-center gap-1 font-medium text-[13px] text-ink-muted">
+                              {p.isHost ? (
+                                <Crown
+                                  className="size-3.5"
+                                  strokeWidth={1.75}
+                                />
+                              ) : null}
+                              {p.isHost
+                                ? t("host")
+                                : p.ready
+                                  ? t("ready")
+                                  : t("notReady")}
+                            </span>
+                          </div>
+                          {p.isHost ? null : (
+                            <span
+                              role="img"
+                              aria-label={p.ready ? t("ready") : t("notReady")}
+                              className={cn(
+                                "ml-auto flex size-7 shrink-0 items-center justify-center rounded-pill transition-colors duration-300",
+                                p.ready
+                                  ? "bg-yes-soft text-yes"
+                                  : "bg-no-soft text-no",
+                              )}
+                            >
+                              {p.ready ? (
+                                <Check className="size-4" strokeWidth={2.25} />
+                              ) : (
+                                <X className="size-4" strokeWidth={2.25} />
+                              )}
+                            </span>
                           )}
+                        </m.li>
+                      );
+                    })}
+                    {Array.from({ length: empty }, (_, i) => (
+                      <m.li
+                        // biome-ignore lint/suspicious/noArrayIndexKey: empty seats have no identity
+                        key={`empty-${i}`}
+                        layout
+                        {...riseIn}
+                        className="flex items-center gap-3 rounded-md border-[1.5px] border-line border-dashed p-3 text-ink-muted"
+                      >
+                        <span className="flex size-11 items-center justify-center rounded-pill border-[1.5px] border-line-strong border-dashed font-bold font-display">
+                          ?
                         </span>
-                      )}
-                    </m.li>
-                  );
-                })}
-                {Array.from({ length: empty }, (_, i) => (
-                  <m.li
-                    // biome-ignore lint/suspicious/noArrayIndexKey: empty seats have no identity
-                    key={`empty-${i}`}
-                    layout
-                    {...riseIn}
-                    className="flex items-center gap-3 rounded-md border-[1.5px] border-line border-dashed p-3 text-ink-muted"
-                  >
-                    <span className="flex size-11 items-center justify-center rounded-pill border-[1.5px] border-line-strong border-dashed font-bold font-display">
-                      ?
-                    </span>
-                    <span className="font-medium">{t("emptySeat")}</span>
-                  </m.li>
-                ))}
-              </AnimatePresence>
-            </ul>
+                        <span className="font-medium">{t("emptySeat")}</span>
+                      </m.li>
+                    ))}
+                  </AnimatePresence>
+                </ul>
+              </div>
+              <div className="flex min-w-0 flex-col gap-4">
+                <h2 className="font-semibold text-xl">{t("matches")}</h2>
+                <PastMatches matches={view.matches} />
+              </div>
+            </div>
           </div>
         </section>
 
