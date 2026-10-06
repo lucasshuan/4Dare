@@ -44,7 +44,7 @@
     "validateSeconds": "Revisar"
   },
   "timesLabel": "Tiempos",
-  "start": "Empezar partida",
+  "start": "Empezar",
   "needPlayers": "Se necesitan al menos 2 jugadores para empezar",
   "confirmStart": {
     "title": "¿Empezar sin que todos estén listos?",
