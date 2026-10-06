@@ -92,6 +92,13 @@
   --dock: 0px;
   /* Width of the match's history sidebar (wide windows); the game's overlays start right of it. */
   --sidebar: 0px;
+  /* Scrollbar thumb: the cool neutral of the borders, see-through so it sits on any ground (canvas, cards, the stage's washes). */
+  --scroll-thumb: color-mix(in oklch, var(--line-strong) 55%, transparent);
+  --scroll-thumb-hover: color-mix(
+    in oklch,
+    var(--line-strong) 85%,
+    transparent
+  );
   color-scheme: light;
 }
 
@@ -324,6 +331,42 @@ body {
   input[type="file"],
   input[type="range"] {
     cursor: pointer;
+  }
+}
+
+/*
+ * Scrollbars: just a rounded thumb, no track, no arrows. In base so a component
+ * can still hide its own (games carousel). Chrome drops the ::-webkit-scrollbar
+ * rules once scrollbar-width/-color are set, so those two are for Firefox only.
+ */
+@layer base {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scroll-thumb);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--scroll-thumb-hover);
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scroll-thumb) transparent;
+    }
   }
 }
 
