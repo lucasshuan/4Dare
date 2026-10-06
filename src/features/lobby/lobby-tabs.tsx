@@ -17,8 +17,8 @@ const spring = { type: "spring", stiffness: 480, damping: 34 } as const;
 export interface LobbyTab {
   key: string;
   label: string;
-  /** In a chip beside the label; no chip when null. */
-  count: string | null;
+  /** In a chip beside the label. */
+  count: string;
   panel: ReactNode;
 }
 
@@ -122,21 +122,19 @@ export function LobbyTabs({
                 )}
               >
                 {tab.label}
-                {tab.count === null ? null : (
-                  <m.span
-                    // a new count pops in
-                    key={tab.count}
-                    initial={still ? false : { scale: 0.6, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={spring}
-                    className={cn(
-                      "rounded-pill px-2 font-semibold text-xs/5 tabular-nums transition-colors duration-200 ease-soft",
-                      on ? "bg-sky-soft text-sky" : "bg-sunken text-ink-muted",
-                    )}
-                  >
-                    {tab.count}
-                  </m.span>
-                )}
+                <m.span
+                  // a new count pops in
+                  key={tab.count}
+                  initial={still ? false : { scale: 0.6, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={spring}
+                  className={cn(
+                    "rounded-pill px-2 font-semibold text-xs/5 tabular-nums transition-colors duration-200 ease-soft",
+                    on ? "bg-sky-soft text-sky" : "bg-sunken text-ink-muted",
+                  )}
+                >
+                  {tab.count}
+                </m.span>
                 {on ? (
                   <m.span
                     layoutId={`${id}-bar`}

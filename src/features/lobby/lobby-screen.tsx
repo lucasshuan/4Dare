@@ -386,7 +386,7 @@ export function LobbyScreen() {
               {
                 key: "matches",
                 label: t("matches"),
-                count: view.matches.length ? String(view.matches.length) : null,
+                count: String(view.matches.length),
                 panel: <PastMatches matches={view.matches} />,
               },
             ]}
