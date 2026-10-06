@@ -29,7 +29,7 @@ function fakeDb(rows: LibraryRow[], fail = () => false, cap = 1000) {
       calls.push(`select ${columns}`);
       return this;
     },
-    eq(column: string, value: string) {
+    eq(column: string, value: unknown) {
       calls.push(`eq ${column} ${value}`);
       return this;
     },
@@ -37,8 +37,13 @@ function fakeDb(rows: LibraryRow[], fail = () => false, cap = 1000) {
       calls.push(`not ${column} ${op} ${value}`);
       return this;
     },
-    order(column: string, { ascending }: { ascending: boolean }) {
-      calls.push(`order ${column} ${ascending ? "asc" : "desc"}`);
+    order(
+      column: string,
+      { ascending, nullsFirst }: { ascending: boolean; nullsFirst?: boolean },
+    ) {
+      calls.push(
+        `order ${column} ${ascending ? "asc" : "desc"}${nullsFirst === false ? " nulls last" : ""}`,
+      );
       return this;
     },
     async range(from: number, to: number) {
@@ -64,16 +69,16 @@ afterEach(() => {
 });
 
 describe("library from Supabase", () => {
-  it("reads the view's library rows, most popular first, id breaking ties", async () => {
+  it("reads the view's whole library, ranked first, id breaking ties", async () => {
     const { db, calls } = fakeDb([]);
     expect(await readLibrary(db, "pt")).toEqual([]);
     expect(calls).toEqual([
       "from character_entries",
       "select character_id, name, origin, image_url, aliases, other_names",
       "eq lang pt",
-      "not popularity is null",
+      "eq shadowed false",
       "not character_id like u-%",
-      "order popularity desc",
+      "order popularity desc nulls last",
       "order character_id asc",
     ]);
   });

@@ -610,6 +610,7 @@ export type Database = {
           origin: string | null;
           other_names: string[] | null;
           popularity: number | null;
+          shadowed: boolean | null;
         };
         Relationships: [
           {
@@ -802,6 +803,7 @@ export type Database = {
           origin: string | null;
           other_names: string[] | null;
           popularity: number | null;
+          shadowed: boolean | null;
         }[];
         SetofOptions: {
           from: "*";

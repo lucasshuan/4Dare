@@ -32,8 +32,10 @@ export const toLibraryItem = (lang: Lang, r: LibraryRow): SearchItem =>
   });
 
 /**
- * One language's library, most popular first, a page at a time. The id breaks
- * popularity ties, so pages never skip or repeat a row. Each page starts where
+ * One language's library, most popular first, a page at a time: every
+ * character, the ones the language doesn't rank last, less those `shadowed`
+ * by a ranked one of the same name and category (the same character under
+ * another id). The id breaks popularity ties, so pages never skip or repeat a row. Each page starts where
  * the rows so far end and only an empty one ends the read, so a server that
  * caps pages below PAGE still gives the whole library.
  */
@@ -45,9 +47,9 @@ export async function readLibrary(db: Db, lang: Lang): Promise<SearchItem[]> {
       .from("character_entries")
       .select(COLUMNS)
       .eq("lang", lang)
-      .not("popularity", "is", null)
+      .eq("shadowed", false)
       .not("character_id", "like", "u-%")
-      .order("popularity", { ascending: false })
+      .order("popularity", { ascending: false, nullsFirst: false })
       .order("character_id", { ascending: true })
       .range(from, from + PAGE - 1);
     if (error) throw error;

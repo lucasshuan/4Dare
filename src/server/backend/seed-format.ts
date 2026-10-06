@@ -25,8 +25,9 @@ export interface SeedCharacter {
   /** Other names and spellings per language (for matching guesses). */
   aliases: ByLang<string[]>;
   /**
-   * Higher = more popular, per language; only the languages whose library
-   * holds the character. Used to rank search results.
+   * Higher = more popular, per language; only the languages that rank the
+   * character. Orders search results: every language searches every
+   * character, the unranked ones last.
    */
   popularity: ByLang<number>;
 }
@@ -57,12 +58,16 @@ export function parseEntryId(id: string): { lang: Lang; id: string } | null {
   return match ? { lang: match[1] as Lang, id: match[2] } : null;
 }
 
+/** Its name in `lang`, else its English one (what the database copies, 0029). */
+const entryName = (c: SeedCharacter, lang: Lang) =>
+  c.names[lang] ?? c.names.en ?? "";
+
 /**
  * Its names in the other languages, as aliases: a player may guess
  * "Spider-Man" in a Portuguese room.
  */
 export function entryAliases(c: SeedCharacter, lang: Lang): string[] {
-  const own = c.names[lang] ?? "";
+  const own = entryName(c, lang);
   const seen = new Set([normalizeName(own)]);
   const out: string[] = [];
   const others = LANGS.filter((l) => l !== lang).map((l) => c.names[l]);
@@ -75,7 +80,10 @@ export function entryAliases(c: SeedCharacter, lang: Lang): string[] {
   return out;
 }
 
-/** One language's library as app characters with their popularity, most popular first. */
+/**
+ * One language's library as app characters with their popularity, most
+ * popular first: the whole library, the ones `lang` doesn't rank last (at 0).
+ */
 export function libraryFor(
   characters: SeedCharacter[],
   origins: SeedOrigin[],
@@ -84,9 +92,9 @@ export function libraryFor(
   const byId = new Map(origins.map((o) => [o.id, o]));
   return characters
     .flatMap((c) => {
-      const popularity = c.popularity[lang];
-      const name = c.names[lang];
-      if (popularity === undefined || !name) return [];
+      const popularity = c.popularity[lang] ?? 0;
+      const name = entryName(c, lang);
+      if (!name) return [];
       const origin = c.origin ? byId.get(c.origin) : undefined;
       const character: Character = {
         id: entryId(lang, c.id),
