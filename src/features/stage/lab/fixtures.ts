@@ -104,61 +104,90 @@ export function labPlayers(params: LabParams): Identity[] {
   }));
 }
 
-/** One theme per set, in its three languages (the client lab can't read local mode's fixtures: builds with the Supabase keys leave them out). */
+/** One theme per set, in every language (the client lab can't read local mode's fixtures: builds with the Supabase keys leave them out). */
 const LAB_SET_THEMES: Record<ThemeSet, Localized> = {
   screen: {
     en: "Disney characters",
+    es: "Personajes de Disney",
     pt: "Personagens da Disney",
     ja: "ディズニーのキャラクター",
   },
   cartoons: {
     en: "The Simpsons characters",
+    es: "Personajes de Los Simpson",
     pt: "Personagens dos Simpsons",
     ja: "シンプソンズのキャラクター",
   },
   anime: {
     en: "Dragon Ball characters",
+    es: "Personajes de Dragon Ball",
     pt: "Personagens de Dragon Ball",
     ja: "ドラゴンボールのキャラクター",
   },
-  games: { en: "Pokémon", pt: "Pokémon", ja: "ポケモン" },
+  games: { en: "Pokémon", es: "Pokémon", pt: "Pokémon", ja: "ポケモン" },
   books: {
     en: "Fairy tale characters",
+    es: "Personajes de cuentos de hadas",
     pt: "Personagens de contos de fadas",
     ja: "おとぎ話のキャラクター",
   },
-  heroes: { en: "Superheroes", pt: "Super-heróis", ja: "スーパーヒーロー" },
+  heroes: {
+    en: "Superheroes",
+    es: "Superhéroes",
+    pt: "Super-heróis",
+    ja: "スーパーヒーロー",
+  },
   powers: {
     en: "Characters who can fly",
+    es: "Personajes que vuelan",
     pt: "Personagens que voam",
     ja: "空を飛べるキャラクター",
   },
-  myths: { en: "Vampires", pt: "Vampiros", ja: "吸血鬼" },
-  scifi: { en: "Robots", pt: "Robôs", ja: "ロボット" },
-  warriors: { en: "Pirates", pt: "Piratas", ja: "海賊" },
-  animals: { en: "Cats", pt: "Gatos", ja: "猫のキャラクター" },
-  music: { en: "Female singers", pt: "Cantoras", ja: "女性歌手" },
-  celebs: { en: "Comedians", pt: "Comediantes", ja: "お笑い芸人" },
+  myths: { en: "Vampires", es: "Vampiros", pt: "Vampiros", ja: "吸血鬼" },
+  scifi: { en: "Robots", es: "Robots", pt: "Robôs", ja: "ロボット" },
+  warriors: { en: "Pirates", es: "Piratas", pt: "Piratas", ja: "海賊" },
+  animals: { en: "Cats", es: "Gatos", pt: "Gatos", ja: "猫のキャラクター" },
+  music: {
+    en: "Female singers",
+    es: "Cantantes femeninas",
+    pt: "Cantoras",
+    ja: "女性歌手",
+  },
+  celebs: {
+    en: "Comedians",
+    es: "Comediantes",
+    pt: "Comediantes",
+    ja: "お笑い芸人",
+  },
   sports: {
     en: "Soccer players",
+    es: "Futbolistas",
     pt: "Jogadores de futebol",
     ja: "サッカー選手",
   },
-  history: { en: "Kings", pt: "Reis", ja: "王様" },
+  history: { en: "Kings", es: "Reyes", pt: "Reis", ja: "王様" },
   world: {
     en: "Famous Brazilians",
+    es: "Brasileños famosos",
     pt: "Brasileiros famosos",
     ja: "有名なブラジル人",
   },
-  jobs: { en: "Detectives", pt: "Detetives", ja: "探偵" },
-  family: { en: "Twins", pt: "Gêmeos", ja: "双子のキャラクター" },
+  jobs: { en: "Detectives", es: "Detectives", pt: "Detetives", ja: "探偵" },
+  family: {
+    en: "Twins",
+    es: "Gemelos",
+    pt: "Gêmeos",
+    ja: "双子のキャラクター",
+  },
   quirks: {
     en: "Clumsy characters",
+    es: "Personajes torpes",
     pt: "Personagens desastrados",
     ja: "ドジなキャラクター",
   },
   looks: {
     en: "Characters who wear a hat",
+    es: "Personajes que usan sombrero",
     pt: "Personagens de chapéu",
     ja: "帽子をかぶったキャラクター",
   },

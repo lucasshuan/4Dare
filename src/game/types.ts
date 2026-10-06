@@ -2,11 +2,11 @@
 import { DEFAULT_GAME, type GameKey } from "./games";
 import { THEME_SET_KEYS, type ThemeSet } from "./theme-sets";
 
-export const LANGS = ["en", "pt", "ja"] as const;
+export const LANGS = ["en", "es", "ja", "pt"] as const;
 export type Lang = (typeof LANGS)[number];
 export type Localized = Record<Lang, string>;
 
-/** A theme in the three languages. `set` is its theme set; null when the host typed it in (the same text in every language). */
+/** A theme in every language. `set` is its theme set; null when the host typed it in (the same text in every language). */
 export interface Theme extends Localized {
   set: ThemeSet | null;
 }

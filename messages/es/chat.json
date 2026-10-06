@@ -1,0 +1,20 @@
+{
+  "title": "Chat",
+  "empty": "Chat de la sala",
+  "placeholder": "Escribe un mensaje…",
+  "inputLabel": "Mensaje",
+  "send": "Enviar",
+  "open": "Abrir el chat",
+  "fold": "Ocultar el chat",
+  "unread": "{count, plural, one {# mensaje nuevo} other {# mensajes nuevos}}",
+  "me": "Tú",
+  "line": "{name}: {text}",
+  "log": "Mensajes",
+  "failed": "No se envió. Toca para intentarlo de nuevo.",
+  "system": {
+    "started": "▶ Empezó la partida",
+    "theme": "{emoji} Tema: {theme}",
+    "order": "Orden: {names}",
+    "firstTurn": "Partida {n} · turno de {name}"
+  }
+}

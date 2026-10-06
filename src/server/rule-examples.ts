@@ -129,7 +129,7 @@ const clash = (a: string, b: string) => {
   return x.trim() !== "" && y.trim() !== "" && (x.includes(y) || y.includes(x));
 };
 
-/** A card when the character has a picture and its names in English and Portuguese (Japanese when it has one). */
+/** A card when the character has a picture and its names in English and Portuguese (Japanese and Spanish when it has them). */
 function toCard(
   id: string,
   found: Map<string, Map<Lang, Character>>,
@@ -138,12 +138,18 @@ function toCard(
   const en = byLang?.get("en");
   const pt = byLang?.get("pt");
   const ja = byLang?.get("ja");
+  const es = byLang?.get("es");
   const imageUrl = en?.imageUrl ?? pt?.imageUrl ?? ja?.imageUrl ?? null;
   if (!en || !pt || !imageUrl) return null;
   return {
     id,
     imageUrl,
-    names: { en: en.name, pt: pt.name, ...(ja ? { ja: ja.name } : {}) },
+    names: {
+      en: en.name,
+      pt: pt.name,
+      ...(ja ? { ja: ja.name } : {}),
+      ...(es ? { es: es.name } : {}),
+    },
   };
 }
 

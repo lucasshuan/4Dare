@@ -13,7 +13,7 @@ import { PlayerName } from "@/components/ui/player-name";
 import { RoomProvider } from "@/features/data/room-context";
 import { RoomStage } from "@/features/room/room-stage";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
-import type { Lang, RoomView } from "@/game/types";
+import { LANGS, type Lang, type RoomView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { type ServerClock, useServerClock } from "@/lib/hooks/use-server-clock";
 import { StageProvider, useStage } from "../stage-context";
@@ -343,7 +343,7 @@ function LabPanel({
           {moment.show} {secs(moment.at * 1000)}
         </span>
         <span className="ml-auto flex gap-1">
-          {(["en", "pt", "ja"] as const).map((l) => (
+          {LANGS.map((l) => (
             <a
               key={l}
               href={`/${l}/dev/stage${labSearch({ ...params, ...moment, play: false })}`}

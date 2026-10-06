@@ -1,0 +1,21 @@
+{
+  "kicker": "Fin de la partida · {count, plural, one {# ronda} other {# rondas}}",
+  "winner": "{name} lo descubrió primero",
+  "winnersTie": "¡Empate! {names} lo descubrieron primero",
+  "youTie": "¡Empate! Tú y {names} lo descubrieron primero",
+  "nobody": "Esta vez nadie lo descubrió",
+  "toLobby": "Volver a la sala de espera",
+  "lobbyIn": "Todos vuelven a la sala de espera en {seconds} s",
+  "home": "Volver a las salas",
+  "place": "{place, plural, =1 {1.er} =3 {3.er} other {#.º}} lugar",
+  "gaveUp": "Se rindió",
+  "notFound": "No lo descubrió",
+  "pickedBy": "elegido por {name}",
+  "discoveredAt": "Lo descubrió en la ronda {n}",
+  "placeShort": "{place}.º",
+  "youWon": "Lo descubriste en la ronda {n}.",
+  "youFound": "Tú también lo descubriste, en la ronda {n}.",
+  "youGaveUp": "Esta vez te rendiste.",
+  "youMissed": "Esta vez no lo descubriste.",
+  "youFirst": "Lo descubriste primero"
+}

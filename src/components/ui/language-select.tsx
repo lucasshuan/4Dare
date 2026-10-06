@@ -17,7 +17,12 @@ export function LanguageSelect({
   const t = useTranslations("common");
   const locale = useLocale() as Lang;
   const pathname = usePathname();
-  const items = LANGS.map((l) => ({ value: l, label: t(`languages.${l}`) }));
+  // Alphabetical by each language's own name, the same order on every page:
+  // English, Español, Português, 日本語.
+  const items = LANGS.map((l) => ({
+    value: l,
+    label: t(`languages.${l}`),
+  })).sort((a, b) => a.label.localeCompare(b.label, "en"));
   return (
     <Select.Root
       items={items}
@@ -57,7 +62,7 @@ export function LanguageSelect({
         >
           <Select.Popup className="min-w-44 origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
             <Select.List>
-              {LANGS.map((l) => (
+              {items.map(({ value: l, label }) => (
                 <Select.Item
                   key={l}
                   value={l}
@@ -65,9 +70,7 @@ export function LanguageSelect({
                   className="flex items-center gap-2.5 rounded-md py-2 pr-3 pl-2 font-semibold text-sm outline-none select-none data-highlighted:bg-sky-soft"
                 >
                   <Flag lang={l} />
-                  <Select.ItemText className="flex-1">
-                    {t(`languages.${l}`)}
-                  </Select.ItemText>
+                  <Select.ItemText className="flex-1">{label}</Select.ItemText>
                   <Select.ItemIndicator className="text-sky">
                     <Check className="size-4" strokeWidth={2.25} />
                   </Select.ItemIndicator>

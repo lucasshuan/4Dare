@@ -10,7 +10,7 @@ export function supabaseThemes(): ThemeStore {
   return {
     async list() {
       const { data, error } = await table()
-        .select("en, pt, ja, theme_set")
+        .select("en, es, ja, pt, theme_set")
         .eq("active", true)
         .limit(5000);
       if (error) throw error;

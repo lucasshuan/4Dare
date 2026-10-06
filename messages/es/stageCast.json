@@ -1,0 +1,11 @@
+{
+  "cast": {
+    "pickedYours": "{name} eligió el tuyo.",
+    "rule": "Ves el de los demás. El tuyo, lo descubres.",
+    "from": "de {name}",
+    "by": "por {name}",
+    "byYou": "por ti",
+    "orderKicker": "Orden de turnos",
+    "starts": "¡{name} empieza!"
+  }
+}

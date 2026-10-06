@@ -1,0 +1,54 @@
+{
+  "title": "4Dare: juegos de adivinanzas para jugar con amigos",
+  "description": "Juegos gratis para jugar online con amigos, directo en el navegador. Empieza con ¿Quién soy?: cada uno elige un personaje para otro jugador y tú descubres el tuyo con preguntas de sí o no.",
+  "keywords": "juego de adivinanzas, quién soy, quién soy yo, quién soy online, juego del papelito en la frente, juego para jugar con amigos, juego online gratis, juego de navegador, multijugador, preguntas de sí o no, juego de fiesta",
+  "tagline": "Juegos de adivinanzas para jugar con amigos",
+  "chips": {
+    "free": "Gratis",
+    "players": "2 a 4 jugadores",
+    "browser": "En el navegador"
+  },
+  "imageAlt": "4Dare: juegos de adivinanzas para jugar con amigos",
+  "whoAmI": {
+    "title": "¿Quién soy? Juega online con amigos",
+    "description": "Cada uno elige un personaje para otro jugador. Ves las cartas de los demás, nunca la tuya. Descubre quién eres con preguntas de sí o no. Gratis, de 2 a 4 jugadores, sin registro.",
+    "pitch": "Cada uno elige un personaje para otro. Descubre el tuyo con preguntas de sí o no.",
+    "imageAlt": "¿Quién soy? en 4Dare: cartas sobre la mesa y una pregunta de sí o no"
+  },
+  "newRoom": {
+    "title": "Crear sala"
+  },
+  "profile": {
+    "title": "Tu perfil"
+  },
+  "room": {
+    "title": "Sala",
+    "inviteTitle": "Ven a jugar ¿Quién soy? conmigo",
+    "inviteDescription": "Sala {code} en 4Dare. Cada uno elige un personaje para otro y tú descubres el tuyo con preguntas de sí o no. Gratis, sin registro.",
+    "invited": "¡Estás invitado!",
+    "join": "Entra a mi sala",
+    "code": "Código de la sala",
+    "imageAlt": "Invitación a la sala {code} en 4Dare"
+  },
+  "tab": {
+    "lobby": "Sala de espera",
+    "theming": "Eligiendo el tema",
+    "voting": "Votación del tema",
+    "picking": "Eligiendo personajes",
+    "playing": "En partida",
+    "finished": "Resultados",
+    "alert": {
+      "theming": "¡Elige el tema!",
+      "voting": "¡Vota por un tema!",
+      "picking": "¡Elige un personaje!",
+      "asking": "¡Te toca!",
+      "answering": "¡Responde la pregunta!",
+      "guessing": "¡Intenta adivinar!",
+      "validating": "¡Revisa un intento!"
+    }
+  },
+  "rooms": {
+    "title": "Salas",
+    "description": "Todas las salas que esperan jugadores en 4Dare: búscalas por juego, nombre o anfitrión, públicas o con contraseña."
+  }
+}

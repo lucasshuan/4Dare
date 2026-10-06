@@ -561,6 +561,7 @@ export type Database = {
           active: boolean;
           created_at: string;
           en: string;
+          es: string;
           example: number | null;
           id: string;
           ja: string;
@@ -572,6 +573,7 @@ export type Database = {
           active?: boolean;
           created_at?: string;
           en: string;
+          es: string;
           example?: number | null;
           id: string;
           ja: string;
@@ -583,6 +585,7 @@ export type Database = {
           active?: boolean;
           created_at?: string;
           en?: string;
+          es?: string;
           example?: number | null;
           id?: string;
           ja?: string;

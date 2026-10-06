@@ -69,7 +69,7 @@ const characters = new Map<Lang, Character[]>();
 async function loadData(langs: Lang[]) {
   const listed = await db
     .from("whoami_themes")
-    .select("en, pt, ja, theme_set")
+    .select("en, es, ja, pt, theme_set")
     .eq("active", true);
   if (listed.error) throw listed.error;
   themes = listed.data.map(({ theme_set, ...t }) => ({

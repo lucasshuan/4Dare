@@ -19,11 +19,13 @@ export const SITE_URL = (
 
 const OG_LOCALE: Record<Lang, string> = {
   en: "en_US",
+  es: "es_LA",
   pt: "pt_BR",
   ja: "ja_JP",
 };
 export const HREFLANG: Record<Lang, string> = {
   en: "en",
+  es: "es",
   pt: "pt-BR",
   ja: "ja",
 };

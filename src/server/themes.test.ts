@@ -7,6 +7,7 @@ import { themes } from "./themes";
 
 const t = (en: string, set: Theme["set"] = "heroes"): Theme => ({
   en,
+  es: en,
   pt: en,
   ja: en,
   set,

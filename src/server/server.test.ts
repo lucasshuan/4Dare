@@ -654,6 +654,7 @@ describe("random pick by theme", () => {
     const draw = vi.spyOn(getBackend().themes, "draw").mockResolvedValue(
       [1, 2, 3].map((i) => ({
         en: `Unplayed ${n}.${i}`,
+        es: `Inédito ${n}.${i}`,
         pt: `Inédito ${n}.${i}`,
         ja: `未プレイ ${n}.${i}`,
         set: "heroes",
@@ -1006,9 +1007,27 @@ describe("rule examples and the hand", () => {
     aliases: [],
   });
   const THEMES: Theme[] = [
-    { en: "Fixture heroes", pt: "Heróis", ja: "ヒーロー", set: "heroes" },
-    { en: "Fixture singers", pt: "Cantoras", ja: "歌手", set: "music" },
-    { en: "Fixture glasses", pt: "Óculos", ja: "眼鏡", set: "looks" },
+    {
+      en: "Fixture heroes",
+      es: "Héroes",
+      ja: "ヒーロー",
+      pt: "Heróis",
+      set: "heroes",
+    },
+    {
+      en: "Fixture singers",
+      es: "Cantantes",
+      ja: "歌手",
+      pt: "Cantoras",
+      set: "music",
+    },
+    {
+      en: "Fixture glasses",
+      es: "Gafas",
+      ja: "眼鏡",
+      pt: "Óculos",
+      set: "looks",
+    },
   ];
   const row = (
     theme: Theme,
@@ -1074,6 +1093,7 @@ describe("rule examples and the hand", () => {
         imageUrl: "https://img.test/wd-Q9000001.png",
         names: {
           en: "wd-Q9000001 en",
+          es: "wd-Q9000001 es",
           pt: "wd-Q9000001 pt",
           ja: "wd-Q9000001 ja",
         },
@@ -1122,6 +1142,7 @@ describe("rule examples and the hand", () => {
     const route = await import("@/app/api/themes/[id]/picks/route");
     const theme: Theme = {
       en: `Hand ${Math.random().toString(36).slice(2, 8)}`,
+      es: "Mano",
       pt: "Mão",
       ja: "手",
       set: "heroes",

@@ -272,6 +272,14 @@ const EMERGENCY: Record<Lang, string[]> = {
     "Harry Potter",
     "Darth Vader",
   ],
+  es: [
+    "Mickey Mouse",
+    "Super Mario",
+    "Pikachu",
+    "Batman",
+    "Harry Potter",
+    "Darth Vader",
+  ],
   pt: [
     "Mickey Mouse",
     "Super Mario",

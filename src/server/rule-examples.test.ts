@@ -10,8 +10,8 @@ import {
 } from "./rule-examples";
 import type { PickStat } from "./theme-picks";
 
-// A small made-up library: every id has a picture and names in en, pt and ja
-// unless listed below.
+// A small made-up library: every id has a picture and names in en, es, ja and
+// pt unless listed below.
 const NO_PICTURE = new Set(["wd-Q1"]);
 const NO_PT = new Set(["wd-Q5"]);
 const NO_JA = new Set(["wd-Q3"]);
@@ -41,6 +41,7 @@ function library(id: string, lang: Lang): Character | null {
 
 const theme = (en: string, set: ThemeSet | null): Theme => ({
   en,
+  es: en,
   pt: en,
   ja: en,
   set,
@@ -122,6 +123,7 @@ const card = (id: string, ja = true) => ({
     en: name(id, "en"),
     pt: name(id, "pt"),
     ...(ja ? { ja: name(id, "ja") } : {}),
+    es: name(id, "es"),
   },
 });
 
@@ -228,7 +230,7 @@ describe("ruleExamples", () => {
       src,
     );
     expect(out[1]).toBeNull();
-    expect(src.lookups).toHaveLength(3);
+    expect(src.lookups).toHaveLength(4);
   });
 
   it("never gives a ✗ that shares its name with one of the theme's own", async () => {

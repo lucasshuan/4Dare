@@ -5,12 +5,14 @@
   "languages": {
     "en": "English",
     "pt": "Português",
-    "ja": "日本語"
+    "ja": "日本語",
+    "es": "Español"
   },
   "languagesShort": {
     "en": "EN",
     "pt": "PT",
-    "ja": "日本語"
+    "ja": "日本語",
+    "es": "ES"
   },
   "moreInfo": "Mais informações",
   "language": "Idioma",

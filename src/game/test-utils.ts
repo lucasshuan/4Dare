@@ -13,6 +13,7 @@ import {
 
 export const THEME: Theme = {
   en: "Villains",
+  es: "Villanos",
   pt: "Vilões",
   ja: "悪役",
   set: "heroes",
@@ -20,8 +21,8 @@ export const THEME: Theme = {
 /** What START puts to the vote; THEME comes first. */
 export const THEMES: Theme[] = [
   THEME,
-  { en: "Robots", pt: "Robôs", ja: "ロボット", set: "scifi" },
-  { en: "Pirates", pt: "Piratas", ja: "海賊", set: "warriors" },
+  { en: "Robots", es: "Robots", ja: "ロボット", pt: "Robôs", set: "scifi" },
+  { en: "Pirates", es: "Piratas", ja: "海賊", pt: "Piratas", set: "warriors" },
 ];
 
 export const ident = (id: string, guestNumber = 10): Identity => ({

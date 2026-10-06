@@ -1,0 +1,17 @@
+{
+  "vote": {
+    "line": "Ahora, elijan juntos un tema.",
+    "waitingEveryone": "Aún votan: todos"
+  },
+  "coldOpen": {
+    "line1": "Cada uno recibe un personaje secreto.",
+    "line2": "Solo tú no ves el tuyo. Pregunta para descubrirlo.",
+    "question": "¿Soy de Marvel?"
+  },
+  "round": "Partida {n}",
+  "rule": {
+    "title": "Todos los personajes deben ser de este tema.",
+    "fits": "Encaja con el tema",
+    "misfit": "No encaja"
+  }
+}

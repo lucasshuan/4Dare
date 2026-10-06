@@ -1,0 +1,139 @@
+{
+  "pitch": "Cada jugador elige un personaje para otro. Ves las cartas de los demás, nunca la tuya. Descubre quién eres con preguntas de sí o no.",
+  "guestHint": "Juegas como invitado. Inicia sesión para elegir nombre y avatar.",
+  "accountHint": "Sesión iniciada.",
+  "create": "Crear sala",
+  "joinLabel": "O únete con un código",
+  "createRoom": {
+    "game": "Juego",
+    "roomName": "Nombre de la sala",
+    "roomNamePlaceholder": "Ej.: Los del sábado",
+    "back": "Volver",
+    "creating": "Creando tu sala…",
+    "failed": "No se pudo crear la sala",
+    "retry": "Reintentar",
+    "tabRoom": "Sala",
+    "roomSummary": "{visibility} · {seats} lugares",
+    "tabRules": "Reglas",
+    "rulesSummary": "{vote} · {ask} · {answer} · {guess} · {validate} s",
+    "visibility": "Quién puede entrar",
+    "public": "Pública",
+    "private": "Privada",
+    "visibilityHint": "Todas las salas aparecen en la lista. Pública: cualquiera puede entrar. Privada: para entrar hay que poner la contraseña.",
+    "password": "Contraseña",
+    "passwordPlaceholder": "Ej.: pizza",
+    "needPassword": "Ponle una contraseña a la sala privada.",
+    "needName": "Ponle un nombre a la sala.",
+    "seats": "Lugares",
+    "seatsHint": "La partida puede empezar con 2 jugadores o más.",
+    "times": {
+      "voteSeconds": {
+        "label": "Tiempo para votar",
+        "hint": "Todos votan el tema antes de la partida. Cada voto descuenta una parte igual de este tiempo a quienes aún no votaron."
+      },
+      "askSeconds": {
+        "label": "Tiempo para preguntar",
+        "hint": "A quien le toca escribe una pregunta de sí o no."
+      },
+      "answerSeconds": {
+        "label": "Tiempo para responder",
+        "hint": "Los demás responden. Cada respuesta descuenta una parte igual de este tiempo a quienes aún no respondieron: un tercio si responden tres, la mitad si responden dos."
+      },
+      "guessSeconds": {
+        "label": "Tiempo para adivinar",
+        "hint": "Después de las respuestas, el jugador intenta adivinar quién es o pasa."
+      },
+      "validateSeconds": {
+        "label": "Tiempo para revisar el intento",
+        "hint": "Quien eligió el personaje revisa un intento que no coincidió exactamente."
+      }
+    },
+    "less": "10 segundos menos",
+    "more": "10 segundos más",
+    "secondsUnit": "segundos",
+    "themes": "Temas",
+    "themesHint": "Todos votan: antes de cada partida, 3 temas de los grupos activados pasan a una votación rápida. Yo elijo: tú escribes el tema cuando empieza la partida.",
+    "themeMode": "Cómo se elige el tema",
+    "themeVote": "Todos votan",
+    "themeHost": "Yo elijo",
+    "setsOn": "{on} de {total} grupos",
+    "allOn": "Activar todos",
+    "allOff": "Desactivar todos",
+    "setExamples": "Por ejemplo",
+    "needOneSet": "Activa al menos un grupo.",
+    "hostNoteTitle": "Tú escribes el tema",
+    "hostNote": "Cuando empiece la partida, escribes el tema que quieras, con algunas ideas a mano. Si pasan 30 s, todos votan."
+  },
+  "signIn": "Entrar con {provider}",
+  "editProfile": "Editar perfil",
+  "testAccount": "Sin Supabase, esto entra en una cuenta de prueba.",
+  "rooms": {
+    "title": "Salas",
+    "waiting": "{count, plural, one {# esperando} other {# esperando}}",
+    "roomOf": "Sala de {name}",
+    "meta": "{players}/{seats} jugadores · {seconds} s por etapa",
+    "join": "Entrar",
+    "joinRoom": "Entrar a la sala de {name}",
+    "empty": "No hay salas ahora. Crea una y aparecerá aquí.",
+    "full": "Llena",
+    "playing": "Jugando",
+    "noOpen": "No hay salas con lugar libre ahora. Crea una y aparecerá aquí.",
+    "seeAll": "Ver todas",
+    "locked": "Con contraseña"
+  },
+  "games": {
+    "title": "Elige un juego",
+    "soon": "Más juegos pronto",
+    "online": "{count, plural, =0 {Nadie jugando ahora} one {# jugador en línea} other {# jugadores en línea}}",
+    "back": "Juegos",
+    "whoAmI": {
+      "name": "¿Quién soy?",
+      "players": "2 a 4 jugadores",
+      "play": "Jugar",
+      "demoQuestion": "¿Soy un animal?",
+      "banner": {
+        "q1": "¿Soy un animal?",
+        "q2": "¿Tengo bigotes?",
+        "guess": "¿Soy un gato?",
+        "hit": "¡Correcto!"
+      }
+    },
+    "next": "Siguientes juegos",
+    "previous": "Juegos anteriores"
+  },
+  "user": {
+    "guest": "Estás jugando como invitado",
+    "guestBadge": "Invitado",
+    "guestHint": "Entra con Discord o Google para elegir nombre y avatar. Conservas tus partidas.",
+    "connected": "Conectado con {provider}",
+    "account": "Sesión iniciada",
+    "editProfile": "Editar perfil",
+    "signOut": "Cerrar sesión",
+    "testAccount": "Sin Supabase, esto entra en una cuenta de prueba.",
+    "reroll": "Otro nombre y bichito al azar"
+  },
+  "codeNotFound": "No hay ninguna sala con este código.",
+  "joining": "Entrando…",
+  "roomsPage": {
+    "back": "Juegos",
+    "title": "Salas",
+    "count": "{count, plural, =0 {No hay salas} one {# sala · {open} con lugar libre} other {# salas · {open} con lugar libre}}",
+    "create": "Crear sala",
+    "search": "Buscar",
+    "searchPlaceholder": "Busca por nombre de sala",
+    "clearSearch": "Borrar búsqueda",
+    "game": "Juego",
+    "allGames": "Todos los juegos",
+    "lang": "Idioma de la sala",
+    "allLangs": "Todos los idiomas",
+    "access": "Quién puede entrar",
+    "accessOptions": {
+      "all": "Todas las salas",
+      "public": "Públicas",
+      "private": "Con contraseña"
+    },
+    "empty": "No hay salas ahora. Crea una y aparecerá aquí.",
+    "emptyFiltered": "Ninguna sala coincide con estos filtros.",
+    "clearFilters": "Borrar filtros"
+  }
+}

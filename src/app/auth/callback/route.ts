@@ -43,11 +43,11 @@ export async function GET(request: Request) {
       console.error("auth callback: moving guest matches failed", e),
     );
   if (profile) {
-    const prefix = /^\/(en|pt|ja)(?:\/|$)/.exec(next)?.[1];
+    const prefix = /^\/(en|es|ja|pt)(?:\/|$)/.exec(next)?.[1];
     const lang: Lang = (LANGS as readonly string[]).includes(prefix ?? "")
       ? (prefix as Lang)
       : "en";
-    const room = /^\/(?:(?:en|pt|ja)\/)?r\/([A-Z0-9]{5})\/?$/.exec(next);
+    const room = /^\/(?:(?:en|es|ja|pt)\/)?r\/([A-Z0-9]{5})\/?$/.exec(next);
     await handOverSeats(
       guest.id,
       {

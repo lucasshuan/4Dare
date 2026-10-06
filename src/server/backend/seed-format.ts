@@ -53,7 +53,7 @@ export const entryId = (lang: Lang, id: string) => `${lang}-${id}`;
 /** The library id and language behind an app-facing id, or null for others. */
 export function parseEntryId(id: string): { lang: Lang; id: string } | null {
   const match =
-    /^(en|pt|ja)-((?:wd-Q|al-)\d+|hand-[a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(id);
+    /^(en|es|ja|pt)-((?:wd-Q|al-)\d+|hand-[a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(id);
   return match ? { lang: match[1] as Lang, id: match[2] } : null;
 }
 

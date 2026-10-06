@@ -5,10 +5,11 @@ import type { ThemeSource, ThemeStore } from "./backend/types";
 
 /** Only while the store's list never arrived (a server's first moments, or the store down). */
 const FALLBACK: Theme[] = [
-  { en: "Villains", pt: "Vilões", ja: "悪役", set: "heroes" },
-  { en: "Robots", pt: "Robôs", ja: "ロボット", set: "scifi" },
+  { en: "Villains", es: "Villanos", ja: "悪役", pt: "Vilões", set: "heroes" },
+  { en: "Robots", es: "Robots", ja: "ロボット", pt: "Robôs", set: "scifi" },
   {
     en: "Rich characters",
+    es: "Personajes ricos",
     pt: "Personagens ricos",
     ja: "お金持ちのキャラクター",
     set: "quirks",

@@ -18,9 +18,9 @@ const PER_SET = 3;
 /** Rows in example order become lists per set. */
 export function groupExamples(rows: ExampleRow[]): ThemeExamples {
   const out: ThemeExamples = {};
-  for (const { theme_set, en, pt, ja } of rows) {
+  for (const { theme_set, en, es, ja, pt } of rows) {
     const list = out[theme_set as ThemeSet] ?? [];
-    if (list.length < PER_SET) list.push({ en, pt, ja });
+    if (list.length < PER_SET) list.push({ en, es, ja, pt });
     out[theme_set as ThemeSet] = list;
   }
   return out;
@@ -30,7 +30,7 @@ export function groupExamples(rows: ExampleRow[]): ThemeExamples {
 async function readExamples(db: Db): Promise<ThemeExamples> {
   const { data, error } = await db
     .from("whoami_themes")
-    .select("en, pt, ja, theme_set")
+    .select("en, es, ja, pt, theme_set")
     .eq("active", true)
     .not("example", "is", null)
     .order("theme_set")

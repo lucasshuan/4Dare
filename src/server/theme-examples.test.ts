@@ -9,6 +9,7 @@ import {
 
 const row = (en: string, theme_set: string) => ({
   en,
+  es: `${en} (es)`,
   pt: `${en} (pt)`,
   ja: `${en} (ja)`,
   theme_set,
@@ -68,7 +69,14 @@ describe("theme examples", () => {
       warriors: [row("Pirates", ""), row("Ninjas", ""), row("Knights", "")].map(
         ({ theme_set: _, ...t }) => t,
       ),
-      scifi: [{ en: "Robots", pt: "Robots (pt)", ja: "Robots (ja)" }],
+      scifi: [
+        {
+          en: "Robots",
+          es: "Robots (es)",
+          pt: "Robots (pt)",
+          ja: "Robots (ja)",
+        },
+      ],
     });
   });
 
@@ -88,7 +96,7 @@ describe("theme examples", () => {
       expect(reads()).toBe(1);
       expect(calls).toEqual([
         "from whoami_themes",
-        "select en, pt, ja, theme_set",
+        "select en, es, ja, pt, theme_set",
         "eq active true",
         "not example is null",
         "order theme_set",

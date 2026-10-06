@@ -27,13 +27,23 @@ const SCRIPT: {
     seat: 1,
     from: "lobby",
     at: -40,
-    text: { en: "here!! 👋", pt: "cheguei!! 👋", ja: "来たよ!! 👋" },
+    text: {
+      en: "here!! 👋",
+      es: "¡¡llegué!! 👋",
+      pt: "cheguei!! 👋",
+      ja: "来たよ!! 👋",
+    },
   },
   {
     seat: 0,
     from: "lobby",
     at: -34,
-    text: { en: "hi everyone", pt: "oi gente", ja: "みんなこんにちは" },
+    text: {
+      en: "hi everyone",
+      es: "hola a todos",
+      pt: "oi gente",
+      ja: "みんなこんにちは",
+    },
   },
   {
     seat: 2,
@@ -41,6 +51,7 @@ const SCRIPT: {
     at: -22,
     text: {
       en: "last time I was Shrek and nobody guessed it for ten minutes, so this time I'm picking someone really hard for you",
+      es: "la última vez fui Shrek y nadie adivinó en diez minutos, así que esta vez voy a elegir a alguien muy difícil",
       pt: "da última vez eu era o Shrek e ninguém acertou por dez minutos, então dessa vez vou escolher alguém bem difícil pra vocês",
       ja: "前回シュレックだったのに10分もだれも当てられなかったから、今回はすごく難しいのを選ぶね",
     },
@@ -49,15 +60,26 @@ const SCRIPT: {
     seat: 3,
     from: "lobby",
     at: -12,
-    text: { en: "ready when you are", pt: "bora", ja: "いつでもいいよ" },
+    text: {
+      en: "ready when you are",
+      es: "listo cuando quieran",
+      pt: "bora",
+      ja: "いつでもいいよ",
+    },
   },
-  { seat: 1, from: "vote", at: 1.2, text: { en: "😂", pt: "😂", ja: "😂" } },
+  {
+    seat: 1,
+    from: "vote",
+    at: 1.2,
+    text: { en: "😂", es: "😂", pt: "😂", ja: "😂" },
+  },
   {
     seat: 2,
     from: "vote",
     at: 2.4,
     text: {
       en: "vote for this one!",
+      es: "¡voten por este!",
       pt: "vota nesse!",
       ja: "これに投票して！",
     },
@@ -66,13 +88,23 @@ const SCRIPT: {
     seat: 0,
     from: "pick",
     at: 3,
-    text: { en: "this is hard", pt: "essa é difícil", ja: "これは難しい" },
+    text: {
+      en: "this is hard",
+      es: "está difícil",
+      pt: "essa é difícil",
+      ja: "これは難しい",
+    },
   },
   {
     seat: 3,
     from: "turn",
     at: 1.5,
-    text: { en: "good luck 🍀", pt: "boa sorte 🍀", ja: "がんばって 🍀" },
+    text: {
+      en: "good luck 🍀",
+      es: "suerte 🍀",
+      pt: "boa sorte 🍀",
+      ja: "がんばって 🍀",
+    },
   },
   {
     seat: 1,
@@ -80,6 +112,7 @@ const SCRIPT: {
     at: 2.5,
     text: {
       en: "I have no idea who I am",
+      es: "no tengo idea de quién soy",
       pt: "não faço ideia de quem eu sou",
       ja: "自分がだれか全然わからない",
     },
@@ -88,7 +121,7 @@ const SCRIPT: {
     seat: 2,
     from: "result",
     at: 2,
-    text: { en: "gg!", pt: "boa!", ja: "おつかれ！" },
+    text: { en: "gg!", es: "¡bien jugado!", pt: "boa!", ja: "おつかれ！" },
   },
 ];
 

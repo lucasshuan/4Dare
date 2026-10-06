@@ -1,0 +1,90 @@
+{
+  "loading": "Abriendo la sala…",
+  "theme": "Tema:",
+  "goHome": "Volver al inicio",
+  "problem": {
+    "not_found": {
+      "title": "Esta sala ya no existe",
+      "body": "Se cerró o el código está mal. Revisa el código o crea una sala nueva."
+    },
+    "room_full": {
+      "title": "Esta sala está llena",
+      "body": "Todos los lugares están ocupados. Pide otra sala o crea la tuya."
+    },
+    "already_started": {
+      "title": "Esta partida ya empezó",
+      "body": "Puedes unirte a la siguiente en esta sala o crear la tuya."
+    },
+    "other": {
+      "title": "Algo salió mal",
+      "body": "Inténtalo de nuevo en un momento."
+    }
+  },
+  "moved": {
+    "title": "Ahora estás en otra sala",
+    "body": "Solo puedes estar en una sala a la vez, y entraste a {room}.",
+    "go": "Ir a esa sala",
+    "stay": "Volver a esta sala"
+  },
+  "pick": {
+    "searchLabel": "Personaje para {name}",
+    "changeImage": "Cambiar imagen",
+    "imageHint": "La tuya va en esta carta y se suma a las imágenes de {name}. La más elegida pasa a ser la principal.",
+    "random": "Al azar",
+    "randomAgain": "Otro al azar",
+    "randomHint": "Elige al azar uno de los personajes que mejor encajan con este tema",
+    "rateQuestion": "¿Encaja con el tema?",
+    "rateYes": "Encaja",
+    "rateNo": "No, otro al azar",
+    "rateThanks": "¡Gracias!",
+    "rateDismiss": "Cerrar"
+  },
+  "found": {
+    "question": "¿{name} encajaba con el tema?",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "vote": {
+    "kicker": "Votación del tema",
+    "title": "Vota por el tema",
+    "subtitle": "Gana el tema más votado. Si hay empate, decide la ruleta.",
+    "option": "Tema {n}",
+    "votes": "{count, plural, =0 {Sin votos} one {# voto} other {# votos}}",
+    "yourVote": "Tu voto",
+    "progress": "{done} de {total} votaron",
+    "waitingFor": "Aún votan: {names}",
+    "allVoted": "¡Todos votaron!",
+    "change": "toca otro tema para cambiar tu voto, o el tuyo otra vez para quitarlo",
+    "tieTitle": "¡Empate!",
+    "tie": "Girando la ruleta entre los temas empatados…",
+    "chosenTitle": "El tema es…",
+    "chosenByVotes": "Elegido por mayoría.",
+    "chosenByDraw": "La ruleta decidió.",
+    "chosen": "Tema elegido",
+    "announce": "Tema elegido: {theme}"
+  },
+  "theming": {
+    "kicker": "Tema",
+    "hostKicker": "Tú decides",
+    "title": "Elige el tema",
+    "subtitle": "Escribe cualquier tema. Después, cada uno elige un personaje que encaje.",
+    "label": "Tema de la partida",
+    "placeholder": "ej.: Piratas espaciales",
+    "submit": "Usar este tema",
+    "ideas": "Ideas",
+    "moreIdeas": "Otras ideas",
+    "fallback": "Si se acaba el tiempo, todos votan.",
+    "waitingTitle": "{name} está eligiendo el tema",
+    "waitingSubtitle": "Prepárate para elegir un personaje que encaje. Si se acaba el tiempo, todos votan.",
+    "chosenTitle": "El tema es…",
+    "chosenBy": "Elegido por {name}",
+    "announce": "Tema elegido: {theme}"
+  },
+  "password": {
+    "title": "Esta sala tiene contraseña",
+    "body": "Escribe la contraseña que te dio el anfitrión.",
+    "label": "Contraseña",
+    "enter": "Entrar",
+    "back": "Volver"
+  }
+}

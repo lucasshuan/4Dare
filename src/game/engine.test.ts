@@ -555,6 +555,7 @@ describe("the host types the theme", () => {
     expect(g.state.phase).toBe("picking");
     expect(g.state.theme).toEqual({
       en: "Space cowboys",
+      es: "Space cowboys",
       pt: "Space cowboys",
       ja: "Space cowboys",
       set: null,

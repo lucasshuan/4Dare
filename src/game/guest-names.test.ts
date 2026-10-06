@@ -25,35 +25,45 @@ describe("guest names", () => {
     expect(GUEST_NAME_COUNT).toBeGreaterThan(100_000);
   });
 
-  it("orders words per language and agrees in gender in Portuguese", () => {
+  it("orders words per language and agrees in gender in Portuguese and Spanish", () => {
     const cat = numberOf("WonderfulCat");
     expect(guestName(cat, "pt")).toBe("GatoMaravilhoso");
+    expect(guestName(cat, "es")).toBe("GatoMaravilloso");
     expect(guestName(cat, "ja")).toBe("すてきなネコ");
     const fox = numberOf("WonderfulFox");
     expect(guestName(fox, "pt")).toBe("RaposaMaravilhosa");
+    expect(guestName(fox, "es")).toBe("ZorroMaravilloso");
+    const frog = numberOf("WonderfulFrog");
+    expect(guestName(frog, "pt")).toBe("SapoMaravilhoso");
+    expect(guestName(frog, "es")).toBe("RanaMaravillosa");
   });
 
   it("makes hybrids of two nouns", () => {
     const n = numberOf("PotatoNinja");
     expect(guestName(n, "pt")).toBe("BatataNinja");
+    expect(guestName(n, "es")).toBe("PapaNinja");
     expect(guestName(n, "ja")).toBe("ジャガイモ忍者");
   });
 
   it("gives titles the noun's gender, after the noun in Japanese", () => {
     const fox = numberOf("QueenFox");
     expect(guestName(fox, "pt")).toBe("RainhaRaposa");
+    expect(guestName(fox, "es")).toBe("ReinaZorro");
     expect(guestName(fox, "ja")).toBe("キツネ女王");
     const cat = numberOf("KingCat");
     expect(guestName(cat, "pt")).toBe("ReiGato");
+    expect(guestName(cat, "es")).toBe("ReyGato");
     expect(guestName(cat, "ja")).toBe("ネコ大王");
   });
 
   it("gives gendered titles the other gender too", () => {
     const cat = numberOf("QueenCat");
     expect(guestName(cat, "pt")).toBe("RainhaGato");
+    expect(guestName(cat, "es")).toBe("ReinaGato");
     expect(guestName(cat, "ja")).toBe("ネコ女王");
     const fox = numberOf("KingFox");
     expect(guestName(fox, "pt")).toBe("ReiRaposa");
+    expect(guestName(fox, "es")).toBe("ReyZorro");
     expect(guestName(fox, "ja")).toBe("キツネ大王");
     expect(numberOf("QueenCat")).toBeGreaterThan(numberOf("QueenBrave"));
   });
@@ -61,15 +71,18 @@ describe("guest names", () => {
   it("translates legendary names to their local twin", () => {
     const n = numberOf("TGIF");
     expect(guestName(n, "pt")).toBe("Sextou");
+    expect(guestName(n, "es")).toBe("YaEsViernes");
     expect(guestName(n, "ja")).toBe("花金");
   });
 
   it("pairs titles with adjectives, half of them feminine", () => {
     const king = numberOf("KingSleepy");
     expect(guestName(king, "pt")).toBe("ReiSonolento");
+    expect(guestName(king, "es")).toBe("ReyDormilón");
     expect(guestName(king, "ja")).toBe("眠たい大王");
     const queen = numberOf("QueenBrave");
     expect(guestName(queen, "pt")).toBe("RainhaCorajosa");
+    expect(guestName(queen, "es")).toBe("ReinaValiente");
     expect(guestName(queen, "ja")).toBe("勇敢な女王");
   });
 
@@ -93,16 +106,17 @@ describe("guest names", () => {
   });
 
   it("has no duplicate or malformed words", () => {
-    for (const column of [0, 1, 2, 3] as const) {
+    for (const column of [0, 1, 2, 3, 4, 5] as const) {
       const adjectives = ADJECTIVES.map((a) => a[column]);
-      if (column !== 2)
-        expect(new Set(adjectives).size).toBe(adjectives.length);
+      expect(new Set(adjectives).size).toBe(adjectives.length);
+      // columns 2 and 5 of a noun are genders
       const nouns = NOUNS.map((n) => n[column]);
-      if (column !== 2) expect(new Set(nouns).size).toBe(nouns.length);
+      if (column !== 2 && column !== 5)
+        expect(new Set(nouns).size).toBe(nouns.length);
     }
     for (const word of [
       ...ADJECTIVES.flat(),
-      ...NOUNS.flatMap(([en, pt, , ja]) => [en, pt, ja]),
+      ...NOUNS.flatMap(([en, pt, , ja, es]) => [en, pt, ja, es]),
       ...TITLES.flat(),
       ...LEGENDARY.flat(),
     ])
@@ -114,7 +128,10 @@ describe("guest names", () => {
       expect(ja).not.toMatch(/[A-Za-z]/);
     for (const word of [
       ...[...ADJECTIVES, ...NOUNS, ...LEGENDARY].flatMap((r) => r.slice(0, 2)),
-      ...TITLES.flatMap((t) => t.slice(0, 4)),
+      ...ADJECTIVES.flatMap((a) => [a[4], a[5]]),
+      ...NOUNS.map((n) => n[4]),
+      ...LEGENDARY.map((l) => l[3]),
+      ...TITLES.flatMap((t) => [...t.slice(0, 4), t[6], t[7]]),
     ])
       expect(word).toMatch(/^\p{Lu}/u);
   });

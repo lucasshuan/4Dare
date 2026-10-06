@@ -385,7 +385,7 @@ function setTheme(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
   requireSeated(s, playerId);
   if (playerId !== s.hostId) fail("not_host");
   const t = cleanText(text.replace(/\s+/g, " "), MAX_THEME);
-  beginMatch(s, { en: t, pt: t, ja: t, set: null }, ctx);
+  beginMatch(s, { en: t, es: t, ja: t, pt: t, set: null }, ctx);
   showTheme(s, { tie: false, typed: true, rule: null }, ctx);
 }
 
