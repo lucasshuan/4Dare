@@ -47,6 +47,7 @@ import {
   updateSettings,
 } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
+import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
 import { StartDialog } from "./start-dialog";
 
@@ -184,153 +185,162 @@ export function LobbyScreen() {
     <Screen left={<HubBrand />} right={<HubActions />}>
       <div className="flex flex-wrap items-start gap-10 lg:gap-16">
         <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
-          <div className="flex flex-col gap-3">
-            <button
-              type="button"
-              onClick={async () => {
-                await leaving.run(() => leaveRoom(code));
-                router.push(GAME_PATHS[game]);
-              }}
-              className={backClass}
-            >
-              <ChevronLeft className="size-4" strokeWidth={2} />
-              {t("leave")}
-            </button>
-            {/* the room leads with its name; the greeting drops to a line under it */}
-            <h1 className={cn(titleClass, "wrap-break-word")}>{title}</h1>
-            {/* the QR code sits right of the greeting and the description (not on phones) */}
-            <div className="flex items-center gap-6">
-              <div className="flex min-w-0 flex-1 flex-col gap-3">
-                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
-                  {greeting}
-                </p>
-                <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
-                  {me.isHost
-                    ? t(view.round > 0 ? "subtitleHostAgain" : "subtitleHost")
-                    : withNames((n) =>
-                        t("subtitleGuest", { name: host ? n(host) : "" }),
-                      )}
-                </p>
+          {/* the greeting sits close to the code it explains */}
+          <div className="flex flex-col gap-4 short:gap-3">
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  await leaving.run(() => leaveRoom(code));
+                  router.push(GAME_PATHS[game]);
+                }}
+                className={backClass}
+              >
+                <ChevronLeft className="size-4" strokeWidth={2} />
+                {t("leave")}
+              </button>
+              {/* the room leads with its name; the greeting drops to a line under it */}
+              <h1 className={cn(titleClass, "wrap-break-word")}>{title}</h1>
+              {/* the QR code sits right of the greeting and the description (not on phones) */}
+              <div className="flex items-center gap-6">
+                <div className="flex min-w-0 flex-1 flex-col gap-3">
+                  <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
+                    {greeting}
+                  </p>
+                  <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
+                    {me.isHost
+                      ? t(view.round > 0 ? "subtitleHostAgain" : "subtitleHost")
+                      : withNames((n) =>
+                          t("subtitleGuest", { name: host ? n(host) : "" }),
+                        )}
+                  </p>
+                </div>
+                <RoomQr code={code} className="max-sm:hidden" />
               </div>
-              <RoomQr code={code} className="max-sm:hidden" />
             </div>
-          </div>
 
-          {/* desktop: "Copy link" right of the code; phones: under it */}
-          <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:items-center">
-            <div className="flex gap-2">
-              <span className="sr-only">
-                {t("codeLabel", { code: code.split("").join(" ") })}
-              </span>
-              {code.split("").map((c, i) => (
-                <span
-                  // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
-                  key={i}
-                  aria-hidden="true"
-                  className="flex h-20 w-14 items-center justify-center rounded-md border border-line bg-surface font-medium font-mono text-[40px] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
-                >
-                  {c}
+            {/* desktop: "Copy link" right of the code; phones: under it */}
+            <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:items-center">
+              <div className="flex gap-2">
+                <span className="sr-only">
+                  {t("codeLabel", { code: code.split("").join(" ") })}
                 </span>
-              ))}
+                {code.split("").map((c, i) => (
+                  <span
+                    // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
+                    key={i}
+                    aria-hidden="true"
+                    className="flex h-20 w-14 items-center justify-center rounded-md border border-line bg-surface font-medium font-mono text-[40px] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+              <Button
+                onClick={() =>
+                  copy(`${window.location.origin}/r/${code}`, t("linkCopied"))
+                }
+              >
+                <LinkIcon strokeWidth={1.75} />
+                {t("copyLink")}
+              </Button>
             </div>
-            <Button
-              onClick={() =>
-                copy(`${window.location.origin}/r/${code}`, t("linkCopied"))
-              }
-            >
-              <LinkIcon strokeWidth={1.75} />
-              {t("copyLink")}
-            </Button>
           </div>
-
-          {/* players and the room's past matches side by side, when the column is wide enough */}
-          <div className="@container">
-            <div className="grid grid-cols-1 gap-8 @xl:grid-cols-2 @xl:gap-6">
-              <div className="flex min-w-0 flex-col gap-4">
-                <h2 className="font-semibold text-xl">
-                  {t("players", {
-                    count: view.players.length,
-                    seats: view.settings.seats,
-                  })}
-                </h2>
-                <ul className="flex flex-col gap-3">
-                  <AnimatePresence initial={false}>
-                    {view.players.map((player) => {
-                      const p = player.isYou
-                        ? { ...player, ready: myReady }
-                        : player;
-                      return (
+          {/* who is here, and the room's past matches */}
+          <LobbyTabs
+            label={t("listsLabel")}
+            tabs={[
+              {
+                key: "players",
+                label: t("players"),
+                count: `${view.players.length}/${view.settings.seats}`,
+                panel: (
+                  <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <AnimatePresence initial={false}>
+                      {view.players.map((player) => {
+                        const p = player.isYou
+                          ? { ...player, ready: myReady }
+                          : player;
+                        return (
+                          <m.li
+                            key={p.id}
+                            layout
+                            {...riseIn}
+                            // the seat shows the colour that is theirs while they stay
+                            style={seatWash(p.colorSlot)}
+                            className="flex items-center gap-3 rounded-md p-3"
+                          >
+                            <Avatar avatar={p.avatar} seat={p.colorSlot} />
+                            <div className="flex min-w-0 flex-col">
+                              <span className="truncate font-semibold text-sm">
+                                {name(p, p.isYou)}
+                              </span>
+                              <span className="inline-flex items-center gap-1 font-medium text-[13px] text-ink-muted">
+                                {p.isHost ? (
+                                  <Crown
+                                    className="size-3.5"
+                                    strokeWidth={1.75}
+                                  />
+                                ) : null}
+                                {p.isHost
+                                  ? t("host")
+                                  : p.ready
+                                    ? t("ready")
+                                    : t("notReady")}
+                              </span>
+                            </div>
+                            {p.isHost ? null : (
+                              <span
+                                role="img"
+                                aria-label={
+                                  p.ready ? t("ready") : t("notReady")
+                                }
+                                className={cn(
+                                  "ml-auto flex size-7 shrink-0 items-center justify-center rounded-pill transition-colors duration-300",
+                                  p.ready
+                                    ? "bg-yes-soft text-yes"
+                                    : "bg-no-soft text-no",
+                                )}
+                              >
+                                {p.ready ? (
+                                  <Check
+                                    className="size-4"
+                                    strokeWidth={2.25}
+                                  />
+                                ) : (
+                                  <X className="size-4" strokeWidth={2.25} />
+                                )}
+                              </span>
+                            )}
+                          </m.li>
+                        );
+                      })}
+                      {Array.from({ length: empty }, (_, i) => (
                         <m.li
-                          key={p.id}
+                          // biome-ignore lint/suspicious/noArrayIndexKey: empty seats have no identity
+                          key={`empty-${i}`}
                           layout
                           {...riseIn}
-                          // the seat shows the colour that is theirs while they stay
-                          style={seatWash(p.colorSlot)}
-                          className="flex items-center gap-3 rounded-md p-3"
+                          className="flex items-center gap-3 rounded-md border-[1.5px] border-line border-dashed p-3 text-ink-muted"
                         >
-                          <Avatar avatar={p.avatar} seat={p.colorSlot} />
-                          <div className="flex min-w-0 flex-col">
-                            <span className="truncate font-semibold">
-                              {name(p, p.isYou)}
-                            </span>
-                            <span className="inline-flex items-center gap-1 font-medium text-[13px] text-ink-muted">
-                              {p.isHost ? (
-                                <Crown
-                                  className="size-3.5"
-                                  strokeWidth={1.75}
-                                />
-                              ) : null}
-                              {p.isHost
-                                ? t("host")
-                                : p.ready
-                                  ? t("ready")
-                                  : t("notReady")}
-                            </span>
-                          </div>
-                          {p.isHost ? null : (
-                            <span
-                              role="img"
-                              aria-label={p.ready ? t("ready") : t("notReady")}
-                              className={cn(
-                                "ml-auto flex size-7 shrink-0 items-center justify-center rounded-pill transition-colors duration-300",
-                                p.ready
-                                  ? "bg-yes-soft text-yes"
-                                  : "bg-no-soft text-no",
-                              )}
-                            >
-                              {p.ready ? (
-                                <Check className="size-4" strokeWidth={2.25} />
-                              ) : (
-                                <X className="size-4" strokeWidth={2.25} />
-                              )}
-                            </span>
-                          )}
+                          <span className="flex size-11 items-center justify-center rounded-pill border-[1.5px] border-line-strong border-dashed font-bold font-display">
+                            ?
+                          </span>
+                          <span className="font-medium">{t("emptySeat")}</span>
                         </m.li>
-                      );
-                    })}
-                    {Array.from({ length: empty }, (_, i) => (
-                      <m.li
-                        // biome-ignore lint/suspicious/noArrayIndexKey: empty seats have no identity
-                        key={`empty-${i}`}
-                        layout
-                        {...riseIn}
-                        className="flex items-center gap-3 rounded-md border-[1.5px] border-line border-dashed p-3 text-ink-muted"
-                      >
-                        <span className="flex size-11 items-center justify-center rounded-pill border-[1.5px] border-line-strong border-dashed font-bold font-display">
-                          ?
-                        </span>
-                        <span className="font-medium">{t("emptySeat")}</span>
-                      </m.li>
-                    ))}
-                  </AnimatePresence>
-                </ul>
-              </div>
-              <div className="flex min-w-0 flex-col gap-4">
-                <h2 className="font-semibold text-xl">{t("matches")}</h2>
-                <PastMatches matches={view.matches} />
-              </div>
-            </div>
-          </div>
+                      ))}
+                    </AnimatePresence>
+                  </ul>
+                ),
+              },
+              {
+                key: "matches",
+                label: t("matches"),
+                count: view.matches.length ? String(view.matches.length) : null,
+                panel: <PastMatches matches={view.matches} />,
+              },
+            ]}
+          />
         </section>
 
         <aside className="flex w-full flex-col gap-4 rounded-lg bg-surface p-6 lg:max-w-[416px] lg:flex-[1_1_360px]">
