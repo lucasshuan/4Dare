@@ -302,6 +302,18 @@ export function ImpostorBanner() {
         ))}
       </m.div>
 
+      {/* melts into the page below through the ground's own hue, not grey, behind the table so the faces stay sharp; not with the lights down, which reach the edge */}
+      <span
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-0 h-8 transition-opacity duration-500",
+          s.caught && "opacity-0",
+        )}
+        style={{
+          background:
+            "linear-gradient(in oklch to bottom, transparent, color-mix(in oklch, var(--art-impostor) 45%, var(--canvas)) 60%, var(--canvas))",
+        }}
+      />
+
       <m.div
         style={{ x: frontX, y: frontY }}
         // its own layer whether or not the pointer moves it, so it stacks the same
@@ -530,14 +542,6 @@ export function ImpostorBanner() {
           );
         })}
       </m.div>
-
-      {/* melts into the page below; not with the lights down, which reach the edge */}
-      <span
-        className={cn(
-          "pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-b from-transparent to-canvas/70 transition-opacity duration-500",
-          s.caught && "opacity-0",
-        )}
-      />
     </div>
   );
 }
