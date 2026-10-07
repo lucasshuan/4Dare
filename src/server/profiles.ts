@@ -134,6 +134,7 @@ export async function profileView(
   const open = sees(privacy.profile, reader);
   const hidden = {
     profile: !open,
+    mural: !open || !sees(privacy.mural, reader),
     activity: !open || !sees(privacy.activity, reader),
     showcase: !open || !sees(privacy.showcase, reader),
     contributions: !open || !sees(privacy.contributions, reader),

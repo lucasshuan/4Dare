@@ -9,6 +9,7 @@ import { supabaseChat } from "./supabase/chat";
 import { supabaseFiles } from "./supabase/files";
 import { supabaseImages } from "./supabase/images";
 import { supabaseMatches } from "./supabase/matches";
+import { supabaseMural } from "./supabase/mural";
 import { supabaseNotify } from "./supabase/notify";
 import { supabaseProfiles } from "./supabase/profiles";
 import { supabaseRooms } from "./supabase/rooms";
@@ -30,6 +31,7 @@ export function getBackend(): Backend {
       files: supabaseFiles(),
       auth: supabaseAuth(),
       profiles: supabaseProfiles(),
+      mural: supabaseMural(),
       notify: supabaseNotify(),
       chat: supabaseChat(),
     };

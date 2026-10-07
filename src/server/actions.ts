@@ -43,6 +43,7 @@ import {
   type Result,
 } from "./contract";
 import { readImage } from "./images";
+import { deleteLine, postLine, reportLine } from "./mural";
 import { countPick, nameWithPicture, sendPicture, wearing } from "./pictures";
 import {
   checkHandle as checkHandleFor,
@@ -680,6 +681,38 @@ export async function checkHandle(raw: string): Promise<Result<HandleCheck>> {
     if (!allow(`handle-check:${current.id}`, 120, 60_000))
       throw new GameError("rate_limited");
     return checkHandleFor(current.id, raw);
+  });
+}
+
+/** A line on `handle`'s mural, or a reply to one of its top lines; its id. */
+export async function postMuralLine(
+  handle: string,
+  body: string,
+  parentId: number | null,
+): Promise<Result<number>> {
+  return run(async () => {
+    if (typeof handle !== "string" || handle.length > 40) bad();
+    if (parentId !== null && !Number.isSafeInteger(parentId)) bad();
+    return postLine(handle, await me(), body, parentId);
+  });
+}
+
+/** Takes a mural line down (the mural's owner, or its author). */
+export async function deleteMuralLine(id: number): Promise<Result> {
+  return run(async () => {
+    if (!Number.isSafeInteger(id)) bad();
+    await deleteLine(id, (await me()).id);
+  });
+}
+
+/** Reports a mural line; whether it is hidden now. */
+export async function reportMuralLine(id: number): Promise<Result<boolean>> {
+  return run(async () => {
+    if (!Number.isSafeInteger(id)) bad();
+    const who = await me();
+    if (!allow(`mural-report:${who.id}`, 30, 60_000))
+      throw new GameError("rate_limited");
+    return reportLine(id, who);
   });
 }
 

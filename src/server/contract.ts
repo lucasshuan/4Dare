@@ -177,6 +177,7 @@ export interface ProfileView extends PersonRef {
   /** The parts the owner keeps from this reader: they come empty. */
   hidden: {
     profile: boolean;
+    mural: boolean;
     activity: boolean;
     showcase: boolean;
     contributions: boolean;
@@ -195,4 +196,26 @@ export interface ProfileView extends PersonRef {
   facts: FactView[];
   pictures: ContributedPicture[];
   characters: CharacterDTO[];
+}
+
+/** A line on a profile's mural, as a reader sees it. */
+export interface MuralLine {
+  id: number;
+  author: PersonRef;
+  body: string;
+  at: number;
+  /** Hidden by reports: only its author still sees it, marked. */
+  hidden: boolean;
+  mine: boolean;
+  canDelete: boolean;
+  /** One level only: replies have none. */
+  replies: MuralLine[];
+}
+
+export interface MuralView {
+  lines: MuralLine[];
+  /** Older top lines wait: ask with ?before= the last one's time. */
+  more: boolean;
+  canWrite: boolean;
+  canReply: boolean;
 }

@@ -266,6 +266,50 @@ export interface ProfileStore {
   update(id: PlayerId, patch: ProfilePatch): Promise<StoredProfile>;
 }
 
+/** A line on a profile's mural (table profile_comments). */
+export interface StoredComment {
+  id: number;
+  profileId: PlayerId;
+  authorId: PlayerId;
+  /** The top line it answers; null for a top line. */
+  parentId: number | null;
+  body: string;
+  /** Reported by enough people: only its author still sees it. */
+  hidden: boolean;
+  createdAt: number;
+}
+
+export interface MuralStore {
+  /**
+   * Top lines newest first, at most `limit`, older than `before` (ms) when
+   * given, with every reply to them, oldest first; `more` when older ones wait.
+   */
+  page(
+    profileId: PlayerId,
+    before: number | null,
+    limit: number,
+  ): Promise<{
+    lines: StoredComment[];
+    replies: StoredComment[];
+    more: boolean;
+  }>;
+  get(id: number): Promise<StoredComment | null>;
+  /**
+   * The new line's id; null past 8 lines a minute or 60 a day from its
+   * author. A reply must answer a top line of the same mural.
+   */
+  post(input: {
+    profileId: PlayerId;
+    authorId: PlayerId;
+    parentId: number | null;
+    body: string;
+  }): Promise<number | null>;
+  /** The line goes, and its replies with it. */
+  remove(id: number): Promise<void>;
+  /** One report per person; the third hides the line. Whether it is hidden now. */
+  report(id: number, reporterId: PlayerId): Promise<boolean>;
+}
+
 export interface Notifier {
   /** Tell everyone in the room that its state changed. Best effort. */
   roomChanged(code: string, version: number): Promise<void>;
@@ -335,6 +379,7 @@ export interface Backend {
   files: FileStore;
   auth: AuthService;
   profiles: ProfileStore;
+  mural: MuralStore;
   notify: Notifier;
   chat: ChatStore;
 }

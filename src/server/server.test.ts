@@ -494,6 +494,130 @@ describe("server, local mode", () => {
     expect(await A.rerollGuest()).toEqual({ ok: false, error: "unauthorized" });
   });
 
+  it("a mural: accounts write and reply one level, the owner takes lines down", async () => {
+    const { muralView } = await import("./mural");
+    as("w1");
+    const owner = must(await A.enterTestAccount());
+    const handle = owner.handle as string;
+    as("w2");
+    expect(await A.postMuralLine(handle, "oi", null)).toEqual({
+      ok: false,
+      error: "unauthorized",
+    });
+    const bia = must(await A.enterTestAccount());
+    expect(await A.postMuralLine(handle, "   ", null)).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    expect(await A.postMuralLine(handle, "x".repeat(201), null)).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    const line = must(
+      await A.postMuralLine(handle, "  Revanche   hoje às 22h?  ", null),
+    );
+    as("w1");
+    const reply = must(await A.postMuralLine(handle, "Bora!", line));
+    // a reply to a reply: one level only
+    expect(await A.postMuralLine(handle, "nope", reply)).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    const read = async (id: string, isGuest = false) =>
+      muralView(
+        handle,
+        {
+          id,
+          isGuest,
+          name: null,
+          guestNumber: 1,
+          avatar: owner.avatar,
+          lang: "pt",
+        },
+        "pt",
+        null,
+      );
+    const seen = await read("someone-else", true);
+    expect(seen).toMatchObject({
+      canWrite: false,
+      canReply: false,
+      more: false,
+      lines: [
+        {
+          id: line,
+          body: "Revanche hoje às 22h?",
+          author: { id: bia.id, handle: bia.handle },
+          canDelete: false,
+          replies: [{ id: reply, body: "Bora!", replies: [] }],
+        },
+      ],
+    });
+    // Bia may delete her own line, not the owner's reply
+    as("w2");
+    expect(await A.deleteMuralLine(reply)).toEqual({
+      ok: false,
+      error: "unauthorized",
+    });
+    // the owner takes Bia's line down, its reply with it
+    as("w1");
+    must(await A.deleteMuralLine(line));
+    expect((await read(owner.id))?.lines).toEqual([]);
+  });
+
+  it("the mural follows its owner's privacy, and three reports hide a line", async () => {
+    const { muralView } = await import("./mural");
+    as("v1");
+    const owner = must(await A.enterTestAccount());
+    const handle = owner.handle as string;
+    must(
+      await A.saveProfile(
+        profileForm(owner, {
+          name: "Owner",
+          color: owner.avatar.color,
+          avatar: "keep",
+          privacy: JSON.stringify({ muralWrite: "me", muralReply: "all" }),
+        }),
+      ),
+    );
+    as("v2");
+    must(await A.enterTestAccount());
+    expect(await A.postMuralLine(handle, "oi", null)).toEqual({
+      ok: false,
+      error: "unauthorized",
+    });
+    as("v1");
+    const line = must(
+      await A.postMuralLine(handle, "Aviso: sala às 22h", null),
+    );
+    as("v2");
+    must(await A.postMuralLine(handle, "Tô dentro", line));
+    const reporters = ["v3", "v4", "v5"];
+    let hidden = false;
+    for (const r of reporters) {
+      as(r);
+      must(await A.enterTestAccount());
+      hidden = must(await A.reportMuralLine(line));
+    }
+    expect(hidden).toBe(true);
+    const reader = {
+      id: "reader",
+      isGuest: true,
+      name: null,
+      guestNumber: 1,
+      avatar: owner.avatar,
+      lang: "pt" as const,
+    };
+    expect((await muralView(handle, reader, "pt", null))?.lines).toEqual([]);
+    // its author still sees it, marked
+    const own = await muralView(
+      handle,
+      { ...reader, id: owner.id, isGuest: false },
+      "pt",
+      null,
+    );
+    expect(own?.lines[0]).toMatchObject({ id: line, hidden: true });
+  });
+
   it("a profile change shows at once in the account's rooms", async () => {
     as("n3");
     const account = must(await A.enterTestAccount());

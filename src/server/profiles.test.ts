@@ -125,6 +125,7 @@ describe("profiles", () => {
       playing: null,
       hidden: {
         profile: false,
+        mural: false,
         activity: false,
         showcase: false,
         contributions: false,
