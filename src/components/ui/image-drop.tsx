@@ -16,6 +16,12 @@ import { riseIn } from "@/lib/motion";
 import { Button } from "./button";
 import { cropToWebp, useImageIntake } from "./use-image-intake";
 
+const SHAPES = {
+  portrait: { w: 640, h: 800 },
+  square: { w: 256, h: 256 },
+  banner: { w: 1600, h: 480 },
+} as const;
+
 /** Exports the current crop on demand: forms call it when they submit, so the latest crop always goes. */
 export interface ImageDropHandle {
   /** The cropped picture, or null when none is chosen. */
@@ -24,7 +30,8 @@ export interface ImageDropHandle {
 
 /**
  * Pick a picture (click, drag-and-drop or paste, also from a web page), then crop it.
- * Portrait 4:5 → 640×800 for characters; square → 256×256 for avatars.
+ * Portrait 4:5 → 640×800 for characters; square → 256×256 for avatars;
+ * banner 10:3 → 1600×480 for profile covers.
  * With `onDone` the person confirms the crop with a button; with `onChange` every crop is
  * sent shortly after it settles (null when the picture is removed), as a preview for forms with
  * their own save button; those forms take the picture itself from `ref` when they submit.
@@ -40,7 +47,7 @@ export function ImageDrop({
   ref?: Ref<ImageDropHandle>;
   onDone?: (blob: Blob) => void | Promise<void>;
   onChange?: (blob: Blob | null) => void;
-  shape?: "portrait" | "square";
+  shape?: keyof typeof SHAPES;
   busy?: boolean;
   className?: string;
 }) {
@@ -50,7 +57,7 @@ export function ImageDrop({
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [area, setArea] = useState<Area | null>(null);
-  const size = shape === "portrait" ? { w: 640, h: 800 } : { w: 256, h: 256 };
+  const size = SHAPES[shape];
   const { error, setError, over, dropHandlers, inputProps } = useImageIntake({
     onPicked: (url) => {
       setZoom(1);
@@ -95,7 +102,9 @@ export function ImageDrop({
                 shape === "portrait"
                   ? // on short windows the crop area shrinks with the height
                     "aspect-[4/5] short:max-w-[min(320px,calc((100dvh_-_420px)_*_0.8))]"
-                  : "aspect-square",
+                  : shape === "banner"
+                    ? "aspect-[10/3] max-w-[560px]"
+                    : "aspect-square",
               )}
             >
               <Cropper
@@ -159,7 +168,11 @@ export function ImageDrop({
               {...dropHandlers}
               className={cn(
                 "flex w-full max-w-[220px] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] border-dashed p-4 text-center font-medium text-ink-muted text-sm transition-colors",
-                shape === "portrait" ? "aspect-[4/5]" : "aspect-square",
+                shape === "portrait"
+                  ? "aspect-[4/5]"
+                  : shape === "banner"
+                    ? "aspect-[10/3] max-w-[560px]"
+                    : "aspect-square",
                 // short windows: a wide strip instead of a tall drop area
                 "short:aspect-auto short:max-w-[360px] short:flex-row short:flex-wrap short:gap-x-3 short:gap-y-0 short:py-4",
                 over

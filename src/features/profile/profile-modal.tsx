@@ -47,9 +47,7 @@ export function ProfileModal({ handle }: { handle: string }) {
             </Dialog.Close>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-            <div className="mx-auto w-full max-w-[1080px]">
-              <ProfileLoader handle={handle} />
-            </div>
+            <ProfileLoader handle={handle} mode="modal" />
           </div>
         </Dialog.Popup>
       </Dialog.Portal>

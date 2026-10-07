@@ -80,5 +80,97 @@
   "card": {
     "seeProfile": "Ver perfil",
     "guest": "Invitado"
+  },
+  "edit": "Editar perfil",
+  "private": "Perfil cerrado",
+  "privateText": "{name} muestra su perfil solo a algunas personas.",
+  "times": {
+    "morning": "Juega más por la mañana",
+    "afternoon": "Juega más por la tarde",
+    "night": "Juega más por la noche",
+    "dawn": "Juega más de madrugada"
+  },
+  "editor": {
+    "changeCover": "Cambiar portada",
+    "covers": "Portadas",
+    "noCover": "Color del avatar",
+    "uploadCover": "Subir imagen",
+    "coverTitle": "Imagen de portada",
+    "coverNames": {
+      "dawn": "Amanecer",
+      "meadow": "Pradera",
+      "sea": "Mar",
+      "dusk": "Atardecer",
+      "candy": "Dulce",
+      "night": "Noche"
+    },
+    "changeAvatar": "Cambiar avatar",
+    "avatarTitle": "Avatar",
+    "done": "Listo",
+    "name": "Nombre",
+    "handle": "@ del enlace",
+    "handleStatus": {
+      "ok": "Disponible",
+      "short": "Al menos 3 caracteres",
+      "long": "Como máximo 20 caracteres",
+      "chars": "Solo letras sin tilde, números y _",
+      "reserved": "Esa @ es de 4Dare",
+      "taken": "Esa @ ya es de otra persona",
+      "wait": "Podrás cambiarla de nuevo el {date}",
+      "checking": "Comprobando…"
+    },
+    "quote": "Frase",
+    "quotePlaceholder": "Una frase tuya",
+    "showcase": "Vitrina",
+    "showcaseHint": "Hasta 3 personajes, cada uno con una frase tuya.",
+    "pick": "Elegir personaje",
+    "swap": "Cambiar",
+    "remove": "Quitar",
+    "search": "Buscar personaje",
+    "searchPlaceholder": "Nombre del personaje",
+    "caption": "Tu frase sobre {name}",
+    "captionPlaceholder": "El amor de mi vida <3",
+    "noResults": "Ningún personaje con ese nombre.",
+    "about": "Sobre ti",
+    "aboutHint": "Lo que quede vacío no aparece en el perfil.",
+    "time": "Cuándo sueles jugar",
+    "timeNone": "No decir",
+    "timeShort": {
+      "morning": "Mañana",
+      "afternoon": "Tarde",
+      "night": "Noche",
+      "dawn": "Madrugada"
+    },
+    "langs": "Idiomas que hablas",
+    "accent": "Color de acento",
+    "accentHint": "En el anillo de nivel, las pestañas y las flores del jardín.",
+    "accentN": "Color {n}",
+    "privacy": "Privacidad",
+    "privacyHint": "Quién ve cada parte de tu perfil.",
+    "privacyRows": {
+      "profile": "Perfil",
+      "mural": "Muro",
+      "muralWrite": "Escribir en el muro",
+      "muralReply": "Responder mensajes",
+      "activity": "Actividad",
+      "showcase": "Vitrina",
+      "contributions": "Aportes",
+      "playing": "Jugando ahora"
+    },
+    "privacyHints": {
+      "profile": "Un perfil cerrado muestra solo nombre y avatar",
+      "activity": "Números, jardín y curiosidades",
+      "playing": "El juego de la partida en la que estás"
+    },
+    "audiences": {
+      "all": "Todos",
+      "played": "Quien jugó conmigo",
+      "friends": "Amigos (pronto)",
+      "me": "Solo yo"
+    },
+    "unsaved": "Cambios sin guardar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saved": "Perfil guardado"
   }
 }

@@ -2,12 +2,26 @@
 
 import { UserRoundX } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { PageLoader } from "@/components/ui/loader";
-import { ProfileBody } from "./profile-body";
+import { Screen } from "@/components/ui/screen";
+import { HubActions, HubBrand } from "@/features/home/hub-actions";
+import { ProfileBody, type ProfileMode } from "./profile-body";
 import { useProfile } from "./use-profile";
 
-/** An account's profile once it loads: a loader first, a short note when nobody has the handle. */
-export function ProfileLoader({ handle }: { handle: string }) {
+/**
+ * An account's profile once it loads: a loader first, a short note when
+ * nobody has the handle. `?edit=1` opens the owner's editor.
+ */
+export function ProfileLoader({
+  handle,
+  mode,
+  coverSlot,
+}: {
+  handle: string;
+  mode: ProfileMode;
+  coverSlot?: HTMLElement | null;
+}) {
   const t = useTranslations("player");
   const tc = useTranslations("common");
   const { data: view, isPending } = useProfile(handle);
@@ -20,5 +34,30 @@ export function ProfileLoader({ handle }: { handle: string }) {
         <p className="text-ink-muted">{t("notFoundText", { handle })}</p>
       </div>
     );
-  return <ProfileBody view={view} />;
+  // the data only comes in the browser, so the address can be read here
+  const editing =
+    new URLSearchParams(window.location.search).get("edit") === "1";
+  return (
+    <ProfileBody
+      key={view.id}
+      view={view}
+      mode={mode}
+      coverSlot={coverSlot}
+      startEditing={editing}
+    />
+  );
+}
+
+/** The profile as its own page: the cover runs the whole width, under the floating top bar. */
+export function ProfilePage({ handle }: { handle: string }) {
+  const [slot, setSlot] = useState<HTMLDivElement | null>(null);
+  return (
+    <Screen
+      left={<HubBrand />}
+      right={<HubActions />}
+      banner={<div ref={setSlot} />}
+    >
+      <ProfileLoader handle={handle} mode="page" coverSlot={slot} />
+    </Screen>
+  );
 }

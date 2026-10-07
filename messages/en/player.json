@@ -80,5 +80,97 @@
   "card": {
     "seeProfile": "See profile",
     "guest": "Guest"
+  },
+  "edit": "Edit profile",
+  "private": "Closed profile",
+  "privateText": "{name} shows their profile to some people only.",
+  "times": {
+    "morning": "Plays mostly in the morning",
+    "afternoon": "Plays mostly in the afternoon",
+    "night": "Plays mostly at night",
+    "dawn": "Plays mostly late at night"
+  },
+  "editor": {
+    "changeCover": "Change cover",
+    "covers": "Covers",
+    "noCover": "Avatar colour",
+    "uploadCover": "Upload picture",
+    "coverTitle": "Cover picture",
+    "coverNames": {
+      "dawn": "Dawn",
+      "meadow": "Meadow",
+      "sea": "Sea",
+      "dusk": "Dusk",
+      "candy": "Candy",
+      "night": "Night"
+    },
+    "changeAvatar": "Change avatar",
+    "avatarTitle": "Avatar",
+    "done": "Done",
+    "name": "Name",
+    "handle": "Link @",
+    "handleStatus": {
+      "ok": "Available",
+      "short": "At least 3 characters",
+      "long": "At most 20 characters",
+      "chars": "Only letters without accents, numbers and _",
+      "reserved": "That @ belongs to 4Dare",
+      "taken": "Someone else has that @",
+      "wait": "You can change it again on {date}",
+      "checking": "Checking…"
+    },
+    "quote": "Quote",
+    "quotePlaceholder": "A line of yours",
+    "showcase": "Showcase",
+    "showcaseHint": "Up to 3 characters, each with a line of yours.",
+    "pick": "Pick a character",
+    "swap": "Change",
+    "remove": "Remove",
+    "search": "Search a character",
+    "searchPlaceholder": "Character name",
+    "caption": "Your line about {name}",
+    "captionPlaceholder": "Love of my life <3",
+    "noResults": "No character with that name.",
+    "about": "About you",
+    "aboutHint": "Whatever stays empty doesn't show on your profile.",
+    "time": "When you usually play",
+    "timeNone": "Don't say",
+    "timeShort": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "night": "Night",
+      "dawn": "Late night"
+    },
+    "langs": "Languages you speak",
+    "accent": "Accent colour",
+    "accentHint": "On the level ring, the tabs and the garden's flowers.",
+    "accentN": "Colour {n}",
+    "privacy": "Privacy",
+    "privacyHint": "Who sees each part of your profile.",
+    "privacyRows": {
+      "profile": "Profile",
+      "mural": "Wall",
+      "muralWrite": "Writing on the wall",
+      "muralReply": "Replying to notes",
+      "activity": "Activity",
+      "showcase": "Showcase",
+      "contributions": "Contributions",
+      "playing": "Playing now"
+    },
+    "privacyHints": {
+      "profile": "A closed profile shows only name and avatar",
+      "activity": "Numbers, garden and fun facts",
+      "playing": "The game of the match you're in"
+    },
+    "audiences": {
+      "all": "Everyone",
+      "played": "People I played with",
+      "friends": "Friends (soon)",
+      "me": "Only me"
+    },
+    "unsaved": "Unsaved changes",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saved": "Profile saved"
   }
 }

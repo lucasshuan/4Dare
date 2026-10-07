@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
-import { Screen } from "@/components/ui/screen";
-import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { ProfileLoader } from "@/features/profile/profile-screen-view";
+import { ProfilePage as Page } from "@/features/profile/profile-screen-view";
 import { displayName } from "@/game/guest-names";
 import { normalizeHandle } from "@/game/profile/handle";
 import type { Lang } from "@/game/types";
@@ -42,11 +40,5 @@ export default async function ProfilePage({
 }: PageProps<"/[locale]/u/[handle]">) {
   const { locale, handle } = await params;
   setRequestLocale(locale);
-  return (
-    <Screen left={<HubBrand />} right={<HubActions />}>
-      <div className="-mx-4 overflow-hidden bg-canvas sm:mx-0 sm:rounded-xl">
-        <ProfileLoader handle={normalizeHandle(decodeURIComponent(handle))} />
-      </div>
-    </Screen>
-  );
+  return <Page handle={normalizeHandle(decodeURIComponent(handle))} />;
 }

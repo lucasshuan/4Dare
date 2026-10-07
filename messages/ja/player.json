@@ -80,5 +80,97 @@
   "card": {
     "seeProfile": "プロフィールを見る",
     "guest": "ゲスト"
+  },
+  "edit": "プロフィールを編集",
+  "private": "非公開のプロフィール",
+  "privateText": "{name}さんはプロフィールを一部の人にだけ公開しています。",
+  "times": {
+    "morning": "朝によく遊ぶ",
+    "afternoon": "昼によく遊ぶ",
+    "night": "夜によく遊ぶ",
+    "dawn": "深夜によく遊ぶ"
+  },
+  "editor": {
+    "changeCover": "カバーを変更",
+    "covers": "カバー",
+    "noCover": "アバターの色",
+    "uploadCover": "画像をアップロード",
+    "coverTitle": "カバー画像",
+    "coverNames": {
+      "dawn": "夜明け",
+      "meadow": "草原",
+      "sea": "海",
+      "dusk": "夕暮れ",
+      "candy": "キャンディ",
+      "night": "夜"
+    },
+    "changeAvatar": "アバターを変更",
+    "avatarTitle": "アバター",
+    "done": "完了",
+    "name": "名前",
+    "handle": "リンクの@",
+    "handleStatus": {
+      "ok": "使えます",
+      "short": "3文字以上",
+      "long": "20文字まで",
+      "chars": "半角英小文字・数字・_のみ",
+      "reserved": "その@は4Dareが使っています",
+      "taken": "その@はほかの人が使っています",
+      "wait": "{date}にまた変更できます",
+      "checking": "確認中…"
+    },
+    "quote": "ひとこと",
+    "quotePlaceholder": "あなたのひとこと",
+    "showcase": "ショーケース",
+    "showcaseHint": "キャラクターを3人まで、それぞれにひとこと。",
+    "pick": "キャラクターを選ぶ",
+    "swap": "変更",
+    "remove": "外す",
+    "search": "キャラクターを検索",
+    "searchPlaceholder": "キャラクター名",
+    "caption": "{name}へのひとこと",
+    "captionPlaceholder": "人生の推し <3",
+    "noResults": "その名前のキャラクターはいません。",
+    "about": "あなたについて",
+    "aboutHint": "空欄はプロフィールに表示されません。",
+    "time": "よく遊ぶ時間",
+    "timeNone": "言わない",
+    "timeShort": {
+      "morning": "朝",
+      "afternoon": "昼",
+      "night": "夜",
+      "dawn": "深夜"
+    },
+    "langs": "話せる言語",
+    "accent": "アクセントカラー",
+    "accentHint": "レベルのリング、タブ、花壇の花に使われます。",
+    "accentN": "色{n}",
+    "privacy": "プライバシー",
+    "privacyHint": "プロフィールの各部分を誰に見せるか。",
+    "privacyRows": {
+      "profile": "プロフィール",
+      "mural": "掲示板",
+      "muralWrite": "掲示板への書き込み",
+      "muralReply": "書き込みへの返信",
+      "activity": "アクティビティ",
+      "showcase": "ショーケース",
+      "contributions": "貢献",
+      "playing": "プレイ中"
+    },
+    "privacyHints": {
+      "profile": "非公開にすると名前とアバターだけ表示されます",
+      "activity": "数字・花壇・トリビア",
+      "playing": "いま遊んでいる試合のゲーム"
+    },
+    "audiences": {
+      "all": "全員",
+      "played": "一緒に遊んだ人",
+      "friends": "フレンド（近日）",
+      "me": "自分だけ"
+    },
+    "unsaved": "未保存の変更があります",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "saved": "プロフィールを保存しました"
   }
 }

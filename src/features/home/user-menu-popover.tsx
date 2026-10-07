@@ -201,7 +201,12 @@ export function UserMenuPopover({
                     ) : null}
                     <MenuItem
                       icon={<UserRoundPen strokeWidth={1.75} />}
-                      href="/profile"
+                      href={
+                        me.handle
+                          ? `${profilePath(me.handle)}?edit=1`
+                          : "/profile"
+                      }
+                      onClick={() => onOpenChange(false)}
                     >
                       {t("editProfile")}
                     </MenuItem>

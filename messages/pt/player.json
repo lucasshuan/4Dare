@@ -80,5 +80,97 @@
   "card": {
     "seeProfile": "Ver perfil",
     "guest": "Convidado"
+  },
+  "edit": "Editar perfil",
+  "private": "Perfil fechado",
+  "privateText": "{name} mostra o perfil só para algumas pessoas.",
+  "times": {
+    "morning": "Joga mais de manhã",
+    "afternoon": "Joga mais à tarde",
+    "night": "Joga mais à noite",
+    "dawn": "Joga mais de madrugada"
+  },
+  "editor": {
+    "changeCover": "Trocar capa",
+    "covers": "Capas",
+    "noCover": "Cor do avatar",
+    "uploadCover": "Enviar imagem",
+    "coverTitle": "Imagem da capa",
+    "coverNames": {
+      "dawn": "Amanhecer",
+      "meadow": "Campo",
+      "sea": "Mar",
+      "dusk": "Entardecer",
+      "candy": "Doce",
+      "night": "Noite"
+    },
+    "changeAvatar": "Trocar avatar",
+    "avatarTitle": "Avatar",
+    "done": "Pronto",
+    "name": "Nome",
+    "handle": "@ do link",
+    "handleStatus": {
+      "ok": "Disponível",
+      "short": "Pelo menos 3 caracteres",
+      "long": "No máximo 20 caracteres",
+      "chars": "Só letras sem acento, números e _",
+      "reserved": "Esse @ é do 4Dare",
+      "taken": "Esse @ já é de outra pessoa",
+      "wait": "Dá para trocar de novo em {date}",
+      "checking": "Conferindo…"
+    },
+    "quote": "Frase",
+    "quotePlaceholder": "Uma frase sua",
+    "showcase": "Vitrine",
+    "showcaseHint": "Até 3 personagens, cada um com uma frase sua.",
+    "pick": "Escolher personagem",
+    "swap": "Trocar",
+    "remove": "Tirar",
+    "search": "Buscar personagem",
+    "searchPlaceholder": "Nome do personagem",
+    "caption": "Sua frase sobre {name}",
+    "captionPlaceholder": "Amor da minha vida <3",
+    "noResults": "Nenhum personagem com esse nome.",
+    "about": "Sobre você",
+    "aboutHint": "O que ficar vazio não aparece no perfil.",
+    "time": "Quando costuma jogar",
+    "timeNone": "Não dizer",
+    "timeShort": {
+      "morning": "Manhã",
+      "afternoon": "Tarde",
+      "night": "Noite",
+      "dawn": "Madrugada"
+    },
+    "langs": "Idiomas que fala",
+    "accent": "Cor de destaque",
+    "accentHint": "No anel de nível, nas abas e nas flores do canteiro.",
+    "accentN": "Cor {n}",
+    "privacy": "Privacidade",
+    "privacyHint": "Quem vê cada parte do seu perfil.",
+    "privacyRows": {
+      "profile": "Perfil",
+      "mural": "Mural",
+      "muralWrite": "Escrever no mural",
+      "muralReply": "Responder recados",
+      "activity": "Atividade",
+      "showcase": "Vitrine",
+      "contributions": "Contribuições",
+      "playing": "Jogando agora"
+    },
+    "privacyHints": {
+      "profile": "Quem fecha o perfil mostra só nome e avatar",
+      "activity": "Números, canteiro e curiosidades",
+      "playing": "O jogo da partida em que você está"
+    },
+    "audiences": {
+      "all": "Todos",
+      "played": "Quem jogou comigo",
+      "friends": "Amigos (em breve)",
+      "me": "Só eu"
+    },
+    "unsaved": "Alterações não salvas",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "saved": "Perfil salvo"
   }
 }

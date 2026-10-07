@@ -9,6 +9,7 @@ import { buttonClass } from "@/components/ui/button";
 import type { Avatar as AvatarData } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { hours } from "./activity";
+import { bannerStyle } from "./banners";
 import { accentStyle } from "./profile-body";
 import { ProfileLink } from "./profile-link";
 import { usePlayerCard } from "./use-profile";
@@ -99,9 +100,7 @@ export function PersonCardBody({
     <div style={accentStyle(card?.accent ?? null)} className="flex flex-col">
       <div
         className="h-12"
-        style={{
-          background: `linear-gradient(120deg, ${person.avatar.color}, color-mix(in oklab, ${person.avatar.color} 60%, var(--accent)))`,
-        }}
+        style={bannerStyle(card?.banner ?? null, person.avatar.color)}
       />
       <div className="-mt-5 flex flex-col gap-3 px-4 pb-4">
         <div className="flex items-end gap-3">
@@ -143,22 +142,24 @@ export function PersonCardBody({
                 {card.quote}
               </p>
             ) : null}
-            <dl className="grid grid-cols-3 gap-1.5">
-              <Num
-                value={format.number(card.matches)}
-                label={t("kpis.matches", { n: card.matches })}
-              />
-              <Num
-                value={`${card.matches ? Math.round((card.wins / card.matches) * 100) : 0}%`}
-                label={t("kpis.wins")}
-              />
-              <Num
-                value={t("kpis.hoursValue", {
-                  n: format.number(hours(card.timeMs)),
-                })}
-                label={t("kpis.hours")}
-              />
-            </dl>
+            {card.numbers ? (
+              <dl className="grid grid-cols-3 gap-1.5">
+                <Num
+                  value={format.number(card.numbers.matches)}
+                  label={t("kpis.matches", { n: card.numbers.matches })}
+                />
+                <Num
+                  value={`${card.numbers.matches ? Math.round((card.numbers.wins / card.numbers.matches) * 100) : 0}%`}
+                  label={t("kpis.wins")}
+                />
+                <Num
+                  value={t("kpis.hoursValue", {
+                    n: format.number(hours(card.numbers.timeMs)),
+                  })}
+                  label={t("kpis.hours")}
+                />
+              </dl>
+            ) : null}
             <ProfileLink
               handle={card.handle}
               onClick={onLeave}
