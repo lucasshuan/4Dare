@@ -81,6 +81,7 @@
     "notDownloadable": "That site doesn't let us take its picture. Right-click it, choose “Copy image” and paste here."
   },
   "signInFailed": "Couldn't sign you in. Try again.",
+  "linkFailed": "Couldn't connect that account. It may already belong to another 4Dare account.",
   "categories": {
     "anime": "Anime & manga",
     "games": "Games",

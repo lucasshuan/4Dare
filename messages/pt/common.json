@@ -81,6 +81,7 @@
     "notDownloadable": "Esse site não deixa pegar a imagem. Clique nela com o botão direito, escolha “Copiar imagem” e cole aqui."
   },
   "signInFailed": "Não deu para entrar. Tente de novo.",
+  "linkFailed": "Não deu para conectar essa conta. Ela pode já estar ligada a outra conta do 4Dare.",
   "categories": {
     "anime": "Anime e mangá",
     "games": "Games",

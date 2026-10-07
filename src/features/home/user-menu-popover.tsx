@@ -9,6 +9,7 @@ import {
   Settings,
   Sun,
   UserRound,
+  UserRoundCog,
   UserRoundPen,
   Volume2,
   VolumeX,
@@ -28,6 +29,7 @@ import { LevelAvatar, XpBar } from "@/features/profile/level";
 import { accentStyle } from "@/features/profile/profile-body";
 import { profilePath } from "@/features/profile/profile-link";
 import { usePlayerCard } from "@/features/profile/use-profile";
+import { AccountDialog } from "@/features/settings/account-dialog";
 import { SettingsDialog } from "@/features/settings/settings-dialog";
 import { levelOf } from "@/game/profile/xp";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -63,6 +65,11 @@ export function UserMenuPopover({
   const openSettings = () => {
     onOpenChange(false);
     setSettingsOpen(true);
+  };
+  const [accountOpen, setAccountOpen] = useState(false);
+  const openAccount = () => {
+    onOpenChange(false);
+    setAccountOpen(true);
   };
   const signOutNow = async () => {
     if ((await run(() => signOut())).ok) {
@@ -169,11 +176,6 @@ export function UserMenuPopover({
                             : t("account")}
                   </Popover.Description>
                 </div>
-                {me.provider ? (
-                  <span className="ml-auto">
-                    <ProviderLogo provider={me.provider} />
-                  </span>
-                ) : null}
               </div>
               {numbers ? <XpBar xp={numbers.xp} /> : null}
               {me.isGuest ? (
@@ -241,6 +243,17 @@ export function UserMenuPopover({
                     >
                       {t("settings")}
                     </MenuItem>
+                    <MenuItem
+                      icon={<UserRoundCog strokeWidth={1.75} />}
+                      onClick={openAccount}
+                      end={
+                        me.provider ? (
+                          <ProviderLogo provider={me.provider} />
+                        ) : null
+                      }
+                    >
+                      {t("account")}
+                    </MenuItem>
                   </MenuItems>
                   <MenuSeparator />
                   <QuickRow>
@@ -261,6 +274,13 @@ export function UserMenuPopover({
         </Popover.Portal>
       </Popover.Root>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      {me.isGuest ? null : (
+        <AccountDialog
+          open={accountOpen}
+          onOpenChange={setAccountOpen}
+          me={me}
+        />
+      )}
     </>
   );
 }
@@ -279,22 +299,28 @@ function MenuItem({
   icon,
   href,
   onClick,
+  end,
   children,
 }: {
   icon: ReactNode;
   href?: string;
   onClick?: () => void;
+  /** At the far right of the row (the account's provider). */
+  end?: ReactNode;
   children: ReactNode;
 }) {
+  const tail = end ? <span className="ml-auto flex">{end}</span> : null;
   return href ? (
     <Link href={href} scroll={false} onClick={onClick} className={ITEM}>
       {icon}
       {children}
+      {tail}
     </Link>
   ) : (
     <button type="button" onClick={onClick} className={ITEM}>
       {icon}
       {children}
+      {tail}
     </button>
   );
 }

@@ -55,5 +55,28 @@
         }
       }
     }
+  },
+  "account": {
+    "title": "アカウント",
+    "email": "メール",
+    "noEmail": "メールなし",
+    "providers": "連携アカウント",
+    "providersHint": "どれでも4Dareにログインできます。",
+    "connected": "連携済み",
+    "connect": "連携する",
+    "disconnect": "連携を解除",
+    "lastOne": "ログイン方法が1つだけのときは解除できません。",
+    "data": "あなたのデータ",
+    "download": "データをダウンロード",
+    "downloadHint": "プロフィール・試合・実績・貢献のJSONファイル。",
+    "sessions": "セッション",
+    "signOutAll": "すべての端末からログアウト",
+    "signedOutAll": "すべての端末からログアウトしました。",
+    "delete": "アカウントを削除",
+    "deleteHint": "プロフィール・掲示板・実績は消えます。試合は「匿名ユーザー」として残ります。元に戻せません。",
+    "deleteType": "確認のため@{handle}と入力",
+    "deleteNow": "アカウントを削除する",
+    "deleted": "アカウントを削除しました。",
+    "testAccount": "テストアカウント（ローカルモード）"
   }
 }

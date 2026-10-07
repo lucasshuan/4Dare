@@ -20,13 +20,12 @@ import { Switch } from "@/components/ui/switch";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { Segmented } from "@/features/create/settings-fields";
 import { GAME_KEYS, type GameKey } from "@/game/games";
+import { GAME_OPTIONS, type GameOption, THEMES } from "@/game/options";
 import { LANGS, type Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
 import { useSwitchLanguage } from "@/lib/hooks/use-switch-language";
 import {
-  GAME_OPTIONS,
-  type GameOption,
   type Settings,
   SOUND_GROUPS,
   updateSettings,
@@ -216,8 +215,6 @@ function SoundPane() {
     </>
   );
 }
-
-const THEMES = ["light", "dark", "system"] as const;
 
 function LookPane() {
   const t = useTranslations("settings.look");

@@ -55,5 +55,28 @@
         }
       }
     }
+  },
+  "account": {
+    "title": "Cuenta",
+    "email": "Correo",
+    "noEmail": "Sin correo",
+    "providers": "Cuentas conectadas",
+    "providersHint": "Entra en 4Dare con cualquiera de ellas.",
+    "connected": "Conectada",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "lastOne": "La única forma de entrar se queda.",
+    "data": "Tus datos",
+    "download": "Descargar mis datos",
+    "downloadHint": "Un archivo JSON con perfil, partidas, logros y aportes.",
+    "sessions": "Sesiones",
+    "signOutAll": "Cerrar sesión en todos los dispositivos",
+    "signedOutAll": "Cerraste sesión en todos los dispositivos.",
+    "delete": "Eliminar cuenta",
+    "deleteHint": "Se van el perfil, el muro y los logros. Las partidas quedan, como “Usuario anónimo”. No se puede deshacer.",
+    "deleteType": "Escribe @{handle} para confirmar",
+    "deleteNow": "Eliminar mi cuenta",
+    "deleted": "Cuenta eliminada.",
+    "testAccount": "Cuenta de prueba (modo local)"
   }
 }

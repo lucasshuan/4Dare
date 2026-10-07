@@ -106,7 +106,7 @@
     "guestBadge": "Guest",
     "guestHint": "Sign in with Discord or Google to pick a name and avatar. Your matches come along.",
     "connected": "Connected with {provider}",
-    "account": "Signed in",
+    "account": "Account",
     "myProfile": "My profile",
     "editProfile": "Edit profile",
     "signOut": "Sign out",

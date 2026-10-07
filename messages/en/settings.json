@@ -55,5 +55,28 @@
         }
       }
     }
+  },
+  "account": {
+    "title": "Account",
+    "email": "E-mail",
+    "noEmail": "No e-mail",
+    "providers": "Connected accounts",
+    "providersHint": "Sign in to 4Dare with any of them.",
+    "connected": "Connected",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "lastOne": "The only way in stays.",
+    "data": "Your data",
+    "download": "Download my data",
+    "downloadHint": "A JSON file with your profile, matches, badges and contributions.",
+    "sessions": "Sessions",
+    "signOutAll": "Sign out on every device",
+    "signedOutAll": "You signed out on every device.",
+    "delete": "Delete account",
+    "deleteHint": "Your profile, wall and badges go. Your matches stay, as “Anonymous user”. This can't be undone.",
+    "deleteType": "Type @{handle} to confirm",
+    "deleteNow": "Delete my account",
+    "deleted": "Account deleted.",
+    "testAccount": "Test account (local mode)"
   }
 }

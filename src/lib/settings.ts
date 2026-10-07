@@ -2,24 +2,16 @@
 
 import { useSyncExternalStore } from "react";
 import type { GameKey } from "@/game/games";
+import {
+  GAME_OPTIONS,
+  type GameOption,
+  type GameOptions,
+  parseGameOptions,
+} from "@/game/options";
 
 /** The sound groups a person can turn down or off; sound.ts says which sound is in which. */
 export const SOUND_GROUPS = ["match", "clock", "chat", "room"] as const;
 export type SoundGroup = (typeof SOUND_GROUPS)[number];
-
-/**
- * Each game's own options, with their defaults. The settings dialog lists a
- * game's options from here, so a new game brings its own entry.
- */
-export const GAME_OPTIONS = {
-  "who-am-i": {
-    /** Passing the turn asks for a second tap. */
-    confirmPass: false,
-    /** The hand of the theme's popular characters under the card being filled. */
-    popularHand: true,
-  },
-} as const satisfies Record<GameKey, Record<string, boolean>>;
-export type GameOption<G extends GameKey> = keyof (typeof GAME_OPTIONS)[G];
 
 /** What this device remembers: how loud the game is, the chat bubbles and each game's options. */
 export type Settings = {
@@ -28,7 +20,7 @@ export type Settings = {
   muted: boolean;
   sounds: Record<SoundGroup, { on: boolean; volume: number }>;
   chatBubbles: boolean;
-  games: { [G in GameKey]: Record<GameOption<G>, boolean> };
+  games: GameOptions;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -57,7 +49,6 @@ const record = (v: unknown): Record<string, unknown> =>
 export function parseSettings(raw: unknown): Settings {
   const r = record(raw);
   const sounds = record(r.sounds);
-  const games = record(r.games);
   return {
     volume: unit(r.volume, DEFAULT_SETTINGS.volume),
     muted: flag(r.muted, DEFAULT_SETTINGS.muted),
@@ -69,17 +60,7 @@ export function parseSettings(raw: unknown): Settings {
       }),
     ) as Settings["sounds"],
     chatBubbles: flag(r.chatBubbles, DEFAULT_SETTINGS.chatBubbles),
-    games: Object.fromEntries(
-      Object.entries(GAME_OPTIONS).map(([game, options]) => {
-        const saved = record(games[game]);
-        return [
-          game,
-          Object.fromEntries(
-            Object.entries(options).map(([k, d]) => [k, flag(saved[k], d)]),
-          ),
-        ];
-      }),
-    ) as Settings["games"],
+    games: parseGameOptions(r.games),
   };
 }
 

@@ -106,7 +106,7 @@
     "guestBadge": "ゲスト",
     "guestHint": "DiscordかGoogleでログインすると名前とアバターを選べます。これまでの対戦も引き継がれます。",
     "connected": "{provider}と連携中",
-    "account": "ログイン中",
+    "account": "アカウント",
     "myProfile": "マイプロフィール",
     "editProfile": "プロフィールを編集",
     "signOut": "ログアウト",
