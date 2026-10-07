@@ -1,57 +1,55 @@
 "use client";
 
-import { m, useReducedMotion } from "motion/react";
+import { VenetianMask } from "lucide-react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { critterUri } from "@/components/ui/critter";
+import { useEffect, useState } from "react";
+import { HeldCard } from "@/features/who-am-i/who-am-i-banner";
 import { cn } from "@/lib/cn";
 
-/** One loop of the little scene, in seconds. */
-const LOOP = 7;
-
-/** The cards on the table: everyone holds the same character but one. */
+/** The cards on the table, left to right: left edge (% of the box) and tilt. */
 const CARDS = [
-  { x: 6, rot: -9, crew: true },
-  { x: 25, rot: -3, crew: true },
-  { x: 44, rot: 3, crew: false },
-  { x: 63, rot: 8, crew: true },
+  { x: 9, tilt: -8 },
+  { x: 31, tilt: -3 },
+  { x: 53, tilt: 3 },
+  { x: 75, tilt: 8 },
 ] as const;
-const CREW = { seed: "dare-crew", color: "#BFE3EA" };
-const ODD = { seed: "dare-odd", color: "#F4C7D9" };
-
-/** The odd card rises out of line while the cards are face up (stays up when still). */
-const rise = (still: boolean) =>
-  still
-    ? { initial: false as const, animate: { y: "-10%" } }
-    : {
-        animate: { y: ["0%", "0%", "-12%", "-12%", "0%"] },
-        transition: {
-          duration: LOOP,
-          times: [0, 0.3, 0.38, 0.8, 0.88],
-          repeat: Number.POSITIVE_INFINITY,
-          ease: "easeInOut" as const,
-        },
-      };
-
-function Face({ seed, color }: { seed: string; color: string }) {
-  return (
-    <div className="flex h-full flex-col gap-1.5 rounded-lg bg-surface p-1.5 shadow-card">
-      <div
-        className="aspect-4/5 overflow-hidden rounded-md"
-        style={{ backgroundColor: color }}
-      >
-        {/* biome-ignore lint/performance/noImgElement: generated svg data uri */}
-        <img src={critterUri(seed, color)} alt="" className="size-full" />
-      </div>
-      <span className="mx-1 mb-0.5 h-1.5 w-2/3 rounded-pill bg-line" />
-    </div>
-  );
-}
+/** A card's width, in % of the box. */
+const W = 22;
+const CREW = { seed: "imp-12", color: "#BFE3EA" };
+const ODD = { seed: "imp-13", color: "#BFE3EA" };
+/** Where the other card turns up, loop after loop. */
+const ODD_AT = [2, 0, 3, 1];
 
 /**
- * The Impostor's card art: four cards face down flip over, three show the
- * same character and one another, which rises out of line; then they all
- * turn back and shuffle. Still (the odd one up) for reduced motion, or with
- * `still` (a small thumbnail).
+ * One loop: cards shuffled face down, turned over (one isn't like the
+ * others), the lights go down and a spotlight sweeps the table, stops on the
+ * odd one, the stamp. `ms` is how long each step stays.
+ */
+const STEPS: {
+  ms: number;
+  up?: boolean;
+  line?: boolean;
+  dark?: boolean;
+  caught?: boolean;
+}[] = [
+  { ms: 800 },
+  { ms: 1500, up: true, line: true },
+  { ms: 1700, up: true, dark: true },
+  { ms: 2000, up: true, dark: true, caught: true },
+  { ms: 600, up: true },
+];
+/** The frame shown when still: the spotlight on the odd card, stamped. */
+const STILL = 3;
+
+/** The middle of card `i`, in % of the box. */
+const centre = (i: number) => CARDS[i].x + W / 2;
+
+/**
+ * The Impostor's card art: four cards turn over, all the same but one; the
+ * lights go down, a spotlight searches the table and lands on the odd one,
+ * stamped. The odd card moves every loop. Still (stamped) for reduced
+ * motion, or with `still`.
  */
 export function ImpostorSnapshot({
   className,
@@ -63,75 +61,157 @@ export function ImpostorSnapshot({
   const t = useTranslations("home.games.impostor");
   const reduced = useReducedMotion() ?? false;
   const still = forceStill || reduced;
+  const [{ step, loop }, setAt] = useState({ step: STILL, loop: 0 });
+
+  useEffect(() => {
+    if (still) return setAt({ step: STILL, loop: 0 });
+    let i = 0;
+    let n = 0;
+    let id: number;
+    const next = () => {
+      setAt({ step: i, loop: n });
+      id = window.setTimeout(next, STEPS[i].ms);
+      i = (i + 1) % STEPS.length;
+      if (i === 0) n += 1;
+    };
+    next();
+    return () => window.clearTimeout(id);
+  }, [still]);
+
+  const s = STEPS[step];
+  const odd = ODD_AT[loop % ODD_AT.length];
+  const spot = `${centre(odd)}%`;
+
   return (
     <div
       aria-hidden="true"
       className={cn(
-        "relative aspect-16/10 overflow-hidden rounded-lg bg-no-soft",
+        "relative isolate aspect-16/10 overflow-hidden rounded-lg bg-no-soft [container-type:size]",
         className,
       )}
     >
+      {/* soft light spots and a couple of masks */}
       <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-surface/40 blur-2xl" />
       <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/50 blur-2xl" />
-      {CARDS.map((c, i) => (
-        <m.div
-          // biome-ignore lint/suspicious/noArrayIndexKey: four fixed cards
-          key={i}
-          className="absolute bottom-[8%] w-[28%] perspective-[800px]"
-          style={{ left: `${c.x}%`, rotate: c.rot }}
-          {...(c.crew ? {} : rise(still))}
-        >
+      <VenetianMask
+        className="absolute top-[10%] right-[8%] size-[16cqh] rotate-12 text-no opacity-20"
+        strokeWidth={2.25}
+      />
+      <VenetianMask
+        className="absolute top-[38%] left-[3%] size-[10cqh] -rotate-12 text-apricot opacity-25"
+        strokeWidth={2.25}
+      />
+
+      {CARDS.map((c, i) => {
+        const theOdd = i === odd;
+        const card = theOdd ? ODD : CREW;
+        return (
           <m.div
-            className="relative transform-3d"
-            {...(still
-              ? { style: { rotateY: 180 } }
-              : {
-                  animate: { rotateY: [0, 0, 180, 180, 0] },
-                  transition: {
-                    duration: LOOP,
-                    times: [0, 0.08 + i * 0.03, 0.2 + i * 0.03, 0.82, 0.92],
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "easeInOut",
-                  },
-                })}
+            // biome-ignore lint/suspicious/noArrayIndexKey: four fixed seats
+            key={i}
+            className="absolute bottom-[7%]"
+            style={{ left: `${c.x}%`, width: `${W}%`, rotate: c.tilt }}
+            animate={
+              step === 0 && !still
+                ? {
+                    y: ["0%", "-14%", "0%"],
+                    rotate: [c.tilt, c.tilt - 8, c.tilt],
+                  }
+                : { y: "0%", rotate: c.tilt }
+            }
+            transition={{ duration: 0.6, delay: i * 0.06 }}
           >
-            {/* the back, as everyone sees it at first */}
-            <div className="flex aspect-[4/5.6] items-center justify-center rounded-lg bg-ink shadow-pop backface-hidden">
-              <span className="font-display font-extrabold text-[clamp(28px,4vw,44px)] text-butter">
-                ?
-              </span>
-            </div>
-            <div
-              className={cn(
-                "absolute inset-0 rotate-y-180 backface-hidden",
-                !c.crew && "rounded-lg outline-[3px] outline-no outline-solid",
-              )}
-            >
-              <Face {...(c.crew ? CREW : ODD)} />
+            <div className="perspective-[800px]">
+              <m.div
+                className="relative transform-3d"
+                initial={false}
+                animate={{ rotateY: s.up ? 180 : 0 }}
+                transition={{
+                  duration: still ? 0 : 0.55,
+                  delay: s.up && !still ? i * 0.08 : 0,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+              >
+                <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-ink shadow-pop backface-hidden">
+                  <VenetianMask
+                    className="size-[45%] text-butter"
+                    strokeWidth={2}
+                  />
+                </div>
+                <div
+                  className={cn(
+                    "absolute inset-0 rotate-y-180 rounded-[14%/11%] backface-hidden",
+                    theOdd &&
+                      s.caught &&
+                      "outline-[3px] outline-no outline-solid",
+                  )}
+                >
+                  <HeldCard seed={card.seed} color={card.color} fill />
+                </div>
+              </m.div>
             </div>
           </m.div>
-        </m.div>
-      ))}
-      <m.div
-        className="absolute top-[8%] left-[7%] max-w-[60%] origin-bottom-left rounded-lg rounded-bl-sm bg-surface px-3 py-2 font-bold font-display text-[clamp(13px,1.6vw,16px)] text-ink leading-tight shadow-card"
-        {...(still
-          ? {}
-          : {
-              initial: { opacity: 0, scale: 0.8 },
-              animate: {
-                opacity: [0, 0, 1, 1, 0],
-                scale: [0.8, 0.8, 1, 1, 0.9],
-              },
-              transition: {
-                duration: LOOP,
-                times: [0, 0.34, 0.42, 0.8, 0.88],
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeOut",
-              },
-            })}
-      >
-        {t("demoLine")}
-      </m.div>
+        );
+      })}
+
+      {/* lights down: a spotlight sweeps the table, then settles on the odd card */}
+      <AnimatePresence>
+        {s.dark ? (
+          <m.span
+            key={`spot-${loop}`}
+            className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[58%] size-[78cqh] rounded-pill shadow-[0_0_0_200vmax_rgba(11,15,23,0.7)]"
+            style={{
+              background:
+                "radial-gradient(circle, transparent 48%, rgba(11,15,23,0.7) 72%)",
+            }}
+            initial={{ opacity: 0, left: still ? spot : "4%" }}
+            animate={{
+              opacity: 1,
+              left: still ? spot : ["4%", "96%", spot],
+            }}
+            exit={{ opacity: 0 }}
+            transition={{
+              opacity: { duration: 0.35 },
+              left: { duration: still ? 0 : 1.5, ease: "easeInOut" },
+            }}
+          />
+        ) : null}
+      </AnimatePresence>
+
+      {/* the stamp on the odd card */}
+      <AnimatePresence>
+        {s.caught ? (
+          <m.span
+            key={`stamp-${loop}`}
+            className="-translate-x-1/2 -translate-y-1/2 absolute top-[58%] whitespace-nowrap rounded-md bg-no px-[3cqh] py-[1.2cqh] font-display font-extrabold text-[clamp(13px,8cqh,20px)] text-on-no uppercase tracking-[0.02em] shadow-pop"
+            style={{ left: spot }}
+            initial={
+              still ? { opacity: 0 } : { opacity: 0, scale: 2.4, rotate: -16 }
+            }
+            animate={{ opacity: 1, scale: 1, rotate: -9 }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+          >
+            {t("banner.caught")}
+          </m.span>
+        ) : null}
+      </AnimatePresence>
+
+      {/* "One of you has another." while the cards are up */}
+      <AnimatePresence>
+        {s.line ? (
+          <m.div
+            key="line"
+            initial={{ opacity: 0, scale: 0.8, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
+            transition={{ type: "spring", stiffness: 420, damping: 26 }}
+            className="absolute top-[8%] left-[7%] max-w-[60%] origin-bottom-left rounded-lg rounded-bl-sm bg-surface px-3 py-2 font-bold font-display text-[clamp(13px,1.6vw,16px)] text-ink leading-tight shadow-card"
+          >
+            {t("demoLine")}
+          </m.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

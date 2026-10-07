@@ -148,7 +148,7 @@
       "name": "Impostor",
       "players": "3 a 10 jugadores",
       "play": "Jugar",
-      "demoLine": "Uno de ustedes tiene otro.",
+      "demoLine": "Uno de ustedes tiene otra carta.",
       "pitch": "Todos tienen el mismo personaje menos uno, que ni lo sabe. Respondan por su carta con un toque y voten para sacar a quien desentona.",
       "banner": {
         "q": "¿Qué tan valiente es?",
