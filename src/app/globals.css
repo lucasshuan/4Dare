@@ -38,8 +38,8 @@
   /* each game's art (home card, page banner): livelier grounds than the soft tints; the Impostor's is dark in both themes, a room with the lights low */
   --art-whoami: #b4cff7;
   --art-whoami-2: #cdbff6;
-  --art-impostor: #383a41;
-  --art-impostor-2: #26282d;
+  --art-impostor: #46414f;
+  --art-impostor-2: #302c38;
   --on-avatar: #1e2433;
   /* One colour per player in the room, theirs from joining (seat-colors.ts): their ring, their name, the match backdrop. */
   --seat-1: #2b69c8;
@@ -183,8 +183,8 @@
   --no-soft: #4a1d14;
   --art-whoami: #21406e;
   --art-whoami-2: #362d68;
-  --art-impostor: #2a2c32;
-  --art-impostor-2: #1c1e22;
+  --art-impostor: #353140;
+  --art-impostor-2: #24212b;
   --seat-1: #86b4f7;
   --seat-2: #f0a566;
   --seat-3: #5ccfc6;
