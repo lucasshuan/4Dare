@@ -10,6 +10,7 @@ import { localFiles } from "./files";
 import { LOCAL_THEMES } from "./fixtures";
 import { localImages } from "./images";
 import { localMatches } from "./matches";
+import { localProfiles } from "./profiles";
 import { localRooms } from "./rooms";
 import { localThemes } from "./themes";
 
@@ -28,6 +29,7 @@ export function localBackend(): Backend {
     themes: themes(localThemes()),
     files: localFiles(),
     auth: localAuth(),
+    profiles: localProfiles(),
     // no push channel: the screens poll
     notify: {
       roomChanged: async () => {},

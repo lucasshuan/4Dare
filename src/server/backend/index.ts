@@ -10,6 +10,7 @@ import { supabaseFiles } from "./supabase/files";
 import { supabaseImages } from "./supabase/images";
 import { supabaseMatches } from "./supabase/matches";
 import { supabaseNotify } from "./supabase/notify";
+import { supabaseProfiles } from "./supabase/profiles";
 import { supabaseRooms } from "./supabase/rooms";
 import { supabaseThemes } from "./supabase/themes";
 import type { Backend } from "./types";
@@ -28,6 +29,7 @@ export function getBackend(): Backend {
       themes: themes(supabaseThemes()),
       files: supabaseFiles(),
       auth: supabaseAuth(),
+      profiles: supabaseProfiles(),
       notify: supabaseNotify(),
       chat: supabaseChat(),
     };

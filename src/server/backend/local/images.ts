@@ -142,6 +142,18 @@ export function localImages(characters: LocalCharacterStore): ImageStore {
         .slice(0, limit)
         .map(toImage);
     },
+    async byAuthor(playerId, withPending, limit) {
+      return [...rows.values()]
+        .filter(
+          (r) =>
+            r.createdBy === playerId &&
+            r.characterId !== null &&
+            (r.status === "active" || (withPending && r.status === "pending")),
+        )
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, limit)
+        .map(toImage);
+    },
     async attach(image, characterId) {
       if (image.characterId === characterId) return;
       seed(characterId);

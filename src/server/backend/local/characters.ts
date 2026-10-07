@@ -11,14 +11,26 @@ interface Row extends Character {
   popularity: number;
   /** Normalised name and aliases, for search. */
   keys: string[];
+  /** Who made it and when (ms): players' characters only (missing in older files). */
+  createdBy?: string;
+  createdAt?: number;
 }
 
 const CREATED_FILE = "characters.json";
 /** Library covers that moved off the fixture's picture: { "wd-Q302": url | null }, every language. */
 const IMAGES_FILE = "character-images.json";
 
-function toRow(c: Character, popularity: number): Row {
-  return { ...c, popularity, keys: [c.name, ...c.aliases].map(normalizeName) };
+function toRow(
+  c: Character,
+  popularity: number,
+  made?: Pick<Row, "createdBy" | "createdAt">,
+): Row {
+  return {
+    ...c,
+    ...made,
+    popularity,
+    keys: [c.name, ...c.aliases].map(normalizeName),
+  };
 }
 
 /** Moved covers by library id. */
@@ -36,7 +48,7 @@ function loadLibrary(): Map<string, Row> {
       rows.set(character.id, toRow(character, popularity));
   }
   for (const c of readJson<Row[]>(CREATED_FILE, []))
-    rows.set(c.id, toRow(c, c.popularity));
+    rows.set(c.id, toRow(c, c.popularity, c));
   for (const [id, url] of Object.entries(swappedImages())) {
     for (const lang of LANGS) {
       const r = rows.get(entryId(lang, id));
@@ -55,7 +67,13 @@ function rank(row: Row, q: string): number {
   return -1;
 }
 
-const strip = ({ keys: _k, popularity: _p, ...c }: Row): Character => c;
+const strip = ({
+  keys: _k,
+  popularity: _p,
+  createdBy: _b,
+  createdAt: _a,
+  ...c
+}: Row): Character => c;
 
 /** The local store, plus what the local picture store needs to move covers. */
 export type LocalCharacterStore = CharacterStore & {
@@ -109,7 +127,10 @@ export function localCharacters(): LocalCharacterStore {
         imageUrl: input.imageUrl,
         aliases: [],
       };
-      rows.set(c.id, toRow(c, 0));
+      rows.set(
+        c.id,
+        toRow(c, 0, { createdBy: input.createdBy, createdAt: Date.now() }),
+      );
       saveCreated();
       return c;
     },
@@ -137,6 +158,13 @@ export function localCharacters(): LocalCharacterStore {
         picked.push(strip(pool.splice(i, 1)[0]));
       }
       return picked;
+    },
+    async createdBy(playerId, limit) {
+      return [...rows.values()]
+        .filter((r) => r.id.startsWith("u-") && r.createdBy === playerId)
+        .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+        .slice(0, limit)
+        .map(strip);
     },
     // The starters live only in Supabase (whoami_theme_starters); the dev lab has fixtures.
     async starters() {

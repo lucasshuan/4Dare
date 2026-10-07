@@ -205,5 +205,17 @@ export function supabaseImages(): ImageStore {
           .limit(limit),
       );
     },
+    async byAuthor(playerId, withPending, limit) {
+      return many(
+        db()
+          .from("character_images")
+          .select(COLUMNS)
+          .eq("created_by", playerId)
+          .not("character_id", "is", null)
+          .in("status", withPending ? ["active", "pending"] : ["active"])
+          .order("created_at", { ascending: false })
+          .limit(limit),
+      );
+    },
   };
 }

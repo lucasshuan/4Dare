@@ -10,13 +10,29 @@ import { processSingleton, readJson, writeJson } from "./disk";
 /** Fake accounts made with "enter test account", keyed by the guest's id. */
 const ACCOUNTS_FILE = "test-accounts.json";
 
-interface TestAccount {
+export interface TestAccount {
   /** Missing on accounts made before handles: given on their next visit. */
   handle?: string;
   name: string | null;
   avatar: Avatar;
   provider: NonNullable<Account["provider"]>;
+  /** The guest's number, for the name an account without one shows (missing in older files). */
+  guestNumber?: number;
+  /** When it was made (ms; missing in older files). */
+  createdAt?: number;
 }
+
+/** The test accounts of this dev server, shared by the auth and profile stores. */
+export const testAccounts = () =>
+  processSingleton(
+    "test-accounts",
+    () =>
+      new Map<string, TestAccount>(
+        Object.entries(
+          readJson<Record<string, TestAccount>>(ACCOUNTS_FILE, {}),
+        ),
+      ),
+  );
 
 /**
  * Local mode: guests are the signed cookie (see auth/guest.ts), like online.
@@ -26,15 +42,7 @@ interface TestAccount {
 export function localAuth(): AuthService & {
   enterTestAccount(provider: "discord" | "google"): Promise<Account>;
 } {
-  const accounts = processSingleton(
-    "test-accounts",
-    () =>
-      new Map<string, TestAccount>(
-        Object.entries(
-          readJson<Record<string, TestAccount>>(ACCOUNTS_FILE, {}),
-        ),
-      ),
-  );
+  const accounts = testAccounts();
   const save = () => writeJson(ACCOUNTS_FILE, Object.fromEntries(accounts));
   const guest = async () => ensureGuest(await cookies());
 
@@ -51,8 +59,9 @@ export function localAuth(): AuthService & {
 
   const toMe = (g: Guest): Account => {
     const a = accounts.get(g.id);
-    if (a && !a.handle) {
-      a.handle = freeHandle(g.id, a.name);
+    if (a && (!a.handle || a.guestNumber === undefined)) {
+      a.handle ??= freeHandle(g.id, a.name);
+      a.guestNumber ??= g.guestNumber;
       save();
     }
     return {
@@ -100,11 +109,14 @@ export function localAuth(): AuthService & {
     async enterTestAccount(provider) {
       const g = await guest();
       const name = accounts.get(g.id)?.name ?? `Tester ${g.guestNumber % 100}`;
+      const known = accounts.get(g.id);
       accounts.set(g.id, {
-        handle: accounts.get(g.id)?.handle ?? freeHandle(g.id, name),
+        handle: known?.handle ?? freeHandle(g.id, name),
         name,
         avatar: g.avatar,
         provider,
+        guestNumber: g.guestNumber,
+        createdAt: known?.createdAt ?? Date.now(),
       });
       save();
       return toMe(g);

@@ -1,5 +1,6 @@
 // Shapes shared by server actions, route handlers and the UI.
 import type { GameKey } from "@/game/games";
+import type { Fact } from "@/game/profile/history";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
   Avatar,
@@ -93,3 +94,78 @@ export const AVATAR_COLORS = [
   "#F2E3A8",
   "#D7DDE8",
 ] as const;
+
+/** An account as a profile names it: in a curiosity, on the mural. */
+export interface PersonRef {
+  id: PlayerId;
+  handle: string;
+  name: string;
+  avatar: Avatar;
+}
+
+/** What the quick card shows of an account, opened from its avatar. */
+export interface PlayerCard extends PersonRef {
+  accent: string | null;
+  quote: string | null;
+  createdAt: number;
+  xp: number;
+  matches: number;
+  wins: number;
+  timeMs: number;
+}
+
+/** One game's card on a profile, with that game's own numbers. */
+export interface GameView {
+  game: GameKey;
+  matches: number;
+  wins: number;
+  timeMs: number;
+  /** Matches in the last 30 days. */
+  recent: number;
+  /** "Who am I?": cards discovered, the share discovered and the questions it took. */
+  discovered: number;
+  discoverRate: number | null;
+  avgQuestions: number | null;
+  bestQuestions: number | null;
+}
+
+/** A curiosity with its people named. */
+export type FactView =
+  | (Omit<Extract<Fact, { kind: "partner" }>, "id"> & { person: PersonRef })
+  | (Omit<Extract<Fact, { kind: "hardest" }>, "to"> & {
+      to: PersonRef | null;
+    })
+  | Extract<Fact, { kind: "fastest" | "theme" }>;
+
+/** A picture someone sent for a character, as their profile lists it. */
+export interface ContributedPicture {
+  id: string;
+  url: string;
+  /** Pending: only its author sees it, while the detector could not tell. */
+  status: "active" | "pending";
+  /** It is the character's cover now. */
+  cover: boolean;
+  /** The character in the reader's language; null when it has no name there. */
+  character: { id: string; name: string; origin: string | null } | null;
+}
+
+/** An account's profile page. */
+export interface ProfileView extends PersonRef {
+  accent: string | null;
+  quote: string | null;
+  createdAt: number;
+  /** The reader is this account. */
+  isMe: boolean;
+  xp: number;
+  matches: number;
+  wins: number;
+  timeMs: number;
+  /** The game of the match they are in now. */
+  playing: GameKey | null;
+  /** The last year's matches, for the garden: when, which game, won. */
+  plays: { at: number; game: GameKey; won: boolean }[];
+  games: GameView[];
+  facts: FactView[];
+  pictures: ContributedPicture[];
+  characters: CharacterDTO[];
+}

@@ -1,4 +1,6 @@
 import "server-only";
+import { isGameKey } from "@/game/games";
+import type { MatchMate, WhoAmIPart } from "@/game/profile/history";
 import type { Lang } from "@/game/types";
 import type { MatchStore } from "../types";
 import { json, serviceClient } from "./clients";
@@ -59,6 +61,45 @@ export function supabaseMatches(): MatchStore {
         voted_at: new Date().toISOString(),
       });
       if (error) throw error;
+    },
+    async totals(userId) {
+      const { data, error } = await serviceClient().rpc("player_totals", {
+        p_user: userId,
+      });
+      if (error) throw error;
+      // one row per game
+      return (data ?? []).reduce(
+        (sum, r) => ({
+          matches: sum.matches + r.matches,
+          wins: sum.wins + r.wins,
+          timeMs: sum.timeMs + Number(r.time_ms),
+          xp: sum.xp + r.xp,
+        }),
+        { matches: 0, wins: 0, timeMs: 0, xp: 0 },
+      );
+    },
+    async history(userId) {
+      const { data, error } = await serviceClient().rpc("player_matches", {
+        p_user: userId,
+        p_since: new Date(0).toISOString(),
+      });
+      if (error) throw error;
+      return (data ?? []).flatMap((r) =>
+        isGameKey(r.game)
+          ? [
+              {
+                matchId: r.match_id,
+                game: r.game,
+                finishedAt: Date.parse(r.finished_at),
+                place: r.place,
+                timeMs: r.time_ms,
+                xp: r.xp,
+                others: r.others as unknown as MatchMate[],
+                details: r.details as unknown as WhoAmIPart | null,
+              },
+            ]
+          : [],
+      );
     },
   };
 }

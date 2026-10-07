@@ -4,10 +4,12 @@
 // Server actions and route handlers only talk to these interfaces (via getBackend()).
 
 import type { ChatMessage, NewChatMessage } from "@/game/chat";
+import type { PlayedMatch } from "@/game/profile/history";
 import type { MatchRecord } from "@/game/record";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
   ActiveRoom,
+  Avatar,
   Character,
   Identity,
   Lang,
@@ -87,6 +89,8 @@ export interface CharacterStore {
   }>;
   /** Every active theme's starters, by theme, language then position (cached; local mode has none). */
   starters(): Promise<ThemeStarter[]>;
+  /** The characters a player made, each in the language it was named in, newest first. */
+  createdBy(playerId: PlayerId, limit: number): Promise<Character[]>;
 }
 
 /** Who sent a picture, as they looked then. */
@@ -164,6 +168,12 @@ export interface ImageStore {
   remove(id: string): Promise<void>;
   /** Pictures sent for a new name that never became a character, sent before `before` (ms). */
   orphans(before: number, limit: number): Promise<CharacterImage[]>;
+  /** A player's pictures of characters, newest first: the active ones, and the pending ones when `withPending`. */
+  byAuthor(
+    playerId: PlayerId,
+    withPending: boolean,
+    limit: number,
+  ): Promise<CharacterImage[]>;
 }
 
 /** Where the theme list lives: the fixtures locally, a table on Supabase. */
@@ -207,6 +217,26 @@ export interface AuthService {
   enterTestAccount?(provider: "discord" | "google"): Promise<Account>;
 }
 
+/** An account's profile (table profiles); guests have none. */
+export interface StoredProfile {
+  id: PlayerId;
+  handle: string;
+  name: string | null;
+  guestNumber: number;
+  avatar: Avatar;
+  /** When the account was made (ms). */
+  createdAt: number;
+  quote: string | null;
+  /** The colour of the XP ring, the tabs and the garden's flowers; null for the default. */
+  accent: string | null;
+}
+
+export interface ProfileStore {
+  byHandle(handle: string): Promise<StoredProfile | null>;
+  /** The accounts among `ids` (guests have none), in one read. */
+  byIds(ids: string[]): Promise<StoredProfile[]>;
+}
+
 export interface Notifier {
   /** Tell everyone in the room that its state changed. Best effort. */
   roomChanged(code: string, version: number): Promise<void>;
@@ -236,7 +266,7 @@ export interface ChatStore {
   reassign(from: PlayerId, to: PlayerId): Promise<void>;
 }
 
-/** Finished matches, kept per player (not shown anywhere yet). */
+/** Finished matches, kept per player: profiles read them. */
 export interface MatchStore {
   /** Saves a finished match; saving the same match id again does nothing. */
   record(match: MatchRecord): Promise<void>;
@@ -252,6 +282,17 @@ export interface MatchStore {
   themeStats(themeId: string, limit: number): Promise<PickStat[]>;
   /** Saves whether a character fit a theme for a player (drawn, or discovered); a new answer replaces theirs. */
   voteFit(vote: FitVote): Promise<void>;
+  /** A player's finished matches, newest first. */
+  history(userId: string): Promise<PlayedMatch[]>;
+  /** A player's numbers over every game, without reading every match. */
+  totals(userId: string): Promise<PlayerTotals>;
+}
+
+export interface PlayerTotals {
+  matches: number;
+  wins: number;
+  timeMs: number;
+  xp: number;
 }
 
 export interface Backend {
@@ -262,6 +303,7 @@ export interface Backend {
   themes: ThemeSource;
   files: FileStore;
   auth: AuthService;
+  profiles: ProfileStore;
   notify: Notifier;
   chat: ChatStore;
 }

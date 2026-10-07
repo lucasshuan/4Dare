@@ -7,7 +7,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname } from "node:path";
-import type { MatchRecord } from "@/game/record";
+import { type PlayedMatch, totalsOf } from "@/game/profile/history";
+import type { MatchRecord, PlayerRecord } from "@/game/record";
 import type { Lang } from "@/game/types";
 import { type PickStat, pickKey } from "../../theme-picks";
 import type { MatchStore } from "../types";
@@ -52,6 +53,45 @@ function tallyPickers(
 
 const utcDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
+/** A player's part of a saved match, as player_matches reads it. */
+function playedMatch(m: MatchRecord, p: PlayerRecord): PlayedMatch {
+  const gave = m.players.find(
+    (q) => q.pickedById === p.userId && !q.autoPicked,
+  );
+  return {
+    matchId: m.id,
+    // lines saved before there were other games
+    game: m.game ?? "who-am-i",
+    finishedAt: m.finishedAt,
+    place: p.place,
+    timeMs: p.timeMs,
+    xp: p.xp ?? 0,
+    others: m.players
+      .filter((q) => q.userId !== p.userId)
+      .map((q) => ({ id: q.userId, place: q.place, guest: q.wasGuest })),
+    details: {
+      themeId: m.themeId,
+      theme: m.theme,
+      result: p.result,
+      questions: p.questions,
+      guesses: p.guesses,
+      discoveredAt: p.discoveredAt,
+      characterId: p.characterId,
+      characterName: p.characterName,
+      pickedBy: p.pickedById,
+      gave: gave
+        ? {
+            to: gave.userId,
+            characterId: gave.characterId,
+            characterName: gave.characterName,
+            result: gave.result,
+            questions: gave.questions,
+          }
+        : null,
+    },
+  };
+}
+
 /** Local mode: one JSON line per finished match, appended to .data/matches.jsonl. */
 export function localMatches(): MatchStore {
   const path = dataPath("matches.jsonl");
@@ -82,6 +122,15 @@ export function localMatches(): MatchStore {
         ),
       ),
   );
+
+  const history = async (userId: string) =>
+    read()
+      .flatMap((m) =>
+        m.players
+          .filter((p) => p.userId === userId)
+          .map((p) => playedMatch(m, p)),
+      )
+      .sort((a, b) => b.finishedAt - a.finishedAt);
 
   return {
     async record(match) {
@@ -176,6 +225,10 @@ export function localMatches(): MatchStore {
         fits: v.fits,
       });
       writeJson(VOTES_FILE, Object.fromEntries(votes));
+    },
+    history,
+    async totals(userId) {
+      return totalsOf(await history(userId));
     },
   };
 }

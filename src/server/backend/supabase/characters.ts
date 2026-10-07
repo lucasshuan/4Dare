@@ -189,5 +189,27 @@ export function supabaseCharacters(): CharacterStore {
       return picked;
     },
     starters,
+    async createdBy(playerId, limit) {
+      const made = await db()
+        .from("characters")
+        .select("id")
+        .eq("created_by", playerId)
+        .like("id", "u-%")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (made.error) throw made.error;
+      const ids = (made.data ?? []).map((r) => r.id);
+      if (ids.length === 0) return [];
+      // named once, in the language of the room it was made in
+      const { data, error } = await db()
+        .from("character_entries")
+        .select(COLUMNS)
+        .in("character_id", ids);
+      if (error) throw error;
+      const named = new Map(
+        ((data ?? []) as Row[]).map((r) => [r.character_id, toCharacter(r)]),
+      );
+      return ids.flatMap((id) => named.get(id) ?? []);
+    },
   };
 }
