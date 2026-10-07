@@ -31,7 +31,7 @@ const CONTENT_LEAVES: Variants = {
  * scrolls (on phones only over a banner, where room is short): clear at the
  * top, frosted glass once something scrolls under it.
  * With a `banner`, it runs full width under the bar, which floats over it;
- * over a `darkBanner` (dark in both themes) the bar takes the dark theme
+ * over a `darkBanner` (dark in both themes) its clear buttons get a ground
  * until something scrolls under it.
  */
 export function Screen({
@@ -96,8 +96,8 @@ export function Screen({
 /**
  * The top bar: sticky, clear at the top, frosted once the page scrolls under
  * it, the same height on every page. `phones="scroll"` lets it scroll away
- * on phones. `dark` gives it the dark theme while it is clear, over a dark
- * banner. A parent's `leave` variant slides it up (the lobby, when the
+ * on phones. `dark` marks it `data-over="dark"` while it is clear over a
+ * dark banner, for the buttons that have no ground of their own. A parent's `leave` variant slides it up (the lobby, when the
  * match starts).
  */
 function TopBar({
@@ -119,7 +119,7 @@ function TopBar({
   return (
     <m.header
       variants={BAR_LEAVES}
-      data-theme={dark && !scrolled ? "dark" : undefined}
+      data-over={dark && !scrolled ? "dark" : undefined}
       className={cn(
         "sticky top-0 z-30 h-[72px] border-b px-4 pt-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft sm:h-[88px] sm:px-8 sm:pt-6 sm:short:h-[72px] sm:short:pt-4",
         phones === "scroll" && "max-sm:static",
