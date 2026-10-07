@@ -102,11 +102,7 @@ export function LogoMark({
   );
 }
 
-/**
- * Full logo, だれ on Japanese pages. Size it by height (`h-9 w-auto`); it
- * shrinks to fit a narrower parent. A soft shadow under it keeps it clear
- * over a banner.
- */
+/** Full logo, だれ on Japanese pages. Size it by height (`h-9 w-auto`); it shrinks to fit a narrower parent. */
 export function Logo({ className }: { className?: string }) {
   const ja = useLocale() === "ja";
   return (
@@ -114,10 +110,7 @@ export function Logo({ className }: { className?: string }) {
       viewBox={`-4 -4 ${ja ? LOGO_WIDTH.ja : LOGO_WIDTH.en} 838`}
       role="img"
       aria-label={ja ? "4だれ" : "4Dare"}
-      className={cn(
-        "max-w-full overflow-visible [filter:drop-shadow(0_1px_1.5px_rgb(18_22_31/0.3))_drop-shadow(0_2px_6px_rgb(18_22_31/0.25))]",
-        className,
-      )}
+      className={cn("max-w-full overflow-visible", className)}
     >
       <Mark />
       {ja
