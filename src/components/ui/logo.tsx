@@ -56,29 +56,16 @@ export const logoFile = (lang: string) =>
 
 export const BRAND = { blue: "#2B69C8", butter: "#F6E3A1" } as const;
 
-/** The ring of the card ground round the whole logo, in its 838-tall units: about 4px in the top bar. */
-const HALO = 104;
-
-/**
- * The 4 bubble and its "?"; when a parent `group` is hovered the bubble tilts
- * and the "?" leans the other way. `halo` draws only the bubble's ring, to sit
- * under it.
- */
-function Mark({ halo = false }: { halo?: boolean }) {
+/** The 4 bubble and its "?"; when a parent `group` is hovered the bubble tilts and the "?" leans the other way. */
+function Mark() {
   return (
     <g className="origin-bottom-left transition-transform duration-300 ease-soft [transform-box:fill-box] group-hover:-rotate-6 group-focus-visible:-rotate-6">
-      {halo ? (
-        <path d={FOUR} strokeWidth={HALO} />
-      ) : (
-        <>
-          <path fill={BRAND.blue} d={FOUR} />
-          <path
-            fill={BRAND.butter}
-            d={QUESTION}
-            className="origin-center transition-transform delay-75 duration-500 ease-soft [transform-box:fill-box] group-hover:rotate-12 group-focus-visible:rotate-12"
-          />
-        </>
-      )}
+      <path fill={BRAND.blue} d={FOUR} />
+      <path
+        fill={BRAND.butter}
+        d={QUESTION}
+        className="origin-center transition-transform delay-75 duration-500 ease-soft [transform-box:fill-box] group-hover:rotate-12 group-focus-visible:rotate-12"
+      />
     </g>
   );
 }
@@ -117,9 +104,8 @@ export function LogoMark({
 
 /**
  * Full logo, だれ on Japanese pages. Size it by height (`h-9 w-auto`); it
- * shrinks to fit a narrower parent. A ring of the card ground runs round it,
- * all rings first so none cuts into a neighbour: unseen on the page, it keeps
- * the logo clear over a banner.
+ * shrinks to fit a narrower parent. A soft shadow under it keeps it clear
+ * over a banner.
  */
 export function Logo({ className }: { className?: string }) {
   const ja = useLocale() === "ja";
@@ -128,14 +114,11 @@ export function Logo({ className }: { className?: string }) {
       viewBox={`-4 -4 ${ja ? LOGO_WIDTH.ja : LOGO_WIDTH.en} 838`}
       role="img"
       aria-label={ja ? "4だれ" : "4Dare"}
-      className={cn("max-w-full overflow-visible", className)}
+      className={cn(
+        "max-w-full overflow-visible [filter:drop-shadow(0_1px_1.5px_rgb(18_22_31/0.3))_drop-shadow(0_2px_6px_rgb(18_22_31/0.25))]",
+        className,
+      )}
     >
-      <g className="fill-surface stroke-surface" strokeLinejoin="round">
-        <Mark halo />
-        {(ja ? LETTERS_JA : LETTERS).map(([d, fill]) => (
-          <path key={fill} d={d} strokeWidth={ja ? 22 + HALO : HALO} />
-        ))}
-      </g>
       <Mark />
       {ja
         ? LETTERS_JA.map(([d, fill]) => (
