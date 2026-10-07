@@ -19,28 +19,29 @@ type Seat = "a" | "b" | "c" | "d" | "e";
 
 /**
  * One loop of the banner, a round in miniature: the cards come face down and
- * turn over (all the same but one), a question, everyone's answer lands on
- * the 1–10 line (one far from the rest), the vote piles up on that one, the
- * lights go down and the stamp comes. `ms` is how long each step stays.
+ * turn over (all the same but one), a question, everyone holds up their
+ * answer like a judge's score (one far from the rest), the vote piles up on
+ * that one, the lights go down and the stamp comes. `ms` is how long each step stays.
  */
 const STEPS: {
   ms: number;
   up?: boolean;
   ask?: "q" | "vote";
-  line?: boolean;
+  /** Everyone holds up their answer. */
+  answers?: boolean;
   votes?: boolean;
   caught?: boolean;
 }[] = [
   { ms: 900 },
   { ms: 1200, up: true },
   { ms: 1000, up: true, ask: "q" },
-  { ms: 2800, up: true, ask: "q", line: true },
+  { ms: 3200, up: true, ask: "q", answers: true },
   { ms: 900, up: true, ask: "vote" },
   { ms: 2000, up: true, ask: "vote", votes: true },
   { ms: 3200, up: true, caught: true, votes: true },
   { ms: 700, up: true },
 ];
-/** The frame shown when motion is reduced: the answers on the line. */
+/** The frame shown when motion is reduced: everyone's answer up. */
 const STILL = 3;
 
 /** Around the table, left to right; phones keep the middle three. `vote` is who they vote for. */
@@ -126,20 +127,86 @@ const pop = {
   transition: { type: "spring", stiffness: 420, damping: 26 },
 } as const;
 
-/** Phones' seats first, so the seats phones hide stack on top, never under. */
-const STACKING = [
-  ...SEATS.filter((p) => !p.place.includes("hidden")),
-  ...SEATS.filter((p) => p.place.includes("hidden")),
-];
+/** The ring's length, for a gauge drawn on a circle of radius 40. */
+const RING = 2 * Math.PI * 40;
 
-/** Where an answer sits on the line, and how high it stacks over the same answers before it. */
-function onLine(i: number) {
-  const n = SEATS[i].answer;
-  const at = STACKING.indexOf(SEATS[i]);
-  return {
-    left: `${((n - 1) / 9) * 100}%`,
-    stack: STACKING.slice(0, at).filter((s) => s.answer === n).length,
-  };
+/**
+ * A judge's round score paddle: the number in the middle and a gauge round
+ * the rim that fills to it out of 10, so a low score shows before it's read.
+ * `flagAt` (seconds) turns the odd one red.
+ */
+function ScorePaddle({
+  n,
+  delay,
+  flagAt,
+}: {
+  n: number;
+  delay: number;
+  flagAt: number | null;
+}) {
+  const fill = (n / 10) * RING;
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative size-[21cqh] rounded-pill bg-surface shadow-pop">
+        <svg
+          viewBox="0 0 100 100"
+          className="-rotate-90 absolute inset-0 size-full"
+          aria-hidden="true"
+        >
+          <circle
+            cx="50"
+            cy="50"
+            r="40"
+            fill="none"
+            strokeWidth="10"
+            className="stroke-sunken"
+          />
+          <m.circle
+            cx="50"
+            cy="50"
+            r="40"
+            fill="none"
+            strokeWidth="10"
+            strokeLinecap="round"
+            className="stroke-sky"
+            strokeDasharray={`${fill} ${RING}`}
+            initial={{ strokeDashoffset: fill }}
+            animate={{ strokeDashoffset: 0 }}
+            transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+          />
+          {flagAt !== null ? (
+            <m.circle
+              cx="50"
+              cy="50"
+              r="40"
+              fill="none"
+              strokeWidth="10"
+              strokeLinecap="round"
+              className="stroke-no"
+              strokeDasharray={`${fill} ${RING}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25, delay: flagAt }}
+            />
+          ) : null}
+        </svg>
+        <span className="absolute inset-0 flex items-center justify-center font-display font-extrabold text-[10.5cqh] text-ink leading-none">
+          {n}
+        </span>
+        {flagAt !== null ? (
+          <m.span
+            className="absolute inset-[16%] flex items-center justify-center rounded-pill bg-surface font-display font-extrabold text-[10.5cqh] text-no leading-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25, delay: flagAt }}
+          >
+            {n}
+          </m.span>
+        ) : null}
+      </div>
+      <span className="-mt-[0.8cqh] h-[9cqh] w-[2.4cqh] rounded-b-pill bg-[#C8925F] shadow-card" />
+    </div>
+  );
 }
 
 /**
@@ -269,70 +336,15 @@ export function ImpostorBanner() {
                 )}
               >
                 {t(s.ask)}
+                {s.ask === "q" ? (
+                  <span className="ml-2 inline-flex items-center gap-1 whitespace-nowrap rounded-pill bg-sunken px-2 py-0.5 align-middle font-semibold text-[0.68em] text-ink-muted">
+                    🐔 1–10 🦁
+                  </span>
+                ) : null}
               </m.div>
             ) : null}
           </AnimatePresence>
         </div>
-
-        {/* the 1–10 line the answers land on, as in the game */}
-        <AnimatePresence>
-          {s.line ? (
-            <m.div
-              key="line"
-              initial={{ opacity: 0, scaleX: 0.6 }}
-              animate={{ opacity: 1, scaleX: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.2 } }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-x-[22%] top-[31%] z-30 flex items-center gap-[2cqh] max-sm:inset-x-[6%]"
-            >
-              <span className="text-[10cqh] leading-none">🐔</span>
-              <div className="relative h-[2.4cqh] flex-1 rounded-pill bg-surface/90 shadow-card">
-                {SEATS.map((p, i) => {
-                  const { left, stack } = onLine(i);
-                  const odd = p.seat === ODD;
-                  return (
-                    <m.span
-                      key={p.seat}
-                      className={cn(
-                        "absolute bottom-[1.2cqh] block",
-                        p.place.includes("hidden") && "max-sm:hidden",
-                      )}
-                      style={{ left, x: "-50%" }}
-                      initial={{ opacity: 0, y: "-160%" }}
-                      animate={{
-                        opacity: 1,
-                        y: `${-stack * 62}%`,
-                        rotate: odd && !reduced ? [0, 0, -12, 12, -6, 0] : 0,
-                      }}
-                      transition={{
-                        y: {
-                          type: "spring",
-                          stiffness: 380,
-                          damping: 18,
-                          delay: reduced ? 0 : 0.15 + i * 0.22,
-                        },
-                        opacity: { delay: reduced ? 0 : 0.15 + i * 0.22 },
-                        rotate: { duration: 0.6, delay: 1.7 },
-                      }}
-                    >
-                      <Critter
-                        seed={p.seed}
-                        color={p.color}
-                        className={cn(
-                          "size-[13cqh] rounded-pill",
-                          odd
-                            ? "shadow-[0_0_0_2px_var(--surface),0_0_0_4px_var(--no)]"
-                            : "shadow-[0_0_0_2px_var(--surface)]",
-                        )}
-                      />
-                    </m.span>
-                  );
-                })}
-              </div>
-              <span className="text-[10cqh] leading-none">🦁</span>
-            </m.div>
-          ) : null}
-        </AnimatePresence>
 
         {SEATS.map((p, i) => {
           const odd = p.seat === ODD;
@@ -366,6 +378,55 @@ export function ImpostorBanner() {
                   ) : null}
                 </AnimatePresence>
               ) : null}
+
+              {/* the answer held up like a judge's score, its stick behind the card */}
+              <AnimatePresence>
+                {s.answers ? (
+                  <m.div
+                    key="score"
+                    className="-translate-x-1/2 absolute bottom-full left-1/2 -mb-[5cqh]"
+                    initial={
+                      reduced
+                        ? { opacity: 0 }
+                        : { opacity: 0, y: "45%", rotate: -16 }
+                    }
+                    animate={{
+                      opacity: 1,
+                      y: "0%",
+                      rotate:
+                        odd && !reduced ? [0, 0, -14, 12, -8, 0] : p.tilt * 0.5,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: "35%",
+                      transition: { duration: 0.2 },
+                    }}
+                    transition={{
+                      opacity: { delay: reduced ? 0 : 0.15 + i * 0.25 },
+                      y: {
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 17,
+                        delay: reduced ? 0 : 0.15 + i * 0.25,
+                      },
+                      rotate: odd
+                        ? { duration: 0.7, delay: 1.9 }
+                        : {
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 12,
+                            delay: 0.15 + i * 0.25,
+                          },
+                    }}
+                  >
+                    <ScorePaddle
+                      n={p.answer}
+                      delay={reduced ? 0 : 0.35 + i * 0.25}
+                      flagAt={odd ? (reduced ? 0 : 1.9) : null}
+                    />
+                  </m.div>
+                ) : null}
+              </AnimatePresence>
 
               {/* the votes piling up over a card */}
               <div className="-translate-x-1/2 absolute bottom-full left-1/2 mb-[2.6cqh] flex">
