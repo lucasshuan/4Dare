@@ -70,12 +70,13 @@ export const FRAME: Record<
   { root: string; overlap: string; belowCover: string }
 > = {
   page: {
-    root: "[--pad:0px]",
+    // the rail stays under the page's sticky top bar
+    root: "[--pad:0px] [--rail-top:88px] short:[--rail-top:72px]",
     overlap: "-mt-[72px] sm:-mt-[84px]",
     belowCover: "sm:pt-[96px]",
   },
   modal: {
-    root: "mx-auto w-full max-w-[1080px] [--pad:1rem] sm:[--pad:1.75rem]",
+    root: "mx-auto w-full max-w-[1080px] [--pad:1rem] [--rail-top:0px] sm:[--pad:1.75rem]",
     overlap: "-mt-12 sm:-mt-[52px]",
     belowCover: "sm:pt-16",
   },
@@ -425,7 +426,7 @@ function ProfileShow({
               >
                 <Tabs.List
                   aria-label={t("tabsLabel")}
-                  className="flex gap-1 overflow-x-auto py-3 max-sm:border-line max-sm:border-b max-sm:px-(--pad) sm:sticky sm:top-0 sm:flex-col sm:self-start sm:py-4 sm:pr-2.5 sm:pl-[max(0px,calc(var(--pad)-1rem))]"
+                  className="flex gap-1 overflow-x-auto py-3 max-sm:border-line max-sm:border-b max-sm:px-(--pad) sm:sticky sm:top-(--rail-top) sm:flex-col sm:self-start sm:py-4 sm:pr-2.5 sm:pl-[max(0px,calc(var(--pad)-1rem))]"
                 >
                   {tabs.map(({ value, Icon }) => (
                     <Tabs.Tab

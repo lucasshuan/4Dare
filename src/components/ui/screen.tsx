@@ -26,11 +26,11 @@ const CONTENT_LEAVES: Variants = {
 };
 
 /**
- * Page shell: a header row spanning the screen and a centred column.
- * `left={null}` drops the wordmark.
- * With a `banner`, it runs full width under the top bar, which stays at the
- * top as you scroll: see-through over the banner, frosted glass once there is
- * something scrolling under it.
+ * Page shell: a top bar spanning the screen and a centred column.
+ * `left={null}` drops the wordmark. The bar stays at the top as the page
+ * scrolls (on phones only over a banner, where room is short): clear at the
+ * top, frosted glass once something scrolls under it.
+ * With a `banner`, it runs full width under the bar, which floats over it.
  */
 export function Screen({
   left,
@@ -74,29 +74,34 @@ export function Screen({
     );
   }
   return (
-    <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:gap-10 sm:px-8 sm:pt-6 sm:pb-[calc(3rem+var(--dock))] sm:short:gap-6 sm:short:pt-4 sm:short:pb-[calc(1.5rem+var(--dock))]">
-      <m.header
-        variants={BAR_LEAVES}
-        className="flex w-full items-center justify-between gap-3"
-      >
-        {bar}
-      </m.header>
-      <m.main
-        variants={CONTENT_LEAVES}
-        className={cn("mx-auto w-full max-w-page flex-1", className)}
-      >
-        {children}
-      </m.main>
+    <div className="flex min-h-dvh flex-col">
+      <TopBar phones="scroll">{bar}</TopBar>
+      {/* with the bar's height, the column starts where it always did */}
+      <div className="flex flex-1 flex-col px-4 pt-2 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-4 sm:pb-[calc(3rem+var(--dock))] sm:short:pt-2 sm:short:pb-[calc(1.5rem+var(--dock))]">
+        <m.main
+          variants={CONTENT_LEAVES}
+          className={cn("mx-auto w-full max-w-page flex-1", className)}
+        >
+          {children}
+        </m.main>
+      </div>
     </div>
   );
 }
 
 /**
- * The bar over a banner: sticky, clear at the top, frosted once the page
- * scrolls under it. Its top padding matches the plain header's, so the bar
- * sits at the same height on every page; the bottom mirrors it.
+ * The top bar: sticky, clear at the top, frosted once the page scrolls under
+ * it, the same height on every page. `phones="scroll"` lets it scroll away
+ * on phones. A parent's `leave` variant slides it up (the lobby, when the
+ * match starts).
  */
-function TopBar({ children }: { children: ReactNode }) {
+function TopBar({
+  phones = "stick",
+  children,
+}: {
+  phones?: "stick" | "scroll";
+  children: ReactNode;
+}) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const check = () => setScrolled(window.scrollY > 4);
@@ -105,18 +110,22 @@ function TopBar({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("scroll", check);
   }, []);
   return (
-    <header
+    <m.header
+      variants={BAR_LEAVES}
       className={cn(
         "sticky top-0 z-30 h-[72px] border-b px-4 pt-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft sm:h-[88px] sm:px-8 sm:pt-6 sm:short:h-[72px] sm:short:pt-4",
+        phones === "scroll" && "max-sm:static",
         scrolled
           ? "border-line/70 bg-canvas/70 backdrop-blur-xl backdrop-saturate-150"
           : "border-transparent bg-transparent",
+        phones === "scroll" &&
+          "max-sm:border-transparent max-sm:bg-transparent max-sm:backdrop-blur-none",
       )}
     >
       <div className="flex w-full items-center justify-between gap-3">
         {children}
       </div>
-    </header>
+    </m.header>
   );
 }
 
