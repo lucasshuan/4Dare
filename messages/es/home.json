@@ -110,7 +110,10 @@
     "editProfile": "Editar perfil",
     "signOut": "Cerrar sesión",
     "testAccount": "Sin Supabase, esto entra en una cuenta de prueba.",
-    "reroll": "Otro nombre y bichito al azar"
+    "reroll": "Otro nombre y bichito al azar",
+    "settings": "Ajustes",
+    "soundOn": "Sonido activado. Silenciar",
+    "soundOff": "Sonido apagado. Activar"
   },
   "codeNotFound": "No hay ninguna sala con este código.",
   "joining": "Entrando…",

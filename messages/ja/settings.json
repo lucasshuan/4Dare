@@ -1,0 +1,59 @@
+{
+  "title": "設定",
+  "tabs": {
+    "sound": "サウンド",
+    "look": "見た目",
+    "game": "ゲーム",
+    "language": "言語"
+  },
+  "sound": {
+    "master": "全体の音量",
+    "mute": "すべてミュート",
+    "unmute": "音をオンにする",
+    "try": "試しに鳴らす",
+    "groups": {
+      "match": {
+        "label": "対戦",
+        "hint": "自分の番の合図と表彰台"
+      },
+      "clock": {
+        "label": "時計",
+        "hint": "残り数秒のカチカチ音"
+      },
+      "chat": {
+        "label": "チャット",
+        "hint": "チャットを閉じているときの新着"
+      },
+      "room": {
+        "label": "ルーム",
+        "hint": "誰かが入る・抜ける"
+      }
+    }
+  },
+  "look": {
+    "theme": "テーマ",
+    "themeHint": "システムは端末の設定に合わせます",
+    "themes": {
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム"
+    },
+    "bubbles": "チャットの吹き出し",
+    "bubblesHint": "チャットを閉じているときに新着を表示します"
+  },
+  "game": {
+    "pick": "ゲーム",
+    "options": {
+      "who-am-i": {
+        "confirmPass": {
+          "label": "パスの前に確認する",
+          "hint": "パスはもう一度押して確定します"
+        },
+        "popularHand": {
+          "label": "選ぶときに人気キャラを出す",
+          "hint": "記入中のカードの下に並ぶ手札"
+        }
+      }
+    }
+  }
+}

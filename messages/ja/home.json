@@ -110,7 +110,10 @@
     "editProfile": "プロフィールを編集",
     "signOut": "ログアウト",
     "testAccount": "Supabaseなしではテスト用アカウントに入ります。",
-    "reroll": "別の名前とキャラを引く"
+    "reroll": "別の名前とキャラを引く",
+    "settings": "設定",
+    "soundOn": "サウンドオン。ミュートする",
+    "soundOff": "サウンドオフ。オンにする"
   },
   "codeNotFound": "このコードのルームはありません。",
   "joining": "参加中…",

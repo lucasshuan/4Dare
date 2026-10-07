@@ -7,6 +7,7 @@ export const NAMESPACES = [
   "common",
   "home",
   "profile",
+  "settings",
   "lobby",
   "game",
   "result",

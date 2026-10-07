@@ -1,0 +1,59 @@
+{
+  "title": "Settings",
+  "tabs": {
+    "sound": "Sound",
+    "look": "Look",
+    "game": "Game",
+    "language": "Language"
+  },
+  "sound": {
+    "master": "Volume",
+    "mute": "Mute all",
+    "unmute": "Turn sound on",
+    "try": "Play a sample",
+    "groups": {
+      "match": {
+        "label": "Match",
+        "hint": "Your turn's steps and the podium"
+      },
+      "clock": {
+        "label": "Clock",
+        "hint": "The ticking in the last seconds"
+      },
+      "chat": {
+        "label": "Chat",
+        "hint": "A new line while the chat is folded"
+      },
+      "room": {
+        "label": "Room",
+        "hint": "Someone joins or leaves"
+      }
+    }
+  },
+  "look": {
+    "theme": "Theme",
+    "themeHint": "System follows your device",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "bubbles": "Chat bubbles",
+    "bubblesHint": "New lines pop up while the chat is folded"
+  },
+  "game": {
+    "pick": "Game",
+    "options": {
+      "who-am-i": {
+        "confirmPass": {
+          "label": "Confirm before passing",
+          "hint": "Pass asks for a second tap"
+        },
+        "popularHand": {
+          "label": "Popular characters while picking",
+          "hint": "The hand of cards under the card you fill"
+        }
+      }
+    }
+  }
+}

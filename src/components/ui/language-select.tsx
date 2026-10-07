@@ -4,8 +4,8 @@ import { Select } from "@base-ui/react/select";
 import { Check, ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { LANGS, type Lang } from "@/game/types";
-import { getPathname, usePathname } from "@/i18n/navigation";
 import type { DeferredProps } from "@/lib/hooks/use-deferred";
+import { useSwitchLanguage } from "@/lib/hooks/use-switch-language";
 import { Flag, LANGUAGE_TRIGGER } from "./language-switch";
 
 /** The language select itself, loaded after the page (language-switch.tsx shows a stand-in until then). */
@@ -16,7 +16,7 @@ export function LanguageSelect({
 }: DeferredProps) {
   const t = useTranslations("common");
   const locale = useLocale() as Lang;
-  const pathname = usePathname();
+  const switchLanguage = useSwitchLanguage();
   // Alphabetical by each language's own name, the same order on every page:
   // English, Español, Português, 日本語.
   const items = LANGS.map((l) => ({
@@ -30,14 +30,7 @@ export function LanguageSelect({
       open={open}
       onOpenChange={onOpenChange}
       onValueChange={(l) => {
-        if (!l || l === locale) return;
-        // A full load, not a client navigation: the whole app (its <html> included)
-        // lives under the locale, and re-rendering it on the client trips React
-        // over the theme script.
-        window.location.assign(
-          getPathname({ href: pathname, locale: l as Lang }) +
-            window.location.search,
-        );
+        if (l && l !== locale) switchLanguage(l as Lang);
       }}
     >
       <Select.Trigger

@@ -1,0 +1,59 @@
+{
+  "title": "Configurações",
+  "tabs": {
+    "sound": "Som",
+    "look": "Aparência",
+    "game": "Jogo",
+    "language": "Idioma"
+  },
+  "sound": {
+    "master": "Volume geral",
+    "mute": "Silenciar tudo",
+    "unmute": "Ligar o som",
+    "try": "Tocar exemplo",
+    "groups": {
+      "match": {
+        "label": "Partida",
+        "hint": "Os passos da sua vez e o pódio"
+      },
+      "clock": {
+        "label": "Relógio",
+        "hint": "O tique-taque nos últimos segundos"
+      },
+      "chat": {
+        "label": "Chat",
+        "hint": "Mensagem nova com o chat recolhido"
+      },
+      "room": {
+        "label": "Sala",
+        "hint": "Alguém entra ou sai"
+      }
+    }
+  },
+  "look": {
+    "theme": "Tema",
+    "themeHint": "Sistema segue o aparelho",
+    "themes": {
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    },
+    "bubbles": "Balões do chat",
+    "bubblesHint": "Mensagens novas aparecem com o chat recolhido"
+  },
+  "game": {
+    "pick": "Jogo",
+    "options": {
+      "who-am-i": {
+        "confirmPass": {
+          "label": "Confirmar antes de passar a vez",
+          "hint": "Passar pede um segundo toque"
+        },
+        "popularHand": {
+          "label": "Personagens populares ao escolher",
+          "hint": "A mão de cartas embaixo da carta que você preenche"
+        }
+      }
+    }
+  }
+}

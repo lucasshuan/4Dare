@@ -110,7 +110,10 @@
     "editProfile": "Editar perfil",
     "signOut": "Sair",
     "testAccount": "Sem Supabase, isso entra numa conta de teste.",
-    "reroll": "Sortear outro nome e bichinho"
+    "reroll": "Sortear outro nome e bichinho",
+    "settings": "Configurações",
+    "soundOn": "Som ligado. Silenciar",
+    "soundOff": "Som desligado. Ligar"
   },
   "codeNotFound": "Nenhuma sala com esse código.",
   "joining": "Entrando…",
