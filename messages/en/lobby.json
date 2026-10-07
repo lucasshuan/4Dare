@@ -57,13 +57,14 @@
   },
   "readyButton": "Ready",
   "leave": "Leave room",
-  "editSettings": "Edit settings",
+  "editSettings": "Edit advanced settings",
   "rename": "Rename room",
   "editVisibility": "Change who can join",
-  "settingsTitle": "Room settings",
+  "editGostos": "Change the tastes",
+  "settingsTitle": "Advanced settings",
   "saveSettings": "Save",
   "settingsSaved": "Settings saved",
-  "themeVote": "Everyone votes · {on} of {total} sets",
-  "themeVoteAll": "Everyone votes · every set",
-  "themeHost": "The host types the theme"
+  "themeVote": "Everyone votes on the theme",
+  "themeHost": "The host types the theme",
+  "themeCount": "{count, plural, one {# theme} other {# themes}}"
 }

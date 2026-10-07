@@ -126,6 +126,40 @@
     "quirks": "Jeito e manias",
     "looks": "Visual e cores"
   },
+  "gostos": {
+    "anime": {
+      "name": "Anime e mangá",
+      "examples": "Goku, Gojo, Luffy"
+    },
+    "animation": {
+      "name": "Desenhos",
+      "examples": "Mickey, Pica-Pau, Pato Donald"
+    },
+    "live": {
+      "name": "Filmes e séries",
+      "examples": "Darth Vader, Daenerys, Freddy Krueger"
+    },
+    "games": {
+      "name": "Games",
+      "examples": "Pikachu, Mario, Arthur Morgan"
+    },
+    "comics": {
+      "name": "Quadrinhos",
+      "examples": "Homem-Aranha, Batman, Hulk"
+    },
+    "books": {
+      "name": "Livros e lendas",
+      "examples": "Sherlock Holmes, Zeus, Drácula"
+    },
+    "faith": {
+      "name": "Fé e religião",
+      "examples": "Jesus, Maria, Salomão"
+    },
+    "real": {
+      "name": "Gente de verdade",
+      "examples": "Cristiano Ronaldo, Cleópatra, Neymar"
+    }
+  },
   "currentMatch": {
     "badge": "Partida em andamento",
     "phase": {

@@ -1,32 +1,36 @@
 "use client";
 
-import { Tooltip } from "@base-ui/react/tooltip";
-import { useQuery } from "@tanstack/react-query";
-import { Check, PenLine, UsersRound } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Minus,
+  PenLine,
+  Search,
+  UsersRound,
+  X,
+} from "lucide-react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { HintLabel } from "@/components/ui/hint-label";
 import { LayoutMotion } from "@/components/ui/layout-motion";
-import { THEME_SET_KEYS, THEME_SETS, type ThemeSet } from "@/game/theme-sets";
+import { letsIn } from "@/game/gostos";
+import { THEME_SETS, type ThemeSet } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
-import type { CreateRoomInput } from "@/server/contract";
-import type { ThemeExamples } from "@/server/theme-examples";
+import type { CreateRoomInput, ThemeCatalogEntry } from "@/server/contract";
+import { ThemeCountLine } from "./gosto-fields";
+import { useThemeCatalog } from "./theme-catalog";
 
-type ThemeSettings = Pick<CreateRoomInput, "themeMode" | "themeSets">;
-type SetTooltip = Tooltip.Handle<ThemeSet>;
+type ThemeSettings = Pick<
+  CreateRoomInput,
+  "game" | "themeMode" | "offGostos" | "offThemes"
+>;
 
 const spring = { type: "spring", stiffness: 420, damping: 32 } as const;
-/** A set card's face: lifts on hover, shrinks a little when pressed. */
-const CARD_FACE = {
-  rest: { y: 0, scale: 1 },
-  hover: { y: -2 },
-  press: { scale: 0.96 },
-} as const;
-/** Pastel tile behind each set's emoji, shifted every row so columns don't repeat. */
+/** Pastel tile behind each set's emoji. */
 const TONES = [
   "bg-sky-soft",
   "bg-butter-soft",
@@ -34,7 +38,6 @@ const TONES = [
   "bg-yes-soft",
   "bg-no-soft",
 ];
-const toneOf = (i: number) => TONES[(i + Math.floor(i / 5)) % TONES.length];
 const fadeSwap = {
   initial: { opacity: 0, y: 8 },
   animate: {
@@ -91,223 +94,311 @@ function ModeSwitch({
   );
 }
 
-/** A set's example themes in this language, from the whoami_themes table: empty until they arrive. */
-function useExamples(set: ThemeSet): string[] {
-  const lang = useLocale() as Lang;
-  const { data } = useQuery({
-    queryKey: ["theme-examples"],
-    queryFn: async (): Promise<ThemeExamples> => {
-      const res = await fetch("/api/themes/examples");
-      if (!res.ok) throw new Error(`theme examples: ${res.status}`);
-      return ((await res.json()) as { examples: ThemeExamples }).examples;
-    },
-    staleTime: Number.POSITIVE_INFINITY,
-  });
-  return data?.[set]?.map((example) => example[lang]) ?? [];
-}
+/** Lowercase and without accents, so "pokemon" finds "Pokémon". */
+const plain = (text: string) =>
+  text
+    .toLocaleLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 
-/** A few themes from the set, one per line. */
-function Examples({ set }: { set: ThemeSet }) {
-  const t = useTranslations("home.createRoom");
-  const examples = useExamples(set);
-  if (!examples.length) return null;
+/** A checkbox drawn as a box: on, off, or (for a set) partly on. */
+function Box({ state }: { state: boolean | "mixed" }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="font-semibold text-[11px] text-ink-muted uppercase tracking-[0.08em]">
-        {t("setExamples")}
-      </span>
-      <ul className="flex flex-col gap-1">
-        {examples.map((example) => (
-          <li
-            key={example}
-            className="flex items-baseline gap-2 font-semibold text-[13px] text-ink leading-4"
-          >
-            <span
-              aria-hidden
-              className="size-1.5 shrink-0 rounded-full bg-ink-muted/50"
-            />
-            {example}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-/**
- * One tooltip for the whole grid: it glides from card to card and swaps its
- * examples as the pointer moves.
- */
-function ExamplesTooltip({ handle }: { handle: SetTooltip }) {
-  return (
-    <Tooltip.Root handle={handle} disableHoverablePopup>
-      {({ payload }) => (
-        <Tooltip.Portal>
-          <Tooltip.Positioner
-            side="top"
-            sideOffset={8}
-            className="pointer-events-none z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) select-none transition-[top,left,right,bottom,transform] duration-300 ease-soft data-instant:transition-none motion-reduce:transition-none"
-          >
-            <Tooltip.Popup className="relative h-(--popup-height,auto) w-66 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-md bg-surface shadow-pop outline-none transition-[height,opacity,scale] duration-300 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0 data-instant:transition-none motion-reduce:transition-none">
-              <Tooltip.Viewport className="relative size-full overflow-clip px-3 py-2.5 **:data-current:transition-[translate,opacity] **:data-current:duration-300 **:data-current:ease-soft **:data-previous:transition-[translate,opacity] **:data-previous:duration-200 **:data-previous:ease-soft **:data-current:data-starting-style:opacity-0 **:data-previous:data-ending-style:opacity-0 data-[activation-direction~=right]:**:data-current:data-starting-style:translate-x-3 data-[activation-direction~=left]:**:data-current:data-starting-style:-translate-x-3 data-[activation-direction~=right]:**:data-previous:data-ending-style:-translate-x-3 data-[activation-direction~=left]:**:data-previous:data-ending-style:translate-x-3 data-instant:**:transition-none motion-reduce:**:transition-none">
-                {payload ? <Examples set={payload} /> : null}
-              </Tooltip.Viewport>
-            </Tooltip.Popup>
-          </Tooltip.Positioner>
-        </Tooltip.Portal>
+    <span
+      aria-hidden
+      className={cn(
+        "flex size-5 shrink-0 items-center justify-center rounded-[6px] border-[1.5px] transition-colors duration-150 ease-soft",
+        state
+          ? "border-ink bg-ink text-on-ink"
+          : "border-line-strong bg-surface",
       )}
-    </Tooltip.Root>
+    >
+      {state === "mixed" ? (
+        <Minus className="size-3" strokeWidth={3.25} />
+      ) : state ? (
+        <Check className="size-3" strokeWidth={3.25} />
+      ) : null}
+    </span>
   );
 }
 
-function SetCard({
-  index,
-  set,
-  on,
-  onToggle,
-  tooltip,
-}: {
-  index: number;
+type Group = {
   set: (typeof THEME_SETS)[number];
-  on: boolean;
-  onToggle: () => void;
-  tooltip: SetTooltip;
+  index: number;
+  /** The set's themes the gostos leave, by name. */
+  themes: { id: string; name: string }[];
+};
+
+/** One set: a box for all its themes, its name and count, and its themes when open. */
+function SetGroup({
+  group,
+  shown,
+  open,
+  onOpen,
+  off,
+  onChange,
+}: {
+  group: Group;
+  /** The themes the search leaves. */
+  shown: Group["themes"];
+  open: boolean;
+  onOpen: () => void;
+  off: string[];
+  onChange: (off: string[]) => void;
 }) {
   const tSets = useTranslations("common.themeSets");
   const t = useTranslations("home.createRoom");
-  const examples = useExamples(set.key);
+  const bodyId = useId();
   const still = useReducedMotion() ?? false;
-  const examplesId = useId();
+  const ids = group.themes.map((th) => th.id);
+  const on = ids.filter((id) => !off.includes(id)).length;
+  const state = on === ids.length ? true : on === 0 ? false : "mixed";
+  const name = tSets(group.set.key);
+  const setAll = (turnOn: boolean) =>
+    onChange(
+      turnOn
+        ? off.filter((id) => !ids.includes(id))
+        : [...off, ...ids.filter((id) => !off.includes(id))],
+    );
+  const toggle = (id: string) =>
+    onChange(off.includes(id) ? off.filter((x) => x !== id) : [...off, id]);
   return (
-    <Tooltip.Trigger
-      handle={tooltip}
-      payload={set.key}
-      delay={0}
-      closeOnClick={false}
-      type="button"
-      aria-pressed={on}
-      aria-describedby={examples.length ? examplesId : undefined}
-      onClick={onToggle}
-      // The button stays still and only its face lifts: a moving anchor makes
-      // the tooltip re-measure every frame of the spring, and it stutters.
-      render={
-        <m.button
-          initial={false}
-          animate="rest"
-          whileHover={still ? undefined : "hover"}
-          whileTap="press"
-        />
-      }
-      // The card under the tooltip rises above it (z-50), out of its shadow.
-      className="relative block w-full rounded-md text-left data-popup-open:z-51"
-    >
-      <m.span
-        variants={CARD_FACE}
-        transition={spring}
-        className={cn(
-          "flex h-12 w-full items-center gap-2.5 rounded-md border-[1.5px] py-1.5 pr-2.5 pl-1.5 transition-[background-color,border-color,color,box-shadow] duration-200 ease-soft",
-          on
-            ? "border-transparent bg-surface text-ink shadow-card"
-            : // canvas, not transparent: the shadow would show through
-              "border-line border-dashed bg-canvas text-ink-muted hover:border-line-strong",
-        )}
-      >
-        <m.span
-          aria-hidden
-          initial={false}
-          animate={
-            on
-              ? {
-                  scale: still ? 1 : [1, 1.28, 1],
-                  rotate: still ? 0 : [0, -14, 0],
-                  opacity: 1,
-                  filter: "grayscale(0)",
-                }
-              : { scale: 0.88, rotate: 0, opacity: 0.5, filter: "grayscale(1)" }
-          }
-          transition={{ duration: 0.42, ease: ease.soft }}
-          className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-sm text-xl leading-none transition-colors duration-200",
-            on ? toneOf(index) : "bg-sunken",
-          )}
+    <li className="overflow-hidden rounded-md bg-surface shadow-card">
+      <div className="flex items-center gap-1 pr-2 pl-3">
+        <label className="-m-1.5 relative cursor-pointer rounded-sm p-1.5 has-focus-visible:ring-2 has-focus-visible:ring-sky">
+          <input
+            type="checkbox"
+            className="absolute inset-0 m-0 size-full cursor-pointer appearance-none opacity-0"
+            checked={state === true}
+            ref={(el) => {
+              if (el) el.indeterminate = state === "mixed";
+            }}
+            aria-label={t("setAll", { set: name })}
+            onChange={() => setAll(state !== true)}
+          />
+          <Box state={state} />
+        </label>
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={bodyId}
+          onClick={onOpen}
+          className="flex min-h-14 min-w-0 flex-1 items-center gap-3 rounded-sm py-2 pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-sky"
         >
-          {set.emoji}
-        </m.span>
-        <span className="line-clamp-2 min-w-0 flex-1 font-semibold text-[13px] leading-4 [word-break:auto-phrase]">
-          {tSets(set.key)}
-        </span>
-        <span className="relative flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] border-line">
-          <AnimatePresence initial={false}>
-            {on ? (
-              <m.span
-                key="on"
-                initial={{ scale: 0, rotate: -60 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={spring}
-                className="-inset-[1.5px] absolute flex items-center justify-center rounded-full bg-ink text-on-ink"
-              >
-                <Check className="size-3" strokeWidth={3.25} />
-              </m.span>
-            ) : null}
-          </AnimatePresence>
-        </span>
-      </m.span>
-      {/* the tooltip is for the eyes only; screen readers get the examples here */}
-      <span id={examplesId} hidden>
-        {`${t("setExamples")}: ${examples.join(", ")}`}
-      </span>
-    </Tooltip.Trigger>
+          <span
+            aria-hidden
+            className={cn(
+              "flex size-9 shrink-0 items-center justify-center rounded-sm text-lg leading-none transition-[filter,opacity] duration-200",
+              TONES[group.index % TONES.length],
+              on === 0 && "opacity-50 grayscale",
+            )}
+          >
+            {group.set.emoji}
+          </span>
+          <span className="min-w-0 flex-1 truncate font-semibold">{name}</span>
+          <span
+            className={cn(
+              "shrink-0 font-medium text-[13px] tabular-nums",
+              on === 0 ? "text-ink-muted/70" : "text-ink-muted",
+            )}
+          >
+            {t("someOf", { on, total: ids.length })}
+          </span>
+          <ChevronDown
+            className={cn(
+              "size-4.5 shrink-0 text-ink-muted transition-transform duration-200 ease-soft",
+              open && "rotate-180",
+            )}
+            strokeWidth={2.25}
+          />
+        </button>
+      </div>
+      <AnimatePresence initial={false}>
+        {open ? (
+          <m.div
+            key="themes"
+            id={bodyId}
+            initial={still ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            animate={{
+              height: "auto",
+              opacity: 1,
+              transition: { duration: dur.base, ease: ease.soft },
+            }}
+            exit={
+              still
+                ? { opacity: 0 }
+                : { height: 0, opacity: 0, transition: { duration: dur.fast } }
+            }
+          >
+            <ul className="grid grid-cols-1 gap-x-3 border-line border-t px-3 py-2 sm:grid-cols-2 lg:grid-cols-3">
+              {shown.map((th) => {
+                const isOn = !off.includes(th.id);
+                return (
+                  <li key={th.id}>
+                    <label
+                      className={cn(
+                        "relative flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-sm px-1.5 text-sm transition-colors duration-150 ease-soft hover:bg-sunken has-focus-visible:ring-2 has-focus-visible:ring-sky",
+                        isOn ? "text-ink" : "text-ink-muted",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        className="absolute inset-0 m-0 size-full cursor-pointer appearance-none opacity-0"
+                        checked={isOn}
+                        onChange={() => toggle(th.id)}
+                      />
+                      <Box state={isOn} />
+                      <span className="min-w-0 flex-1 leading-tight">
+                        {th.name}
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </m.div>
+        ) : null}
+      </AnimatePresence>
+    </li>
   );
 }
 
-/** Every theme set as a card that turns on and off; they come in one after the other. */
-function SetGrid({
+/** The sets the room's gostos leave, each with its themes in this language, A to Z. */
+function useGroups(
+  catalog: ThemeCatalogEntry[] | undefined,
+  value: ThemeSettings,
+): { groups: Group[]; hidden: number } {
+  const lang = useLocale() as Lang;
+  const { game, offGostos } = value;
+  return useMemo(() => {
+    if (!catalog) return { groups: [], hidden: 0 };
+    const ofGame = catalog.filter((th) => th.games.includes(game));
+    // the room's own switched-off themes don't hide them: only the gostos
+    const kept = ofGame.filter((th) =>
+      letsIn(th, { game, offGostos, offThemes: [] }),
+    );
+    const bySet = new Map<ThemeSet, Group["themes"]>();
+    for (const th of kept) {
+      if (!th.set) continue;
+      const list = bySet.get(th.set) ?? [];
+      list.push({ id: th.id, name: th.names[lang] });
+      bySet.set(th.set, list);
+    }
+    const groups = THEME_SETS.flatMap((set, index) => {
+      const themes = bySet.get(set.key);
+      if (!themes?.length) return [];
+      themes.sort((a, b) => a.name.localeCompare(b.name, lang));
+      return [{ set, index, themes }];
+    });
+    return { groups, hidden: ofGame.length - kept.length };
+  }, [catalog, game, offGostos, lang]);
+}
+
+/** Every theme the gostos leave, set by set: a box for each, and one for each whole set. */
+function ThemeChecklist({
   value,
   onChange,
 }: {
-  value: ThemeSet[];
-  onChange: (v: ThemeSet[]) => void;
+  value: ThemeSettings;
+  onChange: (offThemes: string[]) => void;
 }) {
-  const toggle = (key: ThemeSet) =>
-    onChange(
-      value.includes(key)
-        ? value.filter((k) => k !== key)
-        : THEME_SET_KEYS.filter((k) => k === key || value.includes(k)),
-    );
-  const [tooltip] = useState(() => Tooltip.createHandle<ThemeSet>());
-  return (
-    <>
-      <m.ul
-        initial="hidden"
-        animate="shown"
-        variants={{ shown: { transition: { staggerChildren: 0.018 } } }}
-        className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
-      >
-        {THEME_SETS.map((set, i) => (
-          <m.li
-            key={set.key}
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              shown: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: dur.base, ease: ease.soft },
-              },
-            }}
-          >
-            <SetCard
-              index={i}
-              set={set}
-              on={value.includes(set.key)}
-              onToggle={() => toggle(set.key)}
-              tooltip={tooltip}
-            />
-          </m.li>
+  const t = useTranslations("home.createRoom");
+  const catalog = useThemeCatalog();
+  const { groups, hidden } = useGroups(catalog, value);
+  const [opened, setOpened] = useState<ThemeSet[]>([]);
+  const [query, setQuery] = useState("");
+  const q = plain(query.trim());
+  const visible = groups.flatMap((g) => g.themes.map((th) => th.id));
+  const allOn = visible.every((id) => !value.offThemes.includes(id));
+  const found = groups
+    .map((g) => ({
+      group: g,
+      shown: q ? g.themes.filter((th) => plain(th.name).includes(q)) : g.themes,
+    }))
+    .filter((f) => f.shown.length);
+
+  if (!catalog)
+    return (
+      <ul className="flex flex-col gap-1.5" aria-busy>
+        {THEME_SETS.slice(0, 6).map((s) => (
+          <li key={s.key} className="h-14 animate-pulse rounded-md bg-sunken" />
         ))}
-      </m.ul>
-      <ExamplesTooltip handle={tooltip} />
-    </>
+      </ul>
+    );
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="group flex h-11 min-w-56 flex-1 items-center gap-2.5 rounded-pill border-[1.5px] border-line-strong bg-canvas px-4 transition-colors focus-within:border-sky">
+          <Search
+            className="size-4.5 shrink-0 text-ink-muted transition-colors group-focus-within:text-sky"
+            strokeWidth={1.75}
+          />
+          <span className="sr-only">{t("searchThemes")}</span>
+          <input
+            type="search"
+            value={query}
+            placeholder={t("searchThemes")}
+            onChange={(e) => setQuery(e.target.value)}
+            className="h-full min-w-0 flex-1 bg-transparent text-sm placeholder:text-ink-muted focus-visible:outline-none! [&::-webkit-search-cancel-button]:hidden"
+          />
+          {query ? (
+            <button
+              type="button"
+              aria-label={t("clearSearch")}
+              onClick={() => setQuery("")}
+              className="flex size-6 shrink-0 items-center justify-center rounded-pill bg-sunken text-ink-muted hover:text-ink"
+            >
+              <X className="size-3.5" strokeWidth={2} />
+            </button>
+          ) : null}
+        </label>
+        <button
+          type="button"
+          onClick={() =>
+            onChange(
+              allOn
+                ? [...new Set([...value.offThemes, ...visible])]
+                : value.offThemes.filter((id) => !visible.includes(id)),
+            )
+          }
+          className="font-semibold text-sky text-[13px] underline-offset-2 hover:underline"
+        >
+          {allOn ? t("allOff") : t("allOn")}
+        </button>
+      </div>
+      {found.length ? (
+        <ul className="flex flex-col gap-1.5">
+          {found.map(({ group, shown }) => (
+            <SetGroup
+              key={group.set.key}
+              group={group}
+              shown={shown}
+              // a search opens every set it finds something in
+              open={q ? true : opened.includes(group.set.key)}
+              onOpen={() =>
+                setOpened((o) =>
+                  o.includes(group.set.key)
+                    ? o.filter((k) => k !== group.set.key)
+                    : [...o, group.set.key],
+                )
+              }
+              off={value.offThemes}
+              onChange={onChange}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p className="py-4 text-center text-ink-muted text-sm">
+          {t("noThemeFound")}
+        </p>
+      )}
+      {hidden ? (
+        <p className="text-[13px] text-ink-muted">
+          {t("hiddenByGostos", { count: hidden })}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -333,92 +424,55 @@ function HostNote() {
   );
 }
 
-/** How the theme is chosen and, for a vote, which sets it draws from. */
+/**
+ * The "Themes" tab: for "Who am I?", how the theme is chosen; then every
+ * theme the gostos leave, picked by hand. Voting draws from them, and so do
+ * the host's ideas.
+ */
 export function ThemeFields({
   value,
   onChange,
 }: {
   value: ThemeSettings;
-  onChange: (v: ThemeSettings) => void;
+  onChange: (v: Pick<ThemeSettings, "themeMode" | "offThemes">) => void;
 }) {
   const t = useTranslations("home.createRoom");
   const hintId = useId();
-  const voting = value.themeMode === "vote";
-  const on = value.themeSets.length;
-  const total = THEME_SET_KEYS.length;
+  const choosing = value.game === "who-am-i";
+  const host = choosing && value.themeMode === "host";
+  const pick = { themeMode: value.themeMode, offThemes: value.offThemes };
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="flex min-h-9 flex-wrap items-center gap-x-3 gap-y-1">
           <HintLabel
-            hint={t("themesHint")}
+            hint={t(choosing ? "themesHint" : "themesHintVote")}
             hintId={hintId}
             className="self-center"
           >
             {t("themes")}
           </HintLabel>
-          <AnimatePresence initial={false}>
-            {voting ? (
-              <m.span
-                key="count"
-                {...fadeSwap}
-                className="flex items-center gap-3"
-              >
-                <AnimatePresence mode="popLayout" initial={false}>
-                  <m.span
-                    key={on}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: dur.fast }}
-                    className={cn(
-                      "font-medium text-[13px] tabular-nums",
-                      on ? "text-ink-muted" : "text-no",
-                    )}
-                  >
-                    {t("setsOn", { on, total })}
-                  </m.span>
-                </AnimatePresence>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onChange({
-                      ...value,
-                      themeSets: on === total ? [] : [...THEME_SET_KEYS],
-                    })
-                  }
-                  className="font-semibold text-sky text-[13px] underline-offset-2 hover:underline"
-                >
-                  {on === total ? t("allOff") : t("allOn")}
-                </button>
-              </m.span>
-            ) : null}
-          </AnimatePresence>
+          <ThemeCountLine room={value} />
         </div>
-        <ModeSwitch
-          value={value.themeMode}
-          onChange={(themeMode) => onChange({ ...value, themeMode })}
-          describedBy={hintId}
-        />
+        {choosing ? (
+          <ModeSwitch
+            value={value.themeMode}
+            onChange={(themeMode) => onChange({ ...pick, themeMode })}
+            describedBy={hintId}
+          />
+        ) : null}
       </div>
-      <AnimatePresence mode="wait" initial={false}>
-        {voting ? (
-          <m.div key="sets" {...fadeSwap}>
-            <SetGrid
-              value={value.themeSets}
-              onChange={(themeSets) => onChange({ ...value, themeSets })}
-            />
-          </m.div>
-        ) : (
+      <AnimatePresence initial={false}>
+        {host ? (
           <m.div key="host" {...fadeSwap}>
             <HostNote />
           </m.div>
-        )}
+        ) : null}
       </AnimatePresence>
+      <ThemeChecklist
+        value={value}
+        onChange={(offThemes) => onChange({ ...pick, offThemes })}
+      />
     </div>
   );
 }
-
-/** True when a vote has no set to draw from: the room can't be saved like that. */
-export const missingSets = (v: ThemeSettings) =>
-  v.themeMode === "vote" && v.themeSets.length === 0;

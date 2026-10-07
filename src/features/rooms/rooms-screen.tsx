@@ -5,6 +5,7 @@ import {
   Check,
   ChevronDown,
   ChevronLeft,
+  EyeOff,
   Globe,
   Languages,
   Layers,
@@ -24,6 +25,7 @@ import { useCurrentMatch } from "@/features/data/use-current-match";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { DEFAULT_GAME, GAME_KEYS, type GameKey, isGameKey } from "@/game/games";
+import { GOSTO_KEYS, GOSTOS, type Gosto } from "@/game/gostos";
 import { LANGS, type Lang } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { ease, riseIn } from "@/lib/motion";
@@ -41,6 +43,8 @@ export interface RoomFilters {
   access: Access;
   /** The host's languages to show; null: every language. By default only the viewer's. */
   langs: Lang[] | null;
+  /** Rooms with any of these gostos on stay out. */
+  hide: Gosto[];
 }
 
 /** Case- and accent-insensitive, so "joao" finds "João". */
@@ -52,21 +56,22 @@ const fold = (s: string) =>
     .trim();
 
 /** The filters as the link carries them: only what differs from the defaults. */
-function toSearch({ game, q, access, langs }: RoomFilters, locale: Lang) {
+function toSearch({ game, q, access, langs, hide }: RoomFilters, locale: Lang) {
   const params = new URLSearchParams();
   if (game) params.set("game", game);
   if (q.trim()) params.set("q", q.trim());
   if (access !== "all") params.set("access", access);
   if (!langs) params.set("lang", "all");
   else if (langs.join() !== locale) params.set("lang", langs.join());
+  if (hide.length) params.set("hide", hide.join());
   const s = params.toString();
   return s ? `?${s}` : "";
 }
 
 /**
- * The filters a link carries (?game=who-am-i&q=crew&access=private&lang=pt,ja),
+ * The filters a link carries (?game=who-am-i&q=crew&access=private&lang=pt,ja&hide=real),
  * each optional. `lang` is "all" or languages separated by commas; anything
- * else means the viewer's.
+ * else means the viewer's. `hide` is gostos separated by commas.
  */
 function fromSearch(search: string, locale: Lang): RoomFilters {
   const sp = new URLSearchParams(search);
@@ -74,11 +79,13 @@ function fromSearch(search: string, locale: Lang): RoomFilters {
   const access = sp.get("access");
   const lang = sp.get("lang");
   const picked = LANGS.filter((l) => lang?.split(",").includes(l));
+  const hide = sp.get("hide")?.split(",") ?? [];
   return {
     game: isGameKey(game) ? game : null,
     q: (sp.get("q") ?? "").slice(0, 50),
     access: access === "public" || access === "private" ? access : "all",
     langs: lang === "all" ? null : picked.length ? picked : [locale],
+    hide: GOSTO_KEYS.filter((g) => hide.includes(g)),
   };
 }
 
@@ -117,6 +124,7 @@ export function RoomsScreen() {
           (filters.access === "all" ||
             (filters.access === "private") === r.locked) &&
           (!filters.langs || filters.langs.includes(r.host.lang)) &&
+          filters.hide.every((g) => r.offGostos.includes(g)) &&
           (!q ||
             fold(r.name || tr("roomOf", { name: name(r.host) })).includes(q)),
       ),
@@ -127,7 +135,8 @@ export function RoomsScreen() {
     filters.game ||
     filters.q.trim() ||
     filters.access !== "all" ||
-    filters.langs
+    filters.langs ||
+    filters.hide.length
   );
 
   return (
@@ -205,7 +214,13 @@ export function RoomsScreen() {
                   <button
                     type="button"
                     onClick={() =>
-                      set({ game: null, q: "", access: "all", langs: null })
+                      set({
+                        game: null,
+                        q: "",
+                        access: "all",
+                        langs: null,
+                        hide: [],
+                      })
                     }
                     className={buttonClass("secondary", "sm")}
                   >
@@ -298,6 +313,7 @@ function Filters({
         ]}
       />
       <LangSelect value={filters.langs} onChange={(langs) => set({ langs })} />
+      <HideSelect value={filters.hide} onChange={(hide) => set({ hide })} />
       <FilterSelect
         label={t("access")}
         value={filters.access}
@@ -469,6 +485,85 @@ function LangSelect({
                   </span>
                   <Select.ItemText className="flex-1 whitespace-nowrap">
                     {o.label}
+                  </Select.ItemText>
+                  <Select.ItemIndicator className="text-sky">
+                    <Check className="size-4" strokeWidth={2.25} />
+                  </Select.ItemIndicator>
+                </Select.Item>
+              ))}
+            </Select.List>
+          </Select.Popup>
+        </Select.Positioner>
+      </Select.Portal>
+    </Select.Root>
+  );
+}
+
+/** Gostos whose rooms stay out of the list, several at once; none: every room. */
+function HideSelect({
+  value,
+  onChange,
+}: {
+  value: Gosto[];
+  onChange: (hide: Gosto[]) => void;
+}) {
+  const t = useTranslations("home.roomsPage");
+  const tg = useTranslations("common.gostos");
+  return (
+    <Select.Root
+      multiple
+      items={GOSTOS.map((g) => ({ value: g.key, label: tg(`${g.key}.name`) }))}
+      value={value}
+      onValueChange={(next) =>
+        // one stays shown: hiding every gosto would hide every room
+        onChange(
+          next.length === GOSTO_KEYS.length
+            ? value
+            : GOSTO_KEYS.filter((g) => next.includes(g)),
+        )
+      }
+    >
+      <Select.Trigger aria-label={t("hide")} className={TRIGGER}>
+        <span className="flex shrink-0 text-ink-muted max-sm:hidden">
+          <EyeOff className="size-4" strokeWidth={1.75} />
+        </span>
+        <Select.Value className="min-w-0 flex-1 truncate">
+          {() =>
+            value.length
+              ? t("hiding", {
+                  gostos: GOSTOS.filter((g) => value.includes(g.key))
+                    .map((g) => g.emoji)
+                    .join(" "),
+                })
+              : t("hideNone")
+          }
+        </Select.Value>
+        <Select.Icon className="text-ink-muted">
+          <ChevronDown className="size-4" strokeWidth={2} />
+        </Select.Icon>
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Positioner
+          sideOffset={6}
+          align="end"
+          alignItemWithTrigger={false}
+          className="z-50 outline-none"
+        >
+          <Select.Popup className={POPUP}>
+            <span className="block px-2.5 pt-1 pb-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.08em]">
+              {t("hide")}
+            </span>
+            <Select.List>
+              {GOSTOS.map((g) => (
+                <Select.Item key={g.key} value={g.key} className={ITEM}>
+                  <span
+                    aria-hidden
+                    className="flex w-4 shrink-0 justify-center"
+                  >
+                    {g.emoji}
+                  </span>
+                  <Select.ItemText className="flex-1 whitespace-nowrap">
+                    {tg(`${g.key}.name`)}
                   </Select.ItemText>
                   <Select.ItemIndicator className="text-sky">
                     <Check className="size-4" strokeWidth={2.25} />

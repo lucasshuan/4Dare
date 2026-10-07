@@ -1,6 +1,7 @@
 // The whole game in types. Everything else (engine, server, UI) is written against this file.
 import { DEFAULT_GAME, type GameKey } from "./games";
-import { THEME_SET_KEYS, type ThemeSet } from "./theme-sets";
+import type { Gosto } from "./gostos";
+import type { ThemeSet } from "./theme-sets";
 
 export const LANGS = ["en", "es", "ja", "pt"] as const;
 export type Lang = (typeof LANGS)[number];
@@ -66,10 +67,12 @@ export interface RoomSettings {
   /** Seconds for the picker to check a guess that was not an obvious match. */
   validateSeconds: number;
   mode: "classic";
-  /** "vote": everyone votes on themes drawn from `themeSets`. "host": the host types the theme. */
+  /** "vote": everyone votes on themes the gostos and the theme list leave on. "host": the host types the theme. */
   themeMode: "vote" | "host";
-  /** The theme sets a vote draws from: at least one. */
-  themeSets: ThemeSet[];
+  /** Gostos switched off: their characters leave every theme (gostos.ts). At least one stays on. */
+  offGostos: Gosto[];
+  /** Themes switched off, by id (theme-id.ts): a theme added later comes in switched on. */
+  offThemes: string[];
 }
 
 export const DEFAULT_SETTINGS: RoomSettings = {
@@ -85,8 +88,11 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   validateSeconds: 40,
   mode: "classic",
   themeMode: "vote",
-  themeSets: [...THEME_SET_KEYS],
+  offGostos: [],
+  offThemes: [],
 };
+/** The most themes a room can switch off: about every theme there is. */
+export const OFF_THEMES_MAX = 1000;
 export const ROOM_NAME_MAX = 25;
 export const ROOM_PASSWORD_MAX = 20;
 export const STEP_SECONDS_MIN = 30;
@@ -788,6 +794,8 @@ export interface PublicRoom {
   host: Pick<Identity, "id" | "isGuest" | "avatar" | "lang"> & { name: string };
   players: number;
   seats: number;
+  /** The gostos the room switched off: the list shows them and filters by them. */
+  offGostos: Gosto[];
   /** When the room was made (server ms): the game page lists the oldest first. */
   createdAt: number;
   voteSeconds: number;

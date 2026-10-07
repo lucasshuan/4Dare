@@ -1,5 +1,6 @@
 // Shapes shared by server actions, route handlers and the UI.
 import type { GameKey } from "@/game/games";
+import type { Gosto } from "@/game/gostos";
 import type { SyncedSettings } from "@/game/options";
 import type { BadgeGroup, BadgeId } from "@/game/profile/badges";
 import type { Fact } from "@/game/profile/history";
@@ -15,6 +16,7 @@ import type {
   Character,
   ErrorCode,
   Identity,
+  Localized,
   Phase,
   PlayerId,
 } from "@/game/types";
@@ -86,6 +88,16 @@ export interface CharacterSearchResponse {
   results: CharacterDTO[];
 }
 
+/** A theme as the room setup lists it (GET /api/themes/catalog). */
+export interface ThemeCatalogEntry {
+  id: string;
+  set: ThemeSet | null;
+  games: GameKey[];
+  /** Its shared starters' gostos, clearest first; null for a starter with none yet. */
+  gostos: (Gosto[] | null)[];
+  names: Localized;
+}
+
 export interface CreateRoomInput {
   game: GameKey;
   name: string;
@@ -99,7 +111,8 @@ export interface CreateRoomInput {
   answerSeconds: number;
   validateSeconds: number;
   themeMode: "vote" | "host";
-  themeSets: ThemeSet[];
+  offGostos: Gosto[];
+  offThemes: string[];
 }
 
 /** The eight avatar colours an account can choose (design system `avatar-*`). */

@@ -1,6 +1,4 @@
 import "server-only";
-import type { Localized } from "@/game/types";
-import type { ThemeExamples } from "../../theme-examples";
 import { themes } from "../../themes";
 import type { Backend } from "../types";
 import { localAuth } from "./auth";
@@ -8,7 +6,6 @@ import { localBadges } from "./badges";
 import { localCharacters } from "./characters";
 import { localChat } from "./chat";
 import { localFiles } from "./files";
-import { LOCAL_THEMES } from "./fixtures";
 import { localImages } from "./images";
 import { localMatches } from "./matches";
 import { localMural } from "./mural";
@@ -42,16 +39,4 @@ export function localBackend(): Backend {
     },
     chat: localChat(),
   };
-}
-
-/** The first three fixture themes of each set are its examples. */
-export function fixtureExamples(): ThemeExamples {
-  const out: ThemeExamples = {};
-  for (const { set, en, es, ja, pt } of LOCAL_THEMES) {
-    if (!set) continue;
-    const list: Localized[] = out[set] ?? [];
-    if (list.length < 3) list.push({ en, es, ja, pt });
-    out[set] = list;
-  }
-  return out;
 }

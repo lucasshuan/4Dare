@@ -57,13 +57,14 @@
   },
   "readyButton": "Listo",
   "leave": "Salir de la sala",
-  "editSettings": "Editar configuración",
+  "editSettings": "Editar configuración avanzada",
   "rename": "Renombrar sala",
   "editVisibility": "Cambiar quién puede entrar",
-  "settingsTitle": "Configuración de la sala",
+  "editGostos": "Cambiar los gustos",
+  "settingsTitle": "Configuración avanzada",
   "saveSettings": "Guardar",
   "settingsSaved": "Configuración guardada",
-  "themeVote": "Todos votan · {on} de {total} grupos",
-  "themeVoteAll": "Todos votan · todos los grupos",
-  "themeHost": "El anfitrión escribe el tema"
+  "themeVote": "Todos votan el tema",
+  "themeHost": "El anfitrión escribe el tema",
+  "themeCount": "{count, plural, one {# tema} other {# temas}}"
 }

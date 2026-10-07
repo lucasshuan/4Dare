@@ -15,7 +15,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
 - Phases: lobby, voting or theming, picking, turns, finished.
 - No cron: fetching a room applies due timeouts.
-- Host in the lobby: renames the room and makes it public or private in place, switches the game, removes a player (`KICK`; back only after 2 min, `kicked` in state), opens and closes seats within the game's range (`GAME_SEATS`); closed seats show to the host only.
+- Host in the lobby: renames the room and makes it public or private in place, switches the game, removes a player (`KICK`; back only after 2 min, `kicked` in state), opens and closes seats within the game's range (`GAME_SEATS`), switches gostos (popover); closed seats show to the host only. "Edit advanced settings": tabs Room, Rules, Style (gostos), Themes (per set, by hand; theme mode for "Who am I?").
 - Past matches: room state keeps its last 5 (theme, players by place), saved at the podium; only the lobby view lists them.
 - Shows: scenes between steps (opening, theme and rule, draw (skipped with 2 players), "for whom", cast) are beats with server times on `reveal` (`src/game/show-timing/`). Step clocks wait for show end, so every screen plays same frame. A guess's result and a pass are scenes too (`reveal` kinds `guess`, `pass`; `GuessScene`, full screen in the guesser's colour, no close): the next turn waits for them, and its handoff band covers their end. Only the answers reveal is a closable modal over a running step. Client: `stageFrame` picks screen and backdrop, `useStageTimeline` seeks motion to server time. Lab: `/[locale]/dev/stage` (dev only).
 - Sync: local polls 1 s. Supabase: Realtime ping (`src/lib/realtime.ts`, one channel per room, loaded on demand); poll 45 s joined, 10 s down.
@@ -24,7 +24,9 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 ## Themes
 
 - `whoami_themes` table (0018), cached 10 min per server; `active = false` hides one. Local: 60 fixture themes.
-- 20 sets (`src/game/theme-sets.ts`); room's `themeSets` filter vote. Set examples: `example` 1–3 (0014, `/api/themes/examples`).
+- 20 sets (`src/game/theme-sets.ts`). One theme serves every game (`games`, 0032). Setup reads the list at `/api/themes/catalog` (names, set, games, starters' gostos).
+- Gostos (`src/game/gostos.ts`, 0032): anime, animation, live, games, comics, books, faith, real. A character's: its own `characters.gostos`, else its work's (`origins.gostos`, same for every id of a label), else the rule (`al:` anime, `job:`/`group:` real, then category); null filters nothing. `theme_starter_gostos` view gives each theme its shared starters' gostos.
+- Room keeps what is off (`offGostos`, at least one on; `offThemes`, theme ids), so new ones start on. A theme is in when its game, not off, and ≥ min(3, n) of its starters keep a gosto on (`letsIn`). Draws (vote, host ideas, fallback) take those first, then avoided ones, then the rest, so a vote always has 4. Setup asks for 4 on. Old rooms: `upgradeRoom` drops `themeSets`. Room list: a room with gostos off shows the ones it keeps; "Hide rooms with" filters by them (`?hide=`).
 - Vote: 4 themes, 40 s by default (set per room; clock starts after opening), open vote; each first vote cuts the time split among the voters. Server draws tie (wheel).
 - Host mode (`theming`): host types theme (no set, no Random, no stats). 30 s, then vote.
 

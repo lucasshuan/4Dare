@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { knownAs } from "@/game/character-search";
 import { systemLines } from "@/game/chat";
 import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
+import type { ThemeFilter } from "@/game/gostos";
 import { displayName } from "@/game/guest-names";
 import { presenceDue } from "@/game/helpers";
 import { matchRecord } from "@/game/record";
@@ -139,9 +140,15 @@ export async function dispatch(
   throw new GameError("conflict");
 }
 
+/** What the room lets into its draws: its game, its gostos and the themes it switched off. */
+export function roomFilter(state: RoomState): ThemeFilter {
+  const { game, offGostos, offThemes } = state.settings;
+  return { game, offGostos: offGostos ?? [], offThemes: offThemes ?? [] };
+}
+
 /**
  * What a new round needs: ideas for a host who types the theme, or themes to
- * vote on from the room's sets. `quick` draws at once from the list in hand,
+ * vote on that the room lets in. `quick` draws at once from the list in hand,
  * without avoiding the last themes (a round the clock starts).
  */
 export async function roundThemes(
@@ -150,11 +157,12 @@ export async function roundThemes(
   quick = false,
 ): Promise<Theme[]> {
   const { themes } = getBackend();
-  const { themeMode, themeSets } = state.settings;
-  if (themeMode === "host") return themes.drawFromBank(THEME_IDEAS);
+  const filter = roomFilter(state);
+  if (state.settings.themeMode === "host")
+    return themes.drawFromBank(THEME_IDEAS, filter);
   return quick
-    ? themes.drawFromBank(THEME_OPTIONS, themeSets)
-    : themes.draw(avoid, THEME_OPTIONS, themeSets);
+    ? themes.drawFromBank(THEME_OPTIONS, filter)
+    : themes.draw(avoid, THEME_OPTIONS, filter);
 }
 
 /**
@@ -446,8 +454,8 @@ export async function applyDueTimeouts(code: string) {
         drafts = {};
         if (!isExpired(state, Date.now())) throw new GameError("wrong_phase");
         if (state.phase === "theming") {
-          // The host never typed it: everyone votes, on themes from every set.
-          const drawn = themes.drawFromBank(THEME_OPTIONS);
+          // The host never typed it: everyone votes, on themes the room lets in.
+          const drawn = themes.drawFromBank(THEME_OPTIONS, roomFilter(state));
           const examples = await roundExamples(state, drawn);
           return {
             type: "TIMEOUT",

@@ -1,12 +1,15 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { ChevronDown, Globe, Lock, PenLine } from "lucide-react";
+import { ChevronDown, Globe, Heart, Lock, PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
+import { GostoGrid, ThemeCountLine } from "@/features/create/gosto-fields";
 import { Segmented } from "@/features/create/settings-fields";
+import { useThemeCount } from "@/features/create/theme-catalog";
+import { GOSTOS, type Gosto } from "@/game/gostos";
 import {
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
@@ -219,6 +222,144 @@ export function VisibilityRow({
                     variant="primary"
                     size="sm"
                     disabled={missing || pending}
+                  >
+                    {t("saveSettings")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setOpen(false)}
+                  >
+                    {t("cancel")}
+                  </Button>
+                </div>
+              </form>
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
+    </li>
+  );
+}
+
+/**
+ * The room's gostos as a settings row: every emoji, the ones switched off
+ * faded, and how many themes they leave. The host's row opens a dropdown to
+ * switch them.
+ */
+export function GostosRow({
+  settings,
+  editable,
+  pending,
+  onSave,
+}: {
+  settings: Pick<RoomSettings, "game" | "offGostos" | "offThemes">;
+  editable: boolean;
+  pending: boolean;
+  onSave: (v: Pick<RoomSettings, "offGostos">) => Promise<boolean>;
+}) {
+  const t = useTranslations("lobby");
+  const tc = useTranslations("home.createRoom");
+  const tg = useTranslations("common.gostos");
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<Gosto[]>(settings.offGostos);
+  const count = useThemeCount(settings);
+  const draftCount = useThemeCount({ ...settings, offGostos: draft });
+  const on = GOSTOS.filter((g) => !settings.offGostos.includes(g.key));
+  const text = (
+    <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+      <span className="sr-only">
+        {`${tc("gostos")}: ${on.map((g) => tg(`${g.key}.name`)).join(", ")}`}
+      </span>
+      <span aria-hidden className="flex gap-0.5 text-[17px] leading-none">
+        {GOSTOS.map((g) => (
+          <span
+            key={g.key}
+            className={cn(
+              "transition-[filter,opacity] duration-200",
+              settings.offGostos.includes(g.key) && "opacity-30 grayscale",
+            )}
+          >
+            {g.emoji}
+          </span>
+        ))}
+      </span>
+      {count ? (
+        <span
+          className={cn(
+            "text-sm tabular-nums",
+            count.tooFew ? "text-no" : "text-ink-muted",
+          )}
+        >
+          {t("themeCount", { count: count.on })}
+        </span>
+      ) : null}
+    </span>
+  );
+  const icon = (
+    <Heart className="size-5 shrink-0 text-ink-muted" strokeWidth={1.75} />
+  );
+
+  if (!editable)
+    return (
+      <li className="flex items-center gap-3">
+        {icon}
+        {text}
+      </li>
+    );
+
+  return (
+    <li>
+      <Popover.Root
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (next) setDraft(settings.offGostos);
+        }}
+      >
+        <Popover.Trigger
+          aria-label={t("editGostos")}
+          className={cn(
+            "-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-sm px-2 py-1 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
+            open && "bg-sunken",
+          )}
+        >
+          {icon}
+          <span className="min-w-0 flex-1">{text}</span>
+          <ChevronDown
+            className={cn(
+              "size-4.5 shrink-0 text-ink-muted transition-transform duration-200 ease-soft",
+              open && "rotate-180",
+            )}
+            strokeWidth={2.25}
+          />
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Positioner
+            side="bottom"
+            align="start"
+            sideOffset={6}
+            className="z-50"
+          >
+            <Popover.Popup className="w-[min(380px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface p-4 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+              <form
+                className="flex flex-col gap-3"
+                onSubmit={async (e: FormEvent) => {
+                  e.preventDefault();
+                  if (draftCount?.tooFew) return;
+                  if (await onSave({ offGostos: draft })) setOpen(false);
+                }}
+              >
+                <span className="font-semibold text-sm">{tc("gostos")}</span>
+                <GostoGrid off={draft} onChange={setDraft} compact />
+                <ThemeCountLine room={{ ...settings, offGostos: draft }} />
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    disabled={pending || draftCount?.tooFew}
                   >
                     {t("saveSettings")}
                   </Button>

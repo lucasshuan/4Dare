@@ -46,9 +46,7 @@ test("the host types the theme, and the next room starts the same way", async ({
   await expect(guest.getByRole("button", { name: /^random$/i })).toHaveCount(0);
 });
 
-test("the vote only offers themes from the sets turned on", async ({
-  browser,
-}) => {
+test("the vote only offers the themes kept on", async ({ browser }) => {
   const host = await newPlayer(browser);
   const guest = await newPlayer(browser);
   const code = await createRoom(host);
@@ -56,7 +54,9 @@ test("the vote only offers themes from the sets turned on", async ({
     await host.getByRole("tab", { name: /themes/i }).click();
     await host.getByRole("button", { name: /turn all off/i }).click();
     await expect(host.getByRole("button", { name: /^save$/i })).toBeDisabled();
-    await host.getByRole("button", { name: /^sports$/i }).click();
+    await host
+      .getByRole("checkbox", { name: /every theme in sports/i })
+      .check();
   });
   await joinRoom(guest, code);
   await startMatch(host);

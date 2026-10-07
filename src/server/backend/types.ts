@@ -4,6 +4,8 @@
 // Server actions and route handlers only talk to these interfaces (via getBackend()).
 
 import type { ChatMessage, NewChatMessage } from "@/game/chat";
+import type { GameKey } from "@/game/games";
+import type { Gosto, ThemeFilter } from "@/game/gostos";
 import type { SyncedSettings } from "@/game/options";
 import type { PlayedMatch } from "@/game/profile/history";
 import type {
@@ -183,21 +185,34 @@ export interface ImageStore {
   ): Promise<CharacterImage[]>;
 }
 
+/**
+ * A theme as the list keeps it: its id (theme-id.ts), the games it serves
+ * (one theme, both games, one name) and the gostos of its shared starters,
+ * clearest first (null for a starter with none yet).
+ */
+export interface CatalogTheme extends Theme {
+  id: string;
+  games: GameKey[];
+  gostos: (Gosto[] | null)[];
+}
+
 /** Where the theme list lives: the fixtures locally, a table on Supabase. */
 export interface ThemeStore {
   /** Every theme that may be drawn. */
-  list(): Promise<Theme[]>;
+  list(): Promise<CatalogTheme[]>;
 }
 
 export interface ThemeSource {
-  /** `count` different themes in every language, from `sets` (every set when left out) while they have enough. Never throws: falls back to the list in hand. */
+  /** `count` different themes in every language that `filter` lets in, while it lets enough in. Never throws: falls back to the list in hand. */
   draw(
     avoid: Localized[],
     count: number,
-    sets?: readonly ThemeSet[],
+    filter?: ThemeFilter,
   ): Promise<Theme[]>;
   /** Instant, no network: from the list in hand (src/server/themes.ts). */
-  drawFromBank(count: number, sets?: readonly ThemeSet[]): Theme[];
+  drawFromBank(count: number, filter?: ThemeFilter): Theme[];
+  /** The whole list as the room setup shows it, read as draws read it. */
+  catalog(): Promise<CatalogTheme[]>;
 }
 
 export interface FileStore {

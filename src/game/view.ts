@@ -523,6 +523,7 @@ export function toPublicRoom(state: RoomState, now: number): ListedRoom | null {
     },
     players: s.players.length,
     seats: s.settings.seats,
+    offGostos: s.settings.offGostos ?? [],
     createdAt: s.createdAt,
     voteSeconds: s.settings.voteSeconds,
     askSeconds: s.settings.askSeconds,

@@ -1,6 +1,7 @@
 // The rules. Pure functions: same input, same output; no clock, no randomness, no I/O of their own.
 
 import { GAME_SEATS, isGameKey } from "./games";
+import { GOSTO_KEYS, isGosto } from "./gostos";
 import {
   findPlayer,
   goneFor,
@@ -18,7 +19,6 @@ import {
   withQuestionMark,
 } from "./question";
 import { pickColorSlot } from "./seat-colors";
-import { isThemeSet, THEME_SET_KEYS } from "./theme-sets";
 import {
   type AnswerEntry,
   type Assignment,
@@ -37,6 +37,7 @@ import {
   MAX_NOTE,
   MAX_QUESTION,
   MAX_THEME,
+  OFF_THEMES_MAX,
   PICK_SECONDS,
   type PickDraft,
   type Play,
@@ -69,6 +70,9 @@ const fail = (code: ErrorCode): never => {
 
 // --- settings ----------------------------------------------------------------
 
+/** A theme id as theme-id.ts makes it. */
+const THEME_ID = /^[a-z0-9-]{1,80}$/;
+
 function mergeSettings(
   base: RoomSettings,
   patch: Partial<RoomSettings>,
@@ -83,11 +87,13 @@ function mergeSettings(
     ...STEP_TIMES,
     "mode",
     "themeMode",
-    "themeSets",
+    "offGostos",
+    "offThemes",
   ]);
   if (Object.keys(patch).some((k) => !allowed.has(k))) fail("invalid_input");
   const next = { ...base, ...patch };
-  const sets: unknown = next.themeSets;
+  const offGostos: unknown = next.offGostos ?? [];
+  const offThemes: unknown = next.offThemes ?? [];
   const name: unknown = next.name;
   const password: unknown = next.password;
   const ok =
@@ -111,18 +117,26 @@ function mergeSettings(
     ) &&
     next.mode === "classic" &&
     (next.themeMode === "vote" || next.themeMode === "host") &&
-    Array.isArray(sets) &&
-    sets.length > 0 &&
-    sets.every(isThemeSet);
+    Array.isArray(offGostos) &&
+    offGostos.every(isGosto) &&
+    Array.isArray(offThemes) &&
+    offThemes.length <= OFF_THEMES_MAX &&
+    offThemes.every((id) => typeof id === "string" && THEME_ID.test(id));
   if (!ok) fail("invalid_input");
-  // Each set once, in the order the screens show them.
-  const themeSets = THEME_SET_KEYS.filter((k) => next.themeSets.includes(k));
+  // Each gosto once, in the order the screens show them; one stays on.
+  const off = GOSTO_KEYS.filter((k) => (offGostos as string[]).includes(k));
+  if (off.length === GOSTO_KEYS.length) fail("invalid_input");
+  // a room made before gostos carries its old theme sets: they go
+  const { themeSets: _sets, ...rest } = next as RoomSettings & {
+    themeSets?: unknown;
+  };
   return {
-    ...next,
+    ...rest,
     name: next.name.trim(),
     // a public room keeps no password around
     password: next.visibility === "private" ? next.password.trim() : "",
-    themeSets,
+    offGostos: off,
+    offThemes: [...new Set(offThemes as string[])].sort(),
   };
 }
 

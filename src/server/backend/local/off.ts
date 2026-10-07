@@ -1,6 +1,5 @@
 import "server-only";
 import type { SearchItem } from "@/game/character-search";
-import type { ThemeExamples } from "../../theme-examples";
 import type { Backend } from "../types";
 
 // What a build made with the Supabase keys gets instead of local mode
@@ -13,4 +12,3 @@ const off = (): never => {
 
 export const localBackend = (): Backend => off();
 export const fixtureLibrary = (): SearchItem[] => off();
-export const fixtureExamples = (): ThemeExamples => off();

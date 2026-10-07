@@ -169,6 +169,7 @@ export type Database = {
           created_at: string;
           created_by: string | null;
           custom_origin: string | null;
+          gostos: Database["public"]["Enums"]["gosto"][] | null;
           id: string;
           image_url: string | null;
           kind: string | null;
@@ -179,6 +180,7 @@ export type Database = {
           created_at?: string;
           created_by?: string | null;
           custom_origin?: string | null;
+          gostos?: Database["public"]["Enums"]["gosto"][] | null;
           id: string;
           image_url?: string | null;
           kind?: string | null;
@@ -189,6 +191,7 @@ export type Database = {
           created_at?: string;
           created_by?: string | null;
           custom_origin?: string | null;
+          gostos?: Database["public"]["Enums"]["gosto"][] | null;
           id?: string;
           image_url?: string | null;
           kind?: string | null;
@@ -333,12 +336,15 @@ export type Database = {
       };
       origins: {
         Row: {
+          gostos: Database["public"]["Enums"]["gosto"][] | null;
           id: string;
         };
         Insert: {
+          gostos?: Database["public"]["Enums"]["gosto"][] | null;
           id: string;
         };
         Update: {
+          gostos?: Database["public"]["Enums"]["gosto"][] | null;
           id?: string;
         };
         Relationships: [];
@@ -755,6 +761,7 @@ export type Database = {
           en: string;
           es: string;
           example: number | null;
+          games: string[];
           id: string;
           ja: string;
           pt: string;
@@ -767,6 +774,7 @@ export type Database = {
           en: string;
           es: string;
           example?: number | null;
+          games?: string[];
           id: string;
           ja: string;
           pt: string;
@@ -779,6 +787,7 @@ export type Database = {
           en?: string;
           es?: string;
           example?: number | null;
+          games?: string[];
           id?: string;
           ja?: string;
           pt?: string;
@@ -878,6 +887,13 @@ export type Database = {
           },
         ];
       };
+      theme_starter_gostos: {
+        Row: {
+          gostos: string[] | null;
+          theme_id: string | null;
+        };
+        Relationships: [];
+      };
       themes: {
         Row: {
           active: boolean | null;
@@ -943,6 +959,17 @@ export type Database = {
         };
       };
       delete_old_rooms: { Args: never; Returns: number };
+      character_gostos: {
+        Args: { c: Database["public"]["Tables"]["characters"]["Row"] };
+        Returns: Database["public"]["Enums"]["gosto"][];
+      };
+      gostos_by_rule: {
+        Args: {
+          p_category: Database["public"]["Enums"]["character_category"];
+          p_origin: string;
+        };
+        Returns: Database["public"]["Enums"]["gosto"][];
+      };
       played_together: {
         Args: { p_a: string; p_b: string };
         Returns: boolean;
@@ -1090,6 +1117,15 @@ export type Database = {
         | "art"
         | "business"
         | "other";
+      gosto:
+        | "anime"
+        | "animation"
+        | "live"
+        | "games"
+        | "comics"
+        | "books"
+        | "faith"
+        | "real";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1241,6 +1277,16 @@ export const Constants = {
         "art",
         "business",
         "other",
+      ],
+      gosto: [
+        "anime",
+        "animation",
+        "live",
+        "games",
+        "comics",
+        "books",
+        "faith",
+        "real",
       ],
     },
   },

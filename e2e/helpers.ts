@@ -40,12 +40,12 @@ export async function createRoom(host: Page) {
   return host.url().split("/").pop() as string;
 }
 
-/** The host opens "Edit settings" in the lobby, makes `change` and saves. */
+/** The host opens "Edit advanced settings" in the lobby, makes `change` and saves. */
 export async function editSettings(host: Page, change: () => Promise<void>) {
-  await button(host, /edit settings/i).click();
+  await button(host, /edit advanced settings/i).click();
   await change();
   await button(host, /^save$/i).click();
-  await expect(button(host, /edit settings/i)).toBeVisible();
+  await expect(button(host, /edit advanced settings/i)).toBeVisible();
 }
 
 export async function joinRoom(page: Page, code: string) {

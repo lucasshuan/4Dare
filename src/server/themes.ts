@@ -1,10 +1,19 @@
 import "server-only";
-import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
+import { GAME_KEYS } from "@/game/games";
+import { letsIn, type ThemeFilter } from "@/game/gostos";
+import { themeId } from "@/game/theme-id";
 import { type Localized, THEME_OPTIONS, type Theme } from "@/game/types";
-import type { ThemeSource, ThemeStore } from "./backend/types";
+import type { CatalogTheme, ThemeSource, ThemeStore } from "./backend/types";
+
+const fallback = (t: Theme): CatalogTheme => ({
+  ...t,
+  id: themeId(t),
+  games: [...GAME_KEYS],
+  gostos: [],
+});
 
 /** Only while the store's list never arrived (a server's first moments, or the store down). */
-const FALLBACK: Theme[] = [
+const FALLBACK: CatalogTheme[] = [
   { en: "Villains", es: "Villanos", ja: "悪役", pt: "Vilões", set: "heroes" },
   { en: "Robots", es: "Robots", ja: "ロボット", pt: "Robôs", set: "scifi" },
   {
@@ -15,7 +24,7 @@ const FALLBACK: Theme[] = [
     set: "quirks",
   },
   { en: "Pirates", es: "Piratas", ja: "海賊", pt: "Piratas", set: "warriors" },
-];
+].map((t) => fallback(t as Theme));
 
 const same = (a: Localized, b: Localized) =>
   a.en.toLowerCase() === b.en.toLowerCase();
@@ -29,28 +38,37 @@ const shuffled = <T>(items: T[]) =>
     .sort((a, b) => a.key - b.key)
     .map(({ item }) => item);
 
+/** What a vote keeps of a theme: its names and set, nothing the list adds. */
+const plain = ({ en, es, ja, pt, set }: CatalogTheme): Theme => ({
+  en,
+  es,
+  ja,
+  pt,
+  set,
+});
+
 /**
- * `count` different themes from `sets` (every set when left out), avoiding
- * `avoid`. When the sets run short, the avoided ones come back first, then
- * themes from the other sets.
+ * `count` different themes the filter lets in, avoiding `avoid`. When those
+ * run short, the avoided ones come back first, then the themes the filter
+ * kept out, so a vote always has its options.
  */
 function pickFrom(
-  all: Theme[],
+  all: CatalogTheme[],
   avoid: Localized[],
   count: number,
-  sets?: readonly ThemeSet[],
+  filter?: ThemeFilter,
 ): Theme[] {
   const avoided = (t: Theme) => avoid.some((a) => same(a, t));
-  const inSets = (t: Theme) => !sets || (!!t.set && sets.includes(t.set));
+  const fits = (t: CatalogTheme) => !filter || letsIn(t, filter);
   const ordered = [
-    ...shuffled(all.filter((t) => inSets(t) && !avoided(t))),
-    ...shuffled(all.filter((t) => inSets(t) && avoided(t))),
-    ...shuffled(all.filter((t) => !inSets(t))),
+    ...shuffled(all.filter((t) => fits(t) && !avoided(t))),
+    ...shuffled(all.filter((t) => fits(t) && avoided(t))),
+    ...shuffled(all.filter((t) => !fits(t))),
   ];
   const out: Theme[] = [];
   for (const t of ordered) {
     if (out.length === count) break;
-    if (!out.some((o) => same(o, t))) out.push(t);
+    if (!out.some((o) => same(o, t))) out.push(plain(t));
   }
   return out;
 }
@@ -61,12 +79,12 @@ function pickFrom(
  * or while the store fails, a vote's worth of fallback themes stands in.
  */
 export function themes(store: ThemeStore): ThemeSource {
-  let cached: Theme[] | null = null;
+  let cached: CatalogTheme[] | null = null;
   let readAt = 0;
-  let reading: Promise<Theme[]> | null = null;
+  let reading: Promise<CatalogTheme[]> | null = null;
 
   const current = () => (cached?.length ? cached : FALLBACK);
-  const refresh = (): Promise<Theme[]> => {
+  const refresh = (): Promise<CatalogTheme[]> => {
     if (cached && Date.now() - readAt < LIST_TTL)
       return Promise.resolve(cached);
     reading ??= store
@@ -93,12 +111,13 @@ export function themes(store: ThemeStore): ThemeSource {
   void refresh();
 
   return {
-    drawFromBank: (count, sets) => {
+    drawFromBank: (count, filter) => {
       void refresh();
-      return pickFrom(current(), [], count, sets);
+      return pickFrom(current(), [], count, filter);
     },
-    async draw(avoid, count, sets = THEME_SET_KEYS) {
-      return pickFrom(await refresh(), avoid, count, sets);
+    async draw(avoid, count, filter) {
+      return pickFrom(await refresh(), avoid, count, filter);
     },
+    catalog: refresh,
   };
 }

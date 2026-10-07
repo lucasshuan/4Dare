@@ -126,6 +126,40 @@
     "quirks": "Personality & quirks",
     "looks": "Looks & colors"
   },
+  "gostos": {
+    "anime": {
+      "name": "Anime and manga",
+      "examples": "Goku, Gojo, Luffy"
+    },
+    "animation": {
+      "name": "Cartoons",
+      "examples": "Mickey, Woody Woodpecker, Donald Duck"
+    },
+    "live": {
+      "name": "Movies and TV",
+      "examples": "Darth Vader, Daenerys, Freddy Krueger"
+    },
+    "games": {
+      "name": "Video games",
+      "examples": "Pikachu, Mario, Arthur Morgan"
+    },
+    "comics": {
+      "name": "Comics",
+      "examples": "Spider-Man, Batman, Hulk"
+    },
+    "books": {
+      "name": "Books and legends",
+      "examples": "Sherlock Holmes, Zeus, Dracula"
+    },
+    "faith": {
+      "name": "Faith",
+      "examples": "Jesus, Mary, Solomon"
+    },
+    "real": {
+      "name": "Real people",
+      "examples": "Cristiano Ronaldo, Cleopatra, Neymar"
+    }
+  },
   "currentMatch": {
     "badge": "Match in progress",
     "phase": {

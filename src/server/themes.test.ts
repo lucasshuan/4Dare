@@ -1,20 +1,36 @@
 import { describe, expect, it } from "vitest";
+import { GAME_KEYS } from "@/game/games";
+import type { Gosto, ThemeFilter } from "@/game/gostos";
+import { themeId } from "@/game/theme-id";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import { THEME_OPTIONS, type Theme } from "@/game/types";
 import { LOCAL_THEMES } from "./backend/local/fixtures";
-import type { ThemeStore } from "./backend/types";
+import type { CatalogTheme, ThemeStore } from "./backend/types";
 import { themes } from "./themes";
 
-const t = (en: string, set: Theme["set"] = "heroes"): Theme => ({
+const t = (
+  en: string,
+  set: Theme["set"] = "heroes",
+  gostos: (Gosto[] | null)[] = [],
+): CatalogTheme => ({
   en,
   es: en,
   pt: en,
   ja: en,
   set,
+  id: themeId({ en, es: en, pt: en, ja: en }),
+  games: [...GAME_KEYS],
+  gostos,
+});
+const room = (filter: Partial<ThemeFilter>): ThemeFilter => ({
+  game: "who-am-i",
+  offGostos: [],
+  offThemes: [],
+  ...filter,
 });
 const LIST = [t("Pirates"), t("Robots"), t("Wizards"), t("Ninjas")];
 
-function store(list: () => Promise<Theme[]>) {
+function store(list: () => Promise<CatalogTheme[]>) {
   let reads = 0;
   const s: ThemeStore = {
     list: () => {
@@ -47,31 +63,33 @@ describe("themes", () => {
     }
   });
 
-  it("draws from the chosen sets, and from the others only when they run short", async () => {
+  it("draws what the room lets in, and the rest only when that runs short", async () => {
+    const anime: Gosto[] = ["anime"];
     const list = [
       t("Pirates", "warriors"),
-      t("Ninjas", "warriors"),
+      t("Ninjas", "warriors", [anime, anime, ["live"], ["books"]]),
       t("Knights", "warriors"),
-      t("Robots", "scifi"),
+      t("Robots", "scifi", [anime, anime, anime]),
       t("Mario", "games"),
     ];
     const { s } = store(async () => list);
     const source = themes(s);
     for (let i = 0; i < 20; i++) {
-      const drawn = await source.draw([], 3, ["warriors"]);
-      expect(drawn.map((x) => x.set)).toEqual([
-        "warriors",
-        "warriors",
-        "warriors",
-      ]);
-      const short = await source.draw([], 3, ["scifi", "games"]);
+      // anime off: Robots goes, Ninjas keeps 2 of 4 starters and goes too
+      const kept = await source.draw(
+        [],
+        3,
+        room({ offGostos: ["anime"], offThemes: ["mario"] }),
+      );
       expect(
-        short
+        kept
           .slice(0, 2)
           .map((x) => x.en)
           .sort(),
-      ).toEqual(["Mario", "Robots"]);
-      expect(short[2].set).toBe("warriors");
+      ).toEqual(["Knights", "Pirates"]);
+      expect(["Ninjas", "Robots", "Mario"]).toContain(kept[2].en);
+      const one = await source.draw([], 1, room({ offThemes: ["pirates"] }));
+      expect(one[0].en).not.toBe("Pirates");
     }
   });
 

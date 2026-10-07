@@ -6,9 +6,9 @@ import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { knownAs } from "@/game/character-search";
 import { GAME_KEYS } from "@/game/games";
+import { GOSTO_KEYS, type Gosto } from "@/game/gostos";
 import { parseSynced } from "@/game/options";
 import { themeId } from "@/game/theme-id";
-import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
 import {
   ANSWERS,
   type AnswerValue,
@@ -23,6 +23,7 @@ import {
   MAX_NOTE,
   MAX_QUESTION,
   MAX_THEME,
+  OFF_THEMES_MAX,
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
   type RoomSettings,
@@ -127,10 +128,10 @@ const createSchema = z.object({
   answerSeconds: seconds,
   validateSeconds: seconds,
   themeMode: z.enum(["vote", "host"]),
-  themeSets: z
-    .array(z.enum(THEME_SET_KEYS as [ThemeSet, ...ThemeSet[]]))
-    .min(1)
-    .max(THEME_SET_KEYS.length),
+  offGostos: z
+    .array(z.enum(GOSTO_KEYS as [Gosto, ...Gosto[]]))
+    .max(GOSTO_KEYS.length - 1),
+  offThemes: z.array(z.string().regex(/^[a-z0-9-]{1,80}$/)).max(OFF_THEMES_MAX),
 });
 
 export async function createRoom(

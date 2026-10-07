@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { ChatMessage } from "@/game/chat";
+import { GOSTO_KEYS } from "@/game/gostos";
 import { themeId } from "@/game/theme-id";
 import {
   DEFAULT_SETTINGS,
@@ -34,7 +35,7 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "pt" }));
 
-/** Game and theme settings for createRoom: who-am-i, everyone votes, on every set. */
+/** Game and theme settings for createRoom: who-am-i, everyone votes, every theme on. */
 const TIMES = {
   voteSeconds: 40,
   askSeconds: 60,
@@ -47,7 +48,8 @@ const ROOM = {
   name: "Test room",
   password: "",
   themeMode: DEFAULT_SETTINGS.themeMode,
-  themeSets: DEFAULT_SETTINGS.themeSets,
+  offGostos: DEFAULT_SETTINGS.offGostos,
+  offThemes: DEFAULT_SETTINGS.offThemes,
 };
 
 /** The guest id inside a jar's signed guest cookie. */
@@ -298,14 +300,18 @@ describe("server, local mode", () => {
       ok: false,
       error: "invalid_input",
     });
-    for (const themeSets of [[], ["nope" as "games"]])
+    for (const off of [
+      { offGostos: [...GOSTO_KEYS] },
+      { offGostos: ["nope" as "anime"] },
+      { offThemes: ["Not an id"] },
+    ])
       expect(
         await A.createRoom({
           ...ROOM,
           visibility: "public",
           seats: 4,
           ...TIMES,
-          themeSets,
+          ...off,
         }),
       ).toEqual({ ok: false, error: "invalid_input" });
     expect(await A.joinRoom("../../etc")).toEqual({

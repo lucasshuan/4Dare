@@ -1,23 +1,49 @@
 import "server-only";
+import { isGameKey } from "@/game/games";
+import { type Gosto, isGosto } from "@/game/gostos";
 import type { ThemeSet } from "@/game/theme-sets";
-import type { Lang, Theme } from "@/game/types";
-import type { ThemeStarter, ThemeStore } from "../types";
+import type { Lang } from "@/game/types";
+import type { CatalogTheme, ThemeStarter, ThemeStore } from "../types";
 import { type Db, serviceClient } from "./clients";
 
-/** Supabase: the whoami_themes table (see supabase/migrations/0003_themes.sql and 0009_theme_sets.sql). */
+/** The gostos of each shared starter, as theme_starter_gostos joins them ("anime,live", "" for none). */
+const parseGostos = (joined: string[] | null): (Gosto[] | null)[] =>
+  (joined ?? []).map((g) => {
+    const list = g.split(",").filter(isGosto);
+    return list.length ? list : null;
+  });
+
+/**
+ * Supabase: the whoami_themes table (supabase/migrations/0003, 0009, 0018),
+ * the games each serves and its starters' gostos (0032).
+ */
 export function supabaseThemes(): ThemeStore {
-  const table = () => serviceClient().from("whoami_themes");
+  const db = () => serviceClient();
   return {
     async list() {
-      const { data, error } = await table()
-        .select("en, es, ja, pt, theme_set")
-        .eq("active", true)
-        .limit(5000);
-      if (error) throw error;
-      return (data ?? []).map(
-        ({ theme_set, ...t }): Theme => ({
+      const [themes, gostos] = await Promise.all([
+        db()
+          .from("whoami_themes")
+          .select("id, en, es, ja, pt, theme_set, games")
+          .eq("active", true)
+          .limit(5000),
+        db()
+          .from("theme_starter_gostos")
+          .select("theme_id, gostos")
+          .limit(5000),
+      ]);
+      if (themes.error) throw themes.error;
+      // the gostos only narrow the draws: without them every theme stays in
+      const byTheme = new Map(
+        (gostos.data ?? []).map((r) => [r.theme_id, parseGostos(r.gostos)]),
+      );
+      return (themes.data ?? []).map(
+        ({ id, theme_set, games, ...t }): CatalogTheme => ({
           ...t,
+          id,
           set: theme_set as ThemeSet | null,
+          games: games.filter(isGameKey),
+          gostos: byTheme.get(id) ?? [],
         }),
       );
     },

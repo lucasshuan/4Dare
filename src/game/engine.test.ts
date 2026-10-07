@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createRoom, isExpired, reduce } from "./engine";
+import { GOSTO_KEYS } from "./gostos";
 import { abandoned, presenceDue } from "./helpers";
 import { matchRecord } from "./record";
 import { char, Game, ident, THEMES } from "./test-utils";
@@ -133,8 +134,9 @@ describe("lobby", () => {
       { answerSeconds: 60.5 },
       { validateSeconds: "60" },
       { themeMode: "anyone" },
-      { themeSets: [] },
-      { themeSets: ["games", "nope"] },
+      { offGostos: [...GOSTO_KEYS] },
+      { offGostos: ["anime", "nope"] },
+      { offThemes: ["Villains"] },
     ];
     for (const patch of bad) {
       expect(
@@ -160,9 +162,13 @@ describe("lobby", () => {
     );
   });
 
-  it("keeps each theme set once, in the screens' order", () => {
-    const g = new Game(1, 1, { themeSets: ["music", "games", "music"] });
-    expect(g.state.settings.themeSets).toEqual(["games", "music"]);
+  it("keeps what is switched off once, gostos in the screens' order", () => {
+    const g = new Game(1, 1, {
+      offGostos: ["real", "anime", "real"],
+      offThemes: ["villains", "robots", "villains"],
+    });
+    expect(g.state.settings.offGostos).toEqual(["anime", "real"]);
+    expect(g.state.settings.offThemes).toEqual(["robots", "villains"]);
   });
 
   it("joining twice refreshes the identity instead of failing", () => {

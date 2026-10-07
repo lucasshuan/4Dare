@@ -1,6 +1,7 @@
 import "server-only";
 import { DEFAULT_GAME, type GameKey } from "@/game/games";
 import type { ActiveRoom, Phase, RoomState } from "@/game/types";
+import { upgradeRoom } from "@/game/upgrade";
 import { toPublicRoom } from "@/game/view";
 import { LISTED_COLUMNS } from "../../listing";
 import type { RoomStore } from "../types";
@@ -18,7 +19,10 @@ export function supabaseRooms(): RoomStore {
         .maybeSingle();
       if (error) throw error;
       return data
-        ? { state: data.state as unknown as RoomState, version: data.version }
+        ? {
+            state: upgradeRoom(data.state as unknown as RoomState),
+            version: data.version,
+          }
         : null;
     },
     async create(state) {
@@ -68,7 +72,7 @@ export function supabaseRooms(): RoomStore {
       if (error) throw error;
       const now = Date.now();
       return (data ?? []).flatMap((r) => {
-        const room = toPublicRoom(r as unknown as RoomState, now);
+        const room = toPublicRoom(upgradeRoom(r as unknown as RoomState), now);
         return room ? [room] : [];
       });
     },

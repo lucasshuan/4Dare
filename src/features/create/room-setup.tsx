@@ -3,6 +3,7 @@
 import { Tabs } from "@base-ui/react/tabs";
 import {
   ArrowRight,
+  Heart,
   ScrollText,
   Shapes,
   SlidersHorizontal,
@@ -12,20 +13,23 @@ import { useTranslations } from "next-intl";
 import { type FormEvent, type ReactNode, useId, useState } from "react";
 import { keyClass } from "@/components/ui/button";
 import { LayoutMotion } from "@/components/ui/layout-motion";
-import { THEME_SET_KEYS } from "@/game/theme-sets";
+import { GOSTOS } from "@/game/gostos";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
 import type { CreateRoomInput } from "@/server/contract";
 import { GameField } from "./game-field";
+import { GostoFields } from "./gosto-fields";
+import { DEFAULT_SETUP } from "./last-setup";
 import {
   missingName,
   missingPassword,
   RulesFields,
   SettingsFields,
 } from "./settings-fields";
-import { missingSets, ThemeFields } from "./theme-fields";
+import { useThemeCount } from "./theme-catalog";
+import { ThemeFields } from "./theme-fields";
 
-type Tab = "room" | "rules" | "themes";
+type Tab = "room" | "rules" | "style" | "themes";
 
 const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
 
@@ -36,7 +40,7 @@ export const backClass =
 /**
  * Editing a room from the lobby: back, the title with the
  * game select and the submit button on its far right, then the settings in
- * tabs: room, the game's rules and, for "Who am I?", its themes.
+ * tabs: room, the game's rules, the gostos and the themes they leave.
  */
 export function RoomSetup({
   back,
@@ -61,6 +65,7 @@ export function RoomSetup({
   const t = useTranslations("home.createRoom");
   const [tab, setTab] = useState<Tab>("room");
   const problemId = useId();
+  const count = useThemeCount(value ?? DEFAULT_SETUP);
   const problems: Record<Tab, string | null> = {
     room: !value
       ? null
@@ -70,7 +75,8 @@ export function RoomSetup({
           ? t("needPassword")
           : null,
     rules: null,
-    themes: value && missingSets(value) ? t("needOneSet") : null,
+    style: null,
+    themes: count?.tooFew ? t("needThemes") : null,
   };
   const problemTab = problems.room ? "room" : problems.themes ? "themes" : null;
 
@@ -144,25 +150,37 @@ export function RoomSetup({
                 problem={problems.rules}
                 problemId={`${problemId}-rules`}
               />
-              {value.game === "who-am-i" ? (
-                <SetupTab
-                  value="themes"
-                  active={tab === "themes"}
-                  icon={Shapes}
-                  tone="bg-apricot-soft text-apricot"
-                  label={t("themes")}
-                  summary={
-                    value.themeMode === "host"
-                      ? t("themeHost")
-                      : `${t("themeVote")} · ${t("setsOn", {
-                          on: value.themeSets.length,
-                          total: THEME_SET_KEYS.length,
-                        })}`
-                  }
-                  problem={problems.themes}
-                  problemId={`${problemId}-themes`}
-                />
-              ) : null}
+              <SetupTab
+                value="style"
+                active={tab === "style"}
+                icon={Heart}
+                tone="bg-no-soft text-no"
+                label={t("gostos")}
+                summary={GOSTOS.filter((g) => !value.offGostos.includes(g.key))
+                  .map((g) => g.emoji)
+                  .join(" ")}
+                problem={problems.style}
+                problemId={`${problemId}-style`}
+              />
+              <SetupTab
+                value="themes"
+                active={tab === "themes"}
+                icon={Shapes}
+                tone="bg-apricot-soft text-apricot"
+                label={t("themes")}
+                summary={[
+                  value.game === "who-am-i" && value.themeMode === "host"
+                    ? t("themeHost")
+                    : null,
+                  count
+                    ? t("themesOn", { on: count.on, total: count.total })
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                problem={problems.themes}
+                problemId={`${problemId}-themes`}
+              />
             </LayoutMotion>
           </Tabs.List>
           <Tabs.Panel value="room" className="outline-none">
@@ -177,6 +195,14 @@ export function RoomSetup({
           <Tabs.Panel value="rules" className="outline-none">
             <PanelIn>
               <RulesFields value={value} onChange={onChange} />
+            </PanelIn>
+          </Tabs.Panel>
+          <Tabs.Panel value="style" className="outline-none">
+            <PanelIn>
+              <GostoFields
+                value={value}
+                onChange={(offGostos) => onChange({ ...value, offGostos })}
+              />
             </PanelIn>
           </Tabs.Panel>
           <Tabs.Panel value="themes" className="outline-none">

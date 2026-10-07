@@ -10,7 +10,7 @@ test("a private room is listed with a lock and asks for its password", async ({
   const code = await createRoom(host);
   // a new room is named after its host
   await expect(host.getByRole("heading", { level: 1 })).toHaveText(/'s room$/);
-  await host.getByRole("button", { name: /edit settings/i }).click();
+  await host.getByRole("button", { name: /edit advanced settings/i }).click();
   const save = host.getByRole("button", { name: /^save$/i });
   const name = host.getByRole("textbox", { name: "Room name" });
   // no name, no room

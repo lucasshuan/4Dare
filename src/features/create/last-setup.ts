@@ -1,8 +1,9 @@
 // The last room setup, so the next room starts the same way. Kept in this browser only.
 import { DEFAULT_GAME } from "@/game/games";
-import { THEME_SET_KEYS } from "@/game/theme-sets";
+import { GOSTO_KEYS, isGosto } from "@/game/gostos";
 import {
   DEFAULT_SETTINGS,
+  OFF_THEMES_MAX,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
 } from "@/game/types";
@@ -22,11 +23,32 @@ export const DEFAULT_SETUP: CreateRoomInput = {
   answerSeconds: DEFAULT_SETTINGS.answerSeconds,
   validateSeconds: DEFAULT_SETTINGS.validateSeconds,
   themeMode: DEFAULT_SETTINGS.themeMode,
-  themeSets: [...THEME_SET_KEYS],
+  offGostos: [],
+  offThemes: [],
 };
 
 const oneOf = <T>(value: unknown, options: readonly T[], fallback: T): T =>
   options.includes(value as T) ? (value as T) : fallback;
+
+/** What was switched off, as saved: gostos keep their order and one stays on; themes are ids. */
+export function cleanOff(gostos: unknown, themes: unknown) {
+  const g = Array.isArray(gostos) ? gostos.filter(isGosto) : [];
+  const offGostos = GOSTO_KEYS.filter((k) => g.includes(k));
+  const offThemes = Array.isArray(themes)
+    ? [
+        ...new Set(
+          themes.filter(
+            (t): t is string =>
+              typeof t === "string" && /^[a-z0-9-]{1,80}$/.test(t),
+          ),
+        ),
+      ].slice(0, OFF_THEMES_MAX)
+    : [];
+  return {
+    offGostos: offGostos.length === GOSTO_KEYS.length ? [] : offGostos,
+    offThemes,
+  };
+}
 
 /**
  * The setup saved last, field by field; anything missing or odd falls back to
@@ -48,9 +70,6 @@ export function loadSetup(): CreateRoomInput {
     v <= STEP_SECONDS_MAX
       ? v
       : fallback;
-  // Saved as the sets turned off, so a set added later starts on.
-  const off = Array.isArray(saved.setsOff) ? saved.setsOff : [];
-  const themeSets = THEME_SET_KEYS.filter((k) => !off.includes(k));
   return {
     game: d.game,
     name: d.name,
@@ -63,7 +82,8 @@ export function loadSetup(): CreateRoomInput {
     answerSeconds: seconds(saved.answerSeconds, d.answerSeconds),
     validateSeconds: seconds(saved.validateSeconds, d.validateSeconds),
     themeMode: oneOf(saved.themeMode, ["vote", "host"], d.themeMode),
-    themeSets: themeSets.length ? themeSets : d.themeSets,
+    // saved as what is switched off, so a gosto or theme added later starts on
+    ...cleanOff(saved.offGostos, saved.offThemes),
   };
 }
 
@@ -73,11 +93,9 @@ export function saveSetup({
   password: _password,
   visibility: _visibility,
   seats: _seats,
-  themeSets,
   ...rest
 }: CreateRoomInput) {
-  const setsOff = THEME_SET_KEYS.filter((k) => !themeSets.includes(k));
   try {
-    localStorage.setItem(KEY, JSON.stringify({ ...rest, setsOff }));
+    localStorage.setItem(KEY, JSON.stringify(rest));
   } catch {}
 }

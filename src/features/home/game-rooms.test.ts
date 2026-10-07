@@ -30,6 +30,7 @@ const room = (
   guessSeconds: 60,
   answerSeconds: 30,
   validateSeconds: 30,
+  offGostos: [],
 });
 
 describe("gameRooms", () => {

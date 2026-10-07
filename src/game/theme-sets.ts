@@ -110,9 +110,6 @@ export type ThemeSet = (typeof THEME_SETS)[number]["key"];
 /** Every set, in the order the screens show them. */
 export const THEME_SET_KEYS: readonly ThemeSet[] = THEME_SETS.map((s) => s.key);
 
-export const isThemeSet = (key: unknown): key is ThemeSet =>
-  (THEME_SET_KEYS as readonly unknown[]).includes(key);
-
 export const themeSetEmoji = (key: ThemeSet | null | undefined) =>
   THEME_SETS.find((s) => s.key === key)?.emoji ?? null;
 

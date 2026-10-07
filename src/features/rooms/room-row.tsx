@@ -7,6 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { buttonClass } from "@/components/ui/button";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { PersonCard } from "@/features/profile/person-card";
+import { GOSTOS } from "@/game/gostos";
 import { type PublicRoom, STEP_TIMES } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -59,8 +60,13 @@ export function RoomRow({
   const tc = useTranslations("common");
   const name = useDisplayName();
   const gameName = useGameName();
+  const tg = useTranslations("common.gostos");
   const host = name(r.host);
   const title = r.name || t("roomOf", { name: host });
+  // a room that switched gostos off says which ones it keeps
+  const kept = r.offGostos.length
+    ? GOSTOS.filter((g) => !r.offGostos.includes(g.key))
+    : [];
   return (
     <m.li
       layout
@@ -120,6 +126,21 @@ export function RoomRow({
                 seconds: secondsRange(r),
               })}
             </span>
+            {kept.length ? (
+              <span
+                title={kept.map((g) => tg(`${g.key}.name`)).join(", ")}
+                className="flex shrink-0 gap-px text-[12px] leading-none"
+              >
+                <span className="sr-only">
+                  {`${t("gostos")}: ${kept.map((g) => tg(`${g.key}.name`)).join(", ")}`}
+                </span>
+                {kept.map((g) => (
+                  <span key={g.key} aria-hidden>
+                    {g.emoji}
+                  </span>
+                ))}
+              </span>
+            ) : null}
           </span>
         </div>
       </div>

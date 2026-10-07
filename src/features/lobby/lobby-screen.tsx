@@ -32,7 +32,6 @@ import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
 import { GAME_SEATS } from "@/game/games";
-import { THEME_SET_KEYS } from "@/game/theme-sets";
 import { type Lang, STEP_TIMES } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
@@ -49,7 +48,7 @@ import {
 import type { CreateRoomInput } from "@/server/contract";
 import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
-import { RoomTitle, VisibilityRow } from "./room-edits";
+import { GostosRow, RoomTitle, VisibilityRow } from "./room-edits";
 import { SeatGrid } from "./seat-grid";
 import { StartDialog } from "./start-dialog";
 
@@ -69,7 +68,8 @@ const editable = ({
   answerSeconds,
   validateSeconds,
   themeMode,
-  themeSets,
+  offGostos,
+  offThemes,
 }: CreateRoomInput): CreateRoomInput => ({
   game,
   name,
@@ -82,7 +82,8 @@ const editable = ({
   answerSeconds,
   validateSeconds,
   themeMode,
-  themeSets,
+  offGostos,
+  offThemes,
 });
 
 export function LobbyScreen() {
@@ -117,7 +118,7 @@ export function LobbyScreen() {
   const [draft, setDraft] = useState<CreateRoomInput>(() =>
     editable(view.settings),
   );
-  const { game, name: roomName, seats, themeMode, themeSets } = view.settings;
+  const { game, name: roomName, seats, themeMode } = view.settings;
   const gameName = useGameName();
   // The host sees every seat the game allows, and their changes show at once;
   // the server confirms in the background (a refusal puts things back).
@@ -400,16 +401,19 @@ export function LobbyScreen() {
                   ))}
                 </span>
               </Setting>
-              <Setting icon={themeMode === "host" ? PenLine : Vote}>
-                {themeMode === "host"
-                  ? t("themeHost")
-                  : themeSets.length === THEME_SET_KEYS.length
-                    ? t("themeVoteAll")
-                    : t("themeVote", {
-                        on: themeSets.length,
-                        total: THEME_SET_KEYS.length,
-                      })}
-              </Setting>
+              <GostosRow
+                settings={view.settings}
+                editable={me.isHost}
+                pending={pending}
+                onSave={async (v) =>
+                  (await act(() => updateSettings(code, v))).ok
+                }
+              />
+              {game === "who-am-i" ? (
+                <Setting icon={themeMode === "host" ? PenLine : Vote}>
+                  {t(themeMode === "host" ? "themeHost" : "themeVote")}
+                </Setting>
+              ) : null}
             </ul>
             {me.isHost ? (
               <button
