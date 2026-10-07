@@ -943,6 +943,10 @@ export type Database = {
         };
       };
       delete_old_rooms: { Args: never; Returns: number };
+      played_together: {
+        Args: { p_a: string; p_b: string };
+        Returns: boolean;
+      };
       player_matches: {
         Args: { p_since: string; p_user: string };
         Returns: {
