@@ -206,58 +206,61 @@ export type Database = {
       };
       match_players: {
         Row: {
-          auto_picked: boolean;
+          auto_picked: boolean | null;
           character_id: string | null;
           character_name: string | null;
           character_origin: string | null;
           discovered_at: number | null;
           finished_at: string;
-          guesses: number;
+          guesses: number | null;
           lang: string;
           match_id: string;
           picked_by: string | null;
           place: number | null;
-          questions: number;
-          result: string;
+          questions: number | null;
+          result: string | null;
           time_ms: number | null;
           user_id: string;
           was_guest: boolean;
+          xp: number;
         };
         Insert: {
-          auto_picked?: boolean;
+          auto_picked?: boolean | null;
           character_id?: string | null;
           character_name?: string | null;
           character_origin?: string | null;
           discovered_at?: number | null;
           finished_at: string;
-          guesses?: number;
+          guesses?: number | null;
           lang: string;
           match_id: string;
           picked_by?: string | null;
           place?: number | null;
-          questions?: number;
-          result: string;
+          questions?: number | null;
+          result?: string | null;
           time_ms?: number | null;
           user_id: string;
           was_guest: boolean;
+          xp?: number;
         };
         Update: {
-          auto_picked?: boolean;
+          auto_picked?: boolean | null;
           character_id?: string | null;
           character_name?: string | null;
           character_origin?: string | null;
           discovered_at?: number | null;
           finished_at?: string;
-          guesses?: number;
+          guesses?: number | null;
           lang?: string;
           match_id?: string;
           picked_by?: string | null;
           place?: number | null;
-          questions?: number;
-          result?: string;
+          questions?: number | null;
+          result?: string | null;
           time_ms?: number | null;
           user_id?: string;
           was_guest?: boolean;
+          xp?: number;
         };
         Relationships: [
           {
@@ -272,6 +275,7 @@ export type Database = {
       matches: {
         Row: {
           finished_at: string;
+          game: string;
           id: string;
           room_code: string;
           round: number;
@@ -281,6 +285,7 @@ export type Database = {
         };
         Insert: {
           finished_at: string;
+          game?: string;
           id: string;
           room_code: string;
           round: number;
@@ -290,6 +295,7 @@ export type Database = {
         };
         Update: {
           finished_at?: string;
+          game?: string;
           id?: string;
           room_code?: string;
           round?: number;
@@ -337,32 +343,147 @@ export type Database = {
         };
         Relationships: [];
       };
+      profile_comment_reports: {
+        Row: {
+          comment_id: number;
+          created_at: string;
+          reporter_id: string;
+        };
+        Insert: {
+          comment_id: number;
+          created_at?: string;
+          reporter_id: string;
+        };
+        Update: {
+          comment_id?: number;
+          created_at?: string;
+          reporter_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profile_comment_reports_comment_id_fkey";
+            columns: ["comment_id"];
+            isOneToOne: false;
+            referencedRelation: "profile_comments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "profile_comment_reports_reporter_id_fkey";
+            columns: ["reporter_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      profile_comments: {
+        Row: {
+          author_id: string;
+          body: string;
+          created_at: string;
+          hidden: boolean;
+          id: number;
+          parent_id: number | null;
+          profile_id: string;
+        };
+        Insert: {
+          author_id: string;
+          body: string;
+          created_at?: string;
+          hidden?: boolean;
+          id?: never;
+          parent_id?: number | null;
+          profile_id: string;
+        };
+        Update: {
+          author_id?: string;
+          body?: string;
+          created_at?: string;
+          hidden?: boolean;
+          id?: never;
+          parent_id?: number | null;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profile_comments_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "profile_comments_parent_id_fkey";
+            columns: ["parent_id"];
+            isOneToOne: false;
+            referencedRelation: "profile_comments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "profile_comments_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
+          about: Json;
+          accent: string | null;
           avatar: Json;
+          banner: Json | null;
+          created_at: string;
           guest_number: number;
+          handle: string | null;
+          handle_changed_at: string | null;
           id: string;
           name: string | null;
+          privacy: Json;
           provider: string | null;
           provider_avatar_url: string | null;
+          quote: string | null;
+          settings: Json;
+          showcase: Json;
           updated_at: string;
         };
         Insert: {
+          about?: Json;
+          accent?: string | null;
           avatar: Json;
+          banner?: Json | null;
+          created_at?: string;
           guest_number: number;
+          handle?: string | null;
+          handle_changed_at?: string | null;
           id: string;
           name?: string | null;
+          privacy?: Json;
           provider?: string | null;
           provider_avatar_url?: string | null;
+          quote?: string | null;
+          settings?: Json;
+          showcase?: Json;
           updated_at?: string;
         };
         Update: {
+          about?: Json;
+          accent?: string | null;
           avatar?: Json;
+          banner?: Json | null;
+          created_at?: string;
           guest_number?: number;
+          handle?: string | null;
+          handle_changed_at?: string | null;
           id?: string;
           name?: string | null;
+          privacy?: Json;
           provider?: string | null;
           provider_avatar_url?: string | null;
+          quote?: string | null;
+          settings?: Json;
+          showcase?: Json;
           updated_at?: string;
         };
         Relationships: [];
@@ -435,6 +556,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_badges: {
+        Row: {
+          badge: string;
+          earned_at: string;
+          game: string | null;
+          user_id: string;
+        };
+        Insert: {
+          badge: string;
+          earned_at?: string;
+          game?: string | null;
+          user_id: string;
+        };
+        Update: {
+          badge?: string;
+          earned_at?: string;
+          game?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       whoami_fit_votes: {
         Row: {
           character_id: string;
@@ -461,6 +603,56 @@ export type Database = {
           voter_id?: string;
         };
         Relationships: [];
+      };
+      whoami_match_players: {
+        Row: {
+          auto_picked: boolean;
+          character_id: string | null;
+          character_name: string | null;
+          character_origin: string | null;
+          discovered_at: number | null;
+          guesses: number;
+          match_id: string;
+          picked_by: string | null;
+          questions: number;
+          result: string;
+          user_id: string;
+        };
+        Insert: {
+          auto_picked?: boolean;
+          character_id?: string | null;
+          character_name?: string | null;
+          character_origin?: string | null;
+          discovered_at?: number | null;
+          guesses?: number;
+          match_id: string;
+          picked_by?: string | null;
+          questions?: number;
+          result: string;
+          user_id: string;
+        };
+        Update: {
+          auto_picked?: boolean;
+          character_id?: string | null;
+          character_name?: string | null;
+          character_origin?: string | null;
+          discovered_at?: number | null;
+          guesses?: number;
+          match_id?: string;
+          picked_by?: string | null;
+          questions?: number;
+          result?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "whoami_match_players_match_id_user_id_fkey";
+            columns: ["match_id", "user_id"];
+            isOneToOne: true;
+            referencedRelation: "match_players";
+            referencedColumns: ["match_id", "user_id"];
+          },
+        ];
       };
       whoami_pick_feedback: {
         Row: {
@@ -751,12 +943,46 @@ export type Database = {
         };
       };
       delete_old_rooms: { Args: never; Returns: number };
+      player_matches: {
+        Args: { p_since: string; p_user: string };
+        Returns: {
+          details: Json;
+          finished_at: string;
+          game: string;
+          lang: string;
+          match_id: string;
+          others: Json;
+          place: number;
+          time_ms: number;
+          xp: number;
+        }[];
+      };
+      player_totals: {
+        Args: { p_user: string };
+        Returns: {
+          first_at: string;
+          game: string;
+          matches: number;
+          time_ms: number;
+          wins: number;
+          xp: number;
+        }[];
+      };
       popular_picks: {
         Args: { p_limit: number; p_theme: string };
         Returns: {
           id: string;
           picks: number;
         }[];
+      };
+      post_profile_comment: {
+        Args: {
+          p_author: string;
+          p_body: string;
+          p_parent: number;
+          p_profile: string;
+        };
+        Returns: number;
       };
       reassign_matches: {
         Args: { from_id: string; to_id: string };
@@ -788,6 +1014,10 @@ export type Database = {
       report_character_image: {
         Args: { p_hide_at: number; p_image: string; p_reporter: string };
         Returns: string;
+      };
+      report_profile_comment: {
+        Args: { p_comment: number; p_reporter: string };
+        Returns: boolean;
       };
       search_characters: {
         Args: { p_lang: string; p_limit: number; q: string };
