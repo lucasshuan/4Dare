@@ -10,6 +10,7 @@ import { LayoutMotion } from "@/components/ui/layout-motion";
 import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
+import { PersonCard, PersonStrip } from "@/features/profile/person-card";
 import { useStageTimeline } from "@/features/stage/use-stage-timeline";
 import type { PlayerStatus, PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -54,6 +55,7 @@ export function PlayerStrip({
     (a, b) => (a.turnOrder ?? a.seat + 99) - (b.turnOrder ?? b.seat + 99),
   );
   const at = enter?.at ?? null;
+  const name = useDisplayName();
   const ref = useStageTimeline<HTMLUListElement>({
     startsAt: at,
     deps: [at, ordered.map((p) => p.id).join()],
@@ -108,7 +110,13 @@ export function PlayerStrip({
               {p.card && !p.cardHidden ? (
                 <CardPeek player={p} />
               ) : (
-                <PlayerRow player={p} />
+                <PersonCard
+                  person={{ ...p, name: name(p, p.isYou) }}
+                  align="end"
+                  className="group flex min-w-0 flex-1 rounded-md transition-colors duration-200 ease-soft hover:bg-sunken/60 data-popup-open:bg-sunken/60"
+                >
+                  <PlayerRow player={p} />
+                </PersonCard>
               )}
             </div>
           </m.li>
@@ -262,6 +270,7 @@ function PlayerRow({ player: p }: { player: PlayerView }) {
 /** The player's row as a trigger: hover, focus or tap shows their card, big. */
 function CardPeek({ player: p }: { player: PlayerView }) {
   const t = useTranslations("turn.card");
+  const name = useDisplayName();
   const withNames = useWithNames();
   const { playerById } = useRoomContext();
   const card = p.card;
@@ -325,6 +334,10 @@ function CardPeek({ player: p }: { player: PlayerView }) {
                 {pickedBy}
               </p>
             ) : null}
+            {/* the card first (it is what matters in the game), then who holds it */}
+            <div className="mx-1.5 mt-3 border-line border-t pt-3">
+              <PersonStrip person={{ ...p, name: name(p, p.isYou) }} />
+            </div>
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>

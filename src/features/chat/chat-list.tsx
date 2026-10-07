@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { useWithNames } from "@/components/ui/player-name";
 import { useRoomContext } from "@/features/data/room-context";
+import { PersonCard } from "@/features/profile/person-card";
 import type { ShownPerson, SystemLine } from "@/game/chat";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
@@ -200,22 +201,33 @@ function Line({
       )}
     >
       {p && last ? (
-        <Avatar
-          avatar={p.avatar}
-          size={28}
-          seat={slot}
-          className={cn("self-end", first && "row-span-2")}
-        />
+        <PersonCard
+          person={{ ...p, name: name(p) }}
+          side="top"
+          className={cn("flex self-end rounded-pill", first && "row-span-2")}
+        >
+          <Avatar avatar={p.avatar} size={28} seat={slot} />
+        </PersonCard>
       ) : (
         <span className={cn(first && "row-span-2")} />
       )}
       {first ? (
-        <small
-          style={slot === null ? undefined : { color: seatInk(slot) }}
-          className="truncate pl-1 font-bold text-[12px] text-ink-muted"
-        >
-          {p ? name(p) : ""}
-        </small>
+        p ? (
+          <PersonCard
+            person={{ ...p, name: name(p) }}
+            side="top"
+            className="min-w-0 max-w-full justify-self-start truncate rounded-sm pl-1"
+          >
+            <small
+              style={slot === null ? undefined : { color: seatInk(slot) }}
+              className="font-bold text-[12px] text-ink-muted"
+            >
+              {name(p)}
+            </small>
+          </PersonCard>
+        ) : (
+          <small />
+        )
       ) : null}
       {bubble}
     </m.div>

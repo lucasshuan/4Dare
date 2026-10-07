@@ -781,7 +781,7 @@ export interface PublicRoom {
   /** open: has a free seat; full: lobby with no seat left; playing: match under way. */
   status: "open" | "full" | "playing";
   /** The host's name in the reader's language (see PlayerView.name). */
-  host: Pick<Identity, "isGuest" | "avatar" | "lang"> & { name: string };
+  host: Pick<Identity, "id" | "isGuest" | "avatar" | "lang"> & { name: string };
   players: number;
   seats: number;
   /** When the room was made (server ms): the game page lists the oldest first. */
@@ -795,7 +795,10 @@ export interface PublicRoom {
 
 /** A listed room as the server keeps it, before its host's name is put in the reader's language. */
 export type ListedRoom = Omit<PublicRoom, "host"> & {
-  host: Pick<Identity, "isGuest" | "name" | "guestNumber" | "avatar" | "lang">;
+  host: Pick<
+    Identity,
+    "id" | "isGuest" | "name" | "guestNumber" | "avatar" | "lang"
+  >;
 };
 
 /** Just what counting the players online needs from a room. */

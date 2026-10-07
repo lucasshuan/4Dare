@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { buttonClass } from "@/components/ui/button";
 import { GameThumb, useGameName } from "@/features/create/game-info";
+import { PersonCard } from "@/features/profile/person-card";
 import { type PublicRoom, STEP_TIMES } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -84,7 +85,12 @@ export function RoomRow({
           showGame && "max-md:col-span-2",
         )}
       >
-        <Avatar avatar={r.host.avatar} />
+        <PersonCard
+          person={{ ...r.host, name: host }}
+          className="flex shrink-0 rounded-pill"
+        >
+          <Avatar avatar={r.host.avatar} />
+        </PersonCard>
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="flex min-w-0 items-center gap-1.5 font-semibold">
             <span className="truncate">{title}</span>

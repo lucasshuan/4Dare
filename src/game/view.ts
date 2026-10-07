@@ -514,6 +514,7 @@ export function toPublicRoom(state: RoomState, now: number): ListedRoom | null {
     locked,
     status,
     host: {
+      id: host.id,
       isGuest: host.isGuest,
       name: host.name,
       guestNumber: host.guestNumber,
@@ -535,6 +536,7 @@ export function toPublicRoom(state: RoomState, now: number): ListedRoom | null {
 export const showRoom = (r: ListedRoom, lang: Lang): PublicRoom => ({
   ...r,
   host: {
+    id: r.host.id,
     isGuest: r.host.isGuest,
     name: displayName(r.host, lang),
     avatar: r.host.avatar,

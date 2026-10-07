@@ -12,6 +12,7 @@ import { Portrait } from "@/components/ui/portrait";
 import { ThemeTag } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
+import { PersonCard } from "@/features/profile/person-card";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang, PlayerView } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
@@ -246,26 +247,31 @@ export function ResultScreen() {
                       ease: ease.soft,
                     },
                   }}
-                  className="flex items-center gap-3 px-1"
+                  className="flex px-1"
                 >
-                  <Avatar
-                    avatar={p.avatar}
-                    size={48}
-                    seat={p.colorSlot}
-                    className="max-sm:size-8 [--ring-gap:var(--canvas)]"
-                  />
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate font-bold text-[clamp(14px,1.6vw,18px)]">
-                      {name(p, p.isYou)}
+                  <PersonCard
+                    person={{ ...p, name: name(p, p.isYou) }}
+                    className="-m-1 flex min-w-0 items-center gap-3 p-1"
+                  >
+                    <Avatar
+                      avatar={p.avatar}
+                      size={48}
+                      seat={p.colorSlot}
+                      className="max-sm:size-8 [--ring-gap:var(--canvas)]"
+                    />
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate font-bold text-[clamp(14px,1.6vw,18px)]">
+                        {name(p, p.isYou)}
+                      </span>
+                      <span className="font-medium text-[13px] text-ink-muted">
+                        {p.discoveredAt
+                          ? t("discoveredAt", { n: p.discoveredAt })
+                          : p.gaveUp
+                            ? t("gaveUp")
+                            : t("notFound")}
+                      </span>
                     </span>
-                    <span className="font-medium text-[13px] text-ink-muted">
-                      {p.discoveredAt
-                        ? t("discoveredAt", { n: p.discoveredAt })
-                        : p.gaveUp
-                          ? t("gaveUp")
-                          : t("notFound")}
-                    </span>
-                  </div>
+                  </PersonCard>
                 </m.div>
                 <m.div
                   initial={{ height: 0 }}

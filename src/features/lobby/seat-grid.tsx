@@ -12,6 +12,7 @@ import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import { PersonCard } from "@/features/profile/person-card";
 import type { PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
@@ -86,18 +87,24 @@ export function SeatGrid({
           style={seatWash(p.colorSlot)}
           className={cn(cardClass, "border-transparent")}
         >
-          <Avatar avatar={p.avatar} seat={p.colorSlot} />
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate font-semibold text-sm">
-              {name(p, p.isYou)}
+          {/* the face and name open the person's quick card */}
+          <PersonCard
+            person={{ ...p, name: name(p, p.isYou) }}
+            className="-m-1 flex min-w-0 items-center gap-3 p-1"
+          >
+            <Avatar avatar={p.avatar} seat={p.colorSlot} />
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate font-semibold text-sm">
+                {name(p, p.isYou)}
+              </span>
+              <span className="inline-flex items-center gap-1 font-medium text-[13px] text-ink-muted">
+                {p.isHost ? (
+                  <Crown className="size-3.5" strokeWidth={1.75} />
+                ) : null}
+                {p.isHost ? t("host") : p.ready ? t("ready") : t("notReady")}
+              </span>
             </span>
-            <span className="inline-flex items-center gap-1 font-medium text-[13px] text-ink-muted">
-              {p.isHost ? (
-                <Crown className="size-3.5" strokeWidth={1.75} />
-              ) : null}
-              {p.isHost ? t("host") : p.ready ? t("ready") : t("notReady")}
-            </span>
-          </div>
+          </PersonCard>
           {p.isHost ? null : (
             <div className="ml-auto flex shrink-0 items-center gap-1">
               <span

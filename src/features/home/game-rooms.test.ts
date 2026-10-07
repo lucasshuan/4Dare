@@ -16,6 +16,7 @@ const room = (
   locked: false,
   status,
   host: {
+    id: `host-${code}`,
     isGuest: true,
     name: "Host",
     lang,
