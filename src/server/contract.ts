@@ -1,5 +1,6 @@
 // Shapes shared by server actions, route handlers and the UI.
 import type { GameKey } from "@/game/games";
+import type { BadgeGroup, BadgeId } from "@/game/profile/badges";
 import type { Fact } from "@/game/profile/history";
 import type {
   About,
@@ -164,6 +165,17 @@ export interface ContributedPicture {
   character: { id: string; name: string; origin: string | null } | null;
 }
 
+/** A badge on a profile: how far its owner got, and since when they hold the tier. */
+export interface BadgeView {
+  id: BadgeId;
+  group: BadgeGroup;
+  goals: readonly [number, number, number];
+  value: number;
+  /** 0: not yet; 1–3: bronze, silver, gold. */
+  tier: number;
+  earnedAt: number | null;
+}
+
 /** An account's profile page. */
 export interface ProfileView extends PersonRef {
   accent: string | null;
@@ -196,6 +208,7 @@ export interface ProfileView extends PersonRef {
   facts: FactView[];
   pictures: ContributedPicture[];
   characters: CharacterDTO[];
+  badges: BadgeView[];
 }
 
 /** A line on a profile's mural, as a reader sees it. */

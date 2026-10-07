@@ -50,6 +50,7 @@ const store = vi.hoisted(() => ({
   profiles: [] as StoredProfile[],
   history: [] as PlayedMatch[],
   pictures: [] as unknown[],
+  granted: [] as string[],
 }));
 
 vi.mock("./backend", () => ({
@@ -67,6 +68,12 @@ vi.mock("./backend", () => ({
         store.history.some((m) =>
           [a, b].every((id) => m.others.some((o) => o.id === id)),
         ),
+    },
+    badges: {
+      earned: async () => new Map([["matches.bronze", 5]]),
+      grant: async (_id: string, tiers: { key: string }[]) => {
+        store.granted.push(...tiers.map((t) => t.key));
+      },
     },
     images: {
       byAuthor: async (_id: string, withPending: boolean) =>
@@ -92,6 +99,7 @@ vi.mock("./backend", () => ({
 vi.mock("./rooms", () => ({ currentMatch: async () => null }));
 
 beforeEach(() => {
+  store.granted = [];
   store.profiles = [profile(MEI, "mei", "Mei"), profile(BIA, "bia", "Bia")];
   store.history = [played(1, { place: 1 }), played(2), played(400)];
   store.pictures = [
@@ -215,5 +223,26 @@ describe("profiles", () => {
       matches: 0,
     });
     expect((await playerCard(MEI, BIA, "pt"))?.quote).toBeNull();
+  });
+
+  it("hands out badge tiers once and keeps the day of the first", async () => {
+    store.history = Array.from({ length: 12 }, (_, i) => played(i + 1));
+    const view = await profileView("mei", BIA, "pt");
+    const matches = view?.badges.find((b) => b.id === "matches");
+    // bronze was kept before: its day stays, nothing new to keep
+    expect(matches).toMatchObject({ tier: 1, value: 12, earnedAt: 5 });
+    expect(store.granted).not.toContain("matches.bronze");
+    // the people badge: Bia only, not yet bronze
+    expect(view?.badges.find((b) => b.id === "people")).toMatchObject({
+      tier: 0,
+      value: 1,
+      earnedAt: null,
+    });
+    // the library's badges count the pictures (one cover, one waiting)
+    expect(view?.badges.find((b) => b.id === "covers")).toMatchObject({
+      tier: 1,
+      value: 1,
+    });
+    expect(store.granted).toContain("covers.bronze");
   });
 });

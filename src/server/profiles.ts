@@ -2,6 +2,13 @@ import "server-only";
 import { GAME_KEYS } from "@/game/games";
 import { displayName } from "@/game/guest-names";
 import {
+  BADGES,
+  badgeValues,
+  type Contributions,
+  tierKey,
+  tierOf,
+} from "@/game/profile/badges";
+import {
   factsOf,
   type PlayedMatch,
   totalsOf,
@@ -13,6 +20,7 @@ import { getBackend } from "./backend";
 import { entryId } from "./backend/seed-format";
 import type { StoredProfile } from "./backend/types";
 import type {
+  BadgeView,
   CharacterDTO,
   ContributedPicture,
   FactView,
@@ -29,6 +37,8 @@ const DAY = 24 * 60 * 60 * 1000;
 const GARDEN_MS = 372 * DAY;
 const PICTURES = 24;
 const CHARACTERS = 24;
+/** Read for the library badges' counts; the page shows the first few. */
+const COUNTED = 500;
 
 export const person = (p: StoredProfile, lang: Lang): PersonRef => ({
   id: p.id,
@@ -66,6 +76,47 @@ async function charactersFor(keys: string[], lang: Lang) {
   for (const c of await Promise.all(missing.map((k) => characters.get(k))))
     if (c) byKey.set(pickKey(c.id), c);
   return byKey;
+}
+
+/**
+ * Every badge with how far the player got, the library's only when their
+ * contributions show; tiers reached for the first time are kept with today.
+ */
+async function badgeViews(
+  userId: PlayerId,
+  matches: PlayedMatch[],
+  made: Contributions | null,
+): Promise<BadgeView[]> {
+  const { badges } = getBackend();
+  const values = badgeValues(
+    matches,
+    made ?? { pictures: 0, covers: 0, characters: 0 },
+  );
+  const rules = BADGES.filter((b) => made || b.group !== "library");
+  const reached = rules.flatMap((b) => {
+    const { tier } = tierOf(b.goals, values[b.id]);
+    return Array.from({ length: tier }, (_, i) => ({
+      key: tierKey(b.id, i + 1),
+      game: b.group === "general" || b.group === "library" ? null : b.group,
+    }));
+  });
+  const known = await badges.earned(userId);
+  const fresh = reached.filter((r) => !known.has(r.key));
+  if (fresh.length) {
+    await badges.grant(userId, fresh);
+    for (const r of fresh) known.set(r.key, Date.now());
+  }
+  return rules.map((b) => {
+    const { tier } = tierOf(b.goals, values[b.id]);
+    return {
+      id: b.id,
+      group: b.group,
+      goals: b.goals,
+      value: values[b.id],
+      tier,
+      earnedAt: tier ? (known.get(tierKey(b.id, tier)) ?? null) : null,
+    };
+  });
 }
 
 /** One game's card: every game's numbers plus its own. */
@@ -164,16 +215,17 @@ export async function profileView(
       facts: [],
       pictures: [],
       characters: [],
+      badges: [],
     };
 
   const [playing, pictures, made, shown] = await Promise.all([
     privacy.playing || isMe ? currentMatch(profile.id) : null,
     hidden.contributions
       ? []
-      : backend.images.byAuthor(profile.id, isMe, PICTURES),
+      : backend.images.byAuthor(profile.id, isMe, COUNTED),
     hidden.contributions
       ? []
-      : backend.characters.createdBy(profile.id, CHARACTERS),
+      : backend.characters.createdBy(profile.id, COUNTED),
     hidden.showcase
       ? new Map<string | null, Character>()
       : charactersFor(
@@ -209,20 +261,45 @@ export async function profileView(
   });
 
   // the pictures' characters in the reader's language
+  // the pictures' characters in the reader's language
   const pictured = await charactersFor(
     pictures.flatMap((p) => (p.characterId ? [p.characterId] : [])),
     lang,
   );
-  const pictureViews = pictures.map((p): ContributedPicture => {
+  const isCover = (p: (typeof pictures)[number]) => {
     const c = p.characterId ? pictured.get(pickKey(p.characterId)) : undefined;
-    return {
-      id: p.id,
-      url: p.url,
-      status: p.status === "pending" ? "pending" : "active",
-      cover: !!c && c.imageUrl === p.url,
-      character: c ? { id: c.id, name: c.name, origin: c.origin } : null,
-    };
-  });
+    return !!c && c.imageUrl === p.url;
+  };
+  const pictureViews = pictures
+    .slice(0, PICTURES)
+    .map((p): ContributedPicture => {
+      const c = p.characterId
+        ? pictured.get(pickKey(p.characterId))
+        : undefined;
+      return {
+        id: p.id,
+        url: p.url,
+        status: p.status === "pending" ? "pending" : "active",
+        cover: isCover(p),
+        character: c ? { id: c.id, name: c.name, origin: c.origin } : null,
+      };
+    });
+
+  const badges = hidden.activity
+    ? []
+    : await badgeViews(
+        profile.id,
+        activity,
+        hidden.contributions
+          ? null
+          : {
+              pictures: pictures.filter((p) => p.status === "active").length,
+              covers: pictures.filter(
+                (p) => p.status === "active" && isCover(p),
+              ).length,
+              characters: made.length,
+            },
+      );
 
   return {
     ...base,
@@ -244,6 +321,7 @@ export async function profileView(
     ),
     facts: factViews,
     pictures: pictureViews,
-    characters: made.map(dto),
+    characters: made.slice(0, CHARACTERS).map(dto),
+    badges,
   };
 }

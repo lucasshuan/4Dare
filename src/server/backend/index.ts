@@ -4,6 +4,7 @@ import { BACKEND } from "@/config";
 import { localBackend } from "@/server/backend/local";
 import { themes } from "../themes";
 import { supabaseAuth } from "./supabase/auth";
+import { supabaseBadges } from "./supabase/badges";
 import { supabaseCharacters } from "./supabase/characters";
 import { supabaseChat } from "./supabase/chat";
 import { supabaseFiles } from "./supabase/files";
@@ -32,6 +33,7 @@ export function getBackend(): Backend {
       auth: supabaseAuth(),
       profiles: supabaseProfiles(),
       mural: supabaseMural(),
+      badges: supabaseBadges(),
       notify: supabaseNotify(),
       chat: supabaseChat(),
     };

@@ -4,6 +4,7 @@ import type { ThemeExamples } from "../../theme-examples";
 import { themes } from "../../themes";
 import type { Backend } from "../types";
 import { localAuth } from "./auth";
+import { localBadges } from "./badges";
 import { localCharacters } from "./characters";
 import { localChat } from "./chat";
 import { localFiles } from "./files";
@@ -32,6 +33,7 @@ export function localBackend(): Backend {
     auth: localAuth(),
     profiles: localProfiles(),
     mural: localMural(),
+    badges: localBadges(),
     // no push channel: the screens poll
     notify: {
       roomChanged: async () => {},

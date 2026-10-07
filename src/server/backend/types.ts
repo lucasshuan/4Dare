@@ -310,6 +310,17 @@ export interface MuralStore {
   report(id: number, reporterId: PlayerId): Promise<boolean>;
 }
 
+/** When each badge tier was first reached (table user_badges). */
+export interface BadgeStore {
+  /** "matches.silver" → when (ms). */
+  earned(userId: PlayerId): Promise<Map<string, number>>;
+  /** Keeps tiers reached now; one already kept keeps its day. */
+  grant(
+    userId: PlayerId,
+    tiers: { key: string; game: string | null }[],
+  ): Promise<void>;
+}
+
 export interface Notifier {
   /** Tell everyone in the room that its state changed. Best effort. */
   roomChanged(code: string, version: number): Promise<void>;
@@ -380,6 +391,7 @@ export interface Backend {
   auth: AuthService;
   profiles: ProfileStore;
   mural: MuralStore;
+  badges: BadgeStore;
   notify: Notifier;
   chat: ChatStore;
 }
