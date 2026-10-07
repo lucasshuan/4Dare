@@ -23,7 +23,7 @@
   --yes-deep: color-mix(in oklch, var(--yes), black 32%);
   --apricot-deep: color-mix(in oklch, var(--apricot), black 32%);
   --no-deep: color-mix(in oklch, var(--no), black 32%);
-  --apricot: #cf7024;
+  --apricot: #ef7215;
   --on-apricot: #2a1707;
   --apricot-soft: #fce8d6;
   --butter: #f6e3a1;
