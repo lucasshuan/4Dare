@@ -4,17 +4,17 @@ import { ArrowRight, Sparkles, UsersRound } from "lucide-react";
 import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Screen } from "@/components/ui/screen";
+import { GAME_INFO } from "@/features/create/game-info";
 import { LiveDot } from "@/features/current-match/match-lock";
 import { usePlayersOnline } from "@/features/data/use-public-rooms";
 import type { GameKey } from "@/game/games";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
-import { WHO_AM_I } from "@/lib/routes";
+import { GAME_PATHS } from "@/lib/routes";
 import { GamesCarousel } from "./games-carousel";
 import { HubActions, HubBrand } from "./hub-actions";
 import { useAuthErrorToast } from "./use-auth-error";
-import { WhoAmISnapshot } from "./who-am-i-snapshot";
 
 /**
  * Card width follows the window height, so the whole hub fits on screen
@@ -22,7 +22,7 @@ import { WhoAmISnapshot } from "./who-am-i-snapshot";
  */
 const CARD = "w-[clamp(220px,calc((100dvh_-_370px)_*_1.6),340px)]";
 
-/** The hub: logo and who you are on top, then the games. Only one so far. */
+/** The hub: logo and who you are on top, then the games. */
 export function HomeScreen() {
   const t = useTranslations("home");
   useAuthErrorToast();
@@ -42,7 +42,8 @@ export function HomeScreen() {
           {t("games.title")}
         </m.h1>
         <GamesCarousel>
-          <WhoAmICard />
+          <GameCard game="who-am-i" delay={0.12} />
+          <GameCard game="impostor" delay={0.2} />
           <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.35 } }}
@@ -57,23 +58,24 @@ export function HomeScreen() {
   );
 }
 
-function WhoAmICard() {
-  const t = useTranslations("home.games.whoAmI");
+function GameCard({ game, delay }: { game: GameKey; delay: number }) {
+  const { messages, Art } = GAME_INFO[game];
+  const t = useTranslations(`home.games.${messages}`);
   return (
     <m.div
       initial={{ opacity: 0, y: 20 }}
       animate={{
         opacity: 1,
         y: 0,
-        transition: { delay: 0.12, duration: 0.55, ease: ease.soft },
+        transition: { delay, duration: 0.55, ease: ease.soft },
       }}
       className={CARD}
     >
       <Link
-        href={WHO_AM_I}
+        href={GAME_PATHS[game]}
         className="group flex flex-col gap-3 rounded-xl bg-surface p-3 pb-4 shadow-card transition-[transform,box-shadow] duration-300 ease-soft hover:-translate-y-1 focus-visible:-translate-y-1"
       >
-        <WhoAmISnapshot className="transition-transform duration-500 ease-soft group-hover:scale-[1.02]" />
+        <Art className="transition-transform duration-500 ease-soft group-hover:scale-[1.02]" />
         <div className="flex items-end justify-between gap-3 px-1.5">
           <div className="flex min-w-0 flex-col gap-0.5">
             <h3 className="truncate font-bold font-display text-2xl tracking-[-0.01em]">
@@ -83,7 +85,7 @@ function WhoAmICard() {
               <UsersRound className="size-4" strokeWidth={1.75} />
               {t("players")}
             </span>
-            <OnlineNow game="who-am-i" />
+            <OnlineNow game={game} />
           </div>
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-pill bg-ink px-4 py-2 font-semibold text-on-ink text-sm">
             {t("play")}

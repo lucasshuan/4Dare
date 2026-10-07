@@ -3,6 +3,7 @@
 // Pure: the room, the lab and the tests all derive it from (view, server time), so every
 // screen lands on the same frame, after a reload too.
 
+import { SEAT_COLORS } from "@/game/seat-colors";
 import {
   type Beat,
   type BeatKind,
@@ -17,7 +18,7 @@ import { type Look, NO_LOOK, seatLook, type Tone } from "./stage-backdrop";
 export type { Look } from "./stage-backdrop";
 
 export type StageArea = "lobby" | "match" | "result" | "closed";
-export type StageScreen = "theming" | "vote" | "pick" | "turn";
+export type StageScreen = "theming" | "vote" | "pick" | "turn" | "imp";
 
 export interface StageFrame {
   area: StageArea;
@@ -52,15 +53,26 @@ const TURN_PHASES: ReadonlySet<Phase> = new Set([
   "guessing",
   "validating",
 ]);
+/** The Impostor's steps: one screen plays them all. */
+const IMP_PHASES: ReadonlySet<Phase> = new Set([
+  "replying",
+  "talking",
+  "last_chance",
+]);
 const MATCH_PHASES: ReadonlySet<Phase> = new Set([
   "theming",
   "voting",
   "picking",
   ...TURN_PHASES,
+  ...IMP_PHASES,
 ]);
 
 export const isShow = (r: RevealView | null | undefined): r is ShowView =>
-  !!r && (r.kind === "opening" || r.kind === "theme" || r.kind === "cast");
+  !!r &&
+  (r.kind === "opening" ||
+    r.kind === "theme" ||
+    r.kind === "cast" ||
+    r.kind === "deal");
 
 /** A guess's result or a pass on the whole screen: the next turn waits for it. */
 export const isGuessScene = (r: RevealView | null | undefined) =>
@@ -127,6 +139,9 @@ function beatScreen(
   kind: BeatKind,
 ): StageScreen {
   if (show.kind === "opening") return view.vote ? "vote" : "theming";
+  // the Impostor's deal: the vote's result, then your card on the play screen
+  if (show.kind === "deal")
+    return kind === "card" || kind === "entrance" ? "imp" : "vote";
   if (show.kind === "theme") {
     if (kind === "draw" || kind === "target" || kind === "entrance")
       return "pick";
@@ -140,6 +155,7 @@ function phaseScreen(phase: Phase): StageScreen | null {
   if (phase === "theming") return "theming";
   if (phase === "voting") return "vote";
   if (phase === "picking") return "pick";
+  if (IMP_PHASES.has(phase)) return "imp";
   return TURN_PHASES.has(phase) ? "turn" : null;
 }
 
@@ -166,7 +182,7 @@ export function stageFrame(view: RoomView, now: number): StageFrame {
   // the theme tag: hidden until the theme beat's mark while a theme show is ahead or on
   let themeFrom: number | null = null;
   if (area === "match" && view.theme) {
-    const theme = showOfKind(view, "theme");
+    const theme = showOfKind(view, "theme") ?? showOfKind(view, "deal");
     const beat = beatOf(theme, "theme");
     themeFrom = theme
       ? beat
@@ -251,7 +267,14 @@ const BUTTER: Look = {
   fade: 0.8,
 };
 
-const seatTone = (seat: number) => `seat-${(seat % 4) + 1}` as Tone;
+const seatTone = (seat: number) => `seat-${(seat % SEAT_COLORS) + 1}` as Tone;
+/** The Impostor's talk: the theme's coral, with "?" marks. */
+const TALK: Look = {
+  tone: "theme",
+  glyphs: "q",
+  glyphColor: "var(--no)",
+  fade: 0.9,
+};
 
 /** The backdrop at `now`, and when it changes next. */
 export function stageLook(
@@ -273,6 +296,7 @@ export function stageLook(
   const pickedMine = () =>
     withSet(seatOf(view.players.find((p) => p.isYou)?.pickedById));
   const firstPlayer = () => withQ(seatOf(view.turn?.playerId));
+  const mine = () => withQ(seatOf(view.players.find((p) => p.isYou)?.id));
 
   const on = showAt(view, now);
   if (on) {
@@ -315,10 +339,12 @@ export function stageLook(
           pickedMine(),
           firstPlayer(),
         );
+      case "card":
+        return { look: mine(), next: until };
       case "entrance":
         return {
           look:
-            show.kind === "opening"
+            show.kind === "opening" || show.kind === "deal"
               ? BUTTER
               : show.kind === "theme"
                 ? target()
@@ -329,10 +355,18 @@ export function stageLook(
   }
 
   const r = view.reveal;
+  // the Impostor's vote result: lights down while it shows
+  if (r?.kind === "out" && now < r.until && IMP_PHASES.has(view.phase))
+    return { look: BRAND, next: r.until };
   switch (view.phase) {
     case "theming":
     case "voting":
+    case "replying":
       return { look: BUTTER, next: null };
+    case "talking":
+      return { look: TALK, next: null };
+    case "last_chance":
+      return { look: withQ(seatOf(view.imp?.guessing)), next: null };
     case "picking":
       return { look: target(), next: null };
     case "finished":

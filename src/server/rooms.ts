@@ -509,6 +509,9 @@ const LIVE: readonly Phase[] = [
   "answering",
   "guessing",
   "validating",
+  "replying",
+  "talking",
+  "last_chance",
 ];
 
 /**

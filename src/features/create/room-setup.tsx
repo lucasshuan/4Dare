@@ -13,7 +13,9 @@ import { useTranslations } from "next-intl";
 import { type FormEvent, type ReactNode, useId, useState } from "react";
 import { keyClass } from "@/components/ui/button";
 import { LayoutMotion } from "@/components/ui/layout-motion";
+import { GAME_SEATS } from "@/game/games";
 import { GOSTOS } from "@/game/gostos";
+import { GAME_STEP_TIMES } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
 import type { CreateRoomInput } from "@/server/contract";
@@ -98,8 +100,17 @@ export function RoomSetup({
           <div className="ml-auto flex items-center gap-3 max-sm:w-full max-sm:flex-col max-sm:items-stretch">
             {value ? (
               <GameField
+                seated={minSeats}
                 value={value.game}
-                onChange={(game) => onChange({ ...value, game })}
+                onChange={(game) => {
+                  // the seats move into the new game's range
+                  const range = GAME_SEATS[game];
+                  const seats = Math.min(
+                    range.max,
+                    Math.max(range.min, minSeats ?? 0, value.seats),
+                  );
+                  onChange({ ...value, game, seats });
+                }}
               />
             ) : null}
             <SubmitButton
@@ -143,11 +154,9 @@ export function RoomSetup({
                 tone="bg-yes-soft text-yes"
                 label={t("tabRules")}
                 summary={t("rulesSummary", {
-                  vote: value.voteSeconds,
-                  ask: value.askSeconds,
-                  answer: value.answerSeconds,
-                  guess: value.guessSeconds,
-                  validate: value.validateSeconds,
+                  times: GAME_STEP_TIMES[value.game]
+                    .map((k) => value[k])
+                    .join(" · "),
                 })}
                 problem={problems.rules}
                 problemId={`${problemId}-rules`}
@@ -196,7 +205,11 @@ export function RoomSetup({
           </Tabs.Panel>
           <Tabs.Panel value="rules" className="outline-none">
             <PanelIn>
-              <RulesFields value={value} onChange={onChange} />
+              <RulesFields
+                value={value}
+                onChange={onChange}
+                players={minSeats}
+              />
             </PanelIn>
           </Tabs.Panel>
           <Tabs.Panel value="style" className="outline-none">

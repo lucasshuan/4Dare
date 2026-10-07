@@ -6,6 +6,7 @@ import { type ReactNode, type Ref, useEffect, useRef, useState } from "react";
 import { ThemeTag } from "@/components/ui/screen";
 import { Timer } from "@/components/ui/timer";
 import { useRoomContext } from "@/features/data/room-context";
+import { MyCardButton } from "@/features/impostor/my-card";
 import { useStage } from "@/features/stage/stage-context";
 import { GiveUpButton } from "@/features/turn/give-up-button";
 import {
@@ -129,6 +130,8 @@ const AWAITED = new Set<PlayerStatus>([
   "answering",
   "guessing",
   "validating",
+  "replying",
+  "talking",
 ]);
 
 /**
@@ -155,6 +158,11 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
   // the header comes in with the match (after the lobby leaves); joined later, it is just there
   const [arrives] = useState(() => frame.beat?.kind === "curtain");
   const theme = tagReached ? view.theme : null;
+  // the Impostor: your card, from when the deal show has put it up
+  const card =
+    frame.screen === "imp" && frame.beat?.kind !== "card"
+      ? (view.imp?.card ?? null)
+      : null;
 
   return (
     <m.header
@@ -173,6 +181,13 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
                 open={history.open}
                 onClick={history.onToggle}
               />
+            </m.div>
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence initial={false}>
+          {card ? (
+            <m.div key="card" {...TAG_POP} className="flex shrink-0">
+              <MyCardButton card={card} />
             </m.div>
           ) : null}
         </AnimatePresence>

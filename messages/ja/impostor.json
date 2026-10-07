@@ -1,0 +1,120 @@
+{
+  "reply": {
+    "round": "ラウンド{round}",
+    "roundQuestion": "ラウンド{round}・質問 {n}/{of}",
+    "forYourCard": "自分のキャラになりきって答えて",
+    "answer": "答える",
+    "change": "変える",
+    "scaleLabel": "あなたの答え（1〜10）",
+    "wordLabel": "あなたの答え",
+    "wordPlaceholder": "ひと言かふた言で",
+    "wordRule": "20文字まで。名前・あだ名・作品名はNG。",
+    "answered": "{total}人中{n}人が回答",
+    "watching": "このラウンドからは抜けました。チャットで見守ろう。",
+    "dontKnow": "このキャラを知らない",
+    "dontKnowSure": "全員のカードを替えますか？誰が押したかは分かりません。",
+    "dontKnowYes": "替える",
+    "cancel": "キャンセル"
+  },
+  "colors": {
+    "red": "赤",
+    "orange": "オレンジ",
+    "yellow": "黄色",
+    "green": "緑",
+    "lime": "黄緑",
+    "sky": "水色",
+    "blue": "青",
+    "purple": "紫",
+    "pink": "ピンク",
+    "brown": "茶色",
+    "black": "黒",
+    "white": "白"
+  },
+  "reveal": {
+    "nobody": "時間内に誰も答えませんでした。"
+  },
+  "card": {
+    "open": "自分のカードを見る",
+    "yours": "自分のカード",
+    "hold": "長押しで見る",
+    "holdLabel": "長押しで自分のカードを見る"
+  },
+  "deal": {
+    "keep": "覚えて。見せないで。",
+    "warning": "{count, plural, other {#人だけ別のキャラ。それはあなたかも。}}"
+  },
+  "talk": {
+    "title": "{count, plural, one {インポスターは誰？} other {インポスターたちは誰？}}",
+    "votesSoFar": "{total}人中{n}人が投票",
+    "votes": "{count}票",
+    "tapToPoint": "タップして指さそう",
+    "confirm": "{name}に投票",
+    "unvote": "{name}への投票を取り消す",
+    "watching": "脱落しました。チャットで見守ろう。",
+    "wasImpostor": "インポスターだった",
+    "wasNot": "違った",
+    "left": "退出"
+  },
+  "out": {
+    "goes": "{name}が脱落",
+    "impostor": "インポスター！",
+    "notImpostor": "違った",
+    "tie": "同票",
+    "tieBody": "このラウンドは誰も抜けません。"
+  },
+  "swap": {
+    "title": "カードを配り直し",
+    "body": "誰かがキャラを知らなかったみたい。誰かは分かりません。"
+  },
+  "last": {
+    "yourTitle": "あなたがインポスターだった！",
+    "yourBody": "ラストチャンス：みんなのカードは何だった？答えは最後に発表されます。",
+    "theirTitle": "{name}のラストチャンス",
+    "theirBody": "見つかったインポスターが、みんなのカードを当てにいきます。",
+    "fieldLabel": "クルーのカード",
+    "notListed": "リストにありません。入力したまま送ります。",
+    "send": "答えを送る"
+  },
+  "result": {
+    "crewWon": "クルーの勝ち！",
+    "impostorsWon": "{count, plural, one {インポスターの勝ち！} other {インポスターたちの勝ち！}}",
+    "reason": {
+      "caught": "{count, plural, one {インポスターを見つけた。} other {インポスターを全員見つけた。}}",
+      "even": "{count, plural, one {残り2人になり、インポスターが逃げ切った。} other {インポスターがクルーと同数になった。}}",
+      "rounds": "全員見つける前にラウンドが尽きた。",
+      "left": "{count, plural, one {インポスターが退出した。} other {インポスターたちが退出した。}}"
+    },
+    "youWon": "あなたの勝ち。",
+    "youLost": "今回は残念。",
+    "crewCard": "クルー",
+    "impostorCard": "インポスター",
+    "crew": "クルー",
+    "impostor": "インポスター",
+    "why": {
+      "stayed": "最後まで残った",
+      "survived": "最後まで逃げ切った",
+      "voted": "ラウンド{round}で脱落",
+      "caught": "ラウンド{round}で発覚",
+      "left": "退出"
+    },
+    "guessed": "{name}の答え：{guess}",
+    "guessHit": "正解！+3",
+    "guessMiss": "はずれ",
+    "toLobby": "ルームに戻る",
+    "home": "退出する"
+  },
+  "picker": {
+    "title": "インポスター",
+    "badge": "{n}人中{k}人",
+    "auto": "自動",
+    "autoShort": "自動",
+    "row": "インポスター{count}人",
+    "edit": "インポスターの人数を変える",
+    "moreFor2": "6人以上なら2人にできます。",
+    "mood": {
+      "calm": "おだやか",
+      "even": "ほどよく",
+      "wild": "カオス"
+    }
+  }
+}

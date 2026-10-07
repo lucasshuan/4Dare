@@ -65,6 +65,9 @@ export function supabaseRooms(): RoomStore {
           "answering",
           "guessing",
           "validating",
+          "replying",
+          "talking",
+          "last_chance",
         ])
         .gte("updated_at", new Date(Date.now() - 20 * 60_000).toISOString())
         .order("updated_at", { ascending: false })

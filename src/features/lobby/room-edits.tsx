@@ -1,7 +1,14 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { ChevronDown, Globe, Heart, Lock, PenLine } from "lucide-react";
+import {
+  ChevronDown,
+  Globe,
+  Heart,
+  Lock,
+  PenLine,
+  VenetianMask,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +16,10 @@ import { TextField } from "@/components/ui/text-field";
 import { GostoGrid, ThemeCountLine } from "@/features/create/gosto-fields";
 import { Segmented } from "@/features/create/settings-fields";
 import { useThemeCount } from "@/features/create/theme-catalog";
+import { ImpostorsPicker } from "@/features/impostor/impostors-picker";
+import { GAME_SEATS } from "@/game/games";
 import { GOSTOS, type Gosto } from "@/game/gostos";
+import { impostorsFor } from "@/game/impostor/engine";
 import {
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
@@ -370,6 +380,122 @@ export function GostosRow({
                     onClick={() => setOpen(false)}
                   >
                     {t("cancel")}
+                  </Button>
+                </div>
+              </form>
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
+    </li>
+  );
+}
+
+/**
+ * The Impostor's impostors as a settings row: how many and the mood they
+ * make. The host's row opens the picker in a dropdown.
+ */
+export function ImpostorsRow({
+  value,
+  players,
+  editable,
+  pending,
+  onSave,
+}: {
+  value: number | null;
+  players: number;
+  editable: boolean;
+  pending: boolean;
+  onSave: (impostors: number | null) => Promise<boolean>;
+}) {
+  const t = useTranslations("impostor.picker");
+  const tl = useTranslations("lobby");
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const k = impostorsFor(Math.max(GAME_SEATS.impostor.min, players), value);
+  const text = (
+    <span>
+      {t("row", { count: k })}
+      {value === null ? (
+        <span className="text-ink-muted"> · {t("autoShort")}</span>
+      ) : null}
+    </span>
+  );
+  const icon = (
+    <VenetianMask
+      className="size-5 shrink-0 text-ink-muted"
+      strokeWidth={1.75}
+    />
+  );
+  if (!editable)
+    return (
+      <li className="flex items-center gap-3">
+        {icon}
+        {text}
+      </li>
+    );
+  return (
+    <li>
+      <Popover.Root
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (next) setDraft(value);
+        }}
+      >
+        <Popover.Trigger
+          aria-label={t("edit")}
+          className={cn(
+            "-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-sm px-2 py-1 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
+            open && "bg-sunken",
+          )}
+        >
+          {icon}
+          <span className="min-w-0 flex-1">{text}</span>
+          <ChevronDown
+            className={cn(
+              "size-4.5 shrink-0 text-ink-muted transition-transform duration-200 ease-soft",
+              open && "rotate-180",
+            )}
+            strokeWidth={2.25}
+          />
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Positioner
+            side="bottom"
+            align="start"
+            sideOffset={6}
+            className="z-50"
+          >
+            <Popover.Popup className="w-[min(380px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface p-4 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+              <form
+                className="flex flex-col gap-4"
+                onSubmit={async (e: FormEvent) => {
+                  e.preventDefault();
+                  if (await onSave(draft)) setOpen(false);
+                }}
+              >
+                <ImpostorsPicker
+                  value={draft}
+                  players={players}
+                  onChange={setDraft}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    disabled={pending}
+                  >
+                    {tl("saveSettings")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setOpen(false)}
+                  >
+                    {tl("cancel")}
                   </Button>
                 </div>
               </form>

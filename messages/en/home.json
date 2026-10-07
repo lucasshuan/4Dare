@@ -6,6 +6,7 @@
   "joinLabel": "Or join with a code",
   "createRoom": {
     "game": "Game",
+    "gameTooMany": "Up to {max} players: the room has {count}",
     "roomName": "Room name",
     "roomNamePlaceholder": "e.g. Saturday crew",
     "back": "Back",
@@ -15,7 +16,7 @@
     "tabRoom": "Room",
     "roomSummary": "{visibility} · {seats} seats",
     "tabRules": "Rules",
-    "rulesSummary": "{vote} · {ask} · {answer} · {guess} · {validate} s",
+    "rulesSummary": "{times} s",
     "visibility": "Who can join",
     "public": "Public",
     "private": "Private",
@@ -26,6 +27,7 @@
     "needName": "Give the room a name.",
     "seats": "Seats",
     "seatsHint": "The match can start with 2 players or more.",
+    "seatsHintImpostor": "A match can start with 3 or more players.",
     "times": {
       "voteSeconds": {
         "label": "Time to vote",
@@ -146,7 +148,13 @@
       "name": "Impostor",
       "players": "3 to 10 players",
       "play": "Play",
-      "demoLine": "One of you has another."
+      "demoLine": "One of you has another.",
+      "pitch": "Everyone has the same character but one, who doesn't even know. Answer for your card with a tap and vote out whoever stands out.",
+      "banner": {
+        "q": "How brave are they?",
+        "vote": "Who's the impostor?",
+        "caught": "Impostor!"
+      }
     },
     "next": "Next games",
     "previous": "Previous games"

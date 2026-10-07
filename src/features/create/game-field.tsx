@@ -3,7 +3,7 @@
 import { Select } from "@base-ui/react/select";
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { GAME_KEYS, type GameKey } from "@/game/games";
+import { GAME_KEYS, GAME_SEATS, type GameKey } from "@/game/games";
 import { cn } from "@/lib/cn";
 import { GAME_INFO, GameThumb, useGameName } from "./game-info";
 
@@ -17,16 +17,20 @@ export { GAME_INFO, GameThumb, useGameName };
 export function GameField({
   value,
   onChange,
+  seated = 0,
   className,
 }: {
   value: GameKey;
   onChange: (game: GameKey) => void;
+  /** People in the room: a game with fewer seats can't be picked, and says why. */
+  seated?: number;
   className?: string;
 }) {
   const t = useTranslations("home.createRoom");
   const tg = useTranslations("home.games");
   const name = useGameName();
   const players = (game: GameKey) => tg(`${GAME_INFO[game].messages}.players`);
+  const full = (game: GameKey) => seated > GAME_SEATS[game].max;
   return (
     <Select.Root
       items={GAME_KEYS.map((game) => ({ value: game, label: name(game) }))}
@@ -68,7 +72,8 @@ export function GameField({
                 <Select.Item
                   key={game}
                   value={game}
-                  className="flex items-center gap-3 rounded-md p-1.5 pr-3 outline-none select-none data-highlighted:bg-sky-soft"
+                  disabled={full(game)}
+                  className="flex items-center gap-3 rounded-md p-1.5 pr-3 outline-none select-none data-disabled:opacity-50 data-highlighted:bg-sky-soft"
                 >
                   <GameThumb game={game} size="sm" />
                   <span className="flex min-w-0 flex-1 flex-col">
@@ -76,7 +81,12 @@ export function GameField({
                       {name(game)}
                     </Select.ItemText>
                     <span className="truncate font-medium text-[13px] text-ink-muted">
-                      {players(game)}
+                      {full(game)
+                        ? t("gameTooMany", {
+                            max: GAME_SEATS[game].max,
+                            count: seated,
+                          })
+                        : players(game)}
                     </span>
                   </span>
                   <Select.ItemIndicator className="text-sky">

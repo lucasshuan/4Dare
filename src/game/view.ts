@@ -234,8 +234,9 @@ function voteView(
 ): VoteView | null {
   const v = s.vote;
   const r = s.reveal;
-  const show =
-    r?.kind === "theme" ? r : r?.prev?.kind === "theme" ? r.prev : null;
+  // the Impostor's deal show plays the result out the same way
+  const isResult = (k: string | undefined) => k === "theme" || k === "deal";
+  const show = isResult(r?.kind) ? r : isResult(r?.prev?.kind) ? r?.prev : null;
   const revealing = !!show && now < show.until;
   if (!v || (s.phase !== "voting" && !revealing)) return null;
   const seated = new Set(s.players.map((p) => p.id));

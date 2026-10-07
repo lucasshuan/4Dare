@@ -1,0 +1,120 @@
+{
+  "reply": {
+    "round": "Rodada {round}",
+    "roundQuestion": "Rodada {round} · pergunta {n} de {of}",
+    "forYourCard": "Responda pelo seu personagem",
+    "answer": "Responder",
+    "change": "Mudar",
+    "scaleLabel": "Sua resposta, de 1 a 10",
+    "wordLabel": "Sua resposta",
+    "wordPlaceholder": "Uma palavra ou duas",
+    "wordRule": "Até 20 letras. Não vale o nome, apelido ou obra.",
+    "answered": "{n} de {total} responderam",
+    "watching": "Você saiu da rodada: assista e converse no chat.",
+    "dontKnow": "Não conheço este personagem",
+    "dontKnowSure": "Trocar as cartas de todo mundo? Ninguém vai saber que foi você.",
+    "dontKnowYes": "Trocar",
+    "cancel": "Cancelar"
+  },
+  "colors": {
+    "red": "Vermelho",
+    "orange": "Laranja",
+    "yellow": "Amarelo",
+    "green": "Verde",
+    "lime": "Verde-limão",
+    "sky": "Azul-claro",
+    "blue": "Azul",
+    "purple": "Roxo",
+    "pink": "Rosa",
+    "brown": "Marrom",
+    "black": "Preto",
+    "white": "Branco"
+  },
+  "reveal": {
+    "nobody": "Ninguém respondeu a tempo."
+  },
+  "card": {
+    "open": "Ver a sua carta",
+    "yours": "Sua carta",
+    "hold": "Segure para ver",
+    "holdLabel": "Segure para ver a sua carta"
+  },
+  "deal": {
+    "keep": "Decore. Não mostre.",
+    "warning": "{count, plural, one {Um de vocês tem outra carta. Pode ser você.} other {# de vocês têm outra carta. Pode ser você.}}"
+  },
+  "talk": {
+    "title": "{count, plural, one {Quem é o impostor?} other {Quem são os impostores?}}",
+    "votesSoFar": "{n} de {total} votaram",
+    "votes": "{count, plural, one {# voto} other {# votos}}",
+    "tapToPoint": "Toque em alguém para apontar",
+    "confirm": "Votar em {name}",
+    "unvote": "Desfazer o voto em {name}",
+    "watching": "Você saiu: assista e converse no chat.",
+    "wasImpostor": "Era impostor",
+    "wasNot": "Não era",
+    "left": "Saiu da partida"
+  },
+  "out": {
+    "goes": "{name} sai",
+    "impostor": "Impostor!",
+    "notImpostor": "Não era",
+    "tie": "Empate",
+    "tieBody": "Ninguém sai nesta rodada."
+  },
+  "swap": {
+    "title": "Cartas novas",
+    "body": "Alguém não conhecia o personagem. Ninguém sabe quem."
+  },
+  "last": {
+    "yourTitle": "Você era o impostor!",
+    "yourBody": "Última chance: qual era a carta de todo mundo? Seu palpite só aparece no fim.",
+    "theirTitle": "{name} tenta a última chance",
+    "theirBody": "O impostor pego tenta adivinhar a carta de vocês.",
+    "fieldLabel": "A carta da tripulação",
+    "notListed": "Não está na lista: vai como você digitou.",
+    "send": "Enviar palpite"
+  },
+  "result": {
+    "crewWon": "A tripulação venceu!",
+    "impostorsWon": "{count, plural, one {O impostor venceu!} other {Os impostores venceram!}}",
+    "reason": {
+      "caught": "{count, plural, one {O impostor foi pego.} other {Todos os impostores foram pegos.}}",
+      "even": "{count, plural, one {Sobraram só dois: o impostor escapou.} other {Os impostores ficaram em pé de igualdade.}}",
+      "rounds": "As rodadas acabaram sem pegar todo mundo.",
+      "left": "{count, plural, one {O impostor saiu da partida.} other {Os impostores saíram da partida.}}"
+    },
+    "youWon": "Você venceu.",
+    "youLost": "Não foi dessa vez.",
+    "crewCard": "Tripulação",
+    "impostorCard": "Impostor",
+    "crew": "Tripulação",
+    "impostor": "Impostor",
+    "why": {
+      "stayed": "Ficou até o fim",
+      "survived": "Escapou até o fim",
+      "voted": "Saiu na rodada {round}",
+      "caught": "Pego na rodada {round}",
+      "left": "Saiu da partida"
+    },
+    "guessed": "{name} chutou {guess}",
+    "guessHit": "Acertou! +3",
+    "guessMiss": "Errou",
+    "toLobby": "Voltar à sala",
+    "home": "Sair"
+  },
+  "picker": {
+    "title": "Impostores",
+    "badge": "{k} de {n}",
+    "auto": "Automático",
+    "autoShort": "automático",
+    "row": "{count, plural, one {# impostor} other {# impostores}}",
+    "edit": "Mudar quantos impostores",
+    "moreFor2": "Com 6 pessoas ou mais, dá para ter 2.",
+    "mood": {
+      "calm": "Tranquilo",
+      "even": "Equilibrado",
+      "wild": "Caótico"
+    }
+  }
+}

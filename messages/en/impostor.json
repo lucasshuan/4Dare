@@ -1,0 +1,120 @@
+{
+  "reply": {
+    "round": "Round {round}",
+    "roundQuestion": "Round {round} · question {n} of {of}",
+    "forYourCard": "Answer for your character",
+    "answer": "Answer",
+    "change": "Change",
+    "scaleLabel": "Your answer, 1 to 10",
+    "wordLabel": "Your answer",
+    "wordPlaceholder": "A word or two",
+    "wordRule": "Up to 20 letters. No names, nicknames or titles.",
+    "answered": "{n} of {total} answered",
+    "watching": "You're out of the round: watch and talk in the chat.",
+    "dontKnow": "I don't know this character",
+    "dontKnowSure": "Swap everyone's cards? Nobody will know it was you.",
+    "dontKnowYes": "Swap",
+    "cancel": "Cancel"
+  },
+  "colors": {
+    "red": "Red",
+    "orange": "Orange",
+    "yellow": "Yellow",
+    "green": "Green",
+    "lime": "Lime",
+    "sky": "Light blue",
+    "blue": "Blue",
+    "purple": "Purple",
+    "pink": "Pink",
+    "brown": "Brown",
+    "black": "Black",
+    "white": "White"
+  },
+  "reveal": {
+    "nobody": "Nobody answered in time."
+  },
+  "card": {
+    "open": "See your card",
+    "yours": "Your card",
+    "hold": "Hold to see",
+    "holdLabel": "Hold to see your card"
+  },
+  "deal": {
+    "keep": "Memorize it. Don't show it.",
+    "warning": "{count, plural, one {One of you has a different card. It may be you.} other {# of you have a different card. It may be you.}}"
+  },
+  "talk": {
+    "title": "{count, plural, one {Who's the impostor?} other {Who are the impostors?}}",
+    "votesSoFar": "{n} of {total} voted",
+    "votes": "{count, plural, one {# vote} other {# votes}}",
+    "tapToPoint": "Tap someone to point at them",
+    "confirm": "Vote for {name}",
+    "unvote": "Take back your vote for {name}",
+    "watching": "You're out: watch and talk in the chat.",
+    "wasImpostor": "Was an impostor",
+    "wasNot": "Wasn't",
+    "left": "Left the match"
+  },
+  "out": {
+    "goes": "{name} is out",
+    "impostor": "Impostor!",
+    "notImpostor": "Wasn't",
+    "tie": "Tie",
+    "tieBody": "Nobody goes this round."
+  },
+  "swap": {
+    "title": "New cards",
+    "body": "Someone didn't know their character. Nobody knows who."
+  },
+  "last": {
+    "yourTitle": "You were the impostor!",
+    "yourBody": "Last chance: what was everyone else's card? Your guess only shows at the end.",
+    "theirTitle": "{name} takes the last chance",
+    "theirBody": "The caught impostor tries to guess your card.",
+    "fieldLabel": "The crew's card",
+    "notListed": "Not on the list: it goes as you typed it.",
+    "send": "Send guess"
+  },
+  "result": {
+    "crewWon": "The crew won!",
+    "impostorsWon": "{count, plural, one {The impostor won!} other {The impostors won!}}",
+    "reason": {
+      "caught": "{count, plural, one {The impostor was caught.} other {Every impostor was caught.}}",
+      "even": "{count, plural, one {Only two were left: the impostor got away.} other {The impostors caught up with the crew.}}",
+      "rounds": "The rounds ran out before everyone was caught.",
+      "left": "{count, plural, one {The impostor left the match.} other {The impostors left the match.}}"
+    },
+    "youWon": "You won.",
+    "youLost": "Not this time.",
+    "crewCard": "Crew",
+    "impostorCard": "Impostor",
+    "crew": "Crew",
+    "impostor": "Impostor",
+    "why": {
+      "stayed": "Stayed to the end",
+      "survived": "Got away to the end",
+      "voted": "Out in round {round}",
+      "caught": "Caught in round {round}",
+      "left": "Left the match"
+    },
+    "guessed": "{name} guessed {guess}",
+    "guessHit": "Right! +3",
+    "guessMiss": "Wrong",
+    "toLobby": "Back to the room",
+    "home": "Leave"
+  },
+  "picker": {
+    "title": "Impostors",
+    "badge": "{k} of {n}",
+    "auto": "Automatic",
+    "autoShort": "automatic",
+    "row": "{count, plural, one {# impostor} other {# impostors}}",
+    "edit": "Change how many impostors",
+    "moreFor2": "With 6 or more people, you can have 2.",
+    "mood": {
+      "calm": "Calm",
+      "even": "Balanced",
+      "wild": "Chaos"
+    }
+  }
+}

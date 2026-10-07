@@ -1,6 +1,6 @@
 {
   "titleHost": "Sala creada. Ahora invita a alguien.",
-  "subtitleHost": "Manda el enlace o dicta el código. Empiezas la partida cuando quieras, con 2 jugadores o más.",
+  "subtitleHost": "Manda el enlace o dicta el código. Empiezas la partida cuando quieras, con {min} jugadores o más.",
   "titleGuest": "Estás en la sala de {name}.",
   "subtitleGuest": "{name} empieza la partida. Avisa cuando estés listo.",
   "titleHostAgain": "¿Otra partida?",

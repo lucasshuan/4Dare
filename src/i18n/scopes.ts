@@ -16,6 +16,7 @@ const ROOM_ONLY = [
   "stageCast",
   "pickCard",
   "chat",
+  "impostor",
   "meta",
 ];
 

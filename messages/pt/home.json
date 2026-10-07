@@ -6,6 +6,7 @@
   "joinLabel": "Ou entre com um código",
   "createRoom": {
     "game": "Jogo",
+    "gameTooMany": "Até {max} jogadores: a sala tem {count}",
     "roomName": "Nome da sala",
     "roomNamePlaceholder": "Ex.: Turma do sábado",
     "back": "Voltar",
@@ -15,7 +16,7 @@
     "tabRoom": "Sala",
     "roomSummary": "{visibility} · {seats} vagas",
     "tabRules": "Regras",
-    "rulesSummary": "{vote} · {ask} · {answer} · {guess} · {validate} s",
+    "rulesSummary": "{times} s",
     "visibility": "Quem pode entrar",
     "public": "Pública",
     "private": "Privada",
@@ -26,6 +27,7 @@
     "needName": "Dê um nome para a sala.",
     "seats": "Vagas",
     "seatsHint": "A partida pode começar com 2 jogadores ou mais.",
+    "seatsHintImpostor": "A partida pode começar com 3 jogadores ou mais.",
     "times": {
       "voteSeconds": {
         "label": "Tempo para votar",
@@ -146,7 +148,13 @@
       "name": "Impostor",
       "players": "3 a 10 jogadores",
       "play": "Jogar",
-      "demoLine": "Um de vocês tem outro."
+      "demoLine": "Um de vocês tem outro.",
+      "pitch": "Todos têm o mesmo personagem, menos um, que nem sabe. Respondam pela carta com um toque e votem para tirar quem destoa.",
+      "banner": {
+        "q": "Quão corajoso ele é?",
+        "vote": "Quem é o impostor?",
+        "caught": "Impostor!"
+      }
     },
     "next": "Próximos jogos",
     "previous": "Jogos anteriores"

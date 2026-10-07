@@ -3,6 +3,7 @@
 import { AnimatePresence, m } from "motion/react";
 import { type CSSProperties, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { SEAT_COLORS } from "@/game/seat-colors";
 import { type ThemeSet, TYPED_GLYPHS, themeGlyphs } from "@/game/theme-sets";
 import { gs } from "@/lib/motion";
 
@@ -15,7 +16,13 @@ export type Tone =
   | "seat-1"
   | "seat-2"
   | "seat-3"
-  | "seat-4";
+  | "seat-4"
+  | "seat-5"
+  | "seat-6"
+  | "seat-7"
+  | "seat-8"
+  | "seat-9"
+  | "seat-10";
 /** The symbols bobbing on it: "?" marks, the theme set's emoji, or a typed theme's pen and "?". */
 export type Glyphs = "none" | "q" | "set" | "typed";
 
@@ -39,7 +46,7 @@ export const NO_LOOK: Look = {
 /** A seat's colour with its "?" marks: whoever's turn it is. */
 export function seatLook(seat: number | null, fade = 1): Look {
   if (seat === null) return { ...NO_LOOK, fade };
-  const n = (seat % 4) + 1;
+  const n = (seat % SEAT_COLORS) + 1;
   return {
     tone: `seat-${n}` as Tone,
     glyphs: "q",
@@ -57,6 +64,12 @@ const TONES: Record<Exclude<Tone, "none">, { color: string; solid?: true }> = {
   "seat-2": { color: "var(--seat-2)" },
   "seat-3": { color: "var(--seat-3)" },
   "seat-4": { color: "var(--seat-4)" },
+  "seat-5": { color: "var(--seat-5)" },
+  "seat-6": { color: "var(--seat-6)" },
+  "seat-7": { color: "var(--seat-7)" },
+  "seat-8": { color: "var(--seat-8)" },
+  "seat-9": { color: "var(--seat-9)" },
+  "seat-10": { color: "var(--seat-10)" },
 };
 
 /** Where the seven glyphs sit: [left %, top %, size px (×0.8 on phones), bob seconds]. */

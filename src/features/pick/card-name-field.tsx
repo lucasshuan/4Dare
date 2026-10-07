@@ -65,6 +65,7 @@ export function CardNameField({
   readOnly,
   autoFocus,
   onFocusChange,
+  notFound,
 }: {
   value: CardContent;
   onChange: (next: CardContent) => void;
@@ -74,6 +75,8 @@ export function CardNameField({
   readOnly: boolean;
   autoFocus?: boolean;
   onFocusChange?: (focused: boolean) => void;
+  /** The row for a name the library lacks; by default, that it becomes a new character. */
+  notFound?: string;
 }) {
   const t = useTranslations("pickCard");
   const listId = useId();
@@ -305,7 +308,7 @@ export function CardNameField({
                   aria-disabled="true"
                   className="px-3 py-2.5 font-semibold text-ink-muted text-sm"
                 >
-                  {t("notFound")}
+                  {notFound ?? t("notFound")}
                 </div>
               )}
             </div>

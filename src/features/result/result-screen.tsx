@@ -12,6 +12,7 @@ import { Portrait } from "@/components/ui/portrait";
 import { ThemeTag } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
+import { ImpostorResult } from "@/features/impostor/impostor-result";
 import { PersonCard } from "@/features/profile/person-card";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang, PlayerView } from "@/game/types";
@@ -36,7 +37,7 @@ function podiumOrder(ranked: PlayerView[]) {
 }
 
 /** The podium's clock: when it runs out, everyone is taken back to the lobby. */
-function LobbyCountdown() {
+export function LobbyCountdown() {
   const t = useTranslations("result");
   const { view, offset } = useRoomContext();
   const now = useServerClock(offset, 250);
@@ -67,8 +68,13 @@ function LobbyCountdown() {
   );
 }
 
-/** End of the match: everyone on a podium, cards revealed, the winner highest. */
+/** End of the match: the Impostor's own, or everyone on a podium, cards revealed, the winner highest. */
 export function ResultScreen() {
+  const { view } = useRoomContext();
+  return view.imp?.end ? <ImpostorResult /> : <WhoAmIResult />;
+}
+
+function WhoAmIResult() {
   const t = useTranslations("result");
   const tr = useTranslations("room");
   const lang = useLocale() as Lang;

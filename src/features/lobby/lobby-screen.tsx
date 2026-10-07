@@ -48,7 +48,12 @@ import {
 import type { CreateRoomInput } from "@/server/contract";
 import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
-import { GostosRow, RoomTitle, VisibilityRow } from "./room-edits";
+import {
+  GostosRow,
+  ImpostorsRow,
+  RoomTitle,
+  VisibilityRow,
+} from "./room-edits";
 import { SeatGrid } from "./seat-grid";
 import { StartDialog } from "./start-dialog";
 
@@ -248,7 +253,12 @@ export function LobbyScreen() {
                   </p>
                   <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
                     {me.isHost
-                      ? t(view.round > 0 ? "subtitleHostAgain" : "subtitleHost")
+                      ? t(
+                          view.round > 0 ? "subtitleHostAgain" : "subtitleHost",
+                          {
+                            min: GAME_SEATS[view.settings.game].min,
+                          },
+                        )
                       : withNames((n) =>
                           t("subtitleGuest", { name: host ? n(host) : "" }),
                         )}
@@ -321,6 +331,7 @@ export function LobbyScreen() {
             {me.isHost ? (
               <GameField
                 value={game}
+                seated={view.players.length}
                 onChange={(next) => {
                   if (next !== game)
                     void act(() => updateSettings(code, { game: next }));
@@ -417,6 +428,17 @@ export function LobbyScreen() {
                   (await act(() => updateSettings(code, v))).ok
                 }
               />
+              {game === "impostor" ? (
+                <ImpostorsRow
+                  value={view.settings.impostors}
+                  players={view.players.length}
+                  editable={me.isHost}
+                  pending={pending}
+                  onSave={async (impostors) =>
+                    (await act(() => updateSettings(code, { impostors }))).ok
+                  }
+                />
+              ) : null}
               {game === "who-am-i" ? (
                 <Setting icon={themeMode === "host" ? PenLine : Vote}>
                   {t(themeMode === "host" ? "themeHost" : "themeVote")}

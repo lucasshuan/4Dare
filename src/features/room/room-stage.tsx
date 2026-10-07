@@ -7,6 +7,8 @@ import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { RoomChat } from "@/features/chat/room-chat";
 import { useRoomContext } from "@/features/data/room-context";
+import { ImpostorScenes } from "@/features/impostor/impostor-scenes";
+import { ImpostorScreen } from "@/features/impostor/impostor-screen";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
 import { PickScreen } from "@/features/pick/pick-screen";
 import { ResultScreen } from "@/features/result/result-screen";
@@ -22,7 +24,7 @@ import { Link } from "@/i18n/navigation";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
 import { useRoomTitle } from "@/lib/names";
-import { WHO_AM_I } from "@/lib/routes";
+import { GAMES } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
 import { FoundFeedback } from "./found-feedback";
 import {
@@ -48,6 +50,7 @@ export function RoomStage() {
       <Areas />
       <RevealOverlay />
       <GuessScene />
+      <ImpostorScenes />
       <FoundFeedback />
       <Chat />
     </StageProvider>
@@ -191,6 +194,8 @@ function MatchScreen({ screen }: { screen: StageScreen | null }) {
       return <PickScreen />;
     case "turn":
       return <TurnScreen />;
+    case "imp":
+      return <ImpostorScreen />;
     default:
       return null;
   }
@@ -215,7 +220,7 @@ export function RoomProblem({ code }: { code: ErrorCode }) {
           {t(`problem.${known ? code : "other"}.body`)}
         </p>
         <Link
-          href={WHO_AM_I}
+          href={GAMES}
           className={buttonClass("primary", "lg", "self-start")}
         >
           {t("goHome")}
@@ -234,6 +239,9 @@ const TAB_PHASE: Partial<Record<Phase, string>> = {
   answering: "playing",
   guessing: "playing",
   validating: "playing",
+  replying: "playing",
+  talking: "playing",
+  last_chance: "playing",
   finished: "finished",
 };
 /**

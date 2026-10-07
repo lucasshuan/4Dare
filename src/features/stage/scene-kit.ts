@@ -147,7 +147,13 @@ export function showOf(
   kind: ShowView["kind"],
 ): ShowView | null {
   const r = view.reveal;
-  if (!r || (r.kind !== "opening" && r.kind !== "theme" && r.kind !== "cast"))
+  if (
+    !r ||
+    (r.kind !== "opening" &&
+      r.kind !== "theme" &&
+      r.kind !== "cast" &&
+      r.kind !== "deal")
+  )
     return null;
   if (r.kind === kind) return r;
   return r.prev?.kind === kind ? r.prev : null;

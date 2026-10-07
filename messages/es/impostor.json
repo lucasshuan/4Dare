@@ -1,0 +1,120 @@
+{
+  "reply": {
+    "round": "Ronda {round}",
+    "roundQuestion": "Ronda {round} · pregunta {n} de {of}",
+    "forYourCard": "Responde por tu personaje",
+    "answer": "Responder",
+    "change": "Cambiar",
+    "scaleLabel": "Tu respuesta, del 1 al 10",
+    "wordLabel": "Tu respuesta",
+    "wordPlaceholder": "Una o dos palabras",
+    "wordRule": "Hasta 20 letras. No vale el nombre, apodo u obra.",
+    "answered": "{n} de {total} respondieron",
+    "watching": "Saliste de la ronda: mira y habla en el chat.",
+    "dontKnow": "No conozco a este personaje",
+    "dontKnowSure": "¿Cambiar las cartas de todos? Nadie sabrá que fuiste tú.",
+    "dontKnowYes": "Cambiar",
+    "cancel": "Cancelar"
+  },
+  "colors": {
+    "red": "Rojo",
+    "orange": "Naranja",
+    "yellow": "Amarillo",
+    "green": "Verde",
+    "lime": "Verde lima",
+    "sky": "Celeste",
+    "blue": "Azul",
+    "purple": "Morado",
+    "pink": "Rosa",
+    "brown": "Marrón",
+    "black": "Negro",
+    "white": "Blanco"
+  },
+  "reveal": {
+    "nobody": "Nadie respondió a tiempo."
+  },
+  "card": {
+    "open": "Ver tu carta",
+    "yours": "Tu carta",
+    "hold": "Mantén para ver",
+    "holdLabel": "Mantén pulsado para ver tu carta"
+  },
+  "deal": {
+    "keep": "Memorízala. No la muestres.",
+    "warning": "{count, plural, one {Uno de ustedes tiene otra carta. Puedes ser tú.} other {# de ustedes tienen otra carta. Puedes ser tú.}}"
+  },
+  "talk": {
+    "title": "{count, plural, one {¿Quién es el impostor?} other {¿Quiénes son los impostores?}}",
+    "votesSoFar": "{n} de {total} votaron",
+    "votes": "{count, plural, one {# voto} other {# votos}}",
+    "tapToPoint": "Toca a alguien para señalarlo",
+    "confirm": "Votar por {name}",
+    "unvote": "Quitar el voto por {name}",
+    "watching": "Saliste: mira y habla en el chat.",
+    "wasImpostor": "Era impostor",
+    "wasNot": "No era",
+    "left": "Salió de la partida"
+  },
+  "out": {
+    "goes": "{name} sale",
+    "impostor": "¡Impostor!",
+    "notImpostor": "No era",
+    "tie": "Empate",
+    "tieBody": "Nadie sale en esta ronda."
+  },
+  "swap": {
+    "title": "Cartas nuevas",
+    "body": "Alguien no conocía a su personaje. Nadie sabe quién."
+  },
+  "last": {
+    "yourTitle": "¡Eras el impostor!",
+    "yourBody": "Última oportunidad: ¿cuál era la carta de los demás? Tu respuesta solo aparece al final.",
+    "theirTitle": "{name} intenta la última oportunidad",
+    "theirBody": "El impostor atrapado intenta adivinar su carta.",
+    "fieldLabel": "La carta de la tripulación",
+    "notListed": "No está en la lista: va como lo escribiste.",
+    "send": "Enviar respuesta"
+  },
+  "result": {
+    "crewWon": "¡Ganó la tripulación!",
+    "impostorsWon": "{count, plural, one {¡Ganó el impostor!} other {¡Ganaron los impostores!}}",
+    "reason": {
+      "caught": "{count, plural, one {Atraparon al impostor.} other {Atraparon a todos los impostores.}}",
+      "even": "{count, plural, one {Solo quedaron dos: el impostor escapó.} other {Los impostores igualaron a la tripulación.}}",
+      "rounds": "Se acabaron las rondas sin atrapar a todos.",
+      "left": "{count, plural, one {El impostor salió de la partida.} other {Los impostores salieron de la partida.}}"
+    },
+    "youWon": "Ganaste.",
+    "youLost": "Esta vez no.",
+    "crewCard": "Tripulación",
+    "impostorCard": "Impostor",
+    "crew": "Tripulación",
+    "impostor": "Impostor",
+    "why": {
+      "stayed": "Llegó hasta el final",
+      "survived": "Escapó hasta el final",
+      "voted": "Salió en la ronda {round}",
+      "caught": "Atrapado en la ronda {round}",
+      "left": "Salió de la partida"
+    },
+    "guessed": "{name} dijo {guess}",
+    "guessHit": "¡Acertó! +3",
+    "guessMiss": "Falló",
+    "toLobby": "Volver a la sala",
+    "home": "Salir"
+  },
+  "picker": {
+    "title": "Impostores",
+    "badge": "{k} de {n}",
+    "auto": "Automático",
+    "autoShort": "automático",
+    "row": "{count, plural, one {# impostor} other {# impostores}}",
+    "edit": "Cambiar cuántos impostores",
+    "moreFor2": "Con 6 personas o más, puede haber 2.",
+    "mood": {
+      "calm": "Tranquilo",
+      "even": "Equilibrado",
+      "wild": "Caótico"
+    }
+  }
+}

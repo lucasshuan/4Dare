@@ -32,12 +32,13 @@ export function buttonClass(
   );
 }
 
-export type KeyColor = "sky" | "yes" | "apricot";
+export type KeyColor = "sky" | "yes" | "apricot" | "no";
 
 const KEY_COLOR: Record<KeyColor, string> = {
   sky: "bg-sky text-on-sky [--key-lip:var(--sky-deep)]",
   yes: "bg-yes text-on-yes [--key-lip:var(--yes-deep)]",
   apricot: "bg-apricot text-on-apricot [--key-lip:var(--apricot-deep)]",
+  no: "bg-no text-on-no [--key-lip:var(--no-deep)]",
 };
 
 /**

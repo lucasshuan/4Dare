@@ -6,6 +6,7 @@
   "joinLabel": "コードで参加",
   "createRoom": {
     "game": "ゲーム",
+    "gameTooMany": "{max}人まで：ルームに{count}人います",
     "roomName": "ルーム名",
     "roomNamePlaceholder": "例：土曜の仲間",
     "back": "戻る",
@@ -15,7 +16,7 @@
     "tabRoom": "ルーム",
     "roomSummary": "{visibility}・{seats}人",
     "tabRules": "ルール",
-    "rulesSummary": "{vote} · {ask} · {answer} · {guess} · {validate}秒",
+    "rulesSummary": "{times}秒",
     "visibility": "参加できる人",
     "public": "公開",
     "private": "非公開",
@@ -26,6 +27,7 @@
     "needName": "ルーム名を決めてください。",
     "seats": "人数",
     "seatsHint": "2人以上でゲームを始められます。",
+    "seatsHintImpostor": "3人以上で試合を始められます。",
     "times": {
       "voteSeconds": {
         "label": "投票の時間",
@@ -146,7 +148,13 @@
       "name": "インポスター",
       "players": "3〜10人",
       "play": "遊ぶ",
-      "demoLine": "ひとりだけ別のキャラ。"
+      "demoLine": "ひとりだけ別のキャラ。",
+      "pitch": "全員同じキャラ、ひとりだけ別。本人も知らない。カードになりきってタップで答えて、浮いている人を投票で追い出そう。",
+      "banner": {
+        "q": "どれくらい勇敢？",
+        "vote": "インポスターは誰？",
+        "caught": "インポスター！"
+      }
     },
     "next": "次のゲーム",
     "previous": "前のゲーム"

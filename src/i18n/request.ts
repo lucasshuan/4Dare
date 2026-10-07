@@ -21,6 +21,8 @@ export const NAMESPACES = [
   "stageCast",
   "pickCard",
   "chat",
+  // the Impostor's match screens
+  "impostor",
 ] as const;
 
 // `locale` is set when a caller names it (share images, metadata). Then the request is

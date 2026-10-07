@@ -52,6 +52,10 @@ const OPENING_BEATS = ["curtain", "intro", "round"] as const;
 const RESULT_BEATS = ["tie_spin", "settle"] as const;
 const THEME_BEATS = ["theme", "rule"] as const;
 
+/** The show that plays the vote's result: the theme show, or the Impostor's deal. */
+const resultShow = (view: { settings: { game: string } }) =>
+  view.settings.game === "impostor" ? "deal" : "theme";
+
 /** A card lit by the roulette or left as the winner, and one dimmed beside it. */
 const LIT = { opacity: 1, scale: 1.04, filter: "saturate(1)" };
 const DIM = { opacity: 0.35, scale: 0.95, filter: "saturate(0.4)" };
@@ -71,15 +75,17 @@ const from = (a: Look, b: Look) => ({
  * the middle as the theme hero.
  */
 export function VoteScreen() {
-  const opening = useSceneShow("opening", OPENING_BEATS);
-  const result = useSceneShow("theme", RESULT_BEATS);
-  const theme = useSceneShow("theme", THEME_BEATS);
   const { view } = useRoomContext();
+  // the Impostor's deal show plays the result out like the theme show
+  const kind = resultShow(view);
+  const opening = useSceneShow("opening", OPENING_BEATS);
+  const result = useSceneShow(kind, RESULT_BEATS);
+  const theme = useSceneShow(kind, THEME_BEATS);
   // once the vote has its theme, the cards stay only for the roulette and the
   // winner settling: after the rule the screen fades out to the pick, and cards
   // mounted again there would fly the winner back from the hero
   const vote = view.vote?.chosen === null || result ? view.vote : null;
-  usePreloadRule(showOf(view, "theme"));
+  usePreloadRule(showOf(view, kind));
   // layoutId: voters land on cards, the winner flies to the theme stage; the
   // layout features start loading during the cold open
   return (
@@ -110,7 +116,7 @@ function Vote({ v }: { v: VoteView }) {
     null,
   );
   const entrance = beatOf(showOf(view, "opening"), "entrance");
-  const show = showOf(view, "theme");
+  const show = showOf(view, resultShow(view));
   // the vote has its theme (its show may still wait behind the opening): clicks do nothing
   const result = v.chosen !== null && show !== null;
   const spinning = beat?.kind === "tie_spin";

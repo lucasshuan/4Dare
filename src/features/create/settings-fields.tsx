@@ -7,6 +7,8 @@ import { useEffect, useId, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { HintLabel } from "@/components/ui/hint-label";
 import { TextField } from "@/components/ui/text-field";
+import { ImpostorsPicker } from "@/features/impostor/impostors-picker";
+import { GAME_SEATS, type GameKey } from "@/game/games";
 import {
   DEFAULT_SETTINGS,
   GAME_STEP_TIMES,
@@ -209,12 +211,17 @@ export function SettingsFields({
         </AnimatePresence>
       </div>
       <div className="flex flex-col gap-2">
-        <HintLabel hint={t("seatsHint")} hintId={seatsHint}>
+        <HintLabel
+          hint={t(
+            value.game === "impostor" ? "seatsHintImpostor" : "seatsHint",
+          )}
+          hintId={seatsHint}
+        >
           {t("seats")}
         </HintLabel>
         <Segmented
           label={t("seats")}
-          options={[2, 3, 4] as const}
+          options={seatOptions(value.game)}
           value={value.seats}
           onChange={(seats) => onChange({ ...value, seats })}
           render={String}
@@ -226,6 +233,12 @@ export function SettingsFields({
   );
 }
 
+/** Every seat count the game allows. */
+const seatOptions = (game: GameKey) => {
+  const { min, max } = GAME_SEATS[game];
+  return Array.from({ length: max - min + 1 }, (_, i) => min + i);
+};
+
 /**
  * The rules of the room's game: for now the seconds of each step of a match,
  * two by two, four by four on wide screens. Each game can bring its own here.
@@ -233,20 +246,34 @@ export function SettingsFields({
 export function RulesFields({
   value,
   onChange,
+  players = 0,
 }: {
   value: CreateRoomInput;
   onChange: (v: CreateRoomInput) => void;
+  /** People in the room: the Impostor's picker counts its table from it. */
+  players?: number;
 }) {
   return (
-    <div className="grid gap-x-10 gap-y-6 sm:grid-cols-[repeat(2,max-content)] sm:tiny:gap-y-4 xl:grid-cols-4 xl:gap-x-6">
-      {GAME_STEP_TIMES[value.game].map((step) => (
-        <SecondsField
-          key={step}
-          step={step}
-          value={value[step]}
-          onChange={(n) => onChange({ ...value, [step]: n })}
-        />
-      ))}
+    <div className="flex flex-col gap-8">
+      <div className="grid gap-x-10 gap-y-6 sm:grid-cols-[repeat(2,max-content)] sm:tiny:gap-y-4 xl:grid-cols-4 xl:gap-x-6">
+        {GAME_STEP_TIMES[value.game].map((step) => (
+          <SecondsField
+            key={step}
+            step={step}
+            value={value[step]}
+            onChange={(n) => onChange({ ...value, [step]: n })}
+          />
+        ))}
+      </div>
+      {value.game === "impostor" ? (
+        <div className="max-w-[420px] rounded-lg bg-surface p-5 shadow-card">
+          <ImpostorsPicker
+            value={value.impostors}
+            players={Math.max(players, value.seats)}
+            onChange={(impostors) => onChange({ ...value, impostors })}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }
