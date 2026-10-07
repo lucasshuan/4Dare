@@ -56,8 +56,8 @@ export const logoFile = (lang: string) =>
 
 export const BRAND = { blue: "#2B69C8", butter: "#F6E3A1" } as const;
 
-/** The ring of the card ground round the whole logo, in its 838-tall units: about 2.5px in the top bar. */
-const HALO = 64;
+/** The ring of the card ground round the whole logo, in its 838-tall units: about 4px in the top bar. */
+const HALO = 104;
 
 /**
  * The 4 bubble and its "?"; when a parent `group` is hovered the bubble tilts
