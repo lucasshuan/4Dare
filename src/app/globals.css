@@ -191,7 +191,7 @@
   --font-mono:
     var(--font-dm-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  /* The site's column outside a match (Screen): top bar and content (max-w-page). */
+  /* The site's content column outside a match (Screen, max-w-page); the top bar spans the screen. */
   --container-page: 1600px;
 
   --radius-sm: 10px;

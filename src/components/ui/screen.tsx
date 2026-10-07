@@ -26,7 +26,8 @@ const CONTENT_LEAVES: Variants = {
 };
 
 /**
- * Page shell: header row and a centred column. `left={null}` drops the wordmark.
+ * Page shell: a header row spanning the screen and a centred column.
+ * `left={null}` drops the wordmark.
  * With a `banner`, it runs full width under the top bar, which stays at the
  * top as you scroll: see-through over the banner, frosted glass once there is
  * something scrolling under it.
@@ -76,7 +77,7 @@ export function Screen({
     <div className="flex min-h-dvh flex-col gap-6 px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:gap-10 sm:px-8 sm:pt-6 sm:pb-[calc(3rem+var(--dock))] sm:short:gap-6 sm:short:pt-4 sm:short:pb-[calc(1.5rem+var(--dock))]">
       <m.header
         variants={BAR_LEAVES}
-        className="mx-auto flex w-full max-w-page items-center justify-between gap-3"
+        className="flex w-full items-center justify-between gap-3"
       >
         {bar}
       </m.header>
@@ -112,7 +113,7 @@ function TopBar({ children }: { children: ReactNode }) {
           : "border-transparent bg-transparent",
       )}
     >
-      <div className="mx-auto flex w-full max-w-page items-center justify-between gap-3">
+      <div className="flex w-full items-center justify-between gap-3">
         {children}
       </div>
     </header>
