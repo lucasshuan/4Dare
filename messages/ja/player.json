@@ -18,6 +18,7 @@
   "copied": "リンクをコピーしました",
   "tabsLabel": "プロフィールの項目",
   "tabs": {
+    "mural": "掲示板",
     "activity": "アクティビティ",
     "contributions": "貢献"
   },
@@ -172,5 +173,22 @@
     "cancel": "キャンセル",
     "save": "保存",
     "saved": "プロフィールを保存しました"
+  },
+  "mural": {
+    "tab": "掲示板",
+    "label": "書き込み",
+    "placeholder": "ひとこと書き込む",
+    "publish": "投稿",
+    "reply": "返信",
+    "replyPlaceholder": "{name}さんに返信",
+    "delete": "削除",
+    "deleteConfirm": "削除しますか？",
+    "more": "その他",
+    "report": "報告",
+    "reported": "報告しました",
+    "hiddenNote": "報告により非表示：あなただけに見えています",
+    "empty": "まだ書き込みはありません。",
+    "older": "以前の書き込みを見る",
+    "cancel": "キャンセル"
   }
 }

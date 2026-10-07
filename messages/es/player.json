@@ -18,6 +18,7 @@
   "copied": "Enlace copiado",
   "tabsLabel": "Secciones del perfil",
   "tabs": {
+    "mural": "Muro",
     "activity": "Actividad",
     "contributions": "Aportes"
   },
@@ -172,5 +173,22 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "saved": "Perfil guardado"
+  },
+  "mural": {
+    "tab": "Muro",
+    "label": "Mensaje",
+    "placeholder": "Deja un mensaje",
+    "publish": "Publicar",
+    "reply": "Responder",
+    "replyPlaceholder": "Responde a {name}",
+    "delete": "Borrar",
+    "deleteConfirm": "¿Borrar?",
+    "more": "Más acciones",
+    "report": "Denunciar",
+    "reported": "Denuncia enviada",
+    "hiddenNote": "Oculto por denuncias: solo tú lo ves",
+    "empty": "Ningún mensaje todavía.",
+    "older": "Ver mensajes anteriores",
+    "cancel": "Cancelar"
   }
 }

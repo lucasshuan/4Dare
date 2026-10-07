@@ -18,6 +18,7 @@
   "copied": "Link copied",
   "tabsLabel": "Profile sections",
   "tabs": {
+    "mural": "Wall",
     "activity": "Activity",
     "contributions": "Contributions"
   },
@@ -172,5 +173,22 @@
     "cancel": "Cancel",
     "save": "Save",
     "saved": "Profile saved"
+  },
+  "mural": {
+    "tab": "Wall",
+    "label": "Note",
+    "placeholder": "Leave a note",
+    "publish": "Post",
+    "reply": "Reply",
+    "replyPlaceholder": "Reply to {name}",
+    "delete": "Delete",
+    "deleteConfirm": "Delete it?",
+    "more": "More actions",
+    "report": "Report",
+    "reported": "Report sent",
+    "hiddenNote": "Hidden after reports: only you see it",
+    "empty": "No notes yet.",
+    "older": "See older notes",
+    "cancel": "Cancel"
   }
 }

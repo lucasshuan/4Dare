@@ -7,6 +7,7 @@ import {
   ImagePlus,
   Link2,
   Lock,
+  MessageCircle,
   MoonStar,
   Pencil,
   Quote,
@@ -36,6 +37,7 @@ import { ActivityPanel, hours } from "./activity";
 import { bannerStyle } from "./banners";
 import { ContributionsPanel } from "./contributions";
 import { streaks } from "./garden-days";
+import { MuralPanel } from "./mural";
 import { profilePath } from "./profile-link";
 import { Showcase } from "./showcase";
 
@@ -194,6 +196,7 @@ export function ProfileBody({
 }
 
 const TABS = [
+  { value: "mural", Icon: MessageCircle },
   { value: "activity", Icon: Sprout },
   { value: "contributions", Icon: ImagePlus },
 ] as const;
@@ -421,6 +424,11 @@ function ProfileShow({
                     </Tabs.Tab>
                   ))}
                 </Tabs.List>
+                {tabs.some((x) => x.value === "mural") ? (
+                  <Panel value="mural">
+                    <MuralPanel handle={view.handle} />
+                  </Panel>
+                ) : null}
                 {tabs.some((x) => x.value === "activity") ? (
                   <Panel value="activity">
                     <ActivityPanel view={view} now={now} />
