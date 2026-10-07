@@ -203,16 +203,7 @@ export function UserMenuPopover({
                     </span>
                   ) : null}
                   <MenuSeparator />
-                  <MenuItems>
-                    <MenuItem
-                      icon={<Settings strokeWidth={1.75} />}
-                      onClick={openSettings}
-                    >
-                      {t("settings")}
-                    </MenuItem>
-                  </MenuItems>
-                  <MenuSeparator />
-                  <QuickRow />
+                  <QuickRow onSettings={openSettings} />
                 </>
               ) : (
                 <>
@@ -238,12 +229,6 @@ export function UserMenuPopover({
                       {t("editProfile")}
                     </MenuItem>
                     <MenuItem
-                      icon={<Settings strokeWidth={1.75} />}
-                      onClick={openSettings}
-                    >
-                      {t("settings")}
-                    </MenuItem>
-                    <MenuItem
                       icon={<UserRoundCog strokeWidth={1.75} />}
                       onClick={openAccount}
                       end={
@@ -256,7 +241,7 @@ export function UserMenuPopover({
                     </MenuItem>
                   </MenuItems>
                   <MenuSeparator />
-                  <QuickRow>
+                  <QuickRow onSettings={openSettings}>
                     <button
                       type="button"
                       disabled={leaving}
@@ -328,8 +313,14 @@ function MenuItem({
 const ICON_BUTTON =
   "flex size-9 items-center justify-center rounded-pill text-ink-muted transition-colors duration-150 ease-soft hover:bg-sunken hover:text-ink aria-pressed:bg-sunken aria-pressed:text-ink [&_svg]:size-[18px]";
 
-/** The last row: sound on or off, light or dark, then whatever the caller adds (sign out). */
-function QuickRow({ children }: { children?: ReactNode }) {
+/** The last row: settings, sound on or off, light or dark, then whatever the caller adds (sign out). */
+function QuickRow({
+  onSettings,
+  children,
+}: {
+  onSettings: () => void;
+  children?: ReactNode;
+}) {
   const t = useTranslations("home.user");
   const tTheme = useTranslations("common.theme");
   const { muted } = useSettings();
@@ -337,6 +328,14 @@ function QuickRow({ children }: { children?: ReactNode }) {
   const dark = resolvedTheme === "dark";
   return (
     <div className="-mx-1 flex items-center gap-1">
+      <button
+        type="button"
+        onClick={onSettings}
+        className="inline-flex h-9 items-center gap-2 rounded-pill px-3 font-semibold text-ink-muted text-sm transition-colors duration-150 ease-soft hover:bg-sunken hover:text-ink [&_svg]:size-[18px]"
+      >
+        <Settings strokeWidth={1.75} />
+        {t("settings")}
+      </button>
       <button
         type="button"
         aria-pressed={!muted}
