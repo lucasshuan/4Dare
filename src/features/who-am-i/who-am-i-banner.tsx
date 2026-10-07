@@ -10,12 +10,12 @@ import {
   useTransform,
 } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { critterUri } from "@/components/ui/critter";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
 import type { AnswerValue } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 type Seat = "a" | "b" | "c" | "d";
 
@@ -195,20 +195,7 @@ const BURST = Array.from({ length: 10 }, (_, i) => {
 export function WhoAmIBanner() {
   const t = useTranslations("home.games.whoAmI.banner");
   const reduced = useReducedMotion() ?? false;
-  const [step, setStep] = useState(STILL);
-
-  useEffect(() => {
-    if (reduced) return setStep(STILL);
-    let i = 0;
-    let id: number;
-    const next = () => {
-      setStep(i);
-      id = window.setTimeout(next, STEPS[i].ms);
-      i = (i + 1) % STEPS.length;
-    };
-    next();
-    return () => window.clearTimeout(id);
-  }, [reduced]);
+  const { step } = useStepLoop(STEPS, STILL, reduced);
 
   // Pointer parallax: -0.5..0.5 across the banner, eased by a spring.
   const px = useMotionValue(0);

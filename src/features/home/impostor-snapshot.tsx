@@ -3,9 +3,9 @@
 import { VenetianMask } from "lucide-react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { HeldCard } from "@/features/who-am-i/who-am-i-banner";
 import { cn } from "@/lib/cn";
+import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 /** The cards on the table, left to right: left edge (% of the box) and tilt. */
 const CARDS = [
@@ -62,22 +62,7 @@ export function ImpostorSnapshot({
   const t = useTranslations("home.games.impostor");
   const reduced = useReducedMotion() ?? false;
   const still = forceStill || reduced;
-  const [{ step, loop }, setAt] = useState({ step: STILL, loop: 0 });
-
-  useEffect(() => {
-    if (still) return setAt({ step: STILL, loop: 0 });
-    let i = 0;
-    let n = 0;
-    let id: number;
-    const next = () => {
-      setAt({ step: i, loop: n });
-      id = window.setTimeout(next, STEPS[i].ms);
-      i = (i + 1) % STEPS.length;
-      if (i === 0) n += 1;
-    };
-    next();
-    return () => window.clearTimeout(id);
-  }, [still]);
+  const { step, loop } = useStepLoop(STEPS, STILL, still);
 
   const s = STEPS[step];
   const odd = ODD_AT[loop % ODD_AT.length];
