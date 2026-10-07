@@ -271,7 +271,7 @@ export function ImpostorBanner() {
         py.set(0);
       }}
       className={cn(
-        "relative isolate select-none overflow-hidden bg-no-soft",
+        "relative isolate select-none overflow-hidden art-impostor",
         UNDER_TOPBAR,
       )}
     >
@@ -316,7 +316,8 @@ export function ImpostorBanner() {
 
       <m.div
         style={{ x: frontX, y: frontY }}
-        className="relative mx-auto h-[clamp(180px,min(22vw,27vh),230px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[210px]"
+        // its own layer whether or not the pointer moves it, so it stacks the same
+        className="relative isolate mx-auto h-[clamp(180px,min(22vw,27vh),230px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[210px]"
       >
         {/* the table everyone sits around */}
         <span className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-surface/45" />
@@ -369,10 +370,11 @@ export function ImpostorBanner() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[45%] left-1/2 size-[92cqh] rounded-pill shadow-[0_0_0_200vmax_rgba(11,15,23,0.72)]"
+                      // one gradient wide enough for any screen: no seam round the light
+                      className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[45%] left-1/2 size-[400vmax]"
                       style={{
                         background:
-                          "radial-gradient(circle, transparent 50%, rgba(11,15,23,0.72) 72%)",
+                          "radial-gradient(circle, transparent 31cqh, rgba(11,15,23,0.72) 48cqh)",
                       }}
                     />
                   ) : null}
@@ -533,7 +535,7 @@ export function ImpostorBanner() {
                 <Critter
                   seed={p.seed}
                   color={p.color}
-                  className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--no-soft)]"
+                  className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-impostor)]"
                 />
               </m.span>
             </div>
@@ -541,8 +543,13 @@ export function ImpostorBanner() {
         })}
       </m.div>
 
-      {/* melts into the page below */}
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-b from-transparent to-canvas/70" />
+      {/* melts into the page below; not with the lights down, which reach the edge */}
+      <span
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-b from-transparent to-canvas/70 transition-opacity duration-500",
+          s.caught && "opacity-0",
+        )}
+      />
     </div>
   );
 }

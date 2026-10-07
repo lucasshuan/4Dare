@@ -69,7 +69,7 @@ export function WhoAmISnapshot({
     <div
       aria-hidden="true"
       className={cn(
-        "relative aspect-16/10 overflow-hidden rounded-lg bg-sky-soft",
+        "relative aspect-16/10 overflow-hidden rounded-lg art-whoami",
         className,
       )}
     >

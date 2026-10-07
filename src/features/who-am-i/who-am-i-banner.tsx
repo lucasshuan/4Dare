@@ -248,7 +248,7 @@ export function WhoAmIBanner() {
         py.set(0);
       }}
       className={cn(
-        "relative isolate select-none overflow-hidden bg-sky-soft",
+        "relative isolate select-none overflow-hidden art-whoami",
         UNDER_TOPBAR,
       )}
     >
@@ -356,7 +356,7 @@ export function WhoAmIBanner() {
                 <Critter
                   seed={p.seed}
                   color={p.color}
-                  className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--sky-soft)]"
+                  className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-whoami)]"
                 />
               </m.span>
             </div>
@@ -423,7 +423,7 @@ export function WhoAmIBanner() {
           <Critter
             seed={YOU.seed}
             color={YOU.color}
-            className="-mt-[4cqh] size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--sky-soft),0_0_0_6px_var(--sky)]"
+            className="-mt-[4cqh] size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-whoami),0_0_0_6px_var(--sky)]"
           />
         </div>
       </m.div>

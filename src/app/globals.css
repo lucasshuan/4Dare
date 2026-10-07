@@ -35,6 +35,11 @@
   --no: #c2412f;
   --on-no: #ffffff;
   --no-soft: #fadfd8;
+  /* each game's art (home card, page banner): livelier grounds than the soft tints */
+  --art-whoami: #b4cff7;
+  --art-whoami-2: #cdbff6;
+  --art-impostor: #f7b1a1;
+  --art-impostor-2: #f9cd96;
   --on-avatar: #1e2433;
   /* One colour per player in the room, theirs from joining (seat-colors.ts): their ring, their name, the match backdrop. */
   --seat-1: #2b69c8;
@@ -176,6 +181,10 @@
   --no: #f28b76;
   --on-no: #2b0d07;
   --no-soft: #4a1d14;
+  --art-whoami: #21406e;
+  --art-whoami-2: #362d68;
+  --art-impostor: #5f281d;
+  --art-impostor-2: #5a3b19;
   --seat-1: #86b4f7;
   --seat-2: #f0a566;
   --seat-3: #5ccfc6;
@@ -458,6 +467,24 @@ body {
   }
 }
 /* biome-ignore-end lint/complexity/noImportantStyles: see above */
+
+/* Each game's art ground: its colour sliding into a second one. */
+@utility art-whoami {
+  background-color: var(--art-whoami);
+  background-image: linear-gradient(
+    120deg,
+    var(--art-whoami),
+    var(--art-whoami-2)
+  );
+}
+@utility art-impostor {
+  background-color: var(--art-impostor);
+  background-image: linear-gradient(
+    120deg,
+    var(--art-impostor),
+    var(--art-impostor-2)
+  );
+}
 
 /* The game's "?" marks scattered over a coloured ground: card frames, a wide picture's bands. */
 @utility q-marks {

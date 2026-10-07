@@ -86,7 +86,7 @@ export function ImpostorSnapshot({
     <div
       aria-hidden="true"
       className={cn(
-        "relative isolate aspect-16/10 overflow-hidden rounded-lg bg-no-soft [container-type:size]",
+        "relative isolate aspect-16/10 overflow-hidden rounded-lg art-impostor [container-type:size]",
         className,
       )}
     >
