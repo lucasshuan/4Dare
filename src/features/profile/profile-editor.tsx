@@ -226,6 +226,7 @@ export function ProfileEditor({
     toast(t("saved"));
     const next = r.data.handle ?? view.handle;
     await client.invalidateQueries({ queryKey: profileKey(view.handle) });
+    void client.invalidateQueries({ queryKey: ["player-card", view.id] });
     if (next !== view.handle) router.replace(profilePath(next));
     else onClose();
   };

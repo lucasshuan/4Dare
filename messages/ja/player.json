@@ -20,6 +20,7 @@
   "tabs": {
     "mural": "掲示板",
     "activity": "アクティビティ",
+    "badges": "実績",
     "contributions": "貢献"
   },
   "activity": {
@@ -190,5 +191,61 @@
     "empty": "まだ書き込みはありません。",
     "older": "以前の書き込みを見る",
     "cancel": "キャンセル"
+  },
+  "level": {
+    "tag": "Lv",
+    "title": "レベル{n}",
+    "ring": "レベル{n}・{into} / {need} XP",
+    "xp": "{into} / {need} XP",
+    "left": "{total} XP・レベル{next}まであと{left}"
+  },
+  "badges": {
+    "tab": "実績",
+    "xpRules": "XPの増やし方",
+    "everyGame": "すべてのゲーム",
+    "rules": {
+      "finish": "試合を最後まで遊ぶ",
+      "first": "1位",
+      "dayFirst": "その日最初の試合",
+      "discovered": "自分のキャラクターを当てる"
+    },
+    "groups": {
+      "general": "全般",
+      "library": "ライブラリー"
+    },
+    "tiers": {
+      "bronze": "ブロンズ",
+      "silver": "シルバー",
+      "gold": "ゴールド"
+    },
+    "locked": "未獲得",
+    "since": "{date}に獲得",
+    "progress": "{value} / {goal}",
+    "names": {
+      "matches": "常連",
+      "wins": "表彰台",
+      "streak": "コツコツ",
+      "people": "仲間",
+      "discovered": "名探偵",
+      "quick": "一発正解",
+      "themes": "探検家",
+      "tough": "難問カード",
+      "pictures": "カメラマン",
+      "covers": "表紙",
+      "characters": "クリエイター"
+    },
+    "goals": {
+      "matches": "{n}試合",
+      "wins": "{n}勝",
+      "streak": "{n}日連続",
+      "people": "{n}人と遊ぶ",
+      "discovered": "{n}人のキャラクターを当てる",
+      "quick": "質問3回以内で{n}回正解",
+      "themes": "{n}種類のテーマ",
+      "tough": "誰も当てられなかったカード{n}枚",
+      "pictures": "画像を{n}枚送る",
+      "covers": "メイン画像{n}枚",
+      "characters": "キャラクターを{n}人作る"
+    }
   }
 }

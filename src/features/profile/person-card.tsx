@@ -10,6 +10,7 @@ import type { Avatar as AvatarData } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { hours } from "./activity";
 import { bannerStyle } from "./banners";
+import { LevelAvatar } from "./level";
 import { accentStyle } from "./profile-body";
 import { ProfileLink } from "./profile-link";
 import { usePlayerCard } from "./use-profile";
@@ -104,9 +105,20 @@ export function PersonCardBody({
       />
       <div className="-mt-5 flex flex-col gap-3 px-4 pb-4">
         <div className="flex items-end gap-3">
-          <span className="rounded-pill bg-surface p-[3px]">
-            <Avatar avatar={person.avatar} size={52} />
-          </span>
+          {card?.numbers ? (
+            <LevelAvatar
+              avatar={person.avatar}
+              xp={card.numbers.xp}
+              stroke={3}
+              tag="sm"
+              avatarClass="size-13 text-[22px]"
+              on="surface"
+            />
+          ) : (
+            <span className="rounded-pill bg-surface p-[3px]">
+              <Avatar avatar={person.avatar} size={52} />
+            </span>
+          )}
           <div className="flex min-w-0 flex-col pb-0.5">
             <Popover.Title className="m-0 truncate font-bold text-[17px] leading-tight">
               {card?.name ?? person.name}

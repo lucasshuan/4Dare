@@ -20,6 +20,7 @@
   "tabs": {
     "mural": "Wall",
     "activity": "Activity",
+    "badges": "Badges",
     "contributions": "Contributions"
   },
   "activity": {
@@ -190,5 +191,61 @@
     "empty": "No notes yet.",
     "older": "See older notes",
     "cancel": "Cancel"
+  },
+  "level": {
+    "tag": "Lv",
+    "title": "Level {n}",
+    "ring": "Level {n} · {into} of {need} XP",
+    "xp": "{into} / {need} XP",
+    "left": "{total} XP · {left} to level {next}"
+  },
+  "badges": {
+    "tab": "Badges",
+    "xpRules": "How to earn XP",
+    "everyGame": "Every game",
+    "rules": {
+      "finish": "Finish a match",
+      "first": "First place",
+      "dayFirst": "First match of the day",
+      "discovered": "Discover your character"
+    },
+    "groups": {
+      "general": "General",
+      "library": "Library"
+    },
+    "tiers": {
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold"
+    },
+    "locked": "Not yet",
+    "since": "Since {date}",
+    "progress": "{value} / {goal}",
+    "names": {
+      "matches": "Regular",
+      "wins": "Podium",
+      "streak": "Steady",
+      "people": "Crowd",
+      "discovered": "Detective",
+      "quick": "Spot on",
+      "themes": "Explorer",
+      "tough": "Tough card",
+      "pictures": "Photographer",
+      "covers": "Cover",
+      "characters": "Creator"
+    },
+    "goals": {
+      "matches": "{n} matches",
+      "wins": "{n} wins",
+      "streak": "{n} days in a row",
+      "people": "Play with {n} people",
+      "discovered": "Discover {n} characters",
+      "quick": "{n, plural, one {# discovery} other {# discoveries}} in 3 questions or fewer",
+      "themes": "{n} different themes",
+      "tough": "{n, plural, one {# card nobody found} other {# cards nobody found}}",
+      "pictures": "{n, plural, one {# picture sent} other {# pictures sent}}",
+      "covers": "{n, plural, one {# cover picture} other {# cover pictures}}",
+      "characters": "{n, plural, one {# character made} other {# characters made}}"
+    }
   }
 }

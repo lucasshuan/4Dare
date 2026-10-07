@@ -24,8 +24,12 @@ import {
 } from "@/components/ui/auth-button";
 import { Avatar } from "@/components/ui/avatar";
 import { useMe } from "@/features/data/use-me";
+import { LevelAvatar, XpBar } from "@/features/profile/level";
+import { accentStyle } from "@/features/profile/profile-body";
 import { profilePath } from "@/features/profile/profile-link";
+import { usePlayerCard } from "@/features/profile/use-profile";
 import { SettingsDialog } from "@/features/settings/settings-dialog";
+import { levelOf } from "@/game/profile/xp";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
 import type { DeferredProps } from "@/lib/hooks/use-deferred";
@@ -52,6 +56,10 @@ export function UserMenuPopover({
   const client = useQueryClient();
   const [rolls, setRolls] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const tLevel = useTranslations("player.level");
+  // the level ring and bar: the account's own card, fetched with the menu
+  const { data: card } = usePlayerCard(me?.id ?? "", !!me && !me.isGuest);
+  const numbers = me && !me.isGuest ? (card?.numbers ?? null) : null;
   const openSettings = () => {
     onOpenChange(false);
     setSettingsOpen(true);
@@ -81,7 +89,10 @@ export function UserMenuPopover({
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Positioner sideOffset={8} align="end" className="z-50">
-            <Popover.Popup className="flex w-[min(340px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-4 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+            <Popover.Popup
+              style={accentStyle(card?.accent ?? null)}
+              className="flex w-[min(340px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-4 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0"
+            >
               <div className="flex items-center gap-3">
                 {/* a new name and critter swap in */}
                 <AnimatePresence initial={false} mode="popLayout">
@@ -93,7 +104,18 @@ export function UserMenuPopover({
                     exit={{ opacity: 0, scale: 0.6, rotate: 20 }}
                     transition={{ duration: dur.base, ease: ease.soft }}
                   >
-                    <Avatar avatar={me.avatar} />
+                    {numbers ? (
+                      <LevelAvatar
+                        avatar={me.avatar}
+                        xp={numbers.xp}
+                        stroke={3}
+                        tag="sm"
+                        on="surface"
+                        avatarClass="size-11 text-lg"
+                      />
+                    ) : (
+                      <Avatar avatar={me.avatar} />
+                    )}
                   </m.span>
                 </AnimatePresence>
                 <div className="flex min-w-0 flex-col">
@@ -136,13 +158,15 @@ export function UserMenuPopover({
                   <Popover.Description className="font-medium text-[13px] text-ink-muted">
                     {me.isGuest
                       ? t("guest")
-                      : me.handle
-                        ? `@${me.handle}`
-                        : me.provider
-                          ? t("connected", {
-                              provider: PROVIDER_NAME[me.provider],
-                            })
-                          : t("account")}
+                      : me.handle && numbers
+                        ? `@${me.handle} · ${tLevel("title", { n: levelOf(numbers.xp).level })}`
+                        : me.handle
+                          ? `@${me.handle}`
+                          : me.provider
+                            ? t("connected", {
+                                provider: PROVIDER_NAME[me.provider],
+                              })
+                            : t("account")}
                   </Popover.Description>
                 </div>
                 {me.provider ? (
@@ -151,6 +175,7 @@ export function UserMenuPopover({
                   </span>
                 ) : null}
               </div>
+              {numbers ? <XpBar xp={numbers.xp} /> : null}
               {me.isGuest ? (
                 <>
                   <p className="text-ink-muted text-sm">{t("guestHint")}</p>

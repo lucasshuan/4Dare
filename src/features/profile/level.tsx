@@ -1,0 +1,160 @@
+"use client";
+
+import { useFormatter, useTranslations } from "next-intl";
+import type { CSSProperties } from "react";
+import { Avatar } from "@/components/ui/avatar";
+import { levelOf } from "@/game/profile/xp";
+import type { Avatar as AvatarData } from "@/game/types";
+import { cn } from "@/lib/cn";
+
+/** The gap between the face and the ring, and the outline around it all (px). */
+const GAP = 2;
+
+/**
+ * A face inside its level's ring: a thick neutral track, the XP into the
+ * level in the accent (round ends), the level on a tag at the bottom right.
+ * `stroke` is the ring's thickness (5 on a profile, 3 on cards); the face's
+ * size comes from `avatarClass`.
+ */
+export function LevelAvatar({
+  avatar,
+  xp,
+  stroke,
+  avatarClass,
+  tag = "md",
+  on = "canvas",
+  className,
+}: {
+  avatar: AvatarData;
+  xp: number;
+  stroke: number;
+  avatarClass: string;
+  tag?: "sm" | "md";
+  /** What it sits on: the gap and the outline take that colour. */
+  on?: "canvas" | "surface";
+  className?: string;
+}) {
+  const t = useTranslations("player.level");
+  const format = useFormatter();
+  const { level, into, need } = levelOf(xp);
+  const share = need ? into / need : 0;
+  const ring: CSSProperties = { r: `calc(50% - ${stroke / 2}px)` };
+  return (
+    <span
+      role="img"
+      aria-label={t("ring", {
+        n: level,
+        into: format.number(into),
+        need: format.number(need),
+      })}
+      className={cn(
+        "relative inline-flex shrink-0 rounded-pill",
+        on === "canvas" ? "bg-canvas" : "bg-surface",
+        className,
+      )}
+      style={{
+        padding: GAP + stroke,
+        boxShadow: `0 0 0 ${GAP}px var(--${on})`,
+      }}
+    >
+      <svg
+        aria-hidden="true"
+        className="absolute inset-0 size-full -rotate-90 overflow-visible"
+      >
+        <circle
+          cx="50%"
+          cy="50%"
+          style={ring}
+          fill="none"
+          strokeWidth={stroke}
+          className="stroke-line"
+        />
+        <circle
+          cx="50%"
+          cy="50%"
+          style={ring}
+          fill="none"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          pathLength={100}
+          strokeDasharray={100}
+          // a sliver shows even at 0, so the ring reads as progress from the start
+          strokeDashoffset={100 - Math.max(1.5, share * 100)}
+          className="stroke-(--accent)"
+        />
+      </svg>
+      <Avatar avatar={avatar} className={avatarClass} />
+      <LevelTag
+        level={level}
+        size={tag}
+        on={on}
+        className="absolute -right-0.5 -bottom-0.5"
+      />
+    </span>
+  );
+}
+
+/** "Nv 14" on the accent, outlined like the ring. */
+export function LevelTag({
+  level,
+  size = "md",
+  on = "canvas",
+  className,
+}: {
+  level: number;
+  size?: "sm" | "md";
+  on?: "canvas" | "surface";
+  className?: string;
+}) {
+  const t = useTranslations("player.level");
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "inline-flex items-baseline gap-0.5 rounded-pill bg-(--accent) font-bold text-(--on-accent) leading-none tabular-nums",
+        on === "canvas"
+          ? "shadow-[0_0_0_2px_var(--canvas)]"
+          : "shadow-[0_0_0_2px_var(--surface)]",
+        size === "md"
+          ? "px-2 py-[5px] text-[13px]"
+          : "px-1.5 py-[3px] text-[11px]",
+        className,
+      )}
+    >
+      <small className="font-bold text-[0.78em] opacity-85">{t("tag")}</small>
+      {level}
+    </span>
+  );
+}
+
+/** XP into the level, as a bar; the numbers under it. */
+export function XpBar({
+  xp,
+  note,
+  className,
+}: {
+  xp: number;
+  /** Beside the XP on the right (a streak). */
+  note?: React.ReactNode;
+  className?: string;
+}) {
+  const t = useTranslations("player.level");
+  const format = useFormatter();
+  const { into, need } = levelOf(xp);
+  return (
+    <div className={cn("flex flex-col gap-1.5", className)}>
+      <div className="h-1.5 overflow-hidden rounded-pill bg-sunken">
+        <i
+          className="block h-full rounded-pill bg-(--accent)"
+          style={{ width: `${Math.max(2, (into / need) * 100)}%` }}
+        />
+      </div>
+      <div className="flex justify-between gap-2 font-semibold text-[12px] text-ink-muted">
+        <span className="font-mono tabular-nums">
+          {t("xp", { into: format.number(into), need: format.number(need) })}
+        </span>
+        {note}
+      </div>
+    </div>
+  );
+}

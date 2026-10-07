@@ -2,6 +2,7 @@
 
 import { Tabs } from "@base-ui/react/tabs";
 import {
+  Award,
   CalendarDays,
   Flame,
   ImagePlus,
@@ -34,9 +35,11 @@ import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
 import type { ProfileView } from "@/server/contract";
 import { ActivityPanel, hours } from "./activity";
+import { BadgesPanel } from "./badges";
 import { bannerStyle } from "./banners";
 import { ContributionsPanel } from "./contributions";
 import { streaks } from "./garden-days";
+import { LevelAvatar } from "./level";
 import { MuralPanel } from "./mural";
 import { profilePath } from "./profile-link";
 import { Showcase } from "./showcase";
@@ -50,6 +53,8 @@ const ProfileEditor = lazy(() =>
 export const accentStyle = (accent: string | null) =>
   ({
     "--accent": accent ?? "var(--sky)",
+    // the palette's accents are dark enough for white; the default follows the theme
+    "--on-accent": accent ? "#fff" : "var(--on-sky)",
     "--accent-soft": `color-mix(in oklab, ${accent ?? "var(--sky)"} 18%, var(--surface))`,
   }) as CSSProperties;
 
@@ -198,6 +203,7 @@ export function ProfileBody({
 const TABS = [
   { value: "mural", Icon: MessageCircle },
   { value: "activity", Icon: Sprout },
+  { value: "badges", Icon: Award },
   { value: "contributions", Icon: ImagePlus },
 ] as const;
 
@@ -235,7 +241,9 @@ function ProfileShow({
   const winRate = view.matches
     ? Math.round((view.wins / view.matches) * 100)
     : 0;
-  const tabs = TABS.filter(({ value }) => !view.hidden[value]);
+  const tabs = TABS.filter(({ value }) =>
+    value === "badges" ? !view.hidden.activity : !view.hidden[value],
+  );
 
   const copyLink = async () => {
     const url = `${window.location.origin}/${locale}${profilePath(view.handle)}`;
@@ -263,12 +271,21 @@ function ProfileShow({
             FRAME[mode].overlap,
           )}
         >
-          <span className="rounded-pill bg-canvas p-[5px] shadow-[0_0_0_2px_var(--canvas)]">
-            <Avatar
+          {view.hidden.activity ? (
+            <span className="rounded-pill bg-canvas p-[5px] shadow-[0_0_0_2px_var(--canvas)]">
+              <Avatar
+                avatar={view.avatar}
+                className="size-20 text-[32px] sm:size-28 sm:text-[44px]"
+              />
+            </span>
+          ) : (
+            <LevelAvatar
               avatar={view.avatar}
-              className="size-20 text-[32px] sm:size-28 sm:text-[44px]"
+              xp={view.xp}
+              stroke={5}
+              avatarClass="size-20 text-[32px] sm:size-28 sm:text-[44px]"
             />
-          </span>
+          )}
           <div className="flex min-w-0 flex-col gap-1 pb-1">
             <h1 className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-display font-extrabold text-[30px] leading-none tracking-[-0.02em] sm:text-[40px]">
               <span className="min-w-0 break-words">{view.name}</span>
@@ -432,6 +449,11 @@ function ProfileShow({
                 {tabs.some((x) => x.value === "activity") ? (
                   <Panel value="activity">
                     <ActivityPanel view={view} now={now} />
+                  </Panel>
+                ) : null}
+                {tabs.some((x) => x.value === "badges") ? (
+                  <Panel value="badges">
+                    <BadgesPanel view={view} />
                   </Panel>
                 ) : null}
                 {tabs.some((x) => x.value === "contributions") ? (

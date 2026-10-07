@@ -20,6 +20,7 @@
   "tabs": {
     "mural": "Muro",
     "activity": "Actividad",
+    "badges": "Logros",
     "contributions": "Aportes"
   },
   "activity": {
@@ -190,5 +191,61 @@
     "empty": "Ningún mensaje todavía.",
     "older": "Ver mensajes anteriores",
     "cancel": "Cancelar"
+  },
+  "level": {
+    "tag": "Nv",
+    "title": "Nivel {n}",
+    "ring": "Nivel {n} · {into} de {need} XP",
+    "xp": "{into} / {need} XP",
+    "left": "{total} XP · faltan {left} para el nivel {next}"
+  },
+  "badges": {
+    "tab": "Logros",
+    "xpRules": "Cómo ganar XP",
+    "everyGame": "Todos los juegos",
+    "rules": {
+      "finish": "Terminar una partida",
+      "first": "Primer lugar",
+      "dayFirst": "Primera partida del día",
+      "discovered": "Descubrir tu personaje"
+    },
+    "groups": {
+      "general": "Generales",
+      "library": "Biblioteca"
+    },
+    "tiers": {
+      "bronze": "Bronce",
+      "silver": "Plata",
+      "gold": "Oro"
+    },
+    "locked": "Todavía no",
+    "since": "Desde {date}",
+    "progress": "{value} / {goal}",
+    "names": {
+      "matches": "Habitual",
+      "wins": "Podio",
+      "streak": "Constancia",
+      "people": "Pandilla",
+      "discovered": "Detective",
+      "quick": "Al toque",
+      "themes": "Explorador",
+      "tough": "Carta difícil",
+      "pictures": "Fotógrafo",
+      "covers": "Portada",
+      "characters": "Creador"
+    },
+    "goals": {
+      "matches": "{n} partidas",
+      "wins": "{n} victorias",
+      "streak": "{n} días seguidos",
+      "people": "Jugar con {n} personas",
+      "discovered": "Descubrir {n} personajes",
+      "quick": "{n, plural, one {# descubrimiento} other {# descubrimientos}} en 3 preguntas o menos",
+      "themes": "{n} temas distintos",
+      "tough": "{n, plural, one {# carta que nadie descubrió} other {# cartas que nadie descubrió}}",
+      "pictures": "{n, plural, one {# foto enviada} other {# fotos enviadas}}",
+      "covers": "{n, plural, one {# foto principal} other {# fotos principales}}",
+      "characters": "{n, plural, one {# personaje creado} other {# personajes creados}}"
+    }
   }
 }
