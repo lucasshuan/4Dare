@@ -73,6 +73,28 @@
     "hostNoteTitle": "あなたがテーマを書きます",
     "hostNote": "試合が始まったら、好きなテーマを書きます（オンのテーマからアイデアも出ます）。30秒たつと、みんなの投票に切り替わります。"
   },
+  "presets": {
+    "label": "プリセット",
+    "none": "カスタム",
+    "changed": "変更あり",
+    "ready": "用意されたもの",
+    "readyNames": {
+      "everything": "すべて",
+      "anime": "アニメの夜",
+      "tv": "テレビの定番",
+      "real": "実在の人物"
+    },
+    "mine": "あなたの",
+    "empty": "まだありません。いまの設定に名前をつけて保存できます。",
+    "namePlaceholder": "プリセットの名前",
+    "save": "保存",
+    "replace": "上書き",
+    "full": "{max}個まで：保存するには1つ消してください。",
+    "gostosOn": "{total}の好み中{on}",
+    "themesOff": "{count}テーマがオフ",
+    "startsNew": "{game}の新しいルームは{name}で始まる",
+    "remove": "{name}を消す"
+  },
   "signIn": "{provider}でログイン",
   "editProfile": "プロフィールを編集",
   "testAccount": "Supabaseなしではテスト用アカウントに入ります。",

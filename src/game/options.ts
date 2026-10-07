@@ -1,7 +1,9 @@
 // What a person picks that follows their account from device to device:
-// the theme, the chat bubbles and each game's own options. Sound stays on
-// each device (src/lib/settings.ts). Kept on profiles.settings.
+// the theme, the chat bubbles, each game's own options and their room
+// presets. Sound stays on each device (src/lib/settings.ts). Kept on
+// profiles.settings.
 import type { GameKey } from "./games";
+import { parsePresets, type RoomPreset } from "./presets";
 
 /**
  * Each game's own options, with their defaults. The settings dialog lists a
@@ -28,6 +30,7 @@ export interface SyncedSettings {
   theme: ThemeChoice | null;
   chatBubbles: boolean;
   games: GameOptions;
+  presets: RoomPreset[];
 }
 
 const record = (v: unknown): Record<string, unknown> =>
@@ -61,5 +64,6 @@ export function parseSynced(raw: unknown): SyncedSettings {
       : null,
     chatBubbles: flag(r.chatBubbles, true),
     games: parseGameOptions(r.games),
+    presets: parsePresets(r.presets),
   };
 }

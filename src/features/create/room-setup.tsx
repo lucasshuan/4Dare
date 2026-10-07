@@ -20,6 +20,7 @@ import type { CreateRoomInput } from "@/server/contract";
 import { GameField } from "./game-field";
 import { GostoFields } from "./gosto-fields";
 import { DEFAULT_SETUP } from "./last-setup";
+import { PresetMenu } from "./preset-menu";
 import {
   missingName,
   missingPassword,
@@ -113,6 +114,7 @@ export function RoomSetup({
           </div>
         </div>
       </div>
+      {value ? <PresetMenu value={value} onChange={onChange} /> : null}
       {value ? (
         <Tabs.Root
           value={tab}

@@ -43,6 +43,13 @@ const TIMES = {
   answerSeconds: 60,
   validateSeconds: 60,
 };
+const PRESET = {
+  id: "friday",
+  name: "Friday",
+  game: "who-am-i",
+  setup: { ...TIMES, themeMode: "vote", offGostos: ["real"], offThemes: [] },
+  isDefault: true,
+};
 const ROOM = {
   game: DEFAULT_SETTINGS.game,
   name: "Test room",
@@ -634,6 +641,7 @@ describe("server, local mode", () => {
         chatBubbles: false,
         games: { "who-am-i": { confirmPass: true, unknown: 1 } },
         volume: 0.1,
+        presets: [PRESET, { id: "odd", name: "Odd" }],
       }),
     );
     const meRoute = await import("@/app/api/me/route");
@@ -645,6 +653,7 @@ describe("server, local mode", () => {
       theme: "dark",
       chatBubbles: false,
       games: { "who-am-i": { confirmPass: true, popularHand: true } },
+      presets: [PRESET],
     });
 
     const exported = await import("@/app/api/me/export/route");

@@ -73,6 +73,28 @@
     "hostNoteTitle": "Tú escribes el tema",
     "hostNote": "Cuando empiece la partida, escribes el tema que quieras, con algunas ideas de los temas activados. Si pasan 30 s, todos votan."
   },
+  "presets": {
+    "label": "Ajuste",
+    "none": "Personalizado",
+    "changed": "cambiado",
+    "ready": "Listos",
+    "readyNames": {
+      "everything": "Todo",
+      "anime": "Noche de anime",
+      "tv": "Clásicos de la tele",
+      "real": "Gente real"
+    },
+    "mine": "Tuyos",
+    "empty": "Ninguno aún. Ponle nombre a este y guárdalo.",
+    "namePlaceholder": "Nombre del ajuste",
+    "save": "Guardar",
+    "replace": "Reemplazar",
+    "full": "Hasta {max}: borra uno para guardar otro.",
+    "gostosOn": "{on} de {total} gustos",
+    "themesOff": "{count, plural, one {# tema desactivado} other {# temas desactivados}}",
+    "startsNew": "Las salas nuevas de {game} empiezan con {name}",
+    "remove": "Borrar {name}"
+  },
   "signIn": "Entrar con {provider}",
   "editProfile": "Editar perfil",
   "testAccount": "Sin Supabase, esto entra en una cuenta de prueba.",

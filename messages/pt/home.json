@@ -73,6 +73,28 @@
     "hostNoteTitle": "Você escreve o tema",
     "hostNote": "Quando a partida começar, você escreve o tema que quiser, com umas ideias dos temas ligados. Se passarem 30 s, todo mundo vota."
   },
+  "presets": {
+    "label": "Predefinição",
+    "none": "Personalizada",
+    "changed": "alterada",
+    "ready": "Prontas",
+    "readyNames": {
+      "everything": "Tudo",
+      "anime": "Noite de anime",
+      "tv": "Clássicos da TV",
+      "real": "Gente de verdade"
+    },
+    "mine": "Suas",
+    "empty": "Nenhuma ainda. Dê um nome e salve a de agora.",
+    "namePlaceholder": "Nome da predefinição",
+    "save": "Salvar",
+    "replace": "Substituir",
+    "full": "Até {max}: apague uma para salvar outra.",
+    "gostosOn": "{on} de {total} gostos",
+    "themesOff": "{count, plural, one {# tema desligado} other {# temas desligados}}",
+    "startsNew": "Salas novas de {game} começam com {name}",
+    "remove": "Apagar {name}"
+  },
   "signIn": "Entrar com {provider}",
   "editProfile": "Editar perfil",
   "testAccount": "Sem Supabase, isso entra numa conta de teste.",

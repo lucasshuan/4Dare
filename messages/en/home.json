@@ -73,6 +73,28 @@
     "hostNoteTitle": "You type the theme",
     "hostNote": "When the match starts, you write any theme you like, with a few ideas from the themes on. If 30 s go by, everyone votes instead."
   },
+  "presets": {
+    "label": "Preset",
+    "none": "Custom",
+    "changed": "changed",
+    "ready": "Ready-made",
+    "readyNames": {
+      "everything": "Everything",
+      "anime": "Anime night",
+      "tv": "TV classics",
+      "real": "Real people"
+    },
+    "mine": "Yours",
+    "empty": "None yet. Name this one and save it.",
+    "namePlaceholder": "Preset name",
+    "save": "Save",
+    "replace": "Replace",
+    "full": "Up to {max}: delete one to save another.",
+    "gostosOn": "{on} of {total} tastes",
+    "themesOff": "{count, plural, one {# theme off} other {# themes off}}",
+    "startsNew": "New {game} rooms start with {name}",
+    "remove": "Delete {name}"
+  },
   "signIn": "Sign in with {provider}",
   "editProfile": "Edit profile",
   "testAccount": "Without Supabase this enters a test account.",

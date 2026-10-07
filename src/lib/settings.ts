@@ -8,12 +8,13 @@ import {
   type GameOptions,
   parseGameOptions,
 } from "@/game/options";
+import { parsePresets, type RoomPreset } from "@/game/presets";
 
 /** The sound groups a person can turn down or off; sound.ts says which sound is in which. */
 export const SOUND_GROUPS = ["match", "clock", "chat", "room"] as const;
 export type SoundGroup = (typeof SOUND_GROUPS)[number];
 
-/** What this device remembers: how loud the game is, the chat bubbles and each game's options. */
+/** What this device remembers: how loud the game is, the chat bubbles, each game's options and the room presets. */
 export type Settings = {
   /** 0 to 1, over every sound. */
   volume: number;
@@ -21,6 +22,7 @@ export type Settings = {
   sounds: Record<SoundGroup, { on: boolean; volume: number }>;
   chatBubbles: boolean;
   games: GameOptions;
+  presets: RoomPreset[];
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -34,6 +36,7 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   chatBubbles: true,
   games: { "who-am-i": { ...GAME_OPTIONS["who-am-i"] } },
+  presets: [],
 };
 
 const unit = (v: unknown, fallback: number) =>
@@ -61,6 +64,7 @@ export function parseSettings(raw: unknown): Settings {
     ) as Settings["sounds"],
     chatBubbles: flag(r.chatBubbles, DEFAULT_SETTINGS.chatBubbles),
     games: parseGameOptions(r.games),
+    presets: parsePresets(r.presets),
   };
 }
 

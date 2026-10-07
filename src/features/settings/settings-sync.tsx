@@ -8,7 +8,7 @@ import { updateSettings, useSettings } from "@/lib/settings";
 import { saveAccountSettings } from "@/server/actions";
 
 /**
- * An account's theme, chat bubbles and game options follow it to every
+ * An account's theme, chat bubbles, game options and room presets follow it to every
  * device: what the account kept is applied once it loads (an account that
  * kept nothing yet takes this device's), and later changes go back up a
  * moment after they settle. Sound stays per device.
@@ -32,12 +32,14 @@ export function SettingsSync() {
       ...x,
       chatBubbles: s.chatBubbles,
       games: s.games,
+      presets: s.presets,
     }));
     if (s.theme) setTheme(s.theme);
     kept.current = JSON.stringify({
       theme: s.theme,
       chatBubbles: s.chatBubbles,
       games: s.games,
+      presets: s.presets,
     });
   }, [account, setTheme]);
 
@@ -48,6 +50,7 @@ export function SettingsSync() {
     theme: shownTheme,
     chatBubbles: local.chatBubbles,
     games: local.games,
+    presets: local.presets,
   });
   useEffect(() => {
     if (!account || applied.current !== account.id || !shownTheme) return;

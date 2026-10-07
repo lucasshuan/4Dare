@@ -12,21 +12,24 @@ import { useCurrentMatch } from "@/features/data/use-current-match";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { DEFAULT_GAME, type GameKey, isGameKey } from "@/game/games";
+import { applyPreset, defaultPreset } from "@/game/presets";
 import { type ErrorCode, ROOM_NAME_MAX } from "@/game/types";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
 import { meNamed, useDisplayName } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
+import { getSettings } from "@/lib/settings";
 import { createRoom } from "@/server/actions";
 import { loadSetup } from "./last-setup";
 import { backClass } from "./room-setup";
 
 /**
  * /new?game=…: opens a room for that game (an unknown one falls back to the
- * first) right away and goes into it. It starts with the last setup and is
- * named after the host ("Bob123's room"); the rest is changed in the lobby,
- * under "Edit settings". The page is static, so the game is read here.
+ * first) right away and goes into it. It starts with the last setup (or the
+ * preset chosen for the game's new rooms) and is named after the host
+ * ("Bob123's room"); the rest is changed in the lobby, under "Edit advanced
+ * settings". The page is static, so the game is read here.
  */
 export function CreateScreen() {
   const t = useTranslations("home");
@@ -53,7 +56,16 @@ export function CreateScreen() {
     const name = roomName(displayName(meNamed(me)), (n) =>
       t("rooms.roomOf", { name: n }),
     );
-    void run(() => createRoom({ ...loadSetup(), game, name })).then((r) => {
+    // the preset this person starts the game's rooms from, if any: an
+    // account's own, in case this device hasn't taken them yet
+    const presets = me.isGuest
+      ? getSettings().presets
+      : (me.settings?.presets ?? getSettings().presets);
+    const preset = defaultPreset(presets, game);
+    const setup = { ...loadSetup(), game, name };
+    void run(() =>
+      createRoom(preset ? applyPreset(setup, preset) : setup),
+    ).then((r) => {
       if (r.ok) router.replace(`/r/${r.data.code}`);
       else setFailed({ game, error: r.error as ErrorCode });
     });
