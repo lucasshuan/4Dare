@@ -106,7 +106,6 @@
   "picker": {
     "title": "Impostores",
     "badge": "{k} de {n}",
-    "auto": "Automático",
     "autoShort": "automático",
     "row": "{count, plural, one {# impostor} other {# impostores}}",
     "edit": "Cambiar cuántos impostores",
@@ -115,6 +114,11 @@
       "calm": "Tranquilo",
       "even": "Equilibrado",
       "wild": "Caótico"
-    }
+    },
+    "autoKey": "Auto",
+    "upTo": "{count, plural, one {# impostor} other {Hasta # impostores}}",
+    "needs": "{n}+ jugadores",
+    "autoHint": "2 desde 7 jugadores",
+    "now": "Con {players} en la mesa ahora: {count, plural, one {# impostor} other {# impostores}}."
   }
 }

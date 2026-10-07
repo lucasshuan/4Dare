@@ -106,7 +106,6 @@
   "picker": {
     "title": "インポスター",
     "badge": "{n}人中{k}人",
-    "auto": "自動",
     "autoShort": "自動",
     "row": "インポスター{count}人",
     "edit": "インポスターの人数を変える",
@@ -115,6 +114,11 @@
       "calm": "おだやか",
       "even": "ほどよく",
       "wild": "カオス"
-    }
+    },
+    "autoKey": "おまかせ",
+    "upTo": "{count, plural, =1 {インポスター1人} other {インポスター最大#人}}",
+    "needs": "{n}人以上",
+    "autoHint": "7人から2人",
+    "now": "いま{players}人なら、インポスター{count}人。"
   }
 }

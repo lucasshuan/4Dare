@@ -69,5 +69,10 @@
   "settingsSaved": "設定を保存しました",
   "themeVote": "みんなでテーマに投票",
   "themeHost": "ホストがテーマを書く",
-  "themeCount": "{count}テーマ"
+  "themeCount": "{count}テーマ",
+  "editSeats": "人数を変える",
+  "seatsTitle": "プレイヤー",
+  "seatsNow": "いま{n}人",
+  "editTimes": "時間を変える",
+  "editThemeMode": "テーマの決め方を変える"
 }

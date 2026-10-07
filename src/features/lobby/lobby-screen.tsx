@@ -1,17 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import {
-  Check,
-  ChevronLeft,
-  Clock,
-  type Globe,
-  Link as LinkIcon,
-  PenLine,
-  Settings,
-  UsersRound,
-  Vote,
-} from "lucide-react";
+import { Check, ChevronLeft, Link as LinkIcon, Settings } from "lucide-react";
 import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useRef, useState } from "react";
@@ -32,11 +22,11 @@ import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
 import { GAME_SEATS } from "@/game/games";
-import { GAME_STEP_TIMES, type Lang } from "@/game/types";
+import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
-import { formatClock, useDisplayName, useRoomTitle } from "@/lib/names";
+import { useDisplayName, useRoomTitle } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
 import {
   kickPlayer,
@@ -52,6 +42,9 @@ import {
   GostosRow,
   ImpostorsRow,
   RoomTitle,
+  SeatsRow,
+  ThemeModeRow,
+  TimesRow,
   VisibilityRow,
 } from "./room-edits";
 import { SeatGrid } from "./seat-grid";
@@ -400,26 +393,25 @@ export function LobbyScreen() {
                   (await act(() => updateSettings(code, v))).ok
                 }
               />
-              <Setting icon={UsersRound}>
-                {t("seats", { seats: shownSeats })}
-              </Setting>
-              <Setting icon={Clock}>
-                <span className="sr-only">{t("timesLabel")}: </span>
-                {/* the match's steps in order, each with its clock */}
-                <span className="flex flex-wrap gap-1.5">
-                  {GAME_STEP_TIMES[game].map((step) => (
-                    <span
-                      key={step}
-                      className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm"
-                    >
-                      {t(`times.${step}`)}
-                      <span className="font-medium font-mono text-[13px] tabular-nums">
-                        {formatClock(view.settings[step])}
-                      </span>
-                    </span>
-                  ))}
-                </span>
-              </Setting>
+              <SeatsRow
+                game={game}
+                seats={shownSeats}
+                seated={shownPlayers.length}
+                editable={me.isHost}
+                pending={pending}
+                onSave={async (n) => {
+                  await setSeats(n);
+                  return true;
+                }}
+              />
+              <TimesRow
+                settings={view.settings}
+                editable={me.isHost}
+                pending={pending}
+                onSave={async (times) =>
+                  (await act(() => updateSettings(code, times))).ok
+                }
+              />
               <GostosRow
                 settings={view.settings}
                 editable={me.isHost}
@@ -431,6 +423,7 @@ export function LobbyScreen() {
               {game === "impostor" ? (
                 <ImpostorsRow
                   value={view.settings.impostors}
+                  seats={shownSeats}
                   players={view.players.length}
                   editable={me.isHost}
                   pending={pending}
@@ -440,9 +433,15 @@ export function LobbyScreen() {
                 />
               ) : null}
               {game === "who-am-i" ? (
-                <Setting icon={themeMode === "host" ? PenLine : Vote}>
-                  {t(themeMode === "host" ? "themeHost" : "themeVote")}
-                </Setting>
+                <ThemeModeRow
+                  value={themeMode}
+                  editable={me.isHost}
+                  pending={pending}
+                  onSave={async (next) =>
+                    (await act(() => updateSettings(code, { themeMode: next })))
+                      .ok
+                  }
+                />
               ) : null}
             </ul>
             {me.isHost ? (
@@ -500,20 +499,5 @@ function NeedsPlayers({
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>
-  );
-}
-
-function Setting({
-  icon: Icon,
-  children,
-}: {
-  icon: typeof Globe;
-  children: ReactNode;
-}) {
-  return (
-    <li className="flex items-center gap-3">
-      <Icon className="size-5 shrink-0 text-ink-muted" strokeWidth={1.75} />
-      <span>{children}</span>
-    </li>
   );
 }

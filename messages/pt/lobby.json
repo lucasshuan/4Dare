@@ -69,5 +69,10 @@
   "settingsSaved": "Configuração salva",
   "themeVote": "Todos votam no tema",
   "themeHost": "O anfitrião escreve o tema",
-  "themeCount": "{count, plural, one {# tema} other {# temas}}"
+  "themeCount": "{count, plural, one {# tema} other {# temas}}",
+  "editSeats": "Mudar quantos jogam",
+  "seatsTitle": "Jogadores",
+  "seatsNow": "{n} na mesa agora",
+  "editTimes": "Mudar os tempos",
+  "editThemeMode": "Mudar como o tema é escolhido"
 }

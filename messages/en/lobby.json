@@ -69,5 +69,10 @@
   "settingsSaved": "Settings saved",
   "themeVote": "Everyone votes on the theme",
   "themeHost": "The host types the theme",
-  "themeCount": "{count, plural, one {# theme} other {# themes}}"
+  "themeCount": "{count, plural, one {# theme} other {# themes}}",
+  "editSeats": "Change how many can play",
+  "seatsTitle": "Players",
+  "seatsNow": "{n} at the table now",
+  "editTimes": "Change the times",
+  "editThemeMode": "Change how the theme is chosen"
 }

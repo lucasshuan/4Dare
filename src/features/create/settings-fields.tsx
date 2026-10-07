@@ -75,7 +75,7 @@ const clampSeconds = (n: number, fallback: number) =>
   );
 
 /** One step's seconds: a label with its hint, then − [90] + in steps of 10. */
-function SecondsField({
+export function SecondsField({
   step,
   value,
   onChange,
@@ -269,7 +269,8 @@ export function RulesFields({
         <div className="max-w-[420px] rounded-lg bg-surface p-5 shadow-card">
           <ImpostorsPicker
             value={value.impostors}
-            players={Math.max(players, value.seats)}
+            seats={value.seats}
+            players={players}
             onChange={(impostors) => onChange({ ...value, impostors })}
           />
         </div>

@@ -3,29 +3,36 @@
 import { Popover } from "@base-ui/react/popover";
 import {
   ChevronDown,
+  Clock,
   Globe,
   Heart,
   Lock,
+  type LucideIcon,
   PenLine,
+  UsersRound,
   VenetianMask,
+  Vote,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { GostoGrid, ThemeCountLine } from "@/features/create/gosto-fields";
-import { Segmented } from "@/features/create/settings-fields";
+import { SecondsField, Segmented } from "@/features/create/settings-fields";
 import { useThemeCount } from "@/features/create/theme-catalog";
 import { ImpostorsPicker } from "@/features/impostor/impostors-picker";
-import { GAME_SEATS } from "@/game/games";
+import { GAME_SEATS, type GameKey } from "@/game/games";
 import { GOSTOS, type Gosto } from "@/game/gostos";
 import { impostorsFor } from "@/game/impostor/engine";
 import {
+  GAME_STEP_TIMES,
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
   type RoomSettings,
+  type StepTime,
 } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { formatClock } from "@/lib/names";
 
 /**
  * The room's name as the page's title. The host gets a quiet pencil beside it:
@@ -101,8 +108,123 @@ export function RoomTitle({
 }
 
 /**
- * Who can join, as a settings row; the host's row opens a dropdown to make
- * the room public or private (with its password).
+ * A settings row of the lobby's card: its icon and what it says. The host's
+ * row opens a dropdown with a small form under it; Save keeps the draft,
+ * Cancel or closing drops it.
+ */
+function EditRow({
+  icon,
+  text,
+  label,
+  editable,
+  pending,
+  width = "380px",
+  canSave = true,
+  onOpen,
+  onSave,
+  children,
+}: {
+  icon: ReactNode;
+  text: ReactNode;
+  /** What opening the row does, for screen readers ("Change who can join"). */
+  label: string;
+  editable: boolean;
+  pending: boolean;
+  width?: string;
+  canSave?: boolean;
+  /** Puts the draft back to the room's settings. */
+  onOpen: () => void;
+  onSave: () => Promise<boolean>;
+  children: ReactNode;
+}) {
+  const t = useTranslations("lobby");
+  const [open, setOpen] = useState(false);
+  if (!editable)
+    return (
+      <li className="flex items-center gap-3">
+        {icon}
+        <span className="min-w-0">{text}</span>
+      </li>
+    );
+  return (
+    <li>
+      <Popover.Root
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (next) onOpen();
+        }}
+      >
+        <Popover.Trigger
+          aria-label={label}
+          className={cn(
+            "-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-sm px-2 py-1 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
+            open && "bg-sunken",
+          )}
+        >
+          {icon}
+          <span className="min-w-0 flex-1">{text}</span>
+          <ChevronDown
+            className={cn(
+              "size-4.5 shrink-0 text-ink-muted transition-transform duration-200 ease-soft",
+              open && "rotate-180",
+            )}
+            strokeWidth={2.25}
+          />
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Positioner
+            side="bottom"
+            align="start"
+            sideOffset={6}
+            className="z-50"
+          >
+            <Popover.Popup
+              style={{ width: `min(${width}, calc(100vw - 2rem))` }}
+              className="origin-(--transform-origin) rounded-md bg-surface p-4 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0"
+            >
+              <form
+                className="flex flex-col gap-4"
+                onSubmit={async (e: FormEvent) => {
+                  e.preventDefault();
+                  if (canSave && (await onSave())) setOpen(false);
+                }}
+              >
+                {children}
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    disabled={!canSave || pending}
+                  >
+                    {t("saveSettings")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setOpen(false)}
+                  >
+                    {t("cancel")}
+                  </Button>
+                </div>
+              </form>
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
+    </li>
+  );
+}
+
+const rowIcon = (Icon: LucideIcon) => (
+  <Icon className="size-5 shrink-0 text-ink-muted" strokeWidth={1.75} />
+);
+
+/**
+ * Who can join; the host's row makes the room public or private (with its
+ * password).
  */
 export function VisibilityRow({
   settings,
@@ -119,144 +241,240 @@ export function VisibilityRow({
 }) {
   const t = useTranslations("lobby");
   const tc = useTranslations("home.createRoom");
-  const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(settings);
   const isPublic = settings.visibility === "public";
-  const Icon = isPublic ? Globe : Lock;
-  const text = (
-    <>
-      {t(isPublic ? "public" : "private")}
-      {/* the host shares the password; nobody else gets it */}
-      {!isPublic && settings.password ? (
-        <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
-          {settings.password}
-        </span>
-      ) : null}
-    </>
-  );
-  const icon = (
-    <Icon className="size-5 shrink-0 text-ink-muted" strokeWidth={1.75} />
-  );
-
-  if (!editable)
-    return (
-      <li className="flex items-center gap-3">
-        {icon}
-        <span>{text}</span>
-      </li>
-    );
-
   const missing = draft.visibility === "private" && !draft.password.trim();
   return (
-    <li>
-      <Popover.Root
-        open={open}
-        onOpenChange={(next) => {
-          setOpen(next);
-          if (next) setDraft(settings);
-        }}
-      >
-        <Popover.Trigger
-          aria-label={t("editVisibility")}
-          className={cn(
-            "-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-sm px-2 py-1 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
-            open && "bg-sunken",
-          )}
-        >
-          {icon}
-          <span className="min-w-0 flex-1">{text}</span>
-          <ChevronDown
-            className={cn(
-              "size-4.5 shrink-0 text-ink-muted transition-transform duration-200 ease-soft",
-              open && "rotate-180",
-            )}
-            strokeWidth={2.25}
-          />
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner
-            side="bottom"
-            align="start"
-            sideOffset={6}
-            className="z-50"
-          >
-            <Popover.Popup className="w-[min(320px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface p-4 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
-              <form
-                className="flex flex-col gap-4"
-                onSubmit={async (e: FormEvent) => {
-                  e.preventDefault();
-                  if (missing) return;
-                  const saved = await onSave({
-                    visibility: draft.visibility,
-                    password:
-                      draft.visibility === "private"
-                        ? draft.password.trim()
-                        : "",
-                  });
-                  if (saved) setOpen(false);
-                }}
-              >
-                <div className="flex flex-col gap-2">
-                  <span className="font-semibold text-sm">
-                    {tc("visibility")}
-                  </span>
-                  <Segmented
-                    label={tc("visibility")}
-                    options={["public", "private"] as const}
-                    value={draft.visibility}
-                    onChange={(visibility) =>
-                      setDraft((d) => ({ ...d, visibility }))
-                    }
-                    render={(v) => tc(v)}
-                  />
-                </div>
-                {draft.visibility === "private" ? (
-                  <TextField
-                    label={tc("password")}
-                    placeholder={tc("passwordPlaceholder")}
-                    value={draft.password}
-                    max={ROOM_PASSWORD_MAX}
-                    autoComplete="off"
-                    spellCheck={false}
-                    data-1p-ignore
-                    data-lpignore="true"
-                    aria-invalid={missing}
-                    onChange={(e) =>
-                      setDraft((d) => ({ ...d, password: e.target.value }))
-                    }
-                  />
-                ) : null}
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="sm"
-                    disabled={missing || pending}
-                  >
-                    {t("saveSettings")}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setOpen(false)}
-                  >
-                    {t("cancel")}
-                  </Button>
-                </div>
-              </form>
-            </Popover.Popup>
-          </Popover.Positioner>
-        </Popover.Portal>
-      </Popover.Root>
-    </li>
+    <EditRow
+      icon={rowIcon(isPublic ? Globe : Lock)}
+      text={
+        <>
+          {t(isPublic ? "public" : "private")}
+          {/* the host shares the password; nobody else gets it */}
+          {!isPublic && settings.password ? (
+            <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
+              {settings.password}
+            </span>
+          ) : null}
+        </>
+      }
+      label={t("editVisibility")}
+      editable={editable}
+      pending={pending}
+      width="320px"
+      canSave={!missing}
+      onOpen={() => setDraft(settings)}
+      onSave={() =>
+        onSave({
+          visibility: draft.visibility,
+          password: draft.visibility === "private" ? draft.password.trim() : "",
+        })
+      }
+    >
+      <div className="flex flex-col gap-2">
+        <span className="font-semibold text-sm">{tc("visibility")}</span>
+        <Segmented
+          label={tc("visibility")}
+          options={["public", "private"] as const}
+          value={draft.visibility}
+          onChange={(visibility) => setDraft((d) => ({ ...d, visibility }))}
+          render={(v) => tc(v)}
+        />
+      </div>
+      {draft.visibility === "private" ? (
+        <TextField
+          label={tc("password")}
+          placeholder={tc("passwordPlaceholder")}
+          value={draft.password}
+          max={ROOM_PASSWORD_MAX}
+          autoComplete="off"
+          spellCheck={false}
+          data-1p-ignore
+          data-lpignore="true"
+          aria-invalid={missing}
+          onChange={(e) =>
+            setDraft((d) => ({ ...d, password: e.target.value }))
+          }
+        />
+      ) : null}
+    </EditRow>
   );
 }
 
 /**
- * The room's gostos as a settings row: every emoji, the ones switched off
- * faded, and how many themes they leave. The host's row opens a dropdown to
- * switch them.
+ * How many can sit: the host picks it among what the game allows, never
+ * under the people already seated.
+ */
+export function SeatsRow({
+  game,
+  seats,
+  seated,
+  editable,
+  pending,
+  onSave,
+}: {
+  game: GameKey;
+  seats: number;
+  seated: number;
+  editable: boolean;
+  pending: boolean;
+  onSave: (seats: number) => Promise<boolean>;
+}) {
+  const t = useTranslations("lobby");
+  const [draft, setDraft] = useState(seats);
+  const { min, max } = GAME_SEATS[game];
+  const options = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+  return (
+    <EditRow
+      icon={rowIcon(UsersRound)}
+      text={t("seats", { seats })}
+      label={t("editSeats")}
+      editable={editable}
+      pending={pending}
+      width="340px"
+      onOpen={() => setDraft(seats)}
+      onSave={() => onSave(draft)}
+    >
+      <div className="flex flex-col gap-2">
+        <span className="font-semibold text-sm">{t("seatsTitle")}</span>
+        <Segmented
+          label={t("seatsTitle")}
+          options={options}
+          value={draft}
+          onChange={setDraft}
+          render={String}
+          disabled={(n) => n < seated}
+          className="self-stretch [&>button]:flex-1 [&>button]:px-0"
+        />
+        {/* the table: who sits now, and the seats left */}
+        <span className="flex flex-wrap gap-1 pt-1" aria-hidden>
+          {Array.from({ length: draft }, (_, i) => (
+            <span
+              // biome-ignore lint/suspicious/noArrayIndexKey: one per seat
+              key={i}
+              className={cn(
+                "size-3.5 rounded-pill",
+                i < seated
+                  ? "bg-sky"
+                  : "border-[1.5px] border-line-strong border-dashed",
+              )}
+            />
+          ))}
+        </span>
+        <span className="text-[13px] text-ink-muted">
+          {t("seatsNow", { n: seated })}
+        </span>
+      </div>
+    </EditRow>
+  );
+}
+
+/** The match's clocks, step by step; the host's row sets each one. */
+export function TimesRow({
+  settings,
+  editable,
+  pending,
+  onSave,
+}: {
+  settings: Pick<RoomSettings, "game" | StepTime>;
+  editable: boolean;
+  pending: boolean;
+  onSave: (times: Partial<Pick<RoomSettings, StepTime>>) => Promise<boolean>;
+}) {
+  const t = useTranslations("lobby");
+  const steps = GAME_STEP_TIMES[settings.game];
+  const pick = () =>
+    Object.fromEntries(steps.map((s) => [s, settings[s]])) as Partial<
+      Pick<RoomSettings, StepTime>
+    >;
+  const [draft, setDraft] = useState(pick);
+  return (
+    <EditRow
+      icon={rowIcon(Clock)}
+      text={
+        <>
+          <span className="sr-only">{t("timesLabel")}: </span>
+          {/* the match's steps in order, each with its clock */}
+          <span className="flex flex-wrap gap-1.5">
+            {steps.map((step) => (
+              <span
+                key={step}
+                className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm"
+              >
+                {t(`times.${step}`)}
+                <span className="font-medium font-mono text-[13px] tabular-nums">
+                  {formatClock(settings[step])}
+                </span>
+              </span>
+            ))}
+          </span>
+        </>
+      }
+      label={t("editTimes")}
+      editable={editable}
+      pending={pending}
+      width="460px"
+      onOpen={() => setDraft(pick())}
+      onSave={() => onSave(draft)}
+    >
+      <span className="font-semibold text-sm">{t("timesLabel")}</span>
+      <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
+        {steps.map((step) => (
+          <SecondsField
+            key={step}
+            step={step}
+            value={draft[step] ?? settings[step]}
+            onChange={(n) => setDraft((d) => ({ ...d, [step]: n }))}
+          />
+        ))}
+      </div>
+    </EditRow>
+  );
+}
+
+/** "Who am I?": everyone votes the theme, or the host types it. */
+export function ThemeModeRow({
+  value,
+  editable,
+  pending,
+  onSave,
+}: {
+  value: RoomSettings["themeMode"];
+  editable: boolean;
+  pending: boolean;
+  onSave: (themeMode: RoomSettings["themeMode"]) => Promise<boolean>;
+}) {
+  const t = useTranslations("lobby");
+  const tc = useTranslations("home.createRoom");
+  const [draft, setDraft] = useState(value);
+  return (
+    <EditRow
+      icon={rowIcon(value === "host" ? PenLine : Vote)}
+      text={t(value === "host" ? "themeHost" : "themeVote")}
+      label={t("editThemeMode")}
+      editable={editable}
+      pending={pending}
+      width="340px"
+      onOpen={() => setDraft(value)}
+      onSave={() => onSave(draft)}
+    >
+      <div className="flex flex-col gap-2">
+        <span className="font-semibold text-sm">{tc("themeMode")}</span>
+        <Segmented
+          label={tc("themeMode")}
+          options={["vote", "host"] as const}
+          value={draft}
+          onChange={setDraft}
+          render={(v) => tc(v === "host" ? "themeHost" : "themeVote")}
+        />
+      </div>
+    </EditRow>
+  );
+}
+
+/**
+ * The room's gostos: every emoji, the ones switched off faded, and how many
+ * themes they leave; the host's row switches them.
  */
 export function GostosRow({
   settings,
@@ -272,237 +490,104 @@ export function GostosRow({
   const t = useTranslations("lobby");
   const tc = useTranslations("home.createRoom");
   const tg = useTranslations("common.gostos");
-  const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Gosto[]>(settings.offGostos);
   const count = useThemeCount(settings);
   const draftCount = useThemeCount({ ...settings, offGostos: draft });
   const on = GOSTOS.filter((g) => !settings.offGostos.includes(g.key));
-  const text = (
-    <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-      <span className="sr-only">
-        {`${tc("gostos")}: ${on.map((g) => tg(`${g.key}.name`)).join(", ")}`}
-      </span>
-      <span aria-hidden className="flex gap-0.5 text-[17px] leading-none">
-        {GOSTOS.map((g) => (
-          <span
-            key={g.key}
-            className={cn(
-              "transition-[filter,opacity] duration-200",
-              settings.offGostos.includes(g.key) && "opacity-30 grayscale",
-            )}
-          >
-            {g.emoji}
-          </span>
-        ))}
-      </span>
-      {count ? (
-        <span
-          className={cn(
-            "text-sm tabular-nums",
-            count.tooFew ? "text-no" : "text-ink-muted",
-          )}
-        >
-          {t("themeCount", { count: count.on })}
-        </span>
-      ) : null}
-    </span>
-  );
-  const icon = (
-    <Heart className="size-5 shrink-0 text-ink-muted" strokeWidth={1.75} />
-  );
-
-  if (!editable)
-    return (
-      <li className="flex items-center gap-3">
-        {icon}
-        {text}
-      </li>
-    );
-
   return (
-    <li>
-      <Popover.Root
-        open={open}
-        onOpenChange={(next) => {
-          setOpen(next);
-          if (next) setDraft(settings.offGostos);
-        }}
-      >
-        <Popover.Trigger
-          aria-label={t("editGostos")}
-          className={cn(
-            "-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-sm px-2 py-1 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
-            open && "bg-sunken",
-          )}
-        >
-          {icon}
-          <span className="min-w-0 flex-1">{text}</span>
-          <ChevronDown
-            className={cn(
-              "size-4.5 shrink-0 text-ink-muted transition-transform duration-200 ease-soft",
-              open && "rotate-180",
-            )}
-            strokeWidth={2.25}
-          />
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner
-            side="bottom"
-            align="start"
-            sideOffset={6}
-            className="z-50"
-          >
-            <Popover.Popup className="w-[min(380px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface p-4 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
-              <form
-                className="flex flex-col gap-3"
-                onSubmit={async (e: FormEvent) => {
-                  e.preventDefault();
-                  if (draftCount?.tooFew) return;
-                  if (await onSave({ offGostos: draft })) setOpen(false);
-                }}
+    <EditRow
+      icon={rowIcon(Heart)}
+      text={
+        <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          <span className="sr-only">
+            {`${tc("gostos")}: ${on.map((g) => tg(`${g.key}.name`)).join(", ")}`}
+          </span>
+          <span aria-hidden className="flex gap-0.5 text-[17px] leading-none">
+            {GOSTOS.map((g) => (
+              <span
+                key={g.key}
+                className={cn(
+                  "transition-[filter,opacity] duration-200",
+                  settings.offGostos.includes(g.key) && "opacity-30 grayscale",
+                )}
               >
-                <span className="font-semibold text-sm">{tc("gostos")}</span>
-                <GostoGrid off={draft} onChange={setDraft} compact />
-                <ThemeCountLine room={{ ...settings, offGostos: draft }} />
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="sm"
-                    disabled={pending || draftCount?.tooFew}
-                  >
-                    {t("saveSettings")}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setOpen(false)}
-                  >
-                    {t("cancel")}
-                  </Button>
-                </div>
-              </form>
-            </Popover.Popup>
-          </Popover.Positioner>
-        </Popover.Portal>
-      </Popover.Root>
-    </li>
+                {g.emoji}
+              </span>
+            ))}
+          </span>
+          {count ? (
+            <span
+              className={cn(
+                "text-sm tabular-nums",
+                count.tooFew ? "text-no" : "text-ink-muted",
+              )}
+            >
+              {t("themeCount", { count: count.on })}
+            </span>
+          ) : null}
+        </span>
+      }
+      label={t("editGostos")}
+      editable={editable}
+      pending={pending}
+      canSave={!draftCount?.tooFew}
+      onOpen={() => setDraft(settings.offGostos)}
+      onSave={() => onSave({ offGostos: draft })}
+    >
+      <span className="font-semibold text-sm">{tc("gostos")}</span>
+      <GostoGrid off={draft} onChange={setDraft} compact />
+      <ThemeCountLine room={{ ...settings, offGostos: draft }} />
+    </EditRow>
   );
 }
 
 /**
- * The Impostor's impostors as a settings row: how many and the mood they
- * make. The host's row opens the picker in a dropdown.
+ * The Impostor's impostors: how many (or "automatic", with how far it goes
+ * for the room's seats); the host's row opens the picker.
  */
 export function ImpostorsRow({
   value,
+  seats,
   players,
   editable,
   pending,
   onSave,
 }: {
   value: number | null;
+  seats: number;
   players: number;
   editable: boolean;
   pending: boolean;
   onSave: (impostors: number | null) => Promise<boolean>;
 }) {
   const t = useTranslations("impostor.picker");
-  const tl = useTranslations("lobby");
-  const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(value);
-  const k = impostorsFor(Math.max(GAME_SEATS.impostor.min, players), value);
-  const text = (
-    <span>
-      {t("row", { count: k })}
-      {value === null ? (
-        <span className="text-ink-muted"> · {t("autoShort")}</span>
-      ) : null}
-    </span>
-  );
-  const icon = (
-    <VenetianMask
-      className="size-5 shrink-0 text-ink-muted"
-      strokeWidth={1.75}
-    />
-  );
-  if (!editable)
-    return (
-      <li className="flex items-center gap-3">
-        {icon}
-        {text}
-      </li>
-    );
+  const most = impostorsFor(Math.max(GAME_SEATS.impostor.min, seats), value);
   return (
-    <li>
-      <Popover.Root
-        open={open}
-        onOpenChange={(next) => {
-          setOpen(next);
-          if (next) setDraft(value);
-        }}
-      >
-        <Popover.Trigger
-          aria-label={t("edit")}
-          className={cn(
-            "-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-sm px-2 py-1 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
-            open && "bg-sunken",
-          )}
-        >
-          {icon}
-          <span className="min-w-0 flex-1">{text}</span>
-          <ChevronDown
-            className={cn(
-              "size-4.5 shrink-0 text-ink-muted transition-transform duration-200 ease-soft",
-              open && "rotate-180",
-            )}
-            strokeWidth={2.25}
-          />
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner
-            side="bottom"
-            align="start"
-            sideOffset={6}
-            className="z-50"
-          >
-            <Popover.Popup className="w-[min(380px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface p-4 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
-              <form
-                className="flex flex-col gap-4"
-                onSubmit={async (e: FormEvent) => {
-                  e.preventDefault();
-                  if (await onSave(draft)) setOpen(false);
-                }}
-              >
-                <ImpostorsPicker
-                  value={draft}
-                  players={players}
-                  onChange={setDraft}
-                />
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="sm"
-                    disabled={pending}
-                  >
-                    {tl("saveSettings")}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setOpen(false)}
-                  >
-                    {tl("cancel")}
-                  </Button>
-                </div>
-              </form>
-            </Popover.Popup>
-          </Popover.Positioner>
-        </Popover.Portal>
-      </Popover.Root>
-    </li>
+    <EditRow
+      icon={rowIcon(VenetianMask)}
+      text={
+        <span>
+          {value === null
+            ? t("upTo", { count: most })
+            : t("row", { count: most })}
+          {value === null ? (
+            <span className="text-ink-muted"> · {t("autoShort")}</span>
+          ) : null}
+        </span>
+      }
+      label={t("edit")}
+      editable={editable}
+      pending={pending}
+      onOpen={() => setDraft(value)}
+      onSave={() => onSave(draft)}
+    >
+      <ImpostorsPicker
+        value={draft}
+        seats={seats}
+        players={players}
+        onChange={setDraft}
+      />
+    </EditRow>
   );
 }
