@@ -93,6 +93,9 @@ export function supabaseProfiles(): ProfileStore {
           }),
           ...(patch.about !== undefined && { about: json(patch.about) }),
           ...(patch.privacy !== undefined && { privacy: json(patch.privacy) }),
+          ...(patch.settings !== undefined && {
+            settings: json(patch.settings),
+          }),
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)

@@ -2,8 +2,9 @@ import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { randomGuestNumber } from "@/game/guest-names";
+import { parseSynced } from "@/game/options";
 import { handleCandidates } from "@/game/profile/handle";
-import type { Avatar, Identity, Lang } from "@/game/types";
+import { type Avatar, GameError, type Identity, type Lang } from "@/game/types";
 import type { Account } from "@/server/contract";
 import {
   ensureGuest,
@@ -18,6 +19,7 @@ import { accountDefaults, isAccount, isAccountClaims } from "./identity";
 
 interface ProfileRow {
   id: string;
+  settings?: unknown;
   /** Null only for a profile made before handles, until its next visit. */
   handle: string | null;
   name: string | null;
@@ -101,6 +103,13 @@ const accountMe = (p: ProfileRow): Account => ({
   provider: p.provider,
   providerAvatarUrl: p.provider_avatar_url,
   authMode: "supabase",
+  // never saved yet: the browser sends this device's own
+  settings:
+    p.settings &&
+    typeof p.settings === "object" &&
+    Object.keys(p.settings).length > 0
+      ? parseSynced(p.settings)
+      : null,
 });
 
 const guestMe = (g: Guest): Account => ({
@@ -113,6 +122,7 @@ const guestMe = (g: Guest): Account => ({
   provider: null,
   providerAvatarUrl: null,
   authMode: "supabase",
+  settings: null,
 });
 
 /**
@@ -171,7 +181,7 @@ export function supabaseAuth(): AuthService {
     async updateProfile(patch) {
       const p = await account();
       if (!p) throw new Error("only accounts have a profile");
-      const fields: Partial<ProfileRow> = {};
+      const fields: Partial<Pick<ProfileRow, "name" | "avatar">> = {};
       if (patch.name !== undefined) fields.name = patch.name;
       if (patch.avatar !== undefined) fields.avatar = patch.avatar;
       const { data, error } = await profiles()
@@ -182,9 +192,51 @@ export function supabaseAuth(): AuthService {
       if (error) throw error;
       return accountMe(data as unknown as ProfileRow);
     },
-    async signOut() {
+    async signOut(everywhere = false) {
       const client = await sessionClient();
-      await client.auth.signOut();
+      await client.auth.signOut({ scope: everywhere ? "global" : "local" });
+    },
+    async accountInfo() {
+      if (!(await account())) return null;
+      const { data } = await (await sessionClient()).auth.getUser();
+      const user = data.user;
+      if (!user) return null;
+      const providers = (["discord", "google"] as const).filter((p) =>
+        user.identities?.some((i) => i.provider === p),
+      );
+      return { email: user.email ?? null, providers, canLink: true };
+    },
+    async unlink(provider) {
+      const client = await sessionClient();
+      const { data, error } = await client.auth.getUserIdentities();
+      if (error) throw error;
+      const oauth = (data?.identities ?? []).filter(
+        (i) => i.provider === "discord" || i.provider === "google",
+      );
+      const gone = oauth.find((i) => i.provider === provider);
+      // the last way in stays
+      if (!gone || oauth.length < 2) throw new GameError("invalid_input");
+      const unlinked = await client.auth.unlinkIdentity(gone);
+      if (unlinked.error) throw unlinked.error;
+      const left = oauth.find((i) => i !== gone)
+        ?.provider as Account["provider"];
+      const p = await account();
+      if (p && p.provider === provider)
+        await profiles().update({ provider: left }).eq("id", p.id);
+    },
+    async deleteAccount() {
+      const p = await account();
+      if (!p) throw new GameError("unauthorized");
+      const service = serviceClient();
+      // the profile, its mural and its reports go with the user (foreign keys)
+      const { error } = await service.auth.admin.deleteUser(p.id);
+      if (error) throw error;
+      const badges = await service
+        .from("user_badges")
+        .delete()
+        .eq("user_id", p.id);
+      if (badges.error) throw badges.error;
+      await (await sessionClient()).auth.signOut({ scope: "local" });
     },
   };
 }

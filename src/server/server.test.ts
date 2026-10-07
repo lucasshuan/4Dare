@@ -618,6 +618,52 @@ describe("server, local mode", () => {
     expect(own?.lines[0]).toMatchObject({ id: line, hidden: true });
   });
 
+  it("an account keeps its settings, hands its data over and can go", async () => {
+    as("x1");
+    const me = must(await A.enterTestAccount());
+    expect(me.settings).toBeNull();
+    must(
+      await A.saveAccountSettings({
+        theme: "dark",
+        chatBubbles: false,
+        games: { "who-am-i": { confirmPass: true, unknown: 1 } },
+        volume: 0.1,
+      }),
+    );
+    const meRoute = await import("@/app/api/me/route");
+    const read = async () =>
+      (await (
+        await meRoute.GET(new Request("http://x/api/me?lang=pt"))
+      ).json()) as { settings: unknown; isGuest: boolean };
+    expect((await read()).settings).toEqual({
+      theme: "dark",
+      chatBubbles: false,
+      games: { "who-am-i": { confirmPass: true, popularHand: true } },
+    });
+
+    const exported = await import("@/app/api/me/export/route");
+    const file = await exported.GET();
+    expect(file.headers.get("content-disposition")).toContain(
+      `4dare-${me.handle}.json`,
+    );
+    expect(await file.json()).toMatchObject({
+      account: { id: me.id, providers: ["discord"] },
+      profile: { handle: me.handle },
+      matches: [],
+    });
+
+    expect(await A.deleteAccount("someone_else")).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    must(await A.deleteAccount(me.handle as string));
+    expect((await read()).isGuest).toBe(true);
+    const { getBackend } = await import("./backend");
+    expect(
+      await getBackend().profiles.byHandle(me.handle as string),
+    ).toBeNull();
+  });
+
   it("a profile change shows at once in the account's rooms", async () => {
     as("n3");
     const account = must(await A.enterTestAccount());

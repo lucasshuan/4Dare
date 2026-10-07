@@ -1,5 +1,6 @@
 // Shapes shared by server actions, route handlers and the UI.
 import type { GameKey } from "@/game/games";
+import type { SyncedSettings } from "@/game/options";
 import type { BadgeGroup, BadgeId } from "@/game/profile/badges";
 import type { Fact } from "@/game/profile/history";
 import type {
@@ -40,6 +41,17 @@ export interface Account {
   providerAvatarUrl: string | null;
   /** "local" = no Supabase configured: guests only, plus a fake test account. */
   authMode: "local" | "supabase";
+  /** What follows an account between devices (theme, chat bubbles, game options); null for a guest, or before an account saved any. */
+  settings: SyncedSettings | null;
+}
+
+/** The account box: how the person signs in, and with what. */
+export interface AccountInfo {
+  email: string | null;
+  /** The providers linked to the account. */
+  providers: ("discord" | "google")[];
+  /** Another provider can be linked (online, with manual linking on). */
+  canLink: boolean;
 }
 
 /**

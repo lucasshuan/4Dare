@@ -6,6 +6,7 @@ import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { knownAs } from "@/game/character-search";
 import { GAME_KEYS } from "@/game/games";
+import { parseSynced } from "@/game/options";
 import { themeId } from "@/game/theme-id";
 import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
 import {
@@ -743,6 +744,45 @@ export async function rerollGuest(): Promise<Result<Me>> {
 
 export async function signOut(): Promise<Result> {
   return run(() => getBackend().auth.signOut());
+}
+
+/** Ends every session of the account, on every device. */
+export async function signOutEverywhere(): Promise<Result> {
+  return run(() => getBackend().auth.signOut(true));
+}
+
+/** Unlinks Discord or Google from the account; the last one stays. */
+export async function unlinkProvider(provider: string): Promise<Result> {
+  return run(async () => {
+    if (provider !== "discord" && provider !== "google") bad();
+    await getBackend().auth.unlink(provider as "discord" | "google");
+  });
+}
+
+/**
+ * Deletes the account, once its @handle is typed back. Its matches stay,
+ * without a name; the profile, its mural and its badges go.
+ */
+export async function deleteAccount(handle: string): Promise<Result> {
+  return run(async () => {
+    const { auth } = getBackend();
+    const current = await auth.me(await lang());
+    if (current.isGuest) throw new GameError("unauthorized");
+    if (typeof handle !== "string" || handle.trim() !== current.handle) bad();
+    await auth.deleteAccount();
+  });
+}
+
+/** What follows the account between devices: theme, chat bubbles, game options. */
+export async function saveAccountSettings(raw: unknown): Promise<Result> {
+  return run(async () => {
+    const { auth, profiles } = getBackend();
+    const current = await auth.me(await lang());
+    if (current.isGuest) throw new GameError("unauthorized");
+    if (!allow(`settings:${current.id}`, 30, 60_000))
+      throw new GameError("rate_limited");
+    await profiles.update(current.id, { settings: parseSynced(raw) });
+  });
 }
 
 /** Local mode only: flips the current guest into a fake account so the profile screen can be used without Supabase. */

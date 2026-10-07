@@ -1,4 +1,5 @@
 import "server-only";
+import type { SyncedSettings } from "@/game/options";
 import {
   type About,
   type Banner,
@@ -22,6 +23,7 @@ export interface TestProfile {
   about?: About;
   privacy?: Privacy;
   handleChangedAt?: number | null;
+  settings?: SyncedSettings;
 }
 
 const toProfile = (id: string, a: TestAccount): StoredProfile[] =>

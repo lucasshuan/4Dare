@@ -1,7 +1,8 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { parseSynced } from "@/game/options";
 import { handleCandidates } from "@/game/profile/handle";
-import type { Avatar, Identity, Lang } from "@/game/types";
+import { type Avatar, GameError, type Identity, type Lang } from "@/game/types";
 import type { Account } from "@/server/contract";
 import { ensureGuest, type Guest } from "../../auth/guest";
 import type { AuthService } from "../types";
@@ -79,6 +80,7 @@ export function localAuth(): AuthService & {
       provider: a?.provider ?? null,
       providerAvatarUrl: null,
       authMode: "local",
+      settings: a?.settings ? parseSynced(a.settings) : null,
     };
   };
 
@@ -109,6 +111,21 @@ export function localAuth(): AuthService & {
     async signOut() {
       const g = await guest();
       accounts.delete(g.id);
+      save();
+    },
+    async accountInfo() {
+      const a = accounts.get((await guest()).id);
+      return a
+        ? { email: null, providers: [a.provider], canLink: false }
+        : null;
+    },
+    async unlink() {
+      // a test account has one provider, and the last one stays
+      throw new GameError("invalid_input");
+    },
+    async deleteAccount() {
+      const g = await guest();
+      if (!accounts.delete(g.id)) throw new GameError("unauthorized");
       save();
     },
     async enterTestAccount(provider) {

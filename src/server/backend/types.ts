@@ -4,6 +4,7 @@
 // Server actions and route handlers only talk to these interfaces (via getBackend()).
 
 import type { ChatMessage, NewChatMessage } from "@/game/chat";
+import type { SyncedSettings } from "@/game/options";
 import type { PlayedMatch } from "@/game/profile/history";
 import type {
   About,
@@ -26,7 +27,7 @@ import type {
   RoomState,
   Theme,
 } from "@/game/types";
-import type { Account } from "../contract";
+import type { Account, AccountInfo } from "../contract";
 import type { FitVote, PickStat } from "../theme-picks";
 
 export interface StoredRoom {
@@ -218,9 +219,19 @@ export interface AuthService {
     name?: string;
     avatar?: Identity["avatar"];
   }): Promise<Account>;
-  signOut(): Promise<void>;
+  /** Ends this session, or (`everywhere`) every session of the account. */
+  signOut(everywhere?: boolean): Promise<void>;
   /** Local mode only: turns the current guest into a fake account so the profile screen can be tried. */
   enterTestAccount?(provider: "discord" | "google"): Promise<Account>;
+  /** The signed-in account's e-mail and providers; null for a guest. */
+  accountInfo(): Promise<AccountInfo | null>;
+  /** Unlinks a provider; the last one stays (an account needs one to sign in). */
+  unlink(provider: "discord" | "google"): Promise<void>;
+  /**
+   * Deletes the signed-in account: its user, profile, mural and badges go;
+   * its matches stay, without a name ("anonymous").
+   */
+  deleteAccount(): Promise<void>;
 }
 
 /** An account's profile (table profiles); guests have none. */
@@ -256,7 +267,7 @@ export type ProfilePatch = Partial<
     | "privacy"
     | "handleChangedAt"
   >
->;
+> & { settings?: SyncedSettings };
 
 export interface ProfileStore {
   byHandle(handle: string): Promise<StoredProfile | null>;
