@@ -107,6 +107,7 @@
     "guestHint": "Sign in with Discord or Google to pick a name and avatar. Your matches come along.",
     "connected": "Connected with {provider}",
     "account": "Signed in",
+    "myProfile": "My profile",
     "editProfile": "Edit profile",
     "signOut": "Sign out",
     "testAccount": "Without Supabase this enters a test account.",

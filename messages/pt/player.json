@@ -1,0 +1,84 @@
+{
+  "since": "No 4Dare desde {date}",
+  "age": {
+    "days": "{n, plural, one {# dia} other {# dias}}",
+    "months": "{n, plural, one {# mês} other {# meses}}",
+    "years": "{n, plural, one {# ano} other {# anos}}",
+    "and": "{a} e {b}"
+  },
+  "kpis": {
+    "matches": "{n, plural, =0 {partidas} one {partida} other {partidas}}",
+    "wins": "vitórias",
+    "hours": "jogadas",
+    "hoursValue": "{n} h",
+    "streak": "dias seguidos"
+  },
+  "playing": "Jogando agora",
+  "copyLink": "Copiar link",
+  "copied": "Link copiado",
+  "tabsLabel": "Seções do perfil",
+  "tabs": {
+    "activity": "Atividade",
+    "contributions": "Contribuições"
+  },
+  "activity": {
+    "game": "Jogo",
+    "allGames": "Todos os jogos",
+    "garden": "Canteiro",
+    "gardenLabel": "Partidas dos últimos 12 meses",
+    "yearMatches": "partidas em 12 meses",
+    "activeDays": "dias com partida",
+    "streak": "dias seguidos",
+    "bestStreak": "maior sequência",
+    "less": "Menos",
+    "more": "Mais",
+    "legend": "Broto 1 · folha 2–3 · botão 4–6 · flor 7+",
+    "pickDay": "Escolha um dia para ver as partidas dele.",
+    "rest": "o canteiro descansou",
+    "dayMatches": "{n, plural, one {# partida} other {# partidas}}",
+    "dayWins": "{n, plural, one {# vitória} other {# vitórias}}",
+    "noMatches": "Nenhuma partida ainda.",
+    "gameLine": "{matches, plural, one {# partida} other {# partidas}} · {wins, plural, one {# vitória} other {# vitórias}} · {hours} h",
+    "discoveredShort": "descobertas",
+    "questionsShort": "perguntas",
+    "stats": {
+      "matches": "Partidas",
+      "recent": "+{n} nos últimos 30 dias",
+      "wins": "Vitórias",
+      "winRate": "{p} das partidas",
+      "discovered": "Descobertas",
+      "discoverRate": "{p} das vezes",
+      "questions": "Perguntas até descobrir",
+      "questionsNote": "média · melhor: {best}"
+    }
+  },
+  "facts": {
+    "title": "Curiosidades",
+    "partner": "Dupla favorita: <link>{name}</link>",
+    "partnerText": "{together} partidas juntos · {owner} terminou na frente em {ahead}",
+    "streak": "Maior sequência",
+    "streakText": "{n} dias seguidos, em {month}",
+    "fastest": "Descoberta mais rápida",
+    "fastestText": "{name}, na {at}ª jogada",
+    "fastestTime": "{name}, na {at}ª jogada, em {time}",
+    "hardest": "Carta mais difícil",
+    "hardestText": "Escolheu {name} para {to}: {questions} perguntas e não saiu",
+    "aGuest": "um convidado",
+    "theme": "Tema favorito",
+    "themeText": "{theme}, {n} partidas"
+  },
+  "contributions": {
+    "pictures": "Fotos enviadas",
+    "cover": "Principal",
+    "pending": "Em análise",
+    "characters": "Personagens criados",
+    "nonePictures": "Nenhuma foto enviada ainda.",
+    "noneCharacters": "Nenhum personagem criado ainda."
+  },
+  "notFound": "Perfil não encontrado",
+  "notFoundText": "Ninguém usa o @{handle}.",
+  "card": {
+    "seeProfile": "Ver perfil",
+    "guest": "Convidado"
+  }
+}

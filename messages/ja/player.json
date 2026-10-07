@@ -1,0 +1,84 @@
+{
+  "since": "{date}から4Dareに参加",
+  "age": {
+    "days": "{n}日",
+    "months": "{n}か月",
+    "years": "{n}年",
+    "and": "{a}{b}"
+  },
+  "kpis": {
+    "matches": "試合",
+    "wins": "勝率",
+    "hours": "プレイ時間",
+    "hoursValue": "{n}時間",
+    "streak": "連続日数"
+  },
+  "playing": "プレイ中",
+  "copyLink": "リンクをコピー",
+  "copied": "リンクをコピーしました",
+  "tabsLabel": "プロフィールの項目",
+  "tabs": {
+    "activity": "アクティビティ",
+    "contributions": "貢献"
+  },
+  "activity": {
+    "game": "ゲーム",
+    "allGames": "すべてのゲーム",
+    "garden": "花壇",
+    "gardenLabel": "この12か月の試合",
+    "yearMatches": "試合（12か月）",
+    "activeDays": "プレイした日",
+    "streak": "連続日数",
+    "bestStreak": "最長連続",
+    "less": "少",
+    "more": "多",
+    "legend": "芽 1・葉 2〜3・つぼみ 4〜6・花 7+",
+    "pickDay": "日を選ぶとその日の試合が見られます。",
+    "rest": "花壇はお休み",
+    "dayMatches": "{n}試合",
+    "dayWins": "{n}勝",
+    "noMatches": "まだ試合がありません。",
+    "gameLine": "{matches}試合・{wins}勝・{hours}時間",
+    "discoveredShort": "正解率",
+    "questionsShort": "質問",
+    "stats": {
+      "matches": "試合",
+      "recent": "直近30日で+{n}",
+      "wins": "勝利",
+      "winRate": "試合の{p}",
+      "discovered": "正解",
+      "discoverRate": "{p}の確率",
+      "questions": "正解までの質問数",
+      "questionsNote": "平均・最少：{best}"
+    }
+  },
+  "facts": {
+    "title": "トリビア",
+    "partner": "よく遊ぶ相手：<link>{name}</link>",
+    "partnerText": "一緒に{together}試合・{owner}が{ahead}回先着",
+    "streak": "最長連続",
+    "streakText": "{month}に{n}日連続",
+    "fastest": "最速の正解",
+    "fastestText": "{name}、{at}手目",
+    "fastestTime": "{name}、{at}手目、{time}",
+    "hardest": "いちばん難しいカード",
+    "hardestText": "{to}に{name}を選んだ：{questions}問でも当たらず",
+    "aGuest": "ゲスト",
+    "theme": "お気に入りのテーマ",
+    "themeText": "{theme}、{n}試合"
+  },
+  "contributions": {
+    "pictures": "送った画像",
+    "cover": "メイン",
+    "pending": "確認中",
+    "characters": "作ったキャラクター",
+    "nonePictures": "まだ画像を送っていません。",
+    "noneCharacters": "まだキャラクターを作っていません。"
+  },
+  "notFound": "プロフィールが見つかりません",
+  "notFoundText": "@{handle}を使っている人はいません。",
+  "card": {
+    "seeProfile": "プロフィールを見る",
+    "guest": "ゲスト"
+  }
+}

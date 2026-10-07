@@ -34,6 +34,7 @@ const THUMB = {
   md: "h-14 w-[89.6px]",
   sm: "h-10 w-16",
   xs: "h-6 w-[38.4px]",
+  tiny: "h-[15px] w-6 rounded-[4px]",
 } as const;
 
 /** The game's small thumbnail, its own drawing (the card art turns to mush scaled this far down). */

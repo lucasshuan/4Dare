@@ -8,6 +8,7 @@ import {
   Moon,
   Settings,
   Sun,
+  UserRound,
   UserRoundPen,
   Volume2,
   VolumeX,
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/auth-button";
 import { Avatar } from "@/components/ui/avatar";
 import { useMe } from "@/features/data/use-me";
+import { profilePath } from "@/features/profile/profile-link";
 import { SettingsDialog } from "@/features/settings/settings-dialog";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
@@ -134,11 +136,13 @@ export function UserMenuPopover({
                   <Popover.Description className="font-medium text-[13px] text-ink-muted">
                     {me.isGuest
                       ? t("guest")
-                      : me.provider
-                        ? t("connected", {
-                            provider: PROVIDER_NAME[me.provider],
-                          })
-                        : t("account")}
+                      : me.handle
+                        ? `@${me.handle}`
+                        : me.provider
+                          ? t("connected", {
+                              provider: PROVIDER_NAME[me.provider],
+                            })
+                          : t("account")}
                   </Popover.Description>
                 </div>
                 {me.provider ? (
@@ -186,6 +190,15 @@ export function UserMenuPopover({
               ) : (
                 <>
                   <MenuItems>
+                    {me.handle ? (
+                      <MenuItem
+                        icon={<UserRound strokeWidth={1.75} />}
+                        href={profilePath(me.handle)}
+                        onClick={() => onOpenChange(false)}
+                      >
+                        {t("myProfile")}
+                      </MenuItem>
+                    ) : null}
                     <MenuItem
                       icon={<UserRoundPen strokeWidth={1.75} />}
                       href="/profile"
@@ -244,7 +257,7 @@ function MenuItem({
   children: ReactNode;
 }) {
   return href ? (
-    <Link href={href} className={ITEM}>
+    <Link href={href} scroll={false} onClick={onClick} className={ITEM}>
       {icon}
       {children}
     </Link>

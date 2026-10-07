@@ -1,0 +1,84 @@
+{
+  "since": "On 4Dare since {date}",
+  "age": {
+    "days": "{n, plural, one {# day} other {# days}}",
+    "months": "{n, plural, one {# month} other {# months}}",
+    "years": "{n, plural, one {# year} other {# years}}",
+    "and": "{a} and {b}"
+  },
+  "kpis": {
+    "matches": "{n, plural, one {match} other {matches}}",
+    "wins": "wins",
+    "hours": "played",
+    "hoursValue": "{n} h",
+    "streak": "day streak"
+  },
+  "playing": "Playing now",
+  "copyLink": "Copy link",
+  "copied": "Link copied",
+  "tabsLabel": "Profile sections",
+  "tabs": {
+    "activity": "Activity",
+    "contributions": "Contributions"
+  },
+  "activity": {
+    "game": "Game",
+    "allGames": "All games",
+    "garden": "Garden",
+    "gardenLabel": "Matches in the last 12 months",
+    "yearMatches": "matches in 12 months",
+    "activeDays": "days with a match",
+    "streak": "day streak",
+    "bestStreak": "longest streak",
+    "less": "Less",
+    "more": "More",
+    "legend": "Sprout 1 · leaf 2–3 · bud 4–6 · flower 7+",
+    "pickDay": "Pick a day to see its matches.",
+    "rest": "the garden rested",
+    "dayMatches": "{n, plural, one {# match} other {# matches}}",
+    "dayWins": "{n, plural, one {# win} other {# wins}}",
+    "noMatches": "No matches yet.",
+    "gameLine": "{matches, plural, one {# match} other {# matches}} · {wins, plural, one {# win} other {# wins}} · {hours} h",
+    "discoveredShort": "discovered",
+    "questionsShort": "questions",
+    "stats": {
+      "matches": "Matches",
+      "recent": "+{n} in the last 30 days",
+      "wins": "Wins",
+      "winRate": "{p} of matches",
+      "discovered": "Discovered",
+      "discoverRate": "{p} of the time",
+      "questions": "Questions to discover",
+      "questionsNote": "average · best: {best}"
+    }
+  },
+  "facts": {
+    "title": "Fun facts",
+    "partner": "Favourite partner: <link>{name}</link>",
+    "partnerText": "{together} matches together · {owner} finished ahead in {ahead}",
+    "streak": "Longest streak",
+    "streakText": "{n} days in a row, in {month}",
+    "fastest": "Fastest discovery",
+    "fastestText": "{name}, on play {at}",
+    "fastestTime": "{name}, on play {at}, in {time}",
+    "hardest": "Toughest card",
+    "hardestText": "Picked {name} for {to}: {questions} questions and still a mystery",
+    "aGuest": "a guest",
+    "theme": "Favourite theme",
+    "themeText": "{theme}, {n} matches"
+  },
+  "contributions": {
+    "pictures": "Pictures sent",
+    "cover": "Cover",
+    "pending": "Under review",
+    "characters": "Characters made",
+    "nonePictures": "No pictures sent yet.",
+    "noneCharacters": "No characters made yet."
+  },
+  "notFound": "Profile not found",
+  "notFoundText": "Nobody goes by @{handle}.",
+  "card": {
+    "seeProfile": "See profile",
+    "guest": "Guest"
+  }
+}

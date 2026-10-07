@@ -107,6 +107,7 @@
     "guestHint": "Entre com Discord ou Google pra escolher nome e avatar. Suas partidas vêm junto.",
     "connected": "Conectado com {provider}",
     "account": "Conta conectada",
+    "myProfile": "Meu perfil",
     "editProfile": "Editar perfil",
     "signOut": "Sair",
     "testAccount": "Sem Supabase, isso entra numa conta de teste.",
