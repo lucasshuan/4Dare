@@ -51,8 +51,14 @@
       "discovered": "Discovered",
       "discoverRate": "{p} of the time",
       "questions": "Questions to discover",
-      "questionsNote": "average · best: {best}"
-    }
+      "questionsNote": "average · best: {best}",
+      "caught": "Impostors caught",
+      "firstVote": "{n} right on the first vote",
+      "asImpostor": "As the impostor",
+      "escapeRate": "got away {p} of the time"
+    },
+    "caughtShort": "caught",
+    "escapedShort": "got away"
   },
   "facts": {
     "title": "Fun facts",
@@ -67,7 +73,11 @@
     "hardestText": "Picked {name} for {to}: {questions} questions and still a mystery",
     "aGuest": "a guest",
     "theme": "Favourite theme",
-    "themeText": "{theme}, {n} matches"
+    "themeText": "{theme}, {n} matches",
+    "escape": "Cleanest escape",
+    "escapeText": "{votes, plural, =0 {Got away as {name} without a single vote} one {Got away as {name} with # vote} other {Got away as {name} with # votes}}",
+    "bullseye": "Last-chance hit",
+    "bullseyeText": "Caught as the impostor, then guessed the crew's card: {name}"
   },
   "contributions": {
     "pictures": "Pictures sent",
@@ -205,9 +215,12 @@
     "everyGame": "Every game",
     "rules": {
       "finish": "Finish a match",
-      "first": "First place",
+      "first": "First place or the winning side",
       "dayFirst": "First match of the day",
-      "discovered": "Discover your character"
+      "discovered": "Discover your character",
+      "rightVote": "Vote out an impostor",
+      "survived": "Each round as an uncaught impostor",
+      "guessHit": "Guess the crew's card on the last chance"
     },
     "groups": {
       "general": "General",
@@ -232,7 +245,11 @@
       "tough": "Tough card",
       "pictures": "Photographer",
       "covers": "Cover",
-      "characters": "Creator"
+      "characters": "Creator",
+      "pokerFace": "Poker face",
+      "nose": "Sharp nose",
+      "chameleon": "Chameleon",
+      "bullseye": "Bullseye"
     },
     "goals": {
       "matches": "{n} matches",
@@ -245,7 +262,11 @@
       "tough": "{n, plural, one {# card nobody found} other {# cards nobody found}}",
       "pictures": "{n, plural, one {# picture sent} other {# pictures sent}}",
       "covers": "{n, plural, one {# cover picture} other {# cover pictures}}",
-      "characters": "{n, plural, one {# character made} other {# characters made}}"
+      "characters": "{n, plural, one {# character made} other {# characters made}}",
+      "pokerFace": "{n, plural, one {# win as the impostor without a vote} other {# wins as the impostor without a vote}}",
+      "nose": "{n, plural, one {# right first vote} other {# right first votes}}",
+      "chameleon": "{n, plural, one {# win as the impostor} other {# wins as the impostor}}",
+      "bullseye": "{n, plural, one {# last-chance hit} other {# last-chance hits}}"
     }
   }
 }

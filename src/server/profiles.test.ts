@@ -33,7 +33,7 @@ const now = Date.now();
 const DAY = 86_400_000;
 const played = (
   daysAgo: number,
-  fields: Partial<PlayedMatch> = {},
+  fields: Partial<Omit<PlayedMatch, "game" | "details">> = {},
 ): PlayedMatch => ({
   matchId: `m${daysAgo}`,
   game: "who-am-i",

@@ -1,7 +1,6 @@
 // A player's finished matches as their profile reads them (player_matches in
 // migration 0030), and what the profile makes of them: each game's numbers
 // and the curiosities. Every game reads its own part of a match.
-import type { GameKey } from "../games";
 import type { PlayerResult } from "../record";
 import type { Theme } from "../types";
 
@@ -32,19 +31,48 @@ export interface WhoAmIPart {
   } | null;
 }
 
-export interface PlayedMatch {
+/** The Impostor's part of a player's match: their side, how it went for them, their card. */
+export interface ImpostorPart {
+  themeId: string | null;
+  theme: Theme | null;
+  impostor: boolean;
+  /** The round they went out in; null: still in at the end. */
+  outRound: number | null;
+  left: boolean;
+  /** Votes of theirs that helped send an impostor out. */
+  rightVotes: number;
+  /** Their vote in the match's first vote sent an impostor out. */
+  firstRight: boolean;
+  /** Confirmed votes they took over the match. */
+  votesTaken: number;
+  guess: string | null;
+  guessHit: boolean | null;
+  characterName: string | null;
+}
+
+interface MatchBase {
   matchId: string;
-  game: GameKey;
   finishedAt: number;
   place: number | null;
   timeMs: number | null;
   xp: number;
   others: MatchMate[];
-  /** The game's own part; null when the game keeps none. */
-  details: WhoAmIPart | null;
 }
 
+/** A finished match as its player's profile reads it; `details` is the game's own part (null when missing). */
+export type PlayedMatch = MatchBase &
+  (
+    | { game: "who-am-i"; details: WhoAmIPart | null }
+    | { game: "impostor"; details: ImpostorPart | null }
+  );
+
 const won = (m: PlayedMatch) => m.place === 1;
+
+/** The Impostor's parts of these matches, with whether that player's side won. */
+export const impostorParts = (matches: readonly PlayedMatch[]) =>
+  matches.flatMap((m) =>
+    m.game === "impostor" && m.details ? [{ ...m.details, won: won(m) }] : [],
+  );
 
 /** Every game's numbers: matches, wins, time played. */
 export function totalsOf(matches: readonly PlayedMatch[]) {
@@ -73,6 +101,25 @@ export function whoAmINumbers(matches: readonly PlayedMatch[]) {
       ? questions.reduce((a, b) => a + b, 0) / questions.length
       : null,
     bestQuestions: questions.length ? Math.min(...questions) : null,
+  };
+}
+
+/** The Impostor's own numbers: impostors caught and how it went as one. */
+export function impostorNumbers(matches: readonly PlayedMatch[]) {
+  const parts = impostorParts(matches).filter((p) => !p.left);
+  const asImpostor = parts.filter((p) => p.impostor);
+  const crew = parts.filter((p) => !p.impostor);
+  return {
+    /** Votes that helped send an impostor out. */
+    caught: parts.reduce((sum, p) => sum + p.rightVotes, 0),
+    /** Of those, right in the match's first vote. */
+    firstVote: parts.filter((p) => p.firstRight).length,
+    crewMatches: crew.length,
+    asImpostor: asImpostor.length,
+    /** Share of the matches as an impostor that the impostors won, 0–1. */
+    escapeRate: asImpostor.length
+      ? asImpostor.filter((p) => p.won).length / asImpostor.length
+      : null,
   };
 }
 
@@ -108,11 +155,26 @@ export type Fact =
       game: "who-am-i";
       theme: Theme;
       count: number;
+    }
+  | {
+      kind: "escape";
+      game: "impostor";
+      /** The card they got away with. */
+      characterName: string;
+      /** Votes they took on the way; the fewest of all their escapes. */
+      votes: number;
+    }
+  | {
+      kind: "bullseye";
+      game: "impostor";
+      /** The crew's card, guessed right on the last chance (the latest one). */
+      guess: string;
     };
 
 /**
- * The curiosities: the account played with most, and "Who am I?"'s fastest
- * discovery, the card picked that held out longest and the favourite theme.
+ * The curiosities: the account played with most; "Who am I?"'s fastest
+ * discovery, the card picked that held out longest and the favourite theme;
+ * the Impostor's cleanest escape and latest last-chance hit.
  */
 export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
   const facts: Fact[] = [];
@@ -182,6 +244,29 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
   const theme = [...themes.values()].sort((a, b) => b.count - a.count)[0];
   if (theme && theme.count >= 2)
     facts.push({ kind: "theme", game: "who-am-i", ...theme });
+
+  // newest first, so a tie goes to the latest
+  const imps = impostorParts(matches);
+  const cleanest = imps
+    .filter((p) => p.impostor && p.won && !p.left && p.characterName)
+    .reduce<(typeof imps)[number] | null>(
+      (best, p) => (!best || p.votesTaken < best.votesTaken ? p : best),
+      null,
+    );
+  if (cleanest)
+    facts.push({
+      kind: "escape",
+      game: "impostor",
+      characterName: cleanest.characterName as string,
+      votes: cleanest.votesTaken,
+    });
+  const hit = imps.find((p) => p.guessHit && p.guess);
+  if (hit)
+    facts.push({
+      kind: "bullseye",
+      game: "impostor",
+      guess: hit.guess as string,
+    });
 
   return facts;
 }

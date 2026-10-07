@@ -6,10 +6,13 @@ import {
   Flame,
   Gamepad2,
   Palette,
+  Search,
   ShieldCheck,
   Sparkles,
   Sprout,
+  Target,
   Trophy,
+  VenetianMask,
   Zap,
 } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
@@ -199,18 +202,35 @@ function GameCard({ card, onOpen }: { card: GameView; onOpen: () => void }) {
         </span>
       </span>
       <span className="flex gap-5 max-sm:hidden">
-        <Highlight
-          value={percent(card.discoverRate)}
-          label={t("discoveredShort")}
-        />
-        <Highlight
-          value={
-            card.avgQuestions === null
-              ? "–"
-              : format.number(card.avgQuestions, { maximumFractionDigits: 1 })
-          }
-          label={t("questionsShort")}
-        />
+        {card.game === "impostor" ? (
+          <>
+            <Highlight
+              value={format.number(card.caught)}
+              label={t("caughtShort")}
+            />
+            <Highlight
+              value={percent(card.escapeRate)}
+              label={t("escapedShort")}
+            />
+          </>
+        ) : (
+          <>
+            <Highlight
+              value={percent(card.discoverRate)}
+              label={t("discoveredShort")}
+            />
+            <Highlight
+              value={
+                card.avgQuestions === null
+                  ? "–"
+                  : format.number(card.avgQuestions, {
+                      maximumFractionDigits: 1,
+                    })
+              }
+              label={t("questionsShort")}
+            />
+          </>
+        )}
       </span>
       <ChevronRight className="size-[18px] text-ink-muted" strokeWidth={1.75} />
     </button>
@@ -248,26 +268,51 @@ function GameNumbers({ card }: { card: GameView }) {
         value={format.number(card.wins)}
         note={t("winRate", { p: share(card.wins, card.matches) })}
       />
-      <Box
-        icon={<Sparkles />}
-        label={t("discovered")}
-        value={format.number(card.discovered)}
-        note={t("discoverRate", { p: percent(card.discoverRate) })}
-      />
-      <Box
-        icon={<CircleHelp />}
-        label={t("questions")}
-        value={
-          card.avgQuestions === null
-            ? "–"
-            : format.number(card.avgQuestions, { maximumFractionDigits: 1 })
-        }
-        note={
-          card.bestQuestions === null
-            ? null
-            : t("questionsNote", { best: card.bestQuestions })
-        }
-      />
+      {card.game === "impostor" ? (
+        <>
+          <Box
+            icon={<Search />}
+            label={t("caught")}
+            value={format.number(card.caught)}
+            note={card.firstVote ? t("firstVote", { n: card.firstVote }) : null}
+          />
+          <Box
+            icon={<VenetianMask />}
+            label={t("asImpostor")}
+            value={format.number(card.asImpostor)}
+            note={
+              card.escapeRate === null
+                ? null
+                : t("escapeRate", { p: percent(card.escapeRate) })
+            }
+          />
+        </>
+      ) : (
+        <>
+          <Box
+            icon={<Sparkles />}
+            label={t("discovered")}
+            value={format.number(card.discovered)}
+            note={t("discoverRate", { p: percent(card.discoverRate) })}
+          />
+          <Box
+            icon={<CircleHelp />}
+            label={t("questions")}
+            value={
+              card.avgQuestions === null
+                ? "–"
+                : format.number(card.avgQuestions, {
+                    maximumFractionDigits: 1,
+                  })
+            }
+            note={
+              card.bestQuestions === null
+                ? null
+                : t("questionsNote", { best: card.bestQuestions })
+            }
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -378,7 +423,7 @@ function Facts({
           questions: f.questions,
         }),
       });
-    else
+    else if (f.kind === "theme")
       items.push({
         key: "theme",
         icon: <Palette />,
@@ -389,6 +434,24 @@ function Facts({
           theme: f.theme[lang] || f.theme.en,
           n: f.count,
         }),
+      });
+    else if (f.kind === "escape")
+      items.push({
+        key: "escape",
+        icon: <VenetianMask />,
+        tint: "bg-no-soft",
+        game: f.game,
+        title: t("escape"),
+        text: t("escapeText", { name: f.characterName, votes: f.votes }),
+      });
+    else
+      items.push({
+        key: "bullseye",
+        icon: <Target />,
+        tint: "bg-sky-soft",
+        game: f.game,
+        title: t("bullseye"),
+        text: t("bullseyeText", { name: f.guess }),
       });
   }
   if (streak && streak.best >= 2 && streak.bestEnd !== null)

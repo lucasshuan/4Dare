@@ -92,6 +92,8 @@ export interface ImpostorMatch {
   /** The current round's vote, while talking and while its result shows. */
   vote: ImpVote | null;
   outs: ImpOut[];
+  /** Confirmed votes each player took over the match's votes, ties included. */
+  votesTaken: Record<PlayerId, number>;
   /** The vote round under way (1 = the first). */
   round: number;
   /** Times the cards were swapped because someone didn't know theirs. */

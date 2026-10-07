@@ -51,8 +51,14 @@
       "discovered": "正解",
       "discoverRate": "{p}の確率",
       "questions": "正解までの質問数",
-      "questionsNote": "平均・最少：{best}"
-    }
+      "questionsNote": "平均・最少：{best}",
+      "caught": "見破ったインポスター",
+      "firstVote": "最初の投票で{n}回的中",
+      "asImpostor": "インポスターとして",
+      "escapeRate": "{p}で逃げ切り"
+    },
+    "caughtShort": "見破り",
+    "escapedShort": "逃げ切り"
   },
   "facts": {
     "title": "トリビア",
@@ -67,7 +73,11 @@
     "hardestText": "{to}に{name}を選んだ：{questions}問でも当たらず",
     "aGuest": "ゲスト",
     "theme": "お気に入りのテーマ",
-    "themeText": "{theme}、{n}試合"
+    "themeText": "{theme}、{n}試合",
+    "escape": "いちばん鮮やかな逃げ切り",
+    "escapeText": "{votes, plural, =0 {{name}で1票も入らずに逃げ切り} other {{name}で#票だけで逃げ切り}}",
+    "bullseye": "最後の一手",
+    "bullseyeText": "インポスターとして見つかったあと、クルーのカードを当てた：{name}"
   },
   "contributions": {
     "pictures": "送った画像",
@@ -205,9 +215,12 @@
     "everyGame": "すべてのゲーム",
     "rules": {
       "finish": "試合を最後まで遊ぶ",
-      "first": "1位",
+      "first": "1位、または勝った側",
       "dayFirst": "その日最初の試合",
-      "discovered": "自分のキャラクターを当てる"
+      "discovered": "自分のキャラクターを当てる",
+      "rightVote": "インポスターを投票で追い出す",
+      "survived": "見つからずに過ごしたインポスターの1ラウンドごと",
+      "guessHit": "ラストチャンスでクルーのカードを当てる"
     },
     "groups": {
       "general": "全般",
@@ -232,7 +245,11 @@
       "tough": "難問カード",
       "pictures": "カメラマン",
       "covers": "表紙",
-      "characters": "クリエイター"
+      "characters": "クリエイター",
+      "pokerFace": "ポーカーフェイス",
+      "nose": "鋭い嗅覚",
+      "chameleon": "カメレオン",
+      "bullseye": "ど真ん中"
     },
     "goals": {
       "matches": "{n}試合",
@@ -245,7 +262,11 @@
       "tough": "誰も当てられなかったカード{n}枚",
       "pictures": "画像を{n}枚送る",
       "covers": "メイン画像{n}枚",
-      "characters": "キャラクターを{n}人作る"
+      "characters": "キャラクターを{n}人作る",
+      "pokerFace": "{n, plural, other {票を受けずにインポスターで#勝}}",
+      "nose": "{n, plural, other {最初の投票で#回的中}}",
+      "chameleon": "{n, plural, other {インポスターで#勝}}",
+      "bullseye": "{n, plural, other {ラストチャンスで#回的中}}"
     }
   }
 }

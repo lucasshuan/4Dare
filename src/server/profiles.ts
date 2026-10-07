@@ -10,6 +10,7 @@ import {
 } from "@/game/profile/badges";
 import {
   factsOf,
+  impostorNumbers,
   type PlayedMatch,
   totalsOf,
   whoAmINumbers,
@@ -127,12 +128,13 @@ function gameView(
 ): GameView {
   const mine = all.filter((m) => m.game === game);
   const { xp: _xp, ...totals } = totalsOf(mine);
-  return {
-    game,
+  const common = {
     ...totals,
     recent: mine.filter((m) => m.finishedAt > now - 30 * DAY).length,
-    ...whoAmINumbers(mine),
   };
+  return game === "impostor"
+    ? { game, ...common, ...impostorNumbers(mine) }
+    : { game, ...common, ...whoAmINumbers(mine) };
 }
 
 /** The quick card of an account, or null for a guest or an unknown id. */
@@ -260,7 +262,6 @@ export async function profileView(
     return [f];
   });
 
-  // the pictures' characters in the reader's language
   // the pictures' characters in the reader's language
   const pictured = await charactersFor(
     pictures.flatMap((p) => (p.characterId ? [p.characterId] : [])),

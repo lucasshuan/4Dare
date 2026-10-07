@@ -51,8 +51,14 @@
       "discovered": "Descubiertos",
       "discoverRate": "{p} de las veces",
       "questions": "Preguntas hasta descubrir",
-      "questionsNote": "promedio · mejor: {best}"
-    }
+      "questionsNote": "promedio · mejor: {best}",
+      "caught": "Impostores atrapados",
+      "firstVote": "{n} acertados en el primer voto",
+      "asImpostor": "Como impostor",
+      "escapeRate": "escapó {p} de las veces"
+    },
+    "caughtShort": "atrapados",
+    "escapedShort": "escapó"
   },
   "facts": {
     "title": "Curiosidades",
@@ -67,7 +73,11 @@
     "hardestText": "Eligió a {name} para {to}: {questions} preguntas y no salió",
     "aGuest": "un invitado",
     "theme": "Tema favorito",
-    "themeText": "{theme}, {n} partidas"
+    "themeText": "{theme}, {n} partidas",
+    "escape": "Fuga más limpia",
+    "escapeText": "{votes, plural, =0 {Escapó como {name} sin recibir ningún voto} one {Escapó como {name} con # voto} other {Escapó como {name} con # votos}}",
+    "bullseye": "En el blanco",
+    "bullseyeText": "Atrapado como impostor, aún acertó la carta de la tripulación: {name}"
   },
   "contributions": {
     "pictures": "Fotos enviadas",
@@ -205,9 +215,12 @@
     "everyGame": "Todos los juegos",
     "rules": {
       "finish": "Terminar una partida",
-      "first": "Primer lugar",
+      "first": "Primer lugar o el bando ganador",
       "dayFirst": "Primera partida del día",
-      "discovered": "Descubrir tu personaje"
+      "discovered": "Descubrir tu personaje",
+      "rightVote": "Votar a un impostor que sale",
+      "survived": "Cada ronda como impostor sin ser atrapado",
+      "guessHit": "Acertar la carta de la tripulación en la última oportunidad"
     },
     "groups": {
       "general": "Generales",
@@ -232,7 +245,11 @@
       "tough": "Carta difícil",
       "pictures": "Fotógrafo",
       "covers": "Portada",
-      "characters": "Creador"
+      "characters": "Creador",
+      "pokerFace": "Cara de póquer",
+      "nose": "Buen olfato",
+      "chameleon": "Camaleón",
+      "bullseye": "En el blanco"
     },
     "goals": {
       "matches": "{n} partidas",
@@ -245,7 +262,11 @@
       "tough": "{n, plural, one {# carta que nadie descubrió} other {# cartas que nadie descubrió}}",
       "pictures": "{n, plural, one {# foto enviada} other {# fotos enviadas}}",
       "covers": "{n, plural, one {# foto principal} other {# fotos principales}}",
-      "characters": "{n, plural, one {# personaje creado} other {# personajes creados}}"
+      "characters": "{n, plural, one {# personaje creado} other {# personajes creados}}",
+      "pokerFace": "{n, plural, one {# victoria como impostor sin recibir votos} other {# victorias como impostor sin recibir votos}}",
+      "nose": "{n, plural, one {# acierto en el primer voto} other {# aciertos en el primer voto}}",
+      "chameleon": "{n, plural, one {# victoria como impostor} other {# victorias como impostor}}",
+      "bullseye": "{n, plural, one {# acierto en la última oportunidad} other {# aciertos en la última oportunidad}}"
     }
   }
 }

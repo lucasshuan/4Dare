@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { badgeValues, tierKey, tierOf } from "./badges";
-import type { PlayedMatch, WhoAmIPart } from "./history";
+import type { ImpostorPart, PlayedMatch, WhoAmIPart } from "./history";
 
 const DAY = 86_400_000;
 const part = (fields: Partial<WhoAmIPart> = {}): WhoAmIPart => ({
@@ -18,7 +18,7 @@ const part = (fields: Partial<WhoAmIPart> = {}): WhoAmIPart => ({
 });
 const match = (
   day: number,
-  fields: Partial<PlayedMatch> = {},
+  fields: Partial<Omit<PlayedMatch, "game" | "details">> = {},
   details: Partial<WhoAmIPart> = {},
 ): PlayedMatch => ({
   matchId: `m${day}-${Math.random()}`,
@@ -71,9 +71,56 @@ describe("badges", () => {
       quick: 1,
       themes: 2,
       tough: 1,
+      pokerFace: 0,
+      nose: 0,
+      chameleon: 0,
+      bullseye: 0,
       pictures: 4,
       covers: 1,
       characters: 0,
+    });
+  });
+
+  it("counts the Impostor's: clean escapes, right first votes, escapes and last-chance hits", () => {
+    const imp = (
+      day: number,
+      place: number | null,
+      fields: Partial<ImpostorPart>,
+    ): PlayedMatch => ({
+      ...match(day, { place }),
+      game: "impostor",
+      details: {
+        themeId: null,
+        theme: null,
+        impostor: false,
+        outRound: null,
+        left: false,
+        rightVotes: 0,
+        firstRight: false,
+        votesTaken: 0,
+        guess: null,
+        guessHit: null,
+        characterName: "Zoro",
+        ...fields,
+      },
+    });
+    const values = badgeValues(
+      [
+        imp(1, 1, { impostor: true }),
+        imp(2, 1, { impostor: true, votesTaken: 2 }),
+        imp(3, null, { impostor: true, outRound: 1, guessHit: true }),
+        imp(4, 1, { rightVotes: 1, firstRight: true }),
+        // leaving counts for nothing
+        imp(5, 1, { impostor: true, left: true }),
+      ],
+      { pictures: 0, covers: 0, characters: 0 },
+    );
+    expect(values).toMatchObject({
+      pokerFace: 1,
+      nose: 1,
+      chameleon: 2,
+      bullseye: 1,
+      discovered: 0,
     });
   });
 

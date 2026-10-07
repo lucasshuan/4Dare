@@ -1,6 +1,11 @@
 import "server-only";
 import { isGameKey } from "@/game/games";
-import type { MatchMate, WhoAmIPart } from "@/game/profile/history";
+import type {
+  ImpostorPart,
+  MatchMate,
+  PlayedMatch,
+  WhoAmIPart,
+} from "@/game/profile/history";
 import type { Lang } from "@/game/types";
 import type { MatchStore } from "../types";
 import { json, serviceClient } from "./clients";
@@ -93,22 +98,30 @@ export function supabaseMatches(): MatchStore {
         p_since: new Date(0).toISOString(),
       });
       if (error) throw error;
-      return (data ?? []).flatMap((r) =>
-        isGameKey(r.game)
-          ? [
-              {
-                matchId: r.match_id,
+      return (data ?? []).flatMap((r): PlayedMatch[] => {
+        if (!isGameKey(r.game)) return [];
+        const base = {
+          matchId: r.match_id,
+          finishedAt: Date.parse(r.finished_at),
+          place: r.place,
+          timeMs: r.time_ms,
+          xp: r.xp,
+          others: r.others as unknown as MatchMate[],
+        };
+        return [
+          r.game === "impostor"
+            ? {
+                ...base,
                 game: r.game,
-                finishedAt: Date.parse(r.finished_at),
-                place: r.place,
-                timeMs: r.time_ms,
-                xp: r.xp,
-                others: r.others as unknown as MatchMate[],
+                details: r.details as unknown as ImpostorPart | null,
+              }
+            : {
+                ...base,
+                game: r.game,
                 details: r.details as unknown as WhoAmIPart | null,
               },
-            ]
-          : [],
-      );
+        ];
+      });
     },
   };
 }

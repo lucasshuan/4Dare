@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { GAME_XP, XP } from "../profile/xp";
+import { matchRecord } from "../record";
 import { char, Game, ident, THEMES } from "../test-utils";
 import { CLOCK_CUT_FLOOR_MS, GameError, TALK_FLOOR_MS } from "../types";
 import { toView } from "../view";
@@ -267,6 +269,19 @@ describe("impostor", () => {
     expect(
       g.state.matches?.[0].players.filter((p) => p.place === 1),
     ).toHaveLength(4);
+    // the record: the votes taken, the right first vote, the hit and its XP
+    const players = matchRecord(g.state, g.now)?.players ?? [];
+    const caught = players.find((p) => p.userId === bad);
+    expect(caught?.impostor).toMatchObject({
+      impostor: true,
+      outRound: 1,
+      votesTaken: 4,
+      guessHit: true,
+    });
+    expect(caught?.xp).toBe(XP.finish + GAME_XP.impostor.guessHit);
+    const mate = players.find((p) => p.userId === crew);
+    expect(mate?.impostor).toMatchObject({ rightVotes: 1, firstRight: true });
+    expect(mate?.xp).toBe(XP.finish + XP.first + GAME_XP.impostor.rightVote);
   });
 
   it("the impostors win once they are as many as the rest, or when the rounds run out", () => {

@@ -55,13 +55,8 @@ const utcDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
 /** A player's part of a saved match, as player_matches reads it. */
 function playedMatch(m: MatchRecord, p: PlayerRecord): PlayedMatch {
-  const gave = m.players.find(
-    (q) => q.pickedById === p.userId && !q.autoPicked,
-  );
-  return {
+  const base = {
     matchId: m.id,
-    // lines saved before there were other games
-    game: m.game ?? "who-am-i",
     finishedAt: m.finishedAt,
     place: p.place,
     timeMs: p.timeMs,
@@ -69,6 +64,27 @@ function playedMatch(m: MatchRecord, p: PlayerRecord): PlayedMatch {
     others: m.players
       .filter((q) => q.userId !== p.userId)
       .map((q) => ({ id: q.userId, place: q.place, guest: q.wasGuest })),
+  };
+  if (m.game === "impostor")
+    return {
+      ...base,
+      game: "impostor",
+      details: p.impostor
+        ? {
+            themeId: m.themeId,
+            theme: m.theme,
+            ...p.impostor,
+            characterName: p.characterName,
+          }
+        : null,
+    };
+  const gave = m.players.find(
+    (q) => q.pickedById === p.userId && !q.autoPicked,
+  );
+  return {
+    ...base,
+    // lines saved before there were other games have no game
+    game: "who-am-i",
     details: {
       themeId: m.themeId,
       theme: m.theme,

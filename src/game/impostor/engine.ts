@@ -130,6 +130,7 @@ export function beginImpostor(
     asked: [],
     vote: null,
     outs: [],
+    votesTaken: {},
     round: 1,
     swaps: 0,
     guessing: null,
@@ -316,6 +317,8 @@ function resolveVote(s: RoomState, ctx: Ctx) {
   for (const [by, target] of Object.entries(v.votes))
     if (still.includes(by) && still.includes(target))
       counts.set(target, (counts.get(target) ?? 0) + 1);
+  for (const [id, n] of counts)
+    imp.votesTaken[id] = (imp.votesTaken[id] ?? 0) + n;
   const most = Math.max(0, ...counts.values());
   const top = [...counts].filter(([, n]) => n === most).map(([id]) => id);
   const scale = scaleOf(ctx);

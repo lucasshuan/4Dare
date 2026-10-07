@@ -51,8 +51,14 @@
       "discovered": "Descobertas",
       "discoverRate": "{p} das vezes",
       "questions": "Perguntas até descobrir",
-      "questionsNote": "média · melhor: {best}"
-    }
+      "questionsNote": "média · melhor: {best}",
+      "caught": "Impostores pegos",
+      "firstVote": "{n} certos no primeiro voto",
+      "asImpostor": "Como impostor",
+      "escapeRate": "escapou em {p} das vezes"
+    },
+    "caughtShort": "pegos",
+    "escapedShort": "escapou"
   },
   "facts": {
     "title": "Curiosidades",
@@ -67,7 +73,11 @@
     "hardestText": "Escolheu {name} para {to}: {questions} perguntas e não saiu",
     "aGuest": "um convidado",
     "theme": "Tema favorito",
-    "themeText": "{theme}, {n} partidas"
+    "themeText": "{theme}, {n} partidas",
+    "escape": "Fuga mais limpa",
+    "escapeText": "{votes, plural, =0 {Escapou como {name} sem levar nenhum voto} one {Escapou como {name} levando # voto} other {Escapou como {name} levando # votos}}",
+    "bullseye": "Na mosca",
+    "bullseyeText": "Pego como impostor, ainda acertou a carta da tripulação: {name}"
   },
   "contributions": {
     "pictures": "Fotos enviadas",
@@ -205,9 +215,12 @@
     "everyGame": "Todos os jogos",
     "rules": {
       "finish": "Terminar uma partida",
-      "first": "Primeiro lugar",
+      "first": "Primeiro lugar ou o lado que venceu",
       "dayFirst": "Primeira partida do dia",
-      "discovered": "Descobrir seu personagem"
+      "discovered": "Descobrir seu personagem",
+      "rightVote": "Votar num impostor que sai",
+      "survived": "Cada rodada como impostor sem ser pego",
+      "guessHit": "Acertar a carta da tripulação na última chance"
     },
     "groups": {
       "general": "Gerais",
@@ -232,7 +245,11 @@
       "tough": "Carta difícil",
       "pictures": "Fotógrafo",
       "covers": "Capa",
-      "characters": "Criador"
+      "characters": "Criador",
+      "pokerFace": "Cara de pau",
+      "nose": "Faro fino",
+      "chameleon": "Camaleão",
+      "bullseye": "Na mosca"
     },
     "goals": {
       "matches": "{n} partidas",
@@ -245,7 +262,11 @@
       "tough": "{n, plural, one {# carta que não saiu} other {# cartas que não saíram}}",
       "pictures": "{n, plural, one {# foto enviada} other {# fotos enviadas}}",
       "covers": "{n, plural, one {# foto principal} other {# fotos principais}}",
-      "characters": "{n, plural, one {# personagem criado} other {# personagens criados}}"
+      "characters": "{n, plural, one {# personagem criado} other {# personagens criados}}",
+      "pokerFace": "{n, plural, one {# vitória como impostor sem levar voto} other {# vitórias como impostor sem levar voto}}",
+      "nose": "{n, plural, one {# acerto no primeiro voto} other {# acertos no primeiro voto}}",
+      "chameleon": "{n, plural, one {# vitória como impostor} other {# vitórias como impostor}}",
+      "bullseye": "{n, plural, one {# acerto na última chance} other {# acertos na última chance}}"
     }
   }
 }

@@ -13,6 +13,10 @@ export interface ImpostorPlayerRecord {
   left: boolean;
   /** Votes of theirs that helped send an impostor out. */
   rightVotes: number;
+  /** Their vote in the match's first vote sent an impostor out. */
+  firstRight: boolean;
+  /** Confirmed votes they took over the match. */
+  votesTaken: number;
   guess: string | null;
   guessHit: boolean | null;
 }
@@ -22,13 +26,16 @@ export function impostorPart(
   id: PlayerId,
 ): ImpostorPlayerRecord {
   const out = imp.outs.find((o) => o.id === id);
+  const right = imp.outs.filter(
+    (o) => o.impostor && !o.left && o.by.includes(id),
+  );
   return {
     impostor: imp.impostors.includes(id),
     outRound: out?.round ?? null,
     left: out?.left ?? false,
-    rightVotes: imp.outs.filter(
-      (o) => o.impostor && !o.left && o.by.includes(id),
-    ).length,
+    rightVotes: right.length,
+    firstRight: right.some((o) => o.round === 1),
+    votesTaken: imp.votesTaken[id] ?? 0,
     guess: out?.guess ?? null,
     guessHit: out?.hit ?? null,
   };
@@ -40,7 +47,10 @@ const roundsSurvived = (imp: ImpostorMatch, id: PlayerId) => {
   return out ? out.round - 1 : imp.round;
 };
 
-/** The match's XP for a player: finishing, the winning side, right votes, rounds an impostor got through. */
+/**
+ * The match's XP for a player: finishing, the winning side, right votes,
+ * rounds an impostor got through and a right last guess.
+ */
 export function impostorXp(imp: ImpostorMatch, id: PlayerId): number {
   const part = impostorPart(imp, id);
   if (part.left) return 0;
@@ -51,7 +61,8 @@ export function impostorXp(imp: ImpostorMatch, id: PlayerId): number {
     XP.finish +
     (won ? XP.first : 0) +
     X.rightVote * part.rightVotes +
-    (part.impostor ? X.survived * roundsSurvived(imp, id) : 0)
+    (part.impostor ? X.survived * roundsSurvived(imp, id) : 0) +
+    (part.guessHit ? X.guessHit : 0)
   );
 }
 

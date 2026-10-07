@@ -7,11 +7,15 @@ import {
   Gamepad2,
   ImageUp,
   type LucideIcon,
+  Search,
+  Shapes,
   ShieldCheck,
   Sparkles,
+  Target,
   Trophy,
   UserRoundPlus,
   Users,
+  VenetianMask,
   Zap,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
@@ -32,6 +36,10 @@ const ICON: Record<BadgeId, LucideIcon> = {
   quick: Zap,
   themes: Compass,
   tough: ShieldCheck,
+  pokerFace: VenetianMask,
+  nose: Search,
+  chameleon: Shapes,
+  bullseye: Target,
   pictures: Camera,
   covers: ImageUp,
   characters: UserRoundPlus,
@@ -118,6 +126,13 @@ function LevelCard({ xp }: { xp: number }) {
           label={tb("rules.discovered")}
           xp={GAME_XP["who-am-i"].discovered}
         />
+        <li className="mt-1 flex items-center gap-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
+          <GameThumb game="impostor" size="tiny" />
+          {gameName("impostor")}
+        </li>
+        <Rule label={tb("rules.rightVote")} xp={GAME_XP.impostor.rightVote} />
+        <Rule label={tb("rules.survived")} xp={GAME_XP.impostor.survived} />
+        <Rule label={tb("rules.guessHit")} xp={GAME_XP.impostor.guessHit} />
       </ul>
     </section>
   );

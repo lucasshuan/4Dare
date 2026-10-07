@@ -3,7 +3,11 @@ import type { GameKey } from "@/game/games";
 import type { Gosto } from "@/game/gostos";
 import type { SyncedSettings } from "@/game/options";
 import type { BadgeGroup, BadgeId } from "@/game/profile/badges";
-import type { Fact } from "@/game/profile/history";
+import type {
+  Fact,
+  impostorNumbers,
+  whoAmINumbers,
+} from "@/game/profile/history";
 import type {
   About,
   Banner,
@@ -162,19 +166,20 @@ export interface ShowcaseView extends ShowcaseItem {
 }
 
 /** One game's card on a profile, with that game's own numbers. */
-export interface GameView {
-  game: GameKey;
+interface GameTotals {
   matches: number;
   wins: number;
   timeMs: number;
   /** Matches in the last 30 days. */
   recent: number;
-  /** "Who am I?": cards discovered, the share discovered and the questions it took. */
-  discovered: number;
-  discoverRate: number | null;
-  avgQuestions: number | null;
-  bestQuestions: number | null;
 }
+
+/** A game's card on a profile: every game's numbers plus its own. */
+export type GameView = GameTotals &
+  (
+    | ({ game: "who-am-i" } & ReturnType<typeof whoAmINumbers>)
+    | ({ game: "impostor" } & ReturnType<typeof impostorNumbers>)
+  );
 
 /** A curiosity with its people named. */
 export type FactView =
@@ -182,7 +187,7 @@ export type FactView =
   | (Omit<Extract<Fact, { kind: "hardest" }>, "to"> & {
       to: PersonRef | null;
     })
-  | Extract<Fact, { kind: "fastest" | "theme" }>;
+  | Extract<Fact, { kind: "fastest" | "theme" | "escape" | "bullseye" }>;
 
 /** A picture someone sent for a character, as their profile lists it. */
 export interface ContributedPicture {

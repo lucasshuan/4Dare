@@ -209,6 +209,8 @@ export type Database = {
       };
       impostor_match_players: {
         Row: {
+          character_name: string | null;
+          first_right: boolean;
           guess: string | null;
           guess_hit: boolean | null;
           impostor: boolean;
@@ -217,8 +219,11 @@ export type Database = {
           out_round: number | null;
           right_votes: number;
           user_id: string;
+          votes_taken: number;
         };
         Insert: {
+          character_name?: string | null;
+          first_right?: boolean;
           guess?: string | null;
           guess_hit?: boolean | null;
           impostor: boolean;
@@ -227,8 +232,11 @@ export type Database = {
           out_round?: number | null;
           right_votes?: number;
           user_id: string;
+          votes_taken?: number;
         };
         Update: {
+          character_name?: string | null;
+          first_right?: boolean;
           guess?: string | null;
           guess_hit?: boolean | null;
           impostor?: boolean;
@@ -237,6 +245,7 @@ export type Database = {
           out_round?: number | null;
           right_votes?: number;
           user_id?: string;
+          votes_taken?: number;
         };
         Relationships: [
           {
@@ -245,6 +254,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "matches";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "impostor_match_players_player_fkey";
+            columns: ["match_id", "user_id"];
+            isOneToOne: true;
+            referencedRelation: "match_players";
+            referencedColumns: ["match_id", "user_id"];
           },
         ];
       };

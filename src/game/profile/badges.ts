@@ -2,7 +2,7 @@
 // Worked out from their matches and contributions whenever a profile is
 // read; the day a tier was first seen is kept (table user_badges).
 import type { GameKey } from "../games";
-import type { PlayedMatch } from "./history";
+import { impostorParts, type PlayedMatch } from "./history";
 
 export const TIERS = ["bronze", "silver", "gold"] as const;
 
@@ -25,6 +25,10 @@ export const BADGES = [
   { id: "quick", group: "who-am-i", goals: [1, 10, 50] },
   { id: "themes", group: "who-am-i", goals: [5, 20, 60] },
   { id: "tough", group: "who-am-i", goals: [3, 20, 100] },
+  { id: "pokerFace", group: "impostor", goals: [1, 5, 20] },
+  { id: "nose", group: "impostor", goals: [5, 20, 75] },
+  { id: "chameleon", group: "impostor", goals: [3, 10, 30] },
+  { id: "bullseye", group: "impostor", goals: [1, 5, 20] },
   { id: "pictures", group: "library", goals: [1, 10, 50] },
   { id: "covers", group: "library", goals: [1, 5, 20] },
   { id: "characters", group: "library", goals: [1, 10, 50] },
@@ -67,6 +71,8 @@ export function badgeValues(
   const parts = matches.flatMap((m) =>
     m.game === "who-am-i" && m.details ? [m.details] : [],
   );
+  const imps = impostorParts(matches).filter((p) => !p.left);
+  const escapes = imps.filter((p) => p.impostor && p.won);
   return {
     matches: matches.length,
     wins: matches.filter((m) => m.place === 1).length,
@@ -80,6 +86,13 @@ export function badgeValues(
     tough: parts.filter(
       (p) => p.gave && p.gave.result !== "discovered" && p.gave.questions > 0,
     ).length,
+    // won as an impostor without taking a single vote
+    pokerFace: escapes.filter((p) => p.votesTaken === 0).length,
+    // right in the match's first vote
+    nose: imps.filter((p) => p.firstRight).length,
+    chameleon: escapes.length,
+    // the crew's card, guessed on the last chance
+    bullseye: imps.filter((p) => p.guessHit).length,
     pictures: made.pictures,
     covers: made.covers,
     characters: made.characters,
