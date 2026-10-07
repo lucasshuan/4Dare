@@ -77,8 +77,8 @@ export function ImpostorSnapshot({
       )}
     >
       {/* soft light spots and a couple of masks */}
-      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-surface/40 blur-2xl" />
-      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/50 blur-2xl" />
+      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/10 blur-2xl" />
+      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/20 blur-2xl" />
       <VenetianMask
         className="absolute top-[10%] right-[8%] size-[16cqh] rotate-12 text-no opacity-20"
         strokeWidth={2.25}
@@ -118,7 +118,7 @@ export function ImpostorSnapshot({
                   ease: [0.22, 1, 0.36, 1],
                 }}
               >
-                <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-ink shadow-pop backface-hidden">
+                <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-[#16181c] shadow-pop ring-1 ring-butter/25 ring-inset backface-hidden">
                   <VenetianMask
                     className="size-[45%] text-butter"
                     strokeWidth={2}
@@ -148,7 +148,7 @@ export function ImpostorSnapshot({
             className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[58%] size-[78cqh] rounded-pill shadow-[0_0_0_200vmax_rgba(11,15,23,0.7)]"
             style={{
               background:
-                "radial-gradient(circle, transparent 48%, rgba(11,15,23,0.7) 72%)",
+                "radial-gradient(circle, rgba(246,227,161,0.16), transparent 48%, rgba(11,15,23,0.7) 72%)",
             }}
             initial={{ opacity: 0, left: still ? spot : "4%" }}
             animate={{

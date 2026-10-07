@@ -30,12 +30,15 @@ const CONTENT_LEAVES: Variants = {
  * `left={null}` drops the wordmark. The bar stays at the top as the page
  * scrolls (on phones only over a banner, where room is short): clear at the
  * top, frosted glass once something scrolls under it.
- * With a `banner`, it runs full width under the bar, which floats over it.
+ * With a `banner`, it runs full width under the bar, which floats over it;
+ * over a `darkBanner` (dark in both themes) the bar takes the dark theme
+ * until something scrolls under it.
  */
 export function Screen({
   left,
   right,
   banner,
+  darkBanner = false,
   children,
   className,
 }: {
@@ -43,6 +46,7 @@ export function Screen({
   right?: ReactNode;
   /** Full width, right under the top bar; it should start with UNDER_TOPBAR. */
   banner?: ReactNode;
+  darkBanner?: boolean;
   children: ReactNode;
   className?: string;
 }) {
@@ -59,7 +63,7 @@ export function Screen({
   if (banner) {
     return (
       <div className="flex min-h-dvh flex-col">
-        <TopBar>{bar}</TopBar>
+        <TopBar dark={darkBanner}>{bar}</TopBar>
         {/* the banner slides up under the bar */}
         <div className="-mt-[72px] sm:-mt-[88px] sm:short:-mt-[72px]">
           {banner}
@@ -92,14 +96,17 @@ export function Screen({
 /**
  * The top bar: sticky, clear at the top, frosted once the page scrolls under
  * it, the same height on every page. `phones="scroll"` lets it scroll away
- * on phones. A parent's `leave` variant slides it up (the lobby, when the
+ * on phones. `dark` gives it the dark theme while it is clear, over a dark
+ * banner. A parent's `leave` variant slides it up (the lobby, when the
  * match starts).
  */
 function TopBar({
   phones = "stick",
+  dark = false,
   children,
 }: {
   phones?: "stick" | "scroll";
+  dark?: boolean;
   children: ReactNode;
 }) {
   const [scrolled, setScrolled] = useState(false);
@@ -112,6 +119,7 @@ function TopBar({
   return (
     <m.header
       variants={BAR_LEAVES}
+      data-theme={dark && !scrolled ? "dark" : undefined}
       className={cn(
         "sticky top-0 z-30 h-[72px] border-b px-4 pt-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft sm:h-[88px] sm:px-8 sm:pt-6 sm:short:h-[72px] sm:short:pt-4",
         phones === "scroll" && "max-sm:static",

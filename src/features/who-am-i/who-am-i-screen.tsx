@@ -29,9 +29,12 @@ export function WhoAmIScreen() {
 export function GameHub({
   game,
   banner,
+  darkBanner = false,
 }: {
   game: GameKey;
   banner: ReactNode;
+  /** The banner is dark in both themes (see Screen). */
+  darkBanner?: boolean;
 }) {
   const t = useTranslations("home");
   const gameName = useGameName();
@@ -39,7 +42,12 @@ export function GameHub({
   const { match } = useCurrentMatch();
 
   return (
-    <Screen left={<HubBrand />} right={<HubActions />} banner={banner}>
+    <Screen
+      left={<HubBrand />}
+      right={<HubActions />}
+      banner={banner}
+      darkBanner={darkBanner}
+    >
       <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,500px)_minmax(0,560px)] lg:justify-between">
         <m.section
           initial={{ opacity: 0, y: 12 }}

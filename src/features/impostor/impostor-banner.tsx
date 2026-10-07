@@ -268,9 +268,9 @@ export function ImpostorBanner() {
         style={{ x: backX, y: backY }}
         className="-inset-10 -z-10 absolute"
       >
-        <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-surface/50 blur-3xl" />
-        <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-butter/60 blur-3xl" />
-        <span className="absolute top-[5%] right-[22%] h-[45%] w-[25%] rounded-pill bg-sky-soft/70 blur-3xl" />
+        <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-white/10 blur-3xl" />
+        <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-butter/20 blur-3xl" />
+        <span className="absolute top-[5%] right-[22%] h-[45%] w-[25%] rounded-pill bg-sky/15 blur-3xl" />
         {MARKS.map(([left, top, size, color, seconds, mask]) => (
           <m.span
             key={`${left}-${top}`}
@@ -308,7 +308,7 @@ export function ImpostorBanner() {
         className="relative isolate mx-auto h-[clamp(180px,min(22vw,27vh),230px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[210px]"
       >
         {/* the table everyone sits around */}
-        <span className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-surface/45" />
+        <span className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-white/10" />
 
         {/* the question, then the vote */}
         <div className="absolute inset-x-0 top-[1%] flex justify-center px-4">
@@ -320,7 +320,7 @@ export function ImpostorBanner() {
                 className={cn(
                   "max-w-[min(26rem,80%)] text-balance rounded-lg rounded-b-sm px-4 py-2 text-center font-bold font-display text-[clamp(15px,2vw,20px)] leading-tight shadow-card",
                   s.ask === "vote"
-                    ? "bg-ink text-on-ink"
+                    ? "bg-butter text-on-butter"
                     : "bg-surface text-ink",
                 )}
               >
@@ -362,7 +362,7 @@ export function ImpostorBanner() {
                       className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[45%] left-1/2 size-[400vmax]"
                       style={{
                         background:
-                          "radial-gradient(circle, transparent 31cqh, rgba(11,15,23,0.72) 48cqh)",
+                          "radial-gradient(circle, rgba(246,227,161,0.14), transparent 31cqh, rgba(11,15,23,0.72) 48cqh)",
                       }}
                     />
                   ) : null}
@@ -470,7 +470,7 @@ export function ImpostorBanner() {
                         ease: [0.22, 1, 0.36, 1],
                       }}
                     >
-                      <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-ink shadow-pop backface-hidden">
+                      <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-[#16181c] shadow-pop ring-1 ring-butter/25 ring-inset backface-hidden">
                         <VenetianMask
                           className="size-[45%] text-butter"
                           strokeWidth={2}
