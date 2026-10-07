@@ -319,8 +319,14 @@ export function ImpostorBanner() {
         // its own layer whether or not the pointer moves it, so it stacks the same
         className="relative isolate mx-auto h-[clamp(180px,min(22vw,27vh),230px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[210px]"
       >
-        {/* the table everyone sits around */}
-        <span className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-white/10" />
+        {/* the table everyone sits around; it fades with the ground over the banner's last 2rem (its top sits 24cqh above the bottom) */}
+        <span
+          className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-white/10"
+          style={{
+            maskImage:
+              "linear-gradient(to bottom, #000 calc(24cqh - 2rem), transparent 24cqh)",
+          }}
+        />
 
         {/* the question, then the vote */}
         <div className="absolute inset-x-0 top-[1%] flex justify-center px-4">
