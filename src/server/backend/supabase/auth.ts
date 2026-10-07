@@ -2,6 +2,7 @@ import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { randomGuestNumber } from "@/game/guest-names";
+import { handleCandidates } from "@/game/profile/handle";
 import type { Avatar, Identity, Lang } from "@/game/types";
 import type { Account } from "@/server/contract";
 import {
@@ -17,6 +18,8 @@ import { accountDefaults, isAccount, isAccountClaims } from "./identity";
 
 interface ProfileRow {
   id: string;
+  /** Null only for a profile made before handles, until its next visit. */
+  handle: string | null;
   name: string | null;
   guest_number: number;
   avatar: Avatar;
@@ -45,21 +48,53 @@ export async function syncProfile(
   guest: Guest | null,
 ): Promise<ProfileRow> {
   const found = await profileOf(user.id);
-  if (found) return found;
-  const row: ProfileRow = {
-    id: user.id,
-    guest_number: guest?.guestNumber ?? randomGuestNumber(),
-    avatar: guest?.avatar ?? randomAvatar(),
-    ...accountDefaults(user),
-  };
-  const insert = await profiles().upsert(row).select("*").single();
-  if (insert.error) throw insert.error;
-  return insert.data as unknown as ProfileRow;
+  if (found) return withHandle(found);
+  const defaults = accountDefaults(user);
+  return firstFreeHandle(defaults.name, user.id, (handle) =>
+    profiles()
+      .upsert({
+        id: user.id,
+        handle,
+        guest_number: guest?.guestNumber ?? randomGuestNumber(),
+        avatar: guest?.avatar ?? randomAvatar(),
+        ...defaults,
+      })
+      .select("*")
+      .single(),
+  );
+}
+
+/** A profile made before handles gets one from its name. */
+async function withHandle(p: ProfileRow): Promise<ProfileRow> {
+  if (p.handle) return p;
+  return firstFreeHandle(p.name, p.id, (handle) =>
+    profiles().update({ handle }).eq("id", p.id).select("*").single(),
+  );
+}
+
+/** Writes the first of the name's handles nobody has (the unique index decides). */
+async function firstFreeHandle(
+  name: string | null,
+  id: string,
+  write: (
+    handle: string,
+  ) => PromiseLike<{ data: unknown; error: { code?: string } | null }>,
+): Promise<ProfileRow> {
+  let last: unknown = null;
+  for (const handle of handleCandidates(name, id)) {
+    const { data, error } = await write(handle);
+    if (!error) return data as ProfileRow;
+    // 23505: unique_violation, that handle is someone else's
+    if (error.code !== "23505") throw error;
+    last = error;
+  }
+  throw last;
 }
 
 const accountMe = (p: ProfileRow): Account => ({
   id: p.id,
   isGuest: false,
+  handle: p.handle,
   name: p.name,
   guestNumber: p.guest_number,
   avatar: p.avatar,
@@ -71,6 +106,7 @@ const accountMe = (p: ProfileRow): Account => ({
 const guestMe = (g: Guest): Account => ({
   id: g.id,
   isGuest: true,
+  handle: null,
   name: null,
   guestNumber: g.guestNumber,
   avatar: g.avatar,
@@ -94,7 +130,7 @@ export function supabaseAuth(): AuthService {
       .catch(() => ({ data: null }));
     if (!data || !isAccountClaims(data.claims)) return null;
     const profile = await profileOf(data.claims.sub);
-    if (profile) return profile;
+    if (profile) return withHandle(profile);
     // No profile yet (the callback could not make one): the provider's name
     // and picture are only on the full user.
     const { data: fresh } = await client.auth.getUser();

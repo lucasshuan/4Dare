@@ -21,6 +21,8 @@ export const fail = (error: ErrorCode): Result<never> => ({ ok: false, error });
 export interface Account {
   id: PlayerId;
   isGuest: boolean;
+  /** The @handle of the profile's link (/u/<handle>); null for a guest. */
+  handle: string | null;
   name: string | null;
   guestNumber: number;
   avatar: Avatar;

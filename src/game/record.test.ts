@@ -34,12 +34,14 @@ describe("match record", () => {
     const record = matchRecord(g.state, g.now + 1);
     expect(record).toMatchObject({
       id: `ABCDE-${startedAt}`,
+      game: "who-am-i",
       roomCode: "ABCDE",
       round: 1,
       startedAt,
       finishedAt: g.now + 1,
       theme: { pt: "Vilões" },
       themeId: "villains",
+      dayBonus: 5,
     });
     const by = (id: string) => record?.players.find((p) => p.userId === id);
     expect(by(first)).toMatchObject({
@@ -55,10 +57,16 @@ describe("match record", () => {
       wasGuest: false,
       lang: "pt",
       autoPicked: false,
+      // finished, first, discovered
+      xp: 35,
     });
-    expect(by(second)).toMatchObject({ result: "gave_up", place: null });
+    expect(by(second)).toMatchObject({
+      result: "gave_up",
+      place: null,
+      xp: 10,
+    });
     expect(by(second)?.timeMs).toBeGreaterThan(0);
-    expect(by(third)).toMatchObject({ result: "left" });
+    expect(by(third)).toMatchObject({ result: "left", xp: 0 });
     expect(record?.players).toHaveLength(3);
   });
 

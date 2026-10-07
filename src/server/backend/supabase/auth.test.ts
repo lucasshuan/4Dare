@@ -20,6 +20,12 @@ const auth = vi.hoisted(() => ({
 const rows = new Map<string, Row>();
 const jar = new Map<string, string>();
 
+/** The unique index on handles: another row with it refuses the write. */
+const handleTaken = (row: Row) =>
+  !!row.handle &&
+  [...rows.values()].some((r) => r.id !== row.id && r.handle === row.handle);
+const refused = { data: null, error: { code: "23505" } };
+
 /** Only the calls auth.ts makes on `profiles`. */
 const profilesTable = () => ({
   select: () => ({
@@ -30,6 +36,7 @@ const profilesTable = () => ({
   upsert: (row: Row) => ({
     select: () => ({
       single: async () => {
+        if (handleTaken(row)) return refused;
         rows.set(row.id, row);
         return { data: row, error: null };
       },
@@ -40,6 +47,7 @@ const profilesTable = () => ({
       select: () => ({
         single: async () => {
           const row = { ...(rows.get(id) as Row), ...fields };
+          if (handleTaken(row)) return refused;
           rows.set(id, row);
           return { data: row, error: null };
         },
@@ -92,6 +100,7 @@ const googleUser = {
 
 const profile = (): Row => ({
   id: ACCOUNT,
+  handle: "bia",
   name: "Bia",
   guest_number: 7,
   avatar: { kind: "critter", seed: "x", color: "#ffd6e0" },
@@ -163,10 +172,26 @@ describe("Supabase auth", () => {
       avatar: guest.avatar,
       provider: "google",
       providerAvatarUrl: "https://lh3/x",
+      handle: "bia_souza",
     });
     expect(auth.getUser).toHaveBeenCalledTimes(1);
     await supabaseAuth().me("en");
     expect(auth.getUser).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives a new account a handle nobody has, from its name", async () => {
+    rows.set("other", { id: "other", handle: "bia_souza" });
+    signedIn(claims());
+    auth.getUser.mockResolvedValue({ data: { user: googleUser }, error: null });
+    expect((await supabaseAuth().me("en")).handle).toBe("bia_souza_111111");
+  });
+
+  it("gives a profile made before handles one on its next visit", async () => {
+    signedIn(claims());
+    rows.set(ACCOUNT, { ...profile(), handle: null });
+    rows.set("other", { id: "other", handle: "bia" });
+    expect((await supabaseAuth().me("en")).handle).toBe("bia_111111");
+    expect(rows.get(ACCOUNT)?.handle).toBe("bia_111111");
   });
 
   it("is a guest when the profile is missing and Auth no longer knows the user", async () => {

@@ -1,5 +1,7 @@
 // What we keep of a finished match, per player: who picked what for whom,
-// how it ended and how long it took. Not shown anywhere yet.
+// how it ended, how long it took and the XP it gave. Profiles read it.
+import type { GameKey } from "./games";
+import { GAME_XP, XP } from "./profile/xp";
 import { themeId } from "./theme-id";
 import type { Lang, PlayerId, RoomState, Theme } from "./types";
 
@@ -29,11 +31,14 @@ export interface PlayerRecord {
   guesses: number;
   /** From the first question of the match to discovering, giving up or leaving. */
   timeMs: number | null;
+  /** The match's XP, but the day's first match bonus (MatchRecord.dayBonus). */
+  xp: number;
 }
 
 export interface MatchRecord {
   /** Room code + start time: saving the same match twice is a no-op. */
   id: string;
+  game: GameKey;
   roomCode: string;
   round: number;
   theme: Theme | null;
@@ -41,7 +46,19 @@ export interface MatchRecord {
   themeId: string | null;
   startedAt: number;
   finishedAt: number;
+  /** Added by the store to a player's XP when it is their first match of the day (UTC). */
+  dayBonus: number;
   players: PlayerRecord[];
+}
+
+/** What a player's part of a match gives: nothing for leaving. */
+export function playerXp(p: Pick<PlayerRecord, "result" | "place">): number {
+  if (p.result === "left") return 0;
+  return (
+    XP.finish +
+    (p.place === 1 ? XP.first : 0) +
+    (p.result === "discovered" ? GAME_XP["who-am-i"].discovered : 0)
+  );
 }
 
 /** The record of a match that just finished, or null if it never got to the questions. */
@@ -62,6 +79,7 @@ export function matchRecord(s: RoomState, now: number): MatchRecord | null {
               : "gave_up"
             : "not_found";
       const mine = s.plays.filter((play) => play.by === p.id);
+      const place = o?.place ?? null;
       return {
         userId: p.id,
         wasGuest: p.isGuest,
@@ -74,21 +92,24 @@ export function matchRecord(s: RoomState, now: number): MatchRecord | null {
         autoPicked: !!a.auto,
         suggested: !!a.suggested,
         result,
-        place: o?.place ?? null,
+        place,
         discoveredAt: o?.discoveredAt ?? null,
         questions: mine.filter((play) => play.kind === "question").length,
         guesses: mine.filter((play) => play.kind === "guess").length,
         timeMs: o?.endedAt != null ? Math.max(0, o.endedAt - startedAt) : null,
+        xp: playerXp({ result, place }),
       };
     });
   return {
     id: `${s.code}-${startedAt}`,
+    game: s.settings.game,
     roomCode: s.code,
     round: s.round,
     theme: s.theme,
     themeId: s.theme && s.theme.set !== null ? themeId(s.theme) : null,
     startedAt,
     finishedAt: now,
+    dayBonus: XP.dayFirst,
     players,
   };
 }

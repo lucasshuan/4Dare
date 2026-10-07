@@ -50,6 +50,8 @@ function tallyPickers(
   return into;
 }
 
+const utcDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+
 /** Local mode: one JSON line per finished match, appended to .data/matches.jsonl. */
 export function localMatches(): MatchStore {
   const path = dataPath("matches.jsonl");
@@ -84,10 +86,24 @@ export function localMatches(): MatchStore {
   return {
     async record(match) {
       if (saved.has(match.id)) return;
+      // The day's first match gives its bonus, as record_match does.
+      const day = utcDay(match.finishedAt);
+      const playedToday = new Set(
+        read()
+          .filter((m) => utcDay(m.finishedAt) === day)
+          .flatMap((m) => m.players.map((p) => p.userId)),
+      );
+      const kept: MatchRecord = {
+        ...match,
+        players: match.players.map((p) => ({
+          ...p,
+          xp: p.xp + (playedToday.has(p.userId) ? 0 : match.dayBonus),
+        })),
+      };
       mkdirSync(/* turbopackIgnore: true */ dirname(path), { recursive: true });
       appendFileSync(
         /* turbopackIgnore: true */ path,
-        `${JSON.stringify(match)}\n`,
+        `${JSON.stringify(kept)}\n`,
       );
       saved.add(match.id);
       tallyPickers([match], pickers);
@@ -103,9 +119,13 @@ export function localMatches(): MatchStore {
       let changed = false;
       for (const match of all) {
         // Never two rows for the same person in one match.
-        if (match.players.some((p) => p.userId === toUserId)) continue;
+        const seated = match.players.some((p) => p.userId === toUserId);
         for (const p of match.players) {
-          if (p.userId !== fromUserId) continue;
+          if (p.pickedById === fromUserId) {
+            p.pickedById = toUserId;
+            changed = true;
+          }
+          if (seated || p.userId !== fromUserId) continue;
           p.userId = toUserId;
           changed = true;
         }

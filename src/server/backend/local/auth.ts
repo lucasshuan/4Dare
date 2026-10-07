@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { handleCandidates } from "@/game/profile/handle";
 import type { Avatar, Identity, Lang } from "@/game/types";
 import type { Account } from "@/server/contract";
 import { ensureGuest, type Guest } from "../../auth/guest";
@@ -10,6 +11,8 @@ import { processSingleton, readJson, writeJson } from "./disk";
 const ACCOUNTS_FILE = "test-accounts.json";
 
 interface TestAccount {
+  /** Missing on accounts made before handles: given on their next visit. */
+  handle?: string;
   name: string | null;
   avatar: Avatar;
   provider: NonNullable<Account["provider"]>;
@@ -35,11 +38,27 @@ export function localAuth(): AuthService & {
   const save = () => writeJson(ACCOUNTS_FILE, Object.fromEntries(accounts));
   const guest = async () => ensureGuest(await cookies());
 
+  /** The first of the name's handles no other test account has. */
+  const freeHandle = (id: string, name: string | null) => {
+    const taken = new Set(
+      [...accounts].filter(([k]) => k !== id).map(([, a]) => a.handle),
+    );
+    return (
+      handleCandidates(name, id).find((h) => !taken.has(h)) ??
+      `player_${id.replace(/-/g, "").slice(0, 12)}`
+    );
+  };
+
   const toMe = (g: Guest): Account => {
     const a = accounts.get(g.id);
+    if (a && !a.handle) {
+      a.handle = freeHandle(g.id, a.name);
+      save();
+    }
     return {
       id: g.id,
       isGuest: !a,
+      handle: a?.handle ?? null,
       name: a?.name ?? null,
       guestNumber: g.guestNumber,
       avatar: a?.avatar ?? g.avatar,
@@ -80,8 +99,10 @@ export function localAuth(): AuthService & {
     },
     async enterTestAccount(provider) {
       const g = await guest();
+      const name = accounts.get(g.id)?.name ?? `Tester ${g.guestNumber % 100}`;
       accounts.set(g.id, {
-        name: accounts.get(g.id)?.name ?? `Tester ${g.guestNumber % 100}`,
+        handle: accounts.get(g.id)?.handle ?? freeHandle(g.id, name),
+        name,
         avatar: g.avatar,
         provider,
       });

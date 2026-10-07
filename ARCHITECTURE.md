@@ -42,9 +42,9 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 ## People
 
 - Guest: signed cookie (`src/server/auth/guest.ts`), no DB row. Proxy makes it.
-- Account: Supabase Auth (Discord, Google; started server-side at `/auth/sign-in`) plus `profiles` row. Sign-in moves guest's matches, and seat (`SWAP_PLAYER`), to account.
+- Account: Supabase Auth (Discord, Google; started server-side at `/auth/sign-in`) plus `profiles` row. Sign-in moves guest's matches, and seat (`SWAP_PLAYER`), to account. Each account has a unique `@handle` (`src/game/profile/handle.ts`; first sign-in takes it from the name, then the name plus a piece of the id); names may repeat.
 - Names: server sends them ready in reader's language (`?lang=` on routes, request locale in actions; `displayName`). `guestNumber` never leaves server; guest name lists load only in stage lab.
-- Match end: one record per player (`src/game/record.ts`), saved after response.
+- Match end: one record per player (`src/game/record.ts`), saved after response. `matches.game` names the game; `match_players` keeps what every game has (place, time, XP), `whoami_match_players` what only "Who am I?" has (0030). XP (`src/game/profile/xp.ts`): 10 for finishing (none for leaving), 15 for first place, 10 for discovering, 5 for the day's first match (added by `record_match`).
 
 ## Chat
 

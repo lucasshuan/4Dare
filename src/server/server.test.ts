@@ -570,12 +570,14 @@ async function recordPicks(
   const { getBackend } = await import("./backend");
   await getBackend().matches.record({
     id: `seed-${room}-${Math.random()}`,
+    game: "who-am-i",
     roomCode: room,
     round: 1,
     theme,
     themeId: themeId(theme),
     startedAt: 0,
     finishedAt: 1,
+    dayBonus: 0,
     players: characterIds.map((characterId, i) => ({
       userId: `seed-${i}`,
       wasGuest: true,
@@ -593,6 +595,7 @@ async function recordPicks(
       questions: 1,
       guesses: 0,
       timeMs: 1,
+      xp: 0,
     })),
   });
 }
