@@ -79,8 +79,9 @@ async function setup() {
     console.log(`
 No SUPABASE_ACCESS_TOKEN, so the auth settings were left as they are. Add one
 (supabase.com/dashboard/account/tokens) and run this again, or in the dashboard:
-  Authentication > Sign In / Providers: turn off anonymous sign-ins and manual
-    linking, turn on Discord and Google with their client id and secret
+  Authentication > Sign In / Providers: turn off anonymous sign-ins, turn on
+    manual linking (an account adds Google to Discord, or the other way),
+    turn on Discord and Google with their client id and secret
   Authentication > URL Configuration: site URL ${siteUrl}; redirect URLs
     ${siteUrl}/** and http://localhost:3000/**
 Discord and Google redirect URL: https://${ref}.supabase.co/auth/v1/callback`);
@@ -112,7 +113,8 @@ Discord and Google redirect URL: https://${ref}.supabase.co/auth/v1/callback`);
       site_url: siteUrl,
       uri_allow_list: [...allow].join(","),
       external_anonymous_users_enabled: false,
-      security_manual_linking_enabled: false,
+      // the account box links a second provider (/auth/link)
+      security_manual_linking_enabled: true,
       ...providers,
     }),
   });
