@@ -3,7 +3,7 @@
 import { Check } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { Fragment, type ReactNode, useState } from "react";
+import { Fragment, type ReactNode, useEffect, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ import { cn } from "@/lib/cn";
 import { focusIsFree } from "@/lib/focus";
 import { dur, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
+import { useGameOption } from "@/lib/settings";
 import {
   answerQuestion,
   askQuestion,
@@ -534,6 +535,14 @@ function Guess() {
   const { view, code } = useRoomContext();
   const { act, pending } = useRoomAction();
   const [text, setText] = useState("");
+  // with "confirm before passing" on, the first tap arms Pass and the second passes
+  const confirmPass = useGameOption("who-am-i", "confirmPass");
+  const [passArmed, setPassArmed] = useState(false);
+  useEffect(() => {
+    if (!passArmed) return;
+    const id = setTimeout(() => setPassArmed(false), 4000);
+    return () => clearTimeout(id);
+  }, [passArmed]);
   // typed under the answers reveal, sent once the step starts
   // not on phones: a field focused by itself would raise the keyboard and hide the chat bar
   const [autoFocus] = useState(
@@ -574,11 +583,19 @@ function Guess() {
         </Button>
         <Button
           disabled={pending}
+          aria-live="polite"
           onClick={async () => {
+            if (confirmPass && !passArmed) {
+              setPassArmed(true);
+              return;
+            }
+            setPassArmed(false);
             await act(() => passTurn(code));
           }}
+          onBlur={() => setPassArmed(false)}
+          variant={passArmed ? "primary" : "secondary"}
         >
-          {t("pass")}
+          {passArmed ? t("passConfirm") : t("pass")}
         </Button>
       </div>
     </form>

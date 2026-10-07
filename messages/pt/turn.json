@@ -51,7 +51,8 @@
     "label": "Seu palpite",
     "hint": "Se o nome bater, vale na hora. Se ficar na dúvida, decide quem escolheu o seu personagem.",
     "send": "Tentar adivinhar",
-    "pass": "Passar a vez"
+    "pass": "Passar a vez",
+    "passConfirm": "Passar mesmo?"
   },
   "validate": {
     "kicker": "Rodada {n} · Palpite de {name}",

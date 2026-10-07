@@ -40,6 +40,7 @@ import { useMedia } from "@/lib/hooks/use-media";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { dur, type EaseFn, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
+import { useGameOption } from "@/lib/settings";
 import { confirmCard, randomPick } from "@/server/actions";
 import type { CharacterDTO } from "@/server/contract";
 import { DoneRow } from "./done-row";
@@ -430,8 +431,9 @@ function PickTable() {
         }
       : content;
 
-  // the hand: 5 of the theme's 8, drawn for this viewer and this match
+  // the hand: 5 of the theme's 8, drawn for this viewer and this match (off in the settings: no hand)
   const hand = usePickHand(view.theme, lang);
+  const popularHand = useGameOption("who-am-i", "popularHand");
   const cards = useMemo(
     () => drawHand(hand.data ?? [], `${view.youId}:${view.round}`),
     [hand.data, view.youId, view.round],
@@ -572,17 +574,19 @@ function PickTable() {
           </m.div>
         </div>
 
-        <PickHand
-          cards={cards}
-          theme={view.theme?.[lang] ?? ""}
-          phone={phone}
-          open={editing}
-          timeUp={timeUp}
-          seat={target.colorSlot}
-          onPick={(card) =>
-            change({ kind: "picked", card: toCard(card), via: "hand" })
-          }
-        />
+        {popularHand ? (
+          <PickHand
+            cards={cards}
+            theme={view.theme?.[lang] ?? ""}
+            phone={phone}
+            open={editing}
+            timeUp={timeUp}
+            seat={target.colorSlot}
+            onPick={(card) =>
+              change({ kind: "picked", card: toCard(card), via: "hand" })
+            }
+          />
+        ) : null}
         <DoneRow
           ref={setDoneRow}
           players={view.players}

@@ -51,7 +51,8 @@
     "label": "Tu intento",
     "hint": "Si el nombre coincide, cuenta al instante. Si no, decide quien eligió tu personaje.",
     "send": "Adivinar",
-    "pass": "Pasar"
+    "pass": "Pasar",
+    "passConfirm": "¿Pasar de verdad?"
   },
   "validate": {
     "kicker": "Ronda {n} · Intento de {name}",

@@ -18,6 +18,7 @@ import { useMedia } from "@/lib/hooks/use-media";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
+import { useSettings } from "@/lib/settings";
 import { playSound } from "@/lib/sound";
 import { type Bubble, ChatBubbles } from "./chat-bubbles";
 import { ChatCompose } from "./chat-compose";
@@ -59,6 +60,7 @@ export function RoomChat() {
   const clock = useClock();
   const { messages, send, retry, status } = useChat(code);
   const phone = useMedia(PHONE);
+  const { chatBubbles } = useSettings();
   const finePointer = useMedia(FINE_POINTER);
   const reduced = useReducedMotionConfig() ?? false;
   const name = useDisplayName();
@@ -237,7 +239,7 @@ export function RoomChat() {
         hidden && "hidden",
       )}
     >
-      {phone ? null : <ChatBubbles bubbles={bubbles} />}
+      {phone || !chatBubbles ? null : <ChatBubbles bubbles={bubbles} />}
       <div
         ref={hop}
         className={cn(

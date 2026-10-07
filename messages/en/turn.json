@@ -51,7 +51,8 @@
     "label": "Your guess",
     "hint": "If the name matches, it counts right away. If not, whoever picked your character decides.",
     "send": "Take a guess",
-    "pass": "Pass"
+    "pass": "Pass",
+    "passConfirm": "Pass for real?"
   },
   "validate": {
     "kicker": "Round {n} · {name}'s guess",
