@@ -78,6 +78,15 @@ export function supabaseMatches(): MatchStore {
         { matches: 0, wins: 0, timeMs: 0, xp: 0 },
       );
     },
+    async playedTogether(a, b) {
+      if (a === b) return false;
+      const { data, error } = await serviceClient().rpc("played_together", {
+        p_a: a,
+        p_b: b,
+      });
+      if (error) throw error;
+      return data === true;
+    },
     async history(userId) {
       const { data, error } = await serviceClient().rpc("player_matches", {
         p_user: userId,

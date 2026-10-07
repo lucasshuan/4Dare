@@ -5,6 +5,12 @@
 
 import type { ChatMessage, NewChatMessage } from "@/game/chat";
 import type { PlayedMatch } from "@/game/profile/history";
+import type {
+  About,
+  Banner,
+  Privacy,
+  ShowcaseItem,
+} from "@/game/profile/profile";
 import type { MatchRecord } from "@/game/record";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
@@ -229,12 +235,35 @@ export interface StoredProfile {
   quote: string | null;
   /** The colour of the XP ring, the tabs and the garden's flowers; null for the default. */
   accent: string | null;
+  banner: Banner | null;
+  showcase: ShowcaseItem[];
+  about: About;
+  privacy: Privacy;
+  /** When the handle last changed (ms); null if it never did. */
+  handleChangedAt: number | null;
 }
+
+/** What the owner can change on their profile (name and avatar go through AuthService). */
+export type ProfilePatch = Partial<
+  Pick<
+    StoredProfile,
+    | "handle"
+    | "quote"
+    | "accent"
+    | "banner"
+    | "showcase"
+    | "about"
+    | "privacy"
+    | "handleChangedAt"
+  >
+>;
 
 export interface ProfileStore {
   byHandle(handle: string): Promise<StoredProfile | null>;
   /** The accounts among `ids` (guests have none), in one read. */
   byIds(ids: string[]): Promise<StoredProfile[]>;
+  /** Fails with handle_taken when another account has the new handle. */
+  update(id: PlayerId, patch: ProfilePatch): Promise<StoredProfile>;
 }
 
 export interface Notifier {
@@ -286,6 +315,8 @@ export interface MatchStore {
   history(userId: string): Promise<PlayedMatch[]>;
   /** A player's numbers over every game, without reading every match. */
   totals(userId: string): Promise<PlayerTotals>;
+  /** Whether two players ever finished a match together. */
+  playedTogether(a: string, b: string): Promise<boolean>;
 }
 
 export interface PlayerTotals {

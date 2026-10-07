@@ -6,11 +6,12 @@ import type { Account } from "@/server/contract";
 import { ensureGuest, type Guest } from "../../auth/guest";
 import type { AuthService } from "../types";
 import { processSingleton, readJson, writeJson } from "./disk";
+import type { TestProfile } from "./profiles";
 
 /** Fake accounts made with "enter test account", keyed by the guest's id. */
 const ACCOUNTS_FILE = "test-accounts.json";
 
-export interface TestAccount {
+export interface TestAccount extends TestProfile {
   /** Missing on accounts made before handles: given on their next visit. */
   handle?: string;
   name: string | null;
@@ -21,6 +22,10 @@ export interface TestAccount {
   /** When it was made (ms; missing in older files). */
   createdAt?: number;
 }
+
+/** Writes the test accounts back to their file. */
+export const saveTestAccounts = () =>
+  writeJson(ACCOUNTS_FILE, Object.fromEntries(testAccounts()));
 
 /** The test accounts of this dev server, shared by the auth and profile stores. */
 export const testAccounts = () =>
@@ -43,7 +48,7 @@ export function localAuth(): AuthService & {
   enterTestAccount(provider: "discord" | "google"): Promise<Account>;
 } {
   const accounts = testAccounts();
-  const save = () => writeJson(ACCOUNTS_FILE, Object.fromEntries(accounts));
+  const save = saveTestAccounts;
   const guest = async () => ensureGuest(await cookies());
 
   /** The first of the name's handles no other test account has. */

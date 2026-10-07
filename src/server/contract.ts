@@ -1,6 +1,12 @@
 // Shapes shared by server actions, route handlers and the UI.
 import type { GameKey } from "@/game/games";
 import type { Fact } from "@/game/profile/history";
+import type {
+  About,
+  Banner,
+  Privacy,
+  ShowcaseItem,
+} from "@/game/profile/profile";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
   Avatar,
@@ -106,12 +112,21 @@ export interface PersonRef {
 /** What the quick card shows of an account, opened from its avatar. */
 export interface PlayerCard extends PersonRef {
   accent: string | null;
+  banner: Banner | null;
   quote: string | null;
   createdAt: number;
-  xp: number;
-  matches: number;
-  wins: number;
-  timeMs: number;
+  /** Null when the owner keeps their activity from this reader. */
+  numbers: {
+    xp: number;
+    matches: number;
+    wins: number;
+    timeMs: number;
+  } | null;
+}
+
+/** A character on a profile's showcase, in the reader's language (null when it has no name there). */
+export interface ShowcaseView extends ShowcaseItem {
+  character: CharacterDTO | null;
 }
 
 /** One game's card on a profile, with that game's own numbers. */
@@ -152,10 +167,22 @@ export interface ContributedPicture {
 /** An account's profile page. */
 export interface ProfileView extends PersonRef {
   accent: string | null;
+  banner: Banner | null;
   quote: string | null;
   createdAt: number;
+  about: About;
+  showcase: ShowcaseView[];
   /** The reader is this account. */
   isMe: boolean;
+  /** The parts the owner keeps from this reader: they come empty. */
+  hidden: {
+    profile: boolean;
+    activity: boolean;
+    showcase: boolean;
+    contributions: boolean;
+  };
+  /** The owner's own settings, for the editor; null for anyone else. */
+  own: { privacy: Privacy; handleChangedAt: number | null } | null;
   xp: number;
   matches: number;
   wins: number;

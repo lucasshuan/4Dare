@@ -531,6 +531,10 @@ export const ERROR_CODES = [
   "in_match",
   /** The host removed the player from this room a moment ago (KICK_MS). */
   "kicked",
+  /** Another account has that @handle. */
+  "handle_taken",
+  /** The @handle changed less than HANDLE_CHANGE_DAYS ago. */
+  "handle_wait",
   "unknown",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

@@ -16,7 +16,7 @@ export async function GET(
     const lang = langParam(request);
     const me = await getBackend().auth.identity(lang);
     if (!allow(`card:${me.id}`, 240, 60_000)) return failure("rate_limited");
-    const card = await playerCard(id, lang);
+    const card = await playerCard(id, me.id, lang);
     if (!card) return failure("not_found");
     return Response.json(card, { headers: noStore });
   });

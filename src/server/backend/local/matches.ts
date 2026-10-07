@@ -227,6 +227,16 @@ export function localMatches(): MatchStore {
       writeJson(VOTES_FILE, Object.fromEntries(votes));
     },
     history,
+    async playedTogether(a, b) {
+      return (
+        a !== b &&
+        read().some(
+          (m) =>
+            m.players.some((p) => p.userId === a) &&
+            m.players.some((p) => p.userId === b),
+        )
+      );
+    },
     async totals(userId) {
       return totalsOf(await history(userId));
     },

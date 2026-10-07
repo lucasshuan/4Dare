@@ -1,23 +1,33 @@
 // The profile page and the quick card, put together from fake stores.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PlayedMatch } from "@/game/profile/history";
+import { DEFAULT_PRIVACY, type Privacy } from "@/game/profile/profile";
 import type { StoredProfile } from "./backend/types";
 import { playerCard, profileView } from "./profiles";
 
 const MEI = "11111111-1111-4111-8111-111111111111";
 const BIA = "22222222-2222-4222-8222-222222222222";
 const avatar = { kind: "critter", seed: "x", color: "#D9C7F4" } as const;
-const profile = (id: string, handle: string, name: string | null) =>
-  ({
-    id,
-    handle,
-    name,
-    guestNumber: 3,
-    avatar,
-    createdAt: 1000,
-    quote: null,
-    accent: null,
-  }) satisfies StoredProfile;
+const profile = (
+  id: string,
+  handle: string,
+  name: string | null,
+  privacy: Partial<Privacy> = {},
+): StoredProfile => ({
+  id,
+  handle,
+  name,
+  guestNumber: 3,
+  avatar,
+  createdAt: 1000,
+  quote: "Se for o Shrek, eu descubro",
+  accent: null,
+  banner: null,
+  showcase: [{ characterId: "wd-Q9", caption: "Amor da minha vida <3" }],
+  about: { time: "night", langs: ["pt"] },
+  privacy: { ...DEFAULT_PRIVACY, ...privacy },
+  handleChangedAt: null,
+});
 
 const now = Date.now();
 const DAY = 86_400_000;
@@ -53,6 +63,10 @@ vi.mock("./backend", () => ({
     matches: {
       history: async () => store.history,
       totals: async () => ({ matches: 7, wins: 2, timeMs: 1, xp: 99 }),
+      playedTogether: async (a: string, b: string) =>
+        store.history.some((m) =>
+          [a, b].every((id) => m.others.some((o) => o.id === id)),
+        ),
     },
     images: {
       byAuthor: async (_id: string, withPending: boolean) =>
@@ -62,6 +76,7 @@ vi.mock("./backend", () => ({
     },
     characters: {
       createdBy: async () => [],
+      get: async () => null,
       getMany: async (ids: string[], lang: string) =>
         ids.map((id) => ({
           id,
@@ -108,6 +123,22 @@ describe("profiles", () => {
       timeMs: 180_000,
       xp: 30,
       playing: null,
+      hidden: {
+        profile: false,
+        activity: false,
+        showcase: false,
+        contributions: false,
+      },
+      own: null,
+      quote: "Se for o Shrek, eu descubro",
+      about: { time: "night", langs: ["pt"] },
+      showcase: [
+        {
+          characterId: "wd-Q9",
+          caption: "Amor da minha vida <3",
+          character: { id: "pt-wd-Q9", name: "Name of pt-wd-Q9" },
+        },
+      ],
     });
     expect(view?.plays).toHaveLength(2);
     expect(view?.games).toMatchObject([
@@ -141,11 +172,47 @@ describe("profiles", () => {
 
   it("has no page for an unknown handle, and no card for a guest", async () => {
     expect(await profileView("nobody", BIA, "pt")).toBeNull();
-    expect(await playerCard("guest-id", "pt")).toBeNull();
-    expect(await playerCard(BIA, "pt")).toMatchObject({
+    expect(await playerCard("guest-id", MEI, "pt")).toBeNull();
+    expect(await playerCard(BIA, MEI, "pt")).toMatchObject({
       handle: "bia",
-      matches: 7,
-      xp: 99,
+      numbers: { matches: 7, xp: 99 },
     });
+  });
+
+  it("keeps each part to its audience, and shows the owner everything", async () => {
+    const STRANGER = "33333333-3333-4333-8333-333333333333";
+    store.profiles[0] = profile(MEI, "mei", "Mei", {
+      activity: "played",
+      showcase: "me",
+    });
+    // Bia played with Mei: she sees the activity, not the showcase
+    const mate = await profileView("mei", BIA, "pt");
+    expect(mate?.hidden).toMatchObject({ activity: false, showcase: true });
+    expect(mate?.matches).toBe(3);
+    expect(mate?.showcase).toEqual([]);
+    // a stranger sees neither
+    const stranger = await profileView("mei", STRANGER, "pt");
+    expect(stranger?.hidden).toMatchObject({ activity: true, showcase: true });
+    expect(stranger).toMatchObject({ matches: 0, plays: [], facts: [] });
+    const card = await playerCard(MEI, STRANGER, "pt");
+    expect(card?.numbers).toBeNull();
+    // the owner sees it all, with what the editor needs
+    const own = await profileView("mei", MEI, "pt");
+    expect(own?.hidden).toMatchObject({ activity: false, showcase: false });
+    expect(own?.own?.privacy.showcase).toBe("me");
+  });
+
+  it("shows only face, name and handle of a closed profile", async () => {
+    store.profiles[0] = profile(MEI, "mei", "Mei", { profile: "me" });
+    const view = await profileView("mei", BIA, "pt");
+    expect(view).toMatchObject({
+      handle: "mei",
+      name: "Mei",
+      hidden: { profile: true },
+      quote: null,
+      showcase: [],
+      matches: 0,
+    });
+    expect((await playerCard(MEI, BIA, "pt"))?.quote).toBeNull();
   });
 });

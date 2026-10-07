@@ -65,6 +65,8 @@
     "wrong_password": "Senha errada.",
     "in_match": "Você está numa partida. Termine ou saia dela antes.",
     "kicked": "O anfitrião tirou você da sala. Volte daqui a 2 minutos.",
+    "handle_taken": "Esse @ já é de outra pessoa.",
+    "handle_wait": "Você trocou de @ há pouco. Dá para trocar de novo 30 dias depois.",
     "unknown": "Algo deu errado. Tente de novo."
   },
   "image": {

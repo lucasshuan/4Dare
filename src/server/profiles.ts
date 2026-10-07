@@ -7,11 +7,13 @@ import {
   totalsOf,
   whoAmINumbers,
 } from "@/game/profile/history";
-import type { Lang, PlayerId } from "@/game/types";
+import { sees } from "@/game/profile/profile";
+import type { Character, Lang, PlayerId } from "@/game/types";
 import { getBackend } from "./backend";
 import { entryId } from "./backend/seed-format";
 import type { StoredProfile } from "./backend/types";
 import type {
+  CharacterDTO,
   ContributedPicture,
   FactView,
   GameView,
@@ -28,12 +30,43 @@ const GARDEN_MS = 372 * DAY;
 const PICTURES = 24;
 const CHARACTERS = 24;
 
-const person = (p: StoredProfile, lang: Lang): PersonRef => ({
+export const person = (p: StoredProfile, lang: Lang): PersonRef => ({
   id: p.id,
   handle: p.handle,
   name: displayName({ isGuest: false, ...p }, lang),
   avatar: p.avatar,
 });
+
+const dto = ({
+  id,
+  lang,
+  name,
+  origin,
+  imageUrl,
+}: Character): CharacterDTO => ({
+  id,
+  lang,
+  name,
+  origin,
+  imageUrl,
+});
+
+/**
+ * Characters by their language-free ids, in the reader's language; one a
+ * player made in another language comes in that one.
+ */
+async function charactersFor(keys: string[], lang: Lang) {
+  const { characters } = getBackend();
+  const found = await characters.getMany(
+    keys.map((k) => (k.startsWith("u-") ? k : entryId(lang, k))),
+    lang,
+  );
+  const byKey = new Map(found.map((c) => [pickKey(c.id), c]));
+  const missing = keys.filter((k) => k.startsWith("u-") && !byKey.has(k));
+  for (const c of await Promise.all(missing.map((k) => characters.get(k))))
+    if (c) byKey.set(pickKey(c.id), c);
+  return byKey;
+}
 
 /** One game's card: every game's numbers plus its own. */
 function gameView(
@@ -54,18 +87,30 @@ function gameView(
 /** The quick card of an account, or null for a guest or an unknown id. */
 export async function playerCard(
   id: PlayerId,
+  viewer: PlayerId,
   lang: Lang,
 ): Promise<PlayerCard | null> {
-  const backend = getBackend();
-  const [profile] = await backend.profiles.byIds([id]);
+  const { profiles, matches } = getBackend();
+  const [profile] = await profiles.byIds([id]);
   if (!profile) return null;
-  const totals = await backend.matches.totals(id);
+  const { privacy } = profile;
+  const isOwner = id === viewer;
+  // "who played with me" is only asked when it matters
+  const needsMate =
+    !isOwner && [privacy.profile, privacy.activity].includes("played");
+  const reader = {
+    isOwner,
+    playedWith: needsMate ? await matches.playedTogether(id, viewer) : false,
+  };
+  const open = sees(privacy.profile, reader);
   return {
     ...person(profile, lang),
     accent: profile.accent,
-    quote: profile.quote,
+    banner: profile.banner,
+    quote: open ? profile.quote : null,
     createdAt: profile.createdAt,
-    ...totals,
+    numbers:
+      open && sees(privacy.activity, reader) ? await matches.totals(id) : null,
   };
 }
 
@@ -80,14 +125,64 @@ export async function profileView(
   if (!profile) return null;
   const isMe = profile.id === viewer;
   const now = Date.now();
-  const [history, playing, pictures, characters] = await Promise.all([
-    backend.matches.history(profile.id),
-    currentMatch(profile.id),
-    backend.images.byAuthor(profile.id, isMe, PICTURES),
-    backend.characters.createdBy(profile.id, CHARACTERS),
+  const history = await backend.matches.history(profile.id);
+  const reader = {
+    isOwner: isMe,
+    playedWith: history.some((m) => m.others.some((o) => o.id === viewer)),
+  };
+  const { privacy } = profile;
+  const open = sees(privacy.profile, reader);
+  const hidden = {
+    profile: !open,
+    activity: !open || !sees(privacy.activity, reader),
+    showcase: !open || !sees(privacy.showcase, reader),
+    contributions: !open || !sees(privacy.contributions, reader),
+  };
+  const base = {
+    ...person(profile, lang),
+    accent: profile.accent,
+    banner: profile.banner,
+    createdAt: profile.createdAt,
+    isMe,
+    hidden,
+    own: isMe ? { privacy, handleChangedAt: profile.handleChangedAt } : null,
+  };
+  if (!open)
+    return {
+      ...base,
+      quote: null,
+      about: { time: null, langs: [] },
+      showcase: [],
+      xp: 0,
+      matches: 0,
+      wins: 0,
+      timeMs: 0,
+      playing: null,
+      plays: [],
+      games: [],
+      facts: [],
+      pictures: [],
+      characters: [],
+    };
+
+  const [playing, pictures, made, shown] = await Promise.all([
+    privacy.playing || isMe ? currentMatch(profile.id) : null,
+    hidden.contributions
+      ? []
+      : backend.images.byAuthor(profile.id, isMe, PICTURES),
+    hidden.contributions
+      ? []
+      : backend.characters.createdBy(profile.id, CHARACTERS),
+    hidden.showcase
+      ? new Map<string | null, Character>()
+      : charactersFor(
+          profile.showcase.map((s) => s.characterId),
+          lang,
+        ),
   ]);
 
-  const facts = factsOf(history);
+  const activity = hidden.activity ? [] : history;
+  const facts = factsOf(activity);
   const named = new Map(
     (
       await backend.profiles.byIds(
@@ -113,15 +208,12 @@ export async function profileView(
   });
 
   // the pictures' characters in the reader's language
-  const shown = await backend.characters.getMany(
-    pictures.flatMap(({ characterId: id }) =>
-      !id ? [] : id.startsWith("u-") ? [id] : [entryId(lang, id)],
-    ),
+  const pictured = await charactersFor(
+    pictures.flatMap((p) => (p.characterId ? [p.characterId] : [])),
     lang,
   );
-  const byKey = new Map(shown.map((c) => [pickKey(c.id), c]));
   const pictureViews = pictures.map((p): ContributedPicture => {
-    const c = p.characterId ? byKey.get(pickKey(p.characterId)) : undefined;
+    const c = p.characterId ? pictured.get(pickKey(p.characterId)) : undefined;
     return {
       id: p.id,
       url: p.url,
@@ -132,27 +224,25 @@ export async function profileView(
   });
 
   return {
-    ...person(profile, lang),
-    accent: profile.accent,
+    ...base,
     quote: profile.quote,
-    createdAt: profile.createdAt,
-    isMe,
-    ...totalsOf(history),
+    about: profile.about,
+    showcase: hidden.showcase
+      ? []
+      : profile.showcase.map((s) => {
+          const c = shown.get(pickKey(s.characterId));
+          return { ...s, character: c ? dto(c) : null };
+        }),
+    ...totalsOf(activity),
     playing: playing?.game ?? null,
-    plays: history
+    plays: activity
       .filter((m) => m.finishedAt > now - GARDEN_MS)
       .map((m) => ({ at: m.finishedAt, game: m.game, won: m.place === 1 })),
-    games: GAME_KEYS.map((g) => gameView(g, history, now)).filter(
+    games: GAME_KEYS.map((g) => gameView(g, activity, now)).filter(
       (g) => g.matches > 0,
     ),
     facts: factViews,
     pictures: pictureViews,
-    characters: characters.map(({ id, lang: l, name, origin, imageUrl }) => ({
-      id,
-      lang: l,
-      name,
-      origin,
-      imageUrl,
-    })),
+    characters: made.map(dto),
   };
 }

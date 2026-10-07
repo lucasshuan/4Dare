@@ -11,7 +11,6 @@ import { THEME_SET_KEYS, type ThemeSet } from "@/game/theme-sets";
 import {
   ANSWERS,
   type AnswerValue,
-  CRITTER_SEED,
   DEFAULT_SETTINGS,
   GameError,
   type GameEvent,
@@ -20,7 +19,6 @@ import {
   type Lang,
   MAX_CHARACTER_NAME,
   MAX_GUESS,
-  MAX_NAME,
   MAX_NOTE,
   MAX_QUESTION,
   MAX_THEME,
@@ -37,7 +35,6 @@ import { rerollGuest as rerollGuestCookie } from "./auth/guest";
 import { getBackend } from "./backend";
 import { background } from "./background";
 import {
-  AVATAR_COLORS,
   type CharacterDTO,
   type CreateRoomInput,
   fail,
@@ -47,6 +44,11 @@ import {
 } from "./contract";
 import { readImage } from "./images";
 import { countPick, nameWithPicture, sendPicture, wearing } from "./pictures";
+import {
+  checkHandle as checkHandleFor,
+  editProfile,
+  type HandleCheck,
+} from "./profile-edit";
 import { allow } from "./rate-limit";
 import {
   currentMatch,
@@ -649,53 +651,35 @@ export async function createCharacter(
 
 // --- identity -----------------------------------------------------------------
 
-/** FormData: name, color, avatar ("critter" | "provider" | "upload" | "keep"), seed (critter), image (upload). Accounts only. */
-export async function updateProfile(form: FormData): Promise<Result<Me>> {
+/**
+ * The profile editor's save, accounts only. FormData: name, handle, quote,
+ * accent, banner ("none" | "keep" | "preset:<id>" | "upload" + bannerImage),
+ * about, showcase and privacy (JSON), and the avatar: color, avatar
+ * ("critter" + seed | "provider" | "upload" + image | "keep").
+ */
+export async function saveProfile(form: FormData): Promise<Result<Me>> {
   return run(async () => {
-    const { auth, files } = getBackend();
-    const current = await auth.me(await lang());
-    if (current.isGuest) throw new GameError("unauthorized");
-    const name = text(form.get("name"), MAX_NAME);
-    const color = form.get("color");
-    // one of the palette, or the random pastel the guest started with
-    if (
-      typeof color !== "string" ||
-      (!(AVATAR_COLORS as readonly string[]).includes(color) &&
-        color !== current.avatar.color)
-    )
-      bad();
-    const kind = form.get("avatar");
-    let avatar: Identity["avatar"];
-    if (kind === "provider" && current.providerAvatarUrl) {
-      avatar = {
-        kind: "image",
-        url: current.providerAvatarUrl,
-        color: color as string,
-      };
-    } else if (kind === "upload") {
-      const image = (await readImage(form.get("image"))) ?? bad();
-      avatar = {
-        kind: "image",
-        url: await files.put("avatars", image.bytes, image.type),
-        color: color as string,
-      };
-    } else if (kind === "critter") {
-      const seed = form.get("seed");
-      if (typeof seed !== "string" || !CRITTER_SEED.test(seed)) bad();
-      avatar = {
-        kind: "critter",
-        seed: seed as string,
-        color: color as string,
-      };
-    } else if (kind === "keep" && current.avatar.kind === "image") {
-      avatar = { ...current.avatar, color: color as string };
-    } else {
-      avatar = bad();
-    }
-    const updated = await auth.updateProfile({ name, avatar });
+    const { auth } = getBackend();
     const l = await lang();
+    const current = await auth.me(l);
+    if (current.isGuest) throw new GameError("unauthorized");
+    if (!allow(`profile-save:${current.id}`, 20, 60_000))
+      throw new GameError("rate_limited");
+    const updated = await editProfile(current, form, l);
     await syncIdentity(await auth.identity(l));
     return showMe(updated, l);
+  });
+}
+
+/** Whether the caller may take this @handle, asked while they type it. */
+export async function checkHandle(raw: string): Promise<Result<HandleCheck>> {
+  return run(async () => {
+    const current = await getBackend().auth.me(await lang());
+    if (current.isGuest) throw new GameError("unauthorized");
+    if (typeof raw !== "string" || raw.length > 40) bad();
+    if (!allow(`handle-check:${current.id}`, 120, 60_000))
+      throw new GameError("rate_limited");
+    return checkHandleFor(current.id, raw);
   });
 }
 

@@ -1,7 +1,13 @@
 import "server-only";
-import type { Avatar } from "@/game/types";
+import {
+  parseAbout,
+  parseBanner,
+  parsePrivacy,
+  parseShowcase,
+} from "@/game/profile/profile";
+import { type Avatar, GameError } from "@/game/types";
 import type { ProfileStore, StoredProfile } from "../types";
-import { serviceClient } from "./clients";
+import { json, serviceClient } from "./clients";
 import type { Database } from "./database.types";
 
 type Row = Pick<
@@ -14,10 +20,15 @@ type Row = Pick<
   | "created_at"
   | "quote"
   | "accent"
+  | "banner"
+  | "showcase"
+  | "about"
+  | "privacy"
+  | "handle_changed_at"
 >;
 
 const COLUMNS =
-  "id, handle, name, guest_number, avatar, created_at, quote, accent";
+  "id, handle, name, guest_number, avatar, created_at, quote, accent, banner, showcase, about, privacy, handle_changed_at";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -34,6 +45,13 @@ const toProfile = (r: Row): StoredProfile[] =>
           createdAt: Date.parse(r.created_at),
           quote: r.quote,
           accent: r.accent,
+          banner: parseBanner(r.banner),
+          showcase: parseShowcase(r.showcase),
+          about: parseAbout(r.about),
+          privacy: parsePrivacy(r.privacy),
+          handleChangedAt: r.handle_changed_at
+            ? Date.parse(r.handle_changed_at)
+            : null,
         },
       ]
     : [];
@@ -56,6 +74,36 @@ export function supabaseProfiles(): ProfileStore {
       const { data, error } = await profiles().select(COLUMNS).in("id", uuids);
       if (error) throw error;
       return (data ?? []).flatMap(toProfile);
+    },
+    async update(id, patch) {
+      const { data, error } = await profiles()
+        .update({
+          ...(patch.handle !== undefined && { handle: patch.handle }),
+          ...(patch.handleChangedAt !== undefined && {
+            handle_changed_at:
+              patch.handleChangedAt === null
+                ? null
+                : new Date(patch.handleChangedAt).toISOString(),
+          }),
+          ...(patch.quote !== undefined && { quote: patch.quote }),
+          ...(patch.accent !== undefined && { accent: patch.accent }),
+          ...(patch.banner !== undefined && { banner: json(patch.banner) }),
+          ...(patch.showcase !== undefined && {
+            showcase: json(patch.showcase),
+          }),
+          ...(patch.about !== undefined && { about: json(patch.about) }),
+          ...(patch.privacy !== undefined && { privacy: json(patch.privacy) }),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select(COLUMNS)
+        .single();
+      // 23505: unique_violation, the handle is someone else's
+      if (error?.code === "23505") throw new GameError("handle_taken");
+      if (error) throw error;
+      const [profile] = toProfile(data);
+      if (!profile) throw new Error("profiles: updated row has no handle");
+      return profile;
     },
   };
 }

@@ -65,6 +65,8 @@
     "wrong_password": "Wrong password.",
     "in_match": "You are in a match. Finish it or leave it first.",
     "kicked": "The host removed you from this room. Come back in 2 minutes.",
+    "handle_taken": "Someone else already has that @.",
+    "handle_wait": "You changed your @ recently. You can change it again 30 days later.",
     "unknown": "Something went wrong. Try again."
   },
   "image": {

@@ -340,20 +340,22 @@ describe("server, local mode", () => {
 
   it("guests cannot edit a profile; the test account can", async () => {
     as("r1");
-    const form = new FormData();
-    form.set("name", "Jean");
-    form.set("color", "#DCE8FA");
-    form.set("avatar", "critter");
-    form.set("seed", "x");
-    expect(await A.updateProfile(form)).toEqual({
+    const fields = {
+      name: "Jean",
+      color: "#DCE8FA",
+      avatar: "critter",
+      seed: "x",
+    };
+    expect(await A.saveProfile(profileForm(null, fields))).toEqual({
       ok: false,
       error: "unauthorized",
     });
-    must(await A.enterTestAccount());
-    const me = must(await A.updateProfile(form));
+    const account = must(await A.enterTestAccount());
+    const me = must(await A.saveProfile(profileForm(account, fields)));
     expect(me).toMatchObject({
       isGuest: false,
       name: "Jean",
+      handle: account.handle,
       avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
     });
   });
@@ -362,31 +364,95 @@ describe("server, local mode", () => {
     as("r2");
     const guest = must(await A.enterTestAccount());
     expect(guest.avatar).toMatchObject({ kind: "critter" });
-    const form = new FormData();
-    form.set("name", "Bia");
-    form.set("color", "#F4C7D9");
-    form.set("avatar", "critter");
-    form.set("seed", "<svg>");
-    expect(await A.updateProfile(form)).toEqual({
-      ok: false,
-      error: "invalid_input",
-    });
-    form.set("seed", "k3x9q");
-    form.set("color", "#123456");
-    expect(await A.updateProfile(form)).toEqual({
-      ok: false,
-      error: "invalid_input",
-    });
+    const fields = {
+      name: "Bia",
+      color: "#F4C7D9",
+      avatar: "critter",
+      seed: "<svg>",
+    };
+    const save = () => A.saveProfile(profileForm(guest, fields));
+    expect(await save()).toEqual({ ok: false, error: "invalid_input" });
+    fields.seed = "k3x9q";
+    fields.color = "#123456";
+    expect(await save()).toEqual({ ok: false, error: "invalid_input" });
     // the random pastel the guest started with is kept if they don't pick one
-    form.set("color", guest.avatar.color);
-    expect(must(await A.updateProfile(form)).avatar.color).toBe(
-      guest.avatar.color,
-    );
-    form.set("color", "#F4C7D9");
-    expect(must(await A.updateProfile(form)).avatar).toEqual({
+    fields.color = guest.avatar.color;
+    expect(must(await save()).avatar.color).toBe(guest.avatar.color);
+    fields.color = "#F4C7D9";
+    expect(must(await save()).avatar).toEqual({
       kind: "critter",
       seed: "k3x9q",
       color: "#F4C7D9",
+    });
+  });
+
+  it("an account takes a free @handle, once a month", async () => {
+    as("h1");
+    const first = must(await A.enterTestAccount());
+    as("h2");
+    const second = must(await A.enterTestAccount());
+    const keep = { color: second.avatar.color, avatar: "keep" };
+    expect(must(await A.checkHandle(first.handle as string))).toEqual({
+      ok: false,
+      problem: "taken",
+    });
+    expect(must(await A.checkHandle("No"))).toEqual({
+      ok: false,
+      problem: "short",
+    });
+    expect(must(await A.checkHandle("@Mei_Chan"))).toEqual({ ok: true });
+    const taken = profileForm(second, { name: "Bia", ...keep });
+    taken.set("handle", first.handle as string);
+    expect(await A.saveProfile(taken)).toEqual({
+      ok: false,
+      error: "handle_taken",
+    });
+    const mine = profileForm(second, { name: "Bia", ...keep });
+    mine.set("handle", "Mei_Chan");
+    expect(must(await A.saveProfile(mine)).handle).toBe("mei_chan");
+    // a second change waits 30 days; the same handle is no change
+    mine.set("handle", "mei_2");
+    expect(await A.saveProfile(mine)).toEqual({
+      ok: false,
+      error: "handle_wait",
+    });
+    expect(must(await A.checkHandle("mei_2"))).toMatchObject({
+      ok: false,
+      problem: "wait",
+    });
+    mine.set("handle", "mei_chan");
+    must(await A.saveProfile(mine));
+  });
+
+  it("keeps the quote, showcase, about and privacy the editor sends", async () => {
+    as("h3");
+    const me = must(await A.enterTestAccount());
+    const form = profileForm(me, {
+      name: "Mei",
+      color: me.avatar.color,
+      avatar: "keep",
+      quote: "  Se for o Shrek,   eu descubro  ",
+      accent: "#0B7A75",
+      banner: "preset:sea",
+      about: JSON.stringify({ time: "night", langs: ["pt", "ja"] }),
+      showcase: JSON.stringify([
+        { characterId: "wd-Q11934", caption: "Amor da minha vida <3" },
+        { characterId: "nope-404", caption: "unknown" },
+      ]),
+      privacy: JSON.stringify({ activity: "played", playing: false }),
+    });
+    must(await A.saveProfile(form));
+    const { profileView } = await import("./profiles");
+    const view = await profileView(me.handle as string, me.id, "pt");
+    expect(view).toMatchObject({
+      quote: "Se for o Shrek, eu descubro",
+      accent: "#0B7A75",
+      banner: { kind: "preset", id: "sea" },
+      about: { time: "night", langs: ["ja", "pt"] },
+      showcase: [
+        { characterId: "wd-Q11934", caption: "Amor da minha vida <3" },
+      ],
+      own: { privacy: { activity: "played", playing: false } },
     });
   });
 
@@ -430,19 +496,23 @@ describe("server, local mode", () => {
 
   it("a profile change shows at once in the account's rooms", async () => {
     as("n3");
-    must(await A.enterTestAccount());
+    const account = must(await A.enterTestAccount());
     const { code } = must(
       await A.createRoom({ ...ROOM, visibility: "public", seats: 2, ...TIMES }),
     );
     as("n4");
     must(await A.joinRoom(code));
     as("n3");
-    const form = new FormData();
-    form.set("name", "Renamed");
-    form.set("color", "#DCE8FA");
-    form.set("avatar", "critter");
-    form.set("seed", "x");
-    must(await A.updateProfile(form));
+    must(
+      await A.saveProfile(
+        profileForm(account, {
+          name: "Renamed",
+          color: "#DCE8FA",
+          avatar: "critter",
+          seed: "x",
+        }),
+      ),
+    );
     as("n4");
     expect((await view(code)).body.players[0]).toMatchObject({
       name: "Renamed",
@@ -559,6 +629,23 @@ describe("server, local mode", () => {
     expect((await view(lobby)).status).toBe(404);
   });
 });
+
+/** The profile editor's form: what the test sets, the rest as it was. */
+function profileForm(
+  me: { handle: string | null } | null,
+  fields: Record<string, string>,
+) {
+  const form = new FormData();
+  form.set("handle", me?.handle ?? "nobody");
+  form.set("quote", "");
+  form.set("accent", "");
+  form.set("banner", "keep");
+  form.set("about", "{}");
+  form.set("showcase", "[]");
+  form.set("privacy", "{}");
+  for (const [k, v] of Object.entries(fields)) form.set(k, v);
+  return form;
+}
 
 /** Saves a finished match on `theme` where people picked these characters (app ids), once each. */
 async function recordPicks(
