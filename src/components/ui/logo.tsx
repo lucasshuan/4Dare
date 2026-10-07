@@ -56,16 +56,29 @@ export const logoFile = (lang: string) =>
 
 export const BRAND = { blue: "#2B69C8", butter: "#F6E3A1" } as const;
 
-/** The 4 bubble and its "?"; when a parent `group` is hovered the bubble tilts and the "?" leans the other way. */
-function Mark() {
+/** The ring of the card ground round the whole logo, in its 838-tall units: about 2.5px in the top bar. */
+const HALO = 64;
+
+/**
+ * The 4 bubble and its "?"; when a parent `group` is hovered the bubble tilts
+ * and the "?" leans the other way. `halo` draws only the bubble's ring, to sit
+ * under it.
+ */
+function Mark({ halo = false }: { halo?: boolean }) {
   return (
     <g className="origin-bottom-left transition-transform duration-300 ease-soft [transform-box:fill-box] group-hover:-rotate-6 group-focus-visible:-rotate-6">
-      <path fill={BRAND.blue} d={FOUR} />
-      <path
-        fill={BRAND.butter}
-        d={QUESTION}
-        className="origin-center transition-transform delay-75 duration-500 ease-soft [transform-box:fill-box] group-hover:rotate-12 group-focus-visible:rotate-12"
-      />
+      {halo ? (
+        <path d={FOUR} strokeWidth={HALO} />
+      ) : (
+        <>
+          <path fill={BRAND.blue} d={FOUR} />
+          <path
+            fill={BRAND.butter}
+            d={QUESTION}
+            className="origin-center transition-transform delay-75 duration-500 ease-soft [transform-box:fill-box] group-hover:rotate-12 group-focus-visible:rotate-12"
+          />
+        </>
+      )}
     </g>
   );
 }
@@ -102,7 +115,12 @@ export function LogoMark({
   );
 }
 
-/** Full logo, だれ on Japanese pages. Size it by height (`h-9 w-auto`); it shrinks to fit a narrower parent. */
+/**
+ * Full logo, だれ on Japanese pages. Size it by height (`h-9 w-auto`); it
+ * shrinks to fit a narrower parent. A ring of the card ground runs round it,
+ * all rings first so none cuts into a neighbour: unseen on the page, it keeps
+ * the logo clear over a banner.
+ */
 export function Logo({ className }: { className?: string }) {
   const ja = useLocale() === "ja";
   return (
@@ -112,6 +130,12 @@ export function Logo({ className }: { className?: string }) {
       aria-label={ja ? "4だれ" : "4Dare"}
       className={cn("max-w-full overflow-visible", className)}
     >
+      <g className="fill-surface stroke-surface" strokeLinejoin="round">
+        <Mark halo />
+        {(ja ? LETTERS_JA : LETTERS).map(([d, fill]) => (
+          <path key={fill} d={d} strokeWidth={ja ? 22 + HALO : HALO} />
+        ))}
+      </g>
       <Mark />
       {ja
         ? LETTERS_JA.map(([d, fill]) => (
