@@ -9,6 +9,8 @@ export const XP = { finish: 10, first: 15, dayFirst: 5 } as const;
 /** What each game adds for its own feats. */
 export const GAME_XP = {
   "who-am-i": { discovered: 10 },
+  /** A vote on an impostor that sent them out; each round an impostor stayed in. */
+  impostor: { rightVote: 5, survived: 10 },
 } as const satisfies Record<GameKey, Record<string, number>>;
 
 /** XP from one level to the next: 100 to reach level 2, 50 more each level after. */

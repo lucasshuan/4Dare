@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import type { ComponentType } from "react";
+import { ImpostorSnapshot } from "@/features/home/impostor-snapshot";
+import { ImpostorThumb } from "@/features/home/impostor-thumb";
 import { WhoAmISnapshot } from "@/features/home/who-am-i-snapshot";
 import { WhoAmIThumb } from "@/features/home/who-am-i-thumb";
 import type { GameKey } from "@/game/games";
@@ -14,13 +16,18 @@ import { cn } from "@/lib/cn";
 export const GAME_INFO: Record<
   GameKey,
   {
-    messages: "whoAmI";
+    messages: "whoAmI" | "impostor";
     Art: ComponentType<{ className?: string; still?: boolean }>;
     /** Drawn for small boxes (16:10): fills whatever box it is given. */
     Thumb: ComponentType;
   }
 > = {
   "who-am-i": { messages: "whoAmI", Art: WhoAmISnapshot, Thumb: WhoAmIThumb },
+  impostor: {
+    messages: "impostor",
+    Art: ImpostorSnapshot,
+    Thumb: ImpostorThumb,
+  },
 };
 
 /** The game's name, as the hub card shows it. */

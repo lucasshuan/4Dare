@@ -9,11 +9,11 @@ import { HintLabel } from "@/components/ui/hint-label";
 import { TextField } from "@/components/ui/text-field";
 import {
   DEFAULT_SETTINGS,
+  GAME_STEP_TIMES,
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
-  STEP_TIMES,
   type StepTime,
 } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -239,7 +239,7 @@ export function RulesFields({
 }) {
   return (
     <div className="grid gap-x-10 gap-y-6 sm:grid-cols-[repeat(2,max-content)] sm:tiny:gap-y-4 xl:grid-cols-4 xl:gap-x-6">
-      {STEP_TIMES.map((step) => (
+      {GAME_STEP_TIMES[value.game].map((step) => (
         <SecondsField
           key={step}
           step={step}

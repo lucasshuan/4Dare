@@ -10,6 +10,7 @@ import { localImages } from "./images";
 import { localMatches } from "./matches";
 import { localMural } from "./mural";
 import { localProfiles } from "./profiles";
+import { localQuestions } from "./questions";
 import { localRooms } from "./rooms";
 import { localThemes } from "./themes";
 
@@ -24,6 +25,7 @@ export function localBackend(): Backend {
     rooms: localRooms(),
     matches: localMatches(),
     characters,
+    questions: localQuestions(),
     images: localImages(characters),
     themes: themes(localThemes()),
     files: localFiles(),

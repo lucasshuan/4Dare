@@ -32,7 +32,7 @@ import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
 import { GAME_SEATS } from "@/game/games";
-import { type Lang, STEP_TIMES } from "@/game/types";
+import { GAME_STEP_TIMES, type Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
@@ -67,6 +67,10 @@ const editable = ({
   guessSeconds,
   answerSeconds,
   validateSeconds,
+  replySeconds,
+  talkSeconds,
+  lastSeconds,
+  impostors,
   themeMode,
   offGostos,
   offThemes,
@@ -81,6 +85,10 @@ const editable = ({
   guessSeconds,
   answerSeconds,
   validateSeconds,
+  replySeconds,
+  talkSeconds,
+  lastSeconds,
+  impostors,
   themeMode,
   offGostos,
   offThemes,
@@ -388,7 +396,7 @@ export function LobbyScreen() {
                 <span className="sr-only">{t("timesLabel")}: </span>
                 {/* the match's steps in order, each with its clock */}
                 <span className="flex flex-wrap gap-1.5">
-                  {STEP_TIMES.map((step) => (
+                  {GAME_STEP_TIMES[game].map((step) => (
                     <span
                       key={step}
                       className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm"

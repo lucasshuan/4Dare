@@ -46,6 +46,18 @@
       "validateSeconds": {
         "label": "Tiempo para revisar el intento",
         "hint": "Quien eligió el personaje revisa un intento que no coincidió exactamente."
+      },
+      "replySeconds": {
+        "label": "Tiempo para responder",
+        "hint": "Todos responden la pregunta por su propia carta. Cada respuesta quita una parte igual de este tiempo a quienes faltan; cambiarla lo devuelve."
+      },
+      "talkSeconds": {
+        "label": "Tiempo para hablar y votar",
+        "hint": "Señalar es libre. Cada voto confirmado quita una parte, pero siempre quedan 20 s para hablar; quitarlo lo devuelve."
+      },
+      "lastSeconds": {
+        "label": "Última oportunidad",
+        "hint": "El impostor atrapado intenta adivinar la carta de la tripulación."
       }
     },
     "less": "10 segundos menos",
@@ -129,6 +141,12 @@
         "guess": "¿Soy un gato?",
         "hit": "¡Correcto!"
       }
+    },
+    "impostor": {
+      "name": "Impostor",
+      "players": "3 a 10 jugadores",
+      "play": "Jugar",
+      "demoLine": "Uno de ustedes tiene otro."
     },
     "next": "Siguientes juegos",
     "previous": "Juegos anteriores"

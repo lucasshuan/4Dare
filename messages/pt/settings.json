@@ -53,6 +53,12 @@
           "label": "Personagens populares ao escolher",
           "hint": "A mão de cartas embaixo da carta que você preenche"
         }
+      },
+      "impostor": {
+        "hiddenCard": {
+          "label": "Carta escondida",
+          "hint": "A sua carta fica virada até você segurar: para telas que outros veem"
+        }
       }
     }
   },

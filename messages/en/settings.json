@@ -53,6 +53,12 @@
           "label": "Popular characters while picking",
           "hint": "The hand of cards under the card you fill"
         }
+      },
+      "impostor": {
+        "hiddenCard": {
+          "label": "Hidden card",
+          "hint": "Your card stays face down until you hold it: for screens others can see"
+        }
       }
     }
   },

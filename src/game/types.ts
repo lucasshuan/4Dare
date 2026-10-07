@@ -1,6 +1,14 @@
 // The whole game in types. Everything else (engine, server, UI) is written against this file.
 import { DEFAULT_GAME, type GameKey } from "./games";
 import type { Gosto } from "./gostos";
+import type {
+  ImpAnswer,
+  ImpDeal,
+  ImpOut,
+  ImpostorMatch,
+  ImpQuestion,
+  ImpWinner,
+} from "./impostor/types";
 import type { ThemeSet } from "./theme-sets";
 
 export const LANGS = ["en", "es", "ja", "pt"] as const;
@@ -55,7 +63,8 @@ export interface RoomSettings {
    * view carries it; everyone else gets "".
    */
   password: string;
-  seats: 2 | 3 | 4;
+  /** Within the game's range (GAME_SEATS). */
+  seats: number;
   /** Seconds to vote on the theme. Each vote, while others still owe theirs, cuts a share of it (see CLOCK_CUT_FLOOR_MS). */
   voteSeconds: number;
   /** Seconds to ask a question: STEP_SECONDS_MIN..MAX, default 80. */
@@ -66,6 +75,14 @@ export interface RoomSettings {
   answerSeconds: number;
   /** Seconds for the picker to check a guess that was not an obvious match. */
   validateSeconds: number;
+  /** Impostor: seconds to answer a question. Each answer, while others still owe theirs, cuts a share of it. */
+  replySeconds: number;
+  /** Impostor: seconds to talk and vote. Each confirmed vote cuts a share, never below TALK_FLOOR_MS. */
+  talkSeconds: number;
+  /** Impostor: seconds a caught impostor has to guess the crew's card. */
+  lastSeconds: number;
+  /** Impostor: how many get the other card; null lets the seats decide (see impostorsFor). */
+  impostors: number | null;
   mode: "classic";
   /** "vote": everyone votes on themes the gostos and the theme list leave on. "host": the host types the theme. */
   themeMode: "vote" | "host";
@@ -86,6 +103,10 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   guessSeconds: 60,
   answerSeconds: 80,
   validateSeconds: 40,
+  replySeconds: 45,
+  talkSeconds: 120,
+  lastSeconds: 45,
+  impostors: null,
   mode: "classic",
   themeMode: "vote",
   offGostos: [],
@@ -104,8 +125,22 @@ export const STEP_TIMES = [
   "answerSeconds",
   "guessSeconds",
   "validateSeconds",
+  "replySeconds",
+  "talkSeconds",
+  "lastSeconds",
 ] as const;
 export type StepTime = (typeof STEP_TIMES)[number];
+/** Each game's clocks, in the order its match plays them. */
+export const GAME_STEP_TIMES: Record<GameKey, readonly StepTime[]> = {
+  "who-am-i": [
+    "voteSeconds",
+    "askSeconds",
+    "answerSeconds",
+    "guessSeconds",
+    "validateSeconds",
+  ],
+  impostor: ["voteSeconds", "replySeconds", "talkSeconds", "lastSeconds"],
+};
 /** Picking a character always gets this long. */
 export const PICK_SECONDS = 120;
 /** The longest character name, typed or saved. */
@@ -118,6 +153,8 @@ export const MAX_CHARACTER_NAME = 60;
  * left keeps at least this long (ms).
  */
 export const CLOCK_CUT_FLOOR_MS = 10_000;
+/** The Impostor's talk keeps at least this long however fast the votes come (ms). */
+export const TALK_FLOOR_MS = 20_000;
 /**
  * A lobby has no clock: the match starts when the host starts it. One nobody
  * changed in this long leaves the room list (its pages may have died without
@@ -182,6 +219,7 @@ export const BEAT_KINDS = [
   "picked",
   "received",
   "order",
+  "card",
 ] as const;
 export type BeatKind = (typeof BEAT_KINDS)[number];
 /** One scene of a show, in server ms. */
@@ -196,7 +234,7 @@ export interface Beat {
  * theme (the result, the theme, the rule, the draw, "for whom"), cast (everyone picked,
  * "Rafa picked yours", the turn order). Each step's clock starts when its show ends.
  */
-export type ShowKind = "opening" | "theme" | "cast";
+export type ShowKind = "opening" | "theme" | "cast" | "deal";
 
 /** A card of the rule scene: a library id (the same in every language), one picture, its names. */
 export interface ExampleCard {
@@ -232,6 +270,12 @@ export type Phase =
   | "answering"
   | "guessing"
   | "validating"
+  /** Impostor: everyone still in answers the question about their card. */
+  | "replying"
+  /** Impostor: everyone talks and votes someone out. */
+  | "talking"
+  /** Impostor: a caught impostor guesses the crew's card. */
+  | "last_chance"
   | "finished"
   /** Lobby expired with a single player, or everyone left. */
   | "closed";
@@ -245,7 +289,7 @@ export interface RoomPlayer extends Identity {
   away: boolean;
   /** When their page closed (tab or window), until they show up again. */
   goneAt: number | null;
-  /** Their colour (0-based, --seat-1..4), given on joining and theirs until they leave the room. */
+  /** Their colour (0-based, --seat-1..10), given on joining and theirs until they leave the room. */
   colorSlot: number;
 }
 
@@ -338,6 +382,8 @@ export interface ThemeVote {
   tied: number[];
   /** The rule scene's cards for each option (first match only), aligned with `options`. */
   examples?: (RuleExamples | null)[];
+  /** Impostor: each option's cards and questions, aligned with `options`. Never shown. */
+  deals?: ImpDeal[];
 }
 
 /**
@@ -345,7 +391,7 @@ export interface ThemeVote {
  * lives in `plays`), or a show that presents the match.
  */
 export interface Reveal {
-  kind: "answers" | "guess" | "pass" | ShowKind;
+  kind: "answers" | "guess" | "pass" | "replies" | "out" | "swap" | ShowKind;
   /** The turn revealed; for a show, the match it presents (`round`; `round + 1` for the opening). */
   n: number;
   startsAt: number;
@@ -424,6 +470,10 @@ export interface RoomState {
   kicked?: Record<PlayerId, number>;
   /** The room's latest finished matches, newest first. Missing in rooms made before it was kept. */
   matches?: PastMatch[];
+  /** The Impostor match under way (or just over); null otherwise. Missing in older rooms. */
+  imp?: ImpostorMatch | null;
+  /** Impostor questions the room asked lately, newest first: its next matches skip them. */
+  recentQuestions?: string[];
   createdAt: number;
   updatedAt: number;
 }
@@ -460,6 +510,8 @@ export type GameEvent =
       examples?: (RuleExamples | null)[];
       /** Someone seated has never finished a match (the server checks). */
       newcomer?: boolean;
+      /** Impostor: each theme's cards and questions, aligned with `themes`. */
+      deals?: ImpDeal[];
     }
   | { type: "VOTE"; playerId: PlayerId; option: number }
   | { type: "UNVOTE"; playerId: PlayerId }
@@ -485,6 +537,20 @@ export type GameEvent =
   | { type: "PASS"; playerId: PlayerId }
   | { type: "VALIDATE"; playerId: PlayerId; correct: boolean }
   | { type: "GIVE_UP"; playerId: PlayerId }
+  /** Impostor: an answer to the open question (again to change it). */
+  | { type: "REPLY"; playerId: PlayerId; answer: ImpAnswer }
+  /** Impostor: takes the answer back; the time it cut comes back. */
+  | { type: "UNREPLY"; playerId: PlayerId }
+  /** Impostor: points at someone (null: nobody). Free, shown to all, counts for nothing. */
+  | { type: "POINT"; playerId: PlayerId; targetId: PlayerId | null }
+  /** Impostor: confirms a vote to send someone out; it cuts the clock. */
+  | { type: "ACCUSE"; playerId: PlayerId; targetId: PlayerId }
+  /** Impostor: takes the confirmed vote back; the time it cut comes back. */
+  | { type: "UNACCUSE"; playerId: PlayerId }
+  /** Impostor: the player doesn't know their card; everyone gets new ones, nobody is told who asked. */
+  | { type: "DONT_KNOW"; playerId: PlayerId }
+  /** Impostor: a caught impostor's guess at the crew's card. */
+  | { type: "LAST_GUESS"; playerId: PlayerId; text: string }
   /** Host only, from the podium: everyone goes back to the lobby for another match. */
   | { type: "BACK_TO_LOBBY"; playerId: PlayerId }
   /**
@@ -519,6 +585,10 @@ export const ERROR_CODES = [
   "wrong_phase",
   "invalid_input",
   "need_two_players",
+  /** The Impostor needs three. */
+  "need_three_players",
+  /** An Impostor word answer gave the card away (its name, a nickname or its work). */
+  "gives_away",
   "already_done",
   "conflict",
   "unauthorized",
@@ -578,6 +648,12 @@ export type PlayerStatus =
   | "guessing"
   | "validating"
   | "waiting"
+  // impostor
+  | "replying"
+  | "replied"
+  | "talking"
+  | "accused"
+  | "out"
   // end states
   | "discovered"
   | "gave_up";
@@ -601,7 +677,7 @@ export interface PlayerView {
   status: PlayerStatus;
   /** Place in the room (join order), 0-based. */
   seat: number;
-  /** Their colour (0-based, --seat-1..4): theirs from joining until they leave the room. */
+  /** Their colour (0-based, --seat-1..10): theirs from joining until they leave the room. */
   colorSlot: number;
   /** Place in this match's turn order, 0-based (the first to play is 0); null outside a match. */
   turnOrder: number | null;
@@ -703,7 +779,20 @@ export type RevealView =
       byId: PlayerId;
       startsAt: number;
       until: number;
-    };
+    }
+  /** Impostor: the answers to question `n` (its index in ImpostorView.asked) land together. */
+  | { kind: "replies"; n: number; startsAt: number; until: number }
+  /** Impostor: the vote of round `n` sent `id` out (null: a tie, nobody goes) and whether they were one. */
+  | {
+      kind: "out";
+      n: number;
+      id: PlayerId | null;
+      impostor: boolean | null;
+      startsAt: number;
+      until: number;
+    }
+  /** Impostor: someone didn't know their card, so everyone got new ones. */
+  | { kind: "swap"; n: number; startsAt: number; until: number };
 
 export interface VoteView {
   options: Theme[];
@@ -762,8 +851,55 @@ export interface RoomView {
   turns: number;
   /** The lobby only: the room's latest finished matches, newest first. */
   matches: PastMatchView[];
-  /** Host only: the match can start (2+ players). */
+  /** Present for an Impostor match, from the cards on. */
+  imp: ImpostorView | null;
+  /** Host only: the match can start (enough players for the game). */
   canStart: boolean;
+}
+
+/** An Impostor match as one player sees it: their own card only, and never which side it is. */
+export interface ImpostorView {
+  /** The viewer's card; null for someone who sat down after the deal. */
+  card: CardView | null;
+  /** How many hold the other card. */
+  impostors: number;
+  round: number;
+  /** Still in: they answer and vote. */
+  playingIds: PlayerId[];
+  asked: ImpAskedView[];
+  vote: {
+    round: number;
+    points: { byId: PlayerId; targetId: PlayerId }[];
+    votes: { byId: PlayerId; targetId: PlayerId }[];
+    yourPoint: PlayerId | null;
+    yourVote: PlayerId | null;
+  } | null;
+  /** Who went out, and whether they were an impostor; a last chance's guess waits for the end. */
+  outs: Omit<ImpOut, "guess" | "hit" | "by">[];
+  /** The caught impostor guessing now. */
+  guessing: PlayerId | null;
+  swaps: number;
+  /** Once it's over: everything. */
+  end: {
+    winner: ImpWinner;
+    reason: NonNullable<ImpostorMatch["reason"]>;
+    crew: CardView;
+    impostor: CardView;
+    impostorIds: PlayerId[];
+    outs: ImpOut[];
+    /** The room's points for this match, by player. */
+    points: Record<PlayerId, number>;
+  } | null;
+}
+
+export interface ImpAskedView {
+  round: number;
+  question: ImpQuestion;
+  /** Who answered so far (the open question). */
+  answeredIds: PlayerId[];
+  yours: ImpAnswer | null;
+  /** Everyone's, once revealed. */
+  answers: { byId: PlayerId; answer: ImpAnswer }[] | null;
 }
 
 export interface PastMatchView {
@@ -803,6 +939,9 @@ export interface PublicRoom {
   guessSeconds: number;
   answerSeconds: number;
   validateSeconds: number;
+  replySeconds: number;
+  talkSeconds: number;
+  lastSeconds: number;
 }
 
 /** A listed room as the server keeps it, before its host's name is put in the reader's language. */

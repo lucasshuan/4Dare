@@ -104,12 +104,18 @@ export interface CreateRoomInput {
   visibility: "public" | "private";
   /** Required when private; ignored when public. */
   password: string;
-  seats: 2 | 3 | 4;
+  /** Within the game's range (GAME_SEATS). */
+  seats: number;
   voteSeconds: number;
   askSeconds: number;
   guessSeconds: number;
   answerSeconds: number;
   validateSeconds: number;
+  replySeconds: number;
+  talkSeconds: number;
+  lastSeconds: number;
+  /** Impostor: null lets the seats decide. */
+  impostors: number | null;
   themeMode: "vote" | "host";
   offGostos: Gosto[];
   offThemes: string[];

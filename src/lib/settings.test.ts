@@ -26,6 +26,7 @@ describe("parseSettings", () => {
     expect(s.chatBubbles).toBe(false);
     expect(s.games).toEqual({
       "who-am-i": { confirmPass: true, popularHand: true },
+      impostor: { hiddenCard: false },
     });
   });
 });

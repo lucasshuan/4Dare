@@ -36,8 +36,12 @@ const toCharacter = (r: Row): Character => ({
   aliases: [...(r.aliases ?? []), ...(r.other_names ?? [])],
 });
 
+/** Popularities move with library updates only: a day is fresh enough. */
+const FLOOR_TTL_MS = 24 * 3600_000;
+
 export function supabaseCharacters(): CharacterStore {
   const db = () => serviceClient();
+  const floors = new Map<Lang, { at: number; floor: Promise<number | null> }>();
   const starters = supabaseStarters();
   const entry = async (id: string) => {
     const library = parseEntryId(id);
@@ -189,6 +193,36 @@ export function supabaseCharacters(): CharacterStore {
       return picked;
     },
     starters,
+    async facts(ids, lang) {
+      const keys = [...new Set(ids.map((id) => parseEntryId(id)?.id ?? id))];
+      if (keys.length === 0) return [];
+      const { data, error } = await db().rpc("impostor_facts", {
+        p_ids: keys,
+        p_lang: lang,
+      });
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        id: r.character_id,
+        category: r.category ?? null,
+        work: r.work ?? null,
+        popularity: r.popularity ?? null,
+        gostos: r.gostos?.length ? r.gostos : null,
+      }));
+    },
+    knownFloor(lang) {
+      const known = floors.get(lang);
+      if (known && Date.now() - known.at < FLOOR_TTL_MS) return known.floor;
+      const floor = (async () => {
+        const { data, error } = await db().rpc("impostor_known_floor", {
+          p_lang: lang,
+        });
+        if (error) throw error;
+        return typeof data === "number" ? data : null;
+      })();
+      floors.set(lang, { at: Date.now(), floor });
+      floor.catch(() => floors.delete(lang));
+      return floor;
+    },
     async createdBy(playerId, limit) {
       const made = await db()
         .from("characters")

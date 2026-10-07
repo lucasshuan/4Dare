@@ -41,7 +41,10 @@
     "askSeconds": "Ask",
     "answerSeconds": "Answer",
     "guessSeconds": "Guess",
-    "validateSeconds": "Check"
+    "validateSeconds": "Check",
+    "replySeconds": "Answer",
+    "talkSeconds": "Talk",
+    "lastSeconds": "Last chance"
   },
   "timesLabel": "Times",
   "start": "Start match",

@@ -15,6 +15,12 @@
     "pitch": "Cada um escolhe um personagem para outro. Descubra o seu com perguntas de sim ou não.",
     "imageAlt": "Quem sou eu? no 4Dare: cartas na mesa e uma pergunta de sim ou não"
   },
+  "impostor": {
+    "title": "Impostor: jogue online com os amigos",
+    "description": "Todos recebem o mesmo personagem, menos um, que não sabe que é o impostor. Respondam perguntas sobre a carta com um toque e votem para tirar quem destoa. Grátis, 3 a 10 jogadores, sem cadastro.",
+    "pitch": "Todos têm o mesmo personagem, menos um. Nem ele sabe. Respondam pela carta e descubram quem destoa.",
+    "imageAlt": "Impostor no 4Dare: cartas iguais na mesa e uma diferente"
+  },
   "newRoom": {
     "title": "Criar sala"
   },
@@ -44,7 +50,9 @@
       "asking": "Sua vez!",
       "answering": "Responda a pergunta!",
       "guessing": "Dê seu palpite!",
-      "validating": "Confira um palpite!"
+      "validating": "Confira um palpite!",
+      "replying": "Responda pela sua carta!",
+      "talking": "Vote em alguém!"
     }
   },
   "rooms": {

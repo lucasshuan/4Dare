@@ -13,13 +13,22 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 
 ## Room
 
-- Phases: lobby, voting or theming, picking, turns, finished.
+- Phases: lobby, voting or theming, picking, turns, finished (Impostor: voting, replying, talking, last chance, finished).
 - No cron: fetching a room applies due timeouts.
 - Host in the lobby: renames the room and makes it public or private in place, switches the game, removes a player (`KICK`; back only after 2 min, `kicked` in state), opens and closes seats within the game's range (`GAME_SEATS`), switches gostos (popover); closed seats show to the host only. "Edit advanced settings": tabs Room, Rules, Style (gostos), Themes (per set, by hand; theme mode for "Who am I?").
 - Past matches: room state keeps its last 5 (theme, players by place), saved at the podium; only the lobby view lists them.
 - Shows: scenes between steps (opening, theme and rule, draw (skipped with 2 players), "for whom", cast) are beats with server times on `reveal` (`src/game/show-timing/`). Step clocks wait for show end, so every screen plays same frame. A guess's result and a pass are scenes too (`reveal` kinds `guess`, `pass`; `GuessScene`, full screen in the guesser's colour, no close): the next turn waits for them, and its handoff band covers their end. Only the answers reveal is a closable modal over a running step. Client: `stageFrame` picks screen and backdrop, `useStageTimeline` seeks motion to server time. Lab: `/[locale]/dev/stage` (dev only).
 - Sync: local polls 1 s. Supabase: Realtime ping (`src/lib/realtime.ts`, one channel per room, loaded on demand); poll 45 s joined, 10 s down.
 - Cleanup: hourly `pg_cron` drops closed rooms after a day, idle ones after a week (0013).
+
+## Impostor
+
+- Second game (`GAME_KEYS`), 3 to 10 seats, colours `--seat-1..10` (Who am I? uses 4; switching game recolours, refused with more seated than the game allows). Rules in `src/game/impostor/` (engine, view, answers, questions, record), on the shared steps (`src/game/steps.ts`: shows, clocks, cuts, podium). State: `room.imp`.
+- Everyone gets the crew's card but the impostors (1; 2 from 7 players; host's number up to a third), who get a neighbour of it and aren't told. Each sees only their own card; cards show at the end.
+- Flow: theme vote (4, always) → deal show (`deal`: result, theme, card) → questions (2 before the first vote, 1 after) answered with a tap (scale 1–10, colour, emoji palette, pick 2–4, word ≤ 20 that can't name the card) → answers land together (`replies`) → talk and vote (pointing free; a confirmed vote cuts the clock, floor `TALK_FLOOR_MS`; taking an answer or vote back gives its cut back) → most votes goes out (tie: nobody; `out`) → a caught impostor guesses the crew's card (`last_chance`, secret till the end). Crew wins with every impostor out; impostors when they're as many as the rest or after `maxRounds`. "I don't know this one" swaps every card (≤ 2, before any answer shows; `swap`).
+- Deal (`src/server/impostor.ts`): at START, 8 themes the room lets in; per theme, crew from the 20 best known fits (`rankTheme`, known = top 2 500 popularity in the host's language, `impostor_known_floor`), impostor weighted by fit × same work (English label) ×3 / same category ×1.5 × fame closeness; 2 spare pairs; 9 questions (`pickQuestions`: fit both cards' audience, set/theme ones every third, light first, no spice 3 before the vote, no kind twice in a row, the room's last 60 out). Themes without a deal drop; popular characters stand in when none has one. All four ride on START; the chosen one's goes in `imp`.
+- Questions: `impostor_questions` (hand-fed, `supabase/seed/impostor_questions.sql`, 134 in four languages; local copy `local/impostor-questions.ts`), screens read `/api/impostor/questions`. `impostor_question_stats` per question and language (asked, silent, impostor stood out, caught right after) from each finished match.
+- Record: `record_match` (0035) adds `impostor_match_players` (side, out round, left, right votes, guess). Points (room): winning crew +2, +1 per vote that sent an impostor out; winning impostor +5; right last guess +3. XP: finish, win, +5 per right vote, +10 per round an impostor got through.
 
 ## Themes
 

@@ -207,6 +207,151 @@ export type Database = {
           },
         ];
       };
+      impostor_match_players: {
+        Row: {
+          guess: string | null;
+          guess_hit: boolean | null;
+          impostor: boolean;
+          left_match: boolean;
+          match_id: string;
+          out_round: number | null;
+          right_votes: number;
+          user_id: string;
+        };
+        Insert: {
+          guess?: string | null;
+          guess_hit?: boolean | null;
+          impostor: boolean;
+          left_match?: boolean;
+          match_id: string;
+          out_round?: number | null;
+          right_votes?: number;
+          user_id: string;
+        };
+        Update: {
+          guess?: string | null;
+          guess_hit?: boolean | null;
+          impostor?: boolean;
+          left_match?: boolean;
+          match_id?: string;
+          out_round?: number | null;
+          right_votes?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "impostor_match_players_match_id_fkey";
+            columns: ["match_id"];
+            isOneToOne: false;
+            referencedRelation: "matches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      impostor_question_stats: {
+        Row: {
+          asked: number;
+          caught: number;
+          lang: string;
+          question_id: string;
+          silent: number;
+          stood_out: number;
+        };
+        Insert: {
+          asked?: number;
+          caught?: number;
+          lang: string;
+          question_id: string;
+          silent?: number;
+          stood_out?: number;
+        };
+        Update: {
+          asked?: number;
+          caught?: number;
+          lang?: string;
+          question_id?: string;
+          silent?: number;
+          stood_out?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "impostor_question_stats_question_id_fkey";
+            columns: ["question_id"];
+            isOneToOne: false;
+            referencedRelation: "impostor_questions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      impostor_questions: {
+        Row: {
+          audience: string;
+          created_at: string;
+          created_by: string | null;
+          en: string;
+          es: string;
+          id: string;
+          ja: string;
+          kind: string;
+          options: Json | null;
+          pt: string;
+          scope: string;
+          spice: number;
+          status: string;
+          theme_id: string | null;
+          theme_set: string | null;
+        };
+        Insert: {
+          audience?: string;
+          created_at?: string;
+          created_by?: string | null;
+          en: string;
+          es: string;
+          id: string;
+          ja: string;
+          kind: string;
+          options?: Json | null;
+          pt: string;
+          scope: string;
+          spice?: number;
+          status?: string;
+          theme_id?: string | null;
+          theme_set?: string | null;
+        };
+        Update: {
+          audience?: string;
+          created_at?: string;
+          created_by?: string | null;
+          en?: string;
+          es?: string;
+          id?: string;
+          ja?: string;
+          kind?: string;
+          options?: Json | null;
+          pt?: string;
+          scope?: string;
+          spice?: number;
+          status?: string;
+          theme_id?: string | null;
+          theme_set?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "impostor_questions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "impostor_questions_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
+            referencedRelation: "whoami_themes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       match_players: {
         Row: {
           auto_picked: boolean | null;
@@ -970,6 +1115,21 @@ export type Database = {
         };
         Returns: Database["public"]["Enums"]["gosto"][];
       };
+      impostor_count_questions: {
+        Args: { p_rows: Json };
+        Returns: undefined;
+      };
+      impostor_facts: {
+        Args: { p_ids: string[]; p_lang: string };
+        Returns: {
+          category: Database["public"]["Enums"]["character_category"];
+          character_id: string;
+          gostos: Database["public"]["Enums"]["gosto"][];
+          popularity: number;
+          work: string;
+        }[];
+      };
+      impostor_known_floor: { Args: { p_lang: string }; Returns: number };
       played_together: {
         Args: { p_a: string; p_b: string };
         Returns: boolean;

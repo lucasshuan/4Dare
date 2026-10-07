@@ -40,16 +40,35 @@
   --seat-2: #cf7024;
   --seat-3: #0b7a75;
   --seat-4: #8a4fc4;
+  /* seats 5..10: Impostor rooms only (up to ten people) */
+  --seat-5: #c03d8a;
+  --seat-6: #3d8b47;
+  --seat-7: #b38600;
+  --seat-8: #1590a8;
+  --seat-9: #9b5a1f;
+  --seat-10: #6b4fd6;
   /* text on a seat colour */
   --on-seat-1: #ffffff;
   --on-seat-2: #2a1707;
   --on-seat-3: #ffffff;
   --on-seat-4: #ffffff;
+  --on-seat-5: #ffffff;
+  --on-seat-6: #ffffff;
+  --on-seat-7: #2a1f00;
+  --on-seat-8: #ffffff;
+  --on-seat-9: #ffffff;
+  --on-seat-10: #ffffff;
   /* a seat colour as text on its own wash ("for whom" name): deeper on the light wash */
   --seat-1-ink: color-mix(in oklch, var(--seat-1), black 30%);
   --seat-2-ink: color-mix(in oklch, var(--seat-2), black 30%);
   --seat-3-ink: color-mix(in oklch, var(--seat-3), black 30%);
   --seat-4-ink: color-mix(in oklch, var(--seat-4), black 30%);
+  --seat-5-ink: color-mix(in oklch, var(--seat-5), black 30%);
+  --seat-6-ink: color-mix(in oklch, var(--seat-6), black 30%);
+  --seat-7-ink: color-mix(in oklch, var(--seat-7), black 30%);
+  --seat-8-ink: color-mix(in oklch, var(--seat-8), black 30%);
+  --seat-9-ink: color-mix(in oklch, var(--seat-9), black 30%);
+  --seat-10-ink: color-mix(in oklch, var(--seat-10), black 30%);
   /* a seat colour as a light fill behind its player (lobby seat, history number, podium) */
   --seat-soft-mix: 14%;
   --seat-1-soft: color-mix(
@@ -70,6 +89,36 @@
   --seat-4-soft: color-mix(
     in oklch,
     var(--seat-4) var(--seat-soft-mix),
+    var(--surface)
+  );
+  --seat-5-soft: color-mix(
+    in oklch,
+    var(--seat-5) var(--seat-soft-mix),
+    var(--surface)
+  );
+  --seat-6-soft: color-mix(
+    in oklch,
+    var(--seat-6) var(--seat-soft-mix),
+    var(--surface)
+  );
+  --seat-7-soft: color-mix(
+    in oklch,
+    var(--seat-7) var(--seat-soft-mix),
+    var(--surface)
+  );
+  --seat-8-soft: color-mix(
+    in oklch,
+    var(--seat-8) var(--seat-soft-mix),
+    var(--surface)
+  );
+  --seat-9-soft: color-mix(
+    in oklch,
+    var(--seat-9) var(--seat-soft-mix),
+    var(--surface)
+  );
+  --seat-10-soft: color-mix(
+    in oklch,
+    var(--seat-10) var(--seat-soft-mix),
     var(--surface)
   );
   /* The match stage: brand blue with butter marks (cold open, draw), the same hues in both themes. */
@@ -130,14 +179,32 @@
   --seat-2: #f0a566;
   --seat-3: #5ccfc6;
   --seat-4: #c39bf2;
+  --seat-5: #f08cc8;
+  --seat-6: #7fd08a;
+  --seat-7: #e3c04f;
+  --seat-8: #5fc6e0;
+  --seat-9: #d39a63;
+  --seat-10: #a99bf7;
   --on-seat-1: #0f1b30;
   --on-seat-2: #2a1707;
   --on-seat-3: #06211f;
   --on-seat-4: #1d0f2e;
+  --on-seat-5: #2e0b1f;
+  --on-seat-6: #0b2410;
+  --on-seat-7: #2a1f00;
+  --on-seat-8: #062631;
+  --on-seat-9: #2a1607;
+  --on-seat-10: #160f33;
   --seat-1-ink: var(--seat-1);
   --seat-2-ink: var(--seat-2);
   --seat-3-ink: var(--seat-3);
   --seat-4-ink: var(--seat-4);
+  --seat-5-ink: var(--seat-5);
+  --seat-6-ink: var(--seat-6);
+  --seat-7-ink: var(--seat-7);
+  --seat-8-ink: var(--seat-8);
+  --seat-9-ink: var(--seat-9);
+  --seat-10-ink: var(--seat-10);
   --seat-soft-mix: 24%;
   --brand-stage: #1d4a93;
   --wash-mix: 26%;

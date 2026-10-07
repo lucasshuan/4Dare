@@ -3,9 +3,11 @@
 //   supabase → Postgres, Storage, Realtime, Auth
 // Server actions and route handlers only talk to these interfaces (via getBackend()).
 
+import type { Category } from "@/game/categories";
 import type { ChatMessage, NewChatMessage } from "@/game/chat";
 import type { GameKey } from "@/game/games";
 import type { Gosto, ThemeFilter } from "@/game/gostos";
+import type { BankQuestion } from "@/game/impostor/questions";
 import type { SyncedSettings } from "@/game/options";
 import type { PlayedMatch } from "@/game/profile/history";
 import type {
@@ -100,6 +102,37 @@ export interface CharacterStore {
   starters(): Promise<ThemeStarter[]>;
   /** The characters a player made, each in the language it was named in, newest first. */
   createdBy(playerId: PlayerId, limit: number): Promise<Character[]>;
+  /** What the Impostor's deal weighs about library characters (language-free ids), in `lang`. */
+  facts(ids: string[], lang: Lang): Promise<CharacterFacts[]>;
+  /** The popularity a character needs in `lang` to count as known (its 2 500th); null: everyone counts. */
+  knownFloor(lang: Lang): Promise<number | null>;
+}
+
+export interface CharacterFacts {
+  /** Language-free ("wd-Q302"). */
+  id: string;
+  category: Category | null;
+  /** Its work or job by its English label: two ids of one work match. */
+  work: string | null;
+  popularity: number | null;
+  gostos: Gosto[] | null;
+}
+
+/** One question's part in a finished match, in the match's language. */
+export interface QuestionCount {
+  id: string;
+  lang: Lang;
+  asked: number;
+  silent: number;
+  stoodOut: number;
+  caught: number;
+}
+
+/** The Impostor's question bank: the live questions, and what they did in play. */
+export interface QuestionStore {
+  /** Every live question (cached). */
+  list(): Promise<BankQuestion[]>;
+  count(rows: QuestionCount[]): Promise<void>;
 }
 
 /** Who sent a picture, as they looked then. */
@@ -411,6 +444,7 @@ export interface Backend {
   rooms: RoomStore;
   matches: MatchStore;
   characters: CharacterStore;
+  questions: QuestionStore;
   images: ImageStore;
   themes: ThemeSource;
   files: FileStore;

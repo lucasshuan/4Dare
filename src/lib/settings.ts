@@ -35,7 +35,10 @@ export const DEFAULT_SETTINGS: Settings = {
     room: { on: true, volume: 1 },
   },
   chatBubbles: true,
-  games: { "who-am-i": { ...GAME_OPTIONS["who-am-i"] } },
+  games: {
+    "who-am-i": { ...GAME_OPTIONS["who-am-i"] },
+    impostor: { ...GAME_OPTIONS.impostor },
+  },
   presets: [],
 };
 

@@ -41,7 +41,10 @@
     "askSeconds": "Perguntar",
     "answerSeconds": "Responder",
     "guessSeconds": "Palpitar",
-    "validateSeconds": "Conferir"
+    "validateSeconds": "Conferir",
+    "replySeconds": "Responder",
+    "talkSeconds": "Conversar",
+    "lastSeconds": "Última chance"
   },
   "timesLabel": "Tempos",
   "start": "Começar",

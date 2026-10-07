@@ -26,6 +26,7 @@ export function jaShareText(): string {
   const text = [
     ...strings(meta),
     ...strings(home.games.whoAmI),
+    ...strings(home.games.impostor),
     ...strings(common.answers),
     appName("ja"),
     art,

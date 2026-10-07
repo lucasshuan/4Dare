@@ -8,7 +8,7 @@ import { buttonClass } from "@/components/ui/button";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { PersonCard } from "@/features/profile/person-card";
 import { GOSTOS } from "@/game/gostos";
-import { type PublicRoom, STEP_TIMES } from "@/game/types";
+import { GAME_STEP_TIMES, type PublicRoom } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
@@ -35,7 +35,7 @@ export function sortRooms(rooms: PublicRoom[]) {
 
 /** "80", or "40–80" when the steps differ. */
 function secondsRange(r: PublicRoom) {
-  const all = STEP_TIMES.map((k) => r[k]);
+  const all = GAME_STEP_TIMES[r.game].map((k) => r[k]);
   const min = Math.min(...all);
   const max = Math.max(...all);
   return min === max ? String(min) : `${min}–${max}`;

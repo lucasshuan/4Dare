@@ -1,6 +1,11 @@
 // What we keep of a finished match, per player: who picked what for whom,
 // how it ended, how long it took and the XP it gave. Profiles read it.
 import type { GameKey } from "./games";
+import {
+  type ImpostorPlayerRecord,
+  impostorPart,
+  impostorXp,
+} from "./impostor/record";
 import { GAME_XP, XP } from "./profile/xp";
 import { themeId } from "./theme-id";
 import type { Lang, PlayerId, RoomState, Theme } from "./types";
@@ -33,6 +38,8 @@ export interface PlayerRecord {
   timeMs: number | null;
   /** The match's XP, but the day's first match bonus (MatchRecord.dayBonus). */
   xp: number;
+  /** An Impostor match: their side and what they did. */
+  impostor?: ImpostorPlayerRecord;
 }
 
 export interface MatchRecord {
@@ -65,7 +72,64 @@ export function playerXp(p: Pick<PlayerRecord, "result" | "place">): number {
 export function matchRecord(s: RoomState, now: number): MatchRecord | null {
   if (s.phase !== "finished" || s.playStartedAt == null) return null;
   const startedAt = s.playStartedAt;
-  const players = s.players
+  const players = s.imp
+    ? impostorPlayers(s, startedAt, now)
+    : whoAmIPlayers(s, startedAt);
+  return {
+    id: `${s.code}-${startedAt}`,
+    game: s.settings.game,
+    roomCode: s.code,
+    round: s.round,
+    theme: s.theme,
+    themeId: s.theme && s.theme.set !== null ? themeId(s.theme) : null,
+    startedAt,
+    finishedAt: now,
+    dayBonus: XP.dayFirst,
+    players,
+  };
+}
+
+/** Everyone dealt in: the winners share first place; nothing picked, nothing discovered. */
+function impostorPlayers(
+  s: RoomState,
+  startedAt: number,
+  now: number,
+): PlayerRecord[] {
+  const imp = s.imp;
+  if (!imp) return [];
+  return s.players
+    .filter((p) => imp.dealt.includes(p.id))
+    .map((p): PlayerRecord => {
+      const part = impostorPart(imp, p.id);
+      const won =
+        imp.winner !== null && part.impostor === (imp.winner === "impostors");
+      const card = part.impostor ? imp.impostor : imp.crew;
+      return {
+        userId: p.id,
+        wasGuest: p.isGuest,
+        lang: p.lang,
+        pickedById: null,
+        pickerLang: null,
+        characterId: card.id,
+        characterName: card.name,
+        characterOrigin: card.origin,
+        autoPicked: true,
+        suggested: false,
+        result: part.left ? "left" : "not_found",
+        place: won ? 1 : null,
+        discoveredAt: null,
+        questions: imp.asked.filter((q) => q.answers[p.id] !== undefined)
+          .length,
+        guesses: part.guess ? 1 : 0,
+        timeMs: Math.max(0, now - startedAt),
+        xp: impostorXp(imp, p.id),
+        impostor: part,
+      };
+    });
+}
+
+function whoAmIPlayers(s: RoomState, startedAt: number): PlayerRecord[] {
+  return s.players
     .filter((p) => s.assignments[p.id])
     .map((p): PlayerRecord => {
       const o = s.outcomes[p.id];
@@ -100,16 +164,4 @@ export function matchRecord(s: RoomState, now: number): MatchRecord | null {
         xp: playerXp({ result, place }),
       };
     });
-  return {
-    id: `${s.code}-${startedAt}`,
-    game: s.settings.game,
-    roomCode: s.code,
-    round: s.round,
-    theme: s.theme,
-    themeId: s.theme && s.theme.set !== null ? themeId(s.theme) : null,
-    startedAt,
-    finishedAt: now,
-    dayBonus: XP.dayFirst,
-    players,
-  };
 }

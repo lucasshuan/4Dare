@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { Segmented } from "@/features/create/settings-fields";
 import { GAME_KEYS, type GameKey } from "@/game/games";
-import { GAME_OPTIONS, type GameOption, THEMES } from "@/game/options";
+import { GAME_OPTIONS, THEMES } from "@/game/options";
 import { LANGS, type Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
@@ -255,7 +255,9 @@ function GamePane() {
   const gameName = useGameName();
   const [game, setGame] = useState<GameKey>(GAME_KEYS[0]);
   const s = useSettings();
-  const options = Object.keys(GAME_OPTIONS[game]) as GameOption<GameKey>[];
+  // each game's own keys: read loosely, the messages name them
+  const options = Object.keys(GAME_OPTIONS[game]);
+  const values = s.games[game] as Record<string, boolean>;
   return (
     <>
       <fieldset className="m-0 flex min-w-0 flex-wrap gap-2 border-0 border-line border-b p-0 pb-4">
@@ -287,7 +289,7 @@ function GamePane() {
           >
             <Switch
               aria-label={t(`options.${game}.${o}.label`)}
-              checked={s.games[game][o]}
+              checked={values[o]}
               onCheckedChange={(on) =>
                 updateSettings((x) => ({
                   ...x,

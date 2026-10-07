@@ -6,11 +6,13 @@
 import { type GameKey, isGameKey } from "./games";
 import { GOSTO_KEYS, type Gosto, isGosto } from "./gostos";
 import {
+  DEFAULT_SETTINGS,
   OFF_THEMES_MAX,
   type RoomSettings,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
   STEP_TIMES,
+  type StepTime,
 } from "./types";
 
 export const PRESETS_MAX = 12;
@@ -19,14 +21,7 @@ export const PRESET_NAME_MAX = 30;
 /** What a preset keeps: the room's rules, gostos and themes; never its name, password or seats. */
 export type PresetSetup = Pick<
   RoomSettings,
-  | "voteSeconds"
-  | "askSeconds"
-  | "guessSeconds"
-  | "answerSeconds"
-  | "validateSeconds"
-  | "themeMode"
-  | "offGostos"
-  | "offThemes"
+  StepTime | "themeMode" | "impostors" | "offGostos" | "offThemes"
 >;
 
 export interface RoomPreset {
@@ -54,12 +49,12 @@ export const readyOff = (p: ReadyPreset): Gosto[] =>
 /** The part of a room's setup a preset keeps. */
 export function presetSetup(s: PresetSetup): PresetSetup {
   return {
-    voteSeconds: s.voteSeconds,
-    askSeconds: s.askSeconds,
-    guessSeconds: s.guessSeconds,
-    answerSeconds: s.answerSeconds,
-    validateSeconds: s.validateSeconds,
+    ...(Object.fromEntries(STEP_TIMES.map((k) => [k, s[k]])) as Pick<
+      PresetSetup,
+      StepTime
+    >),
     themeMode: s.themeMode,
+    impostors: s.impostors ?? null,
     offGostos: [...s.offGostos],
     offThemes: [...s.offThemes].sort(),
   };
@@ -103,8 +98,18 @@ const seconds = (v: unknown) =>
 const THEME_ID = /^[a-z0-9-]{1,80}$/;
 
 function parseSetup(raw: unknown): PresetSetup | null {
-  const r = record(raw);
+  // a clock a preset was saved without (a game added later) takes its default
+  const r = {
+    ...Object.fromEntries(STEP_TIMES.map((k) => [k, DEFAULT_SETTINGS[k]])),
+    ...record(raw),
+  };
   if (!STEP_TIMES.every((k) => seconds(r[k]))) return null;
+  const impostors =
+    Number.isInteger(r.impostors) &&
+    (r.impostors as number) >= 1 &&
+    (r.impostors as number) <= 3
+      ? (r.impostors as number)
+      : null;
   if (r.themeMode !== "vote" && r.themeMode !== "host") return null;
   const off = Array.isArray(r.offGostos) ? r.offGostos.filter(isGosto) : [];
   const offGostos = GOSTO_KEYS.filter((k) => off.includes(k));
@@ -122,9 +127,10 @@ function parseSetup(raw: unknown): PresetSetup | null {
   return {
     ...(Object.fromEntries(STEP_TIMES.map((k) => [k, r[k]])) as Pick<
       PresetSetup,
-      (typeof STEP_TIMES)[number]
+      StepTime
     >),
     themeMode: r.themeMode,
+    impostors,
     offGostos,
     offThemes,
   };

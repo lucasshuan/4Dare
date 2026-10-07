@@ -15,6 +15,12 @@
     "pitch": "Everyone picks a character for someone else. Find out yours with yes-or-no questions.",
     "imageAlt": "Who am I? on 4Dare: cards on the table and a yes-or-no question"
   },
+  "impostor": {
+    "title": "Impostor: play online with friends",
+    "description": "Everyone gets the same character but one, who doesn't know they're the impostor. Answer questions about your card with a tap and vote out whoever stands out. Free, 3 to 10 players, no sign-up.",
+    "pitch": "Everyone has the same character but one. Not even they know. Answer for your card and find who stands out.",
+    "imageAlt": "Impostor on 4Dare: matching cards on the table and one that differs"
+  },
   "newRoom": {
     "title": "Create a room"
   },
@@ -44,7 +50,9 @@
       "asking": "Your turn!",
       "answering": "Answer the question!",
       "guessing": "Make your guess!",
-      "validating": "Check a guess!"
+      "validating": "Check a guess!",
+      "replying": "Answer for your card!",
+      "talking": "Vote someone out!"
     }
   },
   "rooms": {

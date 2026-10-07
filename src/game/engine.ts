@@ -12,6 +12,19 @@ import {
   presenceDue,
   validatorOf,
 } from "./helpers";
+import {
+  accuse,
+  beginImpostor,
+  dontKnow,
+  impLeft,
+  impTimeout,
+  lastGuess,
+  point,
+  reply,
+  unaccuse,
+  unreply,
+} from "./impostor/engine";
+import type { ImpDeal } from "./impostor/types";
 import { isCloseMatch } from "./match";
 import {
   endsWithQuestionMark,
@@ -20,14 +33,29 @@ import {
 } from "./question";
 import { pickColorSlot } from "./seat-colors";
 import {
+  cleanText,
+  cutClock,
+  fail,
+  finish,
+  guardStep,
+  guessScene,
+  longShows,
+  type Part,
+  presentCount,
+  requireSeated,
+  shuffle,
+  stage,
+  startStep,
+  stepMs,
+  stopClock,
+  TURN_PHASES,
+} from "./steps";
+import {
   type AnswerEntry,
   type Assignment,
-  type BeatKind,
   type Character,
-  CLOCK_CUT_FLOOR_MS,
   type Ctx,
-  type ErrorCode,
-  GameError,
+  DEFAULT_SETTINGS,
   type GameEvent,
   HOST_THEME_SECONDS,
   type Identity,
@@ -42,20 +70,16 @@ import {
   type PickDraft,
   type Play,
   type PlayerId,
-  RESULT_SECONDS,
   REVEAL_TIMING,
-  type Reveal,
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
   type RoomSettings,
   type RoomState,
   type RuleExamples,
   SHOW_TIMING,
-  type ShowKind,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
   STEP_TIMES,
-  type StepTime,
   THEME_IDEAS,
   THEME_OPTIONS,
   type Theme,
@@ -63,10 +87,6 @@ import {
 
 type Question = Extract<Play, { kind: "question" }>;
 type Guess = Extract<Play, { kind: "guess" }>;
-
-const fail = (code: ErrorCode): never => {
-  throw new GameError(code);
-};
 
 // --- settings ----------------------------------------------------------------
 
@@ -89,9 +109,20 @@ function mergeSettings(
     "themeMode",
     "offGostos",
     "offThemes",
+    "impostors",
   ]);
   if (Object.keys(patch).some((k) => !allowed.has(k))) fail("invalid_input");
-  const next = { ...base, ...patch };
+  const next = { ...DEFAULT_SETTINGS, ...base, ...patch };
+  // another game keeps the seats where its range allows
+  if (
+    patch.game !== undefined &&
+    patch.seats === undefined &&
+    isGameKey(next.game)
+  ) {
+    const range = GAME_SEATS[next.game];
+    next.seats = Math.min(range.max, Math.max(range.min, seated, next.seats));
+  }
+  const impostors: unknown = next.impostors;
   const offGostos: unknown = next.offGostos ?? [];
   const offThemes: unknown = next.offThemes ?? [];
   const name: unknown = next.name;
@@ -116,6 +147,10 @@ function mergeSettings(
         next[k] <= STEP_SECONDS_MAX,
     ) &&
     next.mode === "classic" &&
+    (impostors === null ||
+      (Number.isInteger(impostors) &&
+        (impostors as number) >= 1 &&
+        (impostors as number) <= Math.floor(GAME_SEATS.impostor.max / 3))) &&
     (next.themeMode === "vote" || next.themeMode === "host") &&
     Array.isArray(offGostos) &&
     offGostos.every(isGosto) &&
@@ -140,131 +175,7 @@ function mergeSettings(
   };
 }
 
-// --- clock -------------------------------------------------------------------
-
-const isShow = (r: Reveal | null | undefined): r is Reveal =>
-  !!r && (r.kind === "opening" || r.kind === "theme" || r.kind === "cast");
-/** A guess's result, or a pass, on the whole screen: the next turn waits for it. */
-const isGuessScene = (r: Reveal | null | undefined): r is Reveal =>
-  !!r && (r.kind === "guess" || r.kind === "pass");
-
-/** Puts a guess's result (or a pass) on screen for `ms`, scaled like the shows. */
-function guessScene(
-  s: RoomState,
-  kind: "guess" | "pass",
-  n: number,
-  ms: number,
-  ctx: Ctx,
-) {
-  const scale = ctx.showScale && ctx.showScale > 0 ? ctx.showScale : 1;
-  s.reveal = {
-    kind,
-    n,
-    startsAt: ctx.now,
-    until: ctx.now + Math.round(ms * scale),
-  };
-}
-
-/** A beat and its length (ms) before scaling; a 0 drops it. */
-type Part = [BeatKind, number];
-
-/**
- * Puts a show on screen: its beats back to back, from now, or from the end of
- * a show still playing (kept as `prev` so it plays out, never nested deeper).
- * Returns when it ends.
- */
-function stage(
-  s: RoomState,
-  kind: ShowKind,
-  n: number,
-  first: boolean,
-  parts: Part[],
-  ctx: Ctx,
-  rule?: RuleExamples | null,
-) {
-  const scale = ctx.showScale && ctx.showScale > 0 ? ctx.showScale : 1;
-  const running =
-    isShow(s.reveal) && ctx.now < s.reveal.until
-      ? { ...s.reveal, prev: null }
-      : null;
-  const startsAt = Math.max(ctx.now, running?.until ?? 0);
-  let t = startsAt;
-  const beats = [];
-  for (const [beat, ms] of parts) {
-    if (ms <= 0) continue;
-    const until = t + Math.round(ms * scale);
-    beats.push({ kind: beat, startsAt: t, until });
-    t = until;
-  }
-  s.reveal = {
-    kind,
-    n,
-    startsAt,
-    until: t,
-    beats,
-    first,
-    prev: running,
-    ...(rule !== undefined ? { rule } : {}),
-  };
-  return t;
-}
-
-/**
- * Starts a step. The guessing step starts at once, under the answers reveal
- * (players close it when they like); the rest, and any step under a show or
- * a guess's scene, wait for what is on screen.
- */
-function startStep(s: RoomState, ctx: Ctx, ms: number) {
-  const waits =
-    isShow(s.reveal) || isGuessScene(s.reveal) || !TURN_PHASES.has(s.phase);
-  const start = Math.max(ctx.now, waits ? (s.reveal?.until ?? 0) : 0);
-  s.stepStartsAt = start;
-  s.deadline = start + ms;
-  s.stepMs = ms;
-}
-
-const stepMs = (s: RoomState, key: StepTime) => s.settings[key] * 1000;
-
-function stopClock(s: RoomState) {
-  s.deadline = null;
-  s.stepStartsAt = null;
-  s.stepMs = null;
-}
-
-/**
- * One of the `people` who act in this step (vote, answer) did, and others
- * still owe theirs: the clock loses the step's time divided by `people`, so
- * each gets an even share and the last ones don't keep everybody waiting. It
- * never goes below CLOCK_CUT_FLOOR_MS from now, nor moves later.
- */
-function cutClock(s: RoomState, ctx: Ctx, key: StepTime, people: number) {
-  if (s.deadline === null || people < 1) return;
-  const cut = Math.round(stepMs(s, key) / people);
-  const floor = ctx.now + CLOCK_CUT_FLOOR_MS;
-  s.deadline = Math.min(s.deadline, Math.max(s.deadline - cut, floor));
-}
-
-function guardStep(s: RoomState, ctx: Ctx) {
-  if (s.stepStartsAt !== null && ctx.now < s.stepStartsAt) fail("too_early");
-}
-
 // --- shared steps --------------------------------------------------------------
-
-function requireSeated(s: RoomState, id: PlayerId) {
-  return findPlayer(s, id) ?? fail("not_member");
-}
-
-function shuffle<T>(items: T[], random: () => number): T[] {
-  const a = [...items];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-/** Match `round` plays the long shows: the room's first, or someone's first ever. */
-const longShows = (s: RoomState, round: number) => round === 1 || s.newcomer;
 
 /**
  * A new round needs a theme: the host types it, or everyone votes on `themes`.
@@ -275,6 +186,7 @@ function beginTheme(
   s: RoomState,
   themes: Theme[] | undefined,
   examples: (RuleExamples | null)[] | undefined,
+  deals: ImpDeal[] | undefined,
   ctx: Ctx,
 ) {
   const T = SHOW_TIMING;
@@ -282,6 +194,16 @@ function beginTheme(
     ["curtain", T.curtain],
     longShows(s, s.round + 1) ? ["intro", T.intro] : ["round", T.round],
   ];
+  // the Impostor always votes: its cards come with the themes
+  if (s.settings.game === "impostor")
+    return beginVote(
+      s,
+      themes,
+      examples,
+      [...open, ["entrance", T.entrance.vote]],
+      ctx,
+      deals ?? fail("invalid_input"),
+    );
   if (s.settings.themeMode === "host")
     return beginTheming(
       s,
@@ -316,9 +238,11 @@ function beginVote(
   examples: (RuleExamples | null)[] | undefined,
   opening: Part[],
   ctx: Ctx,
+  deals?: ImpDeal[],
 ) {
   if (!themes || themes.length !== THEME_OPTIONS) fail("invalid_input");
   if (examples && examples.length !== THEME_OPTIONS) fail("invalid_input");
+  if (deals && deals.length !== THEME_OPTIONS) fail("invalid_input");
   s.vote = {
     options: (themes ?? []).map((t) => ({ ...t })),
     votes: {},
@@ -326,6 +250,7 @@ function beginVote(
     chosen: null,
     tied: [],
     ...(examples ? { examples: structuredClone(examples) } : {}),
+    ...(deals ? { deals: structuredClone(deals) } : {}),
   };
   s.ideas = [];
   s.theme = null;
@@ -347,6 +272,12 @@ function closeVote(s: RoomState, ctx: Ctx) {
   const most = Math.max(...counts);
   v.tied = counts.flatMap((n, i) => (n === most ? [i] : []));
   v.chosen = v.tied[Math.floor(ctx.random() * v.tied.length)];
+  if (s.settings.game === "impostor") {
+    const deal = v.deals?.[v.chosen] ?? fail("invalid_input");
+    // the other themes' cards are never needed again
+    delete v.deals;
+    return beginImpostor(s, v.options[v.chosen], deal, v.tied.length > 1, ctx);
+  }
   beginMatch(s, v.options[v.chosen], ctx);
   showTheme(
     s,
@@ -484,50 +415,6 @@ function endOutcome(s: RoomState, id: PlayerId, ctx: Ctx) {
   s.outcomes[id].endedAt = ctx.now;
 }
 
-/** The podium; its clock (after the last reveal) takes everyone back to the lobby. */
-function finish(s: RoomState, ctx: Ctx) {
-  // A match that ends mid-show goes to the podium at once; a guess reveal still holds it.
-  if (isShow(s.reveal) && ctx.now < s.reveal.until) {
-    s.reveal = null;
-    // Play was to start once the cast ended: it never got there, so the record starts now.
-    if (s.playStartedAt !== null)
-      s.playStartedAt = Math.min(s.playStartedAt, ctx.now);
-  }
-  s.phase = "finished";
-  s.turnPlayerId = null;
-  startStep(s, ctx, RESULT_SECONDS * 1000);
-  keepMatch(s, ctx);
-}
-
-/** How many finished matches the lobby lists. */
-const PAST_MATCHES = 5;
-
-/** Puts the match that just finished on top of the room's list, if it got to the questions. */
-function keepMatch(s: RoomState, ctx: Ctx) {
-  if (s.playStartedAt === null) return;
-  const players = s.players
-    .filter((p) => s.assignments[p.id])
-    .map((p) => ({
-      id: p.id,
-      isGuest: p.isGuest,
-      name: p.name,
-      guestNumber: p.guestNumber,
-      avatar: p.avatar,
-      colorSlot: p.colorSlot,
-      place: s.outcomes[p.id]?.place ?? null,
-    }))
-    .sort((a, b) => (a.place ?? Infinity) - (b.place ?? Infinity));
-  const match = {
-    round: s.round,
-    theme: s.theme,
-    finishedAt: ctx.now,
-    players,
-  };
-  s.matches = [match, ...(s.matches ?? [])].slice(0, PAST_MATCHES);
-}
-
-const presentCount = (s: RoomState) => s.players.filter(isPresent).length;
-
 function canPlay(s: RoomState, id: PlayerId) {
   const p = findPlayer(s, id);
   return !!p && isPresent(p) && isActive(s, id);
@@ -654,14 +541,8 @@ const MATCH_PHASES = new Set([
   "guessing",
   "validating",
 ]);
-const TURN_PHASES = new Set(["asking", "answering", "guessing", "validating"]);
-
-function cleanText(text: string, max: number) {
-  const t = text.trim();
-  if (!t || t.length > max) fail("invalid_input");
-  return t;
-}
-
+/** The Impostor's steps, from the first question to the last guess. */
+const IMP_PHASES = new Set(["replying", "talking", "last_chance"]);
 /**
  * Every card is set: the cast show (everyone picked or "Time!", whose
  * character you got, the turn order), then the first turn's clock.
@@ -713,7 +594,11 @@ export function createRoom(
         strikes: 0,
         away: false,
         goneAt: null,
-        colorSlot: pickColorSlot([], host.avatar.color),
+        colorSlot: pickColorSlot(
+          [],
+          host.avatar.color,
+          GAME_SEATS[valid.game].max,
+        ),
       },
     ],
     order: [],
@@ -733,6 +618,7 @@ export function createRoom(
     turnRound: 0,
     turnNumber: 0,
     playStartedAt: null,
+    imp: null,
     createdAt: ctx.now,
     updatedAt: ctx.now,
   };
@@ -802,7 +688,9 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
       if (s.phase !== "lobby") fail("wrong_phase");
+      const game = s.settings.game;
       s.settings = mergeSettings(s.settings, e.settings, s.players.length);
+      if (s.settings.game !== game) recolor(s);
       return;
     }
     case "UPDATE_IDENTITY": {
@@ -816,9 +704,14 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
       if (s.phase !== "lobby") fail("wrong_phase");
-      if (s.players.length < 2) fail("need_two_players");
+      if (s.players.length < GAME_SEATS[s.settings.game].min)
+        fail(
+          s.settings.game === "impostor"
+            ? "need_three_players"
+            : "need_two_players",
+        );
       s.newcomer = e.newcomer === true;
-      return beginTheme(s, e.themes, e.examples, ctx);
+      return beginTheme(s, e.themes, e.examples, e.deals, ctx);
     }
     case "VOTE":
       return vote(s, e.playerId, e.option, ctx);
@@ -851,6 +744,20 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     }
     case "GIVE_UP":
       return giveUp(s, e.playerId, ctx);
+    case "REPLY":
+      return reply(s, e.playerId, e.answer, ctx);
+    case "UNREPLY":
+      return unreply(s, e.playerId, ctx);
+    case "POINT":
+      return point(s, e.playerId, e.targetId);
+    case "ACCUSE":
+      return accuse(s, e.playerId, e.targetId, ctx);
+    case "UNACCUSE":
+      return unaccuse(s, e.playerId, ctx);
+    case "DONT_KNOW":
+      return dontKnow(s, e.playerId, ctx);
+    case "LAST_GUESS":
+      return lastGuess(s, e.playerId, e.text, ctx);
     case "BACK_TO_LOBBY": {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
@@ -859,6 +766,21 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     }
     case "TIMEOUT":
       return timeout(s, e, ctx);
+  }
+}
+
+/** A game with fewer colours: whoever holds one beyond them gets a free one it has. */
+function recolor(s: RoomState) {
+  const slots = GAME_SEATS[s.settings.game].max;
+  const held = s.players.filter((p) => p.colorSlot < slots);
+  for (const p of s.players) {
+    if (p.colorSlot < slots) continue;
+    p.colorSlot = pickColorSlot(
+      held.map((x) => x.colorSlot),
+      p.avatar.color,
+      slots,
+    );
+    held.push(p);
   }
 }
 
@@ -903,6 +825,36 @@ function swapPlayer(s: RoomState, from: PlayerId, player: Identity) {
   }
   for (const m of s.matches ?? [])
     for (const p of m.players) if (p.id === from) p.id = to;
+  if (s.imp) swapImpostor(s.imp, swap);
+}
+
+/** The Impostor's traces of a player under their new id. */
+function swapImpostor(
+  imp: NonNullable<RoomState["imp"]>,
+  swap: (id: PlayerId) => PlayerId,
+) {
+  const keys = <T>(r: Record<PlayerId, T>) =>
+    Object.fromEntries(Object.entries(r).map(([k, v]) => [swap(k), v]));
+  imp.dealt = imp.dealt.map(swap);
+  imp.impostors = imp.impostors.map(swap);
+  for (const a of imp.asked) {
+    a.answers = keys(a.answers);
+    a.cuts = keys(a.cuts);
+  }
+  if (imp.vote) {
+    imp.vote.points = Object.fromEntries(
+      Object.entries(imp.vote.points).map(([k, v]) => [swap(k), swap(v)]),
+    );
+    imp.vote.votes = Object.fromEntries(
+      Object.entries(imp.vote.votes).map(([k, v]) => [swap(k), swap(v)]),
+    );
+    imp.vote.cuts = keys(imp.vote.cuts);
+  }
+  for (const o of imp.outs) {
+    o.id = swap(o.id);
+    o.by = o.by.map(swap);
+  }
+  if (imp.guessing) imp.guessing = swap(imp.guessing);
 }
 
 function join(
@@ -936,6 +888,7 @@ function join(
     colorSlot: pickColorSlot(
       s.players.map((p) => p.colorSlot),
       player.avatar.color,
+      GAME_SEATS[s.settings.game].max,
     ),
   });
 }
@@ -999,6 +952,7 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   // mid-match: keep the seat so the history still makes sense
   p.away = true;
   handOverHost(s);
+  if (IMP_PHASES.has(s.phase)) return impLeft(s, id, ctx);
   if (isActive(s, id)) endOutcome(s, id, ctx);
   if (TURN_PHASES.has(s.phase) && s.turnPlayerId === id) {
     abandonTurn(s, ctx);
@@ -1207,6 +1161,7 @@ function backToLobby(s: RoomState) {
   s.turnPlayerId = null;
   s.reveal = null;
   s.playStartedAt = null;
+  s.imp = null;
   stopClock(s);
 }
 
@@ -1278,6 +1233,10 @@ function timeout(
       const g = pendingGuess(s) ?? fail("wrong_phase");
       return miss(s, g, ctx);
     }
+    case "replying":
+    case "talking":
+    case "last_chance":
+      return impTimeout(s, ctx);
     default:
       return fail("wrong_phase");
   }

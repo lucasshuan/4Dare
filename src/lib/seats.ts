@@ -1,4 +1,4 @@
-// Each player in a room has a colour (--seat-1..4 in globals.css), theirs from
+// Each player in a room has a colour (--seat-1..10 in globals.css), theirs from
 // joining until they leave (PlayerView.colorSlot, picked in game/seat-colors.ts).
 
 import type { CSSProperties } from "react";

@@ -1,8 +1,9 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { gostosByRule } from "@/game/gostos";
 import { normalizeName } from "@/game/match";
 import { type Character, LANGS, type Lang } from "@/game/types";
-import { entryId, libraryFor } from "../seed-format";
+import { entryId, libraryFor, parseEntryId } from "../seed-format";
 import type { CharacterStore } from "../types";
 import { processSingleton, readJson, writeJson } from "./disk";
 import { LOCAL_CHARACTERS, LOCAL_ORIGINS } from "./fixtures";
@@ -169,6 +170,21 @@ export function localCharacters(): LocalCharacterStore {
     // The starters live only in Supabase (whoami_theme_starters); the dev lab has fixtures.
     async starters() {
       return [];
+    },
+    async facts(ids, lang) {
+      const keys = new Set(ids.map((id) => parseEntryId(id)?.id ?? id));
+      return LOCAL_CHARACTERS.filter((c) => keys.has(c.id)).map((c) => ({
+        id: c.id,
+        category: c.category,
+        work:
+          LOCAL_ORIGINS.find((o) => o.id === c.origin)?.labels.en ?? c.origin,
+        popularity: c.popularity?.[lang] ?? null,
+        gostos: gostosByRule(c.origin, c.category),
+      }));
+    },
+    // a few dozen characters, all well known
+    async knownFloor() {
+      return null;
     },
     cover(id) {
       if (id.startsWith("u-")) return rows.get(id)?.imageUrl ?? null;

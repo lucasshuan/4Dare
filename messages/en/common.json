@@ -53,6 +53,8 @@
     "wrong_phase": "That does not apply at this step.",
     "invalid_input": "Check what you typed.",
     "need_two_players": "You need 2 or more players.",
+    "need_three_players": "You need 3 or more players.",
+    "gives_away": "That answer gives your card away. Try another.",
     "already_done": "You already did that.",
     "conflict": "Someone played at the same time. Try again.",
     "unauthorized": "Sign in again to continue.",

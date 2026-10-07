@@ -7,6 +7,7 @@ import { z } from "zod";
 import { knownAs } from "@/game/character-search";
 import { GAME_KEYS } from "@/game/games";
 import { GOSTO_KEYS, type Gosto } from "@/game/gostos";
+import type { ImpAnswer } from "@/game/impostor/types";
 import { parseSynced } from "@/game/options";
 import { themeId } from "@/game/theme-id";
 import {
@@ -45,6 +46,7 @@ import {
   type Result,
 } from "./contract";
 import { readImage } from "./images";
+import { impostorRound } from "./impostor";
 import { deleteLine, postLine, reportLine } from "./mural";
 import { countPick, nameWithPicture, sendPicture, wearing } from "./pictures";
 import {
@@ -121,12 +123,17 @@ const createSchema = z.object({
   name: z.string().trim().min(1).max(ROOM_NAME_MAX),
   visibility: z.enum(["public", "private"]),
   password: z.string().trim().max(ROOM_PASSWORD_MAX),
-  seats: z.union([z.literal(2), z.literal(3), z.literal(4)]),
+  // the engine checks the game's own range
+  seats: z.number().int().min(2).max(10),
   voteSeconds: seconds,
   askSeconds: seconds,
   guessSeconds: seconds,
   answerSeconds: seconds,
   validateSeconds: seconds,
+  replySeconds: seconds,
+  talkSeconds: seconds,
+  lastSeconds: seconds,
+  impostors: z.number().int().min(1).max(3).nullable(),
   themeMode: z.enum(["vote", "host"]),
   offGostos: z
     .array(z.enum(GOSTO_KEYS as [Gosto, ...Gosto[]]))
@@ -238,6 +245,20 @@ export async function kickPlayer(
 export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {
     const stored = await getBackend().rooms.get(roomCode(code));
+    // the Impostor deals its cards with the themes it puts to the vote
+    if (stored?.state.settings.game === "impostor") {
+      const [round, newcomer] = await Promise.all([
+        impostorRound(stored.state, stored.state.vote?.options ?? []),
+        hasNewcomer(stored.state),
+      ]);
+      return act(code, (id) => ({
+        type: "START",
+        playerId: id,
+        themes: round.themes,
+        deals: round.deals,
+        ...(newcomer ? { newcomer } : {}),
+      }));
+    }
     const [themes, newcomer] = stored
       ? await Promise.all([
           roundThemes(stored.state, stored.state.vote?.options ?? []),
@@ -285,6 +306,81 @@ export async function voteTheme(
       bad();
     return act(code, (id) => ({ type: "VOTE", playerId: id, option }));
   });
+}
+
+// --- impostor -----------------------------------------------------------------
+
+const answerSchema = z.union([
+  z.object({ n: z.number().int().min(0).max(12) }).strict(),
+  z.object({ word: z.string().max(80) }).strict(),
+]);
+
+/** Answers the open question about your card (again to change it); null takes the answer back. */
+export async function replyCard(
+  code: string,
+  answer: ImpAnswer | null,
+): Promise<Result<RoomView>> {
+  return run(() => {
+    if (answer === null)
+      return act(code, (id) => ({ type: "UNREPLY", playerId: id }));
+    const parsed = answerSchema.safeParse(answer);
+    if (!parsed.success) bad();
+    return act(code, (id) => ({
+      type: "REPLY",
+      playerId: id,
+      answer: parsed.data as ImpAnswer,
+    }));
+  });
+}
+
+const playerId = (raw: unknown) =>
+  typeof raw === "string" && raw.length > 0 && raw.length <= 80 ? raw : bad();
+
+/** Points at a suspect (null: at nobody). Free: it counts for nothing. */
+export async function pointAt(
+  code: string,
+  targetId: string | null,
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({
+      type: "POINT",
+      playerId: id,
+      targetId: targetId === null ? null : playerId(targetId),
+    })),
+  );
+}
+
+/** Confirms a vote to send `targetId` out; null takes it back (and the time it cut). */
+export async function accuse(
+  code: string,
+  targetId: string | null,
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) =>
+      targetId === null
+        ? { type: "UNACCUSE", playerId: id }
+        : { type: "ACCUSE", playerId: id, targetId: playerId(targetId) },
+    ),
+  );
+}
+
+/** "I don't know this one": everyone gets new cards, nobody is told who asked. */
+export async function dontKnowCard(code: string): Promise<Result<RoomView>> {
+  return run(() => act(code, (id) => ({ type: "DONT_KNOW", playerId: id })));
+}
+
+/** A caught impostor's last chance: their guess at the crew's card. */
+export async function guessCrewCard(
+  code: string,
+  guess: string,
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({
+      type: "LAST_GUESS",
+      playerId: id,
+      text: text(guess, MAX_GUESS),
+    })),
+  );
 }
 
 // --- match ------------------------------------------------------------------

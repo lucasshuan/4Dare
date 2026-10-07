@@ -1,6 +1,6 @@
 // What each player is allowed to see. This is the only place that decides secrecy.
 
-import type { GameKey } from "./games";
+import { GAME_SEATS, type GameKey } from "./games";
 import { displayName } from "./guest-names";
 import {
   abandoned,
@@ -13,6 +13,7 @@ import {
   presenceDue,
   validatorOf,
 } from "./helpers";
+import { impReveal, impStatus, impView } from "./impostor/view";
 import {
   type ActiveRoom,
   type AnswerEntry,
@@ -87,6 +88,8 @@ function mustAct(s: RoomState, id: PlayerId) {
 }
 
 function statusOf(s: RoomState, p: RoomPlayer): PlayerStatus {
+  const imp = impStatus(s, p);
+  if (imp) return imp;
   const o = s.outcomes[p.id];
   if (s.phase === "lobby")
     return p.id === s.hostId ? "host" : p.ready ? "ready" : "not_ready";
@@ -260,7 +263,7 @@ function isTied(s: RoomState, id: PlayerId) {
 }
 
 const isShowKind = (kind: Reveal["kind"]): kind is ShowKind =>
-  kind === "opening" || kind === "theme" || kind === "cast";
+  kind === "opening" || kind === "theme" || kind === "cast" || kind === "deal";
 
 /** A show as the screens get it, with the show still playing before it while that lasts. */
 function showView(r: Reveal, kind: ShowKind, now: number): ShowView {
@@ -288,6 +291,8 @@ function reveal(
   const r = s.reveal;
   if (!r || now >= r.until) return null;
   if (isShowKind(r.kind)) return showView(r, r.kind, now);
+  if (r.kind === "replies" || r.kind === "out" || r.kind === "swap")
+    return impReveal(s, r);
   // A turn's question and guess share its number; a pass is told by its question.
   const kind = r.kind === "guess" ? "guess" : "question";
   const play = s.plays.find((p) => p.n === r.n && p.kind === kind);
@@ -409,8 +414,11 @@ export function toView(
     history: history(s),
     turns: s.turnNumber,
     matches: s.phase === "lobby" ? pastMatches(s, viewerId, lang) : [],
+    imp: impView(s, viewerId),
     canStart:
-      viewerId === s.hostId && s.phase === "lobby" && s.players.length >= 2,
+      viewerId === s.hostId &&
+      s.phase === "lobby" &&
+      s.players.length >= GAME_SEATS[s.settings.game].min,
   };
 }
 
@@ -447,6 +455,9 @@ const PLAYING_PHASES = new Set([
   "answering",
   "guessing",
   "validating",
+  "replying",
+  "talking",
+  "last_chance",
 ]);
 
 /**
@@ -530,6 +541,9 @@ export function toPublicRoom(state: RoomState, now: number): ListedRoom | null {
     guessSeconds: s.settings.guessSeconds,
     answerSeconds: s.settings.answerSeconds,
     validateSeconds: s.settings.validateSeconds,
+    replySeconds: s.settings.replySeconds,
+    talkSeconds: s.settings.talkSeconds,
+    lastSeconds: s.settings.lastSeconds,
   };
 }
 

@@ -24,6 +24,7 @@ const SHOW_BEATS: Record<string, BeatKind[]> = {
   opening: ["curtain", "intro", "round", "entrance"],
   theme: ["tie_spin", "settle", "theme", "rule", "draw", "target", "entrance"],
   cast: ["picked", "received", "order", "entrance"],
+  deal: ["tie_spin", "settle", "theme", "card", "entrance"],
 };
 
 /** The lengths a beat may have, for the room's first match or a later one. */
@@ -62,6 +63,8 @@ function beatLengths(show: string, kind: BeatKind, first: boolean): number[] {
       return [T.received[v]];
     case "order":
       return [T.order[v]];
+    case "card":
+      return [T.card[v]];
   }
 }
 

@@ -53,6 +53,8 @@
     "wrong_phase": "Isso não vale nesta etapa.",
     "invalid_input": "Confira o que você digitou.",
     "need_two_players": "Precisa de 2 jogadores ou mais.",
+    "need_three_players": "Precisa de 3 jogadores ou mais.",
+    "gives_away": "Essa resposta entrega a carta. Tente outra.",
     "already_done": "Você já fez isso.",
     "conflict": "Alguém jogou ao mesmo tempo. Tente de novo.",
     "unauthorized": "Entre de novo para continuar.",

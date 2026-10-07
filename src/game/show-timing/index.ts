@@ -2,6 +2,7 @@
 // each can be tuned by playing; the engine times the shows with these, the screens play inside them.
 // Server-wide: reduced motion changes what a screen draws, never how long a beat lasts.
 import { CAST, CAST_MARKS } from "./cast";
+import { DEAL, DEAL_MARKS } from "./deal";
 import { DRAW, DRAW_MARKS } from "./draw";
 import { OPENING, OPENING_MARKS } from "./opening";
 import { PICK } from "./pick";
@@ -22,11 +23,13 @@ export const SHOW_TIMING = {
   picked: PICK.picked,
   received: CAST.received,
   order: CAST.order,
+  card: DEAL.card,
   entrance: {
     vote: OPENING.entrance.vote,
     theming: OPENING.entrance.theming,
     pick: PICK.entrance,
     turn: CAST.entrance,
+    reply: DEAL.entrance,
   },
 } as const;
 
@@ -39,4 +42,5 @@ export const SHOW_MARKS = {
   ...THEME_MARKS,
   ...DRAW_MARKS,
   ...CAST_MARKS,
+  ...DEAL_MARKS,
 } as const;

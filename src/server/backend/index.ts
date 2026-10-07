@@ -13,6 +13,7 @@ import { supabaseMatches } from "./supabase/matches";
 import { supabaseMural } from "./supabase/mural";
 import { supabaseNotify } from "./supabase/notify";
 import { supabaseProfiles } from "./supabase/profiles";
+import { supabaseQuestions } from "./supabase/questions";
 import { supabaseRooms } from "./supabase/rooms";
 import { supabaseThemes } from "./supabase/themes";
 import type { Backend } from "./types";
@@ -27,6 +28,7 @@ export function getBackend(): Backend {
       rooms: supabaseRooms(),
       matches: supabaseMatches(),
       characters: supabaseCharacters(),
+      questions: supabaseQuestions(),
       images: supabaseImages(),
       themes: themes(supabaseThemes()),
       files: supabaseFiles(),

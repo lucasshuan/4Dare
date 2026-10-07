@@ -42,12 +42,21 @@ const TIMES = {
   guessSeconds: 60,
   answerSeconds: 60,
   validateSeconds: 60,
+  replySeconds: 45,
+  talkSeconds: 120,
+  lastSeconds: 45,
 };
 const PRESET = {
   id: "friday",
   name: "Friday",
   game: "who-am-i",
-  setup: { ...TIMES, themeMode: "vote", offGostos: ["real"], offThemes: [] },
+  setup: {
+    ...TIMES,
+    themeMode: "vote",
+    impostors: null,
+    offGostos: ["real"],
+    offThemes: [],
+  },
   isDefault: true,
 };
 const ROOM = {
@@ -57,6 +66,7 @@ const ROOM = {
   themeMode: DEFAULT_SETTINGS.themeMode,
   offGostos: DEFAULT_SETTINGS.offGostos,
   offThemes: DEFAULT_SETTINGS.offThemes,
+  impostors: null,
 };
 
 /** The guest id inside a jar's signed guest cookie. */
@@ -652,7 +662,10 @@ describe("server, local mode", () => {
     expect((await read()).settings).toEqual({
       theme: "dark",
       chatBubbles: false,
-      games: { "who-am-i": { confirmPass: true, popularHand: true } },
+      games: {
+        "who-am-i": { confirmPass: true, popularHand: true },
+        impostor: { hiddenCard: false },
+      },
       presets: [PRESET],
     });
 
@@ -2053,5 +2066,112 @@ describe("character pictures", () => {
     const done = await tidyPictures(Date.now() + 25 * 3600_000);
     expect(done.orphans).toBeGreaterThan(0);
     expect(await images.find(null, imageUrl)).toBeNull();
+  });
+});
+
+describe("impostor, local mode", () => {
+  it("deals the cards with the vote, plays a round and records the match", async () => {
+    const players = ["imp1", "imp2", "imp3", "imp4"];
+    as("imp1");
+    const { code } = must(
+      await A.createRoom({
+        ...ROOM,
+        ...TIMES,
+        game: "impostor",
+        visibility: "public",
+        seats: 10,
+      }),
+    );
+    for (const p of players.slice(1)) {
+      as(p);
+      must(await A.joinRoom(code));
+    }
+    as("imp1");
+    must(await A.startGame(code));
+    for (const p of players) {
+      as(p);
+      expect((await view(code)).body.phase).toBe("voting");
+      must(await A.voteTheme(code, 0));
+    }
+    // the cards came with the vote: never shown, never sent
+    as("imp1");
+    let v = (await view(code)).body;
+    expect(v.phase).toBe("replying");
+    expect(v.reveal?.kind).toBe("deal");
+    expect(JSON.stringify(v)).not.toContain("deals");
+    skipTo(v);
+
+    // who holds which card: the impostor's is the odd one out
+    const cards: Record<string, string> = {};
+    const idOf: Record<string, string> = {};
+    for (const p of players) {
+      as(p);
+      const mine = (await view(code)).body;
+      cards[p] = mine.imp?.card?.characterId ?? "";
+      idOf[p] = mine.youId;
+      expect(mine.imp?.impostors).toBe(1);
+    }
+    const ids = Object.values(cards);
+    const odd = players.find(
+      (p) => ids.filter((id) => id === cards[p]).length === 1,
+    );
+    expect(odd).toBeDefined();
+    const crewCard = ids.find((id) => id !== cards[odd as string]);
+
+    // two questions before the vote: everyone answers each
+    for (let q = 0; q < 2; q++) {
+      for (const p of players) {
+        as(p);
+        const now = (await view(code)).body;
+        const kind = now.imp?.asked.at(-1)?.question.kind;
+        must(
+          await A.replyCard(
+            code,
+            kind === "word"
+              ? { word: "pizza" }
+              : { n: kind === "scale" ? 5 : 0 },
+          ),
+        );
+      }
+      as("imp1");
+      skipTo((await view(code)).body);
+    }
+    as("imp1");
+    v = (await view(code)).body;
+    expect(v.phase).toBe("talking");
+    expect(v.imp?.asked.every((a) => a.answers?.length === 4)).toBe(true);
+
+    // everyone sends the impostor out (the impostor votes for someone else)
+    for (const p of players) {
+      as(p);
+      const target = p === odd ? players.find((x) => x !== odd) : odd;
+      must(await A.accuse(code, idOf[target as string]));
+    }
+    as(odd as string);
+    v = (await view(code)).body;
+    expect(v.phase).toBe("last_chance");
+    expect(v.reveal).toMatchObject({
+      kind: "out",
+      id: idOf[odd as string],
+      impostor: true,
+    });
+    skipTo(v);
+    must(await A.guessCrewCard(code, "Ninguém sabe"));
+    v = (await view(code)).body;
+    expect(v.phase).toBe("finished");
+    expect(v.imp?.end).toMatchObject({
+      winner: "crew",
+      impostorIds: [idOf[odd as string]],
+    });
+    expect(v.imp?.end?.crew.characterId).toBe(crewCard);
+
+    // the questions the screens read the words from
+    const route = await import("@/app/api/impostor/questions/route");
+    const bank = (await (await route.GET()).json()) as {
+      questions: { id: string }[];
+    };
+    expect(bank.questions.length).toBe(134);
+    for (const a of v.imp?.asked ?? [])
+      expect(bank.questions.some((q) => q.id === a.question.id)).toBe(true);
   });
 });

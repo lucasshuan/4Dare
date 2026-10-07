@@ -6,6 +6,7 @@ import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
 import type { ThemeFilter } from "@/game/gostos";
 import { displayName } from "@/game/guest-names";
 import { presenceDue } from "@/game/helpers";
+import { questionParts } from "@/game/impostor/record";
 import { matchRecord } from "@/game/record";
 import { themeId } from "@/game/theme-id";
 import {
@@ -268,6 +269,13 @@ function saveMatch(state: RoomState) {
   const record = matchRecord(state, Date.now());
   if (!record) return;
   background(() => getBackend().matches.record(record));
+  // what each Impostor question did, in the language the cards were dealt in
+  const parts = questionParts(state);
+  const lang = state.players.find((p) => p.id === state.hostId)?.lang ?? "en";
+  if (parts.length)
+    background(() =>
+      getBackend().questions.count(parts.map((p) => ({ ...p, lang }))),
+    );
 }
 
 // Used when the library cannot supply enough characters for a clock-filled pick.

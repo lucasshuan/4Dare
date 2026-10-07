@@ -22,6 +22,10 @@ export const DEFAULT_SETUP: CreateRoomInput = {
   guessSeconds: DEFAULT_SETTINGS.guessSeconds,
   answerSeconds: DEFAULT_SETTINGS.answerSeconds,
   validateSeconds: DEFAULT_SETTINGS.validateSeconds,
+  replySeconds: DEFAULT_SETTINGS.replySeconds,
+  talkSeconds: DEFAULT_SETTINGS.talkSeconds,
+  lastSeconds: DEFAULT_SETTINGS.lastSeconds,
+  impostors: DEFAULT_SETTINGS.impostors,
   themeMode: DEFAULT_SETTINGS.themeMode,
   offGostos: [],
   offThemes: [],
@@ -53,7 +57,7 @@ export function cleanOff(gostos: unknown, themes: unknown) {
 /**
  * The setup saved last, field by field; anything missing or odd falls back to
  * the default. The game comes from the link; each room gets its own name and
- * password, and starts public with 4 seats (none of these stored here). A
+ * password, and starts public with the game's most seats (none of these stored here). A
  * room saved private never comes back private: its password isn't kept, and
  * a private room without one is refused, so every new room would fail.
  */
@@ -81,6 +85,10 @@ export function loadSetup(): CreateRoomInput {
     guessSeconds: seconds(saved.guessSeconds, d.guessSeconds),
     answerSeconds: seconds(saved.answerSeconds, d.answerSeconds),
     validateSeconds: seconds(saved.validateSeconds, d.validateSeconds),
+    replySeconds: seconds(saved.replySeconds, d.replySeconds),
+    talkSeconds: seconds(saved.talkSeconds, d.talkSeconds),
+    lastSeconds: seconds(saved.lastSeconds, d.lastSeconds),
+    impostors: oneOf(saved.impostors, [1, 2, 3], null),
     themeMode: oneOf(saved.themeMode, ["vote", "host"], d.themeMode),
     // saved as what is switched off, so a gosto or theme added later starts on
     ...cleanOff(saved.offGostos, saved.offThemes),

@@ -30,6 +30,9 @@ const room = (
   guessSeconds: 60,
   answerSeconds: 30,
   validateSeconds: 30,
+  replySeconds: 45,
+  talkSeconds: 120,
+  lastSeconds: 45,
   offGostos: [],
 });
 

@@ -53,6 +53,8 @@
     "wrong_phase": "今はできません。",
     "invalid_input": "入力内容を確認してください。",
     "need_two_players": "2人以上必要です。",
+    "need_three_players": "3人以上必要です。",
+    "gives_away": "その答えだとカードがバレます。別の答えにしてください。",
     "already_done": "すでに完了しています。",
     "conflict": "同時に操作がありました。もう一度お試しください。",
     "unauthorized": "もう一度ログインしてください。",

@@ -11,7 +11,12 @@ import { MatchLockPage } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { DEFAULT_GAME, type GameKey, isGameKey } from "@/game/games";
+import {
+  DEFAULT_GAME,
+  GAME_SEATS,
+  type GameKey,
+  isGameKey,
+} from "@/game/games";
 import { applyPreset, defaultPreset } from "@/game/presets";
 import { type ErrorCode, ROOM_NAME_MAX } from "@/game/types";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -62,7 +67,12 @@ export function CreateScreen() {
       ? getSettings().presets
       : (me.settings?.presets ?? getSettings().presets);
     const preset = defaultPreset(presets, game);
-    const setup = { ...loadSetup(), game, name };
+    const setup = {
+      ...loadSetup(),
+      game,
+      name,
+      seats: GAME_SEATS[game].max,
+    };
     void run(() =>
       createRoom(preset ? applyPreset(setup, preset) : setup),
     ).then((r) => {

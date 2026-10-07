@@ -46,6 +46,18 @@
       "validateSeconds": {
         "label": "Time to check the guess",
         "hint": "Whoever picked the character checks a guess that wasn't an exact match."
+      },
+      "replySeconds": {
+        "label": "Time to answer",
+        "hint": "Everyone answers the question for their own card. Each answer cuts an even share of this time for those still left; changing it gives it back."
+      },
+      "talkSeconds": {
+        "label": "Time to talk and vote",
+        "hint": "Pointing is free. Each confirmed vote cuts a share, but 20 s to talk always remain; taking it back gives it back."
+      },
+      "lastSeconds": {
+        "label": "Last chance",
+        "hint": "A caught impostor tries to guess the crew's card."
       }
     },
     "less": "10 seconds less",
@@ -129,6 +141,12 @@
         "guess": "Am I a cat?",
         "hit": "Got it!"
       }
+    },
+    "impostor": {
+      "name": "Impostor",
+      "players": "3 to 10 players",
+      "play": "Play",
+      "demoLine": "One of you has another."
     },
     "next": "Next games",
     "previous": "Previous games"

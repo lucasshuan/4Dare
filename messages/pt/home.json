@@ -46,6 +46,18 @@
       "validateSeconds": {
         "label": "Tempo para conferir o palpite",
         "hint": "Quem escolheu o personagem confere um palpite que não bateu na hora."
+      },
+      "replySeconds": {
+        "label": "Tempo para responder",
+        "hint": "Todos respondem a pergunta pela própria carta. Cada resposta tira uma parte igual desse tempo de quem ainda falta; mudar a resposta devolve."
+      },
+      "talkSeconds": {
+        "label": "Tempo para conversar e votar",
+        "hint": "Apontar é livre. Cada voto confirmado tira uma parte do tempo, mas sempre sobram 20 s para conversar; desconfirmar devolve."
+      },
+      "lastSeconds": {
+        "label": "Última chance",
+        "hint": "O impostor pego tenta adivinhar a carta da tripulação."
       }
     },
     "less": "Menos 10 segundos",
@@ -129,6 +141,12 @@
         "guess": "Eu sou um gato?",
         "hit": "Acertou!"
       }
+    },
+    "impostor": {
+      "name": "Impostor",
+      "players": "3 a 10 jogadores",
+      "play": "Jogar",
+      "demoLine": "Um de vocês tem outro."
     },
     "next": "Próximos jogos",
     "previous": "Jogos anteriores"

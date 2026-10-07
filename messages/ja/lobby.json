@@ -41,7 +41,10 @@
     "askSeconds": "質問",
     "answerSeconds": "回答",
     "guessSeconds": "予想",
-    "validateSeconds": "判定"
+    "validateSeconds": "判定",
+    "replySeconds": "回答",
+    "talkSeconds": "相談",
+    "lastSeconds": "ラスト"
   },
   "timesLabel": "時間",
   "start": "始める",

@@ -16,6 +16,10 @@ export const GAME_OPTIONS = {
     /** The hand of the theme's popular characters under the card being filled. */
     popularHand: true,
   },
+  impostor: {
+    /** Your card stays face down until you hold it: for screens others can see. */
+    hiddenCard: false,
+  },
 } as const satisfies Record<GameKey, Record<string, boolean>>;
 export type GameOption<G extends GameKey> = keyof (typeof GAME_OPTIONS)[G];
 export type GameOptions = {

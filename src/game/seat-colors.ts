@@ -1,9 +1,13 @@
-// The four seat colours (--seat-1..4 in globals.css). A player gets one on
-// joining and keeps it until they leave the room: the free one closest to their
-// avatar's colour, so the room's colour is theirs as much as it can be.
+// The seat colours (--seat-1..10 in globals.css): a "Who am I?" room uses the
+// first four, an Impostor room all ten. A player gets one on joining and keeps
+// it until they leave the room: the free one closest to their avatar's
+// colour, so the room's colour is theirs as much as it can be.
 
-/** Hues (deg) of --seat-1..4 in the light theme: blue, apricot, teal, violet. */
-const SEAT_HUES = [216, 27, 177, 270] as const;
+/**
+ * Hues (deg) of --seat-1..10 in the light theme: blue, apricot, teal, violet,
+ * then pink, green, gold, cyan, brown, indigo.
+ */
+const SEAT_HUES = [216, 27, 177, 270, 325, 127, 45, 190, 29, 252] as const;
 
 export const SEAT_COLORS = SEAT_HUES.length;
 
@@ -34,16 +38,19 @@ const hueGap = (a: number, b: number) => {
 };
 
 /**
- * The colour for someone joining: among the ones nobody holds, the closest to
- * their avatar's colour (the first free one for a grey avatar). With all four
- * held, the first one.
+ * The colour for someone joining: among the first `slots` nobody holds, the
+ * closest to their avatar's colour (the first free one for a grey avatar).
+ * With all of them held, the first one.
  */
 export function pickColorSlot(
   taken: Iterable<number>,
   avatarColor: string,
+  slots = 4,
 ): number {
   const held = new Set(taken);
-  const free = SEAT_HUES.map((_, i) => i).filter((i) => !held.has(i));
+  const free = SEAT_HUES.slice(0, slots)
+    .map((_, i) => i)
+    .filter((i) => !held.has(i));
   if (free.length === 0) return 0;
   const hue = hueOf(avatarColor);
   if (hue === null) return free[0];
