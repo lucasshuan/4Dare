@@ -22,9 +22,9 @@ const ODD = { seed: "imp-13", color: "#BFE3EA" };
 const ODD_AT = [2, 0, 3, 1];
 
 /**
- * One loop: cards shuffled face down, turned over (one isn't like the
- * others), the lights go down and a spotlight sweeps the table, stops on the
- * odd one, the stamp. `ms` is how long each step stays.
+ * One loop: cards shuffled face down, the lights go down and a spotlight
+ * sweeps the table, stops on the odd one, and only then the cards turn over
+ * (one isn't like the others), the stamp. `ms` is how long each step stays.
  */
 const STEPS: {
   ms: number;
@@ -34,21 +34,22 @@ const STEPS: {
   caught?: boolean;
 }[] = [
   { ms: 800 },
-  { ms: 1500, up: true, line: true },
-  { ms: 1700, up: true, dark: true },
+  { ms: 1500, line: true },
+  { ms: 1700, dark: true },
+  { ms: 900, up: true, dark: true },
   { ms: 2000, up: true, dark: true, caught: true },
   { ms: 600, up: true },
 ];
 /** The frame shown when still: the spotlight on the odd card, stamped. */
-const STILL = 3;
+const STILL = 4;
 
 /** The middle of card `i`, in % of the box. */
 const centre = (i: number) => CARDS[i].x + W / 2;
 
 /**
- * The Impostor's card art: four cards turn over, all the same but one; the
- * lights go down, a spotlight searches the table and lands on the odd one,
- * stamped. The odd card moves every loop. Still (stamped) for reduced
+ * The Impostor's card art: four cards face down; the lights go down, a
+ * spotlight searches the table and lands on one, the cards turn over (all the
+ * same but that one) and it is stamped. The odd card moves every loop. Still (stamped) for reduced
  * motion, or with `still`.
  */
 export function ImpostorSnapshot({
@@ -197,7 +198,7 @@ export function ImpostorSnapshot({
         ) : null}
       </AnimatePresence>
 
-      {/* "One of you has another." while the cards are up */}
+      {/* "One of you has another." while the cards are still down */}
       <AnimatePresence>
         {s.line ? (
           <m.div
