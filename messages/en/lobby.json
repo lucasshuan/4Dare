@@ -1,10 +1,7 @@
 {
   "titleHost": "Room created. Now invite someone.",
-  "subtitleHost": "Send the link or read out the code. You start the match whenever you want, with {min} players or more.",
   "titleGuest": "You're in {name}'s room.",
-  "subtitleGuest": "{name} starts the match. Let them know when you're ready.",
   "titleHostAgain": "Another match?",
-  "subtitleHostAgain": "Change the settings if you like and start whenever you want. Everyone marks “Ready” again.",
   "titleGuestAgain": "Back in {name}'s room.",
   "codeLabel": "Room code: {code}",
   "linkCopied": "Link copied",

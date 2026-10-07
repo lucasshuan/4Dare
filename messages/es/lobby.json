@@ -1,10 +1,7 @@
 {
   "titleHost": "Sala creada. Ahora invita a alguien.",
-  "subtitleHost": "Manda el enlace o dicta el código. Empiezas la partida cuando quieras, con {min} jugadores o más.",
   "titleGuest": "Estás en la sala de {name}.",
-  "subtitleGuest": "{name} empieza la partida. Avisa cuando estés listo.",
   "titleHostAgain": "¿Otra partida?",
-  "subtitleHostAgain": "Cambia la configuración si quieres y empieza cuando quieras. Todos marcan “Listo” de nuevo.",
   "titleGuestAgain": "De vuelta en la sala de {name}.",
   "codeLabel": "Código de la sala: {code}",
   "linkCopied": "Enlace copiado",

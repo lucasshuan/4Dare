@@ -1,10 +1,7 @@
 {
   "titleHost": "ルームができました。友だちを呼びましょう。",
-  "subtitleHost": "リンクを送るかコードを伝えてください。{min}人以上いればいつでも始められます。",
   "titleGuest": "{name}さんのルームにいます。",
-  "subtitleGuest": "{name}さんがゲームを始めます。準備ができたら知らせましょう。",
   "titleHostAgain": "もう一戦やる？",
-  "subtitleHostAgain": "必要なら設定を変えて、好きなときに始めましょう。みんなはもう一度「準備OK」を押します。",
   "titleGuestAgain": "{name}さんのルームに戻りました。",
   "codeLabel": "ルームコード：{code}",
   "linkCopied": "リンクをコピーしました",

@@ -216,76 +216,63 @@ export function LobbyScreen() {
     <Screen left={<HubBrand />} right={<HubActions />}>
       <div className="flex flex-wrap items-start gap-10 lg:gap-16">
         <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
-          {/* the greeting sits close to the code it explains */}
-          <div className="flex flex-col gap-4 short:gap-3">
-            <div className="flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={async () => {
-                  await leaving.run(() => leaveRoom(code));
-                  router.push(GAME_PATHS[game]);
-                }}
-                className={backClass}
-              >
-                <ChevronLeft className="size-4" strokeWidth={2} />
-                {t("leave")}
-              </button>
-              {/* the room leads with its name; the greeting drops to a line under it */}
-              <RoomTitle
-                title={title}
-                name={nameGuess ?? roomName}
-                editable={me.isHost}
-                className={titleClass}
-                onRename={rename}
-              />
-              {/* the QR code sits right of the greeting and the description (not on phones) */}
-              <div className="flex items-center gap-6">
-                <div className="flex min-w-0 flex-1 flex-col gap-3">
-                  <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
-                    {greeting}
-                  </p>
-                  <p className="max-w-[480px] text-ink-muted text-lg tiny:text-base">
-                    {me.isHost
-                      ? t(
-                          view.round > 0 ? "subtitleHostAgain" : "subtitleHost",
-                          {
-                            min: GAME_SEATS[view.settings.game].min,
-                          },
-                        )
-                      : withNames((n) =>
-                          t("subtitleGuest", { name: host ? n(host) : "" }),
-                        )}
-                  </p>
-                </div>
-                <RoomQr code={code} className="max-sm:hidden" />
-              </div>
-            </div>
-
-            {/* desktop: "Copy link" right of the code; phones: under it */}
-            <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:items-center">
-              <div className="flex gap-2">
-                <span className="sr-only">
-                  {t("codeLabel", { code: code.split("").join(" ") })}
-                </span>
-                {code.split("").map((c, i) => (
-                  <span
-                    // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
-                    key={i}
-                    aria-hidden="true"
-                    className="flex h-20 w-14 items-center justify-center rounded-md border border-line bg-surface font-medium font-mono text-[40px] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={async () => {
+                await leaving.run(() => leaveRoom(code));
+                router.push(GAME_PATHS[game]);
+              }}
+              className={backClass}
+            >
+              <ChevronLeft className="size-4" strokeWidth={2} />
+              {t("leave")}
+            </button>
+            {/* the room leads with its name; the greeting drops to a line under it */}
+            <RoomTitle
+              title={title}
+              name={nameGuess ?? roomName}
+              editable={me.isHost}
+              className={titleClass}
+              onRename={rename}
+            />
+            {/* the greeting sits close to the code it explains; the QR code to their right (not on phones) */}
+            <div className="flex items-center gap-6">
+              <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3">
+                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
+                  {greeting}
+                </p>
+                {/* desktop: "Copy link" right of the code; phones: under it */}
+                <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="flex gap-2">
+                    <span className="sr-only">
+                      {t("codeLabel", { code: code.split("").join(" ") })}
+                    </span>
+                    {code.split("").map((c, i) => (
+                      <span
+                        // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
+                        key={i}
+                        aria-hidden="true"
+                        className="flex h-20 w-14 items-center justify-center rounded-md border border-line bg-surface font-medium font-mono text-[40px] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                  <Button
+                    onClick={() =>
+                      copy(
+                        `${window.location.origin}/r/${code}`,
+                        t("linkCopied"),
+                      )
+                    }
                   >
-                    {c}
-                  </span>
-                ))}
+                    <LinkIcon strokeWidth={1.75} />
+                    {t("copyLink")}
+                  </Button>
+                </div>
               </div>
-              <Button
-                onClick={() =>
-                  copy(`${window.location.origin}/r/${code}`, t("linkCopied"))
-                }
-              >
-                <LinkIcon strokeWidth={1.75} />
-                {t("copyLink")}
-              </Button>
+              <RoomQr code={code} className="max-sm:hidden" />
             </div>
           </div>
           {/* who is here, and the room's past matches */}
