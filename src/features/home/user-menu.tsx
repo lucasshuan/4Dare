@@ -10,12 +10,13 @@ import { meNamed, useDisplayName } from "@/lib/names";
 import type { Me } from "@/server/contract";
 
 /**
- * A guest's trigger looks unfinished on purpose: dashed outline, faded avatar,
- * muted name and a "Guest" tag. Clear, it takes a ground over a dark banner.
+ * On the same ground as the language button, so it reads over any banner. A
+ * guest's trigger looks unfinished on purpose: dashed outline, faded avatar,
+ * muted name and a "Guest" tag.
  */
 export const userMenuTrigger = (me: Me) =>
   cn(
-    "group inline-flex h-10 min-w-0 max-w-60 items-center gap-2.5 rounded-pill py-1 pr-3 pl-1 font-semibold transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken [[data-over=dark]_&]:bg-surface [[data-over=dark]_&]:hover:bg-sunken [[data-over=dark]_&]:data-popup-open:bg-sunken",
+    "group inline-flex h-10 min-w-0 max-w-60 items-center gap-2.5 rounded-pill bg-surface py-1 pr-3 pl-1 font-semibold transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line",
     me.isGuest &&
       "max-w-72 border-[1.5px] border-line-strong border-dashed text-ink-muted",
   );
