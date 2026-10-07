@@ -18,10 +18,11 @@ import { cn } from "@/lib/cn";
 type Seat = "a" | "b" | "c" | "d" | "e";
 
 /**
- * One loop of the banner, a round in miniature: the cards come face down and
- * turn over (all the same but one), a question, everyone holds up their
- * answer like a judge's score (one far from the rest), the vote piles up on
- * that one, the lights go down and the stamp comes. `ms` is how long each step stays.
+ * One loop of the banner, a round in miniature: the cards come face down, a
+ * question, everyone holds up their answer like a judge's score (one far from
+ * the rest), the vote piles up on that one, and only then the cards turn over
+ * (all the same but one), the lights go down and the stamp comes. `ms` is how
+ * long each step stays.
  */
 const STEPS: {
   ms: number;
@@ -32,17 +33,17 @@ const STEPS: {
   votes?: boolean;
   caught?: boolean;
 }[] = [
-  { ms: 900 },
-  { ms: 1200, up: true },
-  { ms: 1000, up: true, ask: "q" },
-  { ms: 3200, up: true, ask: "q", answers: true },
-  { ms: 900, up: true, ask: "vote" },
-  { ms: 2000, up: true, ask: "vote", votes: true },
+  { ms: 1200 },
+  { ms: 1000, ask: "q" },
+  { ms: 3200, ask: "q", answers: true },
+  { ms: 900, ask: "vote" },
+  { ms: 2000, ask: "vote", votes: true },
+  { ms: 1400, up: true, votes: true },
   { ms: 3200, up: true, caught: true, votes: true },
   { ms: 700, up: true },
 ];
 /** The frame shown when motion is reduced: everyone's answer up. */
-const STILL = 3;
+const STILL = 2;
 
 /** Around the table, left to right; phones keep the middle three. `vote` is who they vote for. */
 const SEATS: {
@@ -211,9 +212,9 @@ function ScorePaddle({
 
 /**
  * The Impostor banner, full width under the top bar: five players around a
- * table, a round on a loop. The audience sees every card, so it sees the odd
- * one; the table doesn't. Layers drift with the pointer; still on the
- * answers for reduced motion.
+ * table, a round on a loop. The cards stay face down until the votes are in,
+ * as in the game, where they show only at the end. Layers drift with the
+ * pointer; still on the answers for reduced motion.
  */
 export function ImpostorBanner() {
   const t = useTranslations("home.games.impostor.banner");
@@ -458,7 +459,7 @@ export function ImpostorBanner() {
                 </AnimatePresence>
               </div>
 
-              {/* the card: shuffled and dealt face down, then turned over for the audience */}
+              {/* the card: shuffled and dealt face down, turned over once the votes are in */}
               <m.div
                 animate={
                   step === 0 && !reduced
