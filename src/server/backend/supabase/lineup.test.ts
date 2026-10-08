@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
+import { POOL_MAX } from "@/game/lineup/deal";
 import { supabaseLineup } from "./lineup";
 
 type PoolRow = { character_id: string; gostos: string[]; popularity: number };
@@ -35,24 +36,25 @@ function fakeDb(rows: PoolRow[], cap = 1000) {
 }
 
 describe("what for?'s deck from Supabase", () => {
-  it("reads the whole deck a page at a time, ranked, the id breaking ties", async () => {
+  it("keeps the best known thousand, ranked, the id breaking ties", async () => {
     const rows = Array.from({ length: 2269 }, (_, i) => row(i + 1));
     const { db, ranges, orders } = fakeDb(rows);
     const pool = await supabaseLineup(() => db).pool("pt");
-    expect(pool).toHaveLength(2269);
+    expect(pool).toHaveLength(POOL_MAX);
     expect(pool.at(-1)).toEqual({
-      id: "wd-Q2269",
+      id: `wd-Q${POOL_MAX}`,
       gostos: ["anime"],
-      rank: 2269,
+      rank: POOL_MAX,
     });
-    expect(ranges.map(([from]) => from)).toEqual([0, 1000, 2000, 2269]);
-    expect(orders.slice(0, 2)).toEqual(["popularity desc", "character_id asc"]);
+    expect(ranges).toEqual([[0, POOL_MAX - 1]]);
+    expect(orders).toEqual(["popularity desc", "character_id asc"]);
   });
 
-  it("still gets every card when the server hands out fewer per page", async () => {
+  it("pages when the server hands out fewer at once, and stops at the end", async () => {
     const rows = Array.from({ length: 700 }, (_, i) => row(i));
-    const { db } = fakeDb(rows, 300);
+    const { db, ranges } = fakeDb(rows, 300);
     const pool = await supabaseLineup(() => db).pool("en");
     expect(pool.map((c) => c.rank)).toEqual(rows.map((_, i) => i + 1));
+    expect(ranges.map(([from]) => from)).toEqual([0, 300, 600, 700]);
   });
 });

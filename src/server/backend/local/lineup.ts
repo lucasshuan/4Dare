@@ -1,6 +1,6 @@
 import "server-only";
 import { gostosByRule } from "@/game/gostos";
-import type { PoolCard } from "@/game/lineup/deal";
+import { POOL_MAX, type PoolCard } from "@/game/lineup/deal";
 import type { LineupStore } from "../types";
 import { LOCAL_CHARACTERS } from "./fixtures";
 import { LOCAL_EXTRAS, LOCAL_MISSIONS } from "./lineup-bank";
@@ -22,6 +22,7 @@ export function localLineup(): LineupStore {
           : [];
       })
         .sort((a, b) => b.popularity - a.popularity)
+        .slice(0, POOL_MAX)
         .map(({ id, gostos }, i): PoolCard => ({ id, gostos, rank: i + 1 }));
     },
     async count() {},

@@ -30,6 +30,8 @@ export const STAR_RANK = 50;
 const FULL_GOSTO = 40;
 /** A room needs this many characters in its gostos to start (or the whole deck, if smaller). */
 export const MIN_POOL = 60;
+/** The deck: a language's best known this many; past them, characters get hard to place. */
+export const POOL_MAX = 1000;
 
 /** The characters of the deck the room's gostos let in. */
 export function roomPool(pool: readonly PoolCard[], on: readonly Gosto[]) {

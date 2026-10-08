@@ -5,7 +5,7 @@ import {
   TONES,
   type Tone,
 } from "@/game/lineup/bank";
-import type { PoolCard } from "@/game/lineup/deal";
+import { POOL_MAX, type PoolCard } from "@/game/lineup/deal";
 import type { Lang } from "@/game/types";
 import type { LineupStore } from "../types";
 import { type Db, serviceClient } from "./clients";
@@ -87,19 +87,19 @@ export function supabaseLineup(db: () => Db = serviceClient): LineupStore {
     pool(lang) {
       let read = pools.get(lang);
       if (!read) {
-        // a page at a time, the id breaking popularity ties, until an empty
-        // page: one request would stop at the first thousand
+        // the best known POOL_MAX, a page at a time (the id breaking
+        // popularity ties) in case the server hands out fewer at once
         read = cached(async () => {
           const cards: PoolCard[] = [];
-          for (;;) {
+          while (cards.length < POOL_MAX) {
             const from = cards.length;
             const { data, error } = await db()
               .rpc("lineup_pool", { p_lang: lang })
               .order("popularity", { ascending: false })
               .order("character_id", { ascending: true })
-              .range(from, from + PAGE - 1);
+              .range(from, Math.min(from + PAGE, POOL_MAX) - 1);
             if (error) throw error;
-            if (!data?.length) return cards;
+            if (!data?.length) break;
             for (const r of data)
               cards.push({
                 id: r.character_id,
@@ -107,6 +107,7 @@ export function supabaseLineup(db: () => Db = serviceClient): LineupStore {
                 rank: cards.length + 1,
               });
           }
+          return cards;
         });
         pools.set(lang, read);
       }
