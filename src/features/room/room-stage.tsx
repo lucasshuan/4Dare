@@ -26,6 +26,7 @@ import type { ErrorCode, Phase, RoomView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
+import { useMusicMuffle } from "@/lib/music";
 import { useRoomTitle } from "@/lib/names";
 import { GAMES } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
@@ -148,6 +149,7 @@ function Areas() {
   useRoomTab();
   useStepSound();
   usePresenceSound(view);
+  useMusicMuffle(area === "lobby");
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
   const lineup = view.settings.game === "lineup";

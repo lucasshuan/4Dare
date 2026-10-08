@@ -52,6 +52,10 @@ type Playing = {
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
+/** The muffle: a low-pass and a dip, as if the music played in the next room. */
+let muffleFilter: BiquadFilterNode | null = null;
+let muffleGain: GainNode | null = null;
+let muffled = false;
 let playing: Playing | null = null;
 let current: Track | null = null;
 const buffers = new Map<string, Promise<AudioBuffer | null>>();
@@ -61,7 +65,12 @@ function context() {
   ctx = new AudioContext();
   master = ctx.createGain();
   master.gain.value = musicVolume(getSettings());
-  master.connect(ctx.destination);
+  muffleFilter = ctx.createBiquadFilter();
+  muffleFilter.type = "lowpass";
+  muffleFilter.Q.value = 0.5;
+  muffleGain = ctx.createGain();
+  setMuffle(true);
+  master.connect(muffleFilter).connect(muffleGain).connect(ctx.destination);
   // the browser keeps audio off until the first touch: wake it then
   const wake = () => {
     if (ctx?.state !== "running") ctx?.resume().catch(() => {});
@@ -180,6 +189,44 @@ async function apply() {
   // back out of the booth, or any other change: a crossfade at the same point in the song
   stop(was, now, 1.5);
   playing = start(want, buffer, now, position(now), 1.5);
+}
+
+/** In the lobby the music plays through the wall: 800 Hz low-pass, 8 dB down. */
+const MUFFLE_HZ = 800;
+const MUFFLE_GAIN = 0.4;
+const OPEN_HZ = 20000;
+
+function setMuffle(now = false) {
+  if (!ctx || !muffleFilter || !muffleGain) return;
+  const hz = muffled ? MUFFLE_HZ : OPEN_HZ;
+  const gain = muffled ? MUFFLE_GAIN : 1;
+  if (now) {
+    muffleFilter.frequency.value = hz;
+    muffleGain.gain.value = gain;
+    return;
+  }
+  // opening takes about 1.5 s, like walking into the room; closing about 1 s
+  const tau = muffled ? 0.35 : 0.5;
+  const t = ctx.currentTime;
+  muffleFilter.frequency.cancelScheduledValues(t);
+  muffleFilter.frequency.setTargetAtTime(hz, t, tau);
+  muffleGain.gain.cancelScheduledValues(t);
+  muffleGain.gain.setTargetAtTime(gain, t, tau);
+}
+
+/** Muffles the music while `on` (the lobby); it opens up when `on` goes false. */
+export function useMusicMuffle(on: boolean) {
+  useEffect(() => {
+    muffled = on;
+    setMuffle();
+  }, [on]);
+  useEffect(
+    () => () => {
+      muffled = false;
+      setMuffle();
+    },
+    [],
+  );
 }
 
 const claims = new Map<string, { track: Track | null; rank: number }>();
