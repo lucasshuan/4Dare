@@ -656,8 +656,8 @@ export type GameEvent =
   | { type: "BOARD"; playerId: PlayerId; board: unknown }
   /** What for?: the owner on stage is done talking. */
   | { type: "PRESENTED"; playerId: PlayerId }
-  /** What for?: reactions to the board on stage, counted per emoji. */
-  | { type: "REACT"; playerId: PlayerId; counts: number[] }
+  /** What for?: reactions to a board on stage (`board`, its owner), counted per emoji. */
+  | { type: "REACT"; playerId: PlayerId; board: PlayerId; counts: number[] }
   /** What for?: a secret vote for a board (in a tiebreak, among the tied). */
   | { type: "JUDGE"; playerId: PlayerId; ownerId: PlayerId }
   /** What for?: "Good mission?" (null takes it back). */
@@ -775,6 +775,8 @@ export type PlayerStatus =
   | "working"
   | "done"
   | "presenting"
+  | "judging"
+  | "judged"
   // end states
   | "discovered"
   | "gave_up";

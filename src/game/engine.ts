@@ -819,7 +819,7 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     case "PRESENTED":
       return presented(s, e.playerId, ctx);
     case "REACT":
-      return react(s, e.playerId, e.counts, ctx);
+      return react(s, e.playerId, e.board, e.counts, ctx);
     case "JUDGE":
       return judge(s, e.playerId, e.ownerId, ctx);
     case "RATE":

@@ -480,12 +480,15 @@ export function presented(s: RoomState, playerId: PlayerId, ctx: Ctx) {
 }
 
 /**
- * Reactions to the board on stage, sent in small batches (counts per
- * REACTIONS emoji). Each player gets REACT_MAX per board; the owner none.
+ * Reactions to a board, sent in small batches (counts per REACTIONS emoji):
+ * the one on stage, or one that already left it (a batch that was on its way
+ * when the owner wrapped up still counts). Each player gets REACT_MAX per
+ * board; the owner none.
  */
 export function react(
   s: RoomState,
   playerId: PlayerId,
+  owner: PlayerId,
   counts: number[],
   ctx: Ctx,
 ) {
@@ -494,8 +497,8 @@ export function react(
   requirePlaying(s, playerId);
   const lu = match(s);
   const round = roundOf(lu);
-  const owner = round.order[lu.showing];
-  if (owner === playerId) fail("invalid_input");
+  const at = round.order.indexOf(owner);
+  if (at < 0 || at > lu.showing || owner === playerId) fail("invalid_input");
   if (
     !Array.isArray(counts) ||
     counts.length !== REACTIONS.length ||

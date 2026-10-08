@@ -115,6 +115,9 @@ export function saveLineupBoard(
   );
 }
 
+/** Thrown inside a dispatch when the stage closed before a batch of reactions came. */
+const LATE = new Error("late");
+
 /**
  * Reactions to the board on stage, a small batch at a time: counted quietly,
  * and shown to everyone at once over the room's channel (they hide nothing).
@@ -122,20 +125,23 @@ export function saveLineupBoard(
 export async function reactOnStage(
   code: string,
   playerId: PlayerId,
+  board: PlayerId,
   counts: number[],
 ) {
-  const { state } = await dispatch(
-    code,
-    (s) => {
-      if (!seated(s, playerId)) throw new GameError("not_member");
-      return { type: "REACT", playerId, counts };
-    },
-    { quiet: true },
-  );
-  const lu = state.lu;
-  const owner = lu?.rounds.at(-1)?.order[lu.showing];
-  if (owner)
-    background(() =>
-      getBackend().notify.reacted(code, { board: owner, counts }),
+  try {
+    await dispatch(
+      code,
+      (s) => {
+        if (!seated(s, playerId)) throw new GameError("not_member");
+        if (s.phase !== "presenting") throw LATE;
+        return { type: "REACT", playerId, board, counts };
+      },
+      { quiet: true },
     );
+  } catch (e) {
+    // the stage closed while the batch was on its way: nothing to count
+    if (e === LATE) return;
+    throw e;
+  }
+  background(() => getBackend().notify.reacted(code, { board, counts }));
 }

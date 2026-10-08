@@ -466,11 +466,26 @@ describe("what for?: boards, stage and vote", () => {
     );
     expect(
       code(() =>
-        g.do({ type: "REACT", playerId: owner, counts: [1, 0, 0, 0] }),
+        g.do({
+          type: "REACT",
+          playerId: owner,
+          board: owner,
+          counts: [1, 0, 0, 0],
+        }),
       ),
     ).toBe("invalid_input");
-    g.do({ type: "REACT", playerId: other, counts: [6, 0, 0, 0] });
-    g.do({ type: "REACT", playerId: other, counts: [3, 3, 0, 0] });
+    g.do({
+      type: "REACT",
+      playerId: other,
+      board: owner,
+      counts: [6, 0, 0, 0],
+    });
+    g.do({
+      type: "REACT",
+      playerId: other,
+      board: owner,
+      counts: [3, 3, 0, 0],
+    });
     expect(round(g).reactions[owner][other]).toEqual([9, 1, 0, 0]);
     expect(toView(g.state, 1, other, g.now, "pt").lu?.reactLeft).toBe(0);
     expect(REACT_MAX).toBe(10);
@@ -478,8 +493,23 @@ describe("what for?: boards, stage and vote", () => {
     expect(
       Object.keys(toView(g.state, 1, other, g.now, "pt").lu?.boards ?? {}),
     ).toEqual([owner]);
+    // a board not on stage yet takes nothing
+    const last = order[2];
+    expect(
+      code(() =>
+        g.do({
+          type: "REACT",
+          playerId: owner,
+          board: last,
+          counts: [1, 0, 0, 0],
+        }),
+      ),
+    ).toBe("invalid_input");
     g.do({ type: "PRESENTED", playerId: owner });
     expect(lu(g).showing).toBe(1);
+    // a batch still on its way to the board that just left counts for it
+    g.do({ type: "REACT", playerId: last, board: owner, counts: [0, 0, 2, 0] });
+    expect(round(g).reactions[owner][last]).toEqual([0, 0, 2, 0]);
     g.timeout();
     expect(lu(g).showing).toBe(2);
     g.timeout();
@@ -561,7 +591,12 @@ describe("what for?: boards, stage and vote", () => {
     doneAll(g);
     const owner = round(g).order[0];
     const fans = ids(g).filter((id) => id !== owner);
-    g.do({ type: "REACT", playerId: fans[0], counts: [2, 1, 0, 0] });
+    g.do({
+      type: "REACT",
+      playerId: fans[0],
+      board: owner,
+      counts: [2, 1, 0, 0],
+    });
     while (g.state.phase === "presenting") g.timeout();
     for (const id of ids(g)) g.do({ type: "JUDGE", playerId: id, ownerId: id });
     expect(round(g).crowd).toBe(owner);
@@ -691,7 +726,12 @@ describe("what for?: random play", () => {
       case "presenting": {
         const owner = r.order[m.showing];
         if (who === owner) return { type: "PRESENTED", playerId: who };
-        return { type: "REACT", playerId: who, counts: [1, 0, 1, 0] };
+        return {
+          type: "REACT",
+          playerId: who,
+          board: owner,
+          counts: [1, 0, 1, 0],
+        };
       }
       case "judging":
         return {
