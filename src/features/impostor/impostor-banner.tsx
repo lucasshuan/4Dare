@@ -212,6 +212,23 @@ function ScorePaddle({
 }
 
 /**
+ * A card face down in the Impostor's art: butter with the game's "?" marks and
+ * a plum disc with the mask, light on either theme's ground.
+ */
+export function MaskCardBack() {
+  return (
+    <div
+      className="q-marks flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-butter shadow-pop inset-ring-2 inset-ring-white/50 backface-hidden"
+      style={{ backgroundSize: "45%" }}
+    >
+      <span className="flex aspect-square w-[56%] items-center justify-center rounded-pill bg-[#4b2a85] shadow-[0_0_0_3px_rgba(255,255,255,0.35)]">
+        <VenetianMask className="size-[64%] text-butter" strokeWidth={2} />
+      </span>
+    </div>
+  );
+}
+
+/**
  * The Impostor banner, full width under the top bar: five players around a
  * table, a round on a loop. The cards stay face down until the votes are in,
  * as in the game, where they show only at the end. Layers drift with the
@@ -489,12 +506,7 @@ export function ImpostorBanner() {
                         ease: [0.22, 1, 0.36, 1],
                       }}
                     >
-                      <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-[#16181c] shadow-pop ring-1 ring-butter/25 ring-inset backface-hidden">
-                        <VenetianMask
-                          className="size-[45%] text-butter"
-                          strokeWidth={2}
-                        />
-                      </div>
+                      <MaskCardBack />
                       <div
                         className={cn(
                           "absolute inset-0 rotate-y-180 rounded-[14%/11%] backface-hidden",

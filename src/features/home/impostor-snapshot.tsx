@@ -3,6 +3,7 @@
 import { VenetianMask } from "lucide-react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { MaskCardBack } from "@/features/impostor/impostor-banner";
 import { HeldCard } from "@/features/who-am-i/who-am-i-banner";
 import { cn } from "@/lib/cn";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
@@ -119,12 +120,7 @@ export function ImpostorSnapshot({
                   ease: [0.22, 1, 0.36, 1],
                 }}
               >
-                <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-[#16181c] shadow-pop ring-1 ring-butter/25 ring-inset backface-hidden">
-                  <VenetianMask
-                    className="size-[45%] text-butter"
-                    strokeWidth={2}
-                  />
-                </div>
+                <MaskCardBack />
                 <div
                   className={cn(
                     "absolute inset-0 rotate-y-180 rounded-[14%/11%] backface-hidden",
