@@ -46,7 +46,7 @@ export function CoverPicker({
   avatarColor: string;
   onPick: (choice: CoverChoice) => void;
 }) {
-  const t = useTranslations("player.editor");
+  const t = useTranslations("profile.editor");
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const tile =
@@ -196,7 +196,7 @@ export function AvatarDialog({
   onChange: (draft: AvatarDraft) => void;
 }) {
   const t = useTranslations("profile");
-  const te = useTranslations("player.editor");
+  const te = useTranslations("profile.editor");
   const blobUrl = useMemo(
     () => (draft.blob ? URL.createObjectURL(draft.blob) : null),
     [draft.blob],
@@ -391,7 +391,7 @@ export function CharacterSearch({
   taken: string[];
   onPick: (character: CharacterDTO) => void;
 }) {
-  const t = useTranslations("player.editor");
+  const t = useTranslations("profile.editor");
   const lang = useLocale();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CharacterDTO[] | null>(null);

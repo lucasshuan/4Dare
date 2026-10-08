@@ -78,7 +78,7 @@ export function CardNameField({
   /** The row for a name the library lacks; by default, that it becomes a new character. */
   notFound?: string;
 }) {
-  const t = useTranslations("pickCard");
+  const t = useTranslations("whoAmI.pickCard");
   const listId = useId();
   const input = useRef<HTMLInputElement>(null);
   const index = useCharacterIndex(lang, !readOnly);

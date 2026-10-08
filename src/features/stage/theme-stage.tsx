@@ -74,7 +74,7 @@ const FLIGHT = { layout: { duration: 0.9, ease: gs.backOut(1.2) } } as const;
  */
 export function ThemeStage({ show, from }: ThemeStageProps) {
   const tv = useTranslations("room.vote");
-  const tr = useTranslations("stageOpening.rule");
+  const tr = useTranslations("whoAmI.rule");
   const lang = useLocale() as Lang;
   const { view } = useRoomContext();
   const { beat } = useStage();
@@ -109,7 +109,7 @@ export function ThemeStage({ show, from }: ThemeStageProps) {
 
 function Hero({ beat, from }: { beat: Beat; from: "vote" | "typed" }) {
   const tv = useTranslations("room.vote");
-  const tt = useTranslations("room.theming");
+  const tt = useTranslations("whoAmI.theming");
   const lang = useLocale() as Lang;
   const withNames = useWithNames();
   const { view, code, playerById } = useRoomContext();

@@ -53,7 +53,7 @@ function useMural(handle: string) {
  * reports hiding one. Guests read it; they just don't get the box.
  */
 export function MuralPanel({ handle }: { handle: string }) {
-  const t = useTranslations("player.mural");
+  const t = useTranslations("profile.mural");
   const client = useQueryClient();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useMural(handle);
@@ -118,7 +118,7 @@ function Composer({
   onCancel?: () => void;
   autoFocus?: boolean;
 }) {
-  const t = useTranslations("player.mural");
+  const t = useTranslations("profile.mural");
   const { run, pending } = useAction();
   const [body, setBody] = useState("");
   const length = [...body.trim()].length;
@@ -197,7 +197,7 @@ function Line({
   onChange: () => void;
   reply?: boolean;
 }) {
-  const t = useTranslations("player.mural");
+  const t = useTranslations("profile.mural");
   const format = useFormatter();
   const toast = useToast();
   const client = useQueryClient();

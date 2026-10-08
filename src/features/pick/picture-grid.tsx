@@ -53,7 +53,7 @@ export function PictureGrid({
   onUpload: () => void;
   uploadHint: string;
 }) {
-  const t = useTranslations("pickCard");
+  const t = useTranslations("whoAmI.pickCard");
   const name = useDisplayName();
   const pictures = useCharacterPictures(characterId);
   const [reported, setReported] = useState<ReadonlySet<string>>(new Set());

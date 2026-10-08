@@ -103,7 +103,7 @@ export function VoteScreen() {
 
 function Vote({ v }: { v: VoteView }) {
   const t = useTranslations("room.vote");
-  const ts = useTranslations("stageOpening.vote");
+  const ts = useTranslations("room.vote");
   const lang = useLocale() as Lang;
   const { view, code, playerById } = useRoomContext();
   const { beat } = useStage();
@@ -556,7 +556,7 @@ function Footer({
   hasVote: boolean;
 }) {
   const t = useTranslations("room.vote");
-  const ts = useTranslations("stageOpening.vote");
+  const ts = useTranslations("room.vote");
   const withNames = useWithNames();
   return (
     <div className="flex min-h-12 flex-col items-center gap-1 text-center">

@@ -22,7 +22,7 @@ export function ProfileLoader({
   mode: ProfileMode;
   coverSlot?: HTMLElement | null;
 }) {
-  const t = useTranslations("player");
+  const t = useTranslations("profile");
   const tc = useTranslations("common");
   const { data: view, isPending } = useProfile(handle);
   if (isPending) return <PageLoader label={tc("loading")} />;

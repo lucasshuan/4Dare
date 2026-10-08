@@ -141,7 +141,7 @@ export function ProfileCover({
 
 /** How long ago `from` was, in its largest two units: "1 ano e 7 meses". */
 function useAge() {
-  const t = useTranslations("player.age");
+  const t = useTranslations("profile.age");
   return (from: number, now: number) => {
     const a = new Date(from);
     const b = new Date(now);
@@ -234,7 +234,7 @@ function ProfileShow({
   coverSlot: HTMLElement | null;
   onEdit: () => void;
 }) {
-  const t = useTranslations("player");
+  const t = useTranslations("profile");
   const format = useFormatter();
   const age = useAge();
   const langList = useLangList();

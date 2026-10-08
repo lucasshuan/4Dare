@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
  * coin, so the header never waits for the game's screens.
  */
 export function Purse({ coins }: { coins: number }) {
-  const t = useTranslations("room");
+  const t = useTranslations("lineup");
   return (
     <span
       role="status"

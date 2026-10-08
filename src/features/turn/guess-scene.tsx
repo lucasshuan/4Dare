@@ -159,7 +159,7 @@ function GuessResult({
   player: PlayerView;
   now: number;
 }) {
-  const t = useTranslations("turn.reveal");
+  const t = useTranslations("whoAmI.turn.reveal");
   const name = useDisplayName();
   const hit = reveal.result === "hit";
   const suspense = Math.min(
@@ -301,7 +301,7 @@ function Pass({
   reveal: Extract<SceneReveal, { kind: "pass" }>;
   player: PlayerView;
 }) {
-  const t = useTranslations("turn.reveal");
+  const t = useTranslations("whoAmI.turn.reveal");
   const name = useDisplayName();
   return (
     <div className="relative flex flex-col items-center gap-5 text-center sm:gap-6">

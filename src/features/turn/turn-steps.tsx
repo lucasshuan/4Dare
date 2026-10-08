@@ -13,7 +13,7 @@ const STEPS = ["asking", "answering", "guessing", "validating"] as const;
  * guess needs it, so it stays faint until then. Hidden on phones, for height.
  */
 export function TurnSteps() {
-  const t = useTranslations("turn.steps");
+  const t = useTranslations("whoAmI.turn.steps");
   const { view, playerById } = useRoomContext();
   const at = STEPS.indexOf(view.phase as (typeof STEPS)[number]);
   if (at < 0) return null;

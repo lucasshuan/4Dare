@@ -64,7 +64,7 @@ const METAL = {
 
 /** Level, how XP comes, and every badge by group: every game's, each game's, the library's. */
 export function BadgesPanel({ view }: { view: ProfileView }) {
-  const t = useTranslations("player.badges");
+  const t = useTranslations("profile.badges");
   const gameName = useGameName();
   const groups = [...new Set(view.badges.map((b) => b.group))];
   return (
@@ -94,8 +94,8 @@ export function BadgesPanel({ view }: { view: ProfileView }) {
 
 /** The level, the bar to the next and how XP is earned. */
 function LevelCard({ xp }: { xp: number }) {
-  const t = useTranslations("player.level");
-  const tb = useTranslations("player.badges");
+  const t = useTranslations("profile.level");
+  const tb = useTranslations("profile.badges");
   const format = useFormatter();
   const gameName = useGameName();
   const { level, into, need } = levelOf(xp);
@@ -173,7 +173,7 @@ const HEX = "M50 3 L95 29 L95 83 L50 109 L5 83 L5 29 Z";
  * locked, a grey outline with how far it got.
  */
 function Medal({ badge }: { badge: BadgeView }) {
-  const t = useTranslations("player.badges");
+  const t = useTranslations("profile.badges");
   const format = useFormatter();
   const Icon = ICON[badge.id];
   const tier = badge.tier ? TIERS[badge.tier - 1] : null;

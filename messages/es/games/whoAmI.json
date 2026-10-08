@@ -1,0 +1,232 @@
+{
+  "coldOpen": {
+    "line1": "Cada uno recibe un personaje secreto.",
+    "line2": "Solo tú no ves el tuyo. Pregunta para descubrirlo.",
+    "question": "¿Soy de Marvel?"
+  },
+  "theming": {
+    "kicker": "Tema",
+    "hostKicker": "Tú decides",
+    "title": "Elige el tema",
+    "subtitle": "Escribe cualquier tema. Después, cada uno elige un personaje que encaje.",
+    "label": "Tema de la partida",
+    "placeholder": "ej.: Piratas espaciales",
+    "submit": "Usar este tema",
+    "ideas": "Ideas",
+    "moreIdeas": "Otras ideas",
+    "fallback": "Si se acaba el tiempo, todos votan.",
+    "waitingTitle": "{name} está eligiendo el tema",
+    "waitingSubtitle": "Prepárate para elegir un personaje que encaje. Si se acaba el tiempo, todos votan.",
+    "chosenTitle": "El tema es…",
+    "chosenBy": "Elegido por {name}",
+    "announce": "Tema elegido: {theme}"
+  },
+  "rule": {
+    "title": "Todos los personajes deben ser de este tema.",
+    "fits": "Encaja con el tema",
+    "misfit": "No encaja"
+  },
+  "draw": {
+    "line": "{count, plural, =2 {Cada uno elige el personaje del otro.} other {Cada uno elige un personaje para otra persona.}}"
+  },
+  "target": {
+    "youPickFor": "Eliges para",
+    "hint": "Elige un personaje que {name} conozca.",
+    "ring": "{count, plural, =2 {Eligen uno para el otro.} other {Todos eligen para alguien.}}",
+    "ringLabel": "Quién elige para quién"
+  },
+  "pick": {
+    "searchLabel": "Personaje para {name}",
+    "changeImage": "Cambiar imagen",
+    "imageHint": "La tuya va en esta carta y se suma a las imágenes de {name}. La más elegida pasa a ser la principal.",
+    "random": "Al azar",
+    "randomAgain": "Otro al azar",
+    "randomHint": "Elige al azar uno de los personajes que mejor encajan con este tema",
+    "rateQuestion": "¿Encaja con el tema?",
+    "rateYes": "Encaja",
+    "rateNo": "No, otro al azar",
+    "rateThanks": "¡Gracias!",
+    "rateDismiss": "Cerrar"
+  },
+  "pickCard": {
+    "cardTitle": "Un personaje para {name}",
+    "placeholder": "Escribe un nombre…",
+    "rowPicks": "{origin} · elegido {count, plural, one {# vez} other {# veces}}",
+    "rowPicksNoOrigin": "Elegido {count, plural, one {# vez} other {# veces}}",
+    "fromLibrary": "{origin} · de la biblioteca",
+    "fromLibraryNoOrigin": "De la biblioteca",
+    "newCharacterLine": "Personaje nuevo · se guarda en este tema",
+    "notFound": "Todavía no está en este tema. Será un personaje nuevo.",
+    "newSeal": "¡Nuevo!",
+    "drop": "Suelta, pega o busca una imagen",
+    "dropOptional": "o déjalo sin imagen, no pasa nada",
+    "upload": "Subir la tuya",
+    "uploading": "Subiendo la imagen…",
+    "trayLabel": "Imágenes de {name}",
+    "libraryPicture": "Imagen de la biblioteca",
+    "sentBy": "Enviada por {name}",
+    "reportPicture": "Reportar esta imagen",
+    "pendingPicture": "En revisión: por ahora solo tú la ves",
+    "picturesFailed": "No se pudieron cargar las imágenes.",
+    "confirmCard": "Confirmar",
+    "rule": "¿Se acabó el tiempo? La carta va como esté.",
+    "handLabel": "Populares en {theme}",
+    "handFits": "{count, plural, one {# jugador dice que encaja} other {# jugadores dicen que encaja}}",
+    "doneWaiting": "¡Listo! Esperando a {names}",
+    "doneAll": "¡Todos eligieron!",
+    "timeUp": "¡Tiempo! Se queda ese."
+  },
+  "cast": {
+    "pickedYours": "{name} eligió el tuyo.",
+    "rule": "Ves el de los demás. El tuyo, lo descubres.",
+    "from": "de {name}",
+    "by": "por {name}",
+    "byYou": "por ti",
+    "orderKicker": "Orden de turnos",
+    "starts": "¡{name} empieza!"
+  },
+  "turn": {
+    "status": {
+      "host": "Anfitrión",
+      "ready": "Listo",
+      "not_ready": "No está listo",
+      "theming": "Eligiendo el tema",
+      "voting": "Votando",
+      "voted": "Votó",
+      "picking": "Eligiendo",
+      "picked": "Eligió",
+      "asking": "Preguntando",
+      "will_answer": "Va a responder",
+      "answering": "Respondiendo",
+      "answered": "Respondió",
+      "guessing": "Adivinando",
+      "validating": "Revisando",
+      "waiting": "Esperando",
+      "discovered": "Lo descubrió",
+      "gave_up": "Se rindió"
+    },
+    "card": {
+      "pickedBy": "Elegido por {name}",
+      "youPicked": "tú lo elegiste",
+      "youPickedFull": "Tú elegiste este personaje",
+      "whoAreYou": "¿Quién eres?"
+    },
+    "ask": {
+      "kicker": "Ronda {n}",
+      "title": "Te toca preguntar",
+      "label": "Una pregunta de sí o no sobre tu personaje",
+      "hintMany": "Todos los demás responden, cada uno con su opción.",
+      "hintOne": "La respuesta llega con una de seis opciones. Después puedes intentar adivinar.",
+      "send": "Enviar pregunta"
+    },
+    "giveUp": {
+      "button": "Rendirse",
+      "sure": "¿Rendirte? Tu carta se revela y dejas de jugar.",
+      "yes": "Sí, revelar",
+      "no": "Seguir jugando"
+    },
+    "answer": {
+      "kicker": "Ronda {n} · {name} pregunta",
+      "yourAnswer": "Tu respuesta",
+      "note": "Contexto (opcional)",
+      "send": "Enviar respuesta",
+      "progress": "{done} de {total} respondieron"
+    },
+    "guess": {
+      "kicker": "Ronda {n} · Preguntaste",
+      "title": "¿Ya sabes quién eres?",
+      "label": "Tu intento",
+      "hint": "Si el nombre coincide, cuenta al instante. Si no, decide quien eligió tu personaje.",
+      "send": "Adivinar",
+      "pass": "Pasar",
+      "passConfirm": "¿Pasar de verdad?"
+    },
+    "validate": {
+      "kicker": "Ronda {n} · Intento de {name}",
+      "title": "¿{name} acertó?",
+      "bodyMany": "No es exactamente el nombre de la carta. Tú elegiste este personaje, así que solo tú decides. {names} esperan.",
+      "bodyOne": "No es exactamente el nombre de la carta. Tú elegiste este personaje, así que tú decides.",
+      "yes": "Sí, es ese",
+      "no": "Aún no"
+    },
+    "wait": {
+      "kicker": "Ronda {n}",
+      "ask": "{name} está pensando una pregunta…",
+      "answers": "Esperando las respuestas",
+      "guess": "{name} está decidiendo si se arriesga…",
+      "validate": "{name} está revisando el intento de {guesser}",
+      "question": "{name} preguntó",
+      "youAnswered": "Tu respuesta:",
+      "stillAnswering": "Aún responden: {names}"
+    },
+    "history": {
+      "title": "Historial",
+      "close": "Cerrar historial",
+      "filter": "De quién",
+      "kindFilter": "Qué tipo",
+      "kinds": {
+        "all": "Todo",
+        "question": "Preguntas",
+        "guess": "Intentos"
+      },
+      "mineCaption": "Tus preguntas e intentos: {shown} de {total} · lo más reciente arriba",
+      "playerCaption": "Preguntas e intentos de {name}: {shown} de {total} · lo más reciente arriba",
+      "nothing": "Nada por aquí todavía. Las preguntas aparecen aquí en cuanto alguien juega.",
+      "question": "Pregunta · {name}",
+      "guess": "Intento · {name}"
+    },
+    "reveal": {
+      "asked": "Ronda {n} · {name} preguntó",
+      "guessed": "Ronda {n} · Intento de {name}",
+      "hit": "Correcto",
+      "hitPlace": "Correcto · {place, plural, =1 {1.er} =3 {3.er} other {#.º}} lugar",
+      "hitTie": "Correcto · empate en el {place, plural, =1 {1.er} =3 {3.er} other {#.º}} lugar",
+      "miss": "Aún no",
+      "cardOf": "Carta de {name}",
+      "passRound": "Ronda {n} · Sin intento",
+      "passed": "{name} pasó",
+      "passedYou": "Pasaste",
+      "passedNote": "Quizá en la próxima ronda."
+    },
+    "turnTag": "Turno",
+    "steps": {
+      "label": "Etapas de la ronda",
+      "asking": "Pregunta",
+      "answering": "Respuestas",
+      "guessing": "Intento",
+      "validating": "Revisión"
+    },
+    "handoff": {
+      "kicker": "Ahora",
+      "kickerYou": "Te toca",
+      "title": "Turno de {name}",
+      "titleYou": "Tu turno",
+      "round": "Ronda {n}"
+    }
+  },
+  "found": {
+    "question": "¿{name} encajaba con el tema?",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "result": {
+    "kicker": "Fin de la partida · {count, plural, one {# ronda} other {# rondas}}",
+    "winner": "{name} lo descubrió primero",
+    "winnersTie": "¡Empate! {names} lo descubrieron primero",
+    "youTie": "¡Empate! Tú y {names} lo descubrieron primero",
+    "nobody": "Esta vez nadie lo descubrió",
+    "toLobby": "Volver a la sala de espera",
+    "home": "Volver a las salas",
+    "place": "{place, plural, =1 {1.er} =3 {3.er} other {#.º}} lugar",
+    "gaveUp": "Se rindió",
+    "notFound": "No lo descubrió",
+    "pickedBy": "elegido por {name}",
+    "discoveredAt": "Lo descubrió en la ronda {n}",
+    "placeShort": "{place}.º",
+    "youWon": "Lo descubriste en la ronda {n}.",
+    "youFound": "Tú también lo descubriste, en la ronda {n}.",
+    "youGaveUp": "Esta vez te rendiste.",
+    "youMissed": "Esta vez no lo descubriste.",
+    "youFirst": "Lo descubriste primero"
+  }
+}

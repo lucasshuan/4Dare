@@ -265,8 +265,8 @@ const fadeOut = (scope: HTMLElement): AnimationSequence => [
 ];
 
 function PickTable() {
-  const t = useTranslations("pickCard");
-  const tPick = useTranslations("room.pick");
+  const t = useTranslations("whoAmI.pickCard");
+  const tPick = useTranslations("whoAmI.pick");
   const tErrors = useTranslations("common.errors");
   const lang = useLocale() as Lang;
   const withNames = useWithNames();

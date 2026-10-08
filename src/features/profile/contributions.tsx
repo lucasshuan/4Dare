@@ -8,7 +8,7 @@ import { Card } from "./activity";
 
 /** The pictures someone sent for characters and the characters they made. */
 export function ContributionsPanel({ view }: { view: ProfileView }) {
-  const t = useTranslations("player.contributions");
+  const t = useTranslations("profile.contributions");
   return (
     <div className="flex flex-col gap-4">
       <Card title={t("pictures")} icon={<ImagePlus strokeWidth={1.75} />}>

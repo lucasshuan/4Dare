@@ -81,7 +81,7 @@ const cellClass = (day: Pick<GardenDay, "matches" | "future">) => {
 
 /** A day's line: its date, matches, wins and the games played. */
 function useDayWords() {
-  const t = useTranslations("player.activity");
+  const t = useTranslations("profile.activity");
   const format = useFormatter();
   return {
     date: (d: Date) =>
@@ -111,7 +111,7 @@ export function Garden({
   game: GameKey | null;
   now: number;
 }) {
-  const t = useTranslations("player.activity");
+  const t = useTranslations("profile.activity");
   const locale = useLocale();
   const words = useDayWords();
   const gameName = useGameName();

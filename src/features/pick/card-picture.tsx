@@ -72,10 +72,10 @@ export function CardPicture({
     replaces?: string,
   ) => Promise<PictureUpload>;
 }) {
-  const t = useTranslations("pickCard");
+  const t = useTranslations("whoAmI.pickCard");
   const tImage = useTranslations("common.image");
   const tErrors = useTranslations("common.errors");
-  const tPick = useTranslations("room.pick");
+  const tPick = useTranslations("whoAmI.pick");
   const key = pictureKey(value);
   const takes = editable && key !== null;
   const wrap = useRef<HTMLDivElement>(null);

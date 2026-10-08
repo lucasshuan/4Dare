@@ -58,7 +58,7 @@ export function UserMenuPopover({
   const client = useQueryClient();
   const [rolls, setRolls] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const tLevel = useTranslations("player.level");
+  const tLevel = useTranslations("profile.level");
   // the level ring and bar: the account's own card, fetched with the menu
   const { data: card } = usePlayerCard(me?.id ?? "", !!me && !me.isGuest);
   const numbers = me && !me.isGuest ? (card?.numbers ?? null) : null;

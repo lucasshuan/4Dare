@@ -39,7 +39,7 @@ function podiumOrder(ranked: PlayerView[]) {
 
 /** The podium's clock: when it runs out, everyone is taken back to the lobby. */
 export function LobbyCountdown() {
-  const t = useTranslations("result");
+  const t = useTranslations("room");
   const { view, offset } = useRoomContext();
   const now = useServerClock(offset, 250);
   if (view.deadline === null || view.stepStartsAt === null) return null;
@@ -81,7 +81,7 @@ export function ResultScreen() {
 }
 
 function WhoAmIResult() {
-  const t = useTranslations("result");
+  const t = useTranslations("whoAmI.result");
   const tr = useTranslations("room");
   const lang = useLocale() as Lang;
   const listFormat = new Intl.ListFormat(lang, { type: "conjunction" });

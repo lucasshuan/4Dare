@@ -1,8 +1,8 @@
 {
   "loading": "ルームを開いています…",
   "theme": "テーマ：",
-  "mission": "ミッション",
-  "coins": "コイン{n}枚",
+  "round": "第{n}戦",
+  "lobbyIn": "{seconds}秒後に全員が待合室に戻ります",
   "goHome": "トップに戻る",
   "problem": {
     "not_found": {
@@ -32,24 +32,6 @@
     "go": "そちらへ行く",
     "stay": "このルームに戻る"
   },
-  "pick": {
-    "searchLabel": "{name}さんのキャラクター",
-    "changeImage": "画像を変える",
-    "imageHint": "あなたの画像はこのカードに使われ、{name}の画像に加わります。いちばん選ばれた画像がメインになります。",
-    "random": "ランダム",
-    "randomAgain": "もう一度",
-    "randomHint": "このテーマに合うキャラクターから1人を選びます",
-    "rateQuestion": "テーマに合ってる？",
-    "rateYes": "合ってる",
-    "rateNo": "合ってない、もう一度",
-    "rateThanks": "ありがとう！",
-    "rateDismiss": "閉じる"
-  },
-  "found": {
-    "question": "{name}はテーマに合ってた？",
-    "yes": "合ってた",
-    "no": "合ってなかった"
-  },
   "vote": {
     "kicker": "テーマ投票",
     "title": "テーマに投票しよう",
@@ -67,24 +49,9 @@
     "chosenByVotes": "多数決で決まりました。",
     "chosenByDraw": "ルーレットで決まりました。",
     "chosen": "決定したテーマ",
-    "announce": "決定したテーマ：{theme}"
-  },
-  "theming": {
-    "kicker": "テーマ",
-    "hostKicker": "あなたが決める",
-    "title": "テーマを決めよう",
-    "subtitle": "好きなテーマを書いてください。みんながそれに合うキャラクターを選びます。",
-    "label": "この試合のテーマ",
-    "placeholder": "例：宇宙の海賊",
-    "submit": "このテーマにする",
-    "ideas": "アイデア",
-    "moreIdeas": "ほかのアイデア",
-    "fallback": "時間切れになると、みんなの投票になります。",
-    "waitingTitle": "{name}さんがテーマを決めています",
-    "waitingSubtitle": "合うキャラクターを選ぶ準備をしよう。時間切れになると、みんなの投票になります。",
-    "chosenTitle": "テーマは…",
-    "chosenBy": "{name}さんが決めました",
-    "announce": "決定したテーマ：{theme}"
+    "announce": "決定したテーマ：{theme}",
+    "line": "さあ、みんなでテーマを選ぼう。",
+    "waitingEveryone": "投票中：全員"
   },
   "password": {
     "title": "パスワード付きのルーム",

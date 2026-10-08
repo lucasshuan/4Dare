@@ -56,7 +56,7 @@ export function HistoryButton({
   onClick: () => void;
   ref?: Ref<HTMLButtonElement>;
 }) {
-  const t = useTranslations("turn.history");
+  const t = useTranslations("whoAmI.turn.history");
   const { view } = useRoomContext();
   const count = view.history.length;
   const Icon = open ? PanelLeftClose : PanelLeftOpen;
@@ -97,7 +97,7 @@ export function HistoryButton({
  * width, anchored right, so it seems to slide in from the edge.
  */
 export function HistorySidebar({ onClose }: { onClose: () => void }) {
-  const t = useTranslations("turn.history");
+  const t = useTranslations("whoAmI.turn.history");
   const bar = useRef<HTMLDivElement>(null);
   // its live width, as it opens and closes: the game's overlays keep right of it (GAME_AREA)
   useEffect(() => {
@@ -143,7 +143,7 @@ export function HistoryDrawer({
   open: boolean;
   onClose: () => void;
 }) {
-  const t = useTranslations("turn.history");
+  const t = useTranslations("whoAmI.turn.history");
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -194,7 +194,7 @@ function HistoryBody({
   onClose: () => void;
   focusClose?: boolean;
 }) {
-  const t = useTranslations("turn.history");
+  const t = useTranslations("whoAmI.turn.history");
   const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
   // One tab per player: you first, then the others in turn order, like the player strip.

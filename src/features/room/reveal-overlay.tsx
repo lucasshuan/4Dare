@@ -149,7 +149,7 @@ function AnswersReveal({
 }: {
   reveal: Extract<RevealView, { kind: "answers" }>;
 }) {
-  const t = useTranslations("turn.reveal");
+  const t = useTranslations("whoAmI.turn.reveal");
   const name = useDisplayName();
   const { playerById } = useRoomContext();
   const asker = playerById(reveal.byId);

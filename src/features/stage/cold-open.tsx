@@ -45,7 +45,7 @@ export function ColdOpen({ show }: ColdOpenProps) {
 }
 
 function ColdOpenScene({ beat }: { beat: Beat }) {
-  const t = useTranslations("stageOpening.coldOpen");
+  const t = useTranslations("whoAmI.coldOpen");
   const tc = useTranslations("common");
   const lang = useLocale();
   const name = useDisplayName();
@@ -276,7 +276,7 @@ function Person({
 
 /** Later matches: "Round N", in and out (1.5 s). */
 function RoundCard({ beat, n }: { beat: Beat; n: number }) {
-  const t = useTranslations("stageOpening");
+  const t = useTranslations("room");
   const len = beatSeconds(beat);
   const outAt = Math.max(len - 0.45, 0.9);
   const shown = useAfter(beat.startsAt + 150);

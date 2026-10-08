@@ -77,7 +77,7 @@ export function PersonCardBody({
   person: Person;
   onLeave?: () => void;
 }) {
-  const t = useTranslations("player");
+  const t = useTranslations("profile");
   const tc = useTranslations("common");
   const format = useFormatter();
   const { data: card, isPending } = usePlayerCard(person.id, !person.isGuest);
@@ -204,7 +204,7 @@ function Num({ value, label }: { value: string; label: string }) {
  * their profile (an account's), or "Guest".
  */
 export function PersonStrip({ person }: { person: Person }) {
-  const t = useTranslations("player.card");
+  const t = useTranslations("profile.card");
   const { data: card } = usePlayerCard(person.id, !person.isGuest);
   return (
     <div className="flex items-center gap-2.5">

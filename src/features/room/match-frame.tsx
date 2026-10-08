@@ -153,6 +153,7 @@ export const isAwaited = (
  */
 export function MatchHeader({ history }: { history: HistoryControl | null }) {
   const t = useTranslations("room");
+  const tl = useTranslations("lineup");
   const lang = useLocale() as Lang;
   const { view, me, offset } = useRoomContext();
   const frame = useStage();
@@ -218,7 +219,7 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
           {mission ? (
             <m.div key="mission" {...TAG_POP} className="flex min-w-0">
               <ThemeTag
-                label={t("mission")}
+                label={tl("mission")}
                 theme={mission.text[lang]}
                 emoji="✉️"
               />

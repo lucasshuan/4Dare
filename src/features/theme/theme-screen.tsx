@@ -51,7 +51,7 @@ export function ThemeScreen() {
 }
 
 function Theming() {
-  const t = useTranslations("room.theming");
+  const t = useTranslations("whoAmI.theming");
   const lang = useLocale() as Lang;
   const withNames = useWithNames();
   const { view, me, code } = useRoomContext();

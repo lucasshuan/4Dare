@@ -1,8 +1,8 @@
 {
   "loading": "Abrindo a sala…",
   "theme": "Tema:",
-  "mission": "Missão",
-  "coins": "{n, plural, one {# moeda} other {# moedas}}",
+  "round": "Partida {n}",
+  "lobbyIn": "Todo mundo volta para a sala de espera em {seconds} s",
   "goHome": "Voltar ao início",
   "problem": {
     "not_found": {
@@ -32,24 +32,6 @@
     "go": "Ir para lá",
     "stay": "Voltar para esta sala"
   },
-  "pick": {
-    "searchLabel": "Personagem para {name}",
-    "changeImage": "Trocar imagem",
-    "imageHint": "A sua vai nesta carta e entra nas imagens de {name}. A mais escolhida vira a principal.",
-    "random": "Sortear",
-    "randomAgain": "Sortear outro",
-    "randomHint": "Sorteia um dos personagens que mais combinam com este tema",
-    "rateQuestion": "Combina com o tema?",
-    "rateYes": "Combina",
-    "rateNo": "Não, sortear outro",
-    "rateThanks": "Valeu!",
-    "rateDismiss": "Fechar"
-  },
-  "found": {
-    "question": "{name} combinou com o tema?",
-    "yes": "Combinou",
-    "no": "Não combinou"
-  },
   "vote": {
     "kicker": "Votação do tema",
     "title": "Vote no tema",
@@ -67,24 +49,9 @@
     "chosenByVotes": "Escolhido pela maioria.",
     "chosenByDraw": "A roleta decidiu.",
     "chosen": "Tema escolhido",
-    "announce": "Tema escolhido: {theme}"
-  },
-  "theming": {
-    "kicker": "Tema",
-    "hostKicker": "Você decide",
-    "title": "Escolha o tema",
-    "subtitle": "Escreva qualquer tema. Depois, cada um escolhe um personagem que combine.",
-    "label": "Tema da partida",
-    "placeholder": "ex.: Piratas do espaço",
-    "submit": "Usar este tema",
-    "ideas": "Ideias",
-    "moreIdeas": "Outras ideias",
-    "fallback": "Se o tempo acabar, todo mundo vota.",
-    "waitingTitle": "{name} está escolhendo o tema",
-    "waitingSubtitle": "Prepare-se para escolher um personagem que combine. Se o tempo acabar, todo mundo vota.",
-    "chosenTitle": "O tema é…",
-    "chosenBy": "Escolhido por {name}",
-    "announce": "Tema escolhido: {theme}"
+    "announce": "Tema escolhido: {theme}",
+    "line": "Agora, escolham juntos um tema.",
+    "waitingEveryone": "Ainda votando: todo mundo"
   },
   "password": {
     "title": "Essa sala tem senha",

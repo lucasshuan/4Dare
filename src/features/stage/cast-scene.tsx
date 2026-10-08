@@ -59,8 +59,8 @@ function around(text: string): [string, string] {
  * the later-match variant is spec C 2.5.
  */
 export function CastScene({ show }: CastSceneProps) {
-  const t = useTranslations("stageCast.cast");
-  const tCard = useTranslations("turn.card");
+  const t = useTranslations("whoAmI.cast");
+  const tCard = useTranslations("whoAmI.turn.card");
   const tCommon = useTranslations("common");
   const name = useDisplayName();
   const { view, playerById } = useRoomContext();

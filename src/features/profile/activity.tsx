@@ -85,7 +85,7 @@ export function ActivityPanel({
   view: ProfileView;
   now: number;
 }) {
-  const t = useTranslations("player.activity");
+  const t = useTranslations("profile.activity");
   const gameName = useGameName();
   const [game, setGame] = useState<GameKey | null>(null);
   const plays = useMemo(
@@ -183,7 +183,7 @@ function Stat({ value, label }: { value: ReactNode; label: string }) {
 
 /** A game's card among all of them: its matches, wins and hours, its two telling numbers. */
 function GameCard({ card, onOpen }: { card: GameView; onOpen: () => void }) {
-  const t = useTranslations("player.activity");
+  const t = useTranslations("profile.activity");
   const format = useFormatter();
   const gameName = useGameName();
   return (
@@ -265,7 +265,7 @@ function Highlight({ value, label }: { value: string; label: string }) {
 
 /** One game's numbers, in four boxes. */
 function GameNumbers({ card }: { card: GameView }) {
-  const t = useTranslations("player.activity.stats");
+  const t = useTranslations("profile.activity.stats");
   const format = useFormatter();
   const share = (n: number, of: number) =>
     of ? percent(n / of) : percent(null);
@@ -384,7 +384,7 @@ function Facts({
   owner: string;
   streak: ReturnType<typeof streaks> | null;
 }) {
-  const t = useTranslations("player.facts");
+  const t = useTranslations("profile.facts");
   const lang = useLocale() as Lang;
   const format = useFormatter();
   const gameName = useGameName();

@@ -104,7 +104,7 @@ export function ProfileEditor({
   coverSlot: HTMLElement | null;
   onClose: () => void;
 }) {
-  const t = useTranslations("player.editor");
+  const t = useTranslations("profile.editor");
   const tc = useTranslations("common");
   const format = useFormatter();
   const langList = useLangList();
@@ -662,7 +662,7 @@ function AudienceSelect({
   value: Audience;
   onChange: (v: Audience) => void;
 }) {
-  const t = useTranslations("player.editor.audiences");
+  const t = useTranslations("profile.editor.audiences");
   return (
     <span className="relative inline-flex">
       <select

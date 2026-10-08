@@ -80,7 +80,7 @@ export function PickCardLab({
   longNames: boolean;
   failUploads: boolean;
 }) {
-  const t = useTranslations("pickCard");
+  const t = useTranslations("whoAmI.pickCard");
   const index = useCharacterIndex(lang);
   const items = index.data ?? [];
   const [value, setValue] = useState<CardContent>({ kind: "empty" });

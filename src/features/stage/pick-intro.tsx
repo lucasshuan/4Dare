@@ -48,7 +48,7 @@ const PAPER_X = { desktop: 44, phone: 30 };
  * sees.
  */
 export function PickIntro({ show }: PickIntroProps) {
-  const t = useTranslations("stageDraw");
+  const t = useTranslations("whoAmI");
   const withNames = useWithNames();
   const displayName = useDisplayName();
   const { view, playerById } = useRoomContext();

@@ -6,16 +6,10 @@ import type { Messages } from "next-intl";
  * layout hands every namespace to its pages.
  */
 const ROOM_ONLY: readonly (keyof Messages)[] = [
-  "game",
   "room",
-  "turn",
-  "result",
   "lobby",
-  "stageOpening",
-  "stageDraw",
-  "stageCast",
-  "pickCard",
   "chat",
+  "whoAmI",
   "impostor",
   "lineup",
   "meta",

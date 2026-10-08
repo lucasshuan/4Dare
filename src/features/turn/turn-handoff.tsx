@@ -83,7 +83,7 @@ function Band({
   elapsed: number;
   onDone: () => void;
 }) {
-  const t = useTranslations("turn.handoff");
+  const t = useTranslations("whoAmI.turn.handoff");
   const name = useDisplayName();
   const reduced = useReducedMotion() ?? false;
   const band = useRef<HTMLDivElement>(null);

@@ -128,7 +128,7 @@ export function PlayerStrip({
 
 /** Whose round it is: a tag on their card, gliding to the next card when the turn passes. */
 function TurnTag({ slot }: { slot: number }) {
-  const t = useTranslations("turn");
+  const t = useTranslations("whoAmI.turn");
   return (
     <m.span
       layoutId="turn-tag"
@@ -209,7 +209,7 @@ function ClockRing({ slot }: { slot: number }) {
  * phones only the face and the name, stacked.
  */
 function PlayerRow({ player: p }: { player: PlayerView }) {
-  const t = useTranslations("turn.status");
+  const t = useTranslations("whoAmI.turn.status");
   const name = useDisplayName();
   const awaited = AWAITED.includes(p.status);
   return (
@@ -245,7 +245,7 @@ function PlayerRow({ player: p }: { player: PlayerView }) {
           className="truncate font-medium text-ink-muted text-xs max-sm:sr-only"
         >
           {/* a "Who am I?" match: every status it gives has words */}
-          {t(p.status as keyof Messages["turn"]["status"])}
+          {t(p.status as keyof Messages["whoAmI"]["turn"]["status"])}
         </m.span>
       </span>
       <span className="w-10 shrink-0 max-sm:hidden">
@@ -270,7 +270,7 @@ function PlayerRow({ player: p }: { player: PlayerView }) {
 
 /** The player's row as a trigger: hover, focus or tap shows their card, big. */
 function CardPeek({ player: p }: { player: PlayerView }) {
-  const t = useTranslations("turn.card");
+  const t = useTranslations("whoAmI.turn.card");
   const name = useDisplayName();
   const withNames = useWithNames();
   const { playerById } = useRoomContext();

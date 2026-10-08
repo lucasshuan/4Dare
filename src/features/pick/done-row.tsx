@@ -28,7 +28,7 @@ export function DoneRow({
   /** The row while it is shown (the table keeps the grown card above it). */
   ref?: Ref<HTMLDivElement>;
 }) {
-  const t = useTranslations("pickCard");
+  const t = useTranslations("whoAmI.pickCard");
   const locale = useLocale();
   const withNames = useWithNames();
   const list = useMemo(

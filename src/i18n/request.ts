@@ -2,30 +2,27 @@ import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
 import { routing } from "./routing";
 
-// One JSON file per namespace and language: messages/<locale>/<namespace>.json
-export const NAMESPACES = [
+// One JSON file per namespace and language. The shared ones, at
+// messages/<locale>/<namespace>.json:
+const SHARED = [
   "common",
   "home",
   "profile",
-  "player",
   "settings",
   "lobby",
-  "game",
-  "result",
   "room",
-  "turn",
-  "meta",
-  // the match's stage scenes, the pick card and the chat
-  "stageOpening",
-  "stageDraw",
-  "stageCast",
-  "pickCard",
   "chat",
-  // the Impostor's match screens
-  "impostor",
-  // What for?'s match screens
-  "lineup",
+  "meta",
 ] as const;
+
+// Each game's own, everything its match shows, at messages/<locale>/games/<namespace>.json:
+export const GAME_NAMESPACES = ["whoAmI", "impostor", "lineup"] as const;
+
+export const NAMESPACES = [...SHARED, ...GAME_NAMESPACES] as const;
+type Namespace = (typeof NAMESPACES)[number];
+
+const isGame = (ns: Namespace) =>
+  (GAME_NAMESPACES as readonly Namespace[]).includes(ns);
 
 // `locale` is set when a caller names it (share images, metadata). Then the request is
 // never read: even touching `requestLocale` reads headers, which fails at build time.
@@ -37,7 +34,10 @@ export default getRequestConfig(async (params) => {
   const entries = await Promise.all(
     NAMESPACES.map(async (ns) => [
       ns,
-      (await import(`../../messages/${locale}/${ns}.json`)).default,
+      (isGame(ns)
+        ? await import(`../../messages/${locale}/games/${ns}.json`)
+        : await import(`../../messages/${locale}/${ns}.json`)
+      ).default,
     ]),
   );
   return { locale, messages: Object.fromEntries(entries) };

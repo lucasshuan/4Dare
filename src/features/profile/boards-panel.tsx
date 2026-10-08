@@ -37,7 +37,7 @@ function drawable(kept: LuKeptBoard) {
 }
 
 function KeptBoard({ item }: { item: ProfileBoard }) {
-  const t = useTranslations("player.boards");
+  const t = useTranslations("profile.boards");
   const format = useFormatter();
   const { board, cards, tags } = useMemo(
     () => drawable(item.board),
@@ -73,7 +73,7 @@ function KeptBoard({ item }: { item: ProfileBoard }) {
 }
 
 export function BoardsPanel({ handle }: { handle: string }) {
-  const t = useTranslations("player.boards");
+  const t = useTranslations("profile.boards");
   const lang = useLocale();
   const plain = useGameOption("lineup", "plainLetters");
   const { data, isPending, isError } = useQuery({

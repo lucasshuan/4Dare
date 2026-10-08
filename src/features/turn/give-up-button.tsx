@@ -11,7 +11,7 @@ import { giveUp } from "@/server/actions";
 
 /** Red "Give up" in the match header; asks first, then reveals your card. Gone once you're out. */
 export function GiveUpButton() {
-  const t = useTranslations("turn.giveUp");
+  const t = useTranslations("whoAmI.turn.giveUp");
   const { me, code } = useRoomContext();
   const { act, pending } = useRoomAction();
   const [open, setOpen] = useState(false);

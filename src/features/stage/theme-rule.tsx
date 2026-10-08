@@ -38,7 +38,7 @@ export function RuleScene({
   beat: Beat;
   rule: RuleExamples | null;
 }) {
-  const t = useTranslations("stageOpening.rule");
+  const t = useTranslations("whoAmI.rule");
   const lang = useLocale() as Lang;
   const phone = useMedia(PHONE);
   const width = phone ? RULE_CARD.phone : RULE_CARD.desktop;

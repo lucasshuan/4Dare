@@ -75,8 +75,8 @@ export function PickCard({
   /** The name field gained or lost focus (the screen holds draft echoes meanwhile). */
   onFocusChange?: (focused: boolean) => void;
 }): ReactNode {
-  const t = useTranslations("pickCard");
-  const tPick = useTranslations("room.pick");
+  const t = useTranslations("whoAmI.pickCard");
+  const tPick = useTranslations("whoAmI.pick");
   const editing = state === "editing";
   const [focused, setFocused] = useState(false);
 

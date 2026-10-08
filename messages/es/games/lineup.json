@@ -1,4 +1,6 @@
 {
+  "mission": "Misión",
+  "coins": "{n, plural, one {# moneda} other {# monedas}}",
   "deck": {
     "prev": "Tablero anterior",
     "next": "Siguiente tablero",

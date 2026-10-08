@@ -37,8 +37,8 @@ function markAsked(key: string) {
  * draws, like a verdict on a drawn character.
  */
 export function FoundFeedback() {
-  const t = useTranslations("room.found");
-  const tp = useTranslations("room.pick");
+  const t = useTranslations("whoAmI.found");
+  const tp = useTranslations("whoAmI.pick");
   const { code, view, me } = useRoomContext();
   const { area } = useStage();
   const inMatch = area === "match" || area === "result";

@@ -1,0 +1,232 @@
+{
+  "coldOpen": {
+    "line1": "Everyone gets a secret character.",
+    "line2": "Only you can't see yours. Ask to find out.",
+    "question": "Am I from Marvel?"
+  },
+  "theming": {
+    "kicker": "Theme",
+    "hostKicker": "Your call",
+    "title": "Choose the theme",
+    "subtitle": "Write any theme. Then everyone picks a character that fits it.",
+    "label": "Theme of the match",
+    "placeholder": "e.g. Space pirates",
+    "submit": "Use this theme",
+    "ideas": "Ideas",
+    "moreIdeas": "Other ideas",
+    "fallback": "If time runs out, everyone votes instead.",
+    "waitingTitle": "{name} is choosing the theme",
+    "waitingSubtitle": "Get ready to pick a character that fits it. If time runs out, everyone votes instead.",
+    "chosenTitle": "The theme is…",
+    "chosenBy": "Chosen by {name}",
+    "announce": "Chosen theme: {theme}"
+  },
+  "rule": {
+    "title": "Every character must be from this theme.",
+    "fits": "Fits the theme",
+    "misfit": "Doesn't fit"
+  },
+  "draw": {
+    "line": "{count, plural, =2 {You each pick a character for the other.} other {Everyone picks a character for someone else.}}"
+  },
+  "target": {
+    "youPickFor": "You pick for",
+    "hint": "Pick a character {name} knows.",
+    "ring": "{count, plural, =2 {You pick for each other.} other {Everyone picks for someone.}}",
+    "ringLabel": "Who picks for whom"
+  },
+  "pick": {
+    "searchLabel": "Character for {name}",
+    "changeImage": "Change picture",
+    "imageHint": "Yours goes on this card and joins {name}'s pictures. The one picked most becomes the main picture.",
+    "random": "Random",
+    "randomAgain": "Draw another",
+    "randomHint": "Draws one of the characters that best fit this theme",
+    "rateQuestion": "Fits the theme?",
+    "rateYes": "It fits",
+    "rateNo": "No, draw another",
+    "rateThanks": "Thanks!",
+    "rateDismiss": "Close"
+  },
+  "pickCard": {
+    "cardTitle": "A character for {name}",
+    "placeholder": "Type a name…",
+    "rowPicks": "{origin} · picked {count, plural, one {# time} other {# times}}",
+    "rowPicksNoOrigin": "Picked {count, plural, one {# time} other {# times}}",
+    "fromLibrary": "{origin} · from the library",
+    "fromLibraryNoOrigin": "From the library",
+    "newCharacterLine": "New character · saved for this theme",
+    "notFound": "Not in this theme yet. It becomes a new character.",
+    "newSeal": "New!",
+    "drop": "Drop, paste or browse for a picture",
+    "dropOptional": "or leave it blank, that's fine",
+    "upload": "Upload yours",
+    "uploading": "Sending the picture…",
+    "trayLabel": "Pictures of {name}",
+    "libraryPicture": "The library's picture",
+    "sentBy": "Sent by {name}",
+    "reportPicture": "Report this picture",
+    "pendingPicture": "Being checked: only you see it for now",
+    "picturesFailed": "Couldn't load the pictures.",
+    "confirmCard": "Confirm",
+    "rule": "Out of time? The card goes as it is.",
+    "handLabel": "Popular in {theme}",
+    "handFits": "{count, plural, one {# player says it fits} other {# players say it fits}}",
+    "doneWaiting": "Done! Waiting for {names}",
+    "doneAll": "Everyone has picked!",
+    "timeUp": "Time! That's the one."
+  },
+  "cast": {
+    "pickedYours": "{name} picked yours.",
+    "rule": "You see everyone else's. Yours, you find out.",
+    "from": "from {name}",
+    "by": "by {name}",
+    "byYou": "by you",
+    "orderKicker": "Turn order",
+    "starts": "{name} starts!"
+  },
+  "turn": {
+    "status": {
+      "host": "Host",
+      "ready": "Ready",
+      "not_ready": "Not ready",
+      "theming": "Choosing the theme",
+      "voting": "Voting",
+      "voted": "Voted",
+      "picking": "Picking",
+      "picked": "Picked",
+      "asking": "Asking",
+      "will_answer": "Will answer",
+      "answering": "Answering",
+      "answered": "Answered",
+      "guessing": "Guessing",
+      "validating": "Checking",
+      "waiting": "Waiting",
+      "discovered": "Discovered",
+      "gave_up": "Gave up"
+    },
+    "card": {
+      "pickedBy": "Picked by {name}",
+      "youPicked": "you picked",
+      "youPickedFull": "You picked this one",
+      "whoAreYou": "Who are you?"
+    },
+    "ask": {
+      "kicker": "Round {n}",
+      "title": "Your turn to ask",
+      "label": "A yes-or-no question about your character",
+      "hintMany": "Everyone else answers, each with their own choice.",
+      "hintOne": "They answer with one of six options. Then you can guess.",
+      "send": "Send question"
+    },
+    "giveUp": {
+      "button": "Give up",
+      "sure": "Give up? Your card is revealed and you stop playing.",
+      "yes": "Yes, reveal",
+      "no": "Keep playing"
+    },
+    "answer": {
+      "kicker": "Round {n} · {name} asks",
+      "yourAnswer": "Your answer",
+      "note": "Context (optional)",
+      "send": "Send answer",
+      "progress": "{done} of {total} answered"
+    },
+    "guess": {
+      "kicker": "Round {n} · You asked",
+      "title": "Do you know who you are?",
+      "label": "Your guess",
+      "hint": "If the name matches, it counts right away. If not, whoever picked your character decides.",
+      "send": "Take a guess",
+      "pass": "Pass",
+      "passConfirm": "Pass for real?"
+    },
+    "validate": {
+      "kicker": "Round {n} · {name}'s guess",
+      "title": "Did {name} get it?",
+      "bodyMany": "It's not exactly the card's name. You picked this character, so only you decide. {names} wait.",
+      "bodyOne": "It's not exactly the card's name. You picked this character, so you decide.",
+      "yes": "Yes, that's it",
+      "no": "Not yet"
+    },
+    "wait": {
+      "kicker": "Round {n}",
+      "ask": "{name} is thinking of a question…",
+      "answers": "Waiting for the answers",
+      "guess": "{name} is deciding whether to guess…",
+      "validate": "{name} is checking {guesser}'s guess",
+      "question": "{name} asked",
+      "youAnswered": "Your answer:",
+      "stillAnswering": "Still answering: {names}"
+    },
+    "history": {
+      "title": "History",
+      "close": "Close history",
+      "filter": "Whose plays",
+      "kindFilter": "Which kind",
+      "kinds": {
+        "all": "All",
+        "question": "Questions",
+        "guess": "Guesses"
+      },
+      "mineCaption": "Your questions and guesses: {shown} of {total} · newest first",
+      "playerCaption": "{name}'s questions and guesses: {shown} of {total} · newest first",
+      "nothing": "Nothing here yet. Questions show up here as soon as someone plays.",
+      "question": "Question · {name}",
+      "guess": "Guess · {name}"
+    },
+    "reveal": {
+      "asked": "Round {n} · {name} asked",
+      "guessed": "Round {n} · {name}'s guess",
+      "hit": "Got it",
+      "hitPlace": "Got it · {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
+      "hitTie": "Got it · tied for {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
+      "miss": "Not yet",
+      "cardOf": "{name}'s card",
+      "passRound": "Round {n} · No guess",
+      "passed": "{name} passed",
+      "passedYou": "You passed",
+      "passedNote": "Maybe next round."
+    },
+    "turnTag": "Turn",
+    "steps": {
+      "label": "Round steps",
+      "asking": "Question",
+      "answering": "Answers",
+      "guessing": "Guess",
+      "validating": "Check"
+    },
+    "handoff": {
+      "kicker": "Up now",
+      "kickerYou": "It's on you",
+      "title": "{name}'s turn",
+      "titleYou": "Your turn",
+      "round": "Round {n}"
+    }
+  },
+  "found": {
+    "question": "Did {name} fit the theme?",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "result": {
+    "kicker": "End of the match · {count, plural, one {# round} other {# rounds}}",
+    "winner": "{name} discovered first",
+    "winnersTie": "It's a tie! {names} discovered first",
+    "youTie": "It's a tie! You and {names} discovered first",
+    "nobody": "Nobody discovered this time",
+    "toLobby": "Back to the lobby",
+    "home": "Back to rooms",
+    "place": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place",
+    "gaveUp": "Gave up",
+    "notFound": "Didn't discover",
+    "pickedBy": "picked by {name}",
+    "discoveredAt": "Discovered on round {n}",
+    "placeShort": "{place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+    "youWon": "You found it on round {n}.",
+    "youFound": "You found it too, on round {n}.",
+    "youGaveUp": "You gave up this time.",
+    "youMissed": "You didn't find it this time.",
+    "youFirst": "You discovered first"
+  }
+}

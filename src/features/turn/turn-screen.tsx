@@ -103,7 +103,7 @@ function joinDot(parts: ReactNode[]): ReactNode {
 
 /** Every step of a turn: asking, answering, guessing, validating, and waiting for others. */
 export function TurnScreen() {
-  const t = useTranslations("turn");
+  const t = useTranslations("whoAmI.turn");
   const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();
   const mode = useMode();
@@ -356,7 +356,7 @@ function Bubble({
 }
 
 function Ask() {
-  const t = useTranslations("turn.ask");
+  const t = useTranslations("whoAmI.turn.ask");
   const mark = questionMark(useLocale() as Lang);
   const { view, code } = useRoomContext();
   const { act, pending } = useRoomAction();
@@ -411,7 +411,7 @@ function Ask() {
 }
 
 function Answer() {
-  const t = useTranslations("turn.answer");
+  const t = useTranslations("whoAmI.turn.answer");
   const name = useDisplayName();
   const { view, code, playerById } = useRoomContext();
   const { act, pending } = useRoomAction();
@@ -531,7 +531,7 @@ function AnswersList({
 }
 
 function Guess() {
-  const t = useTranslations("turn.guess");
+  const t = useTranslations("whoAmI.turn.guess");
   const { view, code } = useRoomContext();
   const { act, pending } = useRoomAction();
   const [text, setText] = useState("");
@@ -603,7 +603,7 @@ function Guess() {
 }
 
 function Validate() {
-  const t = useTranslations("turn.validate");
+  const t = useTranslations("whoAmI.turn.validate");
   const name = useDisplayName();
   const withNames = useWithNames();
   const { view, code, playerById } = useRoomContext();
@@ -659,7 +659,7 @@ function Validate() {
 }
 
 function Waiting({ mode }: { mode: Mode }) {
-  const t = useTranslations("turn.wait");
+  const t = useTranslations("whoAmI.turn.wait");
   const name = useDisplayName();
   const withNames = useWithNames();
   const { view, me, playerById } = useRoomContext();

@@ -21,7 +21,7 @@ export function DrawFeedback({
   show: boolean;
   onMisfit: () => void;
 }) {
-  const t = useTranslations("room.pick");
+  const t = useTranslations("whoAmI.pick");
   return (
     <RateBubble
       show={show}

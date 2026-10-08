@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 import { LANGS } from "@/game/types";
-import { NAMESPACES } from "./request";
+import { GAME_NAMESPACES, NAMESPACES } from "./request";
 
 // request.ts builds next-intl's config; only its list of namespaces matters here.
 vi.mock("next-intl", () => ({ hasLocale: () => true }));
@@ -13,8 +13,12 @@ const DIR = fileURLToPath(new URL("../../messages/", import.meta.url));
 
 type Tree = { [key: string]: string | Tree };
 
+/** Where a namespace lives: the games' under games/. */
+const file = (ns: string) =>
+  (GAME_NAMESPACES as readonly string[]).includes(ns) ? `games/${ns}` : ns;
+
 const load = (lang: string, ns: string): Tree =>
-  JSON.parse(readFileSync(`${DIR}${lang}/${ns}.json`, "utf8"));
+  JSON.parse(readFileSync(`${DIR}${lang}/${file(ns)}.json`, "utf8"));
 
 /** Every string in a namespace, by its dotted key. */
 function leaves(tree: Tree, prefix = "", out = new Map<string, string>()) {
@@ -69,11 +73,12 @@ function args(
 describe("messages", () => {
   it("has a file per registered namespace in every language, and no stray file", () => {
     for (const lang of LANGS) {
-      const files = readdirSync(`${DIR}${lang}`)
+      const files = readdirSync(`${DIR}${lang}`, { recursive: true })
+        .map(String)
         .filter((f) => f.endsWith(".json"))
         .map((f) => f.slice(0, -".json".length))
         .sort();
-      expect(files, lang).toEqual([...NAMESPACES].sort());
+      expect(files, lang).toEqual(NAMESPACES.map(file).sort());
     }
   });
 

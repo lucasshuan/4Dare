@@ -54,7 +54,7 @@ export function PickHand({
   seat: number;
   onPick: (card: HandCard) => void;
 }) {
-  const t = useTranslations("pickCard");
+  const t = useTranslations("whoAmI.pickCard");
   if (!cards.length) return null;
   const width = phone ? 70 : 92;
   const mid = (cards.length - 1) / 2;

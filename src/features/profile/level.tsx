@@ -34,7 +34,7 @@ export function LevelAvatar({
   on?: "canvas" | "surface";
   className?: string;
 }) {
-  const t = useTranslations("player.level");
+  const t = useTranslations("profile.level");
   const format = useFormatter();
   const { level, into, need } = levelOf(xp);
   const share = need ? into / need : 0;
@@ -106,7 +106,7 @@ export function LevelTag({
   on?: "canvas" | "surface";
   className?: string;
 }) {
-  const t = useTranslations("player.level");
+  const t = useTranslations("profile.level");
   return (
     <span
       aria-hidden="true"
@@ -138,7 +138,7 @@ export function XpBar({
   note?: React.ReactNode;
   className?: string;
 }) {
-  const t = useTranslations("player.level");
+  const t = useTranslations("profile.level");
   const format = useFormatter();
   const { into, need } = levelOf(xp);
   return (
