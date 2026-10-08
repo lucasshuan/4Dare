@@ -182,6 +182,7 @@ describe("what for?: the record, with a presenter", () => {
       trades: false,
     });
     const lots = lotsFor(3, g.state.settings.lotsPerSeat);
+    g.do({ type: "DRAW_CHAIR", playerId: g.state.hostId });
     g.do({
       type: "START",
       playerId: g.state.hostId,

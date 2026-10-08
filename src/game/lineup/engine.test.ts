@@ -73,6 +73,9 @@ function lineupGame(
   seed = 1,
 ) {
   const g = new Game(players, seed, { game: "lineup", seats: 8, ...settings });
+  // with a presenter, the host draws the chair
+  if (settings.mode === "host" && players >= 3)
+    g.do({ type: "DRAW_CHAIR", playerId: g.state.hostId });
   const s = g.state.settings;
   const lots = lotsFor(players, s.lotsPerSeat);
   // as the server deals: for the most rounds the table may play
@@ -878,7 +881,7 @@ describe("what for?: with a presenter", () => {
     imageUrl: null,
   });
 
-  it("seats whoever sits in the TV chair, or draws one, and deals the others in", () => {
+  it("seats whoever sits in the TV chair, or the one drawn, and deals the others in", () => {
     const g = new Game(4, 1, { game: "lineup", seats: 8, mode: "host" });
     g.do({ type: "CHAIR", playerId: "p3", seat: "p3" });
     expect(
@@ -895,18 +898,38 @@ describe("what for?: with a presenter", () => {
     // the opening says who presents
     expect(g.state.reveal?.beats?.map((b) => b.kind)).toContain("chair");
 
+    // only the host draws, and the opening says it was a draw
     const drawn = new Game(3, 2, { game: "lineup", seats: 8, mode: "host" });
+    expect(code(() => drawn.do({ type: "DRAW_CHAIR", playerId: "p2" }))).toBe(
+      "not_host",
+    );
+    drawn.do({ type: "DRAW_CHAIR", playerId: drawn.state.hostId });
+    const sat = drawn.state.chair as string;
+    expect(drawn.state.players.map((p) => p.id)).toContain(sat);
     drawn.do({
       type: "START",
       playerId: drawn.state.hostId,
       decks: [deck(15, 1), deck(15, 2)],
     });
+    expect(lu(drawn).presenter).toBe(sat);
     expect(lu(drawn).drawn).toBe(true);
     expect(lu(drawn).dealt).toHaveLength(2);
 
-    // two people: everyone plays
-    const two = lineupGame(2, { mode: "host" });
-    expect(lu(two).presenter).toBeNull();
+    // the chair empty: everyone plays
+    const empty = new Game(3, 2, { game: "lineup", seats: 8, mode: "host" });
+    empty.do({
+      type: "START",
+      playerId: empty.state.hostId,
+      decks: [deck(15, 1), deck(15, 2)],
+    });
+    expect(lu(empty).presenter).toBeNull();
+    expect(lu(empty).dealt).toHaveLength(3);
+
+    // two people: no draw, everyone plays
+    const two = new Game(2, 1, { game: "lineup", seats: 8, mode: "host" });
+    expect(
+      code(() => two.do({ type: "DRAW_CHAIR", playerId: two.state.hostId })),
+    ).toBe("invalid_input");
   });
 
   it("lets the presenter choose a mission or write one; the others guess meanwhile", () => {

@@ -551,6 +551,11 @@ export async function sitChair(
   );
 }
 
+/** The host draws who sits in the TV chair, among the people here. */
+export async function drawChair(code: string): Promise<Result<RoomView>> {
+  return run(() => act(code, (id) => ({ type: "DRAW_CHAIR", playerId: id })));
+}
+
 /** The presenter's mission: one of the three (`pick`), or their own words. */
 export async function chooseMission(
   code: string,

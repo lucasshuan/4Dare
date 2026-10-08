@@ -46,7 +46,13 @@ import {
   saveBoard,
   setQueue,
 } from "./lineup/engine";
-import { COINS, LOTS_PER_SEAT, OFF_MISSIONS_MAX, ROUNDS } from "./lineup/rules";
+import {
+  COINS,
+  HOST_MIN_PEOPLE,
+  LOTS_PER_SEAT,
+  OFF_MISSIONS_MAX,
+  ROUNDS,
+} from "./lineup/rules";
 import { LU_PHASES } from "./lineup/types";
 import { isCloseMatch } from "./match";
 import {
@@ -831,6 +837,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       return rate(s, e.playerId, e.up);
     case "CHAIR":
       return sitChair(s, e.playerId, e.seat);
+    case "DRAW_CHAIR":
+      return drawChair(s, e.playerId, ctx);
     case "MISSION":
       return chooseMission(s, e.playerId, e.pick, e.text, ctx);
     case "QUEUE":
@@ -1060,6 +1068,7 @@ function sitChair(s: RoomState, playerId: PlayerId, seat: PlayerId | null) {
   if (s.phase !== "lobby") fail("wrong_phase");
   const host = playerId === s.hostId;
   const chair = s.chair ?? null;
+  delete s.chairDrawn;
   if (seat === null) {
     if (!host && chair !== playerId) fail("not_host");
     s.chair = null;
@@ -1071,12 +1080,26 @@ function sitChair(s: RoomState, playerId: PlayerId, seat: PlayerId | null) {
   s.chair = seat;
 }
 
+/** The host draws the TV chair among the people here (enough for a presenter). */
+function drawChair(s: RoomState, playerId: PlayerId, ctx: Ctx) {
+  requireSeated(s, playerId);
+  if (s.phase !== "lobby") fail("wrong_phase");
+  if (playerId !== s.hostId) fail("not_host");
+  const here = s.players.filter(isPresent).map((p) => p.id);
+  if (here.length < HOST_MIN_PEOPLE) fail("invalid_input");
+  s.chair = here[Math.floor(ctx.random() * here.length)];
+  s.chairDrawn = true;
+}
+
 function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   const p = requireSeated(s, id);
   if (s.phase === "closed") fail("wrong_phase");
   if (BEFORE_MATCH.has(s.phase)) {
     s.players = s.players.filter((x) => x.id !== id);
-    if (s.chair === id) s.chair = null;
+    if (s.chair === id) {
+      s.chair = null;
+      delete s.chairDrawn;
+    }
     if (s.players.length === 0) {
       s.phase = "closed";
       stopClock(s);

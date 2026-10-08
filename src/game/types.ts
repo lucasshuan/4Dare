@@ -147,7 +147,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   defendSeconds: 90,
   judgeSeconds: 30,
   ...DEFAULT_RULES,
-  mode: "classic",
+  mode: "host",
   themeMode: "vote",
   offGostos: [],
   offThemes: [],
@@ -576,8 +576,10 @@ export interface RoomState {
   lu?: LineupMatch | null;
   /** What for? missions the room played lately, newest first: its next matches skip them. */
   recentMissions?: string[];
-  /** What for?'s TV chair: who presents the next match with a presenter (empty: drawn at the start). */
+  /** What for?'s TV chair: who presents the next match with a presenter (empty: everyone plays). */
   chair?: PlayerId | null;
+  /** The host drew who sits in the chair; the next opening says so. */
+  chairDrawn?: boolean;
   createdAt: number;
   updatedAt: number;
 }
@@ -683,6 +685,8 @@ export type GameEvent =
   | { type: "JUDGE"; playerId: PlayerId; ownerId: PlayerId }
   /** The TV chair (What for?'s presenter): `seat` sits there (oneself, or anyone for the host); null empties it. */
   | { type: "CHAIR"; playerId: PlayerId; seat: PlayerId | null }
+  /** The host draws who sits in the TV chair, among the people here. */
+  | { type: "DRAW_CHAIR"; playerId: PlayerId }
   /** What for?, the presenter: one of the round's three missions (`pick`), or their own `text`. */
   | {
       type: "MISSION";

@@ -96,7 +96,11 @@ describe("what for?: with a presenter", () => {
 
   it("lines up dealt cards, extras and paper cards as the presenter's lots", async () => {
     const ctx = { now: 2000, random: rng(2) };
-    const state = room(4, { mode: "host", rounds: 1 });
+    const state = reduce(
+      room(4, { mode: "host", rounds: 1 }),
+      { type: "CHAIR", playerId: "p1", seat: "p3" },
+      ctx,
+    );
     const decks = await lineupDecks(state, rng(4));
     let s = reduce(state, { type: "START", playerId: "p1", decks }, ctx);
     const host = s.lu?.presenter as string;

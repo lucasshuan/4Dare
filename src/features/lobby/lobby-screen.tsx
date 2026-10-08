@@ -30,6 +30,7 @@ import { riseIn } from "@/lib/motion";
 import { useDisplayName, useRoomTitle } from "@/lib/names";
 import { GAME_PATHS } from "@/lib/routes";
 import {
+  drawChair,
   kickPlayer,
   leaveRoom,
   setReady,
@@ -304,6 +305,19 @@ export function LobbyScreen() {
               <RoomQr code={code} className="max-sm:hidden" />
             </div>
           </div>
+          {/* What for?'s presenter chair, over the lists */}
+          {game === "lineup" && view.settings.mode === "host" ? (
+            <TvChair
+              players={shownPlayers}
+              here={shownPlayers.filter((p) => !p.away).length}
+              chairId={view.chairId}
+              meId={me.id}
+              host={me.isHost}
+              pending={pending}
+              onSeat={(seat) => void act(() => sitChair(code, seat))}
+              onDraw={() => void act(() => drawChair(code))}
+            />
+          ) : null}
           {/* who is here, and the room's past matches */}
           <LobbyTabs
             label={t("listsLabel")}
@@ -313,27 +327,15 @@ export function LobbyScreen() {
                 label: t("players"),
                 count: `${shownPlayers.length}/${shownSeats}`,
                 panel: (
-                  <div className="flex flex-col gap-3">
-                    {game === "lineup" && view.settings.mode === "host" ? (
-                      <TvChair
-                        players={shownPlayers}
-                        chairId={view.chairId}
-                        meId={me.id}
-                        host={me.isHost}
-                        pending={pending}
-                        onSeat={(seat) => void act(() => sitChair(code, seat))}
-                      />
-                    ) : null}
-                    <SeatGrid
-                      players={shownPlayers}
-                      seats={shownSeats}
-                      slots={me.isHost ? range.max : shownSeats}
-                      host={me.isHost}
-                      canClose={canClose}
-                      onSeats={setSeats}
-                      onKick={kick}
-                    />
-                  </div>
+                  <SeatGrid
+                    players={shownPlayers}
+                    seats={shownSeats}
+                    slots={me.isHost ? range.max : shownSeats}
+                    host={me.isHost}
+                    canClose={canClose}
+                    onSeats={setSeats}
+                    onKick={kick}
+                  />
                 ),
               },
               {

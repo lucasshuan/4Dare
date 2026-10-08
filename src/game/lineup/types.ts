@@ -158,7 +158,7 @@ export interface LineupMatch {
   dealt: PlayerId[];
   /** With a presenter: who sits in the TV chair (not dealt in); null when everyone plays. */
   presenter: PlayerId | null;
-  /** The presenter was drawn, the chair being empty. */
+  /** The host drew the presenter in the lobby. */
   drawn?: boolean;
   /** The presenter's lots to come, in order: the next lot is the first. */
   queue: LuCard[];
@@ -228,7 +228,7 @@ export interface LineupView {
   presenterId: PlayerId | null;
   /** The presenter is still here and decides (else the room carries on as if everyone played). */
   hosted: boolean;
-  /** The chair was empty and the room drew the presenter. */
+  /** The host drew the presenter in the lobby. */
   drawn: boolean;
   /** The presenter's three missions while they choose; null for everyone else. */
   options: LuMission[] | null;

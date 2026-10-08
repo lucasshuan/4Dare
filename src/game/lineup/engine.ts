@@ -130,12 +130,12 @@ function settled(s: RoomState) {
  */
 export function beginLineup(s: RoomState, decks: LuDeck[], ctx: Ctx) {
   const here = s.players.filter(isPresent).map((p) => p.id);
-  // with a presenter: whoever sits in the TV chair, or a draw when it's empty
+  // with a presenter: whoever sits in the TV chair; empty, everyone plays
   const withHost = s.settings.mode === "host" && here.length >= HOST_MIN_PEOPLE;
-  const chair = s.chair && here.includes(s.chair) ? s.chair : null;
-  const presenter = withHost
-    ? (chair ?? here[Math.floor(ctx.random() * here.length)])
-    : null;
+  const presenter =
+    withHost && s.chair && here.includes(s.chair) ? s.chair : null;
+  const drawn = !!presenter && !!s.chairDrawn;
+  delete s.chairDrawn;
   const dealt = here.filter((id) => id !== presenter);
   const lots = lotsFor(dealt.length, s.settings.lotsPerSeat);
   const rounds = roundsFor(dealt.length, s.settings.rounds);
@@ -158,7 +158,7 @@ export function beginLineup(s: RoomState, decks: LuDeck[], ctx: Ctx) {
   s.lu = {
     dealt,
     presenter,
-    ...(presenter && !chair ? { drawn: true } : {}),
+    ...(drawn ? { drawn: true } : {}),
     queue: [],
     guesses: {},
     decks: decks.slice(0, rounds).map((d) => ({
