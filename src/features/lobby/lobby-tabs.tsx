@@ -92,12 +92,13 @@ export function LobbyTabs({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    // in a parent of fixed height the panel takes what the tab bar leaves and scrolls inside
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <div
         role="tablist"
         aria-label={label}
         onKeyDown={onKeyDown}
-        className="flex gap-6 border-line border-b"
+        className="flex shrink-0 gap-6 border-line border-b"
       >
         {/* the bar's layoutId needs the layout features */}
         <LayoutMotion>
@@ -148,7 +149,7 @@ export function LobbyTabs({
         </LayoutMotion>
       </div>
       {/* both panels share one cell while they swap, so the page does not jump */}
-      <div className="grid overflow-x-clip">
+      <div className="grid min-h-0 flex-1 overflow-y-auto overflow-x-clip overscroll-contain">
         <AnimatePresence initial={false} custom={dir}>
           <m.div
             key={active.key}
