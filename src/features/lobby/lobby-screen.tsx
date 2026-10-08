@@ -348,8 +348,8 @@ export function LobbyScreen() {
               onDraw={() => void act(() => drawChair(code))}
             />
           ) : null}
-          {/* who is here, and the room's past matches: shrinks to what is left of the window, then scrolls inside */}
-          <div className={cn(panelClass, "flex flex-col lg:min-h-0")}>
+          {/* who is here, and the room's past matches: always takes what is left of the window, and scrolls inside */}
+          <div className={cn(panelClass, "flex flex-col lg:min-h-0 lg:flex-1")}>
             <LobbyTabs
               label={t("listsLabel")}
               tabs={[
