@@ -50,12 +50,16 @@ export function Screen({
   className?: string;
 }) {
   if (bare) {
+    // on a desktop the page is exactly the window: what doesn't fit scrolls inside it, never the page
     return (
-      <div className="flex min-h-dvh flex-col">
-        <div className="flex flex-1 flex-col px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-6 sm:pb-[calc(3rem+var(--dock))] sm:short:pt-4 sm:short:pb-[calc(1.5rem+var(--dock))]">
+      <div className="flex min-h-dvh flex-col lg:h-dvh lg:min-h-0">
+        <div className="flex flex-1 flex-col px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-6 sm:pb-[calc(3rem+var(--dock))] sm:short:pt-4 sm:short:pb-[calc(1.5rem+var(--dock))] lg:min-h-0">
           <m.main
             variants={CONTENT_LEAVES}
-            className={cn("mx-auto w-full max-w-page flex-1", className)}
+            className={cn(
+              "mx-auto w-full max-w-page flex-1 lg:flex lg:min-h-0 lg:flex-col",
+              className,
+            )}
           >
             {children}
           </m.main>

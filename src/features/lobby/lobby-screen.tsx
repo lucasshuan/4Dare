@@ -280,54 +280,60 @@ export function LobbyScreen() {
           <span className="max-sm:sr-only">{tMatch("leaveShort")}</span>
         </button>
       </div>
-      <div className="flex flex-wrap items-start gap-6 lg:gap-8">
-        <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-5 short:gap-4">
-          {/* the room leads with its name, right on the backdrop; the invite and the players sit on panels under it */}
-          <RoomTitle
-            title={title}
-            name={nameGuess ?? roomName}
-            editable={me.isHost}
-            className={titleClass}
-            onRename={rename}
-          />
-          {/* the greeting sits close to the code it explains; the QR code to their right (not on phones) */}
-          <div className={cn(panelClass, "flex items-center gap-6")}>
-            <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3">
-              <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
-                {greeting}
-              </p>
-              {/* desktop: "Copy link" right of the code; phones: under it */}
-              <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                {/* the code as game tiles, each a little askew */}
-                <div className="flex gap-2">
-                  <span className="sr-only">
-                    {t("codeLabel", { code: code.split("").join(" ") })}
-                  </span>
-                  {code.split("").map((c, i) => (
-                    <span
-                      // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
-                      key={i}
-                      aria-hidden="true"
-                      style={{
-                        rotate: `${TILE_TILT[i % TILE_TILT.length]}deg`,
-                      }}
-                      className="flex h-20 w-14 items-center justify-center rounded-md bg-sunken font-display font-extrabold text-[40px] text-ink shadow-[inset_0_-5px_0_var(--line)] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
-                    >
-                      {c}
+      {/* on a desktop the lobby fits the window and never scrolls: the lists and the settings scroll inside their panels */}
+      <div className="flex flex-wrap items-start gap-6 lg:min-h-0 lg:flex-1 lg:flex-nowrap lg:items-stretch lg:gap-8">
+        {/* one width whatever the open tab holds */}
+        <section className="flex w-full min-w-0 flex-col gap-5 short:gap-4 lg:min-h-0 lg:max-w-[768px] lg:flex-1">
+          {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right (not on phones) */}
+          <div className={cn(panelClass, "flex shrink-0 flex-col gap-4")}>
+            <RoomTitle
+              title={title}
+              name={nameGuess ?? roomName}
+              editable={me.isHost}
+              className={titleClass}
+              onRename={rename}
+            />
+            <div className="flex items-center gap-6">
+              <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3">
+                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
+                  {greeting}
+                </p>
+                {/* desktop: "Copy link" right of the code; phones: under it */}
+                <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                  {/* the code as game tiles, each a little askew */}
+                  <div className="flex gap-2">
+                    <span className="sr-only">
+                      {t("codeLabel", { code: code.split("").join(" ") })}
                     </span>
-                  ))}
+                    {code.split("").map((c, i) => (
+                      <span
+                        // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
+                        key={i}
+                        aria-hidden="true"
+                        style={{
+                          rotate: `${TILE_TILT[i % TILE_TILT.length]}deg`,
+                        }}
+                        className="flex h-20 w-14 items-center justify-center rounded-md bg-sunken font-display font-extrabold text-[40px] text-ink shadow-[inset_0_-5px_0_var(--line)] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                  <Button
+                    onClick={() =>
+                      copy(
+                        `${window.location.origin}/r/${code}`,
+                        t("linkCopied"),
+                      )
+                    }
+                  >
+                    <LinkIcon strokeWidth={1.75} />
+                    {t("copyLink")}
+                  </Button>
                 </div>
-                <Button
-                  onClick={() =>
-                    copy(`${window.location.origin}/r/${code}`, t("linkCopied"))
-                  }
-                >
-                  <LinkIcon strokeWidth={1.75} />
-                  {t("copyLink")}
-                </Button>
               </div>
+              <RoomQr code={code} className="max-sm:hidden" />
             </div>
-            <RoomQr code={code} className="max-sm:hidden" />
           </div>
           {/* What for?'s presenter chair, over the lists */}
           {game === "lineup" && view.settings.mode === "host" ? (
@@ -342,8 +348,8 @@ export function LobbyScreen() {
               onDraw={() => void act(() => drawChair(code))}
             />
           ) : null}
-          {/* who is here, and the room's past matches */}
-          <div className={panelClass}>
+          {/* who is here, and the room's past matches: shrinks to what is left of the window, then scrolls inside */}
+          <div className={cn(panelClass, "flex flex-col lg:min-h-0")}>
             <LobbyTabs
               label={t("listsLabel")}
               tabs={[
@@ -374,7 +380,7 @@ export function LobbyScreen() {
           </div>
         </section>
 
-        <div className="flex w-full flex-col gap-4 lg:max-w-[416px] lg:flex-[1_1_360px]">
+        <div className="flex w-full flex-col gap-4 lg:min-h-0 lg:w-[416px] lg:shrink-0">
           {/* the game and the main action, above the room's settings; the host can switch the game there */}
           <div className="flex flex-wrap items-center gap-3">
             {me.isHost ? (
@@ -447,7 +453,12 @@ export function LobbyScreen() {
               </button>
             )}
           </div>
-          <aside className={cn(panelClass, "flex flex-col gap-4")}>
+          <aside
+            className={cn(
+              panelClass,
+              "flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain",
+            )}
+          >
             <ul className="flex flex-col gap-3">
               <VisibilityRow
                 settings={view.settings}
