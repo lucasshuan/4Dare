@@ -199,9 +199,9 @@ export function WhoAmIBanner({ aside }: { aside: ReactNode }) {
         aria-hidden="true"
         className="-inset-10 -z-10 absolute select-none"
       >
-        <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-surface/50 blur-3xl" />
-        <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-(--art-whoami-glow) blur-3xl" />
-        <span className="absolute top-[5%] right-[22%] h-[45%] w-[25%] rounded-pill bg-apricot-soft/70 blur-3xl" />
+        <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-surface/50 blur-3xl dark:bg-white/6" />
+        <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-butter/60 blur-3xl dark:bg-butter/10" />
+        <span className="absolute top-[5%] right-[22%] h-[45%] w-[25%] rounded-pill bg-apricot-soft/70 blur-3xl dark:bg-apricot/8" />
         {MARKS.map(([left, top, size, color, seconds]) => (
           <m.span
             key={`${left}-${top}`}

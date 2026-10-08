@@ -202,7 +202,7 @@ export function LineupBanner({ aside }: { aside: ReactNode }) {
       {/* the wall's light and chalk marks */}
       <div aria-hidden="true" className="-inset-10 -z-10 absolute select-none">
         <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-white/10 blur-3xl dark:hidden" />
-        <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-gold/15 blur-3xl" />
+        <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-gold/15 blur-3xl dark:bg-gold/3" />
         {MARKS.map(([left, top, size, seconds, glyph]) => (
           <m.span
             key={`${left}-${top}`}

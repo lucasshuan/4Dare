@@ -38,8 +38,6 @@
   /* each game's art (home card, page banner): livelier grounds than the soft tints; the Impostor's a plum room, night-dark in the dark theme */
   --art-whoami: #b4cff7;
   --art-whoami-2: #cdbff6;
-  /* Who am I?'s art (home card, page banner): the warm glow low on its right, a faint ember in the dark theme */
-  --art-whoami-glow: rgb(246 227 161 / 0.6);
   --art-impostor: #b39ae0;
   --art-impostor-2: #9776d1;
   /* the Impostor art's lights down: a plum dusk here, near black in the dark theme */
@@ -209,7 +207,6 @@
   --no-soft: #4a1d14;
   --art-whoami: #21406e;
   --art-whoami-2: #362d68;
-  --art-whoami-glow: rgb(227 203 110 / 0.18);
   --art-impostor: #32165a;
   --art-impostor-2: #230f3d;
   --art-impostor-dim: rgb(11 15 23 / 0.82);

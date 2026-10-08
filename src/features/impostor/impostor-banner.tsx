@@ -289,9 +289,9 @@ export function ImpostorBanner({ aside }: { aside: ReactNode }) {
         className="-inset-10 -z-10 absolute select-none"
       >
         <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-white/10 blur-3xl dark:hidden" />
-        <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-butter/20 blur-3xl" />
-        <span className="absolute top-[5%] right-[22%] h-[45%] w-[25%] rounded-pill bg-sky/15 blur-3xl" />
-        <span className="absolute top-[-35%] left-[48%] h-[75%] w-[28%] rounded-pill bg-surface/20 blur-3xl" />
+        <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-butter/20 blur-3xl dark:bg-butter/6" />
+        <span className="absolute top-[5%] right-[22%] h-[45%] w-[25%] rounded-pill bg-sky/15 blur-3xl dark:bg-sky/5" />
+        <span className="absolute top-[-35%] left-[48%] h-[75%] w-[28%] rounded-pill bg-surface/20 blur-3xl dark:bg-white/4" />
         <span className="absolute bottom-[-25%] left-[22%] h-[70%] w-[30%] rounded-pill bg-no-soft/30 blur-3xl" />
         {MARKS.map(([left, top, size, color, seconds, mask]) => (
           <m.span

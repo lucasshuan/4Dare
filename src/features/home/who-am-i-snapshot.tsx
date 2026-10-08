@@ -69,8 +69,8 @@ export function WhoAmISnapshot({
       )}
     >
       {/* soft light spots */}
-      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-surface/40 blur-2xl" />
-      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-(--art-whoami-glow) blur-2xl" />
+      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-surface/40 blur-2xl dark:bg-white/5" />
+      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/50 blur-2xl dark:bg-butter/10" />
 
       <m.div
         className="absolute bottom-[23%] left-[9%] w-[29%]"

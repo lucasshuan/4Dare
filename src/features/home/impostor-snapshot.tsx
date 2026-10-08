@@ -80,7 +80,7 @@ export function ImpostorSnapshot({
     >
       {/* soft light spots and a couple of masks */}
       <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/10 blur-2xl" />
-      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/20 blur-2xl" />
+      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/20 blur-2xl dark:bg-butter/6" />
       <VenetianMask
         className="absolute top-[6%] right-[8%] size-[10cqh] rotate-12 text-no opacity-20"
         strokeWidth={2.25}
