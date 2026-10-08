@@ -5,15 +5,17 @@ import { useTranslations } from "next-intl";
 import { FigureArt } from "@/components/ui/figure-art";
 import { cn } from "@/lib/cn";
 import type { Figure } from "@/lib/figures";
-import { useRandomStart } from "@/lib/hooks/use-random-start";
+import { useShuffle } from "@/lib/hooks/use-shuffle";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
-/** The team bought at auction, left to right: figure, price, left edge (% of the board) and tilt. */
-const TEAM: { figure: Figure; price: number; x: number; tilt: number }[] = [
-  { figure: "fox", price: 5, x: 6, tilt: -5 },
-  { figure: "robot", price: 1, x: 29, tilt: 4 },
-  { figure: "pirate", price: 3, x: 52, tilt: -3 },
-  { figure: "witch", price: 1, x: 75, tilt: 5 },
+/** The team bought at auction, in a new order every loop. */
+const TEAM: Figure[] = ["fox", "robot", "pirate", "witch"];
+/** Where the photos land, left to right: price, left edge (% of the board) and tilt. */
+const SLOTS: { price: number; x: number; tilt: number }[] = [
+  { price: 5, x: 6, tilt: -5 },
+  { price: 1, x: 29, tilt: 4 },
+  { price: 3, x: 52, tilt: -3 },
+  { price: 1, x: 75, tilt: 5 },
 ];
 const COINS = 10;
 
@@ -70,11 +72,13 @@ export function LineupSnapshot({
   const still = forceStill || reduced;
   const { step, loop } = useStepLoop(STEPS, STILL, still);
   const s = STEPS[step];
-  // a different mission each loop, from a random one
+  // the missions in a random order, a new one each loop; the team in a
+  // random order too, turned by one each loop
   const lines = t.raw("demoLines") as string[];
-  const first = useRandomStart(lines.length);
-  const line = lines[(first + loop) % lines.length];
-  const spent = TEAM.slice(0, s.team).reduce((a, c) => a + c.price, 0);
+  const lineOrder = useShuffle(lines.length);
+  const line = lines[lineOrder[loop % lines.length]];
+  const teamOrder = useShuffle(TEAM.length);
+  const spent = SLOTS.slice(0, s.team).reduce((a, c) => a + c.price, 0);
 
   return (
     <div
@@ -91,11 +95,11 @@ export function LineupSnapshot({
         <div className="relative size-full overflow-hidden rounded-[1.6cqh] bg-board">
           <span className="absolute top-[9%] left-[5%] h-[2.6cqh] w-[34%] rounded-pill bg-chalk/80" />
           <span className="absolute inset-[5%] rounded-[1cqh] border border-chalk/20" />
-          {TEAM.map((c, i) => (
-            <AnimatePresence key={c.figure}>
+          {SLOTS.map((c, i) => (
+            <AnimatePresence key={c.x}>
               {i < s.team ? (
                 <m.div
-                  key={`${c.figure}-${loop}`}
+                  key={`${c.x}-${loop}`}
                   className="absolute top-[26%] w-[19%]"
                   style={{ left: `${c.x}%` }}
                   initial={
@@ -106,7 +110,10 @@ export function LineupSnapshot({
                   transition={{ type: "spring", stiffness: 380, damping: 24 }}
                 >
                   <div className="relative bg-white p-[6%] shadow-card">
-                    <FigureArt figure={c.figure} className="aspect-4/5" />
+                    <FigureArt
+                      figure={TEAM[teamOrder[(i + loop) % TEAM.length]]}
+                      className="aspect-4/5"
+                    />
                     <span className="-translate-x-1/2 absolute -top-[5%] left-1/2 h-[9%] w-[44%] bg-butter/85" />
                     <span className="absolute -right-[14%] -bottom-[8%] rounded-[0.8cqh] bg-kraft px-[1.4cqh] font-bold font-mono text-[6cqh] text-kraft-ink leading-[1.3]">
                       {c.price}

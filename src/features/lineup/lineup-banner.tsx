@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { Creature, FigureArt } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
 import { cn } from "@/lib/cn";
-import { useRandomStart } from "@/lib/hooks/use-random-start";
+import type { Figure } from "@/lib/figures";
+import { useShuffle } from "@/lib/hooks/use-shuffle";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 type Seat = "a" | "b" | "c" | "d";
@@ -35,6 +36,9 @@ const STEPS: {
 ];
 /** The frame shown when motion is reduced: sold, and the envelope open. */
 const STILL = 6;
+
+/** The lots up for auction, one a loop, in a random order that never repeats a lot back to back. */
+const LOTS: Figure[] = ["fox", "robot", "pirate", "witch"];
 
 /** Around the lot, left to right; phones keep one on each side. */
 const SEATS: { seat: Seat; place: string; dna: string; color: string }[] = [
@@ -99,10 +103,12 @@ export function LineupBanner() {
   const { step, loop } = useStepLoop(STEPS, STILL, reduced);
   const s = STEPS[step];
   const top = Math.max(0, ...Object.values(s.bids));
-  // a different mission each loop, from a random one
+  // the missions and the lots each in a random order, a new one each loop
   const lines = t.raw("banner.lines") as string[];
-  const first = useRandomStart(lines.length);
-  const line = lines[(first + loop) % lines.length];
+  const lineOrder = useShuffle(lines.length);
+  const line = lines[lineOrder[loop % lines.length]];
+  const lotOrder = useShuffle(LOTS.length);
+  const lot = LOTS[lotOrder[loop % LOTS.length]];
 
   return (
     <div
@@ -181,7 +187,7 @@ export function LineupBanner() {
                 }}
                 transition={{ type: "spring", stiffness: 320, damping: 20 }}
               >
-                <FigureArt figure="pirate" className="aspect-4/5" />
+                <FigureArt figure={lot} className="aspect-4/5" />
                 <span className="-translate-x-1/2 absolute -top-[5%] left-1/2 h-[9%] w-[44%] bg-butter/85" />
                 <span className="absolute -right-[12%] -bottom-[6%] rounded-[1cqh] bg-kraft px-[2cqh] font-bold font-mono text-[8cqh] text-kraft-ink leading-[1.3] shadow-card">
                   {top || "–"}
