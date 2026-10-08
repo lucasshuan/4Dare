@@ -24,7 +24,7 @@ import {
   questionMark,
   withoutQuestionMark,
   withQuestionMark,
-} from "@/game/question";
+} from "@/game/who-am-i/question";
 import {
   type AnswerValue,
   type Lang,

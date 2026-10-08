@@ -1,6 +1,6 @@
 // A question always ends with a question mark. The input shows it as a fixed
 // suffix the player can't delete, and the server adds one if it is missing.
-import type { Lang } from "./types";
+import type { Lang } from "../types";
 
 /** One or more question marks at the end, Latin or full-width (Japanese). */
 const TRAILING_MARKS = /[?？]+$/;

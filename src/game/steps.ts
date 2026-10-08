@@ -1,4 +1,4 @@
-// The parts of a match both games share: shows and reveals on the clock,
+// The parts of a match every game shares: shows and reveals on the clock,
 // step clocks and their cuts, the podium. Pure, like the engine.
 import { findPlayer, isPresent } from "./helpers";
 import { luPlaces } from "./lineup/places";
@@ -223,6 +223,19 @@ function keepMatch(s: RoomState, ctx: Ctx) {
     players,
   };
   s.matches = [match, ...(s.matches ?? [])].slice(0, PAST_MATCHES);
+}
+
+/** When the host is gone (or away mid-match), the room goes to whoever joined first. */
+export function handOverHost(s: RoomState) {
+  const host = findPlayer(s, s.hostId);
+  if (host && isPresent(host)) return;
+  const next =
+    s.players.find((p) => isPresent(p) && p.id !== s.hostId) ??
+    (host ? null : s.players[0]);
+  if (next) {
+    s.hostId = next.id;
+    next.ready = true;
+  }
 }
 
 export const presentCount = (s: RoomState) =>
