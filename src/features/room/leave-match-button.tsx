@@ -1,7 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { DoorOpen } from "lucide-react";
+import { DoorClosed, DoorOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button, buttonClass } from "@/components/ui/button";
@@ -11,15 +11,32 @@ import { useRouter } from "@/i18n/navigation";
 import { GAME_PATHS } from "@/lib/routes";
 
 /**
- * The "Leave" button's look, in the match header and the lobby alike: the
- * "no" colour, soft at rest and solid when pointed at, so it reads as the way
- * out at a glance.
+ * The "Leave" button's look, in the match header and the lobby alike, so it
+ * reads as the way out at a glance: the "no" colour, soft at rest; solid when
+ * pointed at (its door swings open); a deeper red that sinks when pressed. The
+ * focus ring is ink, which shows on the coloured backdrops where sky would not.
  */
 export const leaveButtonClass = buttonClass(
   "secondary",
   "sm",
-  "h-10 border-no bg-no-soft text-no hover:bg-no hover:text-on-no focus-visible:bg-no focus-visible:text-on-no max-sm:w-10 max-sm:px-0",
+  "group h-10 border-no bg-no-soft text-no transition-[translate,scale,background-color,border-color,color] hover:bg-no hover:text-on-no focus-visible:bg-no focus-visible:text-on-no focus-visible:outline-ink! active:translate-y-px active:scale-95 active:border-[var(--no-deep)] active:bg-[var(--no-deep)] active:text-on-no max-sm:w-10 max-sm:px-0",
 );
+
+/** The door on "Leave": shut at rest, open while pointed at or focused. */
+export function LeaveIcon() {
+  return (
+    <>
+      <DoorClosed
+        strokeWidth={1.75}
+        className="group-hover:hidden group-focus-visible:hidden"
+      />
+      <DoorOpen
+        strokeWidth={1.75}
+        className="hidden group-hover:block group-focus-visible:block"
+      />
+    </>
+  );
+}
 
 /** "Leave" in the match header: out of the match for good, after a quick "sure?". */
 export function LeaveMatchButton() {
@@ -32,7 +49,7 @@ export function LeaveMatchButton() {
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger className={leaveButtonClass}>
-        <DoorOpen strokeWidth={1.75} />
+        <LeaveIcon />
         <span className="max-sm:sr-only">{t("leaveShort")}</span>
       </Popover.Trigger>
       <Popover.Portal>

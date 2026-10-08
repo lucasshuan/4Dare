@@ -1,13 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import {
-  Check,
-  ChevronLeft,
-  DoorOpen,
-  Link as LinkIcon,
-  Settings,
-} from "lucide-react";
+import { Check, ChevronLeft, Link as LinkIcon, Settings } from "lucide-react";
 import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useRef, useState } from "react";
@@ -30,7 +24,10 @@ import { backClass, RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { leaveButtonClass } from "@/features/room/leave-match-button";
+import {
+  LeaveIcon,
+  leaveButtonClass,
+} from "@/features/room/leave-match-button";
 import { GAME_SEATS } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
@@ -273,7 +270,7 @@ export function LobbyScreen() {
           }}
           className={leaveButtonClass}
         >
-          <DoorOpen strokeWidth={1.75} />
+          <LeaveIcon />
           <span className="max-sm:sr-only">{tMatch("leaveShort")}</span>
         </button>
       </div>
