@@ -193,7 +193,7 @@
     },
     "impostor": {
       "name": "Impostor",
-      "players": "3 to 10 players",
+      "players": "3–10 players",
       "play": "Play",
       "demoLine": "One of you has a different card.",
       "pitch": "Everyone has the same character but one, who doesn't even know. Answer for your card with a tap and vote out whoever stands out.",
@@ -205,7 +205,7 @@
     },
     "whatFor": {
       "name": "What for?",
-      "players": "2 to 8 players",
+      "players": "2–8 players",
       "play": "Play",
       "demoLines": [
         "To sell ice to penguins.",
