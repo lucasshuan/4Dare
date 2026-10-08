@@ -398,7 +398,11 @@ export function stageLook(
       case "trading":
         return { look: AUCTION, next: null };
       case "halftime":
+      case "choosing":
+      case "queueing":
         return { look: SLATE, next: null };
+      case "verdict":
+        return { look: BUTTER, next: null };
       case "defending":
         return { look: mine(), next: null };
       case "presenting":

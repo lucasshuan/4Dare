@@ -33,6 +33,7 @@ import {
   kickPlayer,
   leaveRoom,
   setReady,
+  sitChair,
   startGame,
   updateSettings,
 } from "@/server/actions";
@@ -44,6 +45,7 @@ import {
   GostosRow,
   ImpostorsRow,
   MissionsRow,
+  ModeRow,
   RoomTitle,
   SeatsRow,
   ThemeModeRow,
@@ -52,6 +54,7 @@ import {
 } from "./room-edits";
 import { SeatGrid } from "./seat-grid";
 import { StartDialog } from "./start-dialog";
+import { TvChair } from "./tv-chair";
 
 const titleClass =
   "max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]";
@@ -310,15 +313,27 @@ export function LobbyScreen() {
                 label: t("players"),
                 count: `${shownPlayers.length}/${shownSeats}`,
                 panel: (
-                  <SeatGrid
-                    players={shownPlayers}
-                    seats={shownSeats}
-                    slots={me.isHost ? range.max : shownSeats}
-                    host={me.isHost}
-                    canClose={canClose}
-                    onSeats={setSeats}
-                    onKick={kick}
-                  />
+                  <div className="flex flex-col gap-3">
+                    {game === "lineup" && view.settings.mode === "host" ? (
+                      <TvChair
+                        players={shownPlayers}
+                        chairId={view.chairId}
+                        meId={me.id}
+                        host={me.isHost}
+                        pending={pending}
+                        onSeat={(seat) => void act(() => sitChair(code, seat))}
+                      />
+                    ) : null}
+                    <SeatGrid
+                      players={shownPlayers}
+                      seats={shownSeats}
+                      slots={me.isHost ? range.max : shownSeats}
+                      host={me.isHost}
+                      canClose={canClose}
+                      onSeats={setSeats}
+                      onKick={kick}
+                    />
+                  </div>
                 ),
               },
               {
@@ -455,6 +470,15 @@ export function LobbyScreen() {
               ) : null}
               {game === "lineup" ? (
                 <>
+                  <ModeRow
+                    value={view.settings.mode}
+                    seats={shownSeats}
+                    editable={me.isHost}
+                    pending={pending}
+                    onSave={async (mode) =>
+                      (await act(() => updateSettings(code, { mode }))).ok
+                    }
+                  />
                   <AuctionRow
                     settings={view.settings}
                     players={shownPlayers.length}

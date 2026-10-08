@@ -82,5 +82,18 @@
   "noHeavy": "sin pesadas",
   "editMissions": "Cambiar las misiones",
   "cardsCount": "{count, plural, one {# personaje} other {# personajes}}",
-  "needCards": "Pocos personajes con estos gustos: activa más para empezar."
+  "needCards": "Pocos personajes con estos gustos: activa más para empezar.",
+  "modeAll": "Todos juegan",
+  "modeHost": "Con presentador",
+  "modeTitle": "Modo",
+  "modeHint": "Con presentador, una persona elige la misión y los personajes de la subasta y decide quién gana; los demás juegan.",
+  "modeNeeds3": "Con presentador hacen falta 3 personas o más.",
+  "editMode": "Cambiar el modo",
+  "chairTitle": "📺 La silla de la TV",
+  "chairEmpty": "Vacía: la sala sortea al empezar",
+  "sit": "Yo presento",
+  "stand": "Dejar la silla",
+  "seatSomeone": "Sentar a alguien en la silla",
+  "chairOf": "{name} presenta",
+  "emptyChair": "Vaciar la silla"
 }

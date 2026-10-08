@@ -158,5 +158,90 @@
     "round": "Ronda {n}",
     "toLobby": "Volver a la sala",
     "home": "Salir al inicio"
+  },
+  "host": {
+    "chair": "{name} presenta",
+    "chairDrawn": "El sorteo eligió a {name}",
+    "chairYou": "Tú presentas",
+    "chairYouDrawn": "El sorteo te eligió a ti",
+    "chairHint": "Elige la misión y los personajes de la subasta, y decide quién gana.",
+    "chairYouHint": "Tú eliges la misión y los personajes de la subasta, y decides quién gana.",
+    "wait": {
+      "choosing": "{name} está eligiendo la misión",
+      "first": "{name} está eligiendo el primer personaje",
+      "next": "{name} está eligiendo el próximo personaje",
+      "verdict": "{name} está decidiendo quién ganó",
+      "steps": {
+        "mission": "Misión",
+        "first": "1.er personaje",
+        "auction": "Subasta"
+      },
+      "hunch": "Tu apuesta",
+      "hunchPrefix": "Para",
+      "hunchPlaceholder": "¿qué?",
+      "hunchSaved": "Apuesta guardada. Sale con el sobre."
+    },
+    "desk": {
+      "title": "Elige la misión",
+      "hint": "Solo tú sabrás para qué.",
+      "none": "Ninguna de estas",
+      "write": "Escribe tu misión",
+      "prefix": "Para",
+      "placeholder": "cambiar la rueda bajo la lluvia, a medianoche",
+      "seal": "Sellar el sobre",
+      "back": "Volver a las tres",
+      "chosen": "Misión sellada"
+    },
+    "queue": {
+      "title": "Cola de la subasta",
+      "empty": "Cola vacía: los jugadores esperan el próximo personaje.",
+      "search": "Buscar personaje",
+      "paper": "Escribir «{name}» en una tarjeta",
+      "suggestions": "Sugerencias",
+      "extras": "Extras",
+      "remove": "Quitar a {name} de la cola",
+      "onAir": "Al aire",
+      "up": "Subir a {name}",
+      "down": "Bajar a {name}",
+      "full": "Cola llena",
+      "noResult": "Ningún personaje con ese nombre.",
+      "taken": "Ya salió a subasta"
+    },
+    "remote": {
+      "title": "Efectos",
+      "cues": {
+        "drum": "Redoble",
+        "clap": "Aplausos",
+        "horn": "Corneta",
+        "gasp": "Suspenso"
+      }
+    },
+    "booth": "Cabina",
+    "tv": "TV",
+    "cams": {
+      "title": "Cámaras",
+      "cam": "CAM {n}",
+      "rec": "REC",
+      "empty": "Todavía nada en el tablero"
+    },
+    "verdict": {
+      "title": "¿Quién ganó?",
+      "hint": "Toca el tablero del medio y di por qué.",
+      "why": "¿Por qué?",
+      "whyPlaceholder": "Porque…",
+      "give": "Dar el veredicto",
+      "min": "Al menos 8 letras",
+      "pinned": "Tu elegido"
+    },
+    "reveal": {
+      "title": "El veredicto",
+      "by": "{name} decidió",
+      "mute": "{name} no lo explicó",
+      "winner": "¡Ganó!",
+      "twist": "Todo esto pasaba en la TV de {name}.",
+      "twistYou": "Todo esto pasaba en tu TV."
+    },
+    "guesses": "Las apuestas",
+    "guess": "Para {text}"
   }
 }

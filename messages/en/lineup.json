@@ -158,5 +158,90 @@
     "round": "Round {n}",
     "toLobby": "Back to the room",
     "home": "Leave to home"
+  },
+  "host": {
+    "chair": "{name} presents",
+    "chairDrawn": "The draw picked {name}",
+    "chairYou": "You present",
+    "chairYouDrawn": "The draw picked you",
+    "chairHint": "They pick the mission and the characters up for auction, and decide who wins.",
+    "chairYouHint": "You pick the mission and the characters up for auction, and decide who wins.",
+    "wait": {
+      "choosing": "{name} is choosing the mission",
+      "first": "{name} is choosing the first character",
+      "next": "{name} is choosing the next character",
+      "verdict": "{name} is deciding who won",
+      "steps": {
+        "mission": "Mission",
+        "first": "1st character",
+        "auction": "Auction"
+      },
+      "hunch": "Your guess",
+      "hunchPrefix": "What for:",
+      "hunchPlaceholder": "what?",
+      "hunchSaved": "Guess kept. It shows with the envelope."
+    },
+    "desk": {
+      "title": "Pick the mission",
+      "hint": "Only you will know what for.",
+      "none": "None of these",
+      "write": "Write your own mission",
+      "prefix": "To",
+      "placeholder": "change a tire in the rain, at midnight",
+      "seal": "Seal the envelope",
+      "back": "Back to the three",
+      "chosen": "Mission sealed"
+    },
+    "queue": {
+      "title": "Auction queue",
+      "empty": "Empty queue: the players wait for the next character.",
+      "search": "Search for a character",
+      "paper": "Write “{name}” on a card",
+      "suggestions": "Suggestions",
+      "extras": "Extras",
+      "remove": "Take {name} out of the queue",
+      "onAir": "On air",
+      "up": "Move {name} up",
+      "down": "Move {name} down",
+      "full": "Queue full",
+      "noResult": "No character by that name.",
+      "taken": "Already auctioned"
+    },
+    "remote": {
+      "title": "Sound effects",
+      "cues": {
+        "drum": "Drum roll",
+        "clap": "Applause",
+        "horn": "Horn",
+        "gasp": "Suspense"
+      }
+    },
+    "booth": "Booth",
+    "tv": "TV",
+    "cams": {
+      "title": "Cameras",
+      "cam": "CAM {n}",
+      "rec": "REC",
+      "empty": "Nothing on the board yet"
+    },
+    "verdict": {
+      "title": "Who won?",
+      "hint": "Tap the board in the middle and say why.",
+      "why": "Why?",
+      "whyPlaceholder": "Because…",
+      "give": "Give the verdict",
+      "min": "At least 8 characters",
+      "pinned": "Your pick"
+    },
+    "reveal": {
+      "title": "The verdict",
+      "by": "{name} decided",
+      "mute": "{name} didn't explain",
+      "winner": "Winner!",
+      "twist": "All of this was on {name}'s TV.",
+      "twistYou": "All of this was on your TV."
+    },
+    "guesses": "The guesses",
+    "guess": "What for: {text}"
   }
 }

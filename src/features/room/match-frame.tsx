@@ -162,7 +162,11 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
   const [arrives] = useState(() => frame.beat?.kind === "curtain");
   const theme = tagReached ? view.theme : null;
   // What for?: the mission, once the envelope put it up; the purse during the auction
-  const mission = tagReached ? (view.lu?.mission ?? null) : null;
+  // the presenter knows it from when they chose it
+  const mission =
+    tagReached || view.lu?.presenterId === me.id
+      ? (view.lu?.mission ?? null)
+      : null;
   const purse =
     view.lu && (view.phase === "bidding" || view.phase === "halftime")
       ? (view.lu.coins[me.id] ?? null)

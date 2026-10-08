@@ -11,7 +11,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { keyClass } from "@/components/ui/button";
 import { fireConfetti } from "@/components/ui/confetti";
 import { useStepStarted } from "@/features/room/match-frame";
-import type { LuRoundView } from "@/game/lineup/types";
+import type { LuRoundView, LuVerdict } from "@/game/lineup/types";
 import type { Lang, PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useDisplayName } from "@/lib/names";
@@ -55,8 +55,11 @@ export function ScoreRows({
                 {team || name(p, p.isYou)}
               </b>
               <small className="block truncate font-semibold text-[12.5px] text-ink-muted">
-                {team ? `${name(p, p.isYou)} · ` : ""}
-                {t("votes", { n: result.votes[p.id] ?? 0 })}
+                {team ? name(p, p.isYou) : ""}
+                {/* with a presenter the verdict decides: no votes to count */}
+                {result.verdict
+                  ? ""
+                  : `${team ? " · " : ""}${t("votes", { n: result.votes[p.id] ?? 0 })}`}
                 {result.crowd === p.id ? ` · 😂 ${t("crowd")}` : ""}
               </small>
             </span>
@@ -116,6 +119,7 @@ export function RoundScore() {
         <p className="m-0 max-w-[90vw] text-balance font-semibold text-ink-muted text-sm">
           {result.mission.text[lang]}
         </p>
+        {result.verdict ? <VerdictLine verdict={result.verdict} /> : null}
       </div>
 
       {result.winners.length ? (
@@ -205,5 +209,24 @@ export function RoundScore() {
         ) : null}
       </div>
     </div>
+  );
+}
+
+/** The presenter's call under the title: their face and why. */
+function VerdictLine({ verdict }: { verdict: LuVerdict }) {
+  const t = useTranslations("lineup.host.reveal");
+  const name = useDisplayName();
+  const { playerById } = useLineup();
+  const host = playerById(verdict.by);
+  if (!host) return null;
+  return (
+    <p className="m-0 mt-1 inline-flex max-w-[90vw] items-center gap-2 rounded-pill bg-surface py-1 pr-4 pl-1 font-semibold text-sm shadow-card">
+      <Avatar avatar={host.avatar} size={28} seat={host.colorSlot} />
+      <span className="min-w-0 text-balance">
+        {verdict.why
+          ? `${name(host, host.isYou)}: “${verdict.why}”`
+          : t("mute", { name: name(host, host.isYou) })}
+      </span>
+    </p>
   );
 }

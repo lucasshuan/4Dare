@@ -61,7 +61,12 @@ export function AuctionScreen() {
   const price = sold ? (tag?.price ?? 0) : (lu.lot?.price ?? 0);
   const passed = sold ? [] : (lu.lot?.passedIds ?? []);
   const next = sold ? i + 1 : lu.lot?.next;
-  const nextCard = next != null && next < lu.lots ? lu.cards[next] : undefined;
+  // with a presenter, the next is the head of their queue
+  const nextCard = lu.hosted
+    ? (lu.lot?.nextCard ?? undefined)
+    : next != null && next < lu.lots
+      ? lu.cards[next]
+      : undefined;
 
   // your bid shows at once; the server's answer replaces it
   const [mine, setMine] = useState<number | null>(null);

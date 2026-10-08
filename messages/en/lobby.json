@@ -82,5 +82,18 @@
   "noHeavy": "no heavy ones",
   "editMissions": "Change the missions",
   "cardsCount": "{count, plural, one {# character} other {# characters}}",
-  "needCards": "Too few characters with these tastes: turn more on to start."
+  "needCards": "Too few characters with these tastes: turn more on to start.",
+  "modeAll": "Everyone plays",
+  "modeHost": "With a presenter",
+  "modeTitle": "Mode",
+  "modeHint": "With a presenter, one person picks the mission and the characters up for auction and decides who wins; the others play.",
+  "modeNeeds3": "A presenter needs 3 people or more.",
+  "editMode": "Change the mode",
+  "chairTitle": "📺 The TV chair",
+  "chairEmpty": "Empty: the room draws one at the start",
+  "sit": "I'll present",
+  "stand": "Leave the chair",
+  "seatSomeone": "Seat someone in the chair",
+  "chairOf": "{name} presents",
+  "emptyChair": "Empty the chair"
 }

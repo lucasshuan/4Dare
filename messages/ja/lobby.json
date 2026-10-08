@@ -82,5 +82,18 @@
   "noHeavy": "重いものなし",
   "editMissions": "ミッションを変更",
   "cardsCount": "{count}人",
-  "needCards": "この好みではキャラクターが少なすぎます。始めるには増やしてください。"
+  "needCards": "この好みではキャラクターが少なすぎます。始めるには増やしてください。",
+  "modeAll": "全員プレイ",
+  "modeHost": "司会あり",
+  "modeTitle": "モード",
+  "modeHint": "司会ありでは、1人がミッションと出品キャラクターを選び、勝者を決めます。ほかの人がプレイします。",
+  "modeNeeds3": "司会ありは3人以上必要です。",
+  "editMode": "モードを変更",
+  "chairTitle": "📺 TVの席",
+  "chairEmpty": "空席：開始時に抽選します",
+  "sit": "司会をする",
+  "stand": "席を立つ",
+  "seatSomeone": "誰かを席に座らせる",
+  "chairOf": "{name}が司会",
+  "emptyChair": "席を空ける"
 }

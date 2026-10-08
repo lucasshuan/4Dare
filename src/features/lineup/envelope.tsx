@@ -5,6 +5,7 @@
 // pops, the flap opens and the mission rises out on a sheet of paper.
 import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
+import { Avatar } from "@/components/ui/avatar";
 import type { Beat, Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { beatDelay, useBeatAgo, useLineup } from "./use-lineup";
@@ -153,7 +154,42 @@ export function EnvelopeScene({ beat }: { beat: Beat }) {
           </m.div>
         </OpeningEnvelope>
       </m.div>
+      <Hunches at={at(0.62)} />
     </div>
+  );
+}
+
+/** With a presenter: the players' guesses, beside the real thing. */
+function Hunches({ at }: { at: number }) {
+  const t = useTranslations("lineup.host");
+  const { lu, playerById } = useLineup();
+  const guesses = Object.entries(lu.guesses).flatMap(([id, text]) => {
+    const p = playerById(id);
+    return p ? [{ p, text }] : [];
+  });
+  if (!guesses.length) return null;
+  return (
+    <m.div
+      className="mt-6 flex w-[min(92vw,620px)] flex-col items-center gap-2 text-chalk"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: at }}
+    >
+      <span className="font-bold text-[13px] uppercase tracking-[0.08em] opacity-80">
+        {t("guesses")}
+      </span>
+      <ul className="flex flex-wrap justify-center gap-2">
+        {guesses.map(({ p, text }) => (
+          <li
+            key={p.id}
+            className="inline-flex max-w-full items-center gap-2 rounded-pill bg-black/25 py-1 pr-3 pl-1 font-semibold text-sm"
+          >
+            <Avatar avatar={p.avatar} size={24} seat={p.colorSlot} />
+            <span className="truncate">{t("guess", { text })}</span>
+          </li>
+        ))}
+      </ul>
+    </m.div>
   );
 }
 

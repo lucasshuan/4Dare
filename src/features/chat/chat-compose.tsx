@@ -13,8 +13,11 @@ export function ChatCompose({
   text,
   onText,
   onSend,
+  hint,
   ref,
 }: {
+  /** In place of the usual placeholder: a word for whoever writes (the presenter's "don't tell"). */
+  hint?: string | null;
   text: string;
   onText: (text: string) => void;
   /** False when the text can't go (empty or too long): it stays. */
@@ -42,7 +45,7 @@ export function ChatCompose({
           onChange={(e) => onText(e.target.value)}
           maxLength={MAX_CHAT}
           aria-label={t("inputLabel")}
-          placeholder={t("placeholder")}
+          placeholder={hint ?? t("placeholder")}
           enterKeyHint="send"
           autoComplete="off"
           className="h-full min-w-0 flex-1 bg-transparent font-medium text-[14.5px] text-ink placeholder:text-ink-muted focus-visible:outline-none!"

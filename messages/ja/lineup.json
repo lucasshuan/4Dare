@@ -158,5 +158,90 @@
     "round": "ラウンド{n}",
     "toLobby": "ルームに戻る",
     "home": "ホームへ"
+  },
+  "host": {
+    "chair": "{name}が司会",
+    "chairDrawn": "抽選で{name}が司会に",
+    "chairYou": "あなたが司会",
+    "chairYouDrawn": "抽選であなたが司会に",
+    "chairHint": "ミッションとオークションのキャラクターを選び、勝者を決めます。",
+    "chairYouHint": "あなたがミッションとオークションのキャラクターを選び、勝者を決めます。",
+    "wait": {
+      "choosing": "{name}がミッションを選んでいます",
+      "first": "{name}が最初のキャラクターを選んでいます",
+      "next": "{name}が次のキャラクターを選んでいます",
+      "verdict": "{name}が勝者を決めています",
+      "steps": {
+        "mission": "ミッション",
+        "first": "最初のキャラ",
+        "auction": "オークション"
+      },
+      "hunch": "予想",
+      "hunchPrefix": "何のため：",
+      "hunchPlaceholder": "なに？",
+      "hunchSaved": "予想を保存しました。封筒と一緒に出ます。"
+    },
+    "desk": {
+      "title": "ミッションを選ぶ",
+      "hint": "何のためかはあなただけが知っています。",
+      "none": "どれでもない",
+      "write": "ミッションを書く",
+      "prefix": "",
+      "placeholder": "真夜中の雨の中でタイヤを交換する",
+      "seal": "封をする",
+      "back": "3つに戻る",
+      "chosen": "ミッションに封をしました"
+    },
+    "queue": {
+      "title": "オークションの順番",
+      "empty": "順番が空です。みんな次のキャラクターを待っています。",
+      "search": "キャラクターを検索",
+      "paper": "「{name}」をカードに書く",
+      "suggestions": "おすすめ",
+      "extras": "エキストラ",
+      "remove": "{name}を外す",
+      "onAir": "出品中",
+      "up": "{name}を上へ",
+      "down": "{name}を下へ",
+      "full": "いっぱいです",
+      "noResult": "その名前のキャラクターはいません。",
+      "taken": "出品済み"
+    },
+    "remote": {
+      "title": "効果音",
+      "cues": {
+        "drum": "ドラムロール",
+        "clap": "拍手",
+        "horn": "ラッパ",
+        "gasp": "ドキッ"
+      }
+    },
+    "booth": "ブース",
+    "tv": "TV",
+    "cams": {
+      "title": "カメラ",
+      "cam": "CAM {n}",
+      "rec": "REC",
+      "empty": "まだボードは空です"
+    },
+    "verdict": {
+      "title": "勝者は？",
+      "hint": "真ん中のボードをタップして理由を。",
+      "why": "理由は？",
+      "whyPlaceholder": "なぜなら…",
+      "give": "判定する",
+      "min": "8文字以上",
+      "pinned": "あなたの選択"
+    },
+    "reveal": {
+      "title": "判定",
+      "by": "{name}が決定",
+      "mute": "{name}は理由を言いませんでした",
+      "winner": "勝利！",
+      "twist": "ぜんぶ{name}のTVに映っていました。",
+      "twistYou": "ぜんぶあなたのTVに映っていました。"
+    },
+    "guesses": "みんなの予想",
+    "guess": "何のため：{text}"
   }
 }

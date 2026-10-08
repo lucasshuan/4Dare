@@ -158,5 +158,90 @@
     "round": "Rodada {n}",
     "toLobby": "Voltar para a sala",
     "home": "Sair para o início"
+  },
+  "host": {
+    "chair": "{name} apresenta",
+    "chairDrawn": "O sorteio escolheu {name}",
+    "chairYou": "Você apresenta",
+    "chairYouDrawn": "O sorteio escolheu você",
+    "chairHint": "Escolhe a missão e os personagens do leilão, e decide quem vence.",
+    "chairYouHint": "Você escolhe a missão e os personagens do leilão, e decide quem vence.",
+    "wait": {
+      "choosing": "{name} está escolhendo a missão",
+      "first": "{name} está escolhendo o primeiro personagem",
+      "next": "{name} está escolhendo o próximo personagem",
+      "verdict": "{name} está decidindo quem venceu",
+      "steps": {
+        "mission": "Missão",
+        "first": "1º personagem",
+        "auction": "Leilão"
+      },
+      "hunch": "Seu chute",
+      "hunchPrefix": "Pra",
+      "hunchPlaceholder": "o quê?",
+      "hunchSaved": "Chute guardado. Aparece no envelope."
+    },
+    "desk": {
+      "title": "Escolha a missão",
+      "hint": "Só você vai saber pra quê.",
+      "none": "Nenhuma dessas",
+      "write": "Escreva a sua missão",
+      "prefix": "Pra",
+      "placeholder": "trocar o pneu na chuva, à meia-noite",
+      "seal": "Lacrar o envelope",
+      "back": "Voltar às três",
+      "chosen": "Missão lacrada"
+    },
+    "queue": {
+      "title": "Fila do leilão",
+      "empty": "Fila vazia: os jogadores esperam o próximo personagem.",
+      "search": "Buscar personagem",
+      "paper": "Escrever “{name}” num cartão",
+      "suggestions": "Sugestões",
+      "extras": "Figurantes",
+      "remove": "Tirar {name} da fila",
+      "onAir": "No ar",
+      "up": "Subir {name}",
+      "down": "Descer {name}",
+      "full": "Fila cheia",
+      "noResult": "Nenhum personagem com esse nome.",
+      "taken": "Já foi a leilão"
+    },
+    "remote": {
+      "title": "Sonoplastia",
+      "cues": {
+        "drum": "Rufar",
+        "clap": "Aplausos",
+        "horn": "Corneta",
+        "gasp": "Suspense"
+      }
+    },
+    "booth": "Cabine",
+    "tv": "TV",
+    "cams": {
+      "title": "Câmeras",
+      "cam": "CAM {n}",
+      "rec": "REC",
+      "empty": "Ainda nada no quadro"
+    },
+    "verdict": {
+      "title": "Quem venceu?",
+      "hint": "Toque no quadro do meio e diga por quê.",
+      "why": "Por quê?",
+      "whyPlaceholder": "Porque…",
+      "give": "Dar o veredito",
+      "min": "Pelo menos 8 letras",
+      "pinned": "Seu escolhido"
+    },
+    "reveal": {
+      "title": "O veredito",
+      "by": "{name} decidiu",
+      "mute": "{name} não explicou",
+      "winner": "Venceu!",
+      "twist": "Tudo isso passava na TV de {name}.",
+      "twistYou": "Tudo isso passava na sua TV."
+    },
+    "guesses": "Os chutes",
+    "guess": "Pra {text}"
   }
 }

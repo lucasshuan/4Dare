@@ -11,6 +11,7 @@ import {
   type LucideIcon,
   Mail,
   PenLine,
+  Tv,
   UsersRound,
   VenetianMask,
   Vote,
@@ -33,7 +34,7 @@ import { ImpostorsPicker } from "@/features/impostor/impostors-picker";
 import { GAME_SEATS, type GameKey } from "@/game/games";
 import { GOSTOS, type Gosto } from "@/game/gostos";
 import { impostorsFor } from "@/game/impostor/engine";
-import { lotsFor, roundsFor } from "@/game/lineup/rules";
+import { HOST_MIN_PEOPLE, lotsFor, roundsFor } from "@/game/lineup/rules";
 import {
   GAME_STEP_TIMES,
   ROOM_NAME_MAX,
@@ -697,6 +698,56 @@ export function MissionsRow({
     >
       <HeavySwitch value={heavy} onChange={setHeavy} />
       <MissionCountLine room={{ heavy, offMissions: settings.offMissions }} />
+    </EditRow>
+  );
+}
+
+/**
+ * What for?'s mode: everyone plays, or one presents (picks the mission and
+ * the lots, gives the verdict) and the others play. A presenter needs three
+ * seats or more.
+ */
+export function ModeRow({
+  value,
+  seats,
+  editable,
+  pending,
+  onSave,
+}: {
+  value: RoomSettings["mode"];
+  seats: number;
+  editable: boolean;
+  pending: boolean;
+  onSave: (mode: RoomSettings["mode"]) => Promise<boolean>;
+}) {
+  const t = useTranslations("lobby");
+  const [draft, setDraft] = useState(value);
+  const few = seats < HOST_MIN_PEOPLE;
+  return (
+    <EditRow
+      icon={rowIcon(Tv)}
+      text={t(value === "host" ? "modeHost" : "modeAll")}
+      label={t("editMode")}
+      editable={editable}
+      pending={pending}
+      width="360px"
+      onOpen={() => setDraft(value)}
+      onSave={() => onSave(draft)}
+    >
+      <div className="flex flex-col gap-2">
+        <span className="font-semibold text-sm">{t("modeTitle")}</span>
+        <Segmented
+          label={t("modeTitle")}
+          options={["classic", "host"] as const}
+          value={draft}
+          onChange={setDraft}
+          render={(v) => t(v === "host" ? "modeHost" : "modeAll")}
+          disabled={(v) => v === "host" && few}
+        />
+        <p className="m-0 text-[13px] text-ink-muted">
+          {few ? t("modeNeeds3") : t("modeHint")}
+        </p>
+      </div>
     </EditRow>
   );
 }

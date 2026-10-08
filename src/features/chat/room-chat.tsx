@@ -56,7 +56,9 @@ const FINE_POINTER = "(hover: hover) and (pointer: fine)";
  */
 export function RoomChat() {
   const t = useTranslations("chat");
-  const { code, me, serverTime, playerById } = useRoomContext();
+  const { code, me, serverTime, playerById, view } = useRoomContext();
+  // What for?'s presenter knows the mission: a word against telling
+  const hostHint = view.lu?.presenterId === me.id && view.phase !== "finished";
   const clock = useClock();
   const { messages, send, retry, status } = useChat(code);
   const phone = useMedia(PHONE);
@@ -282,6 +284,7 @@ export function RoomChat() {
               <ChatList messages={messages} onRetry={retry} />
               <ChatCompose
                 ref={inputRef}
+                hint={hostHint ? t("hostHint") : null}
                 text={draft}
                 onText={setDraft}
                 onSend={send}

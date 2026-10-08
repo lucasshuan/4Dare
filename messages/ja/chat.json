@@ -22,10 +22,11 @@
     "trade": "⇄ {from}が{to}と{gave}を{got}にトレード",
     "mission": "✉️ 何のため？ {text}",
     "roundWon": "🏆 ラウンド{n}：{names}",
-    "presenter": "📺 {name}が司会",
-    "presenterDrawn": "📺 抽選で{name}が司会に",
-    "hostLeft": "📺 {name}が抜けました。みんなで投票します。",
+    "presenter": "🎙️ {name}が司会",
+    "presenterDrawn": "🎙️ 抽選で{name}が司会に",
+    "hostLeft": "🎙️ {name}が抜けました。みんなで投票します。",
     "verdict": "📺 {name}「{why}」",
     "verdictMute": "📺 {name}は理由を言いませんでした"
-  }
+  },
+  "hostHint": "ミッションを知っているのはあなただけ。言わないで。"
 }

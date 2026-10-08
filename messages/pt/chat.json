@@ -22,10 +22,11 @@
     "trade": "⇄ {from} trocou {gave} com {to} por {got}",
     "mission": "✉️ Pra quê? {text}",
     "roundWon": "🏆 Rodada {n}: {names}",
-    "presenter": "📺 {name} apresenta",
-    "presenterDrawn": "📺 O sorteio escolheu {name} para apresentar",
-    "hostLeft": "📺 {name} saiu. A sala vota.",
+    "presenter": "🎙️ {name} apresenta",
+    "presenterDrawn": "🎙️ O sorteio escolheu {name} para apresentar",
+    "hostLeft": "🎙️ {name} saiu. A sala vota.",
     "verdict": "📺 {name}: “{why}”",
     "verdictMute": "📺 {name} não explicou"
-  }
+  },
+  "hostHint": "Você sabe a missão. Não conte."
 }
