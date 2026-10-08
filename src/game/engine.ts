@@ -229,8 +229,8 @@ function mergeSettings(
 
 /**
  * A new round needs a theme: the host types it, or everyone votes on `themes`.
- * The opening plays first: the lobby leaves, then the cold open (a long
- * match, see longShows) or "Round N", then the vote or the host's form comes in.
+ * The opening plays first: the lobby leaves, then the cold open ("Who am I?"'s
+ * long match, see longShows) or "Round N", then the vote or the host's form comes in.
  */
 function beginTheme(
   s: RoomState,
@@ -240,9 +240,11 @@ function beginTheme(
   ctx: Ctx,
 ) {
   const T = SHOW_TIMING;
+  // the cold open tells "Who am I?"'s rules; the Impostor's deal show tells its own
+  const coldOpen = s.settings.game === "who-am-i" && longShows(s, s.round + 1);
   const open: Part[] = [
     ["curtain", T.curtain],
-    longShows(s, s.round + 1) ? ["intro", T.intro] : ["round", T.round],
+    coldOpen ? ["intro", T.intro] : ["round", T.round],
   ];
   // the Impostor always votes: its cards come with the themes
   if (s.settings.game === "impostor")
