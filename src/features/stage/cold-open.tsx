@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { useRoomContext } from "@/features/data/room-context";
-import { Critter, SEATS } from "@/features/who-am-i/who-am-i-banner";
+import { FigureArt, SEATS } from "@/features/who-am-i/who-am-i-banner";
 import type { Beat, PlayerView, ShowView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
@@ -181,7 +181,7 @@ const QUESTION_INK = "#2B69C8";
 
 /**
  * One player of the cold open: their card held up (yours a "?", the others an
- * illustrative critter: nobody has a character yet), the stick, the avatar
+ * illustrative figure: nobody has a character yet), the stick, the avatar
  * and the name. The question bubble sits over yours, an answer chip over the
  * first two players after you.
  */
@@ -254,9 +254,8 @@ function Person({
             ?
           </span>
         ) : (
-          <Critter
-            seed={held.seed}
-            color={held.card}
+          <FigureArt
+            figure={held.figure}
             className="aspect-4/5 rounded-[9px] sm:rounded-[13px]"
           />
         )}

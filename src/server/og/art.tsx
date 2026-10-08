@@ -4,12 +4,12 @@ import { join } from "node:path";
 import type { ReactNode } from "react";
 import { appName } from "@/config";
 import type { Lang } from "@/game/types";
-import { critterDataUri } from "../critter-art";
+import { type Figure, figureSvg } from "@/lib/figures";
 import { FONT } from "./fonts";
 
 // The share images (Open Graph / Twitter / Discord embeds), 1200×630, drawn in
 // satori's flexbox subset. Same look as the home's game card: light canvas,
-// critter cards on the table, a "?" card, a question and its answer.
+// character cards on the table, a "?" card, a question and its answer.
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
@@ -42,7 +42,9 @@ const LOGO = {
 };
 const logoOf = (lang: Lang) => (lang === "ja" ? LOGO.ja : LOGO.en);
 
-const critter = critterDataUri;
+/** A figure as a data URI (satori fetches nothing). */
+const figure = (name: Figure) =>
+  `data:image/svg+xml;base64,${Buffer.from(figureSvg(name)).toString("base64")}`;
 
 const fonts = (lang: Lang) =>
   lang === "ja"
@@ -115,18 +117,16 @@ function Glow({
   );
 }
 
-/** Someone else's card: a critter on a pastel, a grey line for the name. */
+/** Someone else's card: a character's picture, a grey line for the name. */
 function Card({
-  seed,
-  color,
+  figure: name,
   width,
   x,
   y,
   rotate,
   ring,
 }: {
-  seed: string;
-  color: string;
+  figure: Figure;
   width: number;
   x: number;
   y: number;
@@ -158,17 +158,11 @@ function Card({
           width: inner,
           height: inner * 1.25,
           borderRadius: 18,
-          background: color,
           overflow: "hidden",
         }}
       >
         {/* biome-ignore lint/performance/noImgElement: satori only knows <img> */}
-        <img
-          src={critter(seed, color)}
-          width={inner}
-          height={inner * 1.25}
-          alt=""
-        />
+        <img src={figure(name)} width={inner} height={inner * 1.25} alt="" />
       </div>
       <div
         style={{
@@ -355,22 +349,8 @@ export function HomeArt({ text }: { text: OgText }) {
       <Glow x={1080} y={600} size={680} color={C.butterSoft} />
       <Glow x={1100} y={40} size={420} color={C.skySoft} />
 
-      <Card
-        seed="dare-left"
-        color="#F3D3B8"
-        width={190}
-        x={-30}
-        y={360}
-        rotate={-12}
-      />
-      <Card
-        seed="dare-right"
-        color="#BFE6C8"
-        width={190}
-        x={1040}
-        y={330}
-        rotate={11}
-      />
+      <Card figure="cloud" width={190} x={-30} y={360} rotate={-12} />
+      <Card figure="apple" width={190} x={1040} y={330} rotate={11} />
       <MysteryCard width={128} x={1010} y={-40} rotate={14} />
       <Question lang={lang} text={text.question} x={70} y={56} size={30} />
       <Chip
@@ -490,25 +470,10 @@ export function GameArt({ text }: { text: OgText }) {
       >
         <Glow x={60} y={40} size={360} color="rgba(255,255,255,0.7)" />
         <Glow x={480} y={540} size={380} color="rgba(246,227,161,0.8)" />
+        <Card figure="cloud" width={160} x={14} y={290} rotate={-10} />
+        <Card figure="apple" width={160} x={346} y={290} rotate={10} />
         <Card
-          seed="dare-left"
-          color="#F3D3B8"
-          width={160}
-          x={14}
-          y={290}
-          rotate={-10}
-        />
-        <Card
-          seed="dare-right"
-          color="#BFE6C8"
-          width={160}
-          x={346}
-          y={290}
-          rotate={10}
-        />
-        <Card
-          seed="dare-you"
-          color="#D9C7F4"
+          figure="queen"
           width={176}
           x={172}
           y={250}
@@ -649,22 +614,8 @@ export function InviteArt({
         </div>
       </div>
 
-      <Card
-        seed="dare-left"
-        color="#F3D3B8"
-        width={190}
-        x={800}
-        y={250}
-        rotate={-9}
-      />
-      <Card
-        seed="dare-right"
-        color="#BFE6C8"
-        width={190}
-        x={980}
-        y={300}
-        rotate={9}
-      />
+      <Card figure="cloud" width={190} x={800} y={250} rotate={-9} />
+      <Card figure="apple" width={190} x={980} y={300} rotate={9} />
       <MysteryCard width={170} x={900} y={70} rotate={4} />
       <Chip
         lang={lang}

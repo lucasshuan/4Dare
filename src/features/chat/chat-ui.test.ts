@@ -16,7 +16,7 @@ const person = (id: string) => ({
   isGuest: false,
   name: id,
   guestNumber: 1,
-  avatar: { kind: "critter" as const, seed: id, color: "#fff" },
+  avatar: { kind: "creature" as const, dna: "Cat..Happy..0", color: "#fff" },
 });
 
 const say = (id: number, by: string, text = "hi"): ShownLine => ({

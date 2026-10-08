@@ -1,4 +1,5 @@
-import { LANGS, type Lang } from "./types";
+import { avatarColor, dnaOf, type Words } from "@/lib/avatar";
+import { type Avatar, LANGS, type Lang } from "./types";
 
 // Guest names come in four shapes:
 // - an adjective and a noun: "WonderfulCat", "GatoMaravilhoso", "GatoMaravilloso",
@@ -759,6 +760,69 @@ function titled(title: Title, noun: Noun, f: boolean, lang: Lang): string {
   return (f ? enF : enM) + word;
 }
 
+/** A guest number taken apart: its shape and its rows. */
+type Decoded =
+  | { shape: "adjective"; adjective: Adjective; noun: Noun }
+  | { shape: "hybrid"; noun: Noun; noun2: Noun }
+  | { shape: "titled"; title: Title; noun: Noun; f: boolean }
+  | { shape: "legendary"; legendary: Legendary }
+  | {
+      shape: "titledAdjective";
+      title: Title;
+      adjective: Adjective;
+      f: boolean;
+    };
+
+function decode(guestNumber: number): Decoded {
+  let i = Math.abs(Math.trunc(guestNumber) || 0) % GUEST_NAME_COUNT;
+  if (i < ADJECTIVE_NOUNS)
+    return {
+      shape: "adjective",
+      adjective: ADJECTIVES[i % ADJECTIVES.length],
+      noun: NOUNS[Math.floor(i / ADJECTIVES.length)],
+    };
+  i -= ADJECTIVE_NOUNS;
+  if (i < HYBRIDS)
+    return {
+      shape: "hybrid",
+      noun: NOUNS[Math.floor(i / NOUNS.length)],
+      noun2: NOUNS[i % NOUNS.length],
+    };
+  i -= HYBRIDS;
+  if (i < TITLED) {
+    const noun = NOUNS[Math.floor(i / TITLES.length)];
+    return {
+      shape: "titled",
+      title: TITLES[i % TITLES.length],
+      noun,
+      f: noun[2] === "f",
+    };
+  }
+  i -= TITLED;
+  if (i < LEGENDARY.length)
+    return { shape: "legendary", legendary: LEGENDARY[i] };
+  i -= LEGENDARY.length;
+  if (i >= TITLED_ADJECTIVES) {
+    i -= TITLED_ADJECTIVES;
+    const noun = NOUNS[Math.floor(i / GENDERED_TITLES.length)];
+    // the other gender than the noun's
+    return {
+      shape: "titled",
+      title: GENDERED_TITLES[i % GENDERED_TITLES.length],
+      noun,
+      f: noun[2] === "m",
+    };
+  }
+  const t = i % STANDALONE_TITLES.length;
+  const a = Math.floor(i / STANDALONE_TITLES.length);
+  return {
+    shape: "titledAdjective",
+    title: STANDALONE_TITLES[t],
+    adjective: ADJECTIVES[a],
+    f: (t + a) % 2 === 1,
+  };
+}
+
 /**
  * A guest's name from their guest number, written as one word.
  * Adjective and noun: English and Japanese put the adjective first ("WonderfulCat",
@@ -775,51 +839,60 @@ function titled(title: Title, noun: Noun, f: boolean, lang: Lang): string {
  * masculine and half feminine; both would read the same in English.
  */
 export function guestName(guestNumber: number, lang: Lang): string {
-  let i = Math.abs(Math.trunc(guestNumber) || 0) % GUEST_NAME_COUNT;
-  if (i < ADJECTIVE_NOUNS) {
-    const [en, ptM, ptF, ja, esM, esF] = ADJECTIVES[i % ADJECTIVES.length];
-    const noun = NOUNS[Math.floor(i / ADJECTIVES.length)];
-    const [, , gender, , , esGender] = noun;
-    const word = nounIn(noun, lang);
-    if (lang === "pt") return word + (gender === "f" ? ptF : ptM);
-    if (lang === "es") return word + (esGender === "f" ? esF : esM);
-    if (lang === "ja") return ja + word;
-    return en + word;
+  const g = decode(guestNumber);
+  switch (g.shape) {
+    case "adjective": {
+      const [en, ptM, ptF, ja, esM, esF] = g.adjective;
+      const [, , gender, , , esGender] = g.noun;
+      const word = nounIn(g.noun, lang);
+      if (lang === "pt") return word + (gender === "f" ? ptF : ptM);
+      if (lang === "es") return word + (esGender === "f" ? esF : esM);
+      if (lang === "ja") return ja + word;
+      return en + word;
+    }
+    case "hybrid":
+      return nounIn(g.noun, lang) + nounIn(g.noun2, lang);
+    case "titled":
+      return titled(g.title, g.noun, g.f, lang);
+    case "legendary": {
+      const [en, pt, ja, es] = g.legendary;
+      return lang === "pt" ? pt : lang === "es" ? es : lang === "ja" ? ja : en;
+    }
+    case "titledAdjective": {
+      const [enM, enF, ptM, ptF, jaM, jaF, esM, esF] = g.title;
+      const [en, adjPtM, adjPtF, ja, adjEsM, adjEsF] = g.adjective;
+      if (lang === "pt") return g.f ? ptF + adjPtF : ptM + adjPtM;
+      if (lang === "es") return g.f ? esF + adjEsF : esM + adjEsM;
+      if (lang === "ja") return ja + (g.f ? jaF : jaM);
+      return (g.f ? enF : enM) + en;
+    }
   }
-  i -= ADJECTIVE_NOUNS;
-  if (i < HYBRIDS) {
-    return (
-      nounIn(NOUNS[Math.floor(i / NOUNS.length)], lang) +
-      nounIn(NOUNS[i % NOUNS.length], lang)
-    );
+}
+
+/**
+ * The English words of a guest's name (titles in their masculine form, with
+ * the gender apart), which its avatar is drawn from (see src/lib/avatar).
+ */
+export function guestWords(guestNumber: number): Words {
+  const g = decode(guestNumber);
+  switch (g.shape) {
+    case "adjective":
+      return { noun: g.noun[0], adj: g.adjective[0] };
+    case "hybrid":
+      return { noun: g.noun[0], noun2: g.noun2[0] };
+    case "titled":
+      return { noun: g.noun[0], title: g.title[0], f: g.f };
+    case "legendary":
+      return { legend: g.legendary[0] };
+    case "titledAdjective":
+      return { adj: g.adjective[0], title: g.title[0], f: g.f };
   }
-  i -= HYBRIDS;
-  if (i < TITLED) {
-    const noun = NOUNS[Math.floor(i / TITLES.length)];
-    return titled(TITLES[i % TITLES.length], noun, noun[2] === "f", lang);
-  }
-  i -= TITLED;
-  if (i < LEGENDARY.length) {
-    const [en, pt, ja, es] = LEGENDARY[i];
-    return lang === "pt" ? pt : lang === "es" ? es : lang === "ja" ? ja : en;
-  }
-  i -= LEGENDARY.length;
-  if (i >= TITLED_ADJECTIVES) {
-    i -= TITLED_ADJECTIVES;
-    const noun = NOUNS[Math.floor(i / GENDERED_TITLES.length)];
-    // the other gender than the noun's
-    const title = GENDERED_TITLES[i % GENDERED_TITLES.length];
-    return titled(title, noun, noun[2] === "m", lang);
-  }
-  const t = i % STANDALONE_TITLES.length;
-  const a = Math.floor(i / STANDALONE_TITLES.length);
-  const [enM, enF, ptM, ptF, jaM, jaF, esM, esF] = STANDALONE_TITLES[t];
-  const [en, adjPtM, adjPtF, ja, adjEsM, adjEsF] = ADJECTIVES[a];
-  const f = (t + a) % 2 === 1;
-  if (lang === "pt") return f ? ptF + adjPtF : ptM + adjPtM;
-  if (lang === "es") return f ? esF + adjEsF : esM + adjEsM;
-  if (lang === "ja") return ja + (f ? jaF : jaM);
-  return (f ? enF : enM) + en;
+}
+
+/** The creature a guest's name draws: "PotatoNinja" is a potato in a ninja's hood. */
+export function guestAvatar(guestNumber: number): Avatar {
+  const dna = dnaOf(guestWords(guestNumber));
+  return { kind: "creature", dna, color: avatarColor(dna) };
 }
 
 /**

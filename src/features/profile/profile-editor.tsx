@@ -214,9 +214,9 @@ export function ProfileEditor({
     if (avatar.kind === "upload" && avatar.blob) {
       form.set("avatar", "upload");
       form.set("image", avatar.blob, "avatar.webp");
-    } else if (avatar.kind === "critter") {
-      form.set("avatar", "critter");
-      form.set("seed", avatar.seed);
+    } else if (avatar.kind === "creature") {
+      form.set("avatar", "creature");
+      form.set("dna", avatar.dna);
     } else {
       form.set("avatar", avatar.kind === "upload" ? "keep" : avatar.kind);
     }

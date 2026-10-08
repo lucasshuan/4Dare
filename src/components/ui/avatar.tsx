@@ -1,7 +1,7 @@
 import type { Avatar as AvatarData } from "@/game/types";
+import { avatarUri } from "@/lib/avatar";
 import { cn } from "@/lib/cn";
 import { seatColor } from "@/lib/seats";
-import { critterUri } from "./critter";
 
 // Larger faces (the stage's 120-150 px ones) pass `size-[…] text-[…]` in className.
 const SIZE = {
@@ -32,7 +32,7 @@ function seatRing(slot: number, size: number) {
   return `0 0 0 ${gap}px var(--ring-gap, var(--surface)), 0 0 0 ${ring}px ${seatColor(slot)}`;
 }
 
-/** A critter or a picture on a pastel. */
+/** A creature or a picture on a pastel. */
 export function Avatar({
   avatar,
   size = 44,
@@ -58,13 +58,9 @@ export function Avatar({
         className,
       )}
     >
-      {avatar.kind === "critter" ? (
+      {avatar.kind === "creature" ? (
         // biome-ignore lint/performance/noImgElement: generated svg data uri
-        <img
-          src={critterUri(avatar.seed, avatar.color)}
-          alt=""
-          className="size-full"
-        />
+        <img src={avatarUri(avatar.dna, size)} alt="" className="size-full" />
       ) : (
         // biome-ignore lint/performance/noImgElement: remote avatar pictures
         <img src={avatar.url} alt="" className="size-full object-cover" />

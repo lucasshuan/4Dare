@@ -15,13 +15,13 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { PROVIDER_NAME } from "@/components/ui/auth-button";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { randomCritterSeed } from "@/components/ui/critter";
 import { Modal } from "@/components/ui/dialog";
 import { ImageDrop } from "@/components/ui/image-drop";
 import { Portrait } from "@/components/ui/portrait";
 import { thumbUrl } from "@/game/character-search";
 import { BANNER_PRESETS, type BannerPreset } from "@/game/profile/profile";
 import type { Avatar as AvatarData } from "@/game/types";
+import { randomDna } from "@/lib/avatar";
 import { cn } from "@/lib/cn";
 import {
   AVATAR_COLORS,
@@ -141,9 +141,9 @@ export function CoverPicker({
 
 /** The avatar the editor will save. */
 export interface AvatarDraft {
-  kind: "provider" | "upload" | "critter";
+  kind: "provider" | "upload" | "creature";
   color: string;
-  seed: string;
+  dna: string;
   /** A picture just picked (an upload kept from before has none). */
   blob: Blob | null;
 }
@@ -153,12 +153,12 @@ export function initialAvatar(me: Me): AvatarDraft {
   return {
     kind:
       a.kind !== "image"
-        ? "critter"
+        ? "creature"
         : a.url === me.providerAvatarUrl
           ? "provider"
           : "upload",
     color: a.color,
-    seed: a.kind === "critter" ? a.seed : randomCritterSeed(),
+    dna: a.kind === "creature" ? a.dna : randomDna(),
     blob: null,
   };
 }
@@ -178,10 +178,10 @@ export function avatarOf(
   const upload = blobUrl ?? kept;
   if (draft.kind === "upload" && upload)
     return { kind: "image", url: upload, color: draft.color };
-  return { kind: "critter", seed: draft.seed, color: draft.color };
+  return { kind: "creature", dna: draft.dna, color: draft.color };
 }
 
-/** The avatar's box: the provider's picture, an upload or a critter, and a colour for the critter. */
+/** The avatar's box: the provider's picture, an upload or a creature, and a colour for the creature. */
 export function AvatarDialog({
   open,
   onOpenChange,
@@ -207,7 +207,7 @@ export function AvatarDialog({
   );
   const set = (change: Partial<AvatarDraft>) =>
     onChange({ ...draft, ...change });
-  const { color, seed } = draft;
+  const { color, dna } = draft;
   const uploadUrl =
     blobUrl ??
     (me.avatar.kind === "image" && me.avatar.url !== me.providerAvatarUrl
@@ -259,20 +259,20 @@ export function AvatarDialog({
             )}
           </Tile>
           <Tile
-            pressed={draft.kind === "critter"}
-            onClick={() => set({ kind: "critter" })}
-            label={t("critter")}
+            pressed={draft.kind === "creature"}
+            onClick={() => set({ kind: "creature" })}
+            label={t("creature")}
           >
             <AnimatePresence mode="popLayout" initial={false}>
               <m.span
-                key={seed}
+                key={dna}
                 initial={{ opacity: 0, scale: 0.6, rotate: -12 }}
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 exit={{ opacity: 0, scale: 0.6, rotate: 12 }}
                 transition={{ type: "spring", stiffness: 420, damping: 22 }}
                 className="flex"
               >
-                <Avatar avatar={{ kind: "critter", seed, color }} size={64} />
+                <Avatar avatar={{ kind: "creature", dna, color }} size={64} />
               </m.span>
             </AnimatePresence>
           </Tile>
@@ -280,7 +280,7 @@ export function AvatarDialog({
         <Button
           size="sm"
           className="self-start"
-          onClick={() => set({ kind: "critter", seed: randomCritterSeed() })}
+          onClick={() => set({ kind: "creature", dna: randomDna() })}
         >
           <Dices strokeWidth={1.75} />
           {t("shuffle")}
@@ -288,7 +288,7 @@ export function AvatarDialog({
         {draft.kind === "upload" ? (
           <ImageDrop shape="square" onChange={(blob) => set({ blob })} />
         ) : null}
-        {draft.kind === "critter" ? (
+        {draft.kind === "creature" ? (
           <fieldset className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0">
             <legend className="mb-2 font-semibold text-sm">{t("color")}</legend>
             <div className="flex flex-wrap gap-2.5">

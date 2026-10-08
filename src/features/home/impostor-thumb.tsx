@@ -1,4 +1,6 @@
-/** A card at the table: the crew's are white with a blue figure, the impostor's pink. */
+import { figureUri } from "@/lib/figures";
+
+/** A card at the table: the crew's show the sun, the impostor's (pink) its eclipse. */
 function Card({
   x,
   tilt,
@@ -8,7 +10,7 @@ function Card({
   tilt: number;
   odd?: boolean;
 }) {
-  const figure = odd ? "#ffd1e6" : "#2b69c8";
+  const id = `impostor-card-${x}`;
   return (
     <g transform={`rotate(${tilt} ${x + 14} 62)`}>
       <rect
@@ -19,8 +21,17 @@ function Card({
         rx={5}
         fill={odd ? "#c03d8a" : "#ffffff"}
       />
-      <circle cx={x + 14} cy={56} r={7} fill={figure} />
-      <path d={`M${x + 5} 76c0-6 4-9 9-9s9 3 9 9z`} fill={figure} />
+      <clipPath id={id}>
+        <rect x={x + 2.5} y={42.5} width={23} height={28.75} rx={3} />
+      </clipPath>
+      <image
+        href={figureUri(odd ? "eclipse" : "sun")}
+        x={x + 2.5}
+        y={42.5}
+        width={23}
+        height={28.75}
+        clipPath={`url(#${id})`}
+      />
     </g>
   );
 }

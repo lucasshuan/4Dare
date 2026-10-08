@@ -1,7 +1,7 @@
 import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import { randomGuestNumber } from "@/game/guest-names";
+import { guestAvatar, randomGuestNumber } from "@/game/guest-names";
 import { parseSynced } from "@/game/options";
 import { handleCandidates } from "@/game/profile/handle";
 import { type Avatar, GameError, type Identity, type Lang } from "@/game/types";
@@ -12,7 +12,6 @@ import {
   type Guest,
   openGuest,
 } from "../../auth/guest";
-import { randomAvatar } from "../pastel";
 import type { AuthService } from "../types";
 import { serviceClient, sessionClient } from "./clients";
 import { accountDefaults, isAccount, isAccountClaims } from "./identity";
@@ -42,7 +41,7 @@ async function profileOf(id: string): Promise<ProfileRow | null> {
 
 /**
  * An account's profile, made the first time it signs in. It starts from the
- * guest it was (same critter and name number), with the provider's name and
+ * guest it was (same creature and name number), with the provider's name and
  * picture on offer.
  */
 export async function syncProfile(
@@ -52,13 +51,14 @@ export async function syncProfile(
   const found = await profileOf(user.id);
   if (found) return withHandle(found);
   const defaults = accountDefaults(user);
+  const guestNumber = guest?.guestNumber ?? randomGuestNumber();
   return firstFreeHandle(defaults.name, user.id, (handle) =>
     profiles()
       .upsert({
         id: user.id,
         handle,
-        guest_number: guest?.guestNumber ?? randomGuestNumber(),
-        avatar: guest?.avatar ?? randomAvatar(),
+        guest_number: guestNumber,
+        avatar: guest?.avatar ?? guestAvatar(guestNumber),
         ...defaults,
       })
       .select("*")

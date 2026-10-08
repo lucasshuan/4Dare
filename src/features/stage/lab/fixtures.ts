@@ -89,7 +89,13 @@ export function exampleCard(id: string, name: string, i: number): ExampleCard {
 const SHORT = ["Bia", "Rafa", "Leo", "Nina"];
 /** Guests whose Portuguese names are 16 characters (the longest a name gets). */
 const LONG_GUESTS = [532, 956, 843, 99]; // RaposaMisteriosa, PandaAventureiro, PandaTrabalhador, GatoAconchegante
-const CRITTERS = ["bia", "rafa", "leo", "nina"];
+/** The players' creatures, by seat. */
+const CREATURES = [
+  "Cat..Happy..0",
+  "Frog..Sleepy..0",
+  "Potato.Ninja...0",
+  "Owl..Curious..0",
+];
 const COLORS = ["#F4C7D9", "#BFE3EA", "#F2E3A8", "#D9C7F4"];
 
 /** The players by seat; the host sits first. */
@@ -99,7 +105,7 @@ export function labPlayers(params: LabParams): Identity[] {
     isGuest: params.names === "long",
     name: params.names === "long" ? null : SHORT[i],
     guestNumber: params.names === "long" ? LONG_GUESTS[i] : 100 + i,
-    avatar: { kind: "critter", seed: CRITTERS[i], color: COLORS[i] },
+    avatar: { kind: "creature", dna: CREATURES[i], color: COLORS[i] },
     lang: "pt",
   }));
 }

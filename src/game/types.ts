@@ -33,13 +33,13 @@ export type AnswerValue = (typeof ANSWERS)[number];
 
 export type PlayerId = string;
 
-/** `color` is always set: the pastel behind a critter or an image. */
+/**
+ * A creature drawn from its DNA (src/lib/avatar) or a picture; `color` is
+ * always set: the pastel behind it.
+ */
 export type Avatar =
-  | { kind: "critter"; seed: string; color: string }
+  | { kind: "creature"; dna: string; color: string }
   | { kind: "image"; url: string; color: string };
-
-/** Seeds for DiceBear critters: short, URL-safe. */
-export const CRITTER_SEED = /^[a-z0-9]{1,16}$/;
 
 /** Who someone is. Guests have no name: the UI turns guestNumber into "WonderfulCat" / "GatoMaravilhoso" / "すてきなネコ" (see guest-names.ts). */
 export interface Identity {

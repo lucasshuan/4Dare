@@ -754,7 +754,7 @@ export async function createCharacter(
  * The profile editor's save, accounts only. FormData: name, handle, quote,
  * accent, banner ("none" | "keep" | "preset:<id>" | "upload" + bannerImage),
  * about, showcase and privacy (JSON), and the avatar: color, avatar
- * ("critter" + seed | "provider" | "upload" + image | "keep").
+ * ("creature" + dna | "provider" | "upload" + image | "keep").
  */
 export async function saveProfile(form: FormData): Promise<Result<Me>> {
   return run(async () => {
@@ -814,7 +814,7 @@ export async function reportMuralLine(id: number): Promise<Result<boolean>> {
   });
 }
 
-/** Guests only: a new random name and critter, shown at once in every room they sit in. */
+/** Guests only: a new random name and its creature, shown at once in every room they sit in. */
 export async function rerollGuest(): Promise<Result<Me>> {
   return run(async () => {
     const l = await lang();

@@ -1,12 +1,12 @@
 import "server-only";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
-import { randomGuestNumber } from "@/game/guest-names";
+import { guestAvatar, randomGuestNumber } from "@/game/guest-names";
 import type { Avatar } from "@/game/types";
-import { randomAvatar } from "../backend/pastel";
+import { isDna } from "@/lib/avatar";
 
 /**
  * Guests live only in this cookie: a random id, the number behind their
- * generated name and their critter, signed by the server so nobody can pose
+ * generated name and their creature, signed by the server so nobody can pose
  * as another guest. Nothing about a guest is stored in the database; the
  * matches they play keep the id, and move to their account when they sign in.
  */
@@ -29,12 +29,14 @@ const sign = (payload: string) =>
   createHmac("sha256", secret()).update(`guest:${payload}`).digest("base64url");
 
 export function newGuest(): Guest {
-  return {
-    id: randomUUID(),
-    guestNumber: randomGuestNumber(),
-    avatar: randomAvatar(),
-  };
+  const guestNumber = randomGuestNumber();
+  return { id: randomUUID(), guestNumber, avatar: guestAvatar(guestNumber) };
 }
+
+const validAvatar = (a: Partial<Record<string, unknown>> | null) =>
+  typeof a?.color === "string" &&
+  ((a.kind === "creature" && typeof a.dna === "string" && isDna(a.dna)) ||
+    (a.kind === "image" && typeof a.url === "string"));
 
 /** `<base64url json>.<signature>` */
 export function sealGuest(guest: Guest): string {
@@ -59,9 +61,13 @@ export function openGuest(value: string | undefined): Guest | null {
     const ok =
       typeof g?.id === "string" &&
       UUID.test(g.id) &&
-      Number.isInteger(g.guestNumber) &&
-      typeof g.avatar?.color === "string";
-    return ok ? (g as Guest) : null;
+      Number.isInteger(g.guestNumber);
+    if (!ok) return null;
+    // an avatar from before creatures: the guest's name draws a new one
+    const avatar = validAvatar(g.avatar)
+      ? (g.avatar as Avatar)
+      : guestAvatar(g.guestNumber);
+    return { id: g.id, guestNumber: g.guestNumber, avatar };
   } catch {
     return null;
   }
@@ -87,7 +93,7 @@ interface CookieJar {
 
 /**
  * The same guest (same id, so the same seats and matches) with a new random
- * name and critter. Null when there is no guest cookie to change.
+ * name and its creature. Null when there is no guest cookie to change.
  */
 export function rerollGuest(
   jar: CookieJar,

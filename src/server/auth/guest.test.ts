@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { guestAvatar } from "@/game/guest-names";
 import {
   ensureGuest,
   GUEST_COOKIE,
@@ -24,6 +25,23 @@ describe("guest cookie", () => {
     expect(openGuest(`${payload}.${flipped}`)).toBeNull();
     expect(openGuest("garbage")).toBeNull();
     expect(openGuest(undefined)).toBeNull();
+  });
+
+  it("draws a guest's creature from their name", () => {
+    const guest = newGuest();
+    expect(guest.avatar).toEqual(guestAvatar(guest.guestNumber));
+  });
+
+  it("redraws an avatar it cannot draw (older cookies)", () => {
+    const old = {
+      ...newGuest(),
+      avatar: { kind: "sticker", seed: "k3x9q", color: "#DCE8FA" },
+    };
+    expect(openGuest(sealGuest(old as never))).toEqual({
+      id: old.id,
+      guestNumber: old.guestNumber,
+      avatar: guestAvatar(old.guestNumber),
+    });
   });
 
   it("makes a guest once and then keeps it", () => {

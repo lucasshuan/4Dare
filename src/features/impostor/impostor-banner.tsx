@@ -11,7 +11,7 @@ import {
 } from "motion/react";
 import { useTranslations } from "next-intl";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
-import { Critter, HeldCard } from "@/features/who-am-i/who-am-i-banner";
+import { Creature, HeldCard } from "@/features/who-am-i/who-am-i-banner";
 import { cn } from "@/lib/cn";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
@@ -50,7 +50,7 @@ const SEATS: {
   seat: Seat;
   place: string;
   tilt: number;
-  seed: string;
+  dna: string;
   color: string;
   answer: number;
   vote: Seat;
@@ -59,7 +59,7 @@ const SEATS: {
     seat: "a",
     place: "left-[10%] max-sm:hidden",
     tilt: -10,
-    seed: "imp-9",
+    dna: "Dog..Excited..0",
     color: "#F2E3A8",
     answer: 8,
     vote: "d",
@@ -68,7 +68,7 @@ const SEATS: {
     seat: "b",
     place: "left-[29%] max-sm:left-[19%]",
     tilt: -5,
-    seed: "imp-29",
+    dna: "Mushroom..Happy..0",
     color: "#BFE6C8",
     answer: 9,
     vote: "d",
@@ -77,7 +77,7 @@ const SEATS: {
     seat: "c",
     place: "left-1/2",
     tilt: 0,
-    seed: "imp-4",
+    dna: "Bear..Cozy..0",
     color: "#D9C7F4",
     answer: 8,
     vote: "d",
@@ -86,7 +86,7 @@ const SEATS: {
     seat: "d",
     place: "left-[71%] max-sm:left-[81%]",
     tilt: 5,
-    seed: "imp-31",
+    dna: "Axolotl..Cute..0",
     color: "#F3D3B8",
     answer: 3,
     vote: "b",
@@ -95,7 +95,7 @@ const SEATS: {
     seat: "e",
     place: "left-[90%] max-sm:hidden",
     tilt: 10,
-    seed: "imp-44",
+    dna: "Cat.Wizard...0",
     color: "#F4C7D9",
     answer: 9,
     vote: "d",
@@ -103,8 +103,9 @@ const SEATS: {
 ];
 /** Who holds the other card. Nobody at the table knows, not even them. */
 const ODD: Seat = "d";
-const CREW_CARD = { seed: "imp-12", color: "#BFE3EA" };
-const ODD_CARD = { seed: "imp-13", color: "#BFE3EA" };
+/** The crew's card and the odd one: the same card, almost. */
+const CREW_CARD = "sun";
+const ODD_CARD = "eclipse";
 
 /** Masks and question marks drifting behind: [left %, top %, size px, colour, seconds, mask]. */
 const MARKS: [number, number, number, string, number, boolean][] = [
@@ -453,8 +454,8 @@ export function ImpostorBanner() {
                             v.place.includes("hidden") && "max-sm:hidden",
                           )}
                         >
-                          <Critter
-                            seed={v.seed}
+                          <Creature
+                            dna={v.dna}
                             color={v.color}
                             className="size-[10cqh] rounded-pill shadow-[0_0_0_2px_var(--surface)]"
                           />
@@ -502,7 +503,7 @@ export function ImpostorBanner() {
                             "outline-[3px] outline-no outline-solid",
                         )}
                       >
-                        <HeldCard seed={card.seed} color={card.color} fill />
+                        <HeldCard figure={card} fill />
                       </div>
                     </m.div>
                   </div>
@@ -538,8 +539,8 @@ export function ImpostorBanner() {
                 transition={{ duration: 0.45, delay: 1.1 + i * 0.08 }}
                 className="-mt-[4cqh] block"
               >
-                <Critter
-                  seed={p.seed}
+                <Creature
+                  dna={p.dna}
                   color={p.color}
                   className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-impostor)]"
                 />

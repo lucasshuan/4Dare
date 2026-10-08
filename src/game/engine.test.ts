@@ -105,7 +105,10 @@ describe("lobby", () => {
     const join = (id: string, color: string) =>
       g.do({
         type: "JOIN",
-        player: { ...ident(id), avatar: { kind: "critter", seed: "x", color } },
+        player: {
+          ...ident(id),
+          avatar: { kind: "creature", dna: "Cat..Happy..0", color },
+        },
       });
     const slots = () =>
       Object.fromEntries(g.state.players.map((p) => [p.id, p.colorSlot]));

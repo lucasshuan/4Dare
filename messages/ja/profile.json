@@ -6,6 +6,6 @@
   "colorN": "色{n}",
   "guestTitle": "ログインしてプロフィールを作ろう",
   "guestText": "DiscordかGoogleのアカウントで、名前とアバターを選べます。ログインしなくてもゲストとして遊べます。",
-  "critter": "モンスター",
+  "creature": "モンスター",
   "shuffle": "別のモンスターにする"
 }

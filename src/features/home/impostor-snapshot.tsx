@@ -16,8 +16,9 @@ const CARDS = [
 ] as const;
 /** A card's width, in % of the box. */
 const W = 22;
-const CREW = { seed: "imp-12", color: "#BFE3EA" };
-const ODD = { seed: "imp-13", color: "#BFE3EA" };
+/** The crew's card and the odd one: the same card, almost. */
+const CREW = "sun";
+const ODD = "eclipse";
 /** Where the other card turns up, loop after loop. */
 const ODD_AT = [2, 0, 3, 1];
 
@@ -132,7 +133,7 @@ export function ImpostorSnapshot({
                       "outline-[3px] outline-no outline-solid",
                   )}
                 >
-                  <HeldCard seed={card.seed} color={card.color} fill />
+                  <HeldCard figure={card} fill />
                 </div>
               </m.div>
             </div>

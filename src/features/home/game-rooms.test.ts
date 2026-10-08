@@ -20,7 +20,7 @@ const room = (
     isGuest: true,
     name: "Host",
     lang,
-    avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
+    avatar: { kind: "creature", dna: "Cat..Happy..0", color: "#DCE8FA" },
   },
   players: 1,
   seats: 4,

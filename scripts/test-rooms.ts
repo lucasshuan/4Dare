@@ -6,10 +6,10 @@
 //      pnpm test-rooms --clear    closes every test room
 // Needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY in .env.local.
 // Test players' ids start with "test-", which is how --clear finds their rooms.
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { createRoom, reduce } from "../src/game/engine";
-import { randomGuestNumber } from "../src/game/guest-names";
+import { guestAvatar, randomGuestNumber } from "../src/game/guest-names";
 import type { ThemeSet } from "../src/game/theme-sets";
 import {
   type Character,
@@ -34,29 +34,17 @@ const rooms = () => db.from("rooms");
 
 /** Lobbies leave the list after 15 minutes without a change, matches after 20: refresh well before. */
 const KEEP_EVERY_MS = 4 * 60_000;
-const PASTELS = [
-  "#F3D3B8",
-  "#BFE6C8",
-  "#D9C7F4",
-  "#F4C7D9",
-  "#C8DDF6",
-  "#F6E3A1",
-];
-
 const pick = <T>(items: readonly T[]) =>
   items[Math.floor(Math.random() * items.length)];
 
 function guest(lang: Lang): Identity {
+  const guestNumber = randomGuestNumber();
   return {
     id: `test-${randomUUID()}`,
     isGuest: true,
     name: null,
-    guestNumber: randomGuestNumber(),
-    avatar: {
-      kind: "critter",
-      seed: randomBytes(5).toString("hex"),
-      color: pick(PASTELS),
-    },
+    guestNumber,
+    avatar: guestAvatar(guestNumber),
     lang,
   };
 }

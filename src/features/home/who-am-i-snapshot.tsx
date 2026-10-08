@@ -3,8 +3,8 @@
 import { m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { AnswerChip } from "@/components/ui/answer-chip";
-import { critterUri } from "@/components/ui/critter";
 import { cn } from "@/lib/cn";
+import { type Figure, figureUri } from "@/lib/figures";
 
 /** One loop of the little scene, in seconds. */
 const LOOP = 6;
@@ -22,12 +22,10 @@ const popIn = (from: number) => ({
 });
 
 function MiniCard({
-  seed,
-  color,
+  figure,
   className,
 }: {
-  seed: string;
-  color: string;
+  figure: Figure;
   className?: string;
 }) {
   return (
@@ -37,12 +35,9 @@ function MiniCard({
         className,
       )}
     >
-      <div
-        className="aspect-4/5 overflow-hidden rounded-md"
-        style={{ backgroundColor: color }}
-      >
+      <div className="aspect-4/5 overflow-hidden rounded-md">
         {/* biome-ignore lint/performance/noImgElement: generated svg data uri */}
-        <img src={critterUri(seed, color)} alt="" className="size-full" />
+        <img src={figureUri(figure)} alt="" className="size-full" />
       </div>
       <span className="mx-1 mb-0.5 h-1.5 w-2/3 rounded-pill bg-line" />
     </div>
@@ -91,7 +86,7 @@ export function WhoAmISnapshot({
               },
             })}
       >
-        <MiniCard seed="dare-left" color="#F3D3B8" />
+        <MiniCard figure="cloud" />
       </m.div>
       <m.div
         className="absolute right-[8%] bottom-[-6%] w-[26%]"
@@ -108,10 +103,10 @@ export function WhoAmISnapshot({
               },
             })}
       >
-        <MiniCard seed="dare-right" color="#BFE6C8" />
+        <MiniCard figure="apple" />
       </m.div>
 
-      {/* your card: "?" on the front, the critter on the back */}
+      {/* your card: "?" on the front, a character on the back */}
       <div className="absolute bottom-[4%] left-1/2 w-[30%] -translate-x-1/2 perspective-[800px]">
         <m.div
           className="relative transform-3d"
@@ -132,8 +127,7 @@ export function WhoAmISnapshot({
           </div>
           <div className="absolute inset-0 rotate-y-180 backface-hidden">
             <MiniCard
-              seed="dare-you"
-              color="#D9C7F4"
+              figure="queen"
               className="h-full outline-[3px] outline-yes outline-solid"
             />
           </div>

@@ -37,7 +37,7 @@ export const ident = (id: string, guestNumber = 10): Identity => ({
   isGuest: false,
   name: id,
   guestNumber,
-  avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
+  avatar: { kind: "creature", dna: "Cat..Happy..0", color: "#DCE8FA" },
   lang: "pt",
 });
 

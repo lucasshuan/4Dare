@@ -6,6 +6,6 @@
   "colorN": "Colour {n}",
   "guestTitle": "Sign in to get a profile",
   "guestText": "With a Discord or Google account you choose your name and avatar. It's optional: you can play as a guest.",
-  "critter": "Critter",
-  "shuffle": "Shuffle critter"
+  "creature": "Creature",
+  "shuffle": "Shuffle creature"
 }

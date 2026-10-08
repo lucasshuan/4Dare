@@ -7,7 +7,11 @@ import { playerCard, profileView } from "./profiles";
 
 const MEI = "11111111-1111-4111-8111-111111111111";
 const BIA = "22222222-2222-4222-8222-222222222222";
-const avatar = { kind: "critter", seed: "x", color: "#D9C7F4" } as const;
+const avatar = {
+  kind: "creature",
+  dna: "Cat..Happy..0",
+  color: "#D9C7F4",
+} as const;
 const profile = (
   id: string,
   handle: string,

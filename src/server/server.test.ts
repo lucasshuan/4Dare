@@ -366,8 +366,8 @@ describe("server, local mode", () => {
     const fields = {
       name: "Jean",
       color: "#DCE8FA",
-      avatar: "critter",
-      seed: "x",
+      avatar: "creature",
+      dna: "Cat..Happy..0",
     };
     expect(await A.saveProfile(profileForm(null, fields))).toEqual({
       ok: false,
@@ -379,23 +379,26 @@ describe("server, local mode", () => {
       isGuest: false,
       name: "Jean",
       handle: account.handle,
-      avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
+      avatar: { kind: "creature", dna: "Cat..Happy..0", color: "#DCE8FA" },
     });
   });
 
-  it("guests start with a critter; accounts can pick another one", async () => {
+  it("guests start with a creature; accounts can pick another one", async () => {
     as("r2");
     const guest = must(await A.enterTestAccount());
-    expect(guest.avatar).toMatchObject({ kind: "critter" });
+    expect(guest.avatar).toMatchObject({ kind: "creature" });
     const fields = {
       name: "Bia",
       color: "#F4C7D9",
-      avatar: "critter",
-      seed: "<svg>",
+      avatar: "creature",
+      dna: "<svg>",
     };
     const save = () => A.saveProfile(profileForm(guest, fields));
     expect(await save()).toEqual({ ok: false, error: "invalid_input" });
-    fields.seed = "k3x9q";
+    // a word no kit knows
+    fields.dna = "Dragonfruit..Happy..0";
+    expect(await save()).toEqual({ ok: false, error: "invalid_input" });
+    fields.dna = "Potato.Ninja...k3x9q";
     fields.color = "#123456";
     expect(await save()).toEqual({ ok: false, error: "invalid_input" });
     // the random pastel the guest started with is kept if they don't pick one
@@ -403,8 +406,8 @@ describe("server, local mode", () => {
     expect(must(await save()).avatar.color).toBe(guest.avatar.color);
     fields.color = "#F4C7D9";
     expect(must(await save()).avatar).toEqual({
-      kind: "critter",
-      seed: "k3x9q",
+      kind: "creature",
+      dna: "Potato.Ninja...k3x9q",
       color: "#F4C7D9",
     });
   });
@@ -479,7 +482,7 @@ describe("server, local mode", () => {
     });
   });
 
-  it("a guest draws a new name and critter, shown at once in their rooms", async () => {
+  it("a guest draws a new name and creature, shown at once in their rooms", async () => {
     const settings = {
       ...ROOM,
       name: "Sala de Fulano",
@@ -497,7 +500,7 @@ describe("server, local mode", () => {
     const me = must(await A.rerollGuest());
     expect(me.id).toBe(before.id);
     expect(me.isGuest).toBe(true);
-    expect(me.avatar).toMatchObject({ kind: "critter" });
+    expect(me.avatar).toMatchObject({ kind: "creature" });
     expect(me.avatar).not.toEqual(before.avatar);
 
     // the other player sees it on their next look; the room keeps its name
@@ -706,15 +709,15 @@ describe("server, local mode", () => {
         profileForm(account, {
           name: "Renamed",
           color: "#DCE8FA",
-          avatar: "critter",
-          seed: "x",
+          avatar: "creature",
+          dna: "Cat..Happy..0",
         }),
       ),
     );
     as("n4");
     expect((await view(code)).body.players[0]).toMatchObject({
       name: "Renamed",
-      avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
+      avatar: { kind: "creature", dna: "Cat..Happy..0", color: "#DCE8FA" },
     });
   });
 
@@ -1630,7 +1633,7 @@ describe("room chat", () => {
       isGuest: true,
       name: null,
       guestNumber: 1,
-      avatar: { kind: "critter", seed: "x", color: "#fff" },
+      avatar: { kind: "creature", dna: "Cat..Happy..0", color: "#fff" },
     } as const;
     const line = { by: author.id, author, text: "hi" };
     for (let i = 0; i < 5; i++) await chat.add("LIMIT", [line]);
@@ -1717,7 +1720,7 @@ describe("room chat", () => {
             isGuest: true,
             name: null,
             guestNumber: 3,
-            avatar: { kind: "critter", seed: "x", color: "#fff" },
+            avatar: { kind: "creature", dna: "Cat..Happy..0", color: "#fff" },
           },
         },
       },
@@ -1905,7 +1908,11 @@ describe("character pictures", () => {
       name: null,
       isGuest: true,
       guestNumber: 1,
-      avatar: { kind: "critter" as const, seed: "x", color: "#DCE8FA" },
+      avatar: {
+        kind: "creature" as const,
+        dna: "Cat..Happy..0",
+        color: "#DCE8FA",
+      },
     };
     const add = (characterId: string, url: string) =>
       images.add({
@@ -1966,7 +1973,7 @@ describe("character pictures", () => {
         name: null,
         isGuest: true,
         guestNumber: 1,
-        avatar: { kind: "critter", seed: "x", color: "#DCE8FA" },
+        avatar: { kind: "creature", dna: "Cat..Happy..0", color: "#DCE8FA" },
       },
       status: "active",
       moderation: null,

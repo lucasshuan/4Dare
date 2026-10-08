@@ -11,10 +11,11 @@ import {
 } from "motion/react";
 import { useTranslations } from "next-intl";
 import { AnswerChip } from "@/components/ui/answer-chip";
-import { critterUri } from "@/components/ui/critter";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
 import type { AnswerValue } from "@/game/types";
+import { avatarUri } from "@/lib/avatar";
 import { cn } from "@/lib/cn";
+import { type Figure, figureUri } from "@/lib/figures";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 type Seat = "a" | "b" | "c" | "d";
@@ -59,49 +60,53 @@ const STEPS: {
 /** The frame shown when motion is reduced: a question and every answer. */
 const STILL = 5;
 
-/** The others around the table, left to right. Phones keep the two nearest you. */
+/** The others around the table, left to right, their creature and card. Phones keep the two nearest you. */
 export const SEATS: {
   seat: Seat;
   place: string;
   tilt: number;
-  seed: string;
+  dna: string;
   color: string;
-  card: string;
+  figure: Figure;
 }[] = [
   {
     seat: "a",
     place: "left-[12%] max-sm:hidden",
     tilt: -10,
-    seed: "banner-a",
+    dna: "Penguin..Cozy..0",
     color: "#F3D3B8",
-    card: "#BFE6C8",
+    figure: "moon",
   },
   {
     seat: "b",
     place: "left-[31%] max-sm:left-[19%]",
     tilt: -5,
-    seed: "banner-left",
+    dna: "Fox..Curious..0",
     color: "#BFE3EA",
-    card: "#DCE8FA",
+    figure: "cloud",
   },
   {
     seat: "c",
     place: "left-[69%] max-sm:left-[81%]",
     tilt: 5,
-    seed: "banner-right",
+    dna: "Panda..Happy..0",
     color: "#F2E3A8",
-    card: "#F4C7D9",
+    figure: "apple",
   },
   {
     seat: "d",
     place: "left-[88%] max-sm:hidden",
     tilt: 10,
-    seed: "banner-d",
+    dna: "Bee..Busy..0",
     color: "#D7DDE8",
-    card: "#F3D3B8",
+    figure: "diver",
   },
 ];
-export const YOU = { seed: "banner-you", color: "#D9C7F4", card: "#F2E3A8" };
+export const YOU = {
+  dna: "Potato.Ninja...0",
+  color: "#D9C7F4",
+  figure: "queen",
+} as const;
 
 /** Question marks drifting in the background, across the whole width: [left %, top %, size px, colour, seconds]. */
 const MARKS: [number, number, number, string, number][] = [
@@ -117,13 +122,13 @@ const MARKS: [number, number, number, string, number][] = [
   [97, 64, 48, "text-yes", 10.5],
 ];
 
-/** A critter on its pastel, as a round avatar or a card portrait. */
-export function Critter({
-  seed,
+/** A player's creature on its pastel, round. */
+export function Creature({
+  dna,
   color,
   className,
 }: {
-  seed: string;
+  dna: string;
   color: string;
   className?: string;
 }) {
@@ -133,23 +138,33 @@ export function Critter({
       style={{ backgroundColor: color }}
     >
       {/* biome-ignore lint/performance/noImgElement: generated svg data uri */}
-      <img
-        src={critterUri(seed, color)}
-        alt=""
-        className="size-full object-cover"
-      />
+      <img src={avatarUri(dna)} alt="" className="size-full object-cover" />
+    </span>
+  );
+}
+
+/** A character's picture on a card (see src/lib/figures.ts). */
+export function FigureArt({
+  figure,
+  className,
+}: {
+  figure: Figure;
+  className?: string;
+}) {
+  return (
+    <span className={cn("block overflow-hidden", className)}>
+      {/* biome-ignore lint/performance/noImgElement: generated svg data uri */}
+      <img src={figureUri(figure)} alt="" className="size-full object-cover" />
     </span>
   );
 }
 
 /** A card held up for the others to see: the character's picture. `fill` stretches it to its box (the flipped "?" card). */
 export function HeldCard({
-  seed,
-  color,
+  figure,
   fill = false,
 }: {
-  seed: string;
-  color: string;
+  figure: Figure;
   fill?: boolean;
 }) {
   return (
@@ -159,9 +174,8 @@ export function HeldCard({
         fill && "h-full",
       )}
     >
-      <Critter
-        seed={seed}
-        color={color}
+      <FigureArt
+        figure={figure}
         className={cn("rounded-[12%]", fill ? "min-h-0 flex-1" : "aspect-4/5")}
       />
       <span className="mx-[6%] h-[2.1cqh] w-2/3 shrink-0 rounded-pill bg-line" />
@@ -333,15 +347,15 @@ export function WhoAmIBanner() {
                 style={{ rotate: p.tilt }}
                 {...floating(i * 0.7)}
               >
-                <HeldCard seed={`${p.seed}-card`} color={p.card} />
+                <HeldCard figure={p.figure} />
               </m.div>
               <m.span
                 animate={s.hit && !reduced ? { y: [0, -8, 0] } : { y: 0 }}
                 transition={{ duration: 0.45, delay: 0.15 + i * 0.08 }}
                 className="-mt-[4cqh] block"
               >
-                <Critter
-                  seed={p.seed}
+                <Creature
+                  dna={p.dna}
                   color={p.color}
                   className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-whoami)]"
                 />
@@ -375,7 +389,7 @@ export function WhoAmIBanner() {
                   </m.span>
                 </div>
                 <div className="absolute inset-0 rotate-y-180 rounded-[14%/11%] outline-[3px] outline-yes outline-solid backface-hidden">
-                  <HeldCard seed={`${YOU.seed}-card`} color={YOU.card} fill />
+                  <HeldCard figure={YOU.figure} fill />
                 </div>
               </m.div>
             </div>
@@ -407,8 +421,8 @@ export function WhoAmIBanner() {
                 : null}
             </AnimatePresence>
           </m.div>
-          <Critter
-            seed={YOU.seed}
+          <Creature
+            dna={YOU.dna}
             color={YOU.color}
             className="-mt-[4cqh] size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-whoami),0_0_0_6px_var(--sky)]"
           />

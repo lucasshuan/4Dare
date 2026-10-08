@@ -103,7 +103,7 @@ const profile = (): Row => ({
   handle: "bia",
   name: "Bia",
   guest_number: 7,
-  avatar: { kind: "critter", seed: "x", color: "#ffd6e0" },
+  avatar: { kind: "creature", dna: "Cat..Happy..0", color: "#ffd6e0" },
   provider: "google",
   provider_avatar_url: null,
 });

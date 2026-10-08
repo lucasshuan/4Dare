@@ -25,7 +25,7 @@ Every room has a chat, in the lobby and through the match: a panel at the bottom
 
 ## Who plays
 
-- Guest: no sign-up, gets a random name like BraveCat and a critter avatar.
+- Guest: no sign-up, gets a random name like BraveCat and the creature that name draws (a brave cat).
 - Discord or Google account: picks a name and avatar. Signing in mid-match keeps your seat and your chat lines.
 
 ## Extras

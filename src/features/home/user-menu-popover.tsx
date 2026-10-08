@@ -101,10 +101,10 @@ export function UserMenuPopover({
               className="flex w-[min(340px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-4 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0"
             >
               <div className="flex items-center gap-3">
-                {/* a new name and critter swap in */}
+                {/* a new name and creature swap in */}
                 <AnimatePresence initial={false} mode="popLayout">
                   <m.span
-                    key={`${me.guestName}-${me.avatar.kind === "critter" ? me.avatar.seed : ""}`}
+                    key={`${me.guestName}-${me.avatar.kind === "creature" ? me.avatar.dna : ""}`}
                     className="flex shrink-0"
                     initial={{ opacity: 0, scale: 0.6, rotate: -20 }}
                     animate={{ opacity: 1, scale: 1, rotate: 0 }}

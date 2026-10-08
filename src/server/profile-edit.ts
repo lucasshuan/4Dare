@@ -18,13 +18,8 @@ import {
   parsePrivacy,
   parseShowcase,
 } from "@/game/profile/profile";
-import {
-  CRITTER_SEED,
-  GameError,
-  type Identity,
-  type Lang,
-  MAX_NAME,
-} from "@/game/types";
+import { GameError, type Identity, type Lang, MAX_NAME } from "@/game/types";
+import { isDna } from "@/lib/avatar";
 import { getBackend } from "./backend";
 import { entryId } from "./backend/seed-format";
 import type { ProfilePatch } from "./backend/types";
@@ -83,7 +78,7 @@ async function keepPicture(file: FormDataEntryValue | null) {
 }
 
 /**
- * The avatar the form asks for: "critter" (seed), "provider", "upload"
+ * The avatar the form asks for: "creature" (dna), "provider", "upload"
  * (image) or "keep", on one of the palette's colours (or the guest's first).
  */
 async function avatarFrom(
@@ -107,10 +102,10 @@ async function avatarFrom(
       url: await keepPicture(form.get("image")),
       color: c,
     };
-  if (kind === "critter") {
-    const seed = form.get("seed");
-    if (typeof seed !== "string" || !CRITTER_SEED.test(seed)) bad();
-    return { kind: "critter", seed: seed as string, color: c };
+  if (kind === "creature") {
+    const dna = form.get("dna");
+    if (typeof dna !== "string" || !isDna(dna)) bad();
+    return { kind: "creature", dna: dna as string, color: c };
   }
   if (kind === "keep") return { ...current.avatar, color: c };
   return bad();
