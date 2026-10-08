@@ -119,12 +119,12 @@ export function LineupBanner() {
       )}
       style={{
         background:
-          "linear-gradient(120deg, var(--board-hi), var(--board) 55%, var(--board-deep))",
+          "linear-gradient(120deg, var(--art-lineup-slate-hi), var(--art-lineup-slate) 55%, var(--art-lineup-slate-deep))",
       }}
     >
       {/* chalk light and marks */}
       <div className="-inset-10 -z-10 absolute">
-        <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-white/10 blur-3xl" />
+        <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-white/10 blur-3xl dark:hidden" />
         <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-gold/15 blur-3xl" />
         {MARKS.map(([left, top, size, seconds, glyph]) => (
           <m.span
@@ -148,9 +148,9 @@ export function LineupBanner() {
       </div>
 
       {/* a chalk haze in the top left corner, where the logo sits; it fades
-          out slowly so it reads as the board's own light */}
+          out slowly so it reads as the board's own light; none in the dark */}
       <span
-        className="-z-10 pointer-events-none absolute top-0 left-0 h-[260px] w-[max(360px,42%)]"
+        className="-z-10 pointer-events-none absolute top-0 left-0 h-[260px] w-[max(360px,42%)] dark:hidden"
         style={{
           background:
             "radial-gradient(farthest-side at 0 0, color-mix(in oklch, var(--chalk) 40%, transparent), color-mix(in oklch, var(--chalk) 26%, transparent) 22%, color-mix(in oklch, var(--chalk) 12%, transparent) 48%, color-mix(in oklch, var(--chalk) 3%, transparent) 76%, transparent)",
@@ -162,7 +162,7 @@ export function LineupBanner() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-8"
         style={{
           background:
-            "linear-gradient(in oklch to bottom, transparent, color-mix(in oklch, var(--board) 45%, var(--canvas)) 60%, var(--canvas))",
+            "linear-gradient(in oklch to bottom, transparent, color-mix(in oklch, var(--art-lineup-slate) 45%, var(--canvas)) 60%, var(--canvas))",
         }}
       />
 
