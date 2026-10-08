@@ -32,7 +32,7 @@ const STEPS: {
   { ms: 900, bids: { b: 3, c: 2, d: 5 } },
   { ms: 1500, bids: { b: 3, c: 2, d: 5 }, sold: true },
   { ms: 3000, bids: { b: 3, c: 2, d: 5 }, sold: true, open: true },
-  { ms: 500, bids: {}, clear: true },
+  { ms: 700, bids: {}, clear: true },
 ];
 /** The frame shown when motion is reduced: sold, and the mission up. */
 const STILL = 6;
@@ -458,9 +458,9 @@ export function LineupBanner() {
             <div
               key={p.seat}
               className={cn(
-                "-translate-x-1/2 absolute bottom-[12%] flex flex-col items-center",
+                "-translate-x-1/2 absolute bottom-[12%] flex flex-col items-center transition-opacity duration-500",
                 p.place,
-                s.open && "opacity-60 transition-opacity duration-500",
+                s.open && "opacity-60",
               )}
             >
               <div className="flex min-h-[26cqh] flex-col-reverse items-center pb-[1cqh]">
@@ -472,7 +472,17 @@ export function LineupBanner() {
                       className="block"
                       initial={reduced ? false : { opacity: 0, y: -14 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                      // the tower comes down from the top, coin by coin
+                      exit={{
+                        opacity: 0,
+                        y: 6,
+                        scale: 0.85,
+                        transition: {
+                          duration: 0.28,
+                          ease: "easeIn",
+                          delay: reduced ? 0 : (bid - 1 - k) * 0.04,
+                        },
+                      }}
                       transition={{
                         type: "spring",
                         stiffness: 520,
