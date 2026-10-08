@@ -136,6 +136,16 @@ export function LineupBanner() {
         ))}
       </div>
 
+      {/* a chalk haze in the top left corner, where the logo sits; it fades
+          out slowly so it reads as the board's own light */}
+      <span
+        className="-z-10 pointer-events-none absolute top-0 left-0 h-[260px] w-[max(360px,42%)]"
+        style={{
+          background:
+            "radial-gradient(farthest-side at 0 0, color-mix(in oklch, var(--chalk) 40%, transparent), color-mix(in oklch, var(--chalk) 26%, transparent) 22%, color-mix(in oklch, var(--chalk) 12%, transparent) 48%, color-mix(in oklch, var(--chalk) 3%, transparent) 76%, transparent)",
+        }}
+      />
+
       {/* melts into the page below through the ground's own hue */}
       <span
         className="pointer-events-none absolute inset-x-0 bottom-0 h-8"
