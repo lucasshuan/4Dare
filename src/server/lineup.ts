@@ -20,7 +20,7 @@ import {
   type RoomState,
 } from "@/game/types";
 import { getBackend } from "./backend";
-import { entryId } from "./backend/seed-format";
+import { entryId, parseEntryId } from "./backend/seed-format";
 import { background } from "./background";
 import type { QueueItem } from "./contract";
 import { dispatch, seated } from "./rooms";
@@ -201,7 +201,11 @@ export function queueLots(
     const lu = s.lu ?? fail();
     const deck = lu.decks[lu.round - 1] ?? fail();
     const lang: Lang = s.players.find((p) => p.id === s.hostId)?.lang ?? "en";
-    const ids = items.flatMap((x) => (x.kind === "char" ? [x.id] : []));
+    // a search row's id ("pt-wd-Q302") or the library's own ("wd-Q302")
+    const libraryId = (id: string) => parseEntryId(id)?.id ?? id;
+    const ids = items.flatMap((x) =>
+      x.kind === "char" ? [libraryId(x.id)] : [],
+    );
     const [found, extras, blocked] = await Promise.all([
       ids.length
         ? characters.getMany(
@@ -220,10 +224,11 @@ export function queueLots(
         const extra = extras.find((e) => e.id === x.id);
         return extra && extraCard(extra, lang);
       }
-      const c = blocked.has(x.id) ? undefined : byId.get(entryId(lang, x.id));
+      const id = libraryId(x.id);
+      const c = blocked.has(id) ? undefined : byId.get(entryId(lang, id));
       return (
         c && {
-          id: x.id,
+          id,
           name: c.name,
           origin: c.origin ?? null,
           imageUrl: c.imageUrl ?? null,
