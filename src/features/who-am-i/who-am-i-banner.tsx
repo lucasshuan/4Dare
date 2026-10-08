@@ -285,12 +285,21 @@ export function WhoAmIBanner() {
         ))}
       </m.div>
 
+      {/* melts into the page below, behind the table so the faces stay sharp */}
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-b from-transparent to-canvas/70" />
+
       <m.div
         style={{ x: frontX, y: frontY }}
         className="relative mx-auto h-[clamp(180px,min(22vw,27vh),230px)] max-sm:h-[210px] w-full max-w-[1040px] [container-type:size]"
       >
-        {/* the table everyone sits around */}
-        <span className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-surface/45" />
+        {/* the table everyone sits around; it fades with the ground over the banner's last 1.5rem (its top sits 24cqh above the bottom) */}
+        <span
+          className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-surface/45"
+          style={{
+            maskImage:
+              "linear-gradient(to bottom, #000 calc(24cqh - 1.5rem), transparent 24cqh)",
+          }}
+        />
 
         {/* the question, then the guess, then "Got it!" in its place */}
         <div className="absolute inset-x-0 top-[1%] flex justify-center px-4">
@@ -428,9 +437,6 @@ export function WhoAmIBanner() {
           />
         </div>
       </m.div>
-
-      {/* melts into the page below */}
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-b from-transparent to-canvas/70" />
     </div>
   );
 }
