@@ -88,7 +88,7 @@ export function LineupSnapshot({
         className,
       )}
     >
-      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/15 blur-2xl" />
+      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/15 blur-2xl dark:hidden" />
 
       {/* the board, in its frame */}
       <div className="absolute inset-x-[6%] top-[13%] bottom-[29%] rounded-[3.4cqh] bg-wood p-[2.6cqh] shadow-card">
