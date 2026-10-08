@@ -50,30 +50,30 @@ const part = (seat: Seat, cast: number) =>
 
 /**
  * In a row under the board, measured from its middle in the banner's height
- * (the board is 96 wide); phones keep one on each side.
+ * (the board is 102 wide); phones keep one on each side.
  */
 const SEATS: { seat: Seat; place: string; dna: string; color: string }[] = [
   {
     seat: "a",
-    place: "left-[calc(50%_-_84cqh)] max-sm:hidden",
+    place: "left-[calc(50%_-_88cqh)] max-sm:hidden",
     dna: "Fox..Curious..0",
     color: "#F3D3B8",
   },
   {
     seat: "b",
-    place: "left-[calc(50%_-_30cqh)] max-sm:left-[22%]",
+    place: "left-[calc(50%_-_32cqh)] max-sm:left-[22%]",
     dna: "Frog..Happy..0",
     color: "#BFE6C8",
   },
   {
     seat: "c",
-    place: "left-[calc(50%_+_30cqh)] max-sm:hidden",
+    place: "left-[calc(50%_+_32cqh)] max-sm:hidden",
     dna: "Penguin..Cozy..0",
     color: "#C9DDF6",
   },
   {
     seat: "d",
-    place: "left-[calc(50%_+_84cqh)] max-sm:left-[78%]",
+    place: "left-[calc(50%_+_88cqh)] max-sm:left-[78%]",
     dna: "Owl.Wizard...0",
     color: "#F2E3A8",
   },
@@ -156,7 +156,7 @@ function Coin() {
     <svg
       viewBox="0 0 48 15"
       aria-hidden="true"
-      className="-mt-[1.5cqh] block w-[10.5cqh]"
+      className="-mt-[1.4cqh] block w-[9.5cqh]"
     >
       <path d="M1 4.2V10.6A23 3.6 0 0 0 47 10.6V4.2Z" fill="var(--gold-deep)" />
       <ellipse cx={24} cy={4.2} rx={23} ry={3.6} fill="var(--gold)" />
@@ -242,11 +242,11 @@ export function LineupBanner() {
         }}
       />
 
-      <div className="relative isolate mx-auto h-[clamp(200px,min(25vw,31vh),270px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[230px]">
+      <div className="relative isolate mx-auto h-[clamp(220px,min(28vw,35vh),320px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[250px]">
         {/* the pitch board, hovering slowly above the bidders; what is stuck
             on it rides along */}
         <m.div
-          className="-translate-x-1/2 absolute top-[3cqh] left-1/2 z-10 h-[64cqh] w-[96cqh]"
+          className="-translate-x-1/2 absolute top-[3cqh] left-1/2 z-10 h-[68cqh] w-[102cqh]"
           {...(reduced
             ? {}
             : {
@@ -286,7 +286,7 @@ export function LineupBanner() {
               {s.open || s.clear ? null : (
                 <m.div
                   key={`lot-${loop}`}
-                  className="relative w-[35cqh] rounded-[0.8cqh] bg-white p-[1.4cqh] [grid-area:1/1]"
+                  className="relative w-[37cqh] rounded-[0.8cqh] bg-white p-[1.4cqh] [grid-area:1/1]"
                   style={{ boxShadow: FLAT }}
                   initial={
                     reduced
@@ -375,7 +375,7 @@ export function LineupBanner() {
             {s.open ? (
               <m.div
                 key={`mission-${loop}`}
-                className="-translate-x-1/2 absolute top-[9cqh] left-1/2 w-[78cqh] rounded-[1.6cqh] bg-kraft px-[3.4cqh] pt-[4cqh] pb-[3.6cqh] text-center"
+                className="-translate-x-1/2 absolute top-[10cqh] left-1/2 w-[84cqh] rounded-[1.6cqh] bg-kraft px-[3.4cqh] pt-[4cqh] pb-[3.6cqh] text-center"
                 style={{
                   boxShadow: FLAT,
                   backgroundImage:
@@ -433,7 +433,7 @@ export function LineupBanner() {
                 <span className="block font-bold font-display text-[4.6cqh] text-kraft-ink/70 uppercase tracking-[0.06em]">
                   {t("banner.what")}
                 </span>
-                <span className="block text-balance font-bold font-display text-[clamp(12px,6.4cqh,16px)] text-kraft-ink leading-[1.15]">
+                <span className="block text-balance font-bold font-display text-[clamp(13px,6.4cqh,18px)] text-kraft-ink leading-[1.15]">
                   {line}
                 </span>
                 {/* the seal, broken as it lands */}
@@ -458,12 +458,12 @@ export function LineupBanner() {
             <div
               key={p.seat}
               className={cn(
-                "-translate-x-1/2 absolute bottom-[4%] flex flex-col items-center",
+                "-translate-x-1/2 absolute bottom-[2%] flex flex-col items-center",
                 p.place,
                 s.open && "opacity-60 transition-opacity duration-500",
               )}
             >
-              <div className="flex min-h-[14cqh] flex-col-reverse items-center pb-[1cqh]">
+              <div className="flex min-h-[12cqh] flex-col-reverse items-center pb-[1cqh]">
                 <AnimatePresence>
                   {Array.from({ length: bid }, (_, k) => (
                     <m.span
@@ -496,7 +496,7 @@ export function LineupBanner() {
                 <Creature
                   dna={p.dna}
                   color={p.color}
-                  className="size-[15cqh] rounded-pill"
+                  className="size-[14cqh] rounded-pill"
                 />
               </span>
             </div>
