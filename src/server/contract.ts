@@ -4,6 +4,7 @@ import type { Gosto } from "@/game/gostos";
 import type { Tone } from "@/game/lineup/bank";
 import type { LuKeptBoard } from "@/game/lineup/record";
 import type { LineupRules } from "@/game/lineup/rules";
+import type { LuCard } from "@/game/lineup/types";
 import type { SyncedSettings } from "@/game/options";
 import type { BadgeGroup, BadgeId } from "@/game/profile/badges";
 import type {
@@ -116,6 +117,9 @@ export interface LineupCatalog {
    */
   cards: Record<string, number>;
 }
+
+/** A card on What for?'s page among the dearest: its average price and how often it sold (GET /api/lineup/priciest). */
+export type PriciestCard = LuCard & { avg: number; sold: number };
 
 export interface CreateRoomInput extends LineupRules {
   game: GameKey;

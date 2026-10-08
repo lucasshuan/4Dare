@@ -212,6 +212,11 @@
       "banner": {
         "sold": "Vendido!",
         "what": "Pra quê?"
+      },
+      "priciest": {
+        "title": "Os mais caros do leilão",
+        "hint": "Preço médio de quem já foi vendido 20 vezes ou mais.",
+        "avg": "≈ {coins} 🪙"
       }
     },
     "next": "Próximos jogos",

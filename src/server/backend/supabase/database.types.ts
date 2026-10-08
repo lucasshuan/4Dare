@@ -1511,6 +1511,14 @@ export type Database = {
           popularity: number;
         }[];
       };
+      lineup_priciest: {
+        Args: { p_lang: string; p_limit: number; p_min: number };
+        Returns: {
+          avg_price: number;
+          card_id: string;
+          sold: number;
+        }[];
+      };
       played_together: { Args: { p_a: string; p_b: string }; Returns: boolean };
       player_boards: {
         Args: { p_limit: number; p_user: string };

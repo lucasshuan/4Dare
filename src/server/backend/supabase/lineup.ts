@@ -14,6 +14,9 @@ import type { Json } from "./database.types";
 /** The banks change by hand, rarely; the deck with library updates: one read per server every ten minutes. */
 const TTL_MS = 10 * 60_000;
 
+/** A card needs this many sales before its average price is worth showing. */
+const PRICIEST_MIN = 20;
+
 /** A read kept for TTL_MS; a failed one is tried again next time. */
 function cached<T>(read: () => Promise<T>) {
   let kept: { at: number; value: Promise<T> } | null = null;
@@ -64,6 +67,10 @@ export function supabaseLineup(): LineupStore {
     }));
   });
   const pools = new Map<Lang, () => Promise<PoolCard[]>>();
+  const dearest = new Map<
+    Lang,
+    () => Promise<{ id: string; sold: number; avg: number }[]>
+  >();
   return {
     missions,
     extras,
@@ -82,6 +89,26 @@ export function supabaseLineup(): LineupStore {
           }));
         });
         pools.set(lang, read);
+      }
+      return read();
+    },
+    priciest(lang) {
+      let read = dearest.get(lang);
+      if (!read) {
+        read = cached(async () => {
+          const { data, error } = await db().rpc("lineup_priciest", {
+            p_lang: lang,
+            p_min: PRICIEST_MIN,
+            p_limit: 8,
+          });
+          if (error) throw error;
+          return (data ?? []).map((r) => ({
+            id: r.card_id,
+            sold: r.sold,
+            avg: Number(r.avg_price),
+          }));
+        });
+        dearest.set(lang, read);
       }
       return read();
     },

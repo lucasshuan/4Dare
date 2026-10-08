@@ -5,7 +5,7 @@ import type { LineupStore } from "../types";
 import { LOCAL_CHARACTERS } from "./fixtures";
 import { LOCAL_EXTRAS, LOCAL_MISSIONS } from "./lineup-bank";
 
-/** The banks' first lots and the fixture library as a deck; nothing is counted. */
+/** The banks' first lots and the fixture library as a deck; nothing is counted, so nothing is priciest. */
 export function localLineup(): LineupStore {
   return {
     async missions() {
@@ -25,5 +25,8 @@ export function localLineup(): LineupStore {
         .map(({ id, gostos }, i): PoolCard => ({ id, gostos, rank: i + 1 }));
     },
     async count() {},
+    async priciest() {
+      return [];
+    },
   };
 }

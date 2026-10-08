@@ -212,6 +212,11 @@
       "banner": {
         "sold": "Sold!",
         "what": "What for?"
+      },
+      "priciest": {
+        "title": "The priciest at auction",
+        "hint": "Average price of those sold 20 times or more.",
+        "avg": "≈ {coins} 🪙"
       }
     },
     "next": "Next games",

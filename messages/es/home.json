@@ -212,6 +212,11 @@
       "banner": {
         "sold": "¡Vendido!",
         "what": "¿Para qué?"
+      },
+      "priciest": {
+        "title": "Los más caros de la subasta",
+        "hint": "Precio medio de los vendidos 20 veces o más.",
+        "avg": "≈ {coins} 🪙"
       }
     },
     "next": "Siguientes juegos",

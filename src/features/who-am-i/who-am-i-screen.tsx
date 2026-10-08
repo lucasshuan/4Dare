@@ -29,9 +29,12 @@ export function WhoAmIScreen() {
 export function GameHub({
   game,
   banner,
+  extra,
 }: {
   game: GameKey;
   banner: ReactNode;
+  /** The game's own, under creating and joining. */
+  extra?: ReactNode;
 }) {
   const t = useTranslations("home");
   const gameName = useGameName();
@@ -87,6 +90,7 @@ export function GameHub({
             </Link>
             <JoinByCode />
           </div>
+          {extra}
         </m.section>
 
         {/* the public rooms; locked during a match */}

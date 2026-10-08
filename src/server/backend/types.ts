@@ -498,6 +498,8 @@ export interface LineupStore {
   /** A language's deck, best known first (cached). */
   pool(lang: Lang): Promise<PoolCard[]>;
   count(missions: MissionCount[], cards: CardCount[]): Promise<void>;
+  /** A language's dearest cards on average, among those sold often enough to tell (cached). */
+  priciest(lang: Lang): Promise<{ id: string; sold: number; avg: number }[]>;
 }
 
 export interface Backend {
