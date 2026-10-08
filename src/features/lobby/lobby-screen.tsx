@@ -11,10 +11,11 @@ import {
 import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useRef, useState } from "react";
-import { Button, keyClass } from "@/components/ui/button";
+import { Button, buttonClass, keyClass } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
 import { RoomQr } from "@/components/ui/room-qr";
 import { Screen } from "@/components/ui/screen";
+import { SoundToggle } from "@/components/ui/sound-toggle";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useToast } from "@/components/ui/toast";
 import { usePrefetchCharacterIndex } from "@/features/characters/use-character-index";
@@ -29,7 +30,6 @@ import { backClass, RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { UserMenu } from "@/features/home/user-menu";
 import { GAME_SEATS } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
@@ -71,10 +71,6 @@ const titleClass =
 
 /** The lobby's panels: the invite, the players and the room's settings, each lifted off the backdrop. */
 const panelClass = "rounded-lg bg-surface p-6 max-sm:p-4";
-
-/** Leaving the room: a pill that warms to the "no" colour when pointed at. */
-const leaveClass =
-  "inline-flex h-11 items-center gap-2 rounded-pill border-[1.5px] border-line-strong bg-surface pr-5 pl-4 font-semibold text-ink text-sm transition-[color,background-color,border-color,translate] duration-150 ease-soft hover:-translate-y-px hover:border-no hover:bg-no-soft active:translate-y-0";
 
 /** How askew each tile of the room code sits, in degrees. */
 const TILE_TILT = [-3, 2, -1.5, 2.5, -2];
@@ -143,6 +139,7 @@ const editable = ({
 export function LobbyScreen() {
   const t = useTranslations("lobby");
   const tCreate = useTranslations("home.createRoom");
+  const tMatch = useTranslations("common.currentMatch");
   const _name = useDisplayName();
   const roomTitle = useRoomTitle();
   const withNames = useWithNames();
@@ -263,23 +260,25 @@ export function LobbyScreen() {
 
   return (
     <Screen bare>
-      {/* no top bar here: the lobby is the game's waiting room, with only the way out and theme and account */}
-      <div className="mb-5 flex items-center justify-between gap-3 short:mb-3">
+      {/* no top bar here: the lobby is the game's waiting room, with only sound, theme and the way out, top right like a match's "Leave" */}
+      <div className="mb-3 flex items-center justify-end gap-2 sm:gap-3">
+        <SoundToggle />
+        <ThemeToggle />
         <button
           type="button"
           onClick={async () => {
             await leaving.run(() => leaveRoom(code));
             router.push(GAME_PATHS[game]);
           }}
-          className={leaveClass}
+          className={buttonClass(
+            "secondary",
+            "sm",
+            "h-10 max-sm:w-10 max-sm:px-0",
+          )}
         >
-          <DoorOpen className="size-[18px]" strokeWidth={2} />
-          {t("leave")}
+          <DoorOpen strokeWidth={1.75} />
+          <span className="max-sm:sr-only">{tMatch("leaveShort")}</span>
         </button>
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <ThemeToggle />
-          <UserMenu />
-        </div>
       </div>
       <div className="flex flex-wrap items-start gap-6 lg:gap-8">
         <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-5 short:gap-4">
