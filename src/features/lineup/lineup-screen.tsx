@@ -7,6 +7,7 @@ import { AnimatePresence, m } from "motion/react";
 import dynamic from "next/dynamic";
 import { useLocale } from "next-intl";
 import { useStage } from "@/features/stage/stage-context";
+import { useMusic } from "@/lib/music";
 import { useGameOption } from "@/lib/settings";
 import { AuctionScreen } from "./auction";
 import { BreakScreen, WrapScene } from "./boards-side";
@@ -116,11 +117,27 @@ function useScene(): { key: string; node: React.ReactNode } | null {
   return null;
 }
 
+/**
+ * The presenter hears the booth's radio take of the music from the moment
+ * their picture glitches into the booth's TV (the chair scene) to the end of
+ * the match; everyone else, the stage.
+ */
+function useBoothMusic() {
+  const { lu, me } = useLineup();
+  const { show, beat } = useStage();
+  const chair = show?.beats.find((b) => b.kind === "chair");
+  const now = beat?.startsAt ?? show?.startsAt ?? 0;
+  const inBooth =
+    lu.hosted && lu.presenterId === me.id && !(chair && now < chair.startsAt);
+  useMusic(inBooth ? "booth" : undefined, 1);
+}
+
 export function LineupScreen() {
   const plain = useGameOption("lineup", "plainLetters");
   const ja = useLocale() === "ja";
   const scene = useScene();
   const { lu } = useLineup();
+  useBoothMusic();
   return (
     <div className="relative flex w-full flex-col items-center">
       <CoinDefs />

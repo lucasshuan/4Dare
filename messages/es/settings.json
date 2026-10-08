@@ -12,6 +12,10 @@
     "unmute": "Activar el sonido",
     "try": "Reproducir ejemplo",
     "groups": {
+      "music": {
+        "label": "Música",
+        "hint": "La música del programa de fondo"
+      },
       "match": {
         "label": "Partida",
         "hint": "Los pasos de tu turno y el podio"

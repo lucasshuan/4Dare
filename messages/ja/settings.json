@@ -12,6 +12,10 @@
     "unmute": "音をオンにする",
     "try": "試しに鳴らす",
     "groups": {
+      "music": {
+        "label": "音楽",
+        "hint": "番組のBGM"
+      },
       "match": {
         "label": "対戦",
         "hint": "自分の番の合図と表彰台"

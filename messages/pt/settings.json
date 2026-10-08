@@ -12,6 +12,10 @@
     "unmute": "Ligar o som",
     "try": "Tocar exemplo",
     "groups": {
+      "music": {
+        "label": "Música",
+        "hint": "A trilha do programa ao fundo"
+      },
       "match": {
         "label": "Partida",
         "hint": "Os passos da sua vez e o pódio"

@@ -10,8 +10,14 @@ import {
 } from "@/game/options";
 import { parsePresets, type RoomPreset } from "@/game/presets";
 
-/** The sound groups a person can turn down or off; sound.ts says which sound is in which. */
-export const SOUND_GROUPS = ["match", "clock", "chat", "room"] as const;
+/** The sound groups a person can turn down or off; sound.ts says which sound is in which, music.ts plays the music. */
+export const SOUND_GROUPS = [
+  "music",
+  "match",
+  "clock",
+  "chat",
+  "room",
+] as const;
 export type SoundGroup = (typeof SOUND_GROUPS)[number];
 
 /** What this device remembers: how loud the game is, the chat bubbles, each game's options and the room presets. */
@@ -29,6 +35,8 @@ export const DEFAULT_SETTINGS: Settings = {
   volume: 0.8,
   muted: false,
   sounds: {
+    // the music sits under everything else, so it starts at half
+    music: { on: true, volume: 0.5 },
     match: { on: true, volume: 1 },
     clock: { on: true, volume: 1 },
     chat: { on: true, volume: 1 },
@@ -102,7 +110,8 @@ export function updateSettings(change: (s: Settings) => Settings) {
   for (const l of listeners) l();
 }
 
-function subscribe(listener: () => void) {
+/** Calls `listener` whenever the settings change, here or in another tab; returns the unsubscribe. */
+export function subscribeSettings(listener: () => void) {
   listeners.add(listener);
   // another tab changed them
   const onStorage = (e: StorageEvent) => {
@@ -118,7 +127,11 @@ function subscribe(listener: () => void) {
 }
 
 export function useSettings(): Settings {
-  return useSyncExternalStore(subscribe, getSettings, () => DEFAULT_SETTINGS);
+  return useSyncExternalStore(
+    subscribeSettings,
+    getSettings,
+    () => DEFAULT_SETTINGS,
+  );
 }
 
 /** One of a game's options. */

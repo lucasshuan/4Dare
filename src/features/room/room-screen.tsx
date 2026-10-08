@@ -14,6 +14,7 @@ import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import type { ErrorCode } from "@/game/types";
 import { Link, useRouter } from "@/i18n/navigation";
 import { riseIn } from "@/lib/motion";
+import { useMusic } from "@/lib/music";
 import { useRoomTitle } from "@/lib/names";
 import { WHO_AM_I } from "@/lib/routes";
 import { joinRoom, leaveRoom } from "@/server/actions";
@@ -129,6 +130,7 @@ export function RoomScreen({ code }: { code: string }) {
       refresh={refresh}
       apply={apply}
     >
+      <RoomMusic />
       <RoomStage />
     </RoomProvider>
   );
@@ -205,4 +207,10 @@ function MovedElsewhere({
       </m.div>
     </Screen>
   );
+}
+
+/** The show's tune plays the whole time someone is in a room. */
+function RoomMusic() {
+  useMusic("stage");
+  return null;
 }

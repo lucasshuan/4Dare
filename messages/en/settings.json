@@ -12,6 +12,10 @@
     "unmute": "Turn sound on",
     "try": "Play a sample",
     "groups": {
+      "music": {
+        "label": "Music",
+        "hint": "The show's tune in the background"
+      },
       "match": {
         "label": "Match",
         "hint": "Your turn's steps and the podium"
