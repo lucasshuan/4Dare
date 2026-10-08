@@ -123,7 +123,7 @@ export function MatchFrame({ children }: { children: ReactNode }) {
 }
 
 /** Statuses that wait on this player's input. */
-const AWAITED = new Set<PlayerStatus>([
+const AWAITED = [
   "theming",
   "voting",
   "picking",
@@ -135,13 +135,16 @@ const AWAITED = new Set<PlayerStatus>([
   "talking",
   "working",
   "judging",
-]);
+] as const satisfies readonly PlayerStatus[];
 
 /**
  * The clock waits on this player: only then it turns red and ticks near the
  * end, and the tab calls them back.
  */
-export const isAwaited = (status: PlayerStatus) => AWAITED.has(status);
+export const isAwaited = (
+  status: PlayerStatus,
+): status is (typeof AWAITED)[number] =>
+  (AWAITED as readonly PlayerStatus[]).includes(status);
 
 /**
  * Left: the history button (turns only) and the theme tag. Right: the step

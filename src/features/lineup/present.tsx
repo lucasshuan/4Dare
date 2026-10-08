@@ -207,7 +207,7 @@ export function PresentStage() {
                 type="button"
                 disabled={!started || left <= 0}
                 onClick={() => react(k)}
-                aria-label={t(`react.${k}`)}
+                aria-label={t(`react.${k as 0 | 1 | 2 | 3}`)}
                 className="grid size-11 place-items-center rounded-pill bg-sunken text-[23px] transition-transform active:scale-90 disabled:opacity-40 sm:size-13 sm:text-[28px]"
               >
                 {emoji}

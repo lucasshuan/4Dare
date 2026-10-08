@@ -1,6 +1,11 @@
 import "server-only";
 import { ImageResponse } from "next/og";
-import { hasLocale } from "next-intl";
+import {
+  hasLocale,
+  type MessageKeys,
+  type Messages,
+  type NestedKeyOf,
+} from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactElement } from "react";
 import type { Lang } from "@/game/types";
@@ -14,7 +19,7 @@ import { ogFonts } from "./fonts";
  */
 export async function ogImageMetadata(
   params: { locale?: string } | undefined,
-  altKey: string,
+  altKey: MessageKeys<Messages["meta"], NestedKeyOf<Messages["meta"]>>,
   values?: Record<string, string>,
 ) {
   const locale = hasLocale(routing.locales, params?.locale)

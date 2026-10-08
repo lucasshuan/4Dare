@@ -57,6 +57,8 @@
     "gives_away": "Esa respuesta delata tu carta. Prueba otra.",
     "already_done": "Ya hiciste eso.",
     "conflict": "Alguien jugó al mismo tiempo. Inténtalo de nuevo.",
+    "few_cards": "Pocos personajes con estos gustos: activa más para empezar.",
+    "outbid": "Alguien ofertó antes. Inténtalo de nuevo.",
     "unauthorized": "Vuelve a iniciar sesión para continuar.",
     "upload_failed": "No se pudo subir la imagen. Usa JPG, PNG o WebP de hasta 4 MB.",
     "image_rejected": "Esta imagen no se puede usar: nada de sexo, desnudos reales ni gore.",

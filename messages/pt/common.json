@@ -57,6 +57,8 @@
     "gives_away": "Essa resposta entrega a carta. Tente outra.",
     "already_done": "Você já fez isso.",
     "conflict": "Alguém jogou ao mesmo tempo. Tente de novo.",
+    "few_cards": "Poucos personagens com esses gostos: ligue mais para começar.",
+    "outbid": "Alguém deu um lance antes. Tente de novo.",
     "unauthorized": "Entre de novo para continuar.",
     "upload_failed": "Não deu para enviar a imagem. Use JPG, PNG ou WebP de até 4 MB.",
     "image_rejected": "Essa imagem não pode: nada de sexo, nudez real ou gore.",

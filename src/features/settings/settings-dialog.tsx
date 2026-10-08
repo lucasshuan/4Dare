@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { Segmented } from "@/features/create/settings-fields";
 import { type GameKey, OPEN_GAMES } from "@/game/games";
-import { GAME_OPTIONS, THEMES } from "@/game/options";
+import { GAME_OPTIONS, type GameOption, THEMES } from "@/game/options";
 import { LANGS, type Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
@@ -249,6 +249,11 @@ function LookPane() {
   );
 }
 
+/** An option's key under `settings.game.options`, for every option GAME_OPTIONS lists. */
+type OptionKey = {
+  [G in GameKey]: `options.${G}.${GameOption<G> & string}`;
+}[GameKey];
+
 /** The game first, then that game's own options: each game brings its own. */
 function GamePane() {
   const t = useTranslations("settings.game");
@@ -281,24 +286,26 @@ function GamePane() {
         ))}
       </fieldset>
       <div className="flex flex-col">
-        {options.map((o) => (
-          <Row
-            key={o}
-            label={t(`options.${game}.${o}.label`)}
-            hint={t(`options.${game}.${o}.hint`)}
-          >
-            <Switch
-              aria-label={t(`options.${game}.${o}.label`)}
-              checked={values[o]}
-              onCheckedChange={(on) =>
-                updateSettings((x) => ({
-                  ...x,
-                  games: { ...x.games, [game]: { ...x.games[game], [o]: on } },
-                }))
-              }
-            />
-          </Row>
-        ))}
+        {options.map((o) => {
+          const key = `options.${game}.${o}` as OptionKey;
+          return (
+            <Row key={o} label={t(`${key}.label`)} hint={t(`${key}.hint`)}>
+              <Switch
+                aria-label={t(`${key}.label`)}
+                checked={values[o]}
+                onCheckedChange={(on) =>
+                  updateSettings((x) => ({
+                    ...x,
+                    games: {
+                      ...x.games,
+                      [game]: { ...x.games[game], [o]: on },
+                    },
+                  }))
+                }
+              />
+            </Row>
+          );
+        })}
       </div>
     </>
   );

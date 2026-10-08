@@ -2,7 +2,7 @@
 
 import { AnimatePresence, m, type Variants } from "motion/react";
 import dynamic from "next/dynamic";
-import { useTranslations } from "next-intl";
+import { type Messages, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
@@ -213,24 +213,27 @@ function MatchScreen({ screen }: { screen: StageScreen | null }) {
   }
 }
 
+/** The problems with words of their own; any other shows "other". */
+const PROBLEMS = [
+  "not_found",
+  "room_full",
+  "already_started",
+  "kicked",
+] as const satisfies readonly ErrorCode[];
+const isKnownProblem = (code: ErrorCode): code is (typeof PROBLEMS)[number] =>
+  (PROBLEMS as readonly ErrorCode[]).includes(code);
+
 /** The room can't be shown: gone, full, already playing, or another problem. */
 export function RoomProblem({ code }: { code: ErrorCode }) {
   const t = useTranslations("room");
-  const known = [
-    "not_found",
-    "room_full",
-    "already_started",
-    "kicked",
-  ].includes(code);
+  const problem = isKnownProblem(code) ? code : "other";
   return (
     <Screen>
       <m.div {...riseIn} className="flex max-w-lg flex-col gap-6 pt-10">
         <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em]">
-          {t(`problem.${known ? code : "other"}.title`)}
+          {t(`problem.${problem}.title`)}
         </h1>
-        <p className="text-ink-muted text-lg">
-          {t(`problem.${known ? code : "other"}.body`)}
-        </p>
+        <p className="text-ink-muted text-lg">{t(`problem.${problem}.body`)}</p>
         <Link
           href={GAMES}
           className={buttonClass("primary", "lg", "self-start")}
@@ -242,7 +245,9 @@ export function RoomProblem({ code }: { code: ErrorCode }) {
   );
 }
 
-const TAB_PHASE: Partial<Record<Phase, string>> = {
+const TAB_PHASE: Partial<
+  Record<Phase, Exclude<keyof Messages["meta"]["tab"], "alert">>
+> = {
   lobby: "lobby",
   theming: "theming",
   voting: "voting",

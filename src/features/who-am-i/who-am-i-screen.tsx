@@ -64,9 +64,7 @@ export function GameHub({
             {gameName(game)}
           </h1>
           <p className="text-[17px] text-ink-muted leading-[26px]">
-            {game === "who-am-i"
-              ? t("pitch")
-              : t(`games.${GAME_INFO[game].messages}.pitch`)}
+            {t(`games.${GAME_INFO[game].messages}.pitch`)}
           </p>
           {/* creating or joining by code sits under the pitch, so the rooms get the height; off during a match */}
           <div

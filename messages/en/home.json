@@ -1,5 +1,4 @@
 {
-  "pitch": "Everyone picks a character for someone else. You see their cards, never yours. Work out who you are with yes-or-no questions.",
   "guestHint": "You're playing as a guest. Sign in to pick a name and avatar.",
   "accountHint": "Signed in.",
   "create": "Create a room",
@@ -181,6 +180,7 @@
     "back": "Games",
     "whoAmI": {
       "name": "Who am I?",
+      "pitch": "Everyone picks a character for someone else. You see their cards, never yours. Work out who you are with yes-or-no questions.",
       "players": "2–4 players",
       "play": "Play",
       "demoQuestion": "Am I an animal?",

@@ -1,5 +1,4 @@
 {
-  "pitch": "Cada jugador elige un personaje para otro. Ves las cartas de los demás, nunca la tuya. Descubre quién eres con preguntas de sí o no.",
   "guestHint": "Juegas como invitado. Inicia sesión para elegir nombre y avatar.",
   "accountHint": "Sesión iniciada.",
   "create": "Crear sala",
@@ -181,6 +180,7 @@
     "back": "Juegos",
     "whoAmI": {
       "name": "¿Quién soy?",
+      "pitch": "Cada jugador elige un personaje para otro. Ves las cartas de los demás, nunca la tuya. Descubre quién eres con preguntas de sí o no.",
       "players": "2 a 4 jugadores",
       "play": "Jugar",
       "demoQuestion": "¿Soy un animal?",

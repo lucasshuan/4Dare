@@ -3,7 +3,7 @@
 import { Popover } from "@base-ui/react/popover";
 import { Check } from "lucide-react";
 import { type AnimationSequence, m } from "motion/react";
-import { useTranslations } from "next-intl";
+import { type Messages, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { LayoutMotion } from "@/components/ui/layout-motion";
@@ -244,7 +244,8 @@ function PlayerRow({ player: p }: { player: PlayerView }) {
           animate={{ opacity: 1, y: 0 }}
           className="truncate font-medium text-ink-muted text-xs max-sm:sr-only"
         >
-          {t(p.status)}
+          {/* a "Who am I?" match: every status it gives has words */}
+          {t(p.status as keyof Messages["turn"]["status"])}
         </m.span>
       </span>
       <span className="w-10 shrink-0 max-sm:hidden">

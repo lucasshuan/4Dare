@@ -57,6 +57,8 @@
     "gives_away": "That answer gives your card away. Try another.",
     "already_done": "You already did that.",
     "conflict": "Someone played at the same time. Try again.",
+    "few_cards": "Too few characters with these tastes: turn more on to start.",
+    "outbid": "Someone bid first. Try again.",
     "unauthorized": "Sign in again to continue.",
     "upload_failed": "Could not upload the image. Use a JPG, PNG or WebP up to 4 MB.",
     "image_rejected": "This picture can't be used: no sex, real nudity or gore.",
