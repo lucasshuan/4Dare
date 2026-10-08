@@ -75,5 +75,12 @@
   "seatsTitle": "プレイヤー",
   "seatsNow": "いま{n}人",
   "editTimes": "時間を変える",
-  "editThemeMode": "テーマの決め方を変える"
+  "editThemeMode": "テーマの決め方を変える",
+  "auctionRow": "コイン{coins}枚 · {lots}ロット · {rounds}ラウンド",
+  "editAuction": "オークションを変更",
+  "missionsRow": "ミッション{count}件",
+  "noHeavy": "重いものなし",
+  "editMissions": "ミッションを変更",
+  "cardsCount": "{count}人",
+  "needCards": "この好みではキャラクターが少なすぎます。始めるには増やしてください。"
 }

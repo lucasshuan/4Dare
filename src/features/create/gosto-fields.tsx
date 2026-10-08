@@ -9,6 +9,7 @@ import type { GameKey } from "@/game/games";
 import { GOSTO_KEYS, GOSTOS, type Gosto } from "@/game/gostos";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
+import { useLineupCount } from "./lineup-catalog";
 import { useThemeCount } from "./theme-catalog";
 
 const spring = { type: "spring", stiffness: 420, damping: 32 } as const;
@@ -156,8 +157,22 @@ export function GostoGrid({
   );
 }
 
-/** How many themes the room keeps, and a word when that is too few. */
+/** How many themes the room keeps (What for?: characters), and a word when that is too few. */
 export function ThemeCountLine({
+  room,
+}: {
+  room: {
+    game: GameKey;
+    offGostos: readonly Gosto[];
+    offThemes: readonly string[];
+  };
+}) {
+  if (room.game === "lineup")
+    return <CardCountLine offGostos={room.offGostos} />;
+  return <ThemeCount room={room} />;
+}
+
+function ThemeCount({
   room,
 }: {
   room: {
@@ -195,6 +210,24 @@ export function ThemeCountLine({
   );
 }
 
+/** What for?: how many characters the room's gostos send to auction, and a word when too few. */
+function CardCountLine({ offGostos }: { offGostos: readonly Gosto[] }) {
+  const t = useTranslations("home.createRoom.lineup");
+  const count = useLineupCount({ game: "lineup", offGostos });
+  if (!count) return <p className="h-5" />;
+  return (
+    <p
+      aria-live="polite"
+      className="flex flex-wrap items-baseline gap-x-2 font-medium text-[13px]"
+    >
+      <span className="text-ink tabular-nums">
+        {t("cardsOn", { count: count.cards })}
+      </span>
+      {count.tooFew ? <span className="text-no">{t("needCards")}</span> : null}
+    </p>
+  );
+}
+
 /** The "Style" tab: the gostos the room keeps. */
 export function GostoFields({
   value,
@@ -208,7 +241,10 @@ export function GostoFields({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-4 gap-y-1">
-        <HintLabel hint={t("gostosHint")} hintId={hintId}>
+        <HintLabel
+          hint={t(value.game === "lineup" ? "lineup.gostosHint" : "gostosHint")}
+          hintId={hintId}
+        >
           {t("gostos")}
         </HintLabel>
         <ThemeCountLine room={value} />

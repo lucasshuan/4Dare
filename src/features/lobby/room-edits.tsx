@@ -4,10 +4,12 @@ import { Popover } from "@base-ui/react/popover";
 import {
   ChevronDown,
   Clock,
+  Gavel,
   Globe,
   Heart,
   Lock,
   type LucideIcon,
+  Mail,
   PenLine,
   UsersRound,
   VenetianMask,
@@ -18,12 +20,20 @@ import { type FormEvent, type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { GostoGrid, ThemeCountLine } from "@/features/create/gosto-fields";
+import { useLineupCount } from "@/features/create/lineup-catalog";
+import {
+  AuctionFields,
+  type AuctionRules,
+  HeavySwitch,
+  MissionCountLine,
+} from "@/features/create/lineup-fields";
 import { SecondsField, Segmented } from "@/features/create/settings-fields";
 import { useThemeCount } from "@/features/create/theme-catalog";
 import { ImpostorsPicker } from "@/features/impostor/impostors-picker";
 import { GAME_SEATS, type GameKey } from "@/game/games";
 import { GOSTOS, type Gosto } from "@/game/gostos";
 import { impostorsFor } from "@/game/impostor/engine";
+import { lotsFor, roundsFor } from "@/game/lineup/rules";
 import {
   GAME_STEP_TIMES,
   ROOM_NAME_MAX,
@@ -491,8 +501,16 @@ export function GostosRow({
   const tc = useTranslations("home.createRoom");
   const tg = useTranslations("common.gostos");
   const [draft, setDraft] = useState<Gosto[]>(settings.offGostos);
-  const count = useThemeCount(settings);
-  const draftCount = useThemeCount({ ...settings, offGostos: draft });
+  const themes = useThemeCount(settings);
+  const draftThemes = useThemeCount({ ...settings, offGostos: draft });
+  // What for? counts the characters its auction draws from instead
+  const cards = useLineupCount(settings);
+  const draftCards = useLineupCount({ ...settings, offGostos: draft });
+  const count = cards
+    ? { tooFew: cards.tooFew, text: t("cardsCount", { count: cards.cards }) }
+    : themes
+      ? { tooFew: themes.tooFew, text: t("themeCount", { count: themes.on }) }
+      : null;
   const on = GOSTOS.filter((g) => !settings.offGostos.includes(g.key));
   return (
     <EditRow
@@ -522,7 +540,7 @@ export function GostosRow({
                 count.tooFew ? "text-no" : "text-ink-muted",
               )}
             >
-              {t("themeCount", { count: count.on })}
+              {count.text}
             </span>
           ) : null}
         </span>
@@ -530,7 +548,7 @@ export function GostosRow({
       label={t("editGostos")}
       editable={editable}
       pending={pending}
-      canSave={!draftCount?.tooFew}
+      canSave={!(draftThemes?.tooFew || draftCards?.tooFew)}
       onOpen={() => setDraft(settings.offGostos)}
       onSave={() => onSave({ offGostos: draft })}
     >
@@ -588,6 +606,97 @@ export function ImpostorsRow({
         players={players}
         onChange={setDraft}
       />
+    </EditRow>
+  );
+}
+
+/**
+ * What for?'s auction: coins, lots and rounds for the table as it sits now;
+ * the host's row sets them, the break and trades.
+ */
+export function AuctionRow({
+  settings,
+  players,
+  editable,
+  pending,
+  onSave,
+}: {
+  settings: AuctionRules & Pick<RoomSettings, "seats">;
+  /** People seated now: the lots and the automatic rounds follow them. */
+  players: number;
+  editable: boolean;
+  pending: boolean;
+  onSave: (v: AuctionRules) => Promise<boolean>;
+}) {
+  const t = useTranslations("lobby");
+  const pick = (): AuctionRules => ({
+    coins: settings.coins,
+    lotsPerSeat: settings.lotsPerSeat,
+    rounds: settings.rounds,
+    interval: settings.interval,
+    trades: settings.trades,
+  });
+  const [draft, setDraft] = useState(pick);
+  const table = Math.max(GAME_SEATS.lineup.min, players);
+  return (
+    <EditRow
+      icon={rowIcon(Gavel)}
+      text={t("auctionRow", {
+        coins: settings.coins,
+        lots: lotsFor(table, settings.lotsPerSeat),
+        rounds: roundsFor(table, settings.rounds),
+      })}
+      label={t("editAuction")}
+      editable={editable}
+      pending={pending}
+      width="400px"
+      onOpen={() => setDraft(pick())}
+      onSave={() => onSave(draft)}
+    >
+      <AuctionFields value={draft} onChange={setDraft} compact />
+    </EditRow>
+  );
+}
+
+/**
+ * What for?'s missions: how many the rounds draw from, and whether heavy ones
+ * are in; the host's row switches those (each mission is in the advanced
+ * settings).
+ */
+export function MissionsRow({
+  settings,
+  editable,
+  pending,
+  onSave,
+}: {
+  settings: Pick<RoomSettings, "heavy" | "offMissions">;
+  editable: boolean;
+  pending: boolean;
+  onSave: (v: Pick<RoomSettings, "heavy">) => Promise<boolean>;
+}) {
+  const t = useTranslations("lobby");
+  const [heavy, setHeavy] = useState(settings.heavy);
+  const count = useLineupCount({ game: "lineup", offGostos: [], ...settings });
+  return (
+    <EditRow
+      icon={rowIcon(Mail)}
+      text={
+        <span>
+          {count ? t("missionsRow", { count: count.missions }) : "…"}
+          {settings.heavy ? null : (
+            <span className="text-ink-muted"> · {t("noHeavy")}</span>
+          )}
+        </span>
+      }
+      label={t("editMissions")}
+      editable={editable}
+      pending={pending}
+      width="340px"
+      onOpen={() => setHeavy(settings.heavy)}
+      onSave={() => onSave({ heavy })}
+    >
+      <HeavySwitch value={heavy} onChange={setHeavy} />
+      <MissionCountLine room={{ heavy, offMissions: settings.offMissions }} />
     </EditRow>
   );
 }

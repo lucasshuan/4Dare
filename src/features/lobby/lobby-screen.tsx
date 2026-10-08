@@ -16,6 +16,7 @@ import {
   useGameName,
 } from "@/features/create/game-field";
 import { saveSetup } from "@/features/create/last-setup";
+import { useLineupCount } from "@/features/create/lineup-catalog";
 import { backClass, RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
@@ -39,8 +40,10 @@ import type { CreateRoomInput } from "@/server/contract";
 import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
 import {
+  AuctionRow,
   GostosRow,
   ImpostorsRow,
+  MissionsRow,
   RoomTitle,
   SeatsRow,
   ThemeModeRow,
@@ -155,6 +158,7 @@ export function LobbyScreen() {
   const [kicking, setKicking] = useState<string[]>([]);
   const inFlight = useRef(0);
   const shownSeats = seatsGuess ?? seats;
+  const cards = useLineupCount(view.settings);
   const shownPlayers = view.players
     .filter((p) => !kicking.includes(p.id))
     .map((p) => (p.isYou ? { ...p, ready: myReady } : p));
@@ -351,21 +355,29 @@ export function LobbyScreen() {
             {/* keys like "Create room": the host's starts the match; a guest's stays pressed down once ready */}
             {me.isHost ? (
               <>
-                <NeedsPlayers show={view.players.length < 2}>
+                <StartBlocked
+                  reason={
+                    view.players.length < 2
+                      ? t("needPlayers")
+                      : cards?.tooFew
+                        ? t("needCards")
+                        : null
+                  }
+                >
                   <button
                     type="button"
                     className={keyClass("yes", {
                       bounce: true,
                       className: "min-h-14 w-full px-6 text-lg",
                     })}
-                    disabled={!view.canStart || pending}
+                    disabled={!view.canStart || !!cards?.tooFew || pending}
                     onClick={() =>
                       waiting.length ? setConfirming(true) : start()
                     }
                   >
                     {t("start")}
                   </button>
-                </NeedsPlayers>
+                </StartBlocked>
                 <StartDialog
                   open={confirming && view.canStart}
                   onClose={() => setConfirming(false)}
@@ -441,6 +453,27 @@ export function LobbyScreen() {
                   }
                 />
               ) : null}
+              {game === "lineup" ? (
+                <>
+                  <AuctionRow
+                    settings={view.settings}
+                    players={shownPlayers.length}
+                    editable={me.isHost}
+                    pending={pending}
+                    onSave={async (v) =>
+                      (await act(() => updateSettings(code, v))).ok
+                    }
+                  />
+                  <MissionsRow
+                    settings={view.settings}
+                    editable={me.isHost}
+                    pending={pending}
+                    onSave={async (v) =>
+                      (await act(() => updateSettings(code, v))).ok
+                    }
+                  />
+                </>
+              ) : null}
               {game === "who-am-i" ? (
                 <ThemeModeRow
                   value={themeMode}
@@ -474,19 +507,19 @@ export function LobbyScreen() {
 }
 
 /**
- * Wraps the host's start key: while the room is short of players, hovering
- * or tapping it says why it is off. A disabled button takes no pointer
- * events, so the wrapper is the trigger.
+ * Wraps the host's start key: while the room can't start (short of players,
+ * What for?'s gostos leaving too few characters), hovering or tapping it says
+ * why. A disabled button takes no pointer events, so the wrapper is the
+ * trigger.
  */
-function NeedsPlayers({
-  show,
+function StartBlocked({
+  reason,
   children,
 }: {
-  show: boolean;
+  reason: string | null;
   children: ReactNode;
 }) {
-  const t = useTranslations("lobby");
-  if (!show) return <div className="shrink-0 max-sm:w-full">{children}</div>;
+  if (!reason) return <div className="shrink-0 max-sm:w-full">{children}</div>;
   return (
     <Popover.Root>
       <Popover.Trigger
@@ -495,7 +528,7 @@ function NeedsPlayers({
         closeDelay={120}
         nativeButton={false}
         render={<span />}
-        aria-label={t("needPlayers")}
+        aria-label={reason}
         className="shrink-0 rounded-md max-sm:w-full"
       >
         {children}
@@ -503,7 +536,7 @@ function NeedsPlayers({
       <Popover.Portal>
         <Popover.Positioner side="top" sideOffset={8} className="z-50">
           <Popover.Popup className="w-max max-w-[min(300px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface px-3 py-2 font-medium text-[13px] text-ink-muted leading-snug shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
-            {t("needPlayers")}
+            {reason}
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>

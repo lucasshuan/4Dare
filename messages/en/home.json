@@ -60,6 +60,22 @@
       "lastSeconds": {
         "label": "Last chance",
         "hint": "A caught impostor tries to guess the crew's card."
+      },
+      "lotSeconds": {
+        "label": "Time per lot",
+        "hint": "How long a lot lasts at the auction. A bid in the last 5 s puts 5 s back on the clock."
+      },
+      "tradeSeconds": {
+        "label": "Time to trade",
+        "hint": "After the auction, each player can offer one trade. Ends early once everyone confirms."
+      },
+      "defendSeconds": {
+        "label": "Time to build the board",
+        "hint": "After the mission, each team arranges its photos and writes on its board. Ends early once everyone confirms."
+      },
+      "judgeSeconds": {
+        "label": "Time to judge",
+        "hint": "A secret vote for the best board, your own counts too. Ends early once everyone votes."
       }
     },
     "less": "10 seconds less",
@@ -85,7 +101,38 @@
     "noThemeFound": "No theme by that name.",
     "hiddenByGostos": "{count, plural, one {# theme hidden} other {# themes hidden}} by the tastes.",
     "hostNoteTitle": "You type the theme",
-    "hostNote": "When the match starts, you write any theme you like, with a few ideas from the themes on. If 30 s go by, everyone votes instead."
+    "hostNote": "When the match starts, you write any theme you like, with a few ideas from the themes on. If 30 s go by, everyone votes instead.",
+    "lineup": {
+      "coins": "Coins per round",
+      "coinsHint": "Everyone starts each round with these coins to bid with.",
+      "lots": "Lots per person",
+      "lotsHint": "How many characters go to auction per person at the table, plus 3.",
+      "rounds": "Rounds",
+      "roundsAuto": "Auto",
+      "roundsHint": "Auto: 2 rounds up to 4 people, 1 after that.",
+      "interval": "Break halfway through the auction",
+      "intervalHint": "A pause to see everyone's team and the coins they have left.",
+      "trades": "Trades after the auction",
+      "tradesHint": "Before the mission, each player can offer to swap characters with another team.",
+      "missions": "Missions",
+      "missionsOn": "{on} of {total} missions",
+      "missionsHint": "Each round draws one of the missions you keep on. New missions start on.",
+      "heavy": "Heavy missions",
+      "heavyHint": "Shipwrecks, funerals and others that may weigh on the table.",
+      "heavyTag": "heavy",
+      "searchMissions": "Search missions",
+      "noMissionFound": "No mission with that.",
+      "tones": {
+        "chores": "Chores",
+        "social": "Social",
+        "adventure": "Adventure",
+        "absurd": "Absurd",
+        "contest": "Contest"
+      },
+      "cardsOn": "{count, plural, one {# character up for auction} other {# characters up for auction}}",
+      "needCards": "Too few characters: turn more tastes on.",
+      "gostosHint": "Turn off what nobody here wants to see: those characters stay out of the auction."
+    }
   },
   "presets": {
     "label": "Preset",

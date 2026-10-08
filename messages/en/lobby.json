@@ -75,5 +75,12 @@
   "seatsTitle": "Players",
   "seatsNow": "{n} at the table now",
   "editTimes": "Change the times",
-  "editThemeMode": "Change how the theme is chosen"
+  "editThemeMode": "Change how the theme is chosen",
+  "auctionRow": "{coins} coins · {lots} lots · {rounds, plural, one {# round} other {# rounds}}",
+  "editAuction": "Change the auction",
+  "missionsRow": "{count, plural, one {# mission} other {# missions}}",
+  "noHeavy": "no heavy ones",
+  "editMissions": "Change the missions",
+  "cardsCount": "{count, plural, one {# character} other {# characters}}",
+  "needCards": "Too few characters with these tastes: turn more on to start."
 }

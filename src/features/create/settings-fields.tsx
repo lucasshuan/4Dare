@@ -20,6 +20,7 @@ import {
 } from "@/game/types";
 import { cn } from "@/lib/cn";
 import type { CreateRoomInput } from "@/server/contract";
+import { AuctionFields } from "./lineup-fields";
 
 /** Options on a pill track, the chosen one raised. */
 export function Segmented<T extends string | number>({
@@ -265,6 +266,14 @@ export function RulesFields({
           />
         ))}
       </div>
+      {value.game === "lineup" ? (
+        <div className="self-start rounded-lg bg-surface p-5 shadow-card">
+          <AuctionFields
+            value={value}
+            onChange={(rules) => onChange({ ...value, ...rules })}
+          />
+        </div>
+      ) : null}
       {value.game === "impostor" ? (
         <div className="max-w-[420px] rounded-lg bg-surface p-5 shadow-card">
           <ImpostorsPicker

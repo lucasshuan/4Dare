@@ -1,6 +1,7 @@
 // Shapes shared by server actions, route handlers and the UI.
 import type { GameKey } from "@/game/games";
 import type { Gosto } from "@/game/gostos";
+import type { Tone } from "@/game/lineup/bank";
 import type { LineupRules } from "@/game/lineup/rules";
 import type { SyncedSettings } from "@/game/options";
 import type { BadgeGroup, BadgeId } from "@/game/profile/badges";
@@ -101,6 +102,17 @@ export interface ThemeCatalogEntry {
   /** Its shared starters' gostos, clearest first; null for a starter with none yet. */
   gostos: (Gosto[] | null)[];
   names: Localized;
+}
+
+/** What for?'s missions and deck as the room setup counts them (GET /api/lineup/catalog). */
+export interface LineupCatalog {
+  missions: { id: string; tone: Tone; heavy: boolean; text: Localized }[];
+  /**
+   * The deck of the asked language by gostos: each key is a bit mask over
+   * GOSTOS (bit i for GOSTOS[i]), its value how many characters have exactly
+   * those gostos.
+   */
+  cards: Record<string, number>;
 }
 
 export interface CreateRoomInput extends LineupRules {

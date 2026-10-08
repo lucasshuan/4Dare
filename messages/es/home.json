@@ -60,6 +60,22 @@
       "lastSeconds": {
         "label": "Última oportunidad",
         "hint": "El impostor atrapado intenta adivinar la carta de la tripulación."
+      },
+      "lotSeconds": {
+        "label": "Tiempo de cada lote",
+        "hint": "Cuánto dura un lote en la subasta. Una puja en los últimos 5 s le devuelve 5 s al reloj."
+      },
+      "tradeSeconds": {
+        "label": "Tiempo para cambiar",
+        "hint": "Después de la subasta, cada uno puede proponer un cambio. Termina antes si todos confirman."
+      },
+      "defendSeconds": {
+        "label": "Tiempo para armar el tablero",
+        "hint": "Después de la misión, cada equipo acomoda sus fotos y escribe en su tablero. Termina antes si todos confirman."
+      },
+      "judgeSeconds": {
+        "label": "Tiempo para juzgar",
+        "hint": "Voto secreto por el mejor tablero, el tuyo también vale. Termina antes si todos votan."
       }
     },
     "less": "10 segundos menos",
@@ -85,7 +101,38 @@
     "noThemeFound": "Ningún tema con ese nombre.",
     "hiddenByGostos": "{count, plural, one {# tema oculto} other {# temas ocultos}} por los gustos.",
     "hostNoteTitle": "Tú escribes el tema",
-    "hostNote": "Cuando empiece la partida, escribes el tema que quieras, con algunas ideas de los temas activados. Si pasan 30 s, todos votan."
+    "hostNote": "Cuando empiece la partida, escribes el tema que quieras, con algunas ideas de los temas activados. Si pasan 30 s, todos votan.",
+    "lineup": {
+      "coins": "Monedas por ronda",
+      "coinsHint": "Cada uno empieza cada ronda con estas monedas para pujar.",
+      "lots": "Lotes por persona",
+      "lotsHint": "Cuántos personajes salen a subasta por persona en la mesa, más 3.",
+      "rounds": "Rondas",
+      "roundsAuto": "Auto",
+      "roundsHint": "Auto: 2 rondas hasta 4 personas, 1 después.",
+      "interval": "Pausa a mitad de la subasta",
+      "intervalHint": "Un momento para ver los equipos de todos y las monedas que les quedan.",
+      "trades": "Cambios después de la subasta",
+      "tradesHint": "Antes de la misión, cada uno puede proponer cambiar personajes con otro equipo.",
+      "missions": "Misiones",
+      "missionsOn": "{on} de {total} misiones",
+      "missionsHint": "Cada ronda sortea una de las misiones activadas. Una misión nueva entra activada.",
+      "heavy": "Misiones pesadas",
+      "heavyHint": "Naufragios, funerales y otras que pueden pesar en la mesa.",
+      "heavyTag": "pesada",
+      "searchMissions": "Buscar misión",
+      "noMissionFound": "Ninguna misión con eso.",
+      "tones": {
+        "chores": "Tareas",
+        "social": "Social",
+        "adventure": "Aventura",
+        "absurd": "Absurdo",
+        "contest": "Duelo"
+      },
+      "cardsOn": "{count, plural, one {# personaje en la subasta} other {# personajes en la subasta}}",
+      "needCards": "Pocos personajes: activa más gustos.",
+      "gostosHint": "Desactiva lo que nadie aquí quiere ver: esos personajes no salen a subasta."
+    }
   },
   "presets": {
     "label": "Ajuste",

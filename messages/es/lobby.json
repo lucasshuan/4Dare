@@ -75,5 +75,12 @@
   "seatsTitle": "Jugadores",
   "seatsNow": "{n} en la mesa ahora",
   "editTimes": "Cambiar los tiempos",
-  "editThemeMode": "Cambiar cómo se elige el tema"
+  "editThemeMode": "Cambiar cómo se elige el tema",
+  "auctionRow": "{coins} monedas · {lots} lotes · {rounds, plural, one {# ronda} other {# rondas}}",
+  "editAuction": "Cambiar la subasta",
+  "missionsRow": "{count, plural, one {# misión} other {# misiones}}",
+  "noHeavy": "sin pesadas",
+  "editMissions": "Cambiar las misiones",
+  "cardsCount": "{count, plural, one {# personaje} other {# personajes}}",
+  "needCards": "Pocos personajes con estos gustos: activa más para empezar."
 }

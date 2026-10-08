@@ -75,5 +75,12 @@
   "seatsTitle": "Jogadores",
   "seatsNow": "{n} na mesa agora",
   "editTimes": "Mudar os tempos",
-  "editThemeMode": "Mudar como o tema é escolhido"
+  "editThemeMode": "Mudar como o tema é escolhido",
+  "auctionRow": "{coins} moedas · {lots} lotes · {rounds, plural, one {# rodada} other {# rodadas}}",
+  "editAuction": "Mudar o leilão",
+  "missionsRow": "{count, plural, one {# missão} other {# missões}}",
+  "noHeavy": "sem pesadas",
+  "editMissions": "Mudar as missões",
+  "cardsCount": "{count, plural, one {# personagem} other {# personagens}}",
+  "needCards": "Poucos personagens com esses gostos: ligue mais para começar."
 }

@@ -4,6 +4,7 @@ import { Tabs } from "@base-ui/react/tabs";
 import {
   ArrowRight,
   Heart,
+  Mail,
   ScrollText,
   Shapes,
   SlidersHorizontal,
@@ -22,6 +23,8 @@ import type { CreateRoomInput } from "@/server/contract";
 import { GameField } from "./game-field";
 import { GostoFields } from "./gosto-fields";
 import { DEFAULT_SETUP } from "./last-setup";
+import { useLineupCount } from "./lineup-catalog";
+import { MissionFields } from "./lineup-fields";
 import { PresetMenu } from "./preset-menu";
 import {
   missingName,
@@ -69,6 +72,7 @@ export function RoomSetup({
   const [tab, setTab] = useState<Tab>("room");
   const problemId = useId();
   const count = useThemeCount(value ?? DEFAULT_SETUP);
+  const lineup = useLineupCount(value ?? DEFAULT_SETUP);
   const problems: Record<Tab, string | null> = {
     room: !value
       ? null
@@ -78,10 +82,16 @@ export function RoomSetup({
           ? t("needPassword")
           : null,
     rules: null,
-    style: null,
+    style: lineup?.tooFew ? t("lineup.needCards") : null,
     themes: count?.tooFew ? t("needThemes") : null,
   };
-  const problemTab = problems.room ? "room" : problems.themes ? "themes" : null;
+  const problemTab = problems.room
+    ? "room"
+    : problems.style
+      ? "style"
+      : problems.themes
+        ? "themes"
+        : null;
 
   return (
     <form
@@ -173,25 +183,45 @@ export function RoomSetup({
                 problem={problems.style}
                 problemId={`${problemId}-style`}
               />
-              <SetupTab
-                value="themes"
-                active={tab === "themes"}
-                icon={Shapes}
-                tone="bg-apricot-soft text-apricot"
-                label={t("themes")}
-                summary={[
-                  value.game === "who-am-i" && value.themeMode === "host"
-                    ? t("themeHost")
-                    : null,
-                  count
-                    ? t("themesOn", { on: count.on, total: count.total })
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-                problem={problems.themes}
-                problemId={`${problemId}-themes`}
-              />
+              {value.game === "lineup" ? (
+                <SetupTab
+                  value="themes"
+                  active={tab === "themes"}
+                  icon={Mail}
+                  tone="bg-apricot-soft text-apricot"
+                  label={t("lineup.missions")}
+                  summary={
+                    lineup
+                      ? t("lineup.missionsOn", {
+                          on: lineup.missions,
+                          total: lineup.allMissions,
+                        })
+                      : ""
+                  }
+                  problem={null}
+                  problemId={`${problemId}-themes`}
+                />
+              ) : (
+                <SetupTab
+                  value="themes"
+                  active={tab === "themes"}
+                  icon={Shapes}
+                  tone="bg-apricot-soft text-apricot"
+                  label={t("themes")}
+                  summary={[
+                    value.game === "who-am-i" && value.themeMode === "host"
+                      ? t("themeHost")
+                      : null,
+                    count
+                      ? t("themesOn", { on: count.on, total: count.total })
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  problem={problems.themes}
+                  problemId={`${problemId}-themes`}
+                />
+              )}
             </LayoutMotion>
           </Tabs.List>
           <Tabs.Panel value="room" className="outline-none">
@@ -222,10 +252,17 @@ export function RoomSetup({
           </Tabs.Panel>
           <Tabs.Panel value="themes" className="outline-none">
             <PanelIn>
-              <ThemeFields
-                value={value}
-                onChange={(v) => onChange({ ...value, ...v })}
-              />
+              {value.game === "lineup" ? (
+                <MissionFields
+                  value={value}
+                  onChange={(v) => onChange({ ...value, ...v })}
+                />
+              ) : (
+                <ThemeFields
+                  value={value}
+                  onChange={(v) => onChange({ ...value, ...v })}
+                />
+              )}
             </PanelIn>
           </Tabs.Panel>
         </Tabs.Root>

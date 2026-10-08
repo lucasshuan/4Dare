@@ -60,6 +60,22 @@
       "lastSeconds": {
         "label": "Última chance",
         "hint": "O impostor pego tenta adivinhar a carta da tripulação."
+      },
+      "lotSeconds": {
+        "label": "Tempo de cada lote",
+        "hint": "Quanto dura um lote no leilão. Um lance nos últimos 5 s devolve 5 s ao relógio."
+      },
+      "tradeSeconds": {
+        "label": "Tempo para trocar",
+        "hint": "Depois do leilão, cada um pode propor uma troca. Acaba antes se todos confirmarem."
+      },
+      "defendSeconds": {
+        "label": "Tempo para montar o quadro",
+        "hint": "Depois da missão, cada time arruma as fotos e escreve no quadro. Acaba antes se todos confirmarem."
+      },
+      "judgeSeconds": {
+        "label": "Tempo para julgar",
+        "hint": "Voto secreto no melhor quadro, o seu também vale. Acaba antes se todos votarem."
       }
     },
     "less": "Menos 10 segundos",
@@ -85,7 +101,38 @@
     "noThemeFound": "Nenhum tema com esse nome.",
     "hiddenByGostos": "{count, plural, one {# tema escondido} other {# temas escondidos}} pelos gostos.",
     "hostNoteTitle": "Você escreve o tema",
-    "hostNote": "Quando a partida começar, você escreve o tema que quiser, com umas ideias dos temas ligados. Se passarem 30 s, todo mundo vota."
+    "hostNote": "Quando a partida começar, você escreve o tema que quiser, com umas ideias dos temas ligados. Se passarem 30 s, todo mundo vota.",
+    "lineup": {
+      "coins": "Moedas por rodada",
+      "coinsHint": "Cada um começa cada rodada com essas moedas para dar lances.",
+      "lots": "Lotes por pessoa",
+      "lotsHint": "Quantos personagens vão a leilão por pessoa na mesa, mais 3.",
+      "rounds": "Rodadas",
+      "roundsAuto": "Auto",
+      "roundsHint": "Auto: 2 rodadas até 4 pessoas, 1 depois.",
+      "interval": "Intervalo no meio do leilão",
+      "intervalHint": "Uma pausa para ver os times de todos e as moedas que sobram.",
+      "trades": "Trocas depois do leilão",
+      "tradesHint": "Antes da missão, cada um pode propor trocar personagens com outro time.",
+      "missions": "Missões",
+      "missionsOn": "{on} de {total} missões",
+      "missionsHint": "Cada rodada sorteia uma das missões ligadas. Missão nova entra ligada.",
+      "heavy": "Missões pesadas",
+      "heavyHint": "Naufrágios, enterros e outras que podem pesar na mesa.",
+      "heavyTag": "pesada",
+      "searchMissions": "Buscar missão",
+      "noMissionFound": "Nenhuma missão com isso.",
+      "tones": {
+        "chores": "Tarefas",
+        "social": "Social",
+        "adventure": "Aventura",
+        "absurd": "Absurdo",
+        "contest": "Disputa"
+      },
+      "cardsOn": "{count, plural, one {# personagem no leilão} other {# personagens no leilão}}",
+      "needCards": "Poucos personagens: ligue mais gostos.",
+      "gostosHint": "Desligue o que ninguém aqui quer ver: os personagens disso não vão a leilão."
+    }
   },
   "presets": {
     "label": "Predefinição",

@@ -95,14 +95,14 @@ function ModeSwitch({
 }
 
 /** Lowercase and without accents, so "pokemon" finds "Pokémon". */
-const plain = (text: string) =>
+export const plain = (text: string) =>
   text
     .toLocaleLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 
 /** A checkbox drawn as a box: on, off, or (for a set) partly on. */
-function Box({ state }: { state: boolean | "mixed" }) {
+export function Box({ state }: { state: boolean | "mixed" }) {
   return (
     <span
       aria-hidden
