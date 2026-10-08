@@ -145,10 +145,10 @@ export function ImpostorSnapshot({
         {s.dark ? (
           <m.span
             key={`spot-${loop}`}
-            className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[58%] size-[78cqh] rounded-pill shadow-[0_0_0_200vmax_rgba(11,15,23,0.7)]"
+            className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[58%] size-[78cqh] rounded-pill shadow-[0_0_0_200vmax_var(--art-impostor-dim)]"
             style={{
               background:
-                "radial-gradient(circle, rgba(246,227,161,0.16), transparent 48%, rgba(11,15,23,0.7) 72%)",
+                "radial-gradient(circle, rgba(246,227,161,0.16), transparent 48%, var(--art-impostor-dim) 72%)",
             }}
             initial={{ opacity: 0, left: still ? spot : "4%" }}
             animate={{

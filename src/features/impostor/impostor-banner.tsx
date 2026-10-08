@@ -380,7 +380,7 @@ export function ImpostorBanner() {
                       className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[45%] left-1/2 size-[400vmax]"
                       style={{
                         background:
-                          "radial-gradient(circle, rgba(246,227,161,0.14), transparent 31cqh, rgba(11,15,23,0.72) 48cqh)",
+                          "radial-gradient(circle, rgba(246,227,161,0.14), transparent 31cqh, var(--art-impostor-dim) 48cqh)",
                       }}
                     />
                   ) : null}
