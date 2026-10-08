@@ -41,7 +41,7 @@
   --art-impostor: #b39ae0;
   --art-impostor-2: #9776d1;
   /* the Impostor art's lights down: a plum dusk here, near black in the dark theme */
-  --art-impostor-dim: rgb(40 24 70 / 0.42);
+  --art-impostor-dim: rgb(40 24 70 / 0.6);
   /* What for?'s art: a warm kraft wall behind the board */
   --art-lineup: #ecc98f;
   --art-lineup-2: #d9a768;
@@ -209,7 +209,7 @@
   --art-whoami-2: #362d68;
   --art-impostor: #32165a;
   --art-impostor-2: #230f3d;
-  --art-impostor-dim: rgb(11 15 23 / 0.7);
+  --art-impostor-dim: rgb(11 15 23 / 0.82);
   --art-lineup: #4a3420;
   --art-lineup-2: #2e2014;
   --art-lineup-slate: #16261f;
