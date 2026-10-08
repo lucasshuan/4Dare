@@ -68,7 +68,7 @@ import { StartDialog } from "./start-dialog";
 import { TvChair } from "./tv-chair";
 
 const titleClass =
-  "max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]";
+  "font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]";
 
 /** The lobby's panels: the invite, the players and the room's settings, each lifted off the backdrop. */
 const panelClass = "rounded-lg bg-surface p-6 max-sm:p-4";
