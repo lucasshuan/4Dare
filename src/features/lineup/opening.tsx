@@ -29,10 +29,10 @@ export function RoundCard({ n, of }: { n: number; of: number }) {
 }
 
 const TEAM: { figure: Figure; price: number; tilt: number }[] = [
-  { figure: "cat", price: 4, tilt: -5 },
-  { figure: "king", price: 3, tilt: 4 },
-  { figure: "owl", price: 1, tilt: -2 },
-  { figure: "lady", price: 2, tilt: 5 },
+  { figure: "fox", price: 4, tilt: -5 },
+  { figure: "pirate", price: 3, tilt: 4 },
+  { figure: "robot", price: 1, tilt: -2 },
+  { figure: "witch", price: 2, tilt: 5 },
 ];
 
 /** The rule in four lines, each with its picture: coins, photos, the envelope, chalk. */

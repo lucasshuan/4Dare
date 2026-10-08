@@ -176,7 +176,7 @@ export function LineupBanner() {
                 }}
                 transition={{ type: "spring", stiffness: 320, damping: 20 }}
               >
-                <FigureArt figure="king" className="aspect-4/5" />
+                <FigureArt figure="pirate" className="aspect-4/5" />
                 <span className="-translate-x-1/2 absolute -top-[5%] left-1/2 h-[9%] w-[44%] bg-butter/85" />
                 <span className="absolute -right-[12%] -bottom-[6%] rounded-[1cqh] bg-kraft px-[2cqh] font-bold font-mono text-[8cqh] text-kraft-ink leading-[1.3] shadow-card">
                   {top || "–"}

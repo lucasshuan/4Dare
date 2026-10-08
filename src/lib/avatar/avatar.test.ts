@@ -114,6 +114,10 @@ describe("avatars", () => {
       "king",
       "owl",
       "astronaut",
+      "fox",
+      "robot",
+      "pirate",
+      "witch",
     ] as const)
       expect(broken(figureSvg(f)), f).toBe(false);
   });

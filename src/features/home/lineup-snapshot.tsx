@@ -9,10 +9,10 @@ import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 /** The team bought at auction, left to right: figure, price, left edge (% of the board) and tilt. */
 const TEAM: { figure: Figure; price: number; x: number; tilt: number }[] = [
-  { figure: "cat", price: 5, x: 6, tilt: -5 },
-  { figure: "owl", price: 1, x: 29, tilt: 4 },
-  { figure: "king", price: 3, x: 52, tilt: -3 },
-  { figure: "lady", price: 1, x: 75, tilt: 5 },
+  { figure: "fox", price: 5, x: 6, tilt: -5 },
+  { figure: "robot", price: 1, x: 29, tilt: 4 },
+  { figure: "pirate", price: 3, x: 52, tilt: -3 },
+  { figure: "witch", price: 1, x: 75, tilt: 5 },
 ];
 const COINS = 10;
 

@@ -114,10 +114,10 @@ export function LineupThumb() {
         strokeLinecap="round"
         opacity={0.85}
       />
-      <Photo x={18} y={34} tilt={-5} figure="cat" price={5} />
-      <Photo x={52} y={40} tilt={4} figure="owl" price={1} />
-      <Photo x={86} y={34} tilt={-3} figure="king" price={3} />
-      <Photo x={120} y={40} tilt={5} figure="lady" price={1} />
+      <Photo x={18} y={34} tilt={-5} figure="fox" price={5} />
+      <Photo x={52} y={40} tilt={4} figure="robot" price={1} />
+      <Photo x={86} y={34} tilt={-3} figure="pirate" price={3} />
+      <Photo x={120} y={40} tilt={5} figure="witch" price={1} />
       <Coins x={124} y={84} n={3} />
       <Coins x={140} y={88} n={2} />
       <g transform="rotate(10 132 18)">
