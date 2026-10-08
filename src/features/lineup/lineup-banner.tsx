@@ -40,6 +40,14 @@ const STILL = 6;
 /** The lots up for auction, one a loop, in a random order that never repeats a lot back to back. */
 const LOTS: Figure[] = ["fox", "robot", "pirate", "witch"];
 
+/**
+ * Who plays which part of STEPS in a loop: cast 0 to 3, its first bit swaps
+ * the two seats phones keep (b opens, d buys), its second the two they hide.
+ */
+const PAIR: Record<Seat, Seat> = { a: "c", b: "d", c: "a", d: "b" };
+const part = (seat: Seat, cast: number) =>
+  cast & (seat === "b" || seat === "d" ? 1 : 2) ? PAIR[seat] : seat;
+
 /** Around the lot, left to right; phones keep one on each side. */
 const SEATS: { seat: Seat; place: string; dna: string; color: string }[] = [
   {
@@ -109,6 +117,9 @@ export function LineupBanner() {
   const line = lines[lineOrder[loop % lines.length]];
   const lotOrder = useShuffle(LOTS.length);
   const lot = LOTS[lotOrder[loop % LOTS.length]];
+  // the bidders too: each loop a different cast of who bids and who buys
+  const castOrder = useShuffle(4);
+  const cast = castOrder[loop % 4];
 
   return (
     <div
@@ -251,7 +262,7 @@ export function LineupBanner() {
 
         {/* the bidders, each under the coins they put up */}
         {SEATS.map((p) => {
-          const bid = s.bids[p.seat] ?? 0;
+          const bid = s.bids[part(p.seat, cast)] ?? 0;
           const leads = bid > 0 && bid === top;
           return (
             <div
