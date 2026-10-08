@@ -7,7 +7,7 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 - `src/game`: rules, pure. `reduce(room, event)` gives new room; `toView` hides what a player can't see (own card).
 - `src/server`: actions. Load room, apply event, save only if nobody wrote first; else retry.
 - `src/server/backend`: storage. Supabase keys set: `supabase` (Postgres, Realtime, Storage). Else `local` (memory, `.data/`, `local/fixtures.ts`). Builds with keys leave `local` out.
-- `src/app`: pages, API. `src/features`: screens; `stage` routes them and plays scenes. `src/components/ui`: kit. `messages/<lang>`: texts (en, es, ja, pt); shared ones at its root, everything a game's match shows in `games/<namespace>.json` (`whoAmI`, `impostor`, `lineup`). Keys are typed from the English files (`src/i18n/messages.d.ts`): a missing one fails `tsc`.
+- `src/app`: pages, API. `src/features`: screens; `stage` routes them and plays scenes. Each game's own screens in `src/features/<game>` (`who-am-i`: hub, turn, pick, scenes, result; `impostor`; `lineup`); shared ones (room, lobby, vote, stage, result dispatch, home with `GameHub`) at the root. Game art's creatures and figures: `src/components/ui/figure-art.tsx`. `src/components/ui`: kit. `messages/<lang>`: texts (en, es, ja, pt); shared ones at its root, everything a game's match shows in `games/<namespace>.json` (`whoAmI`, `impostor`, `lineup`). Keys are typed from the English files (`src/i18n/messages.d.ts`): a missing one fails `tsc`.
 - Motion: `m.*` only, under one strict `LazyMotion` (`domAnimation`). `layout`/`layoutId` need `<LayoutMotion>` around them (loads `domMax`). `motion/react` aliased to framer-motion barrel in `next.config.ts`.
 - `data/`: old snapshot. Nothing reads it.
 

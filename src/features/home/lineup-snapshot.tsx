@@ -2,7 +2,7 @@
 
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { FigureArt } from "@/features/who-am-i/who-am-i-banner";
+import { FigureArt } from "@/components/ui/figure-art";
 import { cn } from "@/lib/cn";
 import type { Figure } from "@/lib/figures";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";

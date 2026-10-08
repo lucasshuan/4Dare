@@ -3,8 +3,8 @@
 import { VenetianMask } from "lucide-react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { HeldCard } from "@/components/ui/figure-art";
 import { MaskCardBack } from "@/features/impostor/impostor-banner";
-import { HeldCard } from "@/features/who-am-i/who-am-i-banner";
 import { cn } from "@/lib/cn";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 

@@ -9,14 +9,14 @@ import { useRoomContext } from "@/features/data/room-context";
 import { MyCardButton } from "@/features/impostor/my-card";
 import { Purse } from "@/features/lineup/purse";
 import { useStage } from "@/features/stage/stage-context";
-import { GiveUpButton } from "@/features/turn/give-up-button";
+import { GiveUpButton } from "@/features/who-am-i/turn/give-up-button";
 import {
   HistoryButton,
   HistoryDrawer,
   HistorySidebar,
   useHistorySidebar,
   WIDE,
-} from "@/features/turn/history-panel";
+} from "@/features/who-am-i/turn/history-panel";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { BeatKind, Lang, PlayerStatus, ShowView } from "@/game/types";
 import { useMedia } from "@/lib/hooks/use-media";

@@ -15,16 +15,17 @@ import {
 } from "react";
 import { keyClass } from "@/components/ui/button";
 import { PlayerName, useWithNames } from "@/components/ui/player-name";
+import { useCharacterIndex } from "@/features/characters/use-character-index";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
-import { PickIntro } from "@/features/stage/pick-intro";
 import { beatOf, isShow } from "@/features/stage/stage";
 import {
   PHONE,
   type TimelineInfo,
   useStageTimeline,
 } from "@/features/stage/use-stage-timeline";
+import { PickIntro } from "@/features/who-am-i/scenes/pick-intro";
 import { PICK_TABLE } from "@/game/show-timing/pick";
 import type {
   CardView,
@@ -53,7 +54,6 @@ import {
   type PickCardState,
 } from "./pick-card";
 import { PickHand, usePickHand } from "./pick-hand";
-import { useCharacterIndex } from "./use-character-index";
 import { usePickDraft } from "./use-pick-draft";
 
 /** The row layout (spacer, card, actions column); narrower windows stack them. */

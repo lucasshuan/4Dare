@@ -2,8 +2,8 @@
 
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { Creature, FigureArt } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
-import { Creature, FigureArt } from "@/features/who-am-i/who-am-i-banner";
 import { cn } from "@/lib/cn";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 

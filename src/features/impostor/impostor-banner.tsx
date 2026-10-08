@@ -10,8 +10,8 @@ import {
   useTransform,
 } from "motion/react";
 import { useTranslations } from "next-intl";
+import { Creature, HeldCard } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
-import { Creature, HeldCard } from "@/features/who-am-i/who-am-i-banner";
 import { cn } from "@/lib/cn";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 

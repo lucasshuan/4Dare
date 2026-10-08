@@ -8,6 +8,13 @@ import { CardBack } from "@/components/ui/card-frame";
 import { MiniCard } from "@/components/ui/mini-card";
 import { Portrait } from "@/components/ui/portrait";
 import { useRoomContext } from "@/features/data/room-context";
+import { beatOf } from "@/features/stage/stage";
+import { useStage } from "@/features/stage/stage-context";
+import {
+  layoutRect,
+  PHONE,
+  useStageTimeline,
+} from "@/features/stage/use-stage-timeline";
 import { thumbUrl } from "@/game/character-search";
 import { CAST, CAST_MARKS } from "@/game/show-timing/cast";
 import type { PlayerView, ShowView } from "@/game/types";
@@ -16,9 +23,6 @@ import { useMedia } from "@/lib/hooks/use-media";
 import { gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { seatColor } from "@/lib/seats";
-import { beatOf } from "./stage";
-import { useStage } from "./stage-context";
-import { layoutRect, PHONE, useStageTimeline } from "./use-stage-timeline";
 
 export interface CastSceneProps {
   /** The cast show (its received, order or entrance beat is running). */

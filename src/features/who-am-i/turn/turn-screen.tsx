@@ -15,10 +15,10 @@ import { TextArea, TextField } from "@/components/ui/text-field";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
-import { CastScene } from "@/features/stage/cast-scene";
 import { beatOf } from "@/features/stage/stage";
 import { useStage } from "@/features/stage/stage-context";
 import { PHONE, useStageTimeline } from "@/features/stage/use-stage-timeline";
+import { CastScene } from "@/features/who-am-i/scenes/cast-scene";
 import {
   endsWithQuestionMark,
   questionMark,

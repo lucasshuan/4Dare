@@ -7,7 +7,7 @@
 import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { useCharacterIndex } from "@/features/pick/use-character-index";
+import { useCharacterIndex } from "@/features/characters/use-character-index";
 import { searchItems, thumbUrl } from "@/game/character-search";
 import { QUEUE_MAX } from "@/game/lineup/rules";
 import type { LuCard } from "@/game/lineup/types";

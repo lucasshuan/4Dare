@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { APP_NAME } from "@/config";
-import { WhoAmIScreen } from "@/features/who-am-i/who-am-i-screen";
+import { WhoAmIHub } from "@/features/who-am-i/who-am-i-hub";
 import type { Lang } from "@/game/types";
 import { WHO_AM_I } from "@/lib/routes";
 import {
@@ -59,7 +59,7 @@ export default async function WhoAmI({
         // biome-ignore lint/security/noDangerouslySetInnerHtml: escaped JSON-LD
         dangerouslySetInnerHTML={{ __html: jsonLd(game) }}
       />
-      <WhoAmIScreen />
+      <WhoAmIHub />
     </>
   );
 }

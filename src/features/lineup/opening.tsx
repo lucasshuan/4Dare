@@ -6,7 +6,7 @@
 import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { FigureArt } from "@/features/who-am-i/who-am-i-banner";
+import { FigureArt } from "@/components/ui/figure-art";
 import type { Beat } from "@/game/types";
 import type { Figure } from "@/lib/figures";
 import { CoinTower } from "./coin";

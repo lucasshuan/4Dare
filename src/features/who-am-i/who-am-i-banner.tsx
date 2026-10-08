@@ -11,11 +11,11 @@ import {
 } from "motion/react";
 import { useTranslations } from "next-intl";
 import { AnswerChip } from "@/components/ui/answer-chip";
+import { Creature, HeldCard } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
 import type { AnswerValue } from "@/game/types";
-import { avatarUri } from "@/lib/avatar";
 import { cn } from "@/lib/cn";
-import { type Figure, figureUri } from "@/lib/figures";
+import type { Figure } from "@/lib/figures";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 type Seat = "a" | "b" | "c" | "d";
@@ -121,67 +121,6 @@ const MARKS: [number, number, number, string, number][] = [
   [93, 20, 30, "text-sky", 9],
   [97, 64, 48, "text-yes", 10.5],
 ];
-
-/** A player's creature on its pastel, round. */
-export function Creature({
-  dna,
-  color,
-  className,
-}: {
-  dna: string;
-  color: string;
-  className?: string;
-}) {
-  return (
-    <span
-      className={cn("block overflow-hidden", className)}
-      style={{ backgroundColor: color }}
-    >
-      {/* biome-ignore lint/performance/noImgElement: generated svg data uri */}
-      <img src={avatarUri(dna)} alt="" className="size-full object-cover" />
-    </span>
-  );
-}
-
-/** A character's picture on a card (see src/lib/figures.ts). */
-export function FigureArt({
-  figure,
-  className,
-}: {
-  figure: Figure;
-  className?: string;
-}) {
-  return (
-    <span className={cn("block overflow-hidden", className)}>
-      {/* biome-ignore lint/performance/noImgElement: generated svg data uri */}
-      <img src={figureUri(figure)} alt="" className="size-full object-cover" />
-    </span>
-  );
-}
-
-/** A card held up for the others to see: the character's picture. `fill` stretches it to its box (the flipped "?" card). */
-export function HeldCard({
-  figure,
-  fill = false,
-}: {
-  figure: Figure;
-  fill?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col gap-[2.1cqh] rounded-[14%/11%] bg-surface p-[7%] shadow-card",
-        fill && "h-full",
-      )}
-    >
-      <FigureArt
-        figure={figure}
-        className={cn("rounded-[12%]", fill ? "min-h-0 flex-1" : "aspect-4/5")}
-      />
-      <span className="mx-[6%] h-[2.1cqh] w-2/3 shrink-0 rounded-pill bg-line" />
-    </div>
-  );
-}
 
 /** Pops in from below, springy. */
 const pop = {

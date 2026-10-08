@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { fireConfetti } from "@/components/ui/confetti";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { LobbyCountdown } from "@/features/result/result-screen";
+import { LobbyCountdown } from "@/features/result/lobby-countdown";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";

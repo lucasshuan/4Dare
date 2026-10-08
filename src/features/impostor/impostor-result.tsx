@@ -11,7 +11,7 @@ import { fireConfetti } from "@/components/ui/confetti";
 import { ThemeTag } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { LobbyCountdown } from "@/features/result/result-screen";
+import { LobbyCountdown } from "@/features/result/lobby-countdown";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";

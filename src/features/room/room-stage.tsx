@@ -11,15 +11,17 @@ import { useRoomContext } from "@/features/data/room-context";
 import { ImpostorScenes } from "@/features/impostor/impostor-scenes";
 import { ImpostorScreen } from "@/features/impostor/impostor-screen";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
-import { PickScreen } from "@/features/pick/pick-screen";
 import { ResultScreen } from "@/features/result/result-screen";
 import { isGuessScene, isShow, type StageScreen } from "@/features/stage/stage";
 import { StageBackdrop } from "@/features/stage/stage-backdrop";
 import { StageProvider, useStage } from "@/features/stage/stage-context";
-import { ThemeScreen } from "@/features/theme/theme-screen";
-import { GuessScene } from "@/features/turn/guess-scene";
-import { TurnScreen } from "@/features/turn/turn-screen";
 import { VoteScreen } from "@/features/vote/vote-screen";
+import { FoundFeedback } from "@/features/who-am-i/found-feedback";
+import { PickScreen } from "@/features/who-am-i/pick/pick-screen";
+import { RevealOverlay } from "@/features/who-am-i/reveal-overlay";
+import { ThemeScreen } from "@/features/who-am-i/theme-screen";
+import { GuessScene } from "@/features/who-am-i/turn/guess-scene";
+import { TurnScreen } from "@/features/who-am-i/turn/turn-screen";
 import type { ErrorCode, Phase, RoomView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
@@ -27,14 +29,12 @@ import { dur, ease, riseIn } from "@/lib/motion";
 import { useRoomTitle } from "@/lib/names";
 import { GAMES } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
-import { FoundFeedback } from "./found-feedback";
 import {
   isAwaited,
   MatchFrame,
   useReached,
   useStepStarted,
 } from "./match-frame";
-import { RevealOverlay } from "./reveal-overlay";
 import { stepCall } from "./step-call";
 
 /** What for?'s screens come with its match: no other room loads them. */

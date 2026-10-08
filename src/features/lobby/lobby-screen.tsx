@@ -10,6 +10,7 @@ import { useWithNames } from "@/components/ui/player-name";
 import { RoomQr } from "@/components/ui/room-qr";
 import { Screen } from "@/components/ui/screen";
 import { useToast } from "@/components/ui/toast";
+import { usePrefetchCharacterIndex } from "@/features/characters/use-character-index";
 import {
   GameField,
   GameThumb,
@@ -21,7 +22,6 @@ import { backClass, RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { usePrefetchCharacterIndex } from "@/features/pick/use-character-index";
 import { GAME_SEATS } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";

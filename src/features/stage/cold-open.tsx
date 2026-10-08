@@ -2,8 +2,9 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
+import { FigureArt } from "@/components/ui/figure-art";
 import { useRoomContext } from "@/features/data/room-context";
-import { FigureArt, SEATS } from "@/features/who-am-i/who-am-i-banner";
+import { SEATS } from "@/features/who-am-i/who-am-i-banner";
 import type { Beat, PlayerView, ShowView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";

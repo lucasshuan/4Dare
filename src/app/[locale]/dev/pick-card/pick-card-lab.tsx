@@ -2,12 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { useCharacterIndex } from "@/features/characters/use-character-index";
 import {
   type CardContent,
   PickCard,
   type PickCardState,
-} from "@/features/pick/pick-card";
-import { useCharacterIndex } from "@/features/pick/use-character-index";
+} from "@/features/who-am-i/pick/pick-card";
 import { type SearchItem, toCardView } from "@/game/character-search";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";

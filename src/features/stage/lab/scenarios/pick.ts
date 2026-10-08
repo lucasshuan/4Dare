@@ -2,7 +2,7 @@
 // (so typing works without the library), the theme's hand (`queries`), and
 // the viewer's draft for the timeout (the default one: a new name, "Ms. Marvel").
 
-import { type HandCard, handKey } from "@/features/pick/draft-api";
+import { type HandCard, handKey } from "@/features/who-am-i/pick/draft-api";
 import { toSearchItem } from "@/game/character-search";
 import { themeId } from "@/game/theme-id";
 import type { Character, Lang } from "@/game/types";

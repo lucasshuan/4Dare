@@ -1,6 +1,6 @@
 "use client";
 
-import { GameHub } from "@/features/who-am-i/who-am-i-screen";
+import { GameHub } from "@/features/home/game-hub";
 import { LineupBanner } from "./lineup-banner";
 import { Priciest } from "./priciest";
 

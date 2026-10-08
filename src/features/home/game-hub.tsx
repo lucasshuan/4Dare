@@ -18,12 +18,6 @@ import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { GAMES, newRoom } from "@/lib/routes";
 import { JoinByCode } from "./join-by-code";
-import { WhoAmIBanner } from "./who-am-i-banner";
-
-/** "Who am I?": create a room, join one with a code, or pick a public one. */
-export function WhoAmIScreen() {
-  return <GameHub game="who-am-i" banner={<WhoAmIBanner />} />;
-}
 
 /** A game's own page: its banner, name and pitch, create or join by code, and its public rooms. */
 export function GameHub({

@@ -4,11 +4,11 @@ import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { FrameSeal, frameStyle } from "@/components/ui/card-frame";
+import { CardNameField } from "@/features/characters/card-name-field";
 import type { CardContent } from "@/game/character-search";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
-import { CardNameField } from "./card-name-field";
 import { CardPicture } from "./card-picture";
 import type { PictureUpload } from "./draft-api";
 
