@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { keyClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
-import { useGameName } from "@/features/create/game-info";
+import { GAME_INFO, useGameName } from "@/features/create/game-info";
 import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
@@ -61,7 +61,9 @@ export function GameHub({
             {gameName(game)}
           </h1>
           <p className="text-[17px] text-ink-muted leading-[26px]">
-            {game === "who-am-i" ? t("pitch") : t("games.impostor.pitch")}
+            {game === "who-am-i"
+              ? t("pitch")
+              : t(`games.${GAME_INFO[game].messages}.pitch`)}
           </p>
           {/* creating or joining by code sits under the pitch, so the rooms get the height; off during a match */}
           <div

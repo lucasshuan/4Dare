@@ -7,7 +7,7 @@ import { Screen } from "@/components/ui/screen";
 import { GAME_INFO } from "@/features/create/game-info";
 import { LiveDot } from "@/features/current-match/match-lock";
 import { usePlayersOnline } from "@/features/data/use-public-rooms";
-import type { GameKey } from "@/game/games";
+import { type GameKey, OPEN_GAMES } from "@/game/games";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
@@ -42,11 +42,15 @@ export function HomeScreen() {
           {t("games.title")}
         </m.h1>
         <GamesCarousel>
-          <GameCard game="who-am-i" delay={0.12} />
-          <GameCard game="impostor" delay={0.2} />
+          {OPEN_GAMES.map((game, i) => (
+            <GameCard key={game} game={game} delay={0.12 + i * 0.08} />
+          ))}
           <m.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 0.35 } }}
+            animate={{
+              opacity: 1,
+              transition: { delay: 0.2 + OPEN_GAMES.length * 0.08 },
+            }}
             className={`${CARD} flex h-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-line-strong border-dashed p-6 font-semibold text-ink-muted`}
           >
             <Sparkles className="size-5" strokeWidth={1.75} />
