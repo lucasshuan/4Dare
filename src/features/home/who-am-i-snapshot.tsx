@@ -86,7 +86,7 @@ export function WhoAmISnapshot({
               },
             })}
       >
-        <MiniCard figure="cloud" />
+        <MiniCard figure="lady" />
       </m.div>
       <m.div
         className="absolute right-[8%] bottom-[-6%] w-[26%]"
@@ -103,7 +103,7 @@ export function WhoAmISnapshot({
               },
             })}
       >
-        <MiniCard figure="apple" />
+        <MiniCard figure="king" />
       </m.div>
 
       {/* your card: "?" on the front, a character on the back */}
@@ -127,7 +127,7 @@ export function WhoAmISnapshot({
           </div>
           <div className="absolute inset-0 rotate-y-180 backface-hidden">
             <MiniCard
-              figure="queen"
+              figure="cat"
               className="h-full outline-[3px] outline-yes outline-solid"
             />
           </div>

@@ -16,9 +16,9 @@ const CARDS = [
 ] as const;
 /** A card's width, in % of the box. */
 const W = 22;
-/** The crew's card and the odd one: the same card, almost. */
-const CREW = "sun";
-const ODD = "eclipse";
+/** The crew's card and the odd one, its neighbour. */
+const CREW = "lion";
+const ODD = "giraffe";
 /** Where the other card turns up, loop after loop. */
 const ODD_AT = [2, 0, 3, 1];
 

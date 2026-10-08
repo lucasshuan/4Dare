@@ -52,8 +52,8 @@ export function WhoAmIThumb() {
       className="absolute inset-0 size-full"
     >
       <rect width={160} height={100} className="fill-sky-soft" />
-      <SideCard x={10} tilt={-10} figure="moon" />
-      <SideCard x={110} tilt={10} figure="diver" />
+      <SideCard x={10} tilt={-10} figure="owl" />
+      <SideCard x={110} tilt={10} figure="astronaut" />
       <rect
         x={52}
         y={12}

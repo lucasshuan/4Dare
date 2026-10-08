@@ -349,8 +349,8 @@ export function HomeArt({ text }: { text: OgText }) {
       <Glow x={1080} y={600} size={680} color={C.butterSoft} />
       <Glow x={1100} y={40} size={420} color={C.skySoft} />
 
-      <Card figure="cloud" width={190} x={-30} y={360} rotate={-12} />
-      <Card figure="apple" width={190} x={1040} y={330} rotate={11} />
+      <Card figure="lady" width={190} x={-30} y={360} rotate={-12} />
+      <Card figure="king" width={190} x={1040} y={330} rotate={11} />
       <MysteryCard width={128} x={1010} y={-40} rotate={14} />
       <Question lang={lang} text={text.question} x={70} y={56} size={30} />
       <Chip
@@ -470,10 +470,10 @@ export function GameArt({ text }: { text: OgText }) {
       >
         <Glow x={60} y={40} size={360} color="rgba(255,255,255,0.7)" />
         <Glow x={480} y={540} size={380} color="rgba(246,227,161,0.8)" />
-        <Card figure="cloud" width={160} x={14} y={290} rotate={-10} />
-        <Card figure="apple" width={160} x={346} y={290} rotate={10} />
+        <Card figure="lady" width={160} x={14} y={290} rotate={-10} />
+        <Card figure="king" width={160} x={346} y={290} rotate={10} />
         <Card
-          figure="queen"
+          figure="cat"
           width={176}
           x={172}
           y={250}
@@ -614,8 +614,8 @@ export function InviteArt({
         </div>
       </div>
 
-      <Card figure="cloud" width={190} x={800} y={250} rotate={-9} />
-      <Card figure="apple" width={190} x={980} y={300} rotate={9} />
+      <Card figure="lady" width={190} x={800} y={250} rotate={-9} />
+      <Card figure="king" width={190} x={980} y={300} rotate={9} />
       <MysteryCard width={170} x={900} y={70} rotate={4} />
       <Chip
         lang={lang}

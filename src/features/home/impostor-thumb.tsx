@@ -1,6 +1,6 @@
 import { figureUri } from "@/lib/figures";
 
-/** A card at the table: the crew's show the sun, the impostor's (pink) its eclipse. */
+/** A card at the table: the crew's show the lion, the impostor's (pink) a giraffe. */
 function Card({
   x,
   tilt,
@@ -25,7 +25,7 @@ function Card({
         <rect x={x + 2.5} y={42.5} width={23} height={28.75} rx={3} />
       </clipPath>
       <image
-        href={figureUri(odd ? "eclipse" : "sun")}
+        href={figureUri(odd ? "giraffe" : "lion")}
         x={x + 2.5}
         y={42.5}
         width={23}

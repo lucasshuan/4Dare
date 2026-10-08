@@ -107,13 +107,13 @@ describe("avatars", () => {
 
   it("draws the game art's figures", () => {
     for (const f of [
-      "moon",
-      "cloud",
-      "apple",
-      "diver",
-      "queen",
-      "sun",
-      "eclipse",
+      "cat",
+      "lion",
+      "giraffe",
+      "lady",
+      "king",
+      "owl",
+      "astronaut",
     ] as const)
       expect(broken(figureSvg(f)), f).toBe(false);
   });

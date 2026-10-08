@@ -103,9 +103,9 @@ const SEATS: {
 ];
 /** Who holds the other card. Nobody at the table knows, not even them. */
 const ODD: Seat = "d";
-/** The crew's card and the odd one: the same card, almost. */
-const CREW_CARD = "sun";
-const ODD_CARD = "eclipse";
+/** The crew's card and the odd one, its neighbour (a lion, a giraffe: "How brave is he?"). */
+const CREW_CARD = "lion";
+const ODD_CARD = "giraffe";
 
 /** Masks and question marks drifting behind: [left %, top %, size px, colour, seconds, mask]. */
 const MARKS: [number, number, number, string, number, boolean][] = [

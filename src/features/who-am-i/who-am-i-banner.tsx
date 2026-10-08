@@ -75,7 +75,7 @@ export const SEATS: {
     tilt: -10,
     dna: "Penguin..Cozy..0",
     color: "#F3D3B8",
-    figure: "moon",
+    figure: "lady",
   },
   {
     seat: "b",
@@ -83,7 +83,7 @@ export const SEATS: {
     tilt: -5,
     dna: "Fox..Curious..0",
     color: "#BFE3EA",
-    figure: "cloud",
+    figure: "king",
   },
   {
     seat: "c",
@@ -91,7 +91,7 @@ export const SEATS: {
     tilt: 5,
     dna: "Panda..Happy..0",
     color: "#F2E3A8",
-    figure: "apple",
+    figure: "owl",
   },
   {
     seat: "d",
@@ -99,13 +99,13 @@ export const SEATS: {
     tilt: 10,
     dna: "Bee..Busy..0",
     color: "#D7DDE8",
-    figure: "diver",
+    figure: "astronaut",
   },
 ];
 export const YOU = {
   dna: "Potato.Ninja...0",
   color: "#D9C7F4",
-  figure: "queen",
+  figure: "cat",
 } as const;
 
 /** Question marks drifting in the background, across the whole width: [left %, top %, size px, colour, seconds]. */
