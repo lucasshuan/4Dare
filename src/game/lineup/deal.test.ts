@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { GOSTO_KEYS, type Gosto } from "../gostos";
+import { GOSTO_KEYS, type Gosto, gostoReach, REACH_MAX } from "../gostos";
 import { rng } from "../test-utils";
 import { type BankExtra, type BankMission, pickMissions, TONES } from "./bank";
-import { deckOf, drawLots, type PoolCard, roomPool, STAR_RANK } from "./deal";
+import {
+  deckOf,
+  drawLots,
+  GOSTO_POOL,
+  POOL_MAX,
+  type PoolCard,
+  roomDeck,
+  STAR_RANK,
+} from "./deal";
 
 const text = (s: string) => ({ en: s, es: s, ja: s, pt: s });
 
@@ -51,6 +59,44 @@ describe("what for?: the deck", () => {
   });
 });
 
+describe("what for?: a room's deck", () => {
+  /** 3000 real people first, then 400 games characters. */
+  const store = [
+    ...Array.from({ length: 3000 }, (_, i) => ({
+      id: `r${i}`,
+      gostos: ["real" as Gosto],
+    })),
+    ...Array.from({ length: 400 }, (_, i) => ({
+      id: `g${i}`,
+      gostos: ["games" as Gosto],
+    })),
+  ];
+  const count = (off: Gosto[], g: Gosto) =>
+    roomDeck(store, off).filter((c) => c.gostos.includes(g)).length;
+
+  it("keeps the best known and each gosto's own when every gosto is on", () => {
+    expect(count([], "real")).toBe(POOL_MAX);
+    expect(count([], "games")).toBe(GOSTO_POOL);
+  });
+
+  it("reaches deeper into the gostos a room keeps, not in proportion", () => {
+    const real = GOSTO_KEYS.filter((g) => g !== "real");
+    const games = GOSTO_KEYS.filter((g) => g !== "games");
+    // dropping real people: games goes a bit deeper, nowhere near their place
+    expect(gostoReach(["real"])).toBeCloseTo(Math.sqrt(8 / 7));
+    expect(count(["real"], "games")).toBe(
+      Math.round(GOSTO_POOL * gostoReach(["real"])),
+    );
+    // games alone: 2.5 times its usual hundred
+    expect(count(games, "games")).toBe(Math.round(GOSTO_POOL * REACH_MAX));
+    // real people alone: 2.5 times the best known thousand
+    expect(count(real, "real")).toBe(Math.round(POOL_MAX * REACH_MAX));
+    expect(roomDeck(store, real).every((c) => c.gostos[0] === "real")).toBe(
+      true,
+    );
+  });
+});
+
 describe("what for?: the lots", () => {
   it("puts an extra every fourth lot and never repeats a card in a match", () => {
     const pool = deck(GOSTO_KEYS, 40);
@@ -92,7 +138,8 @@ describe("what for?: the lots", () => {
   it("only deals from the room's gostos", () => {
     const pool = deck(GOSTO_KEYS, 20);
     const on: Gosto[] = ["anime", "games"];
-    expect(roomPool(pool, on)).toHaveLength(40);
+    const off = GOSTO_KEYS.filter((g) => !on.includes(g));
+    expect(roomDeck(pool, off)).toHaveLength(40);
     const lots = drawLots(
       pool,
       { on, count: 12, extras: [], used: new Set() },

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
-import { GOSTO_POOL, POOL_MAX } from "@/game/lineup/deal";
+import { DECK_PER_GOSTO, DECK_TOP } from "@/game/lineup/deal";
 import { supabaseLineup } from "./lineup";
 
 type PoolRow = { character_id: string; gostos: string[]; popularity: number };
@@ -48,8 +48,8 @@ describe("what for?'s deck from Supabase", () => {
     const pool = await supabaseLineup(() => db).pool("pt");
     expect(args[0]).toEqual({
       p_lang: "pt",
-      p_top: POOL_MAX,
-      p_per_gosto: GOSTO_POOL,
+      p_top: DECK_TOP,
+      p_per_gosto: DECK_PER_GOSTO,
     });
     expect(pool).toHaveLength(1228);
     expect(pool.at(-1)).toEqual({

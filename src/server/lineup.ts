@@ -7,7 +7,7 @@ import {
   type DrawnLot,
   drawLots,
   MIN_POOL,
-  roomPool,
+  roomDeck,
 } from "@/game/lineup/deal";
 import { lotsFor, roundsFor } from "@/game/lineup/rules";
 import type { LuCard, LuDeck } from "@/game/lineup/types";
@@ -65,7 +65,7 @@ export async function lineupDecks(
     lineup.missions(),
   ]);
   const on = GOSTO_KEYS.filter((g) => !s.offGostos.includes(g));
-  const mine = roomPool(pool, on);
+  const mine = roomDeck(pool, s.offGostos);
   if (mine.length < Math.min(MIN_POOL, pool.length) || !mine.length)
     throw new GameError("few_cards");
   // with a presenter, three missions a round to choose from (the first stands in)

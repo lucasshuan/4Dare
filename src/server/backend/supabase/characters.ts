@@ -41,7 +41,10 @@ const FLOOR_TTL_MS = 24 * 3600_000;
 
 export function supabaseCharacters(): CharacterStore {
   const db = () => serviceClient();
-  const floors = new Map<Lang, { at: number; floor: Promise<number | null> }>();
+  const floors = new Map<
+    string,
+    { at: number; floor: Promise<number | null> }
+  >();
   const starters = supabaseStarters();
   const entry = async (id: string) => {
     const library = parseEntryId(id);
@@ -209,18 +212,20 @@ export function supabaseCharacters(): CharacterStore {
         gostos: r.gostos?.length ? r.gostos : null,
       }));
     },
-    knownFloor(lang) {
-      const known = floors.get(lang);
+    knownFloor(lang, rank) {
+      const key = `${lang}:${rank}`;
+      const known = floors.get(key);
       if (known && Date.now() - known.at < FLOOR_TTL_MS) return known.floor;
       const floor = (async () => {
         const { data, error } = await db().rpc("impostor_known_floor", {
           p_lang: lang,
+          p_rank: rank,
         });
         if (error) throw error;
         return typeof data === "number" ? data : null;
       })();
-      floors.set(lang, { at: Date.now(), floor });
-      floor.catch(() => floors.delete(lang));
+      floors.set(key, { at: Date.now(), floor });
+      floor.catch(() => floors.delete(key));
       return floor;
     },
     async createdBy(playerId, limit) {

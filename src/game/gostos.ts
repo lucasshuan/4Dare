@@ -73,6 +73,22 @@ export function gostoAllowed(
   return gostos.some((g) => !off.includes(g));
 }
 
+/** The deepest a room reaches into the gostos it keeps (gostoReach). */
+export const REACH_MAX = 2.5;
+
+/**
+ * How much deeper than usual a room reaches into the gostos it keeps, where
+ * a game cuts the library by fame: √(all / kept), at most REACH_MAX. Not in
+ * proportion to what it dropped, or the rest would fill with unknowns: a
+ * room that only drops real people (two in five of the best known) goes 7%
+ * deeper, one with half the gostos 41%, one with only anime 2.5 times.
+ */
+export function gostoReach(off: readonly Gosto[]): number {
+  const kept = GOSTO_KEYS.filter((g) => !off.includes(g)).length;
+  if (!kept) return 1;
+  return Math.min(REACH_MAX, Math.sqrt(GOSTO_KEYS.length / kept));
+}
+
 /**
  * How many of a theme's starters must stay for the theme to be offered (all
  * of them when it has fewer). Starters are the theme's clearest fits.

@@ -5,7 +5,7 @@
 // The draw picks the gosto first, with the same weight for each one the room
 // left on, then the character, weighted by fame: a deck drawn straight from
 // the most popular would be all footballers and politicians.
-import type { Gosto } from "../gostos";
+import { type Gosto, gostoReach, REACH_MAX } from "../gostos";
 import type { BankExtra } from "./bank";
 
 /** A character of a language's deck: library id, gostos, rank by fame (1 = the best known). */
@@ -30,7 +30,7 @@ export const STAR_RANK = 50;
 const FULL_GOSTO = 40;
 /** A room needs this many characters in its gostos to start (or the whole deck, if smaller). */
 export const MIN_POOL = 60;
-/** The deck: a language's best known this many; past them, characters get hard to place. */
+/** The deck: a language's best known this many; past them, characters get hard to place. A room that drops gostos reaches deeper into the rest (gostoReach). */
 export const POOL_MAX = 1000;
 /**
  * Each gosto also brings its own best known this many, however far down the
@@ -62,9 +62,35 @@ export function deckOf(
     .map((c, i) => ({ id: c.id, gostos: c.gostos, rank: i + 1 }));
 }
 
-/** The characters of the deck the room's gostos let in. */
-export function roomPool(pool: readonly PoolCard[], on: readonly Gosto[]) {
-  return pool.filter((c) => c.gostos.some((g) => on.includes(g)));
+/** The deck as the store keeps it, best known first: as deep as any room reaches. */
+export const DECK_TOP = Math.round(POOL_MAX * REACH_MAX);
+export const DECK_PER_GOSTO = Math.round(GOSTO_POOL * REACH_MAX);
+
+/**
+ * A room's deck out of the store's (deckOf with DECK_TOP and DECK_PER_GOSTO):
+ * the cards with a gosto the room kept, among the language's best known
+ * POOL_MAX, or among a kept gosto's own best known GOSTO_POOL, both times
+ * its reach. The store's first DECK_TOP are the language's best known in
+ * order, and each gosto's first DECK_PER_GOSTO are its own, so both cuts
+ * read the same as on the whole library.
+ */
+export function roomDeck<T extends { gostos: readonly Gosto[] }>(
+  deck: readonly T[],
+  off: readonly Gosto[],
+): T[] {
+  const reach = gostoReach(off);
+  const top = Math.round(POOL_MAX * reach);
+  const per = Math.round(GOSTO_POOL * reach);
+  const seen = new Map<Gosto, number>();
+  return deck.filter((c, i) => {
+    let keep = false;
+    for (const g of c.gostos) {
+      const n = (seen.get(g) ?? 0) + 1;
+      seen.set(g, n);
+      if (!off.includes(g) && (i < top || n <= per)) keep = true;
+    }
+    return keep;
+  });
 }
 
 function weighted<T>(

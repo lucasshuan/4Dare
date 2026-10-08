@@ -111,9 +111,14 @@ export interface ThemeCatalogEntry {
 export interface LineupCatalog {
   missions: { id: string; tone: Tone; heavy: boolean; text: Localized }[];
   /**
-   * The deck of the asked language by gostos: each key is a bit mask over
-   * GOSTOS (bit i for GOSTOS[i]), its value how many characters have exactly
-   * those gostos.
+   * The deck of the asked language as the store keeps it, best known first:
+   * each card's gostos as a bit mask over GOSTOS (bit i for GOSTOS[i]). A
+   * room's deck is cut from it as the server does (roomDeck).
+   */
+  deck: number[];
+  /**
+   * The same deck by gostos (each key a mask, its value how many cards have
+   * exactly those gostos), for pages from the previous deploy.
    */
   cards: Record<string, number>;
 }

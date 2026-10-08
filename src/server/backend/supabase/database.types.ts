@@ -1506,7 +1506,9 @@ export type Database = {
           work: string;
         }[];
       };
-      impostor_known_floor: { Args: { p_lang: string }; Returns: number };
+      impostor_known_floor:
+        | { Args: { p_lang: string }; Returns: number }
+        | { Args: { p_lang: string; p_rank: number }; Returns: number };
       lineup_count_cards: { Args: { p_rows: Json }; Returns: undefined };
       lineup_count_missions: { Args: { p_rows: Json }; Returns: undefined };
       lineup_pool:

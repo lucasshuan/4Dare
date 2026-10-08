@@ -1,5 +1,5 @@
 import "server-only";
-import { gostoAllowed } from "@/game/gostos";
+import { gostoAllowed, gostoReach } from "@/game/gostos";
 import {
   type Audience,
   type BankQuestion,
@@ -33,6 +33,8 @@ const FAME_SPAN = 8000;
 const FAME_FLOOR = 0.2;
 /** Pairs kept for "I don't know this one". */
 const SPARES = 2;
+/** Known: among a language's best known this many; deeper for a room that dropped gostos (gostoReach). */
+const KNOWN_RANK = 2500;
 /** Themes tried for the vote's four: some have too few known characters. */
 const CANDIDATES = 8;
 
@@ -132,7 +134,7 @@ async function dealFor(
       ranked.map((f) => f.id),
       lang,
     ),
-    characters.knownFloor(lang),
+    characters.knownFloor(lang, Math.round(KNOWN_RANK * gostoReach(offGostos))),
   ]);
   const byId = new Map(facts.map((f) => [f.id, f]));
   const pool: Known[] = ranked.flatMap((fit) => {

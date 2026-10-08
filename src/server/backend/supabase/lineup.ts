@@ -5,7 +5,7 @@ import {
   TONES,
   type Tone,
 } from "@/game/lineup/bank";
-import { GOSTO_POOL, POOL_MAX, type PoolCard } from "@/game/lineup/deal";
+import { DECK_PER_GOSTO, DECK_TOP, type PoolCard } from "@/game/lineup/deal";
 import type { Lang } from "@/game/types";
 import type { LineupStore } from "../types";
 import { type Db, serviceClient } from "./clients";
@@ -87,8 +87,8 @@ export function supabaseLineup(db: () => Db = serviceClient): LineupStore {
     pool(lang) {
       let read = pools.get(lang);
       if (!read) {
-        // the best known POOL_MAX and each gosto's GOSTO_POOL (deckOf, in
-        // SQL), a page at a time (the id breaking popularity ties) until an
+        // as deep as a room reaches (DECK_TOP, each gosto's DECK_PER_GOSTO:
+        // deckOf, in SQL), a page at a time (the id breaking popularity ties) until an
         // empty page: PostgREST hands out a thousand rows at most
         read = cached(async () => {
           const cards: PoolCard[] = [];
@@ -97,8 +97,8 @@ export function supabaseLineup(db: () => Db = serviceClient): LineupStore {
             const { data, error } = await db()
               .rpc("lineup_pool", {
                 p_lang: lang,
-                p_top: POOL_MAX,
-                p_per_gosto: GOSTO_POOL,
+                p_top: DECK_TOP,
+                p_per_gosto: DECK_PER_GOSTO,
               })
               .order("popularity", { ascending: false })
               .order("character_id", { ascending: true })

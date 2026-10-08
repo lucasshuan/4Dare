@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import type { GameKey } from "@/game/games";
 import { GOSTOS, type Gosto } from "@/game/gostos";
 import { roomMissions } from "@/game/lineup/bank";
-import { MIN_POOL } from "@/game/lineup/deal";
+import { MIN_POOL, roomDeck } from "@/game/lineup/deal";
 import type { Lang } from "@/game/types";
 import type { LineupCatalog } from "@/server/contract";
 
@@ -40,18 +40,19 @@ export function useLineupCount(room: {
 }) {
   const catalog = useLineupCatalog(room.game === "lineup");
   const { game, offGostos, heavy = true, offMissions = NONE } = room;
+  // the deck's cards with their gostos, once per catalog
+  const deck = useMemo(
+    () =>
+      (catalog?.deck ?? []).map((mask) => ({
+        gostos: GOSTOS.flatMap((g, i) => (mask & (1 << i) ? [g.key] : [])),
+      })),
+    [catalog],
+  );
   return useMemo(() => {
-    if (!catalog || game !== "lineup") return null;
-    const on = GOSTOS.reduce(
-      (m, g, i) => (offGostos.includes(g.key) ? m : m | (1 << i)),
-      0,
-    );
-    let cards = 0;
-    let total = 0;
-    for (const [mask, n] of Object.entries(catalog.cards)) {
-      total += n;
-      if (Number(mask) & on) cards += n;
-    }
+    // a catalog cached from the previous deploy has no deck yet
+    if (!catalog?.deck || game !== "lineup") return null;
+    const cards = roomDeck(deck, offGostos).length;
+    const total = deck.length;
     const missions = roomMissions(catalog.missions, {
       heavy,
       off: offMissions,
@@ -63,5 +64,5 @@ export function useLineupCount(room: {
       missions,
       allMissions: catalog.missions.length,
     };
-  }, [catalog, game, offGostos, heavy, offMissions]);
+  }, [catalog, deck, game, offGostos, heavy, offMissions]);
 }

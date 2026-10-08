@@ -1,6 +1,6 @@
 import "server-only";
 import { gostosByRule } from "@/game/gostos";
-import { deckOf } from "@/game/lineup/deal";
+import { DECK_PER_GOSTO, DECK_TOP, deckOf } from "@/game/lineup/deal";
 import type { LineupStore } from "../types";
 import { LOCAL_CHARACTERS } from "./fixtures";
 import { LOCAL_EXTRAS, LOCAL_MISSIONS } from "./lineup-bank";
@@ -22,6 +22,8 @@ export function localLineup(): LineupStore {
             ? [{ id: c.id, gostos, popularity: c.popularity[lang] ?? 0 }]
             : [];
         }).sort((a, b) => b.popularity - a.popularity),
+        DECK_TOP,
+        DECK_PER_GOSTO,
       );
     },
     async count() {},

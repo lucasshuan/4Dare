@@ -107,8 +107,8 @@ export interface CharacterStore {
   createdBy(playerId: PlayerId, limit: number): Promise<Character[]>;
   /** What the Impostor's deal weighs about library characters (language-free ids), in `lang`. */
   facts(ids: string[], lang: Lang): Promise<CharacterFacts[]>;
-  /** The popularity a character needs in `lang` to count as known (its 2 500th); null: everyone counts. */
-  knownFloor(lang: Lang): Promise<number | null>;
+  /** The popularity a character needs in `lang` to count as known: the `rank`th best known's; null: everyone counts. */
+  knownFloor(lang: Lang, rank: number): Promise<number | null>;
 }
 
 export interface CharacterFacts {
