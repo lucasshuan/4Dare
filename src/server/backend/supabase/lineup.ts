@@ -8,7 +8,7 @@ import {
 import type { PoolCard } from "@/game/lineup/deal";
 import type { Lang } from "@/game/types";
 import type { LineupStore } from "../types";
-import { serviceClient } from "./clients";
+import { type Db, serviceClient } from "./clients";
 import type { Json } from "./database.types";
 
 /** The banks change by hand, rarely; the deck with library updates: one read per server every ten minutes. */
@@ -16,6 +16,9 @@ const TTL_MS = 10 * 60_000;
 
 /** A card needs this many sales before its average price is worth showing. */
 const PRICIEST_MIN = 20;
+
+/** Rows asked for per request; PostgREST hands out at most its "max rows" (1000) at once. */
+const PAGE = 1000;
 
 /** A read kept for TTL_MS; a failed one is tried again next time. */
 function cached<T>(read: () => Promise<T>) {
@@ -32,8 +35,7 @@ function cached<T>(read: () => Promise<T>) {
   };
 }
 
-export function supabaseLineup(): LineupStore {
-  const db = () => serviceClient();
+export function supabaseLineup(db: () => Db = serviceClient): LineupStore {
   const missions = cached(async (): Promise<BankMission[]> => {
     const { data, error } = await db()
       .from("lineup_missions")
@@ -85,16 +87,26 @@ export function supabaseLineup(): LineupStore {
     pool(lang) {
       let read = pools.get(lang);
       if (!read) {
+        // a page at a time, the id breaking popularity ties, until an empty
+        // page: one request would stop at the first thousand
         read = cached(async () => {
-          const { data, error } = await db().rpc("lineup_pool", {
-            p_lang: lang,
-          });
-          if (error) throw error;
-          return (data ?? []).map((r, i) => ({
-            id: r.character_id,
-            gostos: r.gostos ?? [],
-            rank: i + 1,
-          }));
+          const cards: PoolCard[] = [];
+          for (;;) {
+            const from = cards.length;
+            const { data, error } = await db()
+              .rpc("lineup_pool", { p_lang: lang })
+              .order("popularity", { ascending: false })
+              .order("character_id", { ascending: true })
+              .range(from, from + PAGE - 1);
+            if (error) throw error;
+            if (!data?.length) return cards;
+            for (const r of data)
+              cards.push({
+                id: r.character_id,
+                gostos: r.gostos ?? [],
+                rank: cards.length + 1,
+              });
+          }
         });
         pools.set(lang, read);
       }
