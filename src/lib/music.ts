@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId } from "react";
+import { useEffect, useId, useSyncExternalStore } from "react";
 import { getSettings, type Settings, subscribeSettings } from "./settings";
 
 /**
@@ -34,6 +34,23 @@ export function musicVolume(settings: Settings): number {
   const g = settings.sounds.music;
   if (settings.muted || !g.on) return 0;
   return g.volume * settings.volume;
+}
+
+/**
+ * The tune's beat, for anything that moves with it: 95.08 BPM, the first beat
+ * 0.5333 s into the file. The loop starts on a beat and holds 192 of them, so
+ * the beat keeps its place across every wrap.
+ */
+export const MUSIC_BEAT = 60 / 95.076;
+export const MUSIC_FIRST_BEAT = 0.5333;
+
+/**
+ * The CSS animation-delay (seconds) that lines a beat-long animation started
+ * at `nowMs` up with the music whose position 0 played at `originMs` (both
+ * performance.now() milliseconds): negative once the song is under way.
+ */
+export function beatDelay(originMs: number, nowMs: number): number {
+  return (originMs - nowMs) / 1000 + MUSIC_FIRST_BEAT;
 }
 
 /** Where a timeline position lands in the file once the loop has wrapped. */
@@ -77,16 +94,30 @@ function context() {
   };
   for (const e of ["pointerdown", "keydown", "touchend"])
     document.addEventListener(e, wake, { capture: true, passive: true });
+  // the beat only counts while the context really plays
+  ctx.addEventListener("statechange", publishPulse);
+  return ctx;
+}
+
+let listening = false;
+
+/**
+ * Follows the settings from the first ask on, before any audio exists: a
+ * room joined muted has no context yet, and turning the sound on must still
+ * start the music.
+ */
+function listen() {
+  if (listening) return;
+  listening = true;
   subscribeSettings(() => {
-    if (!ctx || !master) return;
-    master.gain.setTargetAtTime(
-      musicVolume(getSettings()),
-      ctx.currentTime,
-      0.05,
-    );
+    if (ctx && master)
+      master.gain.setTargetAtTime(
+        musicVolume(getSettings()),
+        ctx.currentTime,
+        0.05,
+      );
     apply();
   });
-  return ctx;
 }
 
 function load(src: string): Promise<AudioBuffer | null> {
@@ -130,6 +161,44 @@ function start(
   return { track, source, gain, origin: at - offset } satisfies Playing;
 }
 
+/**
+ * The performance.now() moment the playing song's position 0 played at, while
+ * the music is audible; null when it is silent, stopped or not started yet.
+ */
+let pulse: number | null = null;
+const pulseListeners = new Set<() => void>();
+
+function publishPulse() {
+  let next: number | null = null;
+  if (ctx?.state === "running" && playing && musicVolume(getSettings()) > 0) {
+    // what is scheduled now comes out of the speakers this much later
+    const latency = (ctx.outputLatency || ctx.baseLatency || 0) * 1000;
+    next = Math.round(
+      performance.now() + (playing.origin - ctx.currentTime) * 1000 + latency,
+    );
+  }
+  // a few ms of re-measuring is not a new beat
+  if (
+    next === pulse ||
+    (next !== null && pulse !== null && Math.abs(next - pulse) < 20)
+  )
+    return;
+  pulse = next;
+  for (const l of pulseListeners) l();
+}
+
+/** When the song's position 0 played (performance.now() ms) while the music is audible, else null. */
+export function useMusicPulse(): number | null {
+  return useSyncExternalStore(
+    (l) => {
+      pulseListeners.add(l);
+      return () => pulseListeners.delete(l);
+    },
+    () => pulse,
+    () => null,
+  );
+}
+
 function stop(p: Playing, at: number, fadeOut: number) {
   p.gain.gain.cancelScheduledValues(at);
   p.gain.gain.setValueAtTime(p.gain.gain.value, at);
@@ -149,6 +218,7 @@ async function apply() {
   if (!want) {
     if (playing) stop(playing, c.currentTime, 0.6);
     playing = null;
+    publishPulse();
     return;
   }
   const [buffer, sfx] = await Promise.all([
@@ -161,6 +231,7 @@ async function apply() {
   const was = playing;
   if (!was) {
     playing = start(want, buffer, now, 0, 1);
+    publishPulse();
     return;
   }
   if (sfx) {
@@ -184,11 +255,13 @@ async function apply() {
     was.source.stop(now + CLUNK + 0.05);
     const at = now + CLUNK + BOOTH_IN;
     playing = start(want, buffer, at, position(at), 0.15);
+    publishPulse();
     return;
   }
   // back out of the booth, or any other change: a crossfade at the same point in the song
   stop(was, now, 1.5);
   playing = start(want, buffer, now, position(now), 1.5);
+  publishPulse();
 }
 
 /** In the lobby the music plays through the wall: 800 Hz low-pass, 8 dB down. */
@@ -232,6 +305,7 @@ export function useMusicMuffle(on: boolean) {
 const claims = new Map<string, { track: Track | null; rank: number }>();
 
 function resolve() {
+  listen();
   let best: { track: Track | null; rank: number } | null = null;
   for (const c of claims.values()) if (!best || c.rank > best.rank) best = c;
   current = best?.track ?? null;

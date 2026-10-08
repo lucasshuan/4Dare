@@ -10,6 +10,7 @@ import { RoomChat } from "@/features/chat/room-chat";
 import { useRoomContext } from "@/features/data/room-context";
 import { ImpostorScenes } from "@/features/impostor/impostor-scenes";
 import { ImpostorScreen } from "@/features/impostor/impostor-screen";
+import { LobbyBackdrop } from "@/features/lobby/lobby-backdrop";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
 import { ResultScreen } from "@/features/result/result-screen";
 import { isGuessScene, isShow, type StageScreen } from "@/features/stage/stage";
@@ -157,42 +158,46 @@ function Areas() {
     if (lineup) void loadLineup();
   }, [lineup]);
   return (
-    <AnimatePresence mode="wait">
-      {area === "lobby" ? (
-        <m.div
-          key="lobby"
-          variants={LOBBY}
-          initial="enter"
-          animate="shown"
-          exit="leave"
-        >
-          <LobbyScreen />
-        </m.div>
-      ) : area === "match" ? (
-        <MatchFrame key="match">
-          {/* the screens swap under the header with a short crossfade */}
-          <AnimatePresence mode="wait">
-            <m.div
-              key={screen ?? "none"}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { duration: 0.2 } }}
-              exit={{ opacity: 0, transition: { duration: 0.15 } }}
-            >
-              <MatchScreen screen={screen} />
-            </m.div>
-          </AnimatePresence>
-        </MatchFrame>
-      ) : area === "result" ? (
-        // a hit that ends the match keeps its reveal; the results wait until it is over
-        <m.div key={finishedWait ? "result-wait" : "result"} {...RISE}>
-          {finishedWait ? null : <ResultScreen />}
-        </m.div>
-      ) : (
-        <m.div key="closed" {...RISE}>
-          <RoomProblem code="not_found" />
-        </m.div>
-      )}
-    </AnimatePresence>
+    <>
+      {/* the lobby's coloured backdrop, its flares in time with the music */}
+      {area === "lobby" ? <LobbyBackdrop /> : null}
+      <AnimatePresence mode="wait">
+        {area === "lobby" ? (
+          <m.div
+            key="lobby"
+            variants={LOBBY}
+            initial="enter"
+            animate="shown"
+            exit="leave"
+          >
+            <LobbyScreen />
+          </m.div>
+        ) : area === "match" ? (
+          <MatchFrame key="match">
+            {/* the screens swap under the header with a short crossfade */}
+            <AnimatePresence mode="wait">
+              <m.div
+                key={screen ?? "none"}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { duration: 0.2 } }}
+                exit={{ opacity: 0, transition: { duration: 0.15 } }}
+              >
+                <MatchScreen screen={screen} />
+              </m.div>
+            </AnimatePresence>
+          </MatchFrame>
+        ) : area === "result" ? (
+          // a hit that ends the match keeps its reveal; the results wait until it is over
+          <m.div key={finishedWait ? "result-wait" : "result"} {...RISE}>
+            {finishedWait ? null : <ResultScreen />}
+          </m.div>
+        ) : (
+          <m.div key="closed" {...RISE}>
+            <RoomProblem code="not_found" />
+          </m.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
