@@ -20,6 +20,8 @@ const STEPS: {
   bids: Partial<Record<Seat, number>>;
   sold?: boolean;
   open?: boolean;
+  /** The table cleared between loops: no lot, no envelope. */
+  clear?: boolean;
 }[] = [
   { ms: 900, bids: {} },
   { ms: 650, bids: { b: 1 } },
@@ -28,7 +30,7 @@ const STEPS: {
   { ms: 900, bids: { b: 3, c: 2, d: 5 } },
   { ms: 1500, bids: { b: 3, c: 2, d: 5 }, sold: true },
   { ms: 3000, bids: { b: 3, c: 2, d: 5 }, sold: true, open: true },
-  { ms: 500, bids: {} },
+  { ms: 500, bids: {}, clear: true },
 ];
 /** The frame shown when motion is reduced: sold, and the envelope open. */
 const STILL = 6;
@@ -144,13 +146,13 @@ export function LineupBanner() {
       />
 
       <div className="relative isolate mx-auto h-[clamp(180px,min(22vw,27vh),230px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[210px]">
-        {/* the lot on the table, then sold */}
-        <div className="-translate-x-1/2 absolute top-[5%] left-1/2">
+        {/* the lot on the table, then sold; a leaving lot and the next share one cell */}
+        <div className="-translate-x-1/2 absolute top-[5%] left-1/2 grid">
           <AnimatePresence>
-            {s.open ? null : (
+            {s.open || s.clear ? null : (
               <m.div
                 key={`lot-${loop}`}
-                className="relative w-[40cqh] bg-white p-[1.6cqh] shadow-pop"
+                className="relative w-[40cqh] bg-white p-[1.6cqh] shadow-pop [grid-area:1/1]"
                 initial={
                   reduced ? false : { opacity: 0, y: "-40%", rotate: -12 }
                 }
