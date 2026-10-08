@@ -317,9 +317,9 @@ export async function profileView(
     plays: activity
       .filter((m) => m.finishedAt > now - GARDEN_MS)
       .map((m) => ({ at: m.finishedAt, game: m.game, won: m.place === 1 })),
-    games: GAME_KEYS.map((g) => gameView(g, activity, now)).filter(
-      (g) => g.matches > 0,
-    ),
+    games: GAME_KEYS.filter((g) => g !== "lineup")
+      .map((g) => gameView(g, activity, now))
+      .filter((g) => g.matches > 0),
     facts: factViews,
     pictures: pictureViews,
     characters: made.slice(0, CHARACTERS).map(dto),

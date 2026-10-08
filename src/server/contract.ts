@@ -1,6 +1,7 @@
 // Shapes shared by server actions, route handlers and the UI.
 import type { GameKey } from "@/game/games";
 import type { Gosto } from "@/game/gostos";
+import type { LineupRules } from "@/game/lineup/rules";
 import type { SyncedSettings } from "@/game/options";
 import type { BadgeGroup, BadgeId } from "@/game/profile/badges";
 import type {
@@ -102,7 +103,7 @@ export interface ThemeCatalogEntry {
   names: Localized;
 }
 
-export interface CreateRoomInput {
+export interface CreateRoomInput extends LineupRules {
   game: GameKey;
   name: string;
   visibility: "public" | "private";
@@ -118,6 +119,10 @@ export interface CreateRoomInput {
   replySeconds: number;
   talkSeconds: number;
   lastSeconds: number;
+  lotSeconds: number;
+  tradeSeconds: number;
+  defendSeconds: number;
+  judgeSeconds: number;
   /** Impostor: null lets the seats decide. */
   impostors: number | null;
   themeMode: "vote" | "host";

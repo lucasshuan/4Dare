@@ -38,6 +38,7 @@ export const DEFAULT_SETTINGS: Settings = {
   games: {
     "who-am-i": { ...GAME_OPTIONS["who-am-i"] },
     impostor: { ...GAME_OPTIONS.impostor },
+    lineup: { ...GAME_OPTIONS.lineup },
   },
   presets: [],
 };

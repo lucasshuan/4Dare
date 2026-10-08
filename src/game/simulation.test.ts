@@ -65,6 +65,9 @@ function beatLengths(show: string, kind: BeatKind, first: boolean): number[] {
       return [T.order[v]];
     case "card":
       return [T.card[v]];
+    default:
+      // What for?'s beats: this simulation plays Who am I? only
+      return [];
   }
 }
 

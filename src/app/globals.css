@@ -42,6 +42,26 @@
   --art-impostor-2: #9776d1;
   /* the Impostor art's lights down: a plum dusk here, near black in the dark theme */
   --art-impostor-dim: rgb(40 24 70 / 0.42);
+  /* What for?'s art: a warm kraft wall behind the board */
+  --art-lineup: #ecc98f;
+  --art-lineup-2: #d9a768;
+  /*
+   * What for?'s objects: the standing board (slate and chalk in a wood frame),
+   * the coins, the kraft envelope and its wax seal. Objects keep their colours
+   * in both themes, like the profile covers.
+   */
+  --board: #2c4a3e;
+  --board-deep: #1d3329;
+  --board-hi: #3b6150;
+  --chalk: #eef2e6;
+  --wood: #b07a48;
+  --wood-deep: #7a4f2c;
+  --kraft: #d8b07a;
+  --kraft-deep: #b88a52;
+  --kraft-ink: #2a1d0c;
+  --wax: #b8322a;
+  --gold: #e7b94a;
+  --gold-deep: #b58a1e;
   --on-avatar: #1e2433;
   /* One colour per player in the room, theirs from joining (seat-colors.ts): their ring, their name, the match backdrop. */
   --seat-1: #2b69c8;
@@ -188,6 +208,8 @@
   --art-impostor: #32165a;
   --art-impostor-2: #230f3d;
   --art-impostor-dim: rgb(11 15 23 / 0.7);
+  --art-lineup: #4a3420;
+  --art-lineup-2: #2e2014;
   --seat-1: #86b4f7;
   --seat-2: #f0a566;
   --seat-3: #5ccfc6;
@@ -261,6 +283,18 @@
   --color-brand-stage: var(--brand-stage);
   --color-brand-butter: var(--brand-butter);
   --color-on-brand: var(--on-brand);
+  --color-board: var(--board);
+  --color-board-deep: var(--board-deep);
+  --color-board-hi: var(--board-hi);
+  --color-chalk: var(--chalk);
+  --color-wood: var(--wood);
+  --color-wood-deep: var(--wood-deep);
+  --color-kraft: var(--kraft);
+  --color-kraft-deep: var(--kraft-deep);
+  --color-kraft-ink: var(--kraft-ink);
+  --color-wax: var(--wax);
+  --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
 
   /* Zen Maru Gothic is only loaded on Japanese pages (ja-font.tsx) */
   --font-display:
@@ -486,6 +520,14 @@ body {
     120deg,
     var(--art-impostor),
     var(--art-impostor-2)
+  );
+}
+@utility art-lineup {
+  background-color: var(--art-lineup);
+  background-image: linear-gradient(
+    120deg,
+    var(--art-lineup),
+    var(--art-lineup-2)
   );
 }
 

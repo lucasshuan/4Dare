@@ -25,6 +25,23 @@ import {
   unreply,
 } from "./impostor/engine";
 import type { ImpDeal } from "./impostor/types";
+import {
+  answerOffer,
+  beginLineup,
+  bid,
+  cancelOffer,
+  fold,
+  judge,
+  luLeft,
+  luTimeout,
+  markDone,
+  offer,
+  presented,
+  rate,
+  react,
+  saveBoard,
+} from "./lineup/engine";
+import { COINS, LOTS_PER_SEAT, OFF_MISSIONS_MAX, ROUNDS } from "./lineup/rules";
 import { isCloseMatch } from "./match";
 import {
   endsWithQuestionMark,
@@ -110,6 +127,13 @@ function mergeSettings(
     "offGostos",
     "offThemes",
     "impostors",
+    "coins",
+    "lotsPerSeat",
+    "rounds",
+    "interval",
+    "trades",
+    "heavy",
+    "offMissions",
   ]);
   if (Object.keys(patch).some((k) => !allowed.has(k))) fail("invalid_input");
   const next = { ...DEFAULT_SETTINGS, ...base, ...patch };
@@ -125,6 +149,10 @@ function mergeSettings(
   const impostors: unknown = next.impostors;
   const offGostos: unknown = next.offGostos ?? [];
   const offThemes: unknown = next.offThemes ?? [];
+  const offMissions: unknown = next.offMissions ?? [];
+  const rounds: unknown = next.rounds;
+  const inRange = (v: unknown, r: { min: number; max: number }) =>
+    Number.isInteger(v) && (v as number) >= r.min && (v as number) <= r.max;
   const name: unknown = next.name;
   const password: unknown = next.password;
   const ok =
@@ -156,7 +184,16 @@ function mergeSettings(
     offGostos.every(isGosto) &&
     Array.isArray(offThemes) &&
     offThemes.length <= OFF_THEMES_MAX &&
-    offThemes.every((id) => typeof id === "string" && THEME_ID.test(id));
+    offThemes.every((id) => typeof id === "string" && THEME_ID.test(id)) &&
+    inRange(next.coins, COINS) &&
+    inRange(next.lotsPerSeat, LOTS_PER_SEAT) &&
+    (rounds === null || inRange(rounds, ROUNDS)) &&
+    typeof next.interval === "boolean" &&
+    typeof next.trades === "boolean" &&
+    typeof next.heavy === "boolean" &&
+    Array.isArray(offMissions) &&
+    offMissions.length <= OFF_MISSIONS_MAX &&
+    offMissions.every((id) => typeof id === "string" && THEME_ID.test(id));
   if (!ok) fail("invalid_input");
   // Each gosto once, in the order the screens show them; one stays on.
   const off = GOSTO_KEYS.filter((k) => (offGostos as string[]).includes(k));
@@ -172,6 +209,7 @@ function mergeSettings(
     password: next.visibility === "private" ? next.password.trim() : "",
     offGostos: off,
     offThemes: [...new Set(offThemes as string[])].sort(),
+    offMissions: [...new Set(offMissions as string[])].sort(),
   };
 }
 
@@ -543,6 +581,17 @@ const MATCH_PHASES = new Set([
 ]);
 /** The Impostor's steps, from the first question to the last guess. */
 const IMP_PHASES = new Set(["replying", "talking", "last_chance"]);
+/** What for?'s steps, from the first lot to the last score. */
+const LU_PHASES = new Set([
+  "bidding",
+  "halftime",
+  "trading",
+  "defending",
+  "presenting",
+  "judging",
+  "tiebreak",
+  "scoring",
+]);
 /**
  * Every card is set: the cast show (everyone picked or "Time!", whose
  * character you got, the turn order), then the first turn's clock.
@@ -619,6 +668,7 @@ export function createRoom(
     turnNumber: 0,
     playStartedAt: null,
     imp: null,
+    lu: null,
     createdAt: ctx.now,
     updatedAt: ctx.now,
   };
@@ -711,6 +761,9 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
             : "need_two_players",
         );
       s.newcomer = e.newcomer === true;
+      // What for? has no theme: the cards and missions come with the start
+      if (s.settings.game === "lineup")
+        return beginLineup(s, e.decks ?? fail("invalid_input"), ctx);
       return beginTheme(s, e.themes, e.examples, e.deals, ctx);
     }
     case "VOTE":
@@ -758,6 +811,28 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       return dontKnow(s, e.playerId, ctx);
     case "LAST_GUESS":
       return lastGuess(s, e.playerId, e.text, ctx);
+    case "BID":
+      return bid(s, e.playerId, e.amount, ctx);
+    case "FOLD":
+      return fold(s, e.playerId, ctx);
+    case "DONE":
+      return markDone(s, e.playerId, e.done, ctx);
+    case "OFFER":
+      return offer(s, e.playerId, { to: e.to, give: e.give, get: e.get }, ctx);
+    case "CANCEL_OFFER":
+      return cancelOffer(s, e.playerId, ctx);
+    case "ANSWER_OFFER":
+      return answerOffer(s, e.playerId, e.from, e.accept, ctx);
+    case "BOARD":
+      return saveBoard(s, e.playerId, e.board, ctx);
+    case "PRESENTED":
+      return presented(s, e.playerId, ctx);
+    case "REACT":
+      return react(s, e.playerId, e.counts, ctx);
+    case "JUDGE":
+      return judge(s, e.playerId, e.ownerId, ctx);
+    case "RATE":
+      return rate(s, e.playerId, e.up);
     case "BACK_TO_LOBBY": {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
@@ -826,6 +901,52 @@ function swapPlayer(s: RoomState, from: PlayerId, player: Identity) {
   for (const m of s.matches ?? [])
     for (const p of m.players) if (p.id === from) p.id = to;
   if (s.imp) swapImpostor(s.imp, swap);
+  if (s.lu) swapLineup(s.lu, swap);
+}
+
+/** What for?'s traces of a player under their new id. */
+function swapLineup(
+  lu: NonNullable<RoomState["lu"]>,
+  swap: (id: PlayerId) => PlayerId,
+) {
+  const keys = <T>(r: Record<PlayerId, T>) =>
+    Object.fromEntries(Object.entries(r).map(([k, v]) => [swap(k), v]));
+  const pairs = (r: Record<PlayerId, PlayerId>) =>
+    Object.fromEntries(Object.entries(r).map(([k, v]) => [swap(k), swap(v)]));
+  lu.dealt = lu.dealt.map(swap);
+  lu.coins = keys(lu.coins);
+  lu.bids = keys(lu.bids);
+  lu.passed = lu.passed.map(swap);
+  lu.done = lu.done.map(swap);
+  lu.cuts = keys(lu.cuts);
+  for (const o of lu.offers) {
+    o.from = swap(o.from);
+    o.to = swap(o.to);
+  }
+  for (const r of lu.rounds) {
+    r.hands = keys(r.hands);
+    for (const tag of Object.values(r.tags)) if (tag.by) tag.by = swap(tag.by);
+    r.change = keys(r.change);
+    for (const t of r.trades) {
+      t.from = swap(t.from);
+      t.to = swap(t.to);
+    }
+    r.boards = keys(r.boards);
+    r.order = r.order.map(swap);
+    r.reactions = Object.fromEntries(
+      Object.entries(r.reactions).map(([k, v]) => [swap(k), keys(v)]),
+    );
+    r.votes = pairs(r.votes);
+    if (r.tie) {
+      r.tie.among = r.tie.among.map(swap);
+      r.tie.voters = r.tie.voters.map(swap);
+      r.tie.votes = pairs(r.tie.votes);
+    }
+    r.winners = r.winners.map(swap);
+    if (r.crowd) r.crowd = swap(r.crowd);
+    r.points = keys(r.points);
+    r.rated = keys(r.rated);
+  }
 }
 
 /** The Impostor's traces of a player under their new id. */
@@ -953,6 +1074,7 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   p.away = true;
   handOverHost(s);
   if (IMP_PHASES.has(s.phase)) return impLeft(s, id, ctx);
+  if (LU_PHASES.has(s.phase)) return luLeft(s, id, ctx);
   if (isActive(s, id)) endOutcome(s, id, ctx);
   if (TURN_PHASES.has(s.phase) && s.turnPlayerId === id) {
     abandonTurn(s, ctx);
@@ -1162,6 +1284,7 @@ function backToLobby(s: RoomState) {
   s.reveal = null;
   s.playStartedAt = null;
   s.imp = null;
+  s.lu = null;
   stopClock(s);
 }
 
@@ -1237,6 +1360,15 @@ function timeout(
     case "talking":
     case "last_chance":
       return impTimeout(s, ctx);
+    case "bidding":
+    case "halftime":
+    case "trading":
+    case "defending":
+    case "presenting":
+    case "judging":
+    case "tiebreak":
+    case "scoring":
+      return luTimeout(s, ctx);
     default:
       return fail("wrong_phase");
   }

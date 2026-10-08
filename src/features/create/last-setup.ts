@@ -1,6 +1,7 @@
 // The last room setup, so the next room starts the same way. Kept in this browser only.
 import { DEFAULT_GAME } from "@/game/games";
 import { GOSTO_KEYS, isGosto } from "@/game/gostos";
+import { cleanRules, DEFAULT_RULES } from "@/game/lineup/rules";
 import {
   DEFAULT_SETTINGS,
   OFF_THEMES_MAX,
@@ -25,10 +26,15 @@ export const DEFAULT_SETUP: CreateRoomInput = {
   replySeconds: DEFAULT_SETTINGS.replySeconds,
   talkSeconds: DEFAULT_SETTINGS.talkSeconds,
   lastSeconds: DEFAULT_SETTINGS.lastSeconds,
+  lotSeconds: DEFAULT_SETTINGS.lotSeconds,
+  tradeSeconds: DEFAULT_SETTINGS.tradeSeconds,
+  defendSeconds: DEFAULT_SETTINGS.defendSeconds,
+  judgeSeconds: DEFAULT_SETTINGS.judgeSeconds,
   impostors: DEFAULT_SETTINGS.impostors,
   themeMode: DEFAULT_SETTINGS.themeMode,
   offGostos: [],
   offThemes: [],
+  ...DEFAULT_RULES,
 };
 
 const oneOf = <T>(value: unknown, options: readonly T[], fallback: T): T =>
@@ -88,10 +94,15 @@ export function loadSetup(): CreateRoomInput {
     replySeconds: seconds(saved.replySeconds, d.replySeconds),
     talkSeconds: seconds(saved.talkSeconds, d.talkSeconds),
     lastSeconds: seconds(saved.lastSeconds, d.lastSeconds),
+    lotSeconds: seconds(saved.lotSeconds, d.lotSeconds),
+    tradeSeconds: seconds(saved.tradeSeconds, d.tradeSeconds),
+    defendSeconds: seconds(saved.defendSeconds, d.defendSeconds),
+    judgeSeconds: seconds(saved.judgeSeconds, d.judgeSeconds),
     impostors: oneOf(saved.impostors, [1, 2, 3], null),
     themeMode: oneOf(saved.themeMode, ["vote", "host"], d.themeMode),
     // saved as what is switched off, so a gosto or theme added later starts on
     ...cleanOff(saved.offGostos, saved.offThemes),
+    ...cleanRules(saved),
   };
 }
 

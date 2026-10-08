@@ -20,6 +20,12 @@ export const GAME_OPTIONS = {
     /** Your card stays face down until you hold it: for screens others can see. */
     hiddenCard: false,
   },
+  lineup: {
+    /** Plain letters instead of the chalk on the boards: easier to read. */
+    plainLetters: false,
+    /** No reactions floating over the boards on stage. */
+    hideReactions: false,
+  },
 } as const satisfies Record<GameKey, Record<string, boolean>>;
 export type GameOption<G extends GameKey> = keyof (typeof GAME_OPTIONS)[G];
 export type GameOptions = {

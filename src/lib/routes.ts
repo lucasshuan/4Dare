@@ -4,12 +4,14 @@ import type { GameKey } from "@/game/games";
 export const GAMES = "/";
 export const WHO_AM_I = "/who-am-i";
 export const IMPOSTOR = "/impostor";
+export const WHAT_FOR = "/what-for";
 export const NEW_ROOM = "/new";
 
 /** Each game's own page. */
 export const GAME_PATHS: Record<GameKey, string> = {
   "who-am-i": WHO_AM_I,
   impostor: IMPOSTOR,
+  lineup: WHAT_FOR,
 };
 
 /** The create-room screen, set up for `game`. */

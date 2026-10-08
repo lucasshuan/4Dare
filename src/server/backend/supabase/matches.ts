@@ -108,19 +108,23 @@ export function supabaseMatches(): MatchStore {
           xp: r.xp,
           others: r.others as unknown as MatchMate[],
         };
-        return [
-          r.game === "impostor"
-            ? {
-                ...base,
-                game: r.game,
-                details: r.details as unknown as ImpostorPart | null,
-              }
-            : {
-                ...base,
-                game: r.game,
-                details: r.details as unknown as WhoAmIPart | null,
-              },
-        ];
+        if (r.game === "impostor")
+          return [
+            {
+              ...base,
+              game: r.game,
+              details: r.details as unknown as ImpostorPart | null,
+            },
+          ];
+        if (r.game === "who-am-i")
+          return [
+            {
+              ...base,
+              game: r.game,
+              details: r.details as unknown as WhoAmIPart | null,
+            },
+          ];
+        return [];
       });
     },
   };

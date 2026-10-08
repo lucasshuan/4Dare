@@ -27,6 +27,7 @@ describe("parseSettings", () => {
     expect(s.games).toEqual({
       "who-am-i": { confirmPass: true, popularHand: true },
       impostor: { hiddenCard: false },
+      lineup: { plainLetters: false, hideReactions: false },
     });
   });
 });

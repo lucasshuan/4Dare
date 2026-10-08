@@ -156,6 +156,17 @@
         "caught": "¡Impostor!"
       }
     },
+    "whatFor": {
+      "name": "¿Para qué?",
+      "players": "2 a 8 jugadores",
+      "play": "Jugar",
+      "demoLine": "Para cambiar una llanta, bajo la lluvia.",
+      "pitch": "Cada uno compra su equipo en una subasta de personajes, sin saber para qué. Luego el sobre revela la misión y cada uno defiende su tablero.",
+      "banner": {
+        "sold": "¡Vendido!",
+        "what": "¿Para qué?"
+      }
+    },
     "next": "Siguientes juegos",
     "previous": "Juegos anteriores"
   },

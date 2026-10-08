@@ -156,6 +156,17 @@
         "caught": "Impostor!"
       }
     },
+    "whatFor": {
+      "name": "Pra quê?",
+      "players": "2 a 8 jogadores",
+      "play": "Jogar",
+      "demoLine": "Pra trocar o pneu, na chuva.",
+      "pitch": "Cada um compra o próprio time num leilão de personagens, sem saber pra quê. Depois o envelope abre a missão, e cada um defende o seu quadro.",
+      "banner": {
+        "sold": "Vendido!",
+        "what": "Pra quê?"
+      }
+    },
     "next": "Próximos jogos",
     "previous": "Jogos anteriores"
   },

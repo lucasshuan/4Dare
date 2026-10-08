@@ -19,7 +19,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { Segmented } from "@/features/create/settings-fields";
-import { GAME_KEYS, type GameKey } from "@/game/games";
+import { type GameKey, OPEN_GAMES } from "@/game/games";
 import { GAME_OPTIONS, THEMES } from "@/game/options";
 import { LANGS, type Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -253,7 +253,7 @@ function LookPane() {
 function GamePane() {
   const t = useTranslations("settings.game");
   const gameName = useGameName();
-  const [game, setGame] = useState<GameKey>(GAME_KEYS[0]);
+  const [game, setGame] = useState<GameKey>(OPEN_GAMES[0]);
   const s = useSettings();
   // each game's own keys: read loosely, the messages name them
   const options = Object.keys(GAME_OPTIONS[game]);
@@ -262,7 +262,7 @@ function GamePane() {
     <>
       <fieldset className="m-0 flex min-w-0 flex-wrap gap-2 border-0 border-line border-b p-0 pb-4">
         <legend className="sr-only">{t("pick")}</legend>
-        {GAME_KEYS.map((g) => (
+        {OPEN_GAMES.map((g) => (
           <button
             key={g}
             type="button"

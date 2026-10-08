@@ -5,9 +5,15 @@ import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { knownAs } from "@/game/character-search";
-import { GAME_KEYS } from "@/game/games";
+import { GAME_KEYS, OPEN_GAMES } from "@/game/games";
 import { GOSTO_KEYS, type Gosto } from "@/game/gostos";
 import type { ImpAnswer } from "@/game/impostor/types";
+import {
+  COINS,
+  LOTS_PER_SEAT,
+  OFF_MISSIONS_MAX,
+  ROUNDS,
+} from "@/game/lineup/rules";
 import { parseSynced } from "@/game/options";
 import { themeId } from "@/game/theme-id";
 import {
@@ -119,7 +125,7 @@ async function act(
 const seconds = z.number().int().min(STEP_SECONDS_MIN).max(STEP_SECONDS_MAX);
 
 const createSchema = z.object({
-  game: z.enum(GAME_KEYS),
+  game: z.enum(GAME_KEYS).refine((g) => OPEN_GAMES.includes(g)),
   name: z.string().trim().min(1).max(ROOM_NAME_MAX),
   visibility: z.enum(["public", "private"]),
   password: z.string().trim().max(ROOM_PASSWORD_MAX),
@@ -133,12 +139,25 @@ const createSchema = z.object({
   replySeconds: seconds,
   talkSeconds: seconds,
   lastSeconds: seconds,
+  lotSeconds: seconds,
+  tradeSeconds: seconds,
+  defendSeconds: seconds,
+  judgeSeconds: seconds,
   impostors: z.number().int().min(1).max(3).nullable(),
   themeMode: z.enum(["vote", "host"]),
   offGostos: z
     .array(z.enum(GOSTO_KEYS as [Gosto, ...Gosto[]]))
     .max(GOSTO_KEYS.length - 1),
   offThemes: z.array(z.string().regex(/^[a-z0-9-]{1,80}$/)).max(OFF_THEMES_MAX),
+  coins: z.number().int().min(COINS.min).max(COINS.max),
+  lotsPerSeat: z.number().int().min(LOTS_PER_SEAT.min).max(LOTS_PER_SEAT.max),
+  rounds: z.number().int().min(ROUNDS.min).max(ROUNDS.max).nullable(),
+  interval: z.boolean(),
+  trades: z.boolean(),
+  heavy: z.boolean(),
+  offMissions: z
+    .array(z.string().regex(/^[a-z0-9-]{1,80}$/))
+    .max(OFF_MISSIONS_MAX),
 });
 
 export async function createRoom(

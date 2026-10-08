@@ -24,7 +24,12 @@ import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { DEFAULT_GAME, GAME_KEYS, type GameKey, isGameKey } from "@/game/games";
+import {
+  DEFAULT_GAME,
+  type GameKey,
+  isGameKey,
+  OPEN_GAMES,
+} from "@/game/games";
 import { GOSTO_KEYS, GOSTOS, type Gosto } from "@/game/gostos";
 import { LANGS, type Lang } from "@/game/types";
 import { Link } from "@/i18n/navigation";
@@ -305,7 +310,7 @@ function Filters({
             label: t("allGames"),
             icon: <Layers className="size-4" strokeWidth={1.75} />,
           },
-          ...GAME_KEYS.map((g) => ({
+          ...OPEN_GAMES.map((g) => ({
             value: g,
             label: gameName(g),
             icon: <GameThumb game={g} size="xs" />,

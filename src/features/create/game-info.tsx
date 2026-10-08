@@ -4,6 +4,8 @@ import { useTranslations } from "next-intl";
 import type { ComponentType } from "react";
 import { ImpostorSnapshot } from "@/features/home/impostor-snapshot";
 import { ImpostorThumb } from "@/features/home/impostor-thumb";
+import { LineupSnapshot } from "@/features/home/lineup-snapshot";
+import { LineupThumb } from "@/features/home/lineup-thumb";
 import { WhoAmISnapshot } from "@/features/home/who-am-i-snapshot";
 import { WhoAmIThumb } from "@/features/home/who-am-i-thumb";
 import type { GameKey } from "@/game/games";
@@ -16,7 +18,7 @@ import { cn } from "@/lib/cn";
 export const GAME_INFO: Record<
   GameKey,
   {
-    messages: "whoAmI" | "impostor";
+    messages: "whoAmI" | "impostor" | "whatFor";
     Art: ComponentType<{ className?: string; still?: boolean }>;
     /** Drawn for small boxes (16:10): fills whatever box it is given. */
     Thumb: ComponentType;
@@ -28,6 +30,7 @@ export const GAME_INFO: Record<
     Art: ImpostorSnapshot,
     Thumb: ImpostorThumb,
   },
+  lineup: { messages: "whatFor", Art: LineupSnapshot, Thumb: LineupThumb },
 };
 
 /** The game's name, as the hub card shows it. */

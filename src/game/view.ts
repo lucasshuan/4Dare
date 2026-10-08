@@ -14,6 +14,7 @@ import {
   validatorOf,
 } from "./helpers";
 import { impReveal, impStatus, impView } from "./impostor/view";
+import { luStatus, luView } from "./lineup/view";
 import {
   type ActiveRoom,
   type AnswerEntry,
@@ -37,6 +38,7 @@ import {
   type RoomPlayer,
   type RoomState,
   type RoomView,
+  SHOW_KINDS,
   type ShowKind,
   type ShowView,
   type TurnView,
@@ -88,7 +90,7 @@ function mustAct(s: RoomState, id: PlayerId) {
 }
 
 function statusOf(s: RoomState, p: RoomPlayer): PlayerStatus {
-  const imp = impStatus(s, p);
+  const imp = impStatus(s, p) ?? luStatus(s, p);
   if (imp) return imp;
   const o = s.outcomes[p.id];
   if (s.phase === "lobby")
@@ -264,7 +266,7 @@ function isTied(s: RoomState, id: PlayerId) {
 }
 
 const isShowKind = (kind: Reveal["kind"]): kind is ShowKind =>
-  kind === "opening" || kind === "theme" || kind === "cast" || kind === "deal";
+  (SHOW_KINDS as readonly string[]).includes(kind);
 
 /** A show as the screens get it, with the show still playing before it while that lasts. */
 function showView(r: Reveal, kind: ShowKind, now: number): ShowView {
@@ -416,6 +418,7 @@ export function toView(
     turns: s.turnNumber,
     matches: s.phase === "lobby" ? pastMatches(s, viewerId, lang) : [],
     imp: impView(s, viewerId),
+    lu: luView(s, viewerId),
     canStart:
       viewerId === s.hostId &&
       s.phase === "lobby" &&
@@ -459,6 +462,14 @@ const PLAYING_PHASES = new Set([
   "replying",
   "talking",
   "last_chance",
+  "bidding",
+  "halftime",
+  "trading",
+  "defending",
+  "presenting",
+  "judging",
+  "tiebreak",
+  "scoring",
 ]);
 
 /**
@@ -545,6 +556,10 @@ export function toPublicRoom(state: RoomState, now: number): ListedRoom | null {
     replySeconds: s.settings.replySeconds,
     talkSeconds: s.settings.talkSeconds,
     lastSeconds: s.settings.lastSeconds,
+    lotSeconds: s.settings.lotSeconds,
+    tradeSeconds: s.settings.tradeSeconds,
+    defendSeconds: s.settings.defendSeconds,
+    judgeSeconds: s.settings.judgeSeconds,
   };
 }
 

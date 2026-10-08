@@ -3,7 +3,7 @@
 import { Select } from "@base-ui/react/select";
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { GAME_KEYS, GAME_SEATS, type GameKey } from "@/game/games";
+import { GAME_SEATS, type GameKey, OPEN_GAMES } from "@/game/games";
 import { cn } from "@/lib/cn";
 import { GAME_INFO, GameThumb, useGameName } from "./game-info";
 
@@ -33,7 +33,7 @@ export function GameField({
   const full = (game: GameKey) => seated > GAME_SEATS[game].max;
   return (
     <Select.Root
-      items={GAME_KEYS.map((game) => ({ value: game, label: name(game) }))}
+      items={OPEN_GAMES.map((game) => ({ value: game, label: name(game) }))}
       value={value}
       onValueChange={(game) => {
         if (game) onChange(game as GameKey);
@@ -68,7 +68,7 @@ export function GameField({
         >
           <Select.Popup className="w-[var(--anchor-width)] origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
             <Select.List>
-              {GAME_KEYS.map((game) => (
+              {OPEN_GAMES.map((game) => (
                 <Select.Item
                   key={game}
                   value={game}

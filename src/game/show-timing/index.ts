@@ -4,6 +4,7 @@
 import { CAST, CAST_MARKS } from "./cast";
 import { DEAL, DEAL_MARKS } from "./deal";
 import { DRAW, DRAW_MARKS } from "./draw";
+import { LINEUP, LINEUP_MARKS } from "./lineup";
 import { OPENING, OPENING_MARKS } from "./opening";
 import { PICK } from "./pick";
 import { THEME, THEME_MARKS } from "./theme";
@@ -31,6 +32,8 @@ export const SHOW_TIMING = {
     turn: CAST.entrance,
     reply: DEAL.entrance,
   },
+  /** What for?'s scenes. */
+  lineup: LINEUP,
 } as const;
 
 /**
@@ -43,4 +46,5 @@ export const SHOW_MARKS = {
   ...DRAW_MARKS,
   ...CAST_MARKS,
   ...DEAL_MARKS,
+  ...LINEUP_MARKS,
 } as const;

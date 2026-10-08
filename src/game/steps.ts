@@ -1,6 +1,7 @@
 // The parts of a match both games share: shows and reveals on the clock,
 // step clocks and their cuts, the podium. Pure, like the engine.
 import { findPlayer, isPresent } from "./helpers";
+import { luPlaces } from "./lineup/places";
 import {
   type BeatKind,
   CLOCK_CUT_FLOOR_MS,
@@ -12,6 +13,7 @@ import {
   type Reveal,
   type RoomState,
   type RuleExamples,
+  SHOW_KINDS,
   type ShowKind,
   type StepTime,
 } from "./types";
@@ -29,11 +31,7 @@ export const TURN_PHASES = new Set([
 ]);
 
 const isShow = (r: Reveal | null | undefined): r is Reveal =>
-  !!r &&
-  (r.kind === "opening" ||
-    r.kind === "theme" ||
-    r.kind === "cast" ||
-    r.kind === "deal");
+  !!r && (SHOW_KINDS as readonly string[]).includes(r.kind);
 /** A guess's result, or a pass, on the whole screen: the next turn waits for it. */
 const isGuessScene = (r: Reveal | null | undefined): r is Reveal =>
   !!r && (r.kind === "guess" || r.kind === "pass");
@@ -185,13 +183,29 @@ const PAST_MATCHES = 5;
 function keepMatch(s: RoomState, ctx: Ctx) {
   if (s.playStartedAt === null) return;
   const imp = s.imp;
-  // the Impostor's winners share first place
+  const lu = s.lu;
+  // the Impostor's winners share first place; What for? ranks by points
   const won = (id: PlayerId) =>
     imp?.winner
       ? imp.impostors.includes(id) === (imp.winner === "impostors")
       : false;
+  const places = lu ? luPlaces(lu) : null;
+  const placeOf = (id: PlayerId) =>
+    places
+      ? (places[id] ?? null)
+      : imp
+        ? won(id)
+          ? 1
+          : null
+        : (s.outcomes[id]?.place ?? null);
   const players = s.players
-    .filter((p) => (imp ? imp.dealt.includes(p.id) : s.assignments[p.id]))
+    .filter((p) =>
+      lu
+        ? lu.dealt.includes(p.id)
+        : imp
+          ? imp.dealt.includes(p.id)
+          : s.assignments[p.id],
+    )
     .map((p) => ({
       id: p.id,
       isGuest: p.isGuest,
@@ -199,7 +213,7 @@ function keepMatch(s: RoomState, ctx: Ctx) {
       guestNumber: p.guestNumber,
       avatar: p.avatar,
       colorSlot: p.colorSlot,
-      place: imp ? (won(p.id) ? 1 : null) : (s.outcomes[p.id]?.place ?? null),
+      place: placeOf(p.id),
     }))
     .sort((a, b) => (a.place ?? Infinity) - (b.place ?? Infinity));
   const match = {

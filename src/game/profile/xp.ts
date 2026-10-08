@@ -11,6 +11,8 @@ export const GAME_XP = {
   "who-am-i": { discovered: 10 },
   /** A vote on an impostor that sent them out; each round an impostor stayed in; a right last guess. */
   impostor: { rightVote: 5, survived: 10, guessHit: 10 },
+  /** Each round won (alone or tied), each vote a board got, the crowd's prize. */
+  lineup: { roundWon: 15, vote: 3, crowd: 5 },
 } as const satisfies Record<GameKey, Record<string, number>>;
 
 /** XP from one level to the next: 100 to reach level 2, 50 more each level after. */

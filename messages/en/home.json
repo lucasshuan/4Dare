@@ -156,6 +156,17 @@
         "caught": "Impostor!"
       }
     },
+    "whatFor": {
+      "name": "What for?",
+      "players": "2 to 8 players",
+      "play": "Play",
+      "demoLine": "To change a tire, in the rain.",
+      "pitch": "Everyone buys a team at a character auction, without knowing what for. Then the envelope opens on the mission, and everyone defends their board.",
+      "banner": {
+        "sold": "Sold!",
+        "what": "What for?"
+      }
+    },
     "next": "Next games",
     "previous": "Previous games"
   },

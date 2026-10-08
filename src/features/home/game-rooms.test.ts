@@ -33,6 +33,10 @@ const room = (
   replySeconds: 45,
   talkSeconds: 120,
   lastSeconds: 45,
+  lotSeconds: 60,
+  tradeSeconds: 30,
+  defendSeconds: 90,
+  judgeSeconds: 30,
   offGostos: [],
 });
 

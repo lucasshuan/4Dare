@@ -5,6 +5,7 @@
 // ready ones live in messages/<lang>/home.json (presets.ready).
 import { type GameKey, isGameKey } from "./games";
 import { GOSTO_KEYS, type Gosto, isGosto } from "./gostos";
+import { cleanRules, type LineupRules } from "./lineup/rules";
 import {
   DEFAULT_SETTINGS,
   OFF_THEMES_MAX,
@@ -22,7 +23,8 @@ export const PRESET_NAME_MAX = 30;
 export type PresetSetup = Pick<
   RoomSettings,
   StepTime | "themeMode" | "impostors" | "offGostos" | "offThemes"
->;
+> &
+  LineupRules;
 
 export interface RoomPreset {
   id: string;
@@ -57,6 +59,7 @@ export function presetSetup(s: PresetSetup): PresetSetup {
     impostors: s.impostors ?? null,
     offGostos: [...s.offGostos],
     offThemes: [...s.offThemes].sort(),
+    ...cleanRules(s as unknown as Record<string, unknown>),
   };
 }
 
@@ -133,6 +136,7 @@ function parseSetup(raw: unknown): PresetSetup | null {
     impostors,
     offGostos,
     offThemes,
+    ...cleanRules(r),
   };
 }
 

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { ChatMessage } from "@/game/chat";
 import { GOSTO_KEYS } from "@/game/gostos";
+import { DEFAULT_RULES } from "@/game/lineup/rules";
 import { themeId } from "@/game/theme-id";
 import {
   DEFAULT_SETTINGS,
@@ -45,6 +46,10 @@ const TIMES = {
   replySeconds: 45,
   talkSeconds: 120,
   lastSeconds: 45,
+  lotSeconds: 60,
+  tradeSeconds: 30,
+  defendSeconds: 90,
+  judgeSeconds: 30,
 };
 const PRESET = {
   id: "friday",
@@ -56,6 +61,7 @@ const PRESET = {
     impostors: null,
     offGostos: ["real"],
     offThemes: [],
+    ...DEFAULT_RULES,
   },
   isDefault: true,
 };
@@ -67,6 +73,7 @@ const ROOM = {
   offGostos: DEFAULT_SETTINGS.offGostos,
   offThemes: DEFAULT_SETTINGS.offThemes,
   impostors: null,
+  ...DEFAULT_RULES,
 };
 
 /** The guest id inside a jar's signed guest cookie. */
@@ -668,6 +675,7 @@ describe("server, local mode", () => {
       games: {
         "who-am-i": { confirmPass: true, popularHand: true },
         impostor: { hiddenCard: false },
+        lineup: { plainLetters: false, hideReactions: false },
       },
       presets: [PRESET],
     });

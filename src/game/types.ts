@@ -9,6 +9,8 @@ import type {
   ImpQuestion,
   ImpWinner,
 } from "./impostor/types";
+import { DEFAULT_RULES } from "./lineup/rules";
+import type { LineupMatch, LineupView, LuDeck, LuOffer } from "./lineup/types";
 import type { ThemeSet } from "./theme-sets";
 
 export const LANGS = ["en", "es", "ja", "pt"] as const;
@@ -83,6 +85,28 @@ export interface RoomSettings {
   lastSeconds: number;
   /** Impostor: how many get the other card; null lets the seats decide (see impostorsFor). */
   impostors: number | null;
+  /** What for?: seconds each lot stays on the table (a late bid gives some back). */
+  lotSeconds: number;
+  /** What for?: seconds to trade cards before the envelope. */
+  tradeSeconds: number;
+  /** What for?: seconds to lay out the board. Each "done" cuts a share. */
+  defendSeconds: number;
+  /** What for?: seconds to vote for a board. Each vote cuts a share. */
+  judgeSeconds: number;
+  /** What for?: coins everyone gets each round (lineup/rules.ts COINS). */
+  coins: number;
+  /** What for?: lots per player in a round, plus three (LOTS_PER_SEAT). */
+  lotsPerSeat: number;
+  /** What for?: rounds in a match; null lets the seats decide (roundsFor). */
+  rounds: number | null;
+  /** What for?: the auction stops halfway to show every board and purse. */
+  interval: boolean;
+  /** What for?: a window to trade cards before the envelope. */
+  trades: boolean;
+  /** What for?: missions marked heavy (shipwrecks, funerals) can come up. */
+  heavy: boolean;
+  /** What for?: missions switched off, by id: a mission added later comes in switched on. */
+  offMissions: string[];
   mode: "classic";
   /** "vote": everyone votes on themes the gostos and the theme list leave on. "host": the host types the theme. */
   themeMode: "vote" | "host";
@@ -107,6 +131,11 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   talkSeconds: 120,
   lastSeconds: 45,
   impostors: null,
+  lotSeconds: 60,
+  tradeSeconds: 30,
+  defendSeconds: 90,
+  judgeSeconds: 30,
+  ...DEFAULT_RULES,
   mode: "classic",
   themeMode: "vote",
   offGostos: [],
@@ -128,6 +157,10 @@ export const STEP_TIMES = [
   "replySeconds",
   "talkSeconds",
   "lastSeconds",
+  "lotSeconds",
+  "tradeSeconds",
+  "defendSeconds",
+  "judgeSeconds",
 ] as const;
 export type StepTime = (typeof STEP_TIMES)[number];
 /** Each game's clocks, in the order its match plays them. */
@@ -140,6 +173,7 @@ export const GAME_STEP_TIMES: Record<GameKey, readonly StepTime[]> = {
     "validateSeconds",
   ],
   impostor: ["voteSeconds", "replySeconds", "talkSeconds", "lastSeconds"],
+  lineup: ["lotSeconds", "tradeSeconds", "defendSeconds", "judgeSeconds"],
 };
 /** Picking a character always gets this long. */
 export const PICK_SECONDS = 120;
@@ -220,6 +254,14 @@ export const BEAT_KINDS = [
   "received",
   "order",
   "card",
+  // What for?
+  "rules",
+  "secret",
+  "sold",
+  "wrap",
+  "envelope",
+  "votes",
+  "stamp",
 ] as const;
 export type BeatKind = (typeof BEAT_KINDS)[number];
 /** One scene of a show, in server ms. */
@@ -234,7 +276,28 @@ export interface Beat {
  * theme (the result, the theme, the rule, the draw, "for whom"), cast (everyone picked,
  * "Rafa picked yours", the turn order). Each step's clock starts when its show ends.
  */
-export type ShowKind = "opening" | "theme" | "cast" | "deal";
+export type ShowKind =
+  | "opening"
+  | "theme"
+  | "cast"
+  | "deal"
+  /** What for?: a lot under the hammer, the end of the auction, the envelope, the votes. */
+  | "sold"
+  | "wrap"
+  | "envelope"
+  | "tally";
+
+/** Every show kind, for the places that tell a show from a reveal. */
+export const SHOW_KINDS: readonly ShowKind[] = [
+  "opening",
+  "theme",
+  "cast",
+  "deal",
+  "sold",
+  "wrap",
+  "envelope",
+  "tally",
+];
 
 /** A card of the rule scene: a library id (the same in every language), one picture, its names. */
 export interface ExampleCard {
@@ -276,6 +339,22 @@ export type Phase =
   | "talking"
   /** Impostor: a caught impostor guesses the crew's card. */
   | "last_chance"
+  /** What for?: a lot on the table. */
+  | "bidding"
+  /** What for?: the auction stops to show every board and purse. */
+  | "halftime"
+  /** What for?: trades before the envelope. */
+  | "trading"
+  /** What for?: everyone lays out their board for the mission. */
+  | "defending"
+  /** What for?: the boards on stage, one by one. */
+  | "presenting"
+  /** What for?: the secret vote for the best board. */
+  | "judging"
+  /** What for?: those who voted outside a tie choose among the tied. */
+  | "tiebreak"
+  /** What for?: the round's score. */
+  | "scoring"
   | "finished"
   /** Lobby expired with a single player, or everyone left. */
   | "closed";
@@ -474,6 +553,10 @@ export interface RoomState {
   imp?: ImpostorMatch | null;
   /** Impostor questions the room asked lately, newest first: its next matches skip them. */
   recentQuestions?: string[];
+  /** The What for? match under way (or just over); null otherwise. Missing in older rooms. */
+  lu?: LineupMatch | null;
+  /** What for? missions the room played lately, newest first: its next matches skip them. */
+  recentMissions?: string[];
   createdAt: number;
   updatedAt: number;
 }
@@ -506,12 +589,15 @@ export type GameEvent =
   | {
       type: "START";
       playerId: PlayerId;
-      themes: Theme[];
+      /** Who am I? and the Impostor: the themes put to the vote. */
+      themes?: Theme[];
       examples?: (RuleExamples | null)[];
       /** Someone seated has never finished a match (the server checks). */
       newcomer?: boolean;
       /** Impostor: each theme's cards and questions, aligned with `themes`. */
       deals?: ImpDeal[];
+      /** What for?: each round's cards and mission. */
+      decks?: LuDeck[];
     }
   | { type: "VOTE"; playerId: PlayerId; option: number }
   | { type: "UNVOTE"; playerId: PlayerId }
@@ -551,6 +637,31 @@ export type GameEvent =
   | { type: "DONT_KNOW"; playerId: PlayerId }
   /** Impostor: a caught impostor's guess at the crew's card. */
   | { type: "LAST_GUESS"; playerId: PlayerId; text: string }
+  /** What for?: an offer on the lot on the table: the amount, never "+1". */
+  | { type: "BID"; playerId: PlayerId; amount: number }
+  /** What for?: out of this lot ("Pass"). */
+  | { type: "FOLD"; playerId: PlayerId }
+  /** What for?: done with the break, the trades, the board or the score (false: not after all). */
+  | { type: "DONE"; playerId: PlayerId; done: boolean }
+  /** What for?: an open trade offer; it replaces the player's last one. */
+  | ({ type: "OFFER"; playerId: PlayerId } & Omit<LuOffer, "from">)
+  | { type: "CANCEL_OFFER"; playerId: PlayerId }
+  | {
+      type: "ANSWER_OFFER";
+      playerId: PlayerId;
+      from: PlayerId;
+      accept: boolean;
+    }
+  /** What for?: the board as its owner has it now (written quietly). */
+  | { type: "BOARD"; playerId: PlayerId; board: unknown }
+  /** What for?: the owner on stage is done talking. */
+  | { type: "PRESENTED"; playerId: PlayerId }
+  /** What for?: reactions to the board on stage, counted per emoji. */
+  | { type: "REACT"; playerId: PlayerId; counts: number[] }
+  /** What for?: a secret vote for a board (in a tiebreak, among the tied). */
+  | { type: "JUDGE"; playerId: PlayerId; ownerId: PlayerId }
+  /** What for?: "Good mission?" (null takes it back). */
+  | { type: "RATE"; playerId: PlayerId; up: boolean | null }
   /** Host only, from the podium: everyone goes back to the lobby for another match. */
   | { type: "BACK_TO_LOBBY"; playerId: PlayerId }
   /**
@@ -589,6 +700,8 @@ export const ERROR_CODES = [
   "need_three_players",
   /** An Impostor word answer gave the card away (its name, a nickname or its work). */
   "gives_away",
+  /** What for?: someone else's bid got there first; the lot costs more now. */
+  "outbid",
   "already_done",
   "conflict",
   "unauthorized",
@@ -654,6 +767,12 @@ export type PlayerStatus =
   | "talking"
   | "accused"
   | "out"
+  // what for?
+  | "bidding"
+  | "passed"
+  | "working"
+  | "done"
+  | "presenting"
   // end states
   | "discovered"
   | "gave_up";
@@ -853,6 +972,8 @@ export interface RoomView {
   matches: PastMatchView[];
   /** Present for an Impostor match, from the cards on. */
   imp: ImpostorView | null;
+  /** Present for a What for? match. */
+  lu: LineupView | null;
   /** Host only: the match can start (enough players for the game). */
   canStart: boolean;
 }
@@ -942,6 +1063,10 @@ export interface PublicRoom {
   replySeconds: number;
   talkSeconds: number;
   lastSeconds: number;
+  lotSeconds: number;
+  tradeSeconds: number;
+  defendSeconds: number;
+  judgeSeconds: number;
 }
 
 /** A listed room as the server keeps it, before its host's name is put in the reader's language. */
