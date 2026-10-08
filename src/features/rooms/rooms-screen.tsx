@@ -5,6 +5,7 @@ import {
   Check,
   ChevronDown,
   ChevronLeft,
+  Eye,
   EyeOff,
   Globe,
   Languages,
@@ -353,6 +354,10 @@ const POPUP =
 const ITEM =
   "flex items-center gap-2.5 rounded-md py-2 pr-3 pl-2.5 font-semibold text-sm outline-none select-none data-highlighted:bg-sky-soft";
 
+/** Selected means hidden: shown gostos keep the blue fill, hidden ones fade. */
+const HIDE_ITEM =
+  "group flex items-center gap-2.5 rounded-md py-2 pr-3 pl-2.5 font-semibold text-sm outline-none select-none not-data-selected:bg-sky-soft data-selected:text-ink-muted data-highlighted:ring-2 data-highlighted:ring-sky/30 data-highlighted:ring-inset";
+
 interface FilterOption {
   value: string;
   label: string;
@@ -558,21 +563,27 @@ function HideSelect({
             <span className="block px-2.5 pt-1 pb-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.08em]">
               {t("hide")}
             </span>
-            <Select.List>
+            <Select.List className="flex flex-col gap-0.5">
               {GOSTOS.map((g) => (
-                <Select.Item key={g.key} value={g.key} className={ITEM}>
+                <Select.Item key={g.key} value={g.key} className={HIDE_ITEM}>
                   <span
                     aria-hidden
-                    className="flex w-4 shrink-0 justify-center"
+                    className="flex w-4 shrink-0 justify-center group-data-selected:opacity-40 group-data-selected:grayscale"
                   >
                     {g.emoji}
                   </span>
                   <Select.ItemText className="flex-1 whitespace-nowrap">
                     {tg(`${g.key}.name`)}
                   </Select.ItemText>
-                  <Select.ItemIndicator className="text-sky">
-                    <Check className="size-4" strokeWidth={2.25} />
-                  </Select.ItemIndicator>
+                  {value.includes(g.key) ? (
+                    <EyeOff aria-hidden className="size-4" strokeWidth={2} />
+                  ) : (
+                    <Eye
+                      aria-hidden
+                      className="size-4 text-sky"
+                      strokeWidth={2}
+                    />
+                  )}
                 </Select.Item>
               ))}
             </Select.List>
