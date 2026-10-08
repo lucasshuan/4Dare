@@ -11,7 +11,7 @@ import {
 import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useRef, useState } from "react";
-import { Button, buttonClass, keyClass } from "@/components/ui/button";
+import { Button, keyClass } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
 import { RoomQr } from "@/components/ui/room-qr";
 import { Screen } from "@/components/ui/screen";
@@ -30,6 +30,7 @@ import { backClass, RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
+import { leaveButtonClass } from "@/features/room/leave-match-button";
 import { GAME_SEATS } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
@@ -270,11 +271,7 @@ export function LobbyScreen() {
             await leaving.run(() => leaveRoom(code));
             router.push(GAME_PATHS[game]);
           }}
-          className={buttonClass(
-            "secondary",
-            "sm",
-            "h-10 max-sm:w-10 max-sm:px-0",
-          )}
+          className={leaveButtonClass}
         >
           <DoorOpen strokeWidth={1.75} />
           <span className="max-sm:sr-only">{tMatch("leaveShort")}</span>

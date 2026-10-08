@@ -10,6 +10,17 @@ import { useLeaveMatch } from "@/features/data/use-current-match";
 import { useRouter } from "@/i18n/navigation";
 import { GAME_PATHS } from "@/lib/routes";
 
+/**
+ * The "Leave" button's look, in the match header and the lobby alike: the
+ * "no" colour, soft at rest and solid when pointed at, so it reads as the way
+ * out at a glance.
+ */
+export const leaveButtonClass = buttonClass(
+  "secondary",
+  "sm",
+  "h-10 border-no bg-no-soft text-no hover:bg-no hover:text-on-no focus-visible:bg-no focus-visible:text-on-no max-sm:w-10 max-sm:px-0",
+);
+
 /** "Leave" in the match header: out of the match for good, after a quick "sure?". */
 export function LeaveMatchButton() {
   const t = useTranslations("common.currentMatch");
@@ -20,13 +31,7 @@ export function LeaveMatchButton() {
   if (me.away) return null;
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger
-        className={buttonClass(
-          "secondary",
-          "sm",
-          "h-10 max-sm:w-10 max-sm:px-0",
-        )}
-      >
+      <Popover.Trigger className={leaveButtonClass}>
         <DoorOpen strokeWidth={1.75} />
         <span className="max-sm:sr-only">{t("leaveShort")}</span>
       </Popover.Trigger>
