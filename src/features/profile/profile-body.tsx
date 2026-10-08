@@ -11,9 +11,11 @@ import {
   MessageCircle,
   MoonStar,
   Pencil,
+  Presentation,
   Quote,
   Sprout,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import {
   type CSSProperties,
@@ -41,6 +43,12 @@ import { ContributionsPanel } from "./contributions";
 import { streaks } from "./garden-days";
 import { LevelAvatar } from "./level";
 import { MuralPanel } from "./mural";
+
+// What for?'s boards draw with the game's own board: loaded with the tab
+const BoardsPanel = dynamic(() =>
+  import("./boards-panel").then((m) => m.BoardsPanel),
+);
+
 import { profilePath } from "./profile-link";
 import { Showcase } from "./showcase";
 
@@ -204,6 +212,7 @@ export function ProfileBody({
 const TABS = [
   { value: "mural", Icon: MessageCircle },
   { value: "activity", Icon: Sprout },
+  { value: "boards", Icon: Presentation },
   { value: "badges", Icon: Award },
   { value: "contributions", Icon: ImagePlus },
 ] as const;
@@ -243,7 +252,12 @@ function ProfileShow({
     ? Math.round((view.wins / view.matches) * 100)
     : 0;
   const tabs = TABS.filter(({ value }) =>
-    value === "badges" ? !view.hidden.activity : !view.hidden[value],
+    value === "badges"
+      ? !view.hidden.activity
+      : value === "boards"
+        ? // What for?'s boards, once there is one
+          !view.hidden.activity && view.games.some((g) => g.game === "lineup")
+        : !view.hidden[value],
   );
 
   const copyLink = async () => {
@@ -450,6 +464,11 @@ function ProfileShow({
                 {tabs.some((x) => x.value === "activity") ? (
                   <Panel value="activity">
                     <ActivityPanel view={view} now={now} />
+                  </Panel>
+                ) : null}
+                {tabs.some((x) => x.value === "boards") ? (
+                  <Panel value="boards">
+                    <BoardsPanel handle={view.handle} />
                   </Panel>
                 ) : null}
                 {tabs.some((x) => x.value === "badges") ? (

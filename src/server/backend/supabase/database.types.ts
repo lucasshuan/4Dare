@@ -363,6 +363,13 @@ export type Database = {
             foreignKeyName: "impostor_questions_theme_id_fkey";
             columns: ["theme_id"];
             isOneToOne: false;
+            referencedRelation: "themes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "impostor_questions_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
             referencedRelation: "whoami_themes";
             referencedColumns: ["id"];
           },
@@ -391,6 +398,69 @@ export type Database = {
             isOneToOne: true;
             referencedRelation: "characters";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      lineup_boards: {
+        Row: {
+          board: Json;
+          crowd: boolean;
+          laughs: number;
+          match_id: string;
+          points: number;
+          round: number;
+          spent: number;
+          team_name: string | null;
+          tie_votes: number | null;
+          top_price: number;
+          user_id: string;
+          votes: number;
+          won: boolean;
+        };
+        Insert: {
+          board: Json;
+          crowd?: boolean;
+          laughs?: number;
+          match_id: string;
+          points?: number;
+          round: number;
+          spent: number;
+          team_name?: string | null;
+          tie_votes?: number | null;
+          top_price?: number;
+          user_id: string;
+          votes?: number;
+          won?: boolean;
+        };
+        Update: {
+          board?: Json;
+          crowd?: boolean;
+          laughs?: number;
+          match_id?: string;
+          points?: number;
+          round?: number;
+          spent?: number;
+          team_name?: string | null;
+          tie_votes?: number | null;
+          top_price?: number;
+          user_id?: string;
+          votes?: number;
+          won?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lineup_boards_match_id_round_fkey";
+            columns: ["match_id", "round"];
+            isOneToOne: false;
+            referencedRelation: "lineup_rounds";
+            referencedColumns: ["match_id", "round"];
+          },
+          {
+            foreignKeyName: "lineup_boards_match_id_user_id_fkey";
+            columns: ["match_id", "user_id"];
+            isOneToOne: false;
+            referencedRelation: "match_players";
+            referencedColumns: ["match_id", "user_id"];
           },
         ];
       };
@@ -541,6 +611,57 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      lineup_rounds: {
+        Row: {
+          host_id: string | null;
+          lots: Json;
+          match_id: string;
+          mission_id: string | null;
+          mission_text: string | null;
+          round: number;
+          trades: Json;
+          verdict_for: string | null;
+          verdict_why: string | null;
+        };
+        Insert: {
+          host_id?: string | null;
+          lots: Json;
+          match_id: string;
+          mission_id?: string | null;
+          mission_text?: string | null;
+          round: number;
+          trades: Json;
+          verdict_for?: string | null;
+          verdict_why?: string | null;
+        };
+        Update: {
+          host_id?: string | null;
+          lots?: Json;
+          match_id?: string;
+          mission_id?: string | null;
+          mission_text?: string | null;
+          round?: number;
+          trades?: Json;
+          verdict_for?: string | null;
+          verdict_why?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lineup_rounds_match_id_fkey";
+            columns: ["match_id"];
+            isOneToOne: false;
+            referencedRelation: "matches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lineup_rounds_mission_id_fkey";
+            columns: ["mission_id"];
+            isOneToOne: false;
+            referencedRelation: "lineup_missions";
             referencedColumns: ["id"];
           },
         ];
@@ -873,6 +994,47 @@ export type Database = {
           },
         ];
       };
+      room_presets: {
+        Row: {
+          created_at: string;
+          game: string;
+          id: string;
+          is_default: boolean;
+          name: string;
+          owner: string;
+          settings: Json;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          game: string;
+          id?: string;
+          is_default?: boolean;
+          name: string;
+          owner: string;
+          settings: Json;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          game?: string;
+          id?: string;
+          is_default?: boolean;
+          name?: string;
+          owner?: string;
+          settings?: Json;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "room_presets_owner_fkey";
+            columns: ["owner"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       rooms: {
         Row: {
           code: string;
@@ -1185,6 +1347,28 @@ export type Database = {
         };
         Relationships: [];
       };
+      theme_starter_gostos: {
+        Row: {
+          gostos: string[] | null;
+          theme_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
+            referencedRelation: "themes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "whoami_theme_starters_theme_id_fkey";
+            columns: ["theme_id"];
+            isOneToOne: false;
+            referencedRelation: "whoami_themes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       theme_starters: {
         Row: {
           character_id: string | null;
@@ -1224,13 +1408,6 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
-      };
-      theme_starter_gostos: {
-        Row: {
-          gostos: string[] | null;
-          theme_id: string | null;
-        };
-        Relationships: [];
       };
       themes: {
         Row: {
@@ -1296,8 +1473,12 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      delete_old_rooms: { Args: never; Returns: number };
       character_gostos: {
+        Args: { c: Database["public"]["Tables"]["characters"]["Row"] };
+        Returns: Database["public"]["Enums"]["gosto"][];
+      };
+      delete_old_rooms: { Args: never; Returns: number };
+      gostos: {
         Args: { c: Database["public"]["Tables"]["characters"]["Row"] };
         Returns: Database["public"]["Enums"]["gosto"][];
       };
@@ -1308,10 +1489,7 @@ export type Database = {
         };
         Returns: Database["public"]["Enums"]["gosto"][];
       };
-      impostor_count_questions: {
-        Args: { p_rows: Json };
-        Returns: undefined;
-      };
+      impostor_count_questions: { Args: { p_rows: Json }; Returns: undefined };
       impostor_facts: {
         Args: { p_ids: string[]; p_lang: string };
         Returns: {
@@ -1333,9 +1511,23 @@ export type Database = {
           popularity: number;
         }[];
       };
-      played_together: {
-        Args: { p_a: string; p_b: string };
-        Returns: boolean;
+      played_together: { Args: { p_a: string; p_b: string }; Returns: boolean };
+      player_boards: {
+        Args: { p_limit: number; p_user: string };
+        Returns: {
+          board: Json;
+          crowd: boolean;
+          finished_at: string;
+          laughs: number;
+          match_id: string;
+          mission: Json;
+          mission_text: string;
+          round: number;
+          spent: number;
+          tie_votes: number;
+          votes: number;
+          won: boolean;
+        }[];
       };
       player_matches: {
         Args: { p_since: string; p_user: string };

@@ -7,6 +7,7 @@ import type { ThemeFilter } from "@/game/gostos";
 import { displayName } from "@/game/guest-names";
 import { presenceDue } from "@/game/helpers";
 import { questionParts } from "@/game/impostor/record";
+import { cardCounts, missionCounts } from "@/game/lineup/record";
 import { LU_PHASES } from "@/game/lineup/types";
 import { matchRecord } from "@/game/record";
 import { themeId } from "@/game/theme-id";
@@ -277,6 +278,13 @@ function saveMatch(state: RoomState) {
     background(() =>
       getBackend().questions.count(parts.map((p) => ({ ...p, lang }))),
     );
+  // what each What for? mission and card did, in the deck's language
+  if (state.lu) {
+    const missions = missionCounts(state.lu, lang);
+    const cards = cardCounts(state.lu, lang);
+    if (missions.length || cards.length)
+      background(() => getBackend().lineup.count(missions, cards));
+  }
 }
 
 // Used when the library cannot supply enough characters for a clock-filled pick.

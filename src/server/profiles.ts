@@ -11,6 +11,7 @@ import {
 import {
   factsOf,
   impostorNumbers,
+  lineupNumbers,
   type PlayedMatch,
   totalsOf,
   whoAmINumbers,
@@ -28,6 +29,7 @@ import type {
   GameView,
   PersonRef,
   PlayerCard,
+  ProfileBoard,
   ProfileView,
 } from "./contract";
 import { currentMatch } from "./rooms";
@@ -134,7 +136,9 @@ function gameView(
   };
   return game === "impostor"
     ? { game, ...common, ...impostorNumbers(mine) }
-    : { game, ...common, ...whoAmINumbers(mine) };
+    : game === "lineup"
+      ? { game, ...common, ...lineupNumbers(mine) }
+      : { game, ...common, ...whoAmINumbers(mine) };
 }
 
 /** The quick card of an account, or null for a guest or an unknown id. */
@@ -317,12 +321,55 @@ export async function profileView(
     plays: activity
       .filter((m) => m.finishedAt > now - GARDEN_MS)
       .map((m) => ({ at: m.finishedAt, game: m.game, won: m.place === 1 })),
-    games: GAME_KEYS.filter((g) => g !== "lineup")
-      .map((g) => gameView(g, activity, now))
-      .filter((g) => g.matches > 0),
+    games: GAME_KEYS.map((g) => gameView(g, activity, now)).filter(
+      (g) => g.matches > 0,
+    ),
     facts: factViews,
     pictures: pictureViews,
     characters: made.slice(0, CHARACTERS).map(dto),
     badges,
   };
+}
+
+/** Boards a profile shows on its Boards tab. */
+export const PROFILE_BOARDS = 12;
+
+/**
+ * An account's latest What for? boards as `viewer` reads them, missions in
+ * `lang`; null when there is no such account or its activity is closed to
+ * them (the boards are part of it).
+ */
+export async function profileBoards(
+  handle: string,
+  viewer: PlayerId,
+  lang: Lang,
+): Promise<ProfileBoard[] | null> {
+  const { profiles, matches } = getBackend();
+  const profile = await profiles.byHandle(handle);
+  if (!profile) return null;
+  const { privacy } = profile;
+  const isOwner = profile.id === viewer;
+  const needsMate =
+    !isOwner && [privacy.profile, privacy.activity].includes("played");
+  const reader = {
+    isOwner,
+    playedWith: needsMate
+      ? await matches.playedTogether(profile.id, viewer)
+      : false,
+  };
+  if (!sees(privacy.profile, reader) || !sees(privacy.activity, reader))
+    return null;
+  const boards = await matches.boards(profile.id, PROFILE_BOARDS);
+  return boards.map((b) => ({
+    matchId: b.matchId,
+    round: b.round,
+    at: b.finishedAt,
+    mission: b.mission?.[lang] || b.mission?.en || b.missionText,
+    board: b.board,
+    spent: b.spent,
+    votes: b.votes + (b.tieVotes ?? 0),
+    laughs: b.laughs,
+    won: b.won,
+    crowd: b.crowd,
+  }));
 }

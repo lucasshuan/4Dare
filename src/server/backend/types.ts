@@ -10,6 +10,7 @@ import type { Gosto, ThemeFilter } from "@/game/gostos";
 import type { BankQuestion } from "@/game/impostor/questions";
 import type { BankExtra, BankMission } from "@/game/lineup/bank";
 import type { PoolCard } from "@/game/lineup/deal";
+import type { LuKeptBoard } from "@/game/lineup/record";
 import type { SyncedSettings } from "@/game/options";
 import type { PlayedMatch } from "@/game/profile/history";
 import type {
@@ -434,6 +435,8 @@ export interface MatchStore {
   voteFit(vote: FitVote): Promise<void>;
   /** A player's finished matches, newest first. */
   history(userId: string): Promise<PlayedMatch[]>;
+  /** A player's latest What for? boards, newest first, at most `limit`. */
+  boards(userId: string, limit: number): Promise<StoredBoard[]>;
   /** A player's numbers over every game, without reading every match. */
   totals(userId: string): Promise<PlayerTotals>;
   /** Whether two players ever finished a match together. */
@@ -467,6 +470,23 @@ export interface CardCount {
   price: number;
   traded: number;
   won: number;
+}
+
+/** A What for? board as a match kept it (lineup_boards), with its round's mission. */
+export interface StoredBoard {
+  matchId: string;
+  round: number;
+  finishedAt: number;
+  /** The bank's mission in every language; null for one somebody wrote. */
+  mission: Localized | null;
+  missionText: string | null;
+  board: LuKeptBoard;
+  spent: number;
+  votes: number;
+  tieVotes: number | null;
+  laughs: number;
+  won: boolean;
+  crowd: boolean;
 }
 
 /** What for?'s hand-made banks, a language's deck, and what matches did with them. */

@@ -21,7 +21,8 @@
     "mural": "Mural",
     "activity": "Atividade",
     "badges": "Conquistas",
-    "contributions": "Contribuições"
+    "contributions": "Contribuições",
+    "boards": "Quadros"
   },
   "activity": {
     "game": "Jogo",
@@ -55,10 +56,16 @@
       "caught": "Impostores pegos",
       "firstVote": "{n} certos no primeiro voto",
       "asImpostor": "Como impostor",
-      "escapeRate": "escapou em {p} das vezes"
+      "escapeRate": "escapou em {p} das vezes",
+      "roundsWon": "Rodadas vencidas",
+      "ofRounds": "de {n} jogadas",
+      "votes": "Votos recebidos",
+      "crowd": "{n, plural, one {# prêmio do público} other {# prêmios do público}}"
     },
     "caughtShort": "pegos",
-    "escapedShort": "escapou"
+    "escapedShort": "escapou",
+    "roundsWonShort": "rodadas",
+    "votesShort": "votos"
   },
   "facts": {
     "title": "Curiosidades",
@@ -77,7 +84,11 @@
     "escape": "Fuga mais limpa",
     "escapeText": "{votes, plural, =0 {Escapou como {name} sem levar nenhum voto} one {Escapou como {name} levando # voto} other {Escapou como {name} levando # votos}}",
     "bullseye": "Na mosca",
-    "bullseyeText": "Pego como impostor, ainda acertou a carta da tripulação: {name}"
+    "bullseyeText": "Pego como impostor, ainda acertou a carta da tripulação: {name}",
+    "bargain": "Pechincha",
+    "bargainText": "{coins, plural, =0 {Venceu uma rodada com um time de graça} one {Venceu uma rodada com um time de # moeda} other {Venceu uma rodada com um time de # moedas}}",
+    "splurge": "Tudo num só",
+    "splurgeText": "Pagou {coins} moedas num personagem só"
   },
   "contributions": {
     "pictures": "Fotos enviadas",
@@ -220,7 +231,10 @@
       "discovered": "Descobrir seu personagem",
       "rightVote": "Votar num impostor que sai",
       "survived": "Cada rodada como impostor sem ser pego",
-      "guessHit": "Acertar a carta da tripulação na última chance"
+      "guessHit": "Acertar a carta da tripulação na última chance",
+      "roundWon": "Cada rodada vencida, sozinho ou empatado",
+      "vote": "Cada voto que seu quadro recebe",
+      "crowd": "Prêmio do público (mais reações)"
     },
     "groups": {
       "general": "Gerais",
@@ -249,7 +263,11 @@
       "pokerFace": "Cara de pau",
       "nose": "Faro fino",
       "chameleon": "Camaleão",
-      "bullseye": "Na mosca"
+      "bullseye": "Na mosca",
+      "coach": "Técnico",
+      "bargain": "Pechincha",
+      "allIn": "Tudo num só",
+      "stage": "Palco"
     },
     "goals": {
       "matches": "{n} partidas",
@@ -266,7 +284,17 @@
       "pokerFace": "{n, plural, one {# vitória como impostor sem levar voto} other {# vitórias como impostor sem levar voto}}",
       "nose": "{n, plural, one {# acerto no primeiro voto} other {# acertos no primeiro voto}}",
       "chameleon": "{n, plural, one {# vitória como impostor} other {# vitórias como impostor}}",
-      "bullseye": "{n, plural, one {# acerto na última chance} other {# acertos na última chance}}"
+      "bullseye": "{n, plural, one {# acerto na última chance} other {# acertos na última chance}}",
+      "coach": "Vencer {n} rodadas",
+      "bargain": "{n, plural, one {# rodada vencida} other {# rodadas vencidas}} com um time de até 4 moedas",
+      "allIn": "{n, plural, one {# vez} other {# vezes}} 10 moedas num personagem",
+      "stage": "{n, plural, one {# prêmio do público} other {# prêmios do público}}"
     }
+  },
+  "boards": {
+    "won": "Venceu",
+    "line": "{coins, plural, one {# moeda} other {# moedas}} · {votes, plural, one {# voto} other {# votos}}",
+    "crowd": "público",
+    "empty": "Nenhum quadro ainda."
   }
 }

@@ -13,6 +13,7 @@ import type { Lang } from "@/game/types";
 import { type PickStat, pickKey } from "../../theme-picks";
 import type { MatchStore } from "../types";
 import { dataPath, processSingleton, readJson, writeJson } from "./disk";
+import { LOCAL_MISSIONS } from "./lineup-bank";
 
 /** Fit votes: { "theme|character|voter": { lang, fits } }. */
 const VOTES_FILE = "fit-votes.json";
@@ -75,6 +76,30 @@ function playedMatch(m: MatchRecord, p: PlayerRecord): PlayedMatch {
             theme: m.theme,
             ...p.impostor,
             characterName: p.characterName,
+          }
+        : null,
+    };
+  if (m.game === "lineup")
+    return {
+      ...base,
+      game: "lineup",
+      details: p.lineup
+        ? {
+            rounds: p.lineup.map((r) => ({
+              round: r.round,
+              missionId:
+                m.lineup?.rounds.find((x) => x.round === r.round)?.missionId ??
+                null,
+              spent: r.spent,
+              topPrice: r.topPrice,
+              votes: r.votes,
+              tieVotes: r.tieVotes,
+              laughs: r.laughs,
+              won: r.won,
+              crowd: r.crowd,
+              points: r.points,
+              cards: r.board.cards.length,
+            })),
           }
         : null,
     };
@@ -243,6 +268,35 @@ export function localMatches(): MatchStore {
       writeJson(VOTES_FILE, Object.fromEntries(votes));
     },
     history,
+    async boards(userId, limit) {
+      const missions = new Map(LOCAL_MISSIONS.map((m) => [m.id, m.text]));
+      return read()
+        .filter((m) => m.lineup)
+        .sort((a, b) => b.finishedAt - a.finishedAt)
+        .flatMap((m) => {
+          const p = m.players.find((q) => q.userId === userId);
+          return [...(p?.lineup ?? [])].reverse().map((r) => {
+            const round = m.lineup?.rounds.find((x) => x.round === r.round);
+            return {
+              matchId: m.id,
+              round: r.round,
+              finishedAt: m.finishedAt,
+              mission: round?.missionId
+                ? (missions.get(round.missionId) ?? null)
+                : null,
+              missionText: round?.missionText ?? null,
+              board: r.board,
+              spent: r.spent,
+              votes: r.votes,
+              tieVotes: r.tieVotes,
+              laughs: r.laughs,
+              won: r.won,
+              crowd: r.crowd,
+            };
+          });
+        })
+        .slice(0, limit);
+    },
     async playedTogether(a, b) {
       return (
         a !== b &&

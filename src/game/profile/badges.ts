@@ -2,7 +2,13 @@
 // Worked out from their matches and contributions whenever a profile is
 // read; the day a tier was first seen is kept (table user_badges).
 import type { GameKey } from "../games";
-import { impostorParts, type PlayedMatch } from "./history";
+import {
+  ALL_IN_COINS,
+  BARGAIN_COINS,
+  impostorParts,
+  lineupRounds,
+  type PlayedMatch,
+} from "./history";
 
 export const TIERS = ["bronze", "silver", "gold"] as const;
 
@@ -29,6 +35,10 @@ export const BADGES = [
   { id: "nose", group: "impostor", goals: [5, 20, 75] },
   { id: "chameleon", group: "impostor", goals: [3, 10, 30] },
   { id: "bullseye", group: "impostor", goals: [1, 5, 20] },
+  { id: "coach", group: "lineup", goals: [10, 50, 200] },
+  { id: "bargain", group: "lineup", goals: [1, 5, 20] },
+  { id: "allIn", group: "lineup", goals: [1, 5, 20] },
+  { id: "stage", group: "lineup", goals: [5, 20, 75] },
   { id: "pictures", group: "library", goals: [1, 10, 50] },
   { id: "covers", group: "library", goals: [1, 5, 20] },
   { id: "characters", group: "library", goals: [1, 10, 50] },
@@ -73,6 +83,7 @@ export function badgeValues(
   );
   const imps = impostorParts(matches).filter((p) => !p.left);
   const escapes = imps.filter((p) => p.impostor && p.won);
+  const lus = lineupRounds(matches);
   return {
     matches: matches.length,
     wins: matches.filter((m) => m.place === 1).length,
@@ -93,6 +104,11 @@ export function badgeValues(
     chameleon: escapes.length,
     // the crew's card, guessed on the last chance
     bullseye: imps.filter((p) => p.guessHit).length,
+    // What for?: rounds won, one with a cheap team, all in on one character, the crowd's prize
+    coach: lus.filter((r) => r.won).length,
+    bargain: lus.filter((r) => r.won && r.spent <= BARGAIN_COINS).length,
+    allIn: lus.filter((r) => r.topPrice >= ALL_IN_COINS).length,
+    stage: lus.filter((r) => r.crowd).length,
     pictures: made.pictures,
     covers: made.covers,
     characters: made.characters,

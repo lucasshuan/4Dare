@@ -21,7 +21,8 @@
     "mural": "Muro",
     "activity": "Actividad",
     "badges": "Logros",
-    "contributions": "Aportes"
+    "contributions": "Aportes",
+    "boards": "Tableros"
   },
   "activity": {
     "game": "Juego",
@@ -55,10 +56,16 @@
       "caught": "Impostores atrapados",
       "firstVote": "{n} acertados en el primer voto",
       "asImpostor": "Como impostor",
-      "escapeRate": "escapó {p} de las veces"
+      "escapeRate": "escapó {p} de las veces",
+      "roundsWon": "Rondas ganadas",
+      "ofRounds": "de {n} jugadas",
+      "votes": "Votos recibidos",
+      "crowd": "{n, plural, one {# premio del público} other {# premios del público}}"
     },
     "caughtShort": "atrapados",
-    "escapedShort": "escapó"
+    "escapedShort": "escapó",
+    "roundsWonShort": "rondas",
+    "votesShort": "votos"
   },
   "facts": {
     "title": "Curiosidades",
@@ -77,7 +84,11 @@
     "escape": "Fuga más limpia",
     "escapeText": "{votes, plural, =0 {Escapó como {name} sin recibir ningún voto} one {Escapó como {name} con # voto} other {Escapó como {name} con # votos}}",
     "bullseye": "En el blanco",
-    "bullseyeText": "Atrapado como impostor, aún acertó la carta de la tripulación: {name}"
+    "bullseyeText": "Atrapado como impostor, aún acertó la carta de la tripulación: {name}",
+    "bargain": "Ganga",
+    "bargainText": "{coins, plural, =0 {Ganó una ronda con un equipo gratis} one {Ganó una ronda con un equipo de # moneda} other {Ganó una ronda con un equipo de # monedas}}",
+    "splurge": "Todo a uno",
+    "splurgeText": "Pagó {coins} monedas por un solo personaje"
   },
   "contributions": {
     "pictures": "Fotos enviadas",
@@ -220,7 +231,10 @@
       "discovered": "Descubrir tu personaje",
       "rightVote": "Votar a un impostor que sale",
       "survived": "Cada ronda como impostor sin ser atrapado",
-      "guessHit": "Acertar la carta de la tripulación en la última oportunidad"
+      "guessHit": "Acertar la carta de la tripulación en la última oportunidad",
+      "roundWon": "Cada ronda ganada, solo o empatado",
+      "vote": "Cada voto que recibe tu tablero",
+      "crowd": "Premio del público (más reacciones)"
     },
     "groups": {
       "general": "Generales",
@@ -249,7 +263,11 @@
       "pokerFace": "Cara de póquer",
       "nose": "Buen olfato",
       "chameleon": "Camaleón",
-      "bullseye": "En el blanco"
+      "bullseye": "En el blanco",
+      "coach": "Entrenador",
+      "bargain": "Ganga",
+      "allIn": "Todo a uno",
+      "stage": "Escenario"
     },
     "goals": {
       "matches": "{n} partidas",
@@ -266,7 +284,17 @@
       "pokerFace": "{n, plural, one {# victoria como impostor sin recibir votos} other {# victorias como impostor sin recibir votos}}",
       "nose": "{n, plural, one {# acierto en el primer voto} other {# aciertos en el primer voto}}",
       "chameleon": "{n, plural, one {# victoria como impostor} other {# victorias como impostor}}",
-      "bullseye": "{n, plural, one {# acierto en la última oportunidad} other {# aciertos en la última oportunidad}}"
+      "bullseye": "{n, plural, one {# acierto en la última oportunidad} other {# aciertos en la última oportunidad}}",
+      "coach": "Ganar {n} rondas",
+      "bargain": "{n, plural, one {# ronda ganada} other {# rondas ganadas}} con un equipo de hasta 4 monedas",
+      "allIn": "10 monedas por un personaje {n, plural, one {# vez} other {# veces}}",
+      "stage": "{n, plural, one {# premio del público} other {# premios del público}}"
     }
+  },
+  "boards": {
+    "won": "Ganó",
+    "line": "{coins, plural, one {# moneda} other {# monedas}} · {votes, plural, one {# voto} other {# votos}}",
+    "crowd": "público",
+    "empty": "Todavía no hay tableros."
   }
 }

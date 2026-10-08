@@ -3,16 +3,20 @@
 import {
   ChevronRight,
   CircleHelp,
+  Coins,
   Flame,
   Gamepad2,
+  Medal,
   Palette,
   Search,
   ShieldCheck,
   Sparkles,
   Sprout,
+  Tag,
   Target,
   Trophy,
   VenetianMask,
+  Vote,
   Zap,
 } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
@@ -213,6 +217,17 @@ function GameCard({ card, onOpen }: { card: GameView; onOpen: () => void }) {
               label={t("escapedShort")}
             />
           </>
+        ) : card.game === "lineup" ? (
+          <>
+            <Highlight
+              value={format.number(card.roundsWon)}
+              label={t("roundsWonShort")}
+            />
+            <Highlight
+              value={format.number(card.votes)}
+              label={t("votesShort")}
+            />
+          </>
         ) : (
           <>
             <Highlight
@@ -268,7 +283,22 @@ function GameNumbers({ card }: { card: GameView }) {
         value={format.number(card.wins)}
         note={t("winRate", { p: share(card.wins, card.matches) })}
       />
-      {card.game === "impostor" ? (
+      {card.game === "lineup" ? (
+        <>
+          <Box
+            icon={<Medal />}
+            label={t("roundsWon")}
+            value={format.number(card.roundsWon)}
+            note={t("ofRounds", { n: card.rounds })}
+          />
+          <Box
+            icon={<Vote />}
+            label={t("votes")}
+            value={format.number(card.votes)}
+            note={card.crowd ? t("crowd", { n: card.crowd }) : null}
+          />
+        </>
+      ) : card.game === "impostor" ? (
         <>
           <Box
             icon={<Search />}
@@ -443,6 +473,24 @@ function Facts({
         game: f.game,
         title: t("escape"),
         text: t("escapeText", { name: f.characterName, votes: f.votes }),
+      });
+    else if (f.kind === "bargain")
+      items.push({
+        key: "bargain",
+        icon: <Tag />,
+        tint: "bg-yes-soft",
+        game: f.game,
+        title: t("bargain"),
+        text: t("bargainText", { coins: f.spent, votes: f.votes }),
+      });
+    else if (f.kind === "splurge")
+      items.push({
+        key: "splurge",
+        icon: <Coins />,
+        tint: "bg-butter-soft",
+        game: f.game,
+        title: t("splurge"),
+        text: t("splurgeText", { coins: f.price }),
       });
     else
       items.push({

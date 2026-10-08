@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { badgeValues, tierKey, tierOf } from "./badges";
-import type { ImpostorPart, PlayedMatch, WhoAmIPart } from "./history";
+import {
+  type ImpostorPart,
+  type LineupRoundStat,
+  lineupNumbers,
+  type PlayedMatch,
+  type WhoAmIPart,
+} from "./history";
 
 const DAY = 86_400_000;
 const part = (fields: Partial<WhoAmIPart> = {}): WhoAmIPart => ({
@@ -75,6 +81,10 @@ describe("badges", () => {
       nose: 0,
       chameleon: 0,
       bullseye: 0,
+      coach: 0,
+      bargain: 0,
+      allIn: 0,
+      stage: 0,
       pictures: 4,
       covers: 1,
       characters: 0,
@@ -131,5 +141,65 @@ describe("badges", () => {
     expect(tierOf(goals, 499)).toEqual({ tier: 2, next: 500 });
     expect(tierOf(goals, 900)).toEqual({ tier: 3, next: null });
     expect(tierKey("matches", 2)).toBe("matches.silver");
+  });
+});
+
+describe("badges: what for?", () => {
+  const round = (fields: Partial<LineupRoundStat> = {}): LineupRoundStat => ({
+    round: 1,
+    missionId: "tire-rain",
+    spent: 8,
+    topPrice: 4,
+    votes: 1,
+    tieVotes: null,
+    laughs: 0,
+    won: false,
+    crowd: false,
+    points: 1,
+    cards: 3,
+    ...fields,
+  });
+  const lineupMatch = (rounds: LineupRoundStat[]): PlayedMatch => ({
+    matchId: `l-${Math.random()}`,
+    game: "lineup",
+    finishedAt: DAY,
+    place: null,
+    timeMs: 1,
+    xp: 10,
+    others: [],
+    details: { rounds },
+  });
+
+  it("counts rounds won, cheap wins, all-in buys and crowd prizes", () => {
+    const values = badgeValues(
+      [
+        lineupMatch([
+          round({ won: true, spent: 4 }),
+          round({ won: true, spent: 9, topPrice: 10, crowd: true }),
+        ]),
+        lineupMatch([round({ topPrice: 12 }), round({ won: false, spent: 1 })]),
+      ],
+      { pictures: 0, covers: 0, characters: 0 },
+    );
+    expect(values.coach).toBe(2);
+    expect(values.bargain).toBe(1);
+    expect(values.allIn).toBe(2);
+    expect(values.stage).toBe(1);
+  });
+
+  it("adds the rounds up into the game's numbers", () => {
+    const numbers = lineupNumbers([
+      lineupMatch([
+        round({ won: true, votes: 2, tieVotes: 1, spent: 6 }),
+        round({ votes: 0, spent: 10, crowd: true }),
+      ]),
+    ]);
+    expect(numbers).toEqual({
+      rounds: 2,
+      roundsWon: 1,
+      votes: 3,
+      crowd: 1,
+      avgSpent: 8,
+    });
   });
 });

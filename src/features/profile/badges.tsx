@@ -2,15 +2,19 @@
 
 import {
   Camera,
+  Coins,
   Compass,
   Flame,
   Gamepad2,
   ImageUp,
+  Laugh,
   type LucideIcon,
+  Medal as Medal_,
   Search,
   Shapes,
   ShieldCheck,
   Sparkles,
+  Tag,
   Target,
   Trophy,
   UserRoundPlus,
@@ -40,6 +44,10 @@ const ICON: Record<BadgeId, LucideIcon> = {
   nose: Search,
   chameleon: Shapes,
   bullseye: Target,
+  coach: Medal_,
+  bargain: Tag,
+  allIn: Coins,
+  stage: Laugh,
   pictures: Camera,
   covers: ImageUp,
   characters: UserRoundPlus,
@@ -133,6 +141,13 @@ function LevelCard({ xp }: { xp: number }) {
         <Rule label={tb("rules.rightVote")} xp={GAME_XP.impostor.rightVote} />
         <Rule label={tb("rules.survived")} xp={GAME_XP.impostor.survived} />
         <Rule label={tb("rules.guessHit")} xp={GAME_XP.impostor.guessHit} />
+        <li className="mt-1 flex items-center gap-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
+          <GameThumb game="lineup" size="tiny" />
+          {gameName("lineup")}
+        </li>
+        <Rule label={tb("rules.roundWon")} xp={GAME_XP.lineup.roundWon} />
+        <Rule label={tb("rules.vote")} xp={GAME_XP.lineup.vote} />
+        <Rule label={tb("rules.crowd")} xp={GAME_XP.lineup.crowd} />
       </ul>
     </section>
   );

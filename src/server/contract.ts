@@ -2,12 +2,14 @@
 import type { GameKey } from "@/game/games";
 import type { Gosto } from "@/game/gostos";
 import type { Tone } from "@/game/lineup/bank";
+import type { LuKeptBoard } from "@/game/lineup/record";
 import type { LineupRules } from "@/game/lineup/rules";
 import type { SyncedSettings } from "@/game/options";
 import type { BadgeGroup, BadgeId } from "@/game/profile/badges";
 import type {
   Fact,
   impostorNumbers,
+  lineupNumbers,
   whoAmINumbers,
 } from "@/game/profile/history";
 import type {
@@ -196,6 +198,7 @@ export type GameView = GameTotals &
   (
     | ({ game: "who-am-i" } & ReturnType<typeof whoAmINumbers>)
     | ({ game: "impostor" } & ReturnType<typeof impostorNumbers>)
+    | ({ game: "lineup" } & ReturnType<typeof lineupNumbers>)
   );
 
 /** A curiosity with its people named. */
@@ -204,7 +207,18 @@ export type FactView =
   | (Omit<Extract<Fact, { kind: "hardest" }>, "to"> & {
       to: PersonRef | null;
     })
-  | Extract<Fact, { kind: "fastest" | "theme" | "escape" | "bullseye" }>;
+  | Extract<
+      Fact,
+      {
+        kind:
+          | "fastest"
+          | "theme"
+          | "escape"
+          | "bullseye"
+          | "bargain"
+          | "splurge";
+      }
+    >;
 
 /** A picture someone sent for a character, as their profile lists it. */
 export interface ContributedPicture {
@@ -262,6 +276,22 @@ export interface ProfileView extends PersonRef {
   pictures: ContributedPicture[];
   characters: CharacterDTO[];
   badges: BadgeView[];
+}
+
+/** A What for? board on a profile's Boards tab (GET /api/profiles/[handle]/boards). */
+export interface ProfileBoard {
+  matchId: string;
+  round: number;
+  at: number;
+  /** The round's mission in the reader's language. */
+  mission: string | null;
+  board: LuKeptBoard;
+  spent: number;
+  /** The tiebreak's included. */
+  votes: number;
+  laughs: number;
+  won: boolean;
+  crowd: boolean;
 }
 
 /** A line on a profile's mural, as a reader sees it. */

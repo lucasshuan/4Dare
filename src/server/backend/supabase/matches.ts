@@ -1,12 +1,14 @@
 import "server-only";
 import { isGameKey } from "@/game/games";
+import type { LuKeptBoard } from "@/game/lineup/record";
 import type {
   ImpostorPart,
+  LineupPart,
   MatchMate,
   PlayedMatch,
   WhoAmIPart,
 } from "@/game/profile/history";
-import type { Lang } from "@/game/types";
+import type { Lang, Localized } from "@/game/types";
 import type { MatchStore } from "../types";
 import { json, serviceClient } from "./clients";
 
@@ -116,6 +118,14 @@ export function supabaseMatches(): MatchStore {
               details: r.details as unknown as ImpostorPart | null,
             },
           ];
+        if (r.game === "lineup")
+          return [
+            {
+              ...base,
+              game: r.game,
+              details: r.details as unknown as LineupPart | null,
+            },
+          ];
         if (r.game === "who-am-i")
           return [
             {
@@ -126,6 +136,27 @@ export function supabaseMatches(): MatchStore {
           ];
         return [];
       });
+    },
+    async boards(userId, limit) {
+      const { data, error } = await serviceClient().rpc("player_boards", {
+        p_user: userId,
+        p_limit: limit,
+      });
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        matchId: r.match_id,
+        round: r.round,
+        finishedAt: Date.parse(r.finished_at),
+        mission: r.mission as unknown as Localized | null,
+        missionText: r.mission_text,
+        board: r.board as unknown as LuKeptBoard,
+        spent: r.spent,
+        votes: r.votes,
+        tieVotes: r.tie_votes,
+        laughs: r.laughs,
+        won: r.won,
+        crowd: r.crowd,
+      }));
     },
   };
 }

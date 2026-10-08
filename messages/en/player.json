@@ -21,7 +21,8 @@
     "mural": "Wall",
     "activity": "Activity",
     "badges": "Badges",
-    "contributions": "Contributions"
+    "contributions": "Contributions",
+    "boards": "Boards"
   },
   "activity": {
     "game": "Game",
@@ -55,10 +56,16 @@
       "caught": "Impostors caught",
       "firstVote": "{n} right on the first vote",
       "asImpostor": "As the impostor",
-      "escapeRate": "got away {p} of the time"
+      "escapeRate": "got away {p} of the time",
+      "roundsWon": "Rounds won",
+      "ofRounds": "of {n} played",
+      "votes": "Votes received",
+      "crowd": "{n, plural, one {# crowd prize} other {# crowd prizes}}"
     },
     "caughtShort": "caught",
-    "escapedShort": "got away"
+    "escapedShort": "got away",
+    "roundsWonShort": "rounds",
+    "votesShort": "votes"
   },
   "facts": {
     "title": "Fun facts",
@@ -77,7 +84,11 @@
     "escape": "Cleanest escape",
     "escapeText": "{votes, plural, =0 {Got away as {name} without a single vote} one {Got away as {name} with # vote} other {Got away as {name} with # votes}}",
     "bullseye": "Last-chance hit",
-    "bullseyeText": "Caught as the impostor, then guessed the crew's card: {name}"
+    "bullseyeText": "Caught as the impostor, then guessed the crew's card: {name}",
+    "bargain": "Bargain",
+    "bargainText": "{coins, plural, =0 {Won a round with a free team} one {Won a round with a # coin team} other {Won a round with a # coin team}}",
+    "splurge": "All in",
+    "splurgeText": "Paid {coins} coins for a single character"
   },
   "contributions": {
     "pictures": "Pictures sent",
@@ -220,7 +231,10 @@
       "discovered": "Discover your character",
       "rightVote": "Vote out an impostor",
       "survived": "Each round as an uncaught impostor",
-      "guessHit": "Guess the crew's card on the last chance"
+      "guessHit": "Guess the crew's card on the last chance",
+      "roundWon": "Each round won, alone or tied",
+      "vote": "Each vote your board gets",
+      "crowd": "The crowd's prize (most reactions)"
     },
     "groups": {
       "general": "General",
@@ -249,7 +263,11 @@
       "pokerFace": "Poker face",
       "nose": "Sharp nose",
       "chameleon": "Chameleon",
-      "bullseye": "Bullseye"
+      "bullseye": "Bullseye",
+      "coach": "Coach",
+      "bargain": "Bargain",
+      "allIn": "All in",
+      "stage": "Showstopper"
     },
     "goals": {
       "matches": "{n} matches",
@@ -266,7 +284,17 @@
       "pokerFace": "{n, plural, one {# win as the impostor without a vote} other {# wins as the impostor without a vote}}",
       "nose": "{n, plural, one {# right first vote} other {# right first votes}}",
       "chameleon": "{n, plural, one {# win as the impostor} other {# wins as the impostor}}",
-      "bullseye": "{n, plural, one {# last-chance hit} other {# last-chance hits}}"
+      "bullseye": "{n, plural, one {# last-chance hit} other {# last-chance hits}}",
+      "coach": "Win {n} rounds",
+      "bargain": "{n, plural, one {# round won} other {# rounds won}} with a team of 4 coins or less",
+      "allIn": "10 coins on one character {n, plural, one {# time} other {# times}}",
+      "stage": "{n, plural, one {# crowd prize} other {# crowd prizes}}"
     }
+  },
+  "boards": {
+    "won": "Won",
+    "line": "{coins, plural, one {# coin} other {# coins}} · {votes, plural, one {# vote} other {# votes}}",
+    "crowd": "crowd",
+    "empty": "No boards yet."
   }
 }

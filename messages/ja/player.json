@@ -21,7 +21,8 @@
     "mural": "掲示板",
     "activity": "アクティビティ",
     "badges": "実績",
-    "contributions": "貢献"
+    "contributions": "貢献",
+    "boards": "ボード"
   },
   "activity": {
     "game": "ゲーム",
@@ -55,10 +56,16 @@
       "caught": "見破ったインポスター",
       "firstVote": "最初の投票で{n}回的中",
       "asImpostor": "インポスターとして",
-      "escapeRate": "{p}で逃げ切り"
+      "escapeRate": "{p}で逃げ切り",
+      "roundsWon": "勝ったラウンド",
+      "ofRounds": "{n}ラウンド中",
+      "votes": "もらった票",
+      "crowd": "観客賞{n}回"
     },
     "caughtShort": "見破り",
-    "escapedShort": "逃げ切り"
+    "escapedShort": "逃げ切り",
+    "roundsWonShort": "ラウンド",
+    "votesShort": "票"
   },
   "facts": {
     "title": "トリビア",
@@ -77,7 +84,11 @@
     "escape": "いちばん鮮やかな逃げ切り",
     "escapeText": "{votes, plural, =0 {{name}で1票も入らずに逃げ切り} other {{name}で#票だけで逃げ切り}}",
     "bullseye": "最後の一手",
-    "bullseyeText": "インポスターとして見つかったあと、クルーのカードを当てた：{name}"
+    "bullseyeText": "インポスターとして見つかったあと、クルーのカードを当てた：{name}",
+    "bargain": "掘り出し物",
+    "bargainText": "{coins, plural, =0 {タダのチームでラウンドに勝利} other {コイン#枚のチームでラウンドに勝利}}",
+    "splurge": "一点張り",
+    "splurgeText": "ひとりのキャラクターにコイン{coins}枚"
   },
   "contributions": {
     "pictures": "送った画像",
@@ -220,7 +231,10 @@
       "discovered": "自分のキャラクターを当てる",
       "rightVote": "インポスターを投票で追い出す",
       "survived": "見つからずに過ごしたインポスターの1ラウンドごと",
-      "guessHit": "ラストチャンスでクルーのカードを当てる"
+      "guessHit": "ラストチャンスでクルーのカードを当てる",
+      "roundWon": "勝ったラウンドごと（同点も）",
+      "vote": "ボードがもらった1票ごと",
+      "crowd": "観客賞（いちばん多いリアクション）"
     },
     "groups": {
       "general": "全般",
@@ -249,7 +263,11 @@
       "pokerFace": "ポーカーフェイス",
       "nose": "鋭い嗅覚",
       "chameleon": "カメレオン",
-      "bullseye": "ど真ん中"
+      "bullseye": "ど真ん中",
+      "coach": "監督",
+      "bargain": "掘り出し物",
+      "allIn": "一点張り",
+      "stage": "主役"
     },
     "goals": {
       "matches": "{n}試合",
@@ -266,7 +284,17 @@
       "pokerFace": "{n, plural, other {票を受けずにインポスターで#勝}}",
       "nose": "{n, plural, other {最初の投票で#回的中}}",
       "chameleon": "{n, plural, other {インポスターで#勝}}",
-      "bullseye": "{n, plural, other {ラストチャンスで#回的中}}"
+      "bullseye": "{n, plural, other {ラストチャンスで#回的中}}",
+      "coach": "{n}ラウンドに勝つ",
+      "bargain": "コイン4枚以下のチームで{n}ラウンド勝利",
+      "allIn": "ひとりにコイン10枚を{n}回",
+      "stage": "観客賞{n}回"
     }
+  },
+  "boards": {
+    "won": "勝利",
+    "line": "コイン{coins}枚 · {votes}票",
+    "crowd": "観客賞",
+    "empty": "まだボードはありません。"
   }
 }

@@ -6,6 +6,12 @@ import {
   impostorPart,
   impostorXp,
 } from "./impostor/record";
+import {
+  type LineupRoundPart,
+  type LineupRoundRecord,
+  lineupPlayers as lineupParts,
+  lineupRounds,
+} from "./lineup/record";
 import { GAME_XP, XP } from "./profile/xp";
 import { themeId } from "./theme-id";
 import type { Lang, PlayerId, RoomState, Theme } from "./types";
@@ -40,6 +46,8 @@ export interface PlayerRecord {
   xp: number;
   /** An Impostor match: their side and what they did. */
   impostor?: ImpostorPlayerRecord;
+  /** A What for? match: their boards, round by round. */
+  lineup?: LineupRoundPart[];
 }
 
 export interface MatchRecord {
@@ -56,6 +64,8 @@ export interface MatchRecord {
   /** Added by the store to a player's XP when it is their first match of the day (UTC). */
   dayBonus: number;
   players: PlayerRecord[];
+  /** A What for? match: its rounds (mission, lots, trades). */
+  lineup?: { rounds: LineupRoundRecord[] };
 }
 
 /** What a player's part of a match gives: nothing for leaving. */
@@ -72,9 +82,11 @@ export function playerXp(p: Pick<PlayerRecord, "result" | "place">): number {
 export function matchRecord(s: RoomState, now: number): MatchRecord | null {
   if (s.phase !== "finished" || s.playStartedAt == null) return null;
   const startedAt = s.playStartedAt;
-  const players = s.imp
-    ? impostorPlayers(s, startedAt, now)
-    : whoAmIPlayers(s, startedAt);
+  const players = s.lu
+    ? lineupPlayers(s, startedAt, now)
+    : s.imp
+      ? impostorPlayers(s, startedAt, now)
+      : whoAmIPlayers(s, startedAt);
   return {
     id: `${s.code}-${startedAt}`,
     game: s.settings.game,
@@ -86,7 +98,42 @@ export function matchRecord(s: RoomState, now: number): MatchRecord | null {
     finishedAt: now,
     dayBonus: XP.dayFirst,
     players,
+    ...(s.lu ? { lineup: { rounds: lineupRounds(s.lu) } } : {}),
   };
+}
+
+/** Everyone dealt in, placed by points; nothing picked, nothing discovered. */
+function lineupPlayers(
+  s: RoomState,
+  startedAt: number,
+  now: number,
+): PlayerRecord[] {
+  return lineupParts(s).flatMap((part): PlayerRecord[] => {
+    const p = s.players.find((q) => q.id === part.id);
+    if (!p) return [];
+    return [
+      {
+        userId: p.id,
+        wasGuest: p.isGuest,
+        lang: p.lang,
+        pickedById: null,
+        pickerLang: null,
+        characterId: null,
+        characterName: null,
+        characterOrigin: null,
+        autoPicked: true,
+        suggested: false,
+        result: part.left ? "left" : "not_found",
+        place: part.place,
+        discoveredAt: null,
+        questions: 0,
+        guesses: 0,
+        timeMs: Math.max(0, now - startedAt),
+        xp: part.xp,
+        lineup: part.rounds,
+      },
+    ];
+  });
 }
 
 /** Everyone dealt in: the winners share first place; nothing picked, nothing discovered. */

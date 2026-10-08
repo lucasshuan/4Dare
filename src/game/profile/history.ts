@@ -50,6 +50,31 @@ export interface ImpostorPart {
   characterName: string | null;
 }
 
+/** One of a player's What for? rounds: their board's price and how it did (the board itself waits for the Boards tab). */
+export interface LineupRoundStat {
+  round: number;
+  missionId: string | null;
+  /** Coins the board's cards cost. */
+  spent: number;
+  /** The most paid for one of them. */
+  topPrice: number;
+  votes: number;
+  tieVotes: number | null;
+  /** Reactions on stage. */
+  laughs: number;
+  won: boolean;
+  /** The crowd's prize. */
+  crowd: boolean;
+  points: number;
+  /** Cards on the board. */
+  cards: number;
+}
+
+/** What for?'s part of a player's match: their rounds. */
+export interface LineupPart {
+  rounds: LineupRoundStat[];
+}
+
 interface MatchBase {
   matchId: string;
   finishedAt: number;
@@ -64,6 +89,7 @@ export type PlayedMatch = MatchBase &
   (
     | { game: "who-am-i"; details: WhoAmIPart | null }
     | { game: "impostor"; details: ImpostorPart | null }
+    | { game: "lineup"; details: LineupPart | null }
   );
 
 const won = (m: PlayedMatch) => m.place === 1;
@@ -73,6 +99,17 @@ export const impostorParts = (matches: readonly PlayedMatch[]) =>
   matches.flatMap((m) =>
     m.game === "impostor" && m.details ? [{ ...m.details, won: won(m) }] : [],
   );
+
+/** What for?'s rounds over these matches, newest match first. */
+export const lineupRounds = (matches: readonly PlayedMatch[]) =>
+  matches.flatMap((m) =>
+    m.game === "lineup" && m.details ? m.details.rounds : [],
+  );
+
+/** A round won with a team this cheap or cheaper is a bargain. */
+export const BARGAIN_COINS = 4;
+/** Paying this much for one character goes all in. */
+export const ALL_IN_COINS = 10;
 
 /** Every game's numbers: matches, wins, time played. */
 export function totalsOf(matches: readonly PlayedMatch[]) {
@@ -123,6 +160,22 @@ export function impostorNumbers(matches: readonly PlayedMatch[]) {
   };
 }
 
+/** What for?'s own numbers: rounds won, votes the boards got, the crowd's prizes. */
+export function lineupNumbers(matches: readonly PlayedMatch[]) {
+  const rounds = lineupRounds(matches);
+  const spent = rounds.map((r) => r.spent);
+  return {
+    rounds: rounds.length,
+    roundsWon: rounds.filter((r) => r.won).length,
+    votes: rounds.reduce((sum, r) => sum + r.votes + (r.tieVotes ?? 0), 0),
+    crowd: rounds.filter((r) => r.crowd).length,
+    /** Coins a board cost, on average. */
+    avgSpent: spent.length
+      ? spent.reduce((a, b) => a + b, 0) / spent.length
+      : null,
+  };
+}
+
 /** Something a profile tells about its player; the browser words it. */
 export type Fact =
   | {
@@ -169,6 +222,19 @@ export type Fact =
       game: "impostor";
       /** The crew's card, guessed right on the last chance (the latest one). */
       guess: string;
+    }
+  | {
+      kind: "bargain";
+      game: "lineup";
+      /** The cheapest board that won a round (the latest of the cheapest). */
+      spent: number;
+      votes: number;
+    }
+  | {
+      kind: "splurge";
+      game: "lineup";
+      /** The most paid for one character. */
+      price: number;
     };
 
 /**
@@ -267,6 +333,25 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
       game: "impostor",
       guess: hit.guess as string,
     });
+
+  // newest first, so a tie goes to the latest
+  const lus = lineupRounds(matches);
+  const bargain = lus
+    .filter((r) => r.won)
+    .reduce<LineupRoundStat | null>(
+      (best, r) => (!best || r.spent < best.spent ? r : best),
+      null,
+    );
+  if (bargain)
+    facts.push({
+      kind: "bargain",
+      game: "lineup",
+      spent: bargain.spent,
+      votes: bargain.votes + (bargain.tieVotes ?? 0),
+    });
+  const splurge = Math.max(0, ...lus.map((r) => r.topPrice));
+  if (splurge >= 5)
+    facts.push({ kind: "splurge", game: "lineup", price: splurge });
 
   return facts;
 }
