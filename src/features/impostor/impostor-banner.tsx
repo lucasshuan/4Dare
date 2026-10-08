@@ -10,6 +10,7 @@ import {
   useTransform,
 } from "motion/react";
 import { useTranslations } from "next-intl";
+import type { CSSProperties } from "react";
 import { Creature, HeldCard } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
 import { cn } from "@/lib/cn";
@@ -289,6 +290,8 @@ export function ImpostorBanner() {
         <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-white/10 blur-3xl" />
         <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-butter/20 blur-3xl" />
         <span className="absolute top-[5%] right-[22%] h-[45%] w-[25%] rounded-pill bg-sky/15 blur-3xl" />
+        <span className="absolute top-[-35%] left-[48%] h-[75%] w-[28%] rounded-pill bg-surface/20 blur-3xl" />
+        <span className="absolute bottom-[-25%] left-[22%] h-[70%] w-[30%] rounded-pill bg-no-soft/30 blur-3xl" />
         {MARKS.map(([left, top, size, color, seconds, mask]) => (
           <m.span
             key={`${left}-${top}`}
@@ -319,6 +322,19 @@ export function ImpostorBanner() {
           </m.span>
         ))}
       </m.div>
+
+      {/* a pale lilac haze in the top left corner, where the logo sits; it
+          fades out slowly so it reads as the light's own; none in the dark */}
+      <span
+        className="-z-10 pointer-events-none absolute top-0 left-0 h-[260px] w-[max(360px,42%)] dark:hidden"
+        style={
+          {
+            "--haze": "color-mix(in oklch, var(--art-impostor), white 80%)",
+            background:
+              "radial-gradient(farthest-side at 0 0, color-mix(in oklch, var(--haze) 55%, transparent), color-mix(in oklch, var(--haze) 36%, transparent) 22%, color-mix(in oklch, var(--haze) 16%, transparent) 48%, color-mix(in oklch, var(--haze) 4%, transparent) 76%, transparent)",
+          } as CSSProperties
+        }
+      />
 
       {/* melts into the page below through the ground's own hue, not grey, behind the table so the faces stay sharp; the lights down fade out over it too */}
       <span
