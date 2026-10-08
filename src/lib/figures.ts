@@ -1,6 +1,6 @@
 import { svgUri } from "./svg-uri";
 
-// The characters on the game art (banners, thumbnails, share images), in a
+// The characters on the game art (banners, share images), in a
 // cubist patchwork: colour blocks for a backdrop, long dark silhouettes with
 // coloured facets, big odd eyes, long whiskers; asymmetric on purpose. Each is
 // an 80×100 card. Players are creatures (src/lib/avatar); these stand for the

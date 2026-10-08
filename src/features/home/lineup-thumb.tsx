@@ -1,33 +1,27 @@
-import { type Figure, figureUri } from "@/lib/figures";
-
-/** A 4:5 photo taped on the board, with its price tag. */
+/** A 4:5 photo taped on the board: a flat figure on its pastel, with its price tag. */
 function Photo({
   x,
   y,
   tilt,
+  pastel,
   figure,
   price,
 }: {
   x: number;
   y: number;
   tilt: number;
-  figure: Figure;
+  pastel: string;
+  figure: string;
   price: number;
 }) {
-  const id = `lineup-photo-${figure}`;
   return (
     <g transform={`rotate(${tilt} ${x + 12} ${y + 15})`}>
       <rect x={x} y={y} width={24} height={30} rx={1.5} fill="#ffffff" />
-      <clipPath id={id}>
-        <rect x={x + 2.2} y={y + 2.2} width={19.6} height={24.5} />
-      </clipPath>
-      <image
-        href={figureUri(figure)}
-        x={x + 2.2}
-        y={y + 2.2}
-        width={19.6}
-        height={24.5}
-        clipPath={`url(#${id})`}
+      <rect x={x + 2.2} y={y + 2.2} width={19.6} height={24.5} fill={pastel} />
+      <circle cx={x + 12} cy={y + 12.5} r={4.8} fill={figure} />
+      <path
+        d={`M${x + 5.5} ${y + 26.7}c0-5 2.9-7.6 6.5-7.6s6.5 2.6 6.5 7.6z`}
+        fill={figure}
       />
       <rect
         x={x + 7}
@@ -114,10 +108,38 @@ export function LineupThumb() {
         strokeLinecap="round"
         opacity={0.85}
       />
-      <Photo x={18} y={34} tilt={-5} figure="fox" price={5} />
-      <Photo x={52} y={40} tilt={4} figure="robot" price={1} />
-      <Photo x={86} y={34} tilt={-3} figure="pirate" price={3} />
-      <Photo x={120} y={40} tilt={5} figure="witch" price={1} />
+      <Photo
+        x={18}
+        y={34}
+        tilt={-5}
+        pastel="#fde2c8"
+        figure="#e9852e"
+        price={5}
+      />
+      <Photo
+        x={52}
+        y={40}
+        tilt={4}
+        pastel="#cdeee9"
+        figure="#2f7f86"
+        price={1}
+      />
+      <Photo
+        x={86}
+        y={34}
+        tilt={-3}
+        pastel="#ffd1e6"
+        figure="#c03d8a"
+        price={3}
+      />
+      <Photo
+        x={120}
+        y={40}
+        tilt={5}
+        pastel="#dbe4fb"
+        figure="#2b69c8"
+        price={1}
+      />
       <Coins x={124} y={84} n={3} />
       <Coins x={140} y={88} n={2} />
       <g transform="rotate(10 132 18)">
