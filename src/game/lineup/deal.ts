@@ -32,6 +32,35 @@ const FULL_GOSTO = 40;
 export const MIN_POOL = 60;
 /** The deck: a language's best known this many; past them, characters get hard to place. */
 export const POOL_MAX = 1000;
+/**
+ * Each gosto also brings its own best known this many, however far down the
+ * language's list: the famous few (footballers, presidents) crowd games and
+ * cartoons out of the first thousand, yet Link is easier for a gamer than a tennis player.
+ */
+export const GOSTO_POOL = 100;
+
+/**
+ * The deck out of a language's characters, best known first: the first
+ * `top`, and each gosto's first `perGosto`; ranked again in that order.
+ */
+export function deckOf(
+  known: readonly { id: string; gostos: Gosto[] }[],
+  top = POOL_MAX,
+  perGosto = GOSTO_POOL,
+): PoolCard[] {
+  const seen = new Map<Gosto, number>();
+  return known
+    .filter((c, i) => {
+      let keep = i < top;
+      for (const g of c.gostos) {
+        const n = (seen.get(g) ?? 0) + 1;
+        seen.set(g, n);
+        if (n <= perGosto) keep = true;
+      }
+      return keep;
+    })
+    .map((c, i) => ({ id: c.id, gostos: c.gostos, rank: i + 1 }));
+}
 
 /** The characters of the deck the room's gostos let in. */
 export function roomPool(pool: readonly PoolCard[], on: readonly Gosto[]) {

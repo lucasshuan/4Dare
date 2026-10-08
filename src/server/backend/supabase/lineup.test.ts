@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
-import { POOL_MAX } from "@/game/lineup/deal";
+import { GOSTO_POOL, POOL_MAX } from "@/game/lineup/deal";
 import { supabaseLineup } from "./lineup";
 
 type PoolRow = { character_id: string; gostos: string[]; popularity: number };
@@ -31,23 +31,34 @@ function fakeDb(rows: PoolRow[], cap = 1000) {
       };
     },
   };
-  const db = { rpc: () => query } as unknown as SupabaseClient;
-  return { db, ranges, orders };
+  const args: unknown[] = [];
+  const db = {
+    rpc: (_name: string, a: unknown) => {
+      args.push(a);
+      return query;
+    },
+  } as unknown as SupabaseClient;
+  return { db, ranges, orders, args };
 }
 
 describe("what for?'s deck from Supabase", () => {
-  it("keeps the best known thousand, ranked, the id breaking ties", async () => {
-    const rows = Array.from({ length: 2269 }, (_, i) => row(i + 1));
-    const { db, ranges, orders } = fakeDb(rows);
+  it("reads the whole deck a page at a time, ranked, the id breaking ties", async () => {
+    const rows = Array.from({ length: 1228 }, (_, i) => row(i + 1));
+    const { db, ranges, orders, args } = fakeDb(rows);
     const pool = await supabaseLineup(() => db).pool("pt");
-    expect(pool).toHaveLength(POOL_MAX);
-    expect(pool.at(-1)).toEqual({
-      id: `wd-Q${POOL_MAX}`,
-      gostos: ["anime"],
-      rank: POOL_MAX,
+    expect(args[0]).toEqual({
+      p_lang: "pt",
+      p_top: POOL_MAX,
+      p_per_gosto: GOSTO_POOL,
     });
-    expect(ranges).toEqual([[0, POOL_MAX - 1]]);
-    expect(orders).toEqual(["popularity desc", "character_id asc"]);
+    expect(pool).toHaveLength(1228);
+    expect(pool.at(-1)).toEqual({
+      id: "wd-Q1228",
+      gostos: ["anime"],
+      rank: 1228,
+    });
+    expect(ranges.map(([from]) => from)).toEqual([0, 1000, 1228]);
+    expect(orders.slice(0, 2)).toEqual(["popularity desc", "character_id asc"]);
   });
 
   it("pages when the server hands out fewer at once, and stops at the end", async () => {

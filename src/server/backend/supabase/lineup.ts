@@ -5,7 +5,7 @@ import {
   TONES,
   type Tone,
 } from "@/game/lineup/bank";
-import { POOL_MAX, type PoolCard } from "@/game/lineup/deal";
+import { GOSTO_POOL, POOL_MAX, type PoolCard } from "@/game/lineup/deal";
 import type { Lang } from "@/game/types";
 import type { LineupStore } from "../types";
 import { type Db, serviceClient } from "./clients";
@@ -87,17 +87,22 @@ export function supabaseLineup(db: () => Db = serviceClient): LineupStore {
     pool(lang) {
       let read = pools.get(lang);
       if (!read) {
-        // the best known POOL_MAX, a page at a time (the id breaking
-        // popularity ties) in case the server hands out fewer at once
+        // the best known POOL_MAX and each gosto's GOSTO_POOL (deckOf, in
+        // SQL), a page at a time (the id breaking popularity ties) until an
+        // empty page: PostgREST hands out a thousand rows at most
         read = cached(async () => {
           const cards: PoolCard[] = [];
-          while (cards.length < POOL_MAX) {
+          for (;;) {
             const from = cards.length;
             const { data, error } = await db()
-              .rpc("lineup_pool", { p_lang: lang })
+              .rpc("lineup_pool", {
+                p_lang: lang,
+                p_top: POOL_MAX,
+                p_per_gosto: GOSTO_POOL,
+              })
               .order("popularity", { ascending: false })
               .order("character_id", { ascending: true })
-              .range(from, Math.min(from + PAGE, POOL_MAX) - 1);
+              .range(from, from + PAGE - 1);
             if (error) throw error;
             if (!data?.length) break;
             for (const r of data)

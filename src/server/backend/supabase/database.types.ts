@@ -1509,14 +1509,23 @@ export type Database = {
       impostor_known_floor: { Args: { p_lang: string }; Returns: number };
       lineup_count_cards: { Args: { p_rows: Json }; Returns: undefined };
       lineup_count_missions: { Args: { p_rows: Json }; Returns: undefined };
-      lineup_pool: {
-        Args: { p_lang: string };
-        Returns: {
-          character_id: string;
-          gostos: Database["public"]["Enums"]["gosto"][];
-          popularity: number;
-        }[];
-      };
+      lineup_pool:
+        | {
+            Args: { p_lang: string };
+            Returns: {
+              character_id: string;
+              gostos: Database["public"]["Enums"]["gosto"][];
+              popularity: number;
+            }[];
+          }
+        | {
+            Args: { p_lang: string; p_per_gosto: number; p_top: number };
+            Returns: {
+              character_id: string;
+              gostos: Database["public"]["Enums"]["gosto"][];
+              popularity: number;
+            }[];
+          };
       lineup_priciest: {
         Args: { p_lang: string; p_limit: number; p_min: number };
         Returns: {

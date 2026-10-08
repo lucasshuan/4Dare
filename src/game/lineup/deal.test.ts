@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { GOSTO_KEYS, type Gosto } from "../gostos";
 import { rng } from "../test-utils";
 import { type BankExtra, type BankMission, pickMissions, TONES } from "./bank";
-import { drawLots, type PoolCard, roomPool, STAR_RANK } from "./deal";
+import { deckOf, drawLots, type PoolCard, roomPool, STAR_RANK } from "./deal";
 
 const text = (s: string) => ({ en: s, es: s, ja: s, pt: s });
 
@@ -20,6 +20,36 @@ const extras: BankExtra[] = Array.from({ length: 10 }, (_, i) => ({
   tint: "#fde2c8",
   name: text(`Extra ${i}`),
 }));
+
+describe("what for?: the deck", () => {
+  it("keeps the best known, and each gosto's own best known however far down", () => {
+    // 30 real people first, then 10 games characters, then 5 more real people
+    const known = [
+      ...Array.from({ length: 30 }, (_, i) => ({
+        id: `r${i}`,
+        gostos: ["real" as Gosto],
+      })),
+      ...Array.from({ length: 10 }, (_, i) => ({
+        id: `g${i}`,
+        gostos: ["games" as Gosto],
+      })),
+      ...Array.from({ length: 5 }, (_, i) => ({
+        id: `r${30 + i}`,
+        gostos: ["real" as Gosto],
+      })),
+    ];
+    const deck = deckOf(known, 20, 4);
+    // the first 20, then games' first 4; the rest of the real people are past both
+    expect(deck.map((c) => c.id)).toEqual([
+      ...Array.from({ length: 20 }, (_, i) => `r${i}`),
+      "g0",
+      "g1",
+      "g2",
+      "g3",
+    ]);
+    expect(deck.map((c) => c.rank)).toEqual(deck.map((_, i) => i + 1));
+  });
+});
 
 describe("what for?: the lots", () => {
   it("puts an extra every fourth lot and never repeats a card in a match", () => {
