@@ -1,7 +1,13 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { Check, ChevronLeft, Link as LinkIcon, Settings } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  DoorOpen,
+  Link as LinkIcon,
+  Settings,
+} from "lucide-react";
 import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useRef, useState } from "react";
@@ -9,6 +15,7 @@ import { Button, keyClass } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
 import { RoomQr } from "@/components/ui/room-qr";
 import { Screen } from "@/components/ui/screen";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useToast } from "@/components/ui/toast";
 import { usePrefetchCharacterIndex } from "@/features/characters/use-character-index";
 import {
@@ -22,9 +29,11 @@ import { backClass, RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
+import { UserMenu } from "@/features/home/user-menu";
 import { GAME_SEATS } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
 import { useDisplayName, useRoomTitle } from "@/lib/names";
@@ -59,6 +68,16 @@ import { TvChair } from "./tv-chair";
 
 const titleClass =
   "max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]";
+
+/** The lobby's panels: the invite, the players and the room's settings, each lifted off the backdrop. */
+const panelClass = "rounded-lg bg-surface p-6 max-sm:p-4";
+
+/** Leaving the room: a pill that warms to the "no" colour when pointed at. */
+const leaveClass =
+  "inline-flex h-11 items-center gap-2 rounded-pill border-[1.5px] border-line-strong bg-surface pr-5 pl-4 font-semibold text-ink text-sm transition-[color,background-color,border-color,translate] duration-150 ease-soft hover:-translate-y-px hover:border-no hover:bg-no-soft active:translate-y-0";
+
+/** How askew each tile of the room code sits, in degrees. */
+const TILE_TILT = [-3, 2, -1.5, 2.5, -2];
 
 /** Only what the host can change (the server rejects anything else). */
 const editable = ({
@@ -243,67 +262,73 @@ export function LobbyScreen() {
   }
 
   return (
-    <Screen left={<HubBrand />} right={<HubActions />}>
-      <div className="flex flex-wrap items-start gap-10 lg:gap-16">
-        <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
-          <div className="flex flex-col gap-3">
-            <button
-              type="button"
-              onClick={async () => {
-                await leaving.run(() => leaveRoom(code));
-                router.push(GAME_PATHS[game]);
-              }}
-              className={backClass}
-            >
-              <ChevronLeft className="size-4" strokeWidth={2} />
-              {t("leave")}
-            </button>
-            {/* the room leads with its name; the greeting drops to a line under it */}
-            <RoomTitle
-              title={title}
-              name={nameGuess ?? roomName}
-              editable={me.isHost}
-              className={titleClass}
-              onRename={rename}
-            />
-            {/* the greeting sits close to the code it explains; the QR code to their right (not on phones) */}
-            <div className="flex items-center gap-6">
-              <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3">
-                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
-                  {greeting}
-                </p>
-                {/* desktop: "Copy link" right of the code; phones: under it */}
-                <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                  <div className="flex gap-2">
-                    <span className="sr-only">
-                      {t("codeLabel", { code: code.split("").join(" ") })}
+    <Screen bare>
+      {/* no top bar here: the lobby is the game's waiting room, with only the way out and theme and account */}
+      <div className="mb-5 flex items-center justify-between gap-3 short:mb-3">
+        <button
+          type="button"
+          onClick={async () => {
+            await leaving.run(() => leaveRoom(code));
+            router.push(GAME_PATHS[game]);
+          }}
+          className={leaveClass}
+        >
+          <DoorOpen className="size-[18px]" strokeWidth={2} />
+          {t("leave")}
+        </button>
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <ThemeToggle />
+          <UserMenu />
+        </div>
+      </div>
+      <div className="flex flex-wrap items-start gap-6 lg:gap-8">
+        <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-5 short:gap-4">
+          {/* the room leads with its name, right on the backdrop; the invite and the players sit on panels under it */}
+          <RoomTitle
+            title={title}
+            name={nameGuess ?? roomName}
+            editable={me.isHost}
+            className={titleClass}
+            onRename={rename}
+          />
+          {/* the greeting sits close to the code it explains; the QR code to their right (not on phones) */}
+          <div className={cn(panelClass, "flex items-center gap-6")}>
+            <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3">
+              <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
+                {greeting}
+              </p>
+              {/* desktop: "Copy link" right of the code; phones: under it */}
+              <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                {/* the code as game tiles, each a little askew */}
+                <div className="flex gap-2">
+                  <span className="sr-only">
+                    {t("codeLabel", { code: code.split("").join(" ") })}
+                  </span>
+                  {code.split("").map((c, i) => (
+                    <span
+                      // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
+                      key={i}
+                      aria-hidden="true"
+                      style={{
+                        rotate: `${TILE_TILT[i % TILE_TILT.length]}deg`,
+                      }}
+                      className="flex h-20 w-14 items-center justify-center rounded-md bg-sunken font-display font-extrabold text-[40px] text-ink shadow-[inset_0_-5px_0_var(--line)] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
+                    >
+                      {c}
                     </span>
-                    {code.split("").map((c, i) => (
-                      <span
-                        // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
-                        key={i}
-                        aria-hidden="true"
-                        className="flex h-20 w-14 items-center justify-center rounded-md border border-line bg-surface font-medium font-mono text-[40px] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
-                      >
-                        {c}
-                      </span>
-                    ))}
-                  </div>
-                  <Button
-                    onClick={() =>
-                      copy(
-                        `${window.location.origin}/r/${code}`,
-                        t("linkCopied"),
-                      )
-                    }
-                  >
-                    <LinkIcon strokeWidth={1.75} />
-                    {t("copyLink")}
-                  </Button>
+                  ))}
                 </div>
+                <Button
+                  onClick={() =>
+                    copy(`${window.location.origin}/r/${code}`, t("linkCopied"))
+                  }
+                >
+                  <LinkIcon strokeWidth={1.75} />
+                  {t("copyLink")}
+                </Button>
               </div>
-              <RoomQr code={code} className="max-sm:hidden" />
             </div>
+            <RoomQr code={code} className="max-sm:hidden" />
           </div>
           {/* What for?'s presenter chair, over the lists */}
           {game === "lineup" && view.settings.mode === "host" ? (
@@ -319,33 +344,35 @@ export function LobbyScreen() {
             />
           ) : null}
           {/* who is here, and the room's past matches */}
-          <LobbyTabs
-            label={t("listsLabel")}
-            tabs={[
-              {
-                key: "players",
-                label: t("players"),
-                count: `${shownPlayers.length}/${shownSeats}`,
-                panel: (
-                  <SeatGrid
-                    players={shownPlayers}
-                    seats={shownSeats}
-                    slots={me.isHost ? range.max : shownSeats}
-                    host={me.isHost}
-                    canClose={canClose}
-                    onSeats={setSeats}
-                    onKick={kick}
-                  />
-                ),
-              },
-              {
-                key: "matches",
-                label: t("matches"),
-                count: String(view.matches.length),
-                panel: <PastMatches matches={view.matches} />,
-              },
-            ]}
-          />
+          <div className={panelClass}>
+            <LobbyTabs
+              label={t("listsLabel")}
+              tabs={[
+                {
+                  key: "players",
+                  label: t("players"),
+                  count: `${shownPlayers.length}/${shownSeats}`,
+                  panel: (
+                    <SeatGrid
+                      players={shownPlayers}
+                      seats={shownSeats}
+                      slots={me.isHost ? range.max : shownSeats}
+                      host={me.isHost}
+                      canClose={canClose}
+                      onSeats={setSeats}
+                      onKick={kick}
+                    />
+                  ),
+                },
+                {
+                  key: "matches",
+                  label: t("matches"),
+                  count: String(view.matches.length),
+                  panel: <PastMatches matches={view.matches} />,
+                },
+              ]}
+            />
+          </div>
         </section>
 
         <div className="flex w-full flex-col gap-4 lg:max-w-[416px] lg:flex-[1_1_360px]">
@@ -421,7 +448,7 @@ export function LobbyScreen() {
               </button>
             )}
           </div>
-          <aside className="flex flex-col gap-4 rounded-lg bg-surface p-6">
+          <aside className={cn(panelClass, "flex flex-col gap-4")}>
             <ul className="flex flex-col gap-3">
               <VisibilityRow
                 settings={view.settings}
