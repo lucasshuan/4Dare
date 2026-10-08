@@ -253,8 +253,8 @@ export function LobbyScreen() {
       {/* on a desktop the lobby fits the window and never scrolls: the lists and the settings scroll inside their panels.
           Narrower, one column whose panels mix both sides: the invite, the game and its key, who is here, the settings */}
       <div className="flex flex-col gap-5 short:gap-4 lg:min-h-0 lg:flex-1 lg:flex-row lg:gap-8">
-        {/* one width whatever the open tab holds */}
-        <section className="max-lg:contents lg:flex lg:min-h-0 lg:min-w-0 lg:max-w-[768px] lg:flex-1 lg:flex-col lg:gap-5 lg:short:gap-4">
+        {/* the rest of the page's width, the same whatever the open tab holds, so its right edge meets the controls' */}
+        <section className="max-lg:contents lg:flex lg:min-h-0 lg:min-w-0 lg:flex-1 lg:flex-col lg:gap-5 lg:short:gap-4">
           {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right (not on phones) */}
           <div
             className={cn(
@@ -362,8 +362,8 @@ export function LobbyScreen() {
           </div>
         </section>
 
-        {/* the sidebar, on the left on a desktop: the game on stage, the start key, then the room's settings */}
-        <div className="max-lg:contents lg:order-first lg:flex lg:min-h-0 lg:w-[416px] lg:shrink-0 lg:flex-col lg:gap-4">
+        {/* the sidebar, on the left on a desktop, growing a little with the window: the game on stage, the start key, then the room's settings */}
+        <div className="max-lg:contents lg:order-first lg:flex lg:min-h-0 lg:w-[clamp(416px,30%,520px)] lg:shrink-0 lg:flex-col lg:gap-4">
           {/* the game on stage: its art over the panel's top, its name (the host can switch it there), the main action and who is ready */}
           <div
             className={cn(
