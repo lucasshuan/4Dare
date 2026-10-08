@@ -14,6 +14,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useToast } from "@/components/ui/toast";
 import { usePrefetchCharacterIndex } from "@/features/characters/use-character-index";
 import {
+  GAME_INFO,
   GameField,
   GameThumb,
   useGameName,
@@ -169,6 +170,7 @@ export function LobbyScreen() {
   );
   const { game, name: roomName, seats, themeMode } = view.settings;
   const gameName = useGameName();
+  const GameArt = GAME_INFO[game].Thumb;
   // The host sees every seat the game allows, and their changes show at once;
   // the server confirms in the background (a refusal puts things back).
   const range = GAME_SEATS[game];
@@ -374,9 +376,24 @@ export function LobbyScreen() {
           </div>
         </section>
 
-        <div className="flex w-full flex-col gap-4 lg:min-h-0 lg:w-[416px] lg:shrink-0">
-          {/* the game and the main action, above the room's settings; the host can switch the game there */}
-          <div className="flex flex-wrap items-center gap-3">
+        {/* the sidebar, on the left on a desktop: the game on stage, the start key, then the room's settings */}
+        <div className="flex w-full flex-col gap-4 lg:order-first lg:min-h-0 lg:w-[416px] lg:shrink-0">
+          {/* the game on stage: its art over the panel's top, its name (the host can switch it there), the main action and who is ready */}
+          <div
+            className={cn(
+              panelClass,
+              "flex shrink-0 flex-col gap-4 overflow-hidden",
+            )}
+          >
+            <div
+              aria-hidden="true"
+              className="relative -mx-6 -mt-6 h-44 overflow-hidden bg-sunken short:h-32 max-sm:-mx-4 max-sm:-mt-4"
+            >
+              {/* the game's own picture, drawn to fill any box */}
+              <div className="absolute inset-0 [&_svg]:size-full">
+                <GameArt />
+              </div>
+            </div>
             {me.isHost ? (
               <GameField
                 value={game}
@@ -385,15 +402,15 @@ export function LobbyScreen() {
                   if (next !== game)
                     void act(() => updateSettings(code, { game: next }));
                 }}
-                className="min-w-0 flex-1 basis-56 pr-4 sm:w-auto"
+                className="w-full pr-4 sm:w-full"
               />
             ) : (
-              <>
+              <div className="flex items-center gap-3">
                 <GameThumb game={game} size="sm" />
-                <span className="min-w-20 grow-999 basis-0 font-bold font-display text-lg leading-tight">
+                <span className="min-w-0 flex-1 font-bold font-display text-xl leading-tight">
                   {gameName(game)}
                 </span>
-              </>
+              </div>
             )}
             {/* keys like "Create room": the host's starts the match; a guest's stays pressed down once ready */}
             {me.isHost ? (
@@ -411,7 +428,7 @@ export function LobbyScreen() {
                     type="button"
                     className={keyClass("yes", {
                       bounce: true,
-                      className: "min-h-14 w-full px-6 text-lg",
+                      className: "min-h-16 w-full px-6 text-2xl",
                     })}
                     disabled={!view.canStart || !!cards?.tooFew || pending}
                     onClick={() =>
@@ -435,7 +452,7 @@ export function LobbyScreen() {
                 className={keyClass(myReady ? "yes" : "apricot", {
                   pressed: myReady,
                   bounce: true,
-                  className: "min-h-14 grow px-6 text-lg",
+                  className: "min-h-16 w-full px-6 text-2xl",
                 })}
                 aria-pressed={myReady}
                 disabled={pending}
@@ -446,6 +463,16 @@ export function LobbyScreen() {
                 {t("readyButton")}
               </button>
             )}
+            {others.length ? (
+              <ReadyMeter
+                ready={others.length - waiting.length}
+                total={others.length}
+                label={t("readyCount", {
+                  ready: others.length - waiting.length,
+                  total: others.length,
+                })}
+              />
+            ) : null}
           </div>
           <aside
             className={cn(
@@ -598,5 +625,36 @@ function StartBlocked({
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>
+  );
+}
+
+/** Who is ready, under the start key: a pip per guest, filled once they confirm, and the count. */
+function ReadyMeter({
+  ready,
+  total,
+  label,
+}: {
+  ready: number;
+  total: number;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <span aria-hidden="true" className="flex gap-1.5">
+        {Array.from({ length: total }, (_, i) => (
+          <span
+            // biome-ignore lint/suspicious/noArrayIndexKey: one pip per guest, in order
+            key={i}
+            className={cn(
+              "size-2.5 rounded-pill transition-colors duration-300 ease-soft",
+              i < ready ? "bg-yes" : "bg-line",
+            )}
+          />
+        ))}
+      </span>
+      <span className="font-semibold text-ink-muted text-sm tabular-nums">
+        {label}
+      </span>
+    </div>
   );
 }

@@ -60,6 +60,7 @@
     "wait": "Esperar"
   },
   "readyButton": "Pronto",
+  "readyCount": "{ready} de {total} prontos",
   "editSettings": "Editar configuração avançada",
   "rename": "Renomear sala",
   "editVisibility": "Mudar quem pode entrar",

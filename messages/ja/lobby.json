@@ -60,6 +60,7 @@
     "wait": "待つ"
   },
   "readyButton": "準備OK",
+  "readyCount": "{total}人中{ready}人が準備OK",
   "editSettings": "詳細設定を変更",
   "rename": "ルーム名を変える",
   "editVisibility": "入れる人を変える",

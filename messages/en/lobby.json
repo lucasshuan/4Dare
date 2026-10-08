@@ -60,6 +60,7 @@
     "wait": "Wait"
   },
   "readyButton": "Ready",
+  "readyCount": "{ready} of {total} ready",
   "editSettings": "Edit advanced settings",
   "rename": "Rename room",
   "editVisibility": "Change who can join",
