@@ -9,6 +9,7 @@ import { supabaseCharacters } from "./supabase/characters";
 import { supabaseChat } from "./supabase/chat";
 import { supabaseFiles } from "./supabase/files";
 import { supabaseImages } from "./supabase/images";
+import { supabaseLineup } from "./supabase/lineup";
 import { supabaseMatches } from "./supabase/matches";
 import { supabaseMural } from "./supabase/mural";
 import { supabaseNotify } from "./supabase/notify";
@@ -29,6 +30,7 @@ export function getBackend(): Backend {
       matches: supabaseMatches(),
       characters: supabaseCharacters(),
       questions: supabaseQuestions(),
+      lineup: supabaseLineup(),
       images: supabaseImages(),
       themes: themes(supabaseThemes()),
       files: supabaseFiles(),

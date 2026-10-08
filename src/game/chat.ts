@@ -133,7 +133,9 @@ export function systemLines(
   const lines: NewChatMessage[] = [];
   if (
     before.phase === "lobby" &&
-    (after.phase === "voting" || after.phase === "theming")
+    (after.phase === "voting" ||
+      after.phase === "theming" ||
+      after.phase === "bidding")
   ) {
     lines.push({
       system: { type: "started" },

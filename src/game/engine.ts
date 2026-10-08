@@ -42,6 +42,7 @@ import {
   saveBoard,
 } from "./lineup/engine";
 import { COINS, LOTS_PER_SEAT, OFF_MISSIONS_MAX, ROUNDS } from "./lineup/rules";
+import { LU_PHASES } from "./lineup/types";
 import { isCloseMatch } from "./match";
 import {
   endsWithQuestionMark,
@@ -581,17 +582,7 @@ const MATCH_PHASES = new Set([
 ]);
 /** The Impostor's steps, from the first question to the last guess. */
 const IMP_PHASES = new Set(["replying", "talking", "last_chance"]);
-/** What for?'s steps, from the first lot to the last score. */
-const LU_PHASES = new Set([
-  "bidding",
-  "halftime",
-  "trading",
-  "defending",
-  "presenting",
-  "judging",
-  "tiebreak",
-  "scoring",
-]);
+const LUP = new Set<string>(LU_PHASES);
 /**
  * Every card is set: the cast show (everyone picked or "Time!", whose
  * character you got, the turn order), then the first turn's clock.
@@ -1074,7 +1065,7 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   p.away = true;
   handOverHost(s);
   if (IMP_PHASES.has(s.phase)) return impLeft(s, id, ctx);
-  if (LU_PHASES.has(s.phase)) return luLeft(s, id, ctx);
+  if (LUP.has(s.phase)) return luLeft(s, id, ctx);
   if (isActive(s, id)) endOutcome(s, id, ctx);
   if (TURN_PHASES.has(s.phase) && s.turnPlayerId === id) {
     abandonTurn(s, ctx);
@@ -1360,16 +1351,7 @@ function timeout(
     case "talking":
     case "last_chance":
       return impTimeout(s, ctx);
-    case "bidding":
-    case "halftime":
-    case "trading":
-    case "defending":
-    case "presenting":
-    case "judging":
-    case "tiebreak":
-    case "scoring":
-      return luTimeout(s, ctx);
     default:
-      return fail("wrong_phase");
+      return LUP.has(s.phase) ? luTimeout(s, ctx) : fail("wrong_phase");
   }
 }

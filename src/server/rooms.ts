@@ -7,6 +7,7 @@ import type { ThemeFilter } from "@/game/gostos";
 import { displayName } from "@/game/guest-names";
 import { presenceDue } from "@/game/helpers";
 import { questionParts } from "@/game/impostor/record";
+import { LU_PHASES } from "@/game/lineup/types";
 import { matchRecord } from "@/game/record";
 import { themeId } from "@/game/theme-id";
 import {
@@ -512,6 +513,7 @@ const LIVE: readonly Phase[] = [
   "replying",
   "talking",
   "last_chance",
+  ...LU_PHASES,
 ];
 
 /**

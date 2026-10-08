@@ -14,6 +14,7 @@ import {
   validatorOf,
 } from "./helpers";
 import { impReveal, impStatus, impView } from "./impostor/view";
+import { LU_PHASES } from "./lineup/types";
 import { luStatus, luView } from "./lineup/view";
 import {
   type ActiveRoom,
@@ -462,14 +463,7 @@ const PLAYING_PHASES = new Set([
   "replying",
   "talking",
   "last_chance",
-  "bidding",
-  "halftime",
-  "trading",
-  "defending",
-  "presenting",
-  "judging",
-  "tiebreak",
-  "scoring",
+  ...LU_PHASES,
 ]);
 
 /**

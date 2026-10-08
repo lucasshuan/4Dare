@@ -4,7 +4,19 @@
 // boards on stage one by one, and a secret vote. The room's shared parts
 // (seats, shows, clocks) are in ../types.ts.
 import type { Gosto } from "../gostos";
-import type { Localized, PlayerId } from "../types";
+import type { Localized, Phase, PlayerId } from "../types";
+
+/** What for?'s steps, from the first lot to the last score. */
+export const LU_PHASES = [
+  "bidding",
+  "halftime",
+  "trading",
+  "defending",
+  "presenting",
+  "judging",
+  "tiebreak",
+  "scoring",
+] as const satisfies readonly Phase[];
 
 /**
  * A card that goes under the hammer: a library character in the room's

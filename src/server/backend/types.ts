@@ -8,6 +8,8 @@ import type { ChatMessage, NewChatMessage } from "@/game/chat";
 import type { GameKey } from "@/game/games";
 import type { Gosto, ThemeFilter } from "@/game/gostos";
 import type { BankQuestion } from "@/game/impostor/questions";
+import type { BankExtra, BankMission } from "@/game/lineup/bank";
+import type { PoolCard } from "@/game/lineup/deal";
 import type { SyncedSettings } from "@/game/options";
 import type { PlayedMatch } from "@/game/profile/history";
 import type {
@@ -387,6 +389,11 @@ export interface Notifier {
   lobbyChanged(): Promise<void>;
   /** New chat lines in the room; `id` is the newest. A ping only, never the text (topics are public). Best effort. */
   chatChanged(code: string, id: number): Promise<void>;
+  /** What for?: reactions to the board on stage, for every screen to float them. Best effort. */
+  reacted(
+    code: string,
+    payload: { board: PlayerId; counts: number[] },
+  ): Promise<void>;
 }
 
 export type { NewChatMessage };
@@ -440,11 +447,45 @@ export interface PlayerTotals {
   xp: number;
 }
 
+/** One mission's part in a finished match, in the match's language. */
+export interface MissionCount {
+  id: string;
+  lang: Lang;
+  played: number;
+  liked: number;
+  disliked: number;
+  laughs: number;
+  ties: number;
+}
+
+/** One card's part in a finished match (a library id, or "x:<extra>"). */
+export interface CardCount {
+  id: string;
+  lang: Lang;
+  lots: number;
+  sold: number;
+  price: number;
+  traded: number;
+  won: number;
+}
+
+/** What for?'s hand-made banks, a language's deck, and what matches did with them. */
+export interface LineupStore {
+  /** Every live mission (cached). */
+  missions(): Promise<BankMission[]>;
+  /** Every live extra (cached). */
+  extras(): Promise<BankExtra[]>;
+  /** A language's deck, best known first (cached). */
+  pool(lang: Lang): Promise<PoolCard[]>;
+  count(missions: MissionCount[], cards: CardCount[]): Promise<void>;
+}
+
 export interface Backend {
   rooms: RoomStore;
   matches: MatchStore;
   characters: CharacterStore;
   questions: QuestionStore;
+  lineup: LineupStore;
   images: ImageStore;
   themes: ThemeSource;
   files: FileStore;

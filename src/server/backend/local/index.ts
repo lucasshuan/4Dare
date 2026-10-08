@@ -7,6 +7,7 @@ import { localCharacters } from "./characters";
 import { localChat } from "./chat";
 import { localFiles } from "./files";
 import { localImages } from "./images";
+import { localLineup } from "./lineup";
 import { localMatches } from "./matches";
 import { localMural } from "./mural";
 import { localProfiles } from "./profiles";
@@ -26,6 +27,7 @@ export function localBackend(): Backend {
     matches: localMatches(),
     characters,
     questions: localQuestions(),
+    lineup: localLineup(),
     images: localImages(characters),
     themes: themes(localThemes()),
     files: localFiles(),
@@ -38,6 +40,7 @@ export function localBackend(): Backend {
       roomChanged: async () => {},
       lobbyChanged: async () => {},
       chatChanged: async () => {},
+      reacted: async () => {},
     },
     chat: localChat(),
   };

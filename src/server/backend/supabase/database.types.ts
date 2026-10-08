@@ -368,6 +368,183 @@ export type Database = {
           },
         ];
       };
+      lineup_blocked: {
+        Row: {
+          character_id: string;
+          created_at: string;
+          reason: string;
+        };
+        Insert: {
+          character_id: string;
+          created_at?: string;
+          reason: string;
+        };
+        Update: {
+          character_id?: string;
+          created_at?: string;
+          reason?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lineup_blocked_character_id_fkey";
+            columns: ["character_id"];
+            isOneToOne: true;
+            referencedRelation: "characters";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      lineup_card_stats: {
+        Row: {
+          card_id: string;
+          lang: string;
+          lots: number;
+          price_sum: number;
+          sold: number;
+          traded: number;
+          won: number;
+        };
+        Insert: {
+          card_id: string;
+          lang: string;
+          lots?: number;
+          price_sum?: number;
+          sold?: number;
+          traded?: number;
+          won?: number;
+        };
+        Update: {
+          card_id?: string;
+          lang?: string;
+          lots?: number;
+          price_sum?: number;
+          sold?: number;
+          traded?: number;
+          won?: number;
+        };
+        Relationships: [];
+      };
+      lineup_extras: {
+        Row: {
+          created_at: string;
+          emoji: string;
+          en: string;
+          es: string;
+          id: string;
+          ja: string;
+          pt: string;
+          status: string;
+          tint: string;
+        };
+        Insert: {
+          created_at?: string;
+          emoji: string;
+          en: string;
+          es: string;
+          id: string;
+          ja: string;
+          pt: string;
+          status?: string;
+          tint: string;
+        };
+        Update: {
+          created_at?: string;
+          emoji?: string;
+          en?: string;
+          es?: string;
+          id?: string;
+          ja?: string;
+          pt?: string;
+          status?: string;
+          tint?: string;
+        };
+        Relationships: [];
+      };
+      lineup_mission_stats: {
+        Row: {
+          disliked: number;
+          lang: string;
+          laughs: number;
+          liked: number;
+          mission_id: string;
+          played: number;
+          ties: number;
+        };
+        Insert: {
+          disliked?: number;
+          lang: string;
+          laughs?: number;
+          liked?: number;
+          mission_id: string;
+          played?: number;
+          ties?: number;
+        };
+        Update: {
+          disliked?: number;
+          lang?: string;
+          laughs?: number;
+          liked?: number;
+          mission_id?: string;
+          played?: number;
+          ties?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lineup_mission_stats_mission_id_fkey";
+            columns: ["mission_id"];
+            isOneToOne: false;
+            referencedRelation: "lineup_missions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      lineup_missions: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          en: string;
+          es: string;
+          heavy: boolean;
+          id: string;
+          ja: string;
+          pt: string;
+          status: string;
+          tone: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          en: string;
+          es: string;
+          heavy?: boolean;
+          id: string;
+          ja: string;
+          pt: string;
+          status?: string;
+          tone: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          en?: string;
+          es?: string;
+          heavy?: boolean;
+          id?: string;
+          ja?: string;
+          pt?: string;
+          status?: string;
+          tone?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lineup_missions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       match_players: {
         Row: {
           auto_picked: boolean | null;
@@ -1146,6 +1323,16 @@ export type Database = {
         }[];
       };
       impostor_known_floor: { Args: { p_lang: string }; Returns: number };
+      lineup_count_cards: { Args: { p_rows: Json }; Returns: undefined };
+      lineup_count_missions: { Args: { p_rows: Json }; Returns: undefined };
+      lineup_pool: {
+        Args: { p_lang: string };
+        Returns: {
+          character_id: string;
+          gostos: Database["public"]["Enums"]["gosto"][];
+          popularity: number;
+        }[];
+      };
       played_together: {
         Args: { p_a: string; p_b: string };
         Returns: boolean;

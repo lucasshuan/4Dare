@@ -53,6 +53,7 @@ import {
 } from "./contract";
 import { readImage } from "./images";
 import { impostorRound } from "./impostor";
+import { lineupDecks } from "./lineup";
 import { deleteLine, postLine, reportLine } from "./mural";
 import { countPick, nameWithPicture, sendPicture, wearing } from "./pictures";
 import {
@@ -264,6 +265,19 @@ export async function kickPlayer(
 export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {
     const stored = await getBackend().rooms.get(roomCode(code));
+    // What for? has no theme: every round's cards and mission come along
+    if (stored?.state.settings.game === "lineup") {
+      const [decks, newcomer] = await Promise.all([
+        lineupDecks(stored.state),
+        hasNewcomer(stored.state),
+      ]);
+      return act(code, (id) => ({
+        type: "START",
+        playerId: id,
+        decks,
+        ...(newcomer ? { newcomer } : {}),
+      }));
+    }
     // the Impostor deals its cards with the themes it puts to the vote
     if (stored?.state.settings.game === "impostor") {
       const [round, newcomer] = await Promise.all([
@@ -398,6 +412,106 @@ export async function guessCrewCard(
       type: "LAST_GUESS",
       playerId: id,
       text: text(guess, MAX_GUESS),
+    })),
+  );
+}
+
+// --- what for? -----------------------------------------------------------------
+
+/** An offer on the lot on the table: the amount itself, so of two that cross, the first wins. */
+export async function bidOnLot(
+  code: string,
+  amount: number,
+): Promise<Result<RoomView>> {
+  return run(() => {
+    if (!Number.isInteger(amount) || amount < 1 || amount > COINS.max) bad();
+    return act(code, (id) => ({ type: "BID", playerId: id, amount }));
+  });
+}
+
+/** "Pass": out of this lot. */
+export async function foldLot(code: string): Promise<Result<RoomView>> {
+  return run(() => act(code, (id) => ({ type: "FOLD", playerId: id })));
+}
+
+/** Done with the break, the trades, the board or the score (false: not after all). */
+export async function markDone(
+  code: string,
+  done: boolean,
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({ type: "DONE", playerId: id, done: done === true })),
+  );
+}
+
+const cardsSchema = z.array(z.number().int().min(0).max(60)).min(1).max(9);
+
+/** An open trade offer to `to`: some of my cards for some of theirs; null takes mine back. */
+export async function offerTrade(
+  code: string,
+  offer: { to: string; give: number[]; get: number[] } | null,
+): Promise<Result<RoomView>> {
+  return run(() => {
+    if (offer === null)
+      return act(code, (id) => ({ type: "CANCEL_OFFER", playerId: id }));
+    const give = cardsSchema.safeParse(offer.give);
+    const get = cardsSchema.safeParse(offer.get);
+    if (!give.success || !get.success) bad();
+    return act(code, (id) => ({
+      type: "OFFER",
+      playerId: id,
+      to: playerId(offer.to),
+      give: give.data ?? [],
+      get: get.data ?? [],
+    }));
+  });
+}
+
+/** Yes or no to the trade `from` offered me. */
+export async function answerTrade(
+  code: string,
+  from: string,
+  accept: boolean,
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({
+      type: "ANSWER_OFFER",
+      playerId: id,
+      from: playerId(from),
+      accept: accept === true,
+    })),
+  );
+}
+
+/** The owner on stage is done talking. */
+export async function endPresentation(code: string): Promise<Result<RoomView>> {
+  return run(() => act(code, (id) => ({ type: "PRESENTED", playerId: id })));
+}
+
+/** A secret vote for a board (in a tiebreak, among the tied). */
+export async function judgeBoard(
+  code: string,
+  ownerId: string,
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({
+      type: "JUDGE",
+      playerId: id,
+      ownerId: playerId(ownerId),
+    })),
+  );
+}
+
+/** "Good mission?": up, down, or null to take it back. */
+export async function rateMission(
+  code: string,
+  up: boolean | null,
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({
+      type: "RATE",
+      playerId: id,
+      up: up === null ? null : up === true,
     })),
   );
 }

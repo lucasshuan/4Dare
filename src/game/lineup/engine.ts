@@ -20,6 +20,7 @@ import {
   stepMs,
 } from "../steps";
 import { type Ctx, type PlayerId, type RoomState, SHOW_TIMING } from "../types";
+import { RECENT_MISSIONS } from "./bank";
 import {
   boardOf,
   breaksFor,
@@ -102,10 +103,9 @@ function settled(s: RoomState) {
 export function beginLineup(s: RoomState, decks: LuDeck[], ctx: Ctx) {
   const dealt = s.players.filter(isPresent).map((p) => p.id);
   const lots = lotsFor(dealt.length, s.settings.lotsPerSeat);
-  if (
-    decks.length !== roundsFor(dealt.length, s.settings.rounds) ||
-    decks.some((d) => d.lots !== lots || d.cards.length < lots)
-  )
+  const rounds = roundsFor(dealt.length, s.settings.rounds);
+  // the server deals for the open seats: what the table doesn't need waits as spares
+  if (decks.length < rounds || decks.some((d) => d.lots < lots))
     fail("invalid_input");
   s.round += 1;
   s.theme = null;
@@ -122,7 +122,11 @@ export function beginLineup(s: RoomState, decks: LuDeck[], ctx: Ctx) {
   }
   s.lu = {
     dealt,
-    decks: structuredClone(decks),
+    decks: decks.slice(0, rounds).map((d) => ({
+      cards: structuredClone(d.cards),
+      lots,
+      mission: structuredClone(d.mission),
+    })),
     round: 0,
     rounds: [],
     coins: {},
@@ -661,11 +665,22 @@ export function rate(s: RoomState, playerId: PlayerId, up: boolean | null) {
   else round.rated[playerId] = up ? 1 : -1;
 }
 
+/** The podium; the room's next matches skip the missions this one played. */
+function end(s: RoomState, ctx: Ctx) {
+  const played = match(s)
+    .decks.slice(0, match(s).round)
+    .flatMap((d) => (d.mission.id ? [d.mission.id] : []))
+    .reverse();
+  s.recentMissions = [
+    ...new Set([...played, ...(s.recentMissions ?? [])]),
+  ].slice(0, RECENT_MISSIONS);
+  finish(s, ctx);
+}
+
 /** The next round's coins and lots, or the podium. */
 function nextRound(s: RoomState, ctx: Ctx) {
   const lu = match(s);
-  if (lu.round >= lu.decks.length || inPlay(s).length < 2)
-    return finish(s, ctx);
+  if (lu.round >= lu.decks.length || inPlay(s).length < 2) return end(s, ctx);
   const L = SHOW_TIMING.lineup;
   startRound(s, ctx, [
     ["round", SHOW_TIMING.round],
@@ -764,7 +779,7 @@ export const luTimeout = (s: RoomState, ctx: Ctx) => advance(s, ctx);
 export function luLeft(s: RoomState, id: PlayerId, ctx: Ctx) {
   const lu = s.lu;
   if (!lu?.dealt.includes(id)) return;
-  if (inPlay(s).length < 2) return finish(s, ctx);
+  if (inPlay(s).length < 2) return end(s, ctx);
   lu.offers = lu.offers.filter((o) => o.from !== id && o.to !== id);
   const round = roundOf(lu);
   switch (s.phase) {

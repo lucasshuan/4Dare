@@ -702,6 +702,8 @@ export const ERROR_CODES = [
   "gives_away",
   /** What for?: someone else's bid got there first; the lot costs more now. */
   "outbid",
+  /** What for?: the room's gostos leave too few known characters to deal from. */
+  "few_cards",
   "already_done",
   "conflict",
   "unauthorized",

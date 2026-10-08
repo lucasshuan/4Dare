@@ -1,5 +1,6 @@
 import "server-only";
 import { DEFAULT_GAME, type GameKey } from "@/game/games";
+import { LU_PHASES } from "@/game/lineup/types";
 import type { ActiveRoom, Phase, RoomState } from "@/game/types";
 import { upgradeRoom } from "@/game/upgrade";
 import { toPublicRoom } from "@/game/view";
@@ -68,6 +69,7 @@ export function supabaseRooms(): RoomStore {
           "replying",
           "talking",
           "last_chance",
+          ...LU_PHASES,
         ])
         .gte("updated_at", new Date(Date.now() - 20 * 60_000).toISOString())
         .order("updated_at", { ascending: false })
