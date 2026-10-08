@@ -21,6 +21,11 @@
     "freebie": "{name} gets {card} from the leftovers",
     "trade": "⇄ {from} traded {gave} with {to} for {got}",
     "mission": "✉️ What for? {text}",
-    "roundWon": "🏆 Round {n}: {names}"
+    "roundWon": "🏆 Round {n}: {names}",
+    "presenter": "📺 {name} presents",
+    "presenterDrawn": "📺 The draw picked {name} to present",
+    "hostLeft": "📺 {name} left. The room votes.",
+    "verdict": "📺 {name}: “{why}”",
+    "verdictMute": "📺 {name} didn't explain"
   }
 }

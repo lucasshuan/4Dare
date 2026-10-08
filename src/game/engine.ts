@@ -30,7 +30,10 @@ import {
   beginLineup,
   bid,
   cancelOffer,
+  chooseMission,
   fold,
+  giveVerdict,
+  hunch,
   judge,
   luLeft,
   luTimeout,
@@ -40,6 +43,7 @@ import {
   rate,
   react,
   saveBoard,
+  setQueue,
 } from "./lineup/engine";
 import { COINS, LOTS_PER_SEAT, OFF_MISSIONS_MAX, ROUNDS } from "./lineup/rules";
 import { LU_PHASES } from "./lineup/types";
@@ -175,7 +179,7 @@ function mergeSettings(
         next[k] >= STEP_SECONDS_MIN &&
         next[k] <= STEP_SECONDS_MAX,
     ) &&
-    next.mode === "classic" &&
+    (next.mode === "classic" || next.mode === "host") &&
     (impostors === null ||
       (Number.isInteger(impostors) &&
         (impostors as number) >= 1 &&
@@ -824,6 +828,16 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       return judge(s, e.playerId, e.ownerId, ctx);
     case "RATE":
       return rate(s, e.playerId, e.up);
+    case "CHAIR":
+      return sitChair(s, e.playerId, e.seat);
+    case "MISSION":
+      return chooseMission(s, e.playerId, e.pick, e.text, ctx);
+    case "QUEUE":
+      return setQueue(s, e.playerId, e.cards, ctx);
+    case "HUNCH":
+      return hunch(s, e.playerId, e.text);
+    case "VERDICT":
+      return giveVerdict(s, e.playerId, e.ownerId, e.why, e.final, ctx);
     case "BACK_TO_LOBBY": {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
@@ -1033,11 +1047,33 @@ function handOverHost(s: RoomState) {
   }
 }
 
+/**
+ * What for?'s TV chair, in the lobby: anyone sits in it when it's empty and
+ * gets up from it; the host seats anyone there or empties it. Being the host
+ * and presenting are apart: handing the room over leaves the chair as it is.
+ */
+function sitChair(s: RoomState, playerId: PlayerId, seat: PlayerId | null) {
+  requireSeated(s, playerId);
+  if (s.phase !== "lobby") fail("wrong_phase");
+  const host = playerId === s.hostId;
+  const chair = s.chair ?? null;
+  if (seat === null) {
+    if (!host && chair !== playerId) fail("not_host");
+    s.chair = null;
+    return;
+  }
+  requireSeated(s, seat);
+  if (!host && (seat !== playerId || (chair !== null && chair !== playerId)))
+    fail("not_host");
+  s.chair = seat;
+}
+
 function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
   const p = requireSeated(s, id);
   if (s.phase === "closed") fail("wrong_phase");
   if (BEFORE_MATCH.has(s.phase)) {
     s.players = s.players.filter((x) => x.id !== id);
+    if (s.chair === id) s.chair = null;
     if (s.players.length === 0) {
       s.phase = "closed";
       stopClock(s);

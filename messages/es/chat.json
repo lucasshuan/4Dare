@@ -21,6 +21,11 @@
     "freebie": "{name} recibe {card} de las sobras",
     "trade": "⇄ {from} cambió {gave} con {to} por {got}",
     "mission": "✉️ ¿Para qué? {text}",
-    "roundWon": "🏆 Ronda {n}: {names}"
+    "roundWon": "🏆 Ronda {n}: {names}",
+    "presenter": "📺 {name} presenta",
+    "presenterDrawn": "📺 El sorteo eligió a {name} para presentar",
+    "hostLeft": "📺 {name} se fue. La sala vota.",
+    "verdict": "📺 {name}: «{why}»",
+    "verdictMute": "📺 {name} no lo explicó"
   }
 }

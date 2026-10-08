@@ -100,6 +100,16 @@ export const LU_CLOCKS = {
   tiebreak: 15_000,
   /** The round's score, before the next round (or the podium). */
   score: 15_000,
+  /** With a presenter: to choose the mission (or write one). */
+  choose: 40_000,
+  /** With a presenter: the first lot of a round, while their queue is empty. */
+  firstLot: 20_000,
+  /** With a presenter: a later lot, when their queue ran dry. */
+  nextLot: 10_000,
+  /** With a presenter: to pick the winning board and say why. */
+  verdict: 60_000,
+  /** The presenter gave no verdict (or left): the room votes, this quickly. */
+  quickVote: 20_000,
 } as const;
 
 /** Floors for the cuts each "done" makes (ms). */
@@ -114,6 +124,23 @@ export const LU_FLOORS = {
 /** Points: one per vote a board gets, and the round's winners get more. */
 export const VOTE_POINTS = 1;
 export const WIN_POINTS = 2;
+/** With a presenter: the board they pick wins this much (no points per vote). */
+export const HOST_WIN_POINTS = 3;
+
+// --- the presenter -------------------------------------------------------------
+
+/** People a room needs for a presenter: one presents, at least two play. */
+export const HOST_MIN_PEOPLE = 3;
+/** A mission the presenter writes: up to this many characters, in up to MISSION_LINES lines. */
+export const MISSION_MAX = 200;
+export const MISSION_LINES = 4;
+/** "What for ____": a player's guess while the presenter chooses. */
+export const GUESS_MAX = 80;
+/** The presenter's "why": none, or this long. */
+export const WHY = { min: 8, max: 100 } as const;
+/** The most lots the presenter can line up at once. */
+export const QUEUE_MAX = 12;
+
 /** The crowd's prize needs at least this many reactions. */
 export const CROWD_MIN = 3;
 /** Reactions one player can send a board. */

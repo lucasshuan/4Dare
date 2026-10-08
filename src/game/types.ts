@@ -10,7 +10,13 @@ import type {
   ImpWinner,
 } from "./impostor/types";
 import { DEFAULT_RULES } from "./lineup/rules";
-import type { LineupMatch, LineupView, LuDeck, LuOffer } from "./lineup/types";
+import type {
+  LineupMatch,
+  LineupView,
+  LuCard,
+  LuDeck,
+  LuOffer,
+} from "./lineup/types";
 import type { ThemeSet } from "./theme-sets";
 
 export const LANGS = ["en", "es", "ja", "pt"] as const;
@@ -107,7 +113,11 @@ export interface RoomSettings {
   heavy: boolean;
   /** What for?: missions switched off, by id: a mission added later comes in switched on. */
   offMissions: string[];
-  mode: "classic";
+  /**
+   * "classic": everyone plays. "host": What for? with a presenter, who picks
+   * the mission and the lots and gives the verdict (3 people or more).
+   */
+  mode: "classic" | "host";
   /** "vote": everyone votes on themes the gostos and the theme list leave on. "host": the host types the theme. */
   themeMode: "vote" | "host";
   /** Gostos switched off: their characters leave every theme (gostos.ts). At least one stays on. */
@@ -262,6 +272,8 @@ export const BEAT_KINDS = [
   "envelope",
   "votes",
   "stamp",
+  "chair",
+  "verdict",
 ] as const;
 export type BeatKind = (typeof BEAT_KINDS)[number];
 /** One scene of a show, in server ms. */
@@ -347,8 +359,14 @@ export type Phase =
   | "trading"
   /** What for?: everyone lays out their board for the mission. */
   | "defending"
+  /** What for?, with a presenter: they pick the round's mission; the others guess what for. */
+  | "choosing"
+  /** What for?, with a presenter: the queue ran dry; the next lot waits for them. */
+  | "queueing"
   /** What for?: the boards on stage, one by one. */
   | "presenting"
+  /** What for?, with a presenter: they pick the winning board and say why. */
+  | "verdict"
   /** What for?: the secret vote for the best board. */
   | "judging"
   /** What for?: those who voted outside a tie choose among the tied. */
@@ -557,6 +575,8 @@ export interface RoomState {
   lu?: LineupMatch | null;
   /** What for? missions the room played lately, newest first: its next matches skip them. */
   recentMissions?: string[];
+  /** What for?'s TV chair: who presents the next match with a presenter (empty: drawn at the start). */
+  chair?: PlayerId | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -660,6 +680,27 @@ export type GameEvent =
   | { type: "REACT"; playerId: PlayerId; board: PlayerId; counts: number[] }
   /** What for?: a secret vote for a board (in a tiebreak, among the tied). */
   | { type: "JUDGE"; playerId: PlayerId; ownerId: PlayerId }
+  /** The TV chair (What for?'s presenter): `seat` sits there (oneself, or anyone for the host); null empties it. */
+  | { type: "CHAIR"; playerId: PlayerId; seat: PlayerId | null }
+  /** What for?, the presenter: one of the round's three missions (`pick`), or their own `text`. */
+  | {
+      type: "MISSION";
+      playerId: PlayerId;
+      pick: number | null;
+      text: string | null;
+    }
+  /** What for?, the presenter: the lots to come, in order (the server makes the cards). */
+  | { type: "QUEUE"; playerId: PlayerId; cards: LuCard[] }
+  /** What for?, a player waiting on the presenter: "What for ____" (empty takes it back). */
+  | { type: "HUNCH"; playerId: PlayerId; text: string }
+  /** What for?, the presenter: the winning board and why; not `final` keeps it as a draft. */
+  | {
+      type: "VERDICT";
+      playerId: PlayerId;
+      ownerId: PlayerId;
+      why: string;
+      final: boolean;
+    }
   /** What for?: "Good mission?" (null takes it back). */
   | { type: "RATE"; playerId: PlayerId; up: boolean | null }
   /** Host only, from the podium: everyone goes back to the lobby for another match. */
@@ -777,6 +818,8 @@ export type PlayerStatus =
   | "presenting"
   | "judging"
   | "judged"
+  // what for?, the presenter in their booth
+  | "hosting"
   // end states
   | "discovered"
   | "gave_up";
@@ -943,6 +986,8 @@ export interface RoomView {
   code: string;
   phase: Phase;
   settings: RoomSettings;
+  /** What for?'s TV chair: who presents the next match with a presenter. */
+  chairId: PlayerId | null;
   round: number;
   version: number;
   youId: PlayerId;

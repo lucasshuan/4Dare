@@ -420,6 +420,7 @@ export function toView(
     matches: s.phase === "lobby" ? pastMatches(s, viewerId, lang) : [],
     imp: impView(s, viewerId),
     lu: luView(s, viewerId),
+    chairId: s.chair ?? null,
     canStart:
       viewerId === s.hostId &&
       s.phase === "lobby" &&

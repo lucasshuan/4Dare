@@ -3,7 +3,7 @@
 // envelope on, their own board while defending, the others on stage, and the
 // votes only once they are counted.
 import type { PlayerId, PlayerStatus, RoomPlayer, RoomState } from "../types";
-import { boardsOf, inPlay, leaderOf, reactionsOn } from "./engine";
+import { boardsOf, hosted, inPlay, leaderOf, reactionsOn } from "./engine";
 import { luTotals } from "./places";
 import { boardOf, REACT_MAX } from "./rules";
 import {
@@ -19,6 +19,7 @@ import {
 const MISSION_OUT = new Set([
   "defending",
   "presenting",
+  "verdict",
   "judging",
   "tiebreak",
   "scoring",
@@ -59,6 +60,9 @@ function roundView(s: RoomState, round: LuRound): LuRoundView | null {
     tags: Object.fromEntries(
       Object.keys(cards).map((c) => [c, round.tags[Number(c)]]),
     ),
+    verdict: round.verdict?.final
+      ? { by: round.verdict.by, for: round.verdict.for, why: round.verdict.why }
+      : null,
   };
 }
 
@@ -71,10 +75,20 @@ export function luView(s: RoomState, viewer: PlayerId): LineupView | null {
   const phase = s.phase;
   const auction = phase === "bidding" || phase === "halftime";
   const scored = SCORED.has(phase);
+  const isPresenter = viewer === lu.presenter;
+  // with a presenter, the next lot is theirs to choose: the deal's stays hidden
+  const live = hosted(s);
+  const before = phase === "choosing" || phase === "queueing";
 
   // the cards on the table so far, the next lot, and whatever went to a team
   const seen = new Set<number>();
-  const upTo = auction ? Math.min(deck.lots - 1, lu.lot + 1) : deck.lots - 1;
+  const upTo = before
+    ? lu.lot - 1
+    : auction
+      ? live
+        ? lu.lot
+        : Math.min(deck.lots - 1, lu.lot + 1)
+      : deck.lots - 1;
   for (let i = 0; i <= upTo; i++) seen.add(i);
   for (const hand of Object.values(round.hands))
     for (const c of hand) seen.add(c);
@@ -85,7 +99,9 @@ export function luView(s: RoomState, viewer: PlayerId): LineupView | null {
   const all = boardsOf(round);
   const boards: Record<PlayerId, LuBoard> = {};
   if (phase === "defending") {
-    if (all[viewer]) boards[viewer] = all[viewer];
+    // the presenter watches every board being made, on the booth's cameras
+    if (isPresenter) Object.assign(boards, all);
+    else if (all[viewer]) boards[viewer] = all[viewer];
   } else if (phase === "presenting") {
     for (const id of round.order.slice(0, lu.showing + 1)) boards[id] = all[id];
   } else if (MISSION_OUT.has(phase)) Object.assign(boards, all);
@@ -119,9 +135,24 @@ export function luView(s: RoomState, viewer: PlayerId): LineupView | null {
     .filter((r) => r.n < lu.round || scored)
     .flatMap((r) => roundView(s, r) ?? []);
 
+  const verdict = round.verdict;
   return {
     round: lu.round,
     rounds: lu.decks.length,
+    presenterId: lu.presenter,
+    hosted: live,
+    drawn: !!lu.drawn,
+    options:
+      isPresenter && phase === "choosing"
+        ? structuredClone(deck.options ?? [])
+        : null,
+    queue: isPresenter ? structuredClone(lu.queue) : null,
+    guesses: MISSION_OUT.has(phase)
+      ? { ...lu.guesses }
+      : lu.guesses[viewer]
+        ? { [viewer]: lu.guesses[viewer] }
+        : {},
+    verdict: verdict && (verdict.final || isPresenter) ? { ...verdict } : null,
     dealtIds: [...lu.dealt],
     coins: { ...lu.coins },
     lots: deck.lots,
@@ -134,7 +165,15 @@ export function luView(s: RoomState, viewer: PlayerId): LineupView | null {
             passedIds: [...lu.passed],
             leaderId: lead.id,
             price: lead.price,
-            next: lu.lot + 1 < deck.lots ? lu.lot + 1 : null,
+            next: !live && lu.lot + 1 < deck.lots ? lu.lot + 1 : null,
+            ...(live
+              ? {
+                  nextCard:
+                    lu.lot + 1 < deck.lots
+                      ? structuredClone(lu.queue[0] ?? null)
+                      : null,
+                }
+              : {}),
           }
         : null,
     breaks: [...lu.breaks],
@@ -144,7 +183,11 @@ export function luView(s: RoomState, viewer: PlayerId): LineupView | null {
     offers: structuredClone(lu.offers),
     trades: structuredClone(round.trades),
     doneIds: [...lu.done],
-    mission: MISSION_OUT.has(phase) ? structuredClone(deck.mission) : null,
+    // the presenter knows it once chosen; everyone else from the envelope on
+    mission:
+      MISSION_OUT.has(phase) || (isPresenter && phase !== "choosing")
+        ? structuredClone(deck.mission)
+        : null,
     boards,
     order:
       phase === "presenting" || MISSION_OUT.has(phase) ? [...round.order] : [],
@@ -179,7 +222,12 @@ export function luStatus(s: RoomState, p: RoomPlayer): PlayerStatus | null {
   if (!lu) return null;
   const playing = inPlay(s).includes(p.id);
   const round = lu.rounds.at(-1);
+  if (p.id === lu.presenter && s.phase !== "finished") return "hosting";
   switch (s.phase) {
+    case "choosing":
+    case "queueing":
+    case "verdict":
+      return "waiting";
     case "bidding":
       if (!playing) return "waiting";
       return lu.passed.includes(p.id) ? "passed" : "bidding";

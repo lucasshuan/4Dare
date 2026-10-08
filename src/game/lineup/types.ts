@@ -8,11 +8,14 @@ import type { Localized, Phase, PlayerId } from "../types";
 
 /** What for?'s steps, from the first lot to the last score. */
 export const LU_PHASES = [
+  "choosing",
+  "queueing",
   "bidding",
   "halftime",
   "trading",
   "defending",
   "presenting",
+  "verdict",
   "judging",
   "tiebreak",
   "scoring",
@@ -53,6 +56,15 @@ export interface LuDeck {
   cards: LuCard[];
   lots: number;
   mission: LuMission;
+  /** With a presenter: the three missions they choose from (`mission` is the first until they do). */
+  options?: LuMission[];
+}
+
+/** The presenter's call on a round: the winning board and why (empty: they didn't say). */
+export interface LuVerdict {
+  by: PlayerId;
+  for: PlayerId;
+  why: string;
 }
 
 /** The price tag a card wears on the board: who paid, and how much (0: a free leftover). */
@@ -137,11 +149,21 @@ export interface LuRound {
   points: Record<PlayerId, number>;
   /** "Good mission?" from the score, by player. */
   rated: Record<PlayerId, 1 | -1>;
+  /** With a presenter: their pick while it is a draft, then their verdict; null when the room voted. */
+  verdict?: (LuVerdict & { final: boolean }) | null;
 }
 
 export interface LineupMatch {
   /** Everyone in when it started, in seat order: they bid, defend and vote. */
   dealt: PlayerId[];
+  /** With a presenter: who sits in the TV chair (not dealt in); null when everyone plays. */
+  presenter: PlayerId | null;
+  /** The presenter was drawn, the chair being empty. */
+  drawn?: boolean;
+  /** The presenter's lots to come, in order: the next lot is the first. */
+  queue: LuCard[];
+  /** "What for ____": each player's guess while the presenter chooses, shown with the envelope. */
+  guesses: Record<PlayerId, string>;
   decks: LuDeck[];
   /** The round under way, 1-based. */
   round: number;
@@ -189,11 +211,27 @@ export interface LuRoundView {
   boards: Record<PlayerId, LuBoard>;
   cards: Record<number, LuCard>;
   tags: Record<number, LuTag>;
+  /** With a presenter: their verdict; null when the room voted. */
+  verdict: LuVerdict | null;
 }
 
 export interface LineupView {
   round: number;
   rounds: number;
+  /** With a presenter: who; null when everyone plays. */
+  presenterId: PlayerId | null;
+  /** The presenter is still here and decides (else the room carries on as if everyone played). */
+  hosted: boolean;
+  /** The chair was empty and the room drew the presenter. */
+  drawn: boolean;
+  /** The presenter's three missions while they choose; null for everyone else. */
+  options: LuMission[] | null;
+  /** The presenter's lots to come; null for everyone else. */
+  queue: LuCard[] | null;
+  /** "What for ____": your guess, and everyone's from the envelope on. */
+  guesses: Record<PlayerId, string>;
+  /** With a presenter: their pick (a draft only they see) and, once given, their verdict. */
+  verdict: (LuVerdict & { final: boolean }) | null;
   /** Everyone dealt in: they bid, defend and vote. */
   dealtIds: PlayerId[];
   coins: Record<PlayerId, number>;
@@ -210,6 +248,8 @@ export interface LineupView {
     price: number;
     /** The lot after it, shown small in the corner; null on the last. */
     next: number | null;
+    /** With a presenter: the lot after it is the first in their queue (null while it is empty). */
+    nextCard?: LuCard | null;
   } | null;
   /** Lot indexes after which the auction breaks. */
   breaks: number[];

@@ -11,6 +11,7 @@ import { inPlay, leaderOf } from "./engine";
 import { luPlaces, luTotals } from "./places";
 import {
   breaksFor,
+  HOST_WIN_POINTS,
   LU_CLOCKS,
   LU_FLOORS,
   lotsFor,
@@ -30,6 +31,12 @@ const card = (i: number, round = 1): LuCard => ({
 });
 
 /** A round's deck: `lots` cards to auction and `spares` more for empty teams. */
+const mission = (id: string) => ({
+  id,
+  text: { en: id, es: id, ja: id, pt: id },
+});
+
+/** A round's deck: `lots` cards to auction and `spares` more for empty teams; three missions for a presenter. */
 const deck = (lots: number, round = 1, spares = 4): LuDeck => ({
   cards: Array.from({ length: lots + spares }, (_, i) => card(i, round)),
   lots,
@@ -42,6 +49,11 @@ const deck = (lots: number, round = 1, spares = 4): LuDeck => ({
       pt: `Missão ${round}`,
     },
   },
+  options: [
+    mission(`mission-${round}`),
+    mission(`other-${round}`),
+    mission(`third-${round}`),
+  ],
 });
 
 const code = (fn: () => unknown) => {
@@ -63,7 +75,8 @@ function lineupGame(
   const g = new Game(players, seed, { game: "lineup", seats: 8, ...settings });
   const s = g.state.settings;
   const lots = lotsFor(players, s.lotsPerSeat);
-  const decks = Array.from({ length: roundsFor(players, s.rounds) }, (_, r) =>
+  // as the server deals: for the most rounds the table may play
+  const decks = Array.from({ length: roundsFor(2, s.rounds) }, (_, r) =>
     deck(lots, r + 1),
   );
   g.do({ type: "START", playerId: g.state.hostId, decks });
@@ -116,8 +129,10 @@ function doneAll(g: Game) {
 
 /** Plays the auction out: the first player buys lot 1 for 1, then everyone passes the rest (breaks skipped). */
 function runAuction(g: Game) {
-  while (g.state.phase === "bidding" || g.state.phase === "halftime") {
+  while (["bidding", "halftime", "queueing"].includes(g.state.phase)) {
     if (g.state.phase === "halftime") doneAll(g);
+    // a presenter's empty queue: the deal's card comes in
+    else if (g.state.phase === "queueing") g.timeout();
     else passAll(g);
   }
 }
@@ -671,7 +686,40 @@ describe("what for?: random play", () => {
     const who = here[Math.floor(random() * here.length)];
     const r = round(g);
     const pick = <T>(xs: T[]) => xs[Math.floor(random() * xs.length)];
+    const host = m.presenter;
     switch (s.phase) {
+      case "choosing":
+        if (!host) return null;
+        return random() < 0.3
+          ? { type: "MISSION", playerId: host, pick: null, text: "Fix a car" }
+          : { type: "MISSION", playerId: host, pick: 1, text: null };
+      case "queueing":
+        if (!host) return null;
+        return random() < 0.7
+          ? {
+              type: "QUEUE",
+              playerId: host,
+              cards: [
+                {
+                  id: `wd-Qhost${Math.floor(random() * 1e9)}`,
+                  name: "Queued",
+                  origin: null,
+                  imageUrl: null,
+                },
+              ],
+            }
+          : null;
+      case "verdict": {
+        if (!host) return null;
+        const owners = m.dealt.filter((id) => r.hands[id]?.length);
+        return {
+          type: "VERDICT",
+          playerId: host,
+          ownerId: pick(owners),
+          why: random() < 0.5 ? "Because they can" : "",
+          final: random() < 0.5,
+        };
+      }
       case "bidding": {
         const price = leaderOf(m).price;
         if (random() < 0.5 && m.coins[who] > price)
@@ -757,7 +805,11 @@ describe("what for?: random play", () => {
     for (let seed = 1; seed <= 28; seed++) {
       const players = 2 + (seed % 7);
       const random = rng(seed * 7919);
-      const g = lineupGame(players, { interval: seed % 3 !== 0 }, seed);
+      const g = lineupGame(
+        players,
+        { interval: seed % 3 !== 0, mode: seed % 2 ? "host" : "classic" },
+        seed,
+      );
       let steps = 0;
       while (g.state.phase !== "finished" && steps < 4000) {
         steps += 1;
@@ -807,5 +859,213 @@ describe("what for?: random play", () => {
           m.rounds.length,
         );
     }
+  });
+});
+
+describe("what for?: with a presenter", () => {
+  /** Four people, a presenter: one round, no break, no trades, the opening over. */
+  function hostGame(settings: Partial<RoomSettings> = {}, seed = 1) {
+    return lineupGame(
+      4,
+      { mode: "host", rounds: 1, interval: false, trades: false, ...settings },
+      seed,
+    );
+  }
+  const queued = (id: string): LuCard => ({
+    id,
+    name: id,
+    origin: null,
+    imageUrl: null,
+  });
+
+  it("seats whoever sits in the TV chair, or draws one, and deals the others in", () => {
+    const g = new Game(4, 1, { game: "lineup", seats: 8, mode: "host" });
+    g.do({ type: "CHAIR", playerId: "p3", seat: "p3" });
+    expect(
+      code(() => g.do({ type: "CHAIR", playerId: "p2", seat: "p2" })),
+    ).toBe("not_host");
+    g.do({
+      type: "START",
+      playerId: g.state.hostId,
+      decks: [deck(15, 1), deck(15, 2)],
+    });
+    expect(lu(g).presenter).toBe("p3");
+    expect(lu(g).drawn).toBeUndefined();
+    expect(lu(g).dealt).toEqual(["p1", "p2", "p4"]);
+    // the opening says who presents
+    expect(g.state.reveal?.beats?.map((b) => b.kind)).toContain("chair");
+
+    const drawn = new Game(3, 2, { game: "lineup", seats: 8, mode: "host" });
+    drawn.do({
+      type: "START",
+      playerId: drawn.state.hostId,
+      decks: [deck(15, 1), deck(15, 2)],
+    });
+    expect(lu(drawn).drawn).toBe(true);
+    expect(lu(drawn).dealt).toHaveLength(2);
+
+    // two people: everyone plays
+    const two = lineupGame(2, { mode: "host" });
+    expect(lu(two).presenter).toBeNull();
+  });
+
+  it("lets the presenter choose a mission or write one; the others guess meanwhile", () => {
+    const g = hostGame();
+    const host = lu(g).presenter as string;
+    const [a] = lu(g).dealt;
+    expect(g.state.phase).toBe("choosing");
+    expect(toView(g.state, 1, host, g.now, "en").lu?.options).toHaveLength(3);
+    expect(toView(g.state, 1, a, g.now, "en").lu?.options).toBeNull();
+    expect(
+      code(() => g.do({ type: "MISSION", playerId: a, pick: 0, text: null })),
+    ).toBe("not_your_turn");
+    g.do({ type: "HUNCH", playerId: a, text: "  fix   a car " });
+    expect(lu(g).guesses[a]).toBe("fix a car");
+    // the guesses stay private until the envelope
+    expect(toView(g.state, 1, host, g.now, "en").lu?.guesses).toEqual({});
+    g.do({
+      type: "MISSION",
+      playerId: host,
+      pick: null,
+      text: "Win a cooking show\n\nwith no stove",
+    });
+    expect(lu(g).decks[0].mission).toEqual({
+      id: null,
+      text: {
+        en: "Win a cooking show\nwith no stove",
+        es: "Win a cooking show\nwith no stove",
+        ja: "Win a cooking show\nwith no stove",
+        pt: "Win a cooking show\nwith no stove",
+      },
+    });
+    // the presenter knows it now; the players only from the envelope on
+    expect(toView(g.state, 1, host, g.now, "en").lu?.mission?.id).toBeNull();
+    expect(toView(g.state, 1, a, g.now, "en").lu?.mission).toBeNull();
+  });
+
+  it("keeps the first mission when the presenter runs out of time", () => {
+    const g = hostGame();
+    g.timeout();
+    expect(lu(g).decks[0].mission.id).toBe("mission-1");
+  });
+
+  it("puts the presenter's queue under the hammer, and the deal's card when it runs dry", () => {
+    const g = hostGame();
+    const host = lu(g).presenter as string;
+    g.do({ type: "MISSION", playerId: host, pick: 1, text: null });
+    expect(lu(g).decks[0].mission.id).toBe("other-1");
+    // the queue is empty: the table waits
+    expect(g.state.phase).toBe("queueing");
+    g.do({
+      type: "QUEUE",
+      playerId: host,
+      cards: [queued("wd-Qa"), queued("wd-Qb")],
+    });
+    expect(g.state.phase).toBe("bidding");
+    expect(lu(g).decks[0].cards[0].id).toBe("wd-Qa");
+    expect(lu(g).queue.map((c) => c.id)).toEqual(["wd-Qb"]);
+    // the next lot shows the queue's head, never the deal's card
+    const [a] = lu(g).dealt;
+    const view = toView(g.state, 1, a, g.now, "en").lu;
+    expect(view?.lot?.next).toBeNull();
+    expect(view?.lot?.nextCard?.id).toBe("wd-Qb");
+    // a card already under the hammer can't come back
+    expect(
+      code(() =>
+        g.do({ type: "QUEUE", playerId: host, cards: [queued("wd-Qa")] }),
+      ),
+    ).toBe("invalid_input");
+    passAll(g);
+    expect(lu(g).decks[0].cards[1].id).toBe("wd-Qb");
+    passAll(g);
+    // dry: a few seconds, then the deal's card
+    expect(g.state.phase).toBe("queueing");
+    g.timeout();
+    expect(g.state.phase).toBe("bidding");
+    expect(lu(g).decks[0].cards[2].id).toBe(card(2).id);
+  });
+
+  it("lets the presenter pick the winner and say why: 3 points, none per vote", () => {
+    const g = hostGame();
+    const host = lu(g).presenter as string;
+    g.timeout(); // the first mission
+    g.timeout(); // the deal's lot
+    toJudging(g);
+    expect(g.state.phase).toBe("verdict");
+    const [a, b] = lu(g).dealt;
+    // the presenter cheers on stage too: nothing to count here, but allowed
+    expect(
+      code(() =>
+        g.do({
+          type: "VERDICT",
+          playerId: host,
+          ownerId: a,
+          why: "short",
+          final: true,
+        }),
+      ),
+    ).toBe("invalid_input");
+    g.do({
+      type: "VERDICT",
+      playerId: host,
+      ownerId: b,
+      why: "",
+      final: false,
+    });
+    // a draft only the presenter sees
+    expect(toView(g.state, 1, a, g.now, "en").lu?.verdict).toBeNull();
+    g.do({
+      type: "VERDICT",
+      playerId: host,
+      ownerId: a,
+      why: "They'd fix it in the rain",
+      final: true,
+    });
+    expect(g.state.phase).toBe("scoring");
+    expect(round(g).winners).toEqual([a]);
+    expect(round(g).points[a]).toBe(HOST_WIN_POINTS);
+    expect(round(g).points[b]).toBe(0);
+    expect(toView(g.state, 1, b, g.now, "en").lu?.results[0].verdict).toEqual({
+      by: host,
+      for: a,
+      why: "They'd fix it in the rain",
+    });
+  });
+
+  it("stands by a picked board when time runs out; without one the room votes", () => {
+    const g = hostGame();
+    const host = lu(g).presenter as string;
+    g.timeout();
+    g.timeout();
+    toJudging(g);
+    const [a] = lu(g).dealt;
+    g.do({
+      type: "VERDICT",
+      playerId: host,
+      ownerId: a,
+      why: "",
+      final: false,
+    });
+    g.timeout();
+    expect(round(g).winners).toEqual([a]);
+    expect(round(g).verdict).toMatchObject({ for: a, why: "", final: true });
+
+    const h = hostGame({}, 2);
+    h.timeout();
+    h.timeout();
+    toJudging(h);
+    h.timeout();
+    expect(h.state.phase).toBe("judging");
+  });
+
+  it("goes on as if everyone played when the presenter leaves", () => {
+    const g = hostGame();
+    const host = lu(g).presenter as string;
+    g.do({ type: "LEAVE", playerId: host });
+    // the first mission, the deal's lot
+    expect(g.state.phase).toBe("bidding");
+    expect(lu(g).decks[0].mission.id).toBe("mission-1");
+    toJudging(g);
+    expect(g.state.phase).toBe("judging");
   });
 });

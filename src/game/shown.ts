@@ -21,7 +21,14 @@ export const showPerson = (p: ChatPerson, lang: Lang): ShownPerson => ({
 function showSystem(s: SystemLine, lang: Lang): SystemLine<ShownPerson> {
   if (s.type === "order")
     return { ...s, players: s.players.map((p) => showPerson(p, lang)) };
-  if (s.type === "firstTurn" || s.type === "sold" || s.type === "freebie")
+  if (
+    s.type === "firstTurn" ||
+    s.type === "sold" ||
+    s.type === "freebie" ||
+    s.type === "presenter" ||
+    s.type === "hostLeft" ||
+    s.type === "verdict"
+  )
     return { ...s, player: showPerson(s.player, lang) };
   if (s.type === "trade")
     return { ...s, from: showPerson(s.from, lang), to: showPerson(s.to, lang) };

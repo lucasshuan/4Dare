@@ -146,6 +146,7 @@ const createSchema = z.object({
   judgeSeconds: seconds,
   impostors: z.number().int().min(1).max(3).nullable(),
   themeMode: z.enum(["vote", "host"]),
+  mode: z.enum(["classic", "host"]).optional(),
   offGostos: z
     .array(z.enum(GOSTO_KEYS as [Gosto, ...Gosto[]]))
     .max(GOSTO_KEYS.length - 1),

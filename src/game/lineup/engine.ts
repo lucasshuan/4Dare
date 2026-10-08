@@ -26,16 +26,24 @@ import {
   breaksFor,
   CROWD_MIN,
   cleanBoard,
+  GUESS_MAX,
+  HOST_MIN_PEOPLE,
+  HOST_WIN_POINTS,
   LU_CLOCKS,
   LU_FLOORS,
   lotsFor,
+  MISSION_LINES,
+  MISSION_MAX,
+  QUEUE_MAX,
   REACT_MAX,
   roundsFor,
   VOTE_POINTS,
+  WHY,
   WIN_POINTS,
 } from "./rules";
 import {
   type LineupMatch,
+  type LuCard,
   type LuDeck,
   type LuOffer,
   type LuRound,
@@ -64,6 +72,19 @@ export function inPlay(s: RoomState): PlayerId[] {
 function requirePlaying(s: RoomState, id: PlayerId) {
   requireSeated(s, id);
   if (!inPlay(s).includes(id)) fail("not_your_turn");
+}
+
+/** There is a presenter and they are still here: they choose, line up the lots and judge. */
+export function hosted(s: RoomState): boolean {
+  const id = s.lu?.presenter;
+  if (!id) return false;
+  const p = findPlayer(s, id);
+  return !!p && isPresent(p);
+}
+
+function requirePresenter(s: RoomState, id: PlayerId) {
+  requireSeated(s, id);
+  if (s.lu?.presenter !== id || !hosted(s)) fail("not_your_turn");
 }
 
 /** The highest offer on the open lot, and who made it. */
@@ -101,7 +122,14 @@ function settled(s: RoomState) {
  * lot comes onto the table.
  */
 export function beginLineup(s: RoomState, decks: LuDeck[], ctx: Ctx) {
-  const dealt = s.players.filter(isPresent).map((p) => p.id);
+  const here = s.players.filter(isPresent).map((p) => p.id);
+  // with a presenter: whoever sits in the TV chair, or a draw when it's empty
+  const withHost = s.settings.mode === "host" && here.length >= HOST_MIN_PEOPLE;
+  const chair = s.chair && here.includes(s.chair) ? s.chair : null;
+  const presenter = withHost
+    ? (chair ?? here[Math.floor(ctx.random() * here.length)])
+    : null;
+  const dealt = here.filter((id) => id !== presenter);
   const lots = lotsFor(dealt.length, s.settings.lotsPerSeat);
   const rounds = roundsFor(dealt.length, s.settings.rounds);
   // the server deals for the open seats: what the table doesn't need waits as spares
@@ -122,10 +150,19 @@ export function beginLineup(s: RoomState, decks: LuDeck[], ctx: Ctx) {
   }
   s.lu = {
     dealt,
+    presenter,
+    ...(presenter && !chair ? { drawn: true } : {}),
+    queue: [],
+    guesses: {},
     decks: decks.slice(0, rounds).map((d) => ({
       cards: structuredClone(d.cards),
       lots,
-      mission: structuredClone(d.mission),
+      mission: structuredClone(
+        presenter && d.options?.length ? d.options[0] : d.mission,
+      ),
+      ...(presenter && d.options?.length
+        ? { options: structuredClone(d.options) }
+        : {}),
     })),
     round: 0,
     rounds: [],
@@ -145,6 +182,7 @@ export function beginLineup(s: RoomState, decks: LuDeck[], ctx: Ctx) {
     ["curtain", SHOW_TIMING.curtain],
     first ? ["rules", L.rules] : ["round", SHOW_TIMING.round],
     ["secret", first ? L.secret.first : L.secret.later],
+    ...(presenter ? [["chair", L.chair] satisfies Part] : []),
     ["entrance", L.entrance],
   ]);
   // the first bid can come once the opening is over
@@ -178,13 +216,140 @@ function startRound(s: RoomState, ctx: Ctx, parts: Part[]) {
   lu.offers = [];
   const first = lu.round === 1 && longShows(s, s.round);
   stage(s, "opening", lu.round, first, parts, ctx);
+  if (hosted(s) && deck.options?.length) return beginChoosing(s, ctx);
   openLot(s, ctx, 0);
+}
+
+// --- the presenter's mission ------------------------------------------------------
+
+/** The presenter picks the round's mission; the others wait and guess what for. */
+function beginChoosing(s: RoomState, ctx: Ctx) {
+  const lu = match(s);
+  lu.done = [];
+  lu.cuts = {};
+  s.phase = "choosing";
+  startStep(s, ctx, LU_CLOCKS.choose);
+}
+
+/** A mission the presenter wrote, as kept: trimmed, up to MISSION_LINES lines and MISSION_MAX characters. */
+export function cleanMission(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const text = raw
+    .split("\n")
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, MISSION_LINES)
+    .join("\n");
+  return text && [...text].length <= MISSION_MAX ? text : null;
+}
+
+/** The presenter's choice: one of the three missions, or their own words. Then the first lot. */
+export function chooseMission(
+  s: RoomState,
+  playerId: PlayerId,
+  pick: number | null,
+  text: string | null,
+  ctx: Ctx,
+) {
+  if (s.phase !== "choosing") fail("wrong_phase");
+  guardStep(s, ctx);
+  requirePresenter(s, playerId);
+  const deck = deckOf(match(s));
+  if (text !== null) {
+    const own = cleanMission(text) ?? fail("invalid_input");
+    deck.mission = { id: null, text: { en: own, es: own, ja: own, pt: own } };
+  } else {
+    const options = deck.options ?? [];
+    if (!Number.isInteger(pick) || pick === null || !options[pick])
+      fail("invalid_input");
+    deck.mission = structuredClone(options[pick as number]);
+  }
+  openLot(s, ctx, 0);
+}
+
+/** "What for ____": a player's guess while the presenter chooses (empty takes it back). */
+export function hunch(s: RoomState, playerId: PlayerId, raw: string) {
+  if (
+    !["choosing", "queueing", "bidding", "halftime", "trading"].includes(
+      s.phase,
+    )
+  )
+    fail("wrong_phase");
+  requirePlaying(s, playerId);
+  const lu = match(s);
+  if (typeof raw !== "string") fail("invalid_input");
+  const text = raw.replace(/\s+/g, " ").trim();
+  if ([...text].length > GUESS_MAX) fail("invalid_input");
+  if (text) lu.guesses[playerId] = text;
+  else delete lu.guesses[playerId];
+}
+
+/** Cards that already went under the hammer in this match (the lot on air included). */
+function auctioned(s: RoomState) {
+  const lu = match(s);
+  const ids = new Set<string>();
+  lu.decks.forEach((deck, r) => {
+    const upTo =
+      r + 1 < lu.round
+        ? deck.lots
+        : r + 1 === lu.round
+          ? s.phase === "queueing" || s.phase === "choosing"
+            ? lu.lot
+            : lu.lot + 1
+          : 0;
+    for (const c of deck.cards.slice(0, Math.max(0, upTo))) ids.add(c.id);
+  });
+  return ids;
+}
+
+/** A card the server made for the presenter's queue, checked for shape. */
+const isCard = (c: unknown): c is LuCard => {
+  const card = c as LuCard;
+  return (
+    !!card &&
+    typeof card.id === "string" &&
+    card.id.length > 0 &&
+    card.id.length <= 120 &&
+    typeof card.name === "string" &&
+    card.name.length > 0 &&
+    card.name.length <= 120 &&
+    (card.imageUrl === null || typeof card.imageUrl === "string")
+  );
+};
+
+/**
+ * The presenter's lots to come, the whole list in order: the lot on air is
+ * already locked, the next one changes until it comes in. With the table
+ * waiting on an empty queue, the first card opens the lot.
+ */
+export function setQueue(
+  s: RoomState,
+  playerId: PlayerId,
+  cards: LuCard[],
+  ctx: Ctx,
+) {
+  if (!["choosing", "queueing", "bidding", "halftime"].includes(s.phase))
+    fail("wrong_phase");
+  requirePresenter(s, playerId);
+  if (!Array.isArray(cards) || cards.length > QUEUE_MAX || !cards.every(isCard))
+    fail("invalid_input");
+  const ids = cards.map((c) => c.id);
+  const used = auctioned(s);
+  if (new Set(ids).size !== ids.length || ids.some((id) => used.has(id)))
+    fail("invalid_input");
+  const lu = match(s);
+  lu.queue = structuredClone(cards);
+  if (s.phase === "queueing" && lu.queue.length) openLot(s, ctx, lu.lot);
 }
 
 // --- the auction ---------------------------------------------------------------
 
-/** Lot `i` on the table; with nobody left to bid, the rest go to the leftovers. */
-function openLot(s: RoomState, ctx: Ctx, i: number) {
+/**
+ * Lot `i` on the table; with nobody left to bid, the rest go to the
+ * leftovers. With a presenter it is the first card in their queue; an empty
+ * queue waits for them a little, then the deal's card (`dealt`) comes in.
+ */
+function openLot(s: RoomState, ctx: Ctx, i: number, dealt = false) {
   const lu = match(s);
   const deck = deckOf(lu);
   lu.lot = i;
@@ -198,6 +363,15 @@ function openLot(s: RoomState, ctx: Ctx, i: number) {
     for (let j = i; j < deck.lots; j++) round.leftovers.push(j);
     lu.lot = deck.lots - 1;
     return endAuction(s, ctx);
+  }
+  if (hosted(s) && !dealt) {
+    const next = lu.queue.shift();
+    if (next) deck.cards[i] = next;
+    else {
+      s.phase = "queueing";
+      startStep(s, ctx, i === 0 ? LU_CLOCKS.firstLot : LU_CLOCKS.nextLot);
+      return;
+    }
   }
   s.phase = "bidding";
   startStep(
@@ -464,7 +638,8 @@ function showBoard(s: RoomState, ctx: Ctx, i: number) {
   const here = inPlay(s);
   let k = i;
   while (k < round.order.length && !here.includes(round.order[k])) k += 1;
-  if (k >= round.order.length) return beginJudging(s, ctx);
+  if (k >= round.order.length)
+    return hosted(s) ? beginVerdict(s, ctx) : beginJudging(s, ctx);
   lu.showing = k;
   startStep(s, ctx, LU_CLOCKS.present);
 }
@@ -494,8 +669,10 @@ export function react(
 ) {
   if (s.phase !== "presenting") fail("wrong_phase");
   guardStep(s, ctx);
-  requirePlaying(s, playerId);
   const lu = match(s);
+  // the presenter cheers too
+  if (playerId === lu.presenter) requireSeated(s, playerId);
+  else requirePlaying(s, playerId);
   const round = roundOf(lu);
   const at = round.order.indexOf(owner);
   if (at < 0 || at > lu.showing || owner === playerId) fail("invalid_input");
@@ -519,13 +696,76 @@ export function react(
 
 // --- the vote ----------------------------------------------------------------
 
-function beginJudging(s: RoomState, ctx: Ctx) {
+function beginJudging(s: RoomState, ctx: Ctx, ms = stepMs(s, "judgeSeconds")) {
   const lu = match(s);
   roundOf(lu).votes = {};
   lu.done = [];
   lu.cuts = {};
   s.phase = "judging";
-  startStep(s, ctx, stepMs(s, "judgeSeconds"));
+  startStep(s, ctx, ms);
+}
+
+// --- the presenter's verdict -------------------------------------------------------
+
+function beginVerdict(s: RoomState, ctx: Ctx) {
+  const lu = match(s);
+  roundOf(lu).verdict = null;
+  lu.done = [];
+  lu.cuts = {};
+  s.phase = "verdict";
+  startStep(s, ctx, LU_CLOCKS.verdict);
+}
+
+/**
+ * The presenter's pick and why. A draft (`final` false) waits; the final
+ * one, with a why of WHY.min to WHY.max characters, decides the round.
+ */
+export function giveVerdict(
+  s: RoomState,
+  playerId: PlayerId,
+  ownerId: PlayerId,
+  raw: string,
+  final: boolean,
+  ctx: Ctx,
+) {
+  if (s.phase !== "verdict") fail("wrong_phase");
+  guardStep(s, ctx);
+  requirePresenter(s, playerId);
+  const lu = match(s);
+  if (!candidates(lu).includes(ownerId)) fail("invalid_input");
+  if (typeof raw !== "string") fail("invalid_input");
+  const why = raw.replace(/\s+/g, " ").trim();
+  const n = [...why].length;
+  if (n > WHY.max || (final && n < WHY.min)) fail("invalid_input");
+  roundOf(lu).verdict = { by: playerId, for: ownerId, why, final };
+  if (final) closeVerdict(s, ctx);
+}
+
+/** The verdict is in: the board wins alone, and everyone reads why. */
+function closeVerdict(s: RoomState, ctx: Ctx) {
+  const lu = match(s);
+  const round = roundOf(lu);
+  const verdict = round.verdict ?? fail("wrong_phase");
+  verdict.final = true;
+  round.winners = [verdict.for];
+  stage(
+    s,
+    "tally",
+    lu.round,
+    false,
+    [["verdict", SHOW_TIMING.lineup.verdict]],
+    ctx,
+  );
+  scoreRound(s, ctx);
+}
+
+/** Time's up on the verdict: a board picked stands (unexplained); none, and the room votes quickly. */
+function verdictOver(s: RoomState, ctx: Ctx) {
+  const round = roundOf(match(s));
+  if (round.verdict && candidates(match(s)).includes(round.verdict.for))
+    return closeVerdict(s, ctx);
+  round.verdict = null;
+  beginJudging(s, ctx, LU_CLOCKS.quickVote);
 }
 
 /** Boards one can vote for: every team with a card. */
@@ -636,11 +876,17 @@ function scoreRound(s: RoomState, ctx: Ctx) {
   const lu = match(s);
   const round = roundOf(lu);
   const n = counts(round.votes);
+  // the presenter's verdict: the winning board takes it all, no points per vote
+  const verdict = round.verdict?.final === true;
   round.points = Object.fromEntries(
     lu.dealt.map((id) => [
       id,
-      (n.get(id) ?? 0) * VOTE_POINTS +
-        (round.winners.includes(id) ? WIN_POINTS : 0),
+      verdict
+        ? round.winners.includes(id)
+          ? HOST_WIN_POINTS
+          : 0
+        : (n.get(id) ?? 0) * VOTE_POINTS +
+          (round.winners.includes(id) ? WIN_POINTS : 0),
     ]),
   );
   const laughs = lu.dealt.map((id) => [id, reactionsOn(round, id)] as const);
@@ -750,6 +996,12 @@ export function markDone(
 function advance(s: RoomState, ctx: Ctx) {
   const lu = match(s);
   switch (s.phase) {
+    case "choosing":
+      return openLot(s, ctx, 0);
+    case "queueing":
+      return openLot(s, ctx, lu.lot, true);
+    case "verdict":
+      return verdictOver(s, ctx);
     case "bidding":
       return closeLot(s, ctx);
     case "halftime":
@@ -781,6 +1033,7 @@ export const luTimeout = (s: RoomState, ctx: Ctx) => advance(s, ctx);
  */
 export function luLeft(s: RoomState, id: PlayerId, ctx: Ctx) {
   const lu = s.lu;
+  if (lu && id === lu.presenter) return presenterLeft(s, ctx);
   if (!lu?.dealt.includes(id)) return;
   if (inPlay(s).length < 2) return end(s, ctx);
   lu.offers = lu.offers.filter((o) => o.from !== id && o.to !== id);
@@ -813,6 +1066,25 @@ export function luLeft(s: RoomState, id: PlayerId, ctx: Ctx) {
         settleTie(s, ctx);
       return;
     }
+  }
+}
+
+/**
+ * The presenter left: the match goes on as if everyone played. A mission
+ * not chosen is the first one, the lots come from the deal, and the room
+ * votes in place of the verdict.
+ */
+function presenterLeft(s: RoomState, ctx: Ctx) {
+  const lu = match(s);
+  lu.queue = [];
+  switch (s.phase) {
+    case "choosing":
+      return openLot(s, ctx, 0);
+    case "queueing":
+      return openLot(s, ctx, lu.lot, true);
+    case "verdict":
+      roundOf(lu).verdict = null;
+      return beginJudging(s, ctx, LU_CLOCKS.quickVote);
   }
 }
 

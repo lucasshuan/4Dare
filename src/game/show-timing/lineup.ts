@@ -21,6 +21,10 @@ export const LINEUP = {
   votes: { base: 1400, each: 420, max: 6200 },
   /** The winners' stamp (or the tie's). */
   stamp: 1800,
+  /** With a presenter: who sits in the TV chair (or who the draw put there). */
+  chair: 3200,
+  /** The presenter's verdict: the winning board and why. */
+  verdict: 5200,
 } as const;
 
 /** Moments inside those beats (ms from the beat's start). */

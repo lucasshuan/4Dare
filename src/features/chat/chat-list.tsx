@@ -301,5 +301,28 @@ function SystemText({ line }: { line: SystemLine<ShownPerson> }) {
             .join(lang === "ja" ? "、" : ", "),
         }),
       );
+    case "presenter":
+      return withNames((n) =>
+        t(line.drawn ? "presenterDrawn" : "presenter", {
+          name: n(live(line.player), line.player.id === me.id),
+        }),
+      );
+    case "hostLeft":
+      return withNames((n) =>
+        t("hostLeft", {
+          name: n(live(line.player), line.player.id === me.id),
+        }),
+      );
+    case "verdict":
+      return withNames((n) =>
+        line.why
+          ? t("verdict", {
+              name: n(live(line.player), line.player.id === me.id),
+              why: line.why,
+            })
+          : t("verdictMute", {
+              name: n(live(line.player), line.player.id === me.id),
+            }),
+      );
   }
 }

@@ -59,7 +59,13 @@ export type SystemLine<P = ChatPerson> =
   /** What for?: "✉️ What for? Change a tire, in the rain." */
   | { type: "mission"; text: Localized }
   /** What for?: "🏆 Round 1: [av]Bia" (or several, tied) */
-  | { type: "roundWon"; n: number; players: P[] };
+  | { type: "roundWon"; n: number; players: P[] }
+  /** What for?: "📺 [av]Bia presents" (or "The draw picked [av]Bia") */
+  | { type: "presenter"; player: P; drawn: boolean }
+  /** What for?: "📺 [av]Caio left. The room votes." */
+  | { type: "hostLeft"; player: P }
+  /** What for?: "📺 [av]Caio: "They'd fix it in the rain"" (or that they didn't explain) */
+  | { type: "verdict"; player: P; why: string };
 
 /** A line as it is kept (ChatPerson) or as the browser gets it (ShownPerson, see ShownLine). */
 export interface ChatMessage<P = ChatPerson> {
@@ -213,6 +219,17 @@ function lineupLines(
     return p ? chatPerson(p) : null;
   };
   const name = (c: number) => deck.cards[c]?.name ?? "";
+  // the presenter: who sits in the chair, and whether they walk out
+  const host = person(a.presenter);
+  if (host && before.phase === "lobby" && after.phase !== "lobby")
+    lines.push({
+      system: { type: "presenter", player: host, drawn: !!a.drawn },
+      showAt: beatOf(show(after.reveal, "opening"), "chair")?.startsAt ?? now,
+    });
+  const away = (s: RoomState) =>
+    !s.players.some((p) => p.id === a.presenter && !p.away);
+  if (host && b?.presenter && !away(before) && away(after))
+    lines.push({ system: { type: "hostLeft", player: host }, showAt: now });
   const sold = show(after.reveal, "sold");
   const soldAt = sold ? sold.startsAt + Math.round(600 * scale) : now;
   for (const [key, tag] of Object.entries(round.tags)) {
@@ -270,7 +287,15 @@ function lineupLines(
     round.winners.length
   ) {
     const tally = show(after.reveal, "tally");
-    const stamp = beatOf(tally, "stamp");
+    const verdict = round.verdict?.final ? round.verdict : null;
+    const call = beatOf(tally, "verdict");
+    const by = verdict ? person(verdict.by) : null;
+    if (verdict && by)
+      lines.push({
+        system: { type: "verdict", player: by, why: verdict.why },
+        showAt: call?.startsAt ?? now,
+      });
+    const stamp = beatOf(tally, "stamp") ?? call;
     lines.push({
       system: {
         type: "roundWon",
