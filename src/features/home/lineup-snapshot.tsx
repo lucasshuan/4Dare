@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { FigureArt } from "@/components/ui/figure-art";
 import { cn } from "@/lib/cn";
 import type { Figure } from "@/lib/figures";
+import { useRandomStart } from "@/lib/hooks/use-random-start";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 /** The team bought at auction, left to right: figure, price, left edge (% of the board) and tilt. */
@@ -69,6 +70,10 @@ export function LineupSnapshot({
   const still = forceStill || reduced;
   const { step, loop } = useStepLoop(STEPS, STILL, still);
   const s = STEPS[step];
+  // a different mission each loop, from a random one
+  const lines = t.raw("demoLines") as string[];
+  const first = useRandomStart(lines.length);
+  const line = lines[(first + loop) % lines.length];
   const spent = TEAM.slice(0, s.team).reduce((a, c) => a + c.price, 0);
 
   return (
@@ -142,7 +147,7 @@ export function LineupSnapshot({
                 {t("banner.what")}
               </span>
               <span className="block font-bold font-display text-[8cqh] text-kraft-ink leading-[1.1] [text-wrap:balance]">
-                {t("demoLine")}
+                {line}
               </span>
               <span className="-top-[7cqh] absolute right-[8%] grid size-[11cqh] place-items-center rounded-pill bg-wax font-black text-[6cqh] text-white shadow-card">
                 ?

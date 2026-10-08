@@ -207,11 +207,24 @@
       "name": "Pra quê?",
       "players": "2 a 8 jogadores",
       "play": "Jogar",
-      "demoLine": "Pra trocar o pneu, na chuva.",
+      "demoLines": [
+        "Pra vender gelo pra pinguim.",
+        "Pra fazer a vaca subir a escada.",
+        "Pra tirar o gato da geladeira.",
+        "Pra anunciar o fim do mundo.",
+        "Pra salvar todos do Titanic."
+      ],
       "pitch": "Cada um compra o próprio time num leilão de personagens, sem saber pra quê. Depois o envelope abre a missão, e cada um defende o seu quadro.",
       "banner": {
         "sold": "Vendido!",
-        "what": "Pra quê?"
+        "what": "Pra quê?",
+        "lines": [
+          "Pra vender gelo pra pinguim, no inverno.",
+          "Pra fazer uma vaca subir a escada, de ré.",
+          "Pra convencer o gato a descer da geladeira.",
+          "Pra anunciar o fim do mundo no jornal da noite.",
+          "Pra salvar todo mundo do Titanic, com um balde."
+        ]
       },
       "priciest": {
         "title": "Os mais caros do leilão",

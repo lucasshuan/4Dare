@@ -207,11 +207,24 @@
       "name": "What for?",
       "players": "2 to 8 players",
       "play": "Play",
-      "demoLine": "To change a tire, in the rain.",
+      "demoLines": [
+        "To sell ice to penguins.",
+        "To get a cow up the stairs.",
+        "To get the cat off the fridge.",
+        "To announce the end of the world.",
+        "To save everyone on the Titanic."
+      ],
       "pitch": "Everyone buys a team at a character auction, without knowing what for. Then the envelope opens on the mission, and everyone defends their board.",
       "banner": {
         "sold": "Sold!",
-        "what": "What for?"
+        "what": "What for?",
+        "lines": [
+          "To sell ice to penguins, in the dead of winter.",
+          "To get a cow up the stairs, backwards.",
+          "To talk the cat down from the fridge.",
+          "To announce the end of the world, live.",
+          "To save everyone on the Titanic, with a bucket."
+        ]
       },
       "priciest": {
         "title": "The priciest at auction",

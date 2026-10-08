@@ -207,11 +207,24 @@
       "name": "¿Para qué?",
       "players": "2 a 8 jugadores",
       "play": "Jugar",
-      "demoLine": "Para cambiar una llanta, bajo la lluvia.",
+      "demoLines": [
+        "Para vender hielo al pingüino.",
+        "Para subir una vaca al techo.",
+        "Para bajar al gato del refri.",
+        "Para anunciar el fin del mundo.",
+        "Para salvar a todos del Titanic."
+      ],
       "pitch": "Cada uno compra su equipo en una subasta de personajes, sin saber para qué. Luego el sobre revela la misión y cada uno defiende su tablero.",
       "banner": {
         "sold": "¡Vendido!",
-        "what": "¿Para qué?"
+        "what": "¿Para qué?",
+        "lines": [
+          "Para venderles hielo a pingüinos, en invierno.",
+          "Para que una vaca suba la escalera, de espaldas.",
+          "Para convencer al gato de bajarse del refrigerador.",
+          "Para anunciar el fin del mundo, en vivo.",
+          "Para salvar a todos en el Titanic, con un balde."
+        ]
       },
       "priciest": {
         "title": "Los más caros de la subasta",

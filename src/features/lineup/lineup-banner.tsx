@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Creature, FigureArt } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
 import { cn } from "@/lib/cn";
+import { useRandomStart } from "@/lib/hooks/use-random-start";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 type Seat = "a" | "b" | "c" | "d";
@@ -98,6 +99,10 @@ export function LineupBanner() {
   const { step, loop } = useStepLoop(STEPS, STILL, reduced);
   const s = STEPS[step];
   const top = Math.max(0, ...Object.values(s.bids));
+  // a different mission each loop, from a random one
+  const lines = t.raw("banner.lines") as string[];
+  const first = useRandomStart(lines.length);
+  const line = lines[(first + loop) % lines.length];
 
   return (
     <div
@@ -223,7 +228,7 @@ export function LineupBanner() {
                   {t("banner.what")}
                 </span>
                 <span className="block text-balance font-bold font-display text-[clamp(16px,11cqh,26px)] text-kraft-ink leading-[1.15]">
-                  {t("demoLine")}
+                  {line}
                 </span>
                 <m.span
                   className="-top-[6cqh] absolute right-[8%] grid size-[13cqh] place-items-center rounded-pill bg-wax font-black text-[7cqh] text-white shadow-card"
