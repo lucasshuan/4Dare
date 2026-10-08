@@ -12,6 +12,7 @@ import { fireConfetti } from "@/components/ui/confetti";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { LobbyCountdown } from "@/features/result/lobby-countdown";
+import { RoomControls } from "@/features/room/room-controls";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -53,7 +54,10 @@ export function LineupResult() {
     1 + ranked.filter((p) => (lu.totals[p.id] ?? 0) > points).length;
 
   return (
-    <div className="flex min-h-dvh flex-col items-center gap-6 px-4 pt-6 pb-[calc(2rem+var(--dock))] sm:px-8">
+    <div className="flex min-h-dvh flex-col items-center gap-6 px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-6">
+      <header className="flex w-full justify-end">
+        <RoomControls />
+      </header>
       <CoinDefs />
       <h1 className="m-0 text-center font-display font-extrabold text-[clamp(30px,5vw,48px)] leading-tight">
         {t("title")}

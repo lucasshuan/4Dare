@@ -9,8 +9,6 @@ import { Button, keyClass } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
 import { RoomQr } from "@/components/ui/room-qr";
 import { Screen } from "@/components/ui/screen";
-import { SoundToggle } from "@/components/ui/sound-toggle";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useToast } from "@/components/ui/toast";
 import { usePrefetchCharacterIndex } from "@/features/characters/use-character-index";
 import {
@@ -25,22 +23,15 @@ import { backClass, RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import {
-  LeaveIcon,
-  leaveButtonClass,
-} from "@/features/room/leave-match-button";
+import { RoomControls } from "@/features/room/room-controls";
 import { GAME_SEATS } from "@/game/games";
 import type { Lang } from "@/game/types";
-import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { useAction } from "@/lib/hooks/use-action";
 import { riseIn } from "@/lib/motion";
 import { useDisplayName, useRoomTitle } from "@/lib/names";
-import { GAME_PATHS } from "@/lib/routes";
 import {
   drawChair,
   kickPlayer,
-  leaveRoom,
   setReady,
   sitChair,
   startGame,
@@ -138,15 +129,12 @@ const editable = ({
 export function LobbyScreen() {
   const t = useTranslations("lobby");
   const tCreate = useTranslations("home.createRoom");
-  const tMatch = useTranslations("common.currentMatch");
   const _name = useDisplayName();
   const roomTitle = useRoomTitle();
   const withNames = useWithNames();
   const toast = useToast();
-  const router = useRouter();
   const { view, me, code } = useRoomContext();
   const { act, pending } = useRoomAction();
-  const leaving = useAction();
   // "Ready" flips at once; the server confirms in the background.
   const [readyGuess, setReadyGuess] = useState<boolean | null>(null);
   const myReady = readyGuess ?? me.ready;
@@ -261,27 +249,19 @@ export function LobbyScreen() {
   return (
     <Screen bare>
       {/* no top bar here: the lobby is the game's waiting room, with only sound, theme and the way out, top right like a match's "Leave" */}
-      <div className="mb-3 flex items-center justify-end gap-2 sm:gap-3">
-        <SoundToggle />
-        <ThemeToggle />
-        <button
-          type="button"
-          onClick={async () => {
-            await leaving.run(() => leaveRoom(code));
-            router.push(GAME_PATHS[game]);
-          }}
-          className={leaveButtonClass}
-        >
-          <LeaveIcon />
-          <span className="max-sm:sr-only">{tMatch("leaveShort")}</span>
-        </button>
-      </div>
-      {/* on a desktop the lobby fits the window and never scrolls: the lists and the settings scroll inside their panels */}
-      <div className="flex flex-wrap items-start gap-6 lg:min-h-0 lg:flex-1 lg:flex-nowrap lg:items-stretch lg:gap-8">
+      <RoomControls className="mb-3 justify-end" />
+      {/* on a desktop the lobby fits the window and never scrolls: the lists and the settings scroll inside their panels.
+          Narrower, one column whose panels mix both sides: the invite, the game and its key, who is here, the settings */}
+      <div className="flex flex-col gap-5 short:gap-4 lg:min-h-0 lg:flex-1 lg:flex-row lg:gap-8">
         {/* one width whatever the open tab holds */}
-        <section className="flex w-full min-w-0 flex-col gap-5 short:gap-4 lg:min-h-0 lg:max-w-[768px] lg:flex-1">
+        <section className="max-lg:contents lg:flex lg:min-h-0 lg:min-w-0 lg:max-w-[768px] lg:flex-1 lg:flex-col lg:gap-5 lg:short:gap-4">
           {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right (not on phones) */}
-          <div className={cn(panelClass, "flex shrink-0 flex-col gap-4")}>
+          <div
+            className={cn(
+              panelClass,
+              "flex shrink-0 flex-col gap-4 max-lg:order-1",
+            )}
+          >
             <RoomTitle
               title={title}
               name={nameGuess ?? roomName}
@@ -334,6 +314,7 @@ export function LobbyScreen() {
           {/* What for?'s presenter chair, over the lists */}
           {game === "lineup" && view.settings.mode === "host" ? (
             <TvChair
+              className="max-lg:order-3"
               players={shownPlayers}
               here={shownPlayers.filter((p) => !p.away).length}
               chairId={view.chairId}
@@ -345,7 +326,12 @@ export function LobbyScreen() {
             />
           ) : null}
           {/* who is here, and the room's past matches: always takes what is left of the window, and scrolls inside */}
-          <div className={cn(panelClass, "flex flex-col lg:min-h-0 lg:flex-1")}>
+          <div
+            className={cn(
+              panelClass,
+              "flex flex-col max-lg:order-3 lg:min-h-0 lg:flex-1",
+            )}
+          >
             <LobbyTabs
               label={t("listsLabel")}
               tabs={[
@@ -377,17 +363,17 @@ export function LobbyScreen() {
         </section>
 
         {/* the sidebar, on the left on a desktop: the game on stage, the start key, then the room's settings */}
-        <div className="flex w-full flex-col gap-4 lg:order-first lg:min-h-0 lg:w-[416px] lg:shrink-0">
+        <div className="max-lg:contents lg:order-first lg:flex lg:min-h-0 lg:w-[416px] lg:shrink-0 lg:flex-col lg:gap-4">
           {/* the game on stage: its art over the panel's top, its name (the host can switch it there), the main action and who is ready */}
           <div
             className={cn(
               panelClass,
-              "flex shrink-0 flex-col gap-4 overflow-hidden",
+              "flex shrink-0 flex-col gap-4 overflow-hidden max-lg:order-2",
             )}
           >
             <div
               aria-hidden="true"
-              className="relative -mx-6 -mt-6 h-44 overflow-hidden bg-sunken short:h-32 max-sm:-mx-4 max-sm:-mt-4"
+              className="relative -mx-6 -mt-6 h-44 overflow-hidden bg-sunken short:h-32 max-sm:-mx-4 max-sm:-mt-4 max-sm:h-32"
             >
               {/* the game's own picture, drawn to fill any box */}
               <div className="absolute inset-0 [&_svg]:size-full">
@@ -477,7 +463,7 @@ export function LobbyScreen() {
           <aside
             className={cn(
               panelClass,
-              "flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain",
+              "flex flex-col gap-4 max-lg:order-4 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain",
             )}
           >
             <ul className="flex flex-col gap-3">

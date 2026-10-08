@@ -12,6 +12,7 @@ import { ThemeTag } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { LobbyCountdown } from "@/features/result/lobby-countdown";
+import { RoomControls } from "@/features/room/room-controls";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
@@ -66,7 +67,10 @@ export function ImpostorResult() {
     .sort((a, b) => b.points - a.points);
   const guesses = end.outs.filter((o) => o.guess);
   return (
-    <div className="flex min-h-dvh flex-col gap-8 px-4 py-8 max-sm:pb-[calc(2rem+var(--dock))] sm:px-8">
+    <div className="flex min-h-dvh flex-col gap-8 px-4 pt-4 pb-8 max-sm:pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-6">
+      <header className="flex justify-end">
+        <RoomControls />
+      </header>
       <div className="flex flex-col items-center gap-2 text-center">
         {view.theme ? (
           <ThemeTag

@@ -14,6 +14,7 @@ import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { PersonCard } from "@/features/profile/person-card";
 import { LobbyCountdown } from "@/features/result/lobby-countdown";
+import { RoomControls } from "@/features/room/room-controls";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang, PlayerView } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
@@ -90,6 +91,7 @@ export function WhoAmIResult() {
             }
           />
         ) : null}
+        <RoomControls className="ml-auto" />
       </header>
       <div className="mx-auto grid w-full max-w-[1120px] flex-1 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-12">
         <div className="flex flex-col gap-3 lg:self-center lg:pb-16">

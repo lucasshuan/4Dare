@@ -22,6 +22,7 @@ import type { BeatKind, Lang, PlayerStatus, ShowView } from "@/game/types";
 import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease, gs } from "@/lib/motion";
 import { LeaveMatchButton } from "./leave-match-button";
+import { RoomControls } from "./room-controls";
 
 /**
  * Whether the server time `at` has come. Exact without reading the clock:
@@ -148,7 +149,7 @@ export const isAwaited = (
 
 /**
  * Left: the history button (turns only) and the theme tag. Right: the step
- * clock, then leave and give up (turns only). Each part pops in when it arrives live
+ * clock, then sound, theme and leave, and give up (turns only). Each part pops in when it arrives live
  * (at the times the stage gives); one already there on mount just shows.
  */
 export function MatchHeader({ history }: { history: HistoryControl | null }) {
@@ -264,7 +265,7 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
             </m.div>
           ) : null}
         </AnimatePresence>
-        <LeaveMatchButton />
+        <RoomControls leave={<LeaveMatchButton />} />
         <AnimatePresence initial={false}>
           {history && canGiveUp ? (
             <m.div key="give-up" {...HISTORY_POP} className="flex">
