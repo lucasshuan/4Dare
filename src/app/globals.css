@@ -45,10 +45,8 @@
   /* What for?'s art: a warm kraft wall behind the board */
   --art-lineup: #ecc98f;
   --art-lineup-2: #d9a768;
-  /* What for?'s page banner: the board as a wall of slate, night-dark in the dark theme */
+  /* What for?'s page banner: its board's slate, night-dark in the dark theme */
   --art-lineup-slate: var(--board);
-  --art-lineup-slate-hi: var(--board-hi);
-  --art-lineup-slate-deep: var(--board-deep);
   /*
    * What for?'s objects: the standing board (slate and chalk in a wood frame),
    * the coins, the kraft envelope and its wax seal. Objects keep their colours
@@ -215,8 +213,6 @@
   --art-lineup: #4a3420;
   --art-lineup-2: #2e2014;
   --art-lineup-slate: #16261f;
-  --art-lineup-slate-hi: #1f3529;
-  --art-lineup-slate-deep: #0d1712;
   --seat-1: #86b4f7;
   --seat-2: #f0a566;
   --seat-3: #5ccfc6;

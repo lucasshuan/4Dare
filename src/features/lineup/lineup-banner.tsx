@@ -101,9 +101,10 @@ function Coin() {
 }
 
 /**
- * What for?'s page banner, on the chalkboard: a lot on the table, the bidders' coin
- * towers, "Sold!", then the envelope with the mission. Transforms and
- * opacity only; the still frame for reduced motion.
+ * What for?'s page banner, a board in its wood frame floating on the kraft
+ * wall of its home card: a lot on the table, the bidders' coin towers,
+ * "Sold!", then the envelope with the mission. Transforms and opacity only;
+ * the still frame for reduced motion.
  */
 export function LineupBanner() {
   const t = useTranslations("home.games.whatFor");
@@ -125,15 +126,11 @@ export function LineupBanner() {
     <div
       aria-hidden="true"
       className={cn(
-        "relative isolate select-none overflow-hidden",
+        "relative isolate select-none overflow-hidden pb-8 art-lineup",
         UNDER_TOPBAR,
       )}
-      style={{
-        background:
-          "linear-gradient(120deg, var(--art-lineup-slate-hi), var(--art-lineup-slate) 55%, var(--art-lineup-slate-deep))",
-      }}
     >
-      {/* chalk light and marks */}
+      {/* the wall's light and chalk marks */}
       <div className="-inset-10 -z-10 absolute">
         <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-white/10 blur-3xl dark:hidden" />
         <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-gold/15 blur-3xl" />
@@ -159,7 +156,7 @@ export function LineupBanner() {
       </div>
 
       {/* a chalk haze in the top left corner, where the logo sits; it fades
-          out slowly so it reads as the board's own light; none in the dark */}
+          out slowly so it reads as the wall's own light; none in the dark */}
       <span
         className="-z-10 pointer-events-none absolute top-0 left-0 h-[260px] w-[max(360px,42%)] dark:hidden"
         style={{
@@ -173,11 +170,18 @@ export function LineupBanner() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-8"
         style={{
           background:
-            "linear-gradient(in oklch to bottom, transparent, color-mix(in oklch, var(--art-lineup-slate) 45%, var(--canvas)) 60%, var(--canvas))",
+            "linear-gradient(in oklch to bottom, transparent, color-mix(in oklch, var(--art-lineup-2) 45%, var(--canvas)) 60%, var(--canvas))",
         }}
       />
 
       <div className="relative isolate mx-auto h-[clamp(180px,min(22vw,27vh),230px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[210px]">
+        {/* the board, floating in its frame; the scene plays on its slate */}
+        <div className="-z-10 absolute inset-x-3 inset-y-0 rounded-[4cqh] bg-wood p-[4.5cqh] shadow-pop sm:inset-x-[2%]">
+          <div className="relative size-full rounded-[2cqh] bg-(--art-lineup-slate)">
+            <span className="absolute inset-[3%] rounded-[1cqh] border border-chalk/20" />
+          </div>
+        </div>
+
         {/* the lot on the table, then sold; a leaving lot and the next share one cell */}
         <div className="-translate-x-1/2 absolute top-[5%] left-1/2 grid">
           <AnimatePresence>
@@ -268,7 +272,7 @@ export function LineupBanner() {
             <div
               key={p.seat}
               className={cn(
-                "-translate-x-1/2 absolute bottom-[4%] flex flex-col items-center",
+                "-translate-x-1/2 absolute bottom-[8%] flex flex-col items-center",
                 p.place,
                 s.open && "opacity-60 transition-opacity duration-500",
               )}
@@ -300,7 +304,7 @@ export function LineupBanner() {
                   "block rounded-pill transition-shadow duration-300",
                   leads
                     ? "shadow-[0_0_0_3px_var(--gold),0_0_18px_var(--gold)]"
-                    : "shadow-[0_0_0_3px_var(--board)]",
+                    : "shadow-[0_0_0_3px_var(--art-lineup-slate)]",
                 )}
               >
                 <Creature
