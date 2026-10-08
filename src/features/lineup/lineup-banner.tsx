@@ -2,27 +2,29 @@
 
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
+import type { CSSProperties } from "react";
 import { Creature, FigureArt } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
 import { cn } from "@/lib/cn";
 import type { Figure } from "@/lib/figures";
 import { useShuffle } from "@/lib/hooks/use-shuffle";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
+import { BoardShell, FitBoard } from "./board";
 
 type Seat = "a" | "b" | "c" | "d";
 
 /**
- * One loop of the banner, a lot in miniature: the photo goes on the table,
+ * One loop of the banner, a lot in miniature: the photo goes on the board,
  * the coin towers rise bid by bid (the leader's glows), the hammer comes down
- * on "Sold!", and the sealed envelope drops and opens on the mission nobody
- * knew. `ms` is how long each step stays.
+ * on "Sold!", the photo flies to its buyer and the mission nobody knew is
+ * stuck on in its place. `ms` is how long each step stays.
  */
 const STEPS: {
   ms: number;
   bids: Partial<Record<Seat, number>>;
   sold?: boolean;
   open?: boolean;
-  /** The table cleared between loops: no lot, no envelope. */
+  /** The board cleared between loops: no lot, no mission. */
   clear?: boolean;
 }[] = [
   { ms: 900, bids: {} },
@@ -34,7 +36,7 @@ const STEPS: {
   { ms: 3000, bids: { b: 3, c: 2, d: 5 }, sold: true, open: true },
   { ms: 500, bids: {}, clear: true },
 ];
-/** The frame shown when motion is reduced: sold, and the envelope open. */
+/** The frame shown when motion is reduced: sold, and the mission up. */
 const STILL = 6;
 
 /** The lots up for auction, one a loop, in a random order that never repeats a lot back to back. */
@@ -48,29 +50,32 @@ const PAIR: Record<Seat, Seat> = { a: "c", b: "d", c: "a", d: "b" };
 const part = (seat: Seat, cast: number) =>
   cast & (seat === "b" || seat === "d" ? 1 : 2) ? PAIR[seat] : seat;
 
-/** Around the lot, left to right; phones keep one on each side. */
+/**
+ * On the wall either side of the board, measured from its middle in the
+ * banner's height (the board is 61 wide); phones keep one on each side.
+ */
 const SEATS: { seat: Seat; place: string; dna: string; color: string }[] = [
   {
     seat: "a",
-    place: "left-[20%] max-sm:hidden",
+    place: "left-[calc(50%_-_100cqh)] max-sm:hidden",
     dna: "Fox..Curious..0",
     color: "#F3D3B8",
   },
   {
     seat: "b",
-    place: "left-[36%] max-sm:left-[16%]",
+    place: "left-[calc(50%_-_54cqh)] max-sm:left-[16%]",
     dna: "Frog..Happy..0",
     color: "#BFE6C8",
   },
   {
     seat: "c",
-    place: "left-[64%] max-sm:hidden",
+    place: "left-[calc(50%_+_54cqh)] max-sm:hidden",
     dna: "Penguin..Cozy..0",
     color: "#C9DDF6",
   },
   {
     seat: "d",
-    place: "left-[80%] max-sm:left-[84%]",
+    place: "left-[calc(50%_+_100cqh)] max-sm:left-[84%]",
     dna: "Owl.Wizard...0",
     color: "#F2E3A8",
   },
@@ -85,6 +90,47 @@ const MARKS: [number, number, number, number, string][] = [
   [78, 10, 24, 8.5, "✉"],
   [95, 56, 20, 7, "?"],
 ];
+
+/**
+ * The board's slate takes the banner's colours (night-dark in the dark
+ * theme): BoardShell reads these three.
+ */
+const SLATE_VARS = {
+  "--board": "var(--art-lineup-slate)",
+  "--board-hi": "var(--art-lineup-slate-hi)",
+  "--board-deep": "var(--art-lineup-slate-deep)",
+} as CSSProperties;
+
+/**
+ * Paper on the board, flat, and the same paper still in the hand, high above
+ * it: the shadow grows soft and far as it lifts. Same shape, so it tweens.
+ * In the board's own units (400 × 600), like everything on it.
+ */
+const FLAT = "0 3px 0 rgba(0,0,0,0.12), 0 14px 26px rgba(0,0,0,0.4)";
+const LIFTED = "0 3px 0 rgba(0,0,0,0), 0 64px 72px rgba(0,0,0,0.26)";
+
+/** A strip of tape pressed on from one end, a beat after the paper lands. */
+function Tape({
+  className,
+  delay,
+  reduced,
+}: {
+  className: string;
+  delay: number;
+  reduced: boolean;
+}) {
+  return (
+    <m.span
+      className={cn(
+        "absolute h-[40px] bg-butter/85 shadow-[0_2px_3px_rgba(0,0,0,0.15)]",
+        className,
+      )}
+      initial={reduced ? false : { scaleX: 0, opacity: 0 }}
+      animate={{ scaleX: 1, opacity: 1 }}
+      transition={{ delay, duration: 0.22, ease: "easeOut" }}
+    />
+  );
+}
 
 /** The coin seen from the side, as on the auction table. */
 function Coin() {
@@ -101,10 +147,11 @@ function Coin() {
 }
 
 /**
- * What for?'s page banner, a board in its wood frame floating on the kraft
- * wall of its home card: a lot on the table, the bidders' coin towers,
- * "Sold!", then the envelope with the mission. Transforms and opacity only;
- * the still frame for reduced motion.
+ * What for?'s page banner, on the kraft wall of its home card: the pitch
+ * board, small and hovering, gets a photo taped on for auction while the
+ * bidders on the wall raise their coin towers; "Sold!", the photo flies to
+ * its buyer and the mission is stuck on in its place. Transforms, opacity
+ * and shadows only; the still frame for reduced motion.
  */
 export function LineupBanner() {
   const t = useTranslations("home.games.whatFor");
@@ -121,6 +168,9 @@ export function LineupBanner() {
   // the bidders too: each loop a different cast of who bids and who buys
   const castOrder = useShuffle(4);
   const cast = castOrder[loop % 4];
+  // the sold photo flies off to the side its buyer sits on
+  const buyer = SEATS.find((p) => part(p.seat, cast) === "d")?.seat;
+  const away = buyer === "a" || buyer === "b" ? -1 : 1;
 
   return (
     <div
@@ -175,96 +225,200 @@ export function LineupBanner() {
       />
 
       <div className="relative isolate mx-auto h-[clamp(180px,min(22vw,27vh),230px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[210px]">
-        {/* the board, floating in its frame; the scene plays on its slate */}
-        <div className="-z-10 absolute inset-x-3 inset-y-0 rounded-[4cqh] bg-wood p-[4.5cqh] shadow-pop sm:inset-x-[2%]">
-          <div className="relative size-full rounded-[2cqh] bg-(--art-lineup-slate)">
-            <span className="absolute inset-[3%] rounded-[1cqh] border border-chalk/20" />
-          </div>
-        </div>
+        {/* the pitch board, hovering slowly; what is stuck on it rides along */}
+        <m.div
+          className="-translate-x-1/2 absolute top-[4cqh] left-1/2 z-10 w-[61cqh]"
+          style={SLATE_VARS}
+          {...(reduced
+            ? {}
+            : {
+                animate: { y: [0, -7, 0], rotate: [-0.6, 0.6, -0.6] },
+                transition: {
+                  duration: 6.5,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                },
+              })}
+        >
+          <FitBoard>
+            <BoardShell />
 
-        {/* the lot on the table, then sold; a leaving lot and the next share one cell */}
-        <div className="-translate-x-1/2 absolute top-[5%] left-1/2 grid">
-          <AnimatePresence>
-            {s.open || s.clear ? null : (
-              <m.div
-                key={`lot-${loop}`}
-                className="relative w-[40cqh] bg-white p-[1.6cqh] shadow-pop [grid-area:1/1]"
-                initial={
-                  reduced ? false : { opacity: 0, y: "-40%", rotate: -12 }
-                }
-                animate={{ opacity: 1, y: "0%", rotate: -3 }}
-                exit={{
-                  opacity: 0,
-                  x: "60%",
-                  y: "40%",
-                  scale: 0.6,
-                  transition: { duration: 0.35 },
-                }}
-                transition={{ type: "spring", stiffness: 320, damping: 20 }}
-              >
-                <FigureArt figure={lot} className="aspect-4/5" />
-                <span className="-translate-x-1/2 absolute -top-[5%] left-1/2 h-[9%] w-[44%] bg-butter/85" />
-                <span className="absolute -right-[12%] -bottom-[6%] rounded-[1cqh] bg-kraft px-[2cqh] font-bold font-mono text-[8cqh] text-kraft-ink leading-[1.3] shadow-card">
-                  {top || "–"}
-                </span>
-                <AnimatePresence>
-                  {s.sold ? (
+            {/* the lot, taped on; a leaving lot and the next share one cell */}
+            <div className="-translate-x-1/2 absolute top-[92px] left-1/2 grid">
+              <AnimatePresence>
+                {s.open || s.clear ? null : (
+                  <m.div
+                    key={`lot-${loop}`}
+                    className="relative w-[262px] rounded-[8px] bg-white p-[12px] [grid-area:1/1]"
+                    style={{ boxShadow: FLAT }}
+                    initial={
+                      reduced
+                        ? false
+                        : {
+                            opacity: 0,
+                            y: -150,
+                            rotate: -14,
+                            scale: 1.18,
+                            boxShadow: LIFTED,
+                          }
+                    }
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      rotate: -3,
+                      scale: 1,
+                      boxShadow: FLAT,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      x: away * 420,
+                      y: 260,
+                      rotate: away * 30,
+                      scale: 0.35,
+                      boxShadow: LIFTED,
+                      transition: { duration: 0.5, ease: [0.5, 0, 0.75, 0] },
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 17,
+                      opacity: { duration: 0.2 },
+                      boxShadow: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+                    }}
+                  >
+                    <FigureArt
+                      figure={lot}
+                      className="aspect-4/5 rounded-[4px]"
+                    />
+                    <Tape
+                      className="-rotate-3 top-[-20px] left-[27%] w-[46%] origin-left"
+                      delay={0.3}
+                      reduced={reduced}
+                    />
+                    {/* the price, bumped up bid by bid */}
                     <m.span
-                      key="sold"
+                      key={top}
+                      className="absolute -right-[26px] -bottom-[20px] rounded-[10px] bg-kraft px-[16px] font-bold font-mono text-[46px] text-kraft-ink leading-[1.3] shadow-card"
                       initial={
-                        reduced
-                          ? { opacity: 0 }
-                          : { opacity: 0, scale: 2.4, rotate: -18 }
+                        reduced || !top ? false : { scale: 1.4, rotate: -10 }
                       }
-                      animate={{ opacity: 1, scale: 1, rotate: -10 }}
-                      exit={{ opacity: 0 }}
+                      animate={{ scale: 1, rotate: 0 }}
                       transition={{
-                        duration: 0.35,
-                        ease: [0.34, 1.56, 0.64, 1],
+                        type: "spring",
+                        stiffness: 520,
+                        damping: 14,
                       }}
-                      className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 whitespace-nowrap rounded-md bg-wax px-[2.4cqh] py-[0.8cqh] font-display font-extrabold text-[8cqh] text-white uppercase shadow-pop"
                     >
-                      {t("banner.sold")}
+                      {top || "–"}
                     </m.span>
-                  ) : null}
-                </AnimatePresence>
-              </m.div>
-            )}
-          </AnimatePresence>
-        </div>
+                    <AnimatePresence>
+                      {s.sold ? (
+                        <m.span
+                          key="sold"
+                          initial={
+                            reduced
+                              ? { opacity: 0 }
+                              : { opacity: 0, scale: 2.4, rotate: -18 }
+                          }
+                          animate={{ opacity: 1, scale: 1, rotate: -10 }}
+                          exit={{ opacity: 0 }}
+                          transition={{
+                            duration: 0.35,
+                            ease: [0.34, 1.56, 0.64, 1],
+                          }}
+                          className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 whitespace-nowrap rounded-[12px] bg-wax px-[26px] py-[8px] font-display font-extrabold text-[60px] text-white uppercase shadow-pop"
+                        >
+                          {t("banner.sold")}
+                        </m.span>
+                      ) : null}
+                    </AnimatePresence>
+                  </m.div>
+                )}
+              </AnimatePresence>
+            </div>
 
-        {/* the envelope drops and opens on the mission */}
-        <AnimatePresence>
-          {s.open ? (
-            <m.div
-              key={`envelope-${loop}`}
-              className="-translate-x-1/2 absolute top-[6%] left-1/2 w-[min(64cqh+20cqw,520px)] max-sm:w-[86%]"
-              initial={reduced ? false : { opacity: 0, y: "-50%", rotate: 10 }}
-              animate={{ opacity: 1, y: "0%", rotate: -2 }}
-              exit={{ opacity: 0, transition: { duration: 0.25 } }}
-              transition={{ type: "spring", stiffness: 280, damping: 20 }}
-            >
-              <div className="relative rounded-[2cqh] bg-kraft px-[4cqh] pt-[3cqh] pb-[3.6cqh] text-center shadow-pop">
-                <span className="block font-bold font-display text-[7cqh] text-kraft-ink/70 uppercase tracking-[0.06em]">
-                  {t("banner.what")}
-                </span>
-                <span className="block text-balance font-bold font-display text-[clamp(16px,11cqh,26px)] text-kraft-ink leading-[1.15]">
-                  {line}
-                </span>
-                <m.span
-                  className="-top-[6cqh] absolute right-[8%] grid size-[13cqh] place-items-center rounded-pill bg-wax font-black text-[7cqh] text-white shadow-card"
-                  initial={reduced ? false : { scale: 1 }}
-                  animate={reduced ? { scale: 1 } : { scale: [1, 1.3, 0] }}
-                  transition={{ delay: 0.5, duration: 0.4 }}
+            {/* the mission, stuck on in the lot's place once it's gone */}
+            <AnimatePresence>
+              {s.open ? (
+                <m.div
+                  key={`mission-${loop}`}
+                  className="-translate-x-1/2 absolute top-[132px] left-1/2 w-[520px] rounded-[16px] bg-kraft px-[44px] pt-[46px] pb-[50px] text-center"
+                  style={{
+                    boxShadow: FLAT,
+                    backgroundImage:
+                      "linear-gradient(170deg, rgba(255,255,255,0.14), transparent 45%)",
+                  }}
+                  initial={
+                    reduced
+                      ? false
+                      : {
+                          opacity: 0,
+                          y: -210,
+                          rotate: 10,
+                          scale: 1.12,
+                          boxShadow: LIFTED,
+                        }
+                  }
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    rotate: -2.5,
+                    scale: 1,
+                    boxShadow: FLAT,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: -40,
+                    rotate: -7,
+                    scale: 1.05,
+                    boxShadow: LIFTED,
+                    transition: { duration: 0.3 },
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 240,
+                    damping: 18,
+                    delay: reduced ? 0 : 0.2,
+                    opacity: { duration: 0.2, delay: reduced ? 0 : 0.2 },
+                    boxShadow: {
+                      duration: 0.55,
+                      delay: reduced ? 0 : 0.2,
+                      ease: [0.22, 1, 0.36, 1],
+                    },
+                  }}
                 >
-                  ?
-                </m.span>
-              </div>
-            </m.div>
-          ) : null}
-        </AnimatePresence>
+                  <Tape
+                    className="-left-[36px] -rotate-[28deg] top-[-4px] w-[124px] origin-right"
+                    delay={0.6}
+                    reduced={reduced}
+                  />
+                  <Tape
+                    className="-right-[36px] top-[-4px] w-[124px] origin-left rotate-[28deg]"
+                    delay={0.7}
+                    reduced={reduced}
+                  />
+                  <span className="block font-bold font-display text-[38px] text-kraft-ink/70 uppercase tracking-[0.06em]">
+                    {t("banner.what")}
+                  </span>
+                  <span className="block text-balance font-bold font-display text-[56px] text-kraft-ink leading-[1.12]">
+                    {line}
+                  </span>
+                  {/* the seal, broken as it lands */}
+                  <m.span
+                    className="-translate-x-1/2 absolute top-[-38px] left-1/2 grid size-[76px] place-items-center rounded-pill bg-wax font-black text-[40px] text-white shadow-card"
+                    initial={reduced ? false : { scale: 1 }}
+                    animate={reduced ? { scale: 1 } : { scale: [1, 1.3, 0] }}
+                    transition={{ delay: 0.75, duration: 0.4 }}
+                  >
+                    ?
+                  </m.span>
+                </m.div>
+              ) : null}
+            </AnimatePresence>
+          </FitBoard>
+        </m.div>
 
-        {/* the bidders, each under the coins they put up */}
+        {/* the bidders on the wall, each under the coins they put up */}
         {SEATS.map((p) => {
           const bid = s.bids[part(p.seat, cast)] ?? 0;
           const leads = bid > 0 && bid === top;
@@ -304,7 +458,7 @@ export function LineupBanner() {
                   "block rounded-pill transition-shadow duration-300",
                   leads
                     ? "shadow-[0_0_0_3px_var(--gold),0_0_18px_var(--gold)]"
-                    : "shadow-[0_0_0_3px_var(--art-lineup-slate)]",
+                    : "shadow-[0_0_0_3px_var(--wood),0_6px_14px_rgba(42,29,12,0.22)]",
                 )}
               >
                 <Creature
