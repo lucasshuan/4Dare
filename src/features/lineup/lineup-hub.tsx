@@ -6,7 +6,5 @@ import { Priciest } from "./priciest";
 
 /** What for?'s page: create a room, join one with a code, or pick a public one; the priciest characters under. */
 export function LineupHub() {
-  return (
-    <GameHub game="lineup" banner={<LineupBanner />} extra={<Priciest />} />
-  );
+  return <GameHub game="lineup" banner={LineupBanner} extra={<Priciest />} />;
 }

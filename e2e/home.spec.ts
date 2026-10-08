@@ -55,7 +55,10 @@ test("typing a room code joins it, or says why not", async ({ browser }) => {
   const visitor = await newPlayer(browser);
   const code = await createRoom(host);
   await visitor.goto("/en/who-am-i");
-  const box = visitor.getByLabel(/or join with a code/i);
+  // the page keeps one field under the pitch and one in the banner, one shown
+  const box = visitor
+    .getByLabel(/or join with a code/i)
+    .filter({ visible: true });
   await box.pressSequentially("ZZZZ2");
   // (Next's route announcer is also an alert, so match the text)
   await expect(visitor.getByText("No room with this code.")).toBeVisible();

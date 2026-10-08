@@ -10,9 +10,11 @@ import {
   useTransform,
 } from "motion/react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import { Creature, HeldCard } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
+import { BannerRow, SCENE_WIDTH } from "@/features/home/banner-row";
 import type { AnswerValue } from "@/game/types";
 import { cn } from "@/lib/cn";
 import type { Figure } from "@/lib/figures";
@@ -145,7 +147,7 @@ const BURST = Array.from({ length: 10 }, (_, i) => {
  * table, cards up, a round playing on a loop. Answers wrap rather than spill,
  * so longer languages fit. Layers drift with the pointer; still for reduced motion.
  */
-export function WhoAmIBanner() {
+export function WhoAmIBanner({ aside }: { aside: ReactNode }) {
   const t = useTranslations("home.games.whoAmI.banner");
   const reduced = useReducedMotion() ?? false;
   const { step } = useStepLoop(STEPS, STILL, reduced);
@@ -176,7 +178,6 @@ export function WhoAmIBanner() {
 
   return (
     <div
-      aria-hidden="true"
       onPointerMove={(e) => {
         if (reduced || e.pointerType !== "mouse") return;
         const r = e.currentTarget.getBoundingClientRect();
@@ -188,14 +189,15 @@ export function WhoAmIBanner() {
         py.set(0);
       }}
       className={cn(
-        "relative isolate select-none overflow-hidden art-whoami",
+        "relative isolate overflow-hidden art-whoami",
         UNDER_TOPBAR,
       )}
     >
       {/* light and question marks, drifting the other way */}
       <m.div
         style={{ x: backX, y: backY }}
-        className="-inset-10 -z-10 absolute"
+        aria-hidden="true"
+        className="-inset-10 -z-10 absolute select-none"
       >
         <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-surface/50 blur-3xl" />
         <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-butter/60 blur-3xl" />
@@ -227,155 +229,161 @@ export function WhoAmIBanner() {
       {/* melts into the page below, behind the table so the faces stay sharp */}
       <span className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-b from-transparent to-canvas/70" />
 
-      <m.div
-        style={{ x: frontX, y: frontY }}
-        className="relative mx-auto h-[clamp(180px,min(22vw,27vh),230px)] max-sm:h-[210px] w-full max-w-[1040px] [container-type:size]"
-      >
-        {/* the table everyone sits around; it fades with the ground over the banner's last 1.5rem (its top sits 24cqh above the bottom) */}
-        <span
-          className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-surface/45"
-          style={{
-            maskImage:
-              "linear-gradient(to bottom, #000 calc(24cqh - 1.5rem), transparent 24cqh)",
-          }}
-        />
+      <BannerRow aside={aside}>
+        <m.div
+          style={{ x: frontX, y: frontY }}
+          aria-hidden="true"
+          className={cn(
+            "relative h-[clamp(180px,min(22vw,27vh),230px)] select-none [container-type:size] max-sm:h-[210px]",
+            SCENE_WIDTH,
+          )}
+        >
+          {/* the table everyone sits around; it fades with the ground over the banner's last 1.5rem (its top sits 24cqh above the bottom) */}
+          <span
+            className="-translate-x-1/2 absolute bottom-[-46%] left-1/2 h-[70%] w-[92%] rounded-[50%] bg-surface/45"
+            style={{
+              maskImage:
+                "linear-gradient(to bottom, #000 calc(24cqh - 1.5rem), transparent 24cqh)",
+            }}
+          />
 
-        {/* the question, then the guess, then "Got it!" in its place */}
-        <div className="absolute inset-x-0 top-[1%] flex justify-center px-4">
-          <AnimatePresence mode="wait">
-            {s.hit ? (
-              <m.div
-                key="hit"
-                {...pop}
-                className="inline-flex items-center gap-1.5 rounded-pill bg-yes px-4 py-2 font-bold font-display text-[clamp(15px,2vw,20px)] text-on-yes leading-tight shadow-card"
-              >
-                <Sparkles className="size-[1.1em]" strokeWidth={2} />
-                {t("hit")}
-              </m.div>
-            ) : s.ask ? (
-              <m.div
-                key={s.ask}
-                {...pop}
+          {/* the question, then the guess, then "Got it!" in its place */}
+          <div className="absolute inset-x-0 top-[1%] flex justify-center px-4">
+            <AnimatePresence mode="wait">
+              {s.hit ? (
+                <m.div
+                  key="hit"
+                  {...pop}
+                  className="inline-flex items-center gap-1.5 rounded-pill bg-yes px-4 py-2 font-bold font-display text-[clamp(15px,2vw,20px)] text-on-yes leading-tight shadow-card"
+                >
+                  <Sparkles className="size-[1.1em]" strokeWidth={2} />
+                  {t("hit")}
+                </m.div>
+              ) : s.ask ? (
+                <m.div
+                  key={s.ask}
+                  {...pop}
+                  className={cn(
+                    "max-w-[min(26rem,80%)] text-balance rounded-lg rounded-b-sm px-4 py-2 text-center font-bold font-display text-[clamp(15px,2vw,20px)] leading-tight shadow-card",
+                    s.ask === "guess"
+                      ? "bg-ink text-on-ink"
+                      : "bg-surface text-ink",
+                  )}
+                >
+                  {t(s.ask)}
+                </m.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
+
+          {/* the others, cards up, answers over their cards */}
+          {SEATS.map((p, i) => {
+            const answer = s.answers?.[p.seat];
+            return (
+              <div
+                key={p.seat}
                 className={cn(
-                  "max-w-[min(26rem,80%)] text-balance rounded-lg rounded-b-sm px-4 py-2 text-center font-bold font-display text-[clamp(15px,2vw,20px)] leading-tight shadow-card",
-                  s.ask === "guess"
-                    ? "bg-ink text-on-ink"
-                    : "bg-surface text-ink",
+                  "-translate-x-1/2 absolute bottom-[3%] flex flex-col items-center",
+                  p.place,
                 )}
               >
-                {t(s.ask)}
-              </m.div>
-            ) : null}
-          </AnimatePresence>
-        </div>
-
-        {/* the others, cards up, answers over their cards */}
-        {SEATS.map((p, i) => {
-          const answer = s.answers?.[p.seat];
-          return (
-            <div
-              key={p.seat}
-              className={cn(
-                "-translate-x-1/2 absolute bottom-[3%] flex flex-col items-center",
-                p.place,
-              )}
-            >
-              {/* grows upwards and wraps when long: it never pushes the card */}
-              <div className="-translate-x-1/2 absolute bottom-full left-1/2 mb-[2.6cqh] flex w-max max-w-[min(9.5rem,15cqw)] justify-center max-sm:max-w-[26cqw]">
-                <AnimatePresence>
-                  {answer ? (
-                    <m.span key={`${s.ask}-${answer}`} {...pop}>
-                      <AnswerChip value={answer} small pressed wrap />
-                    </m.span>
-                  ) : null}
-                </AnimatePresence>
+                {/* grows upwards and wraps when long: it never pushes the card */}
+                <div className="-translate-x-1/2 absolute bottom-full left-1/2 mb-[2.6cqh] flex w-max max-w-[min(9.5rem,15cqw)] justify-center max-sm:max-w-[26cqw]">
+                  <AnimatePresence>
+                    {answer ? (
+                      <m.span key={`${s.ask}-${answer}`} {...pop}>
+                        <AnswerChip value={answer} small pressed wrap />
+                      </m.span>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
+                <m.div
+                  className="w-[33cqh]"
+                  style={{ rotate: p.tilt }}
+                  {...floating(i * 0.7)}
+                >
+                  <HeldCard figure={p.figure} />
+                </m.div>
+                <m.span
+                  animate={s.hit && !reduced ? { y: [0, -8, 0] } : { y: 0 }}
+                  transition={{ duration: 0.45, delay: 0.15 + i * 0.08 }}
+                  className="-mt-[4cqh] block"
+                >
+                  <Creature
+                    dna={p.dna}
+                    color={p.color}
+                    className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-whoami)]"
+                  />
+                </m.span>
               </div>
-              <m.div
-                className="w-[33cqh]"
-                style={{ rotate: p.tilt }}
-                {...floating(i * 0.7)}
-              >
-                <HeldCard figure={p.figure} />
-              </m.div>
-              <m.span
-                animate={s.hit && !reduced ? { y: [0, -8, 0] } : { y: 0 }}
-                transition={{ duration: 0.45, delay: 0.15 + i * 0.08 }}
-                className="-mt-[4cqh] block"
-              >
-                <Creature
-                  dna={p.dna}
-                  color={p.color}
-                  className="size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-whoami)]"
-                />
-              </m.span>
-            </div>
-          );
-        })}
+            );
+          })}
 
-        {/* you: the "?" card, which flips when you get it */}
-        <div className="-translate-x-1/2 absolute bottom-[3%] left-1/2 flex flex-col items-center">
-          <m.div
-            className="relative w-[38.5cqh] sm:w-[39.5cqh]"
-            {...floating(0.4)}
-          >
-            <div className="perspective-[800px]">
-              <m.div
-                className="relative transform-3d"
-                animate={{ rotateY: s.hit ? 180 : 0 }}
-                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-surface font-display font-extrabold text-[23.5cqh] text-sky shadow-pop backface-hidden">
-                  <m.span
-                    animate={
-                      reduced || s.ask !== "guess" || s.hit
-                        ? { rotate: 0 }
-                        : { rotate: [0, -10, 10, -6, 0] }
-                    }
-                    transition={{ duration: 0.6 }}
-                  >
-                    ?
-                  </m.span>
-                </div>
-                <div className="absolute inset-0 rotate-y-180 rounded-[14%/11%] outline-[3px] outline-yes outline-solid backface-hidden">
-                  <HeldCard figure={YOU.figure} fill />
-                </div>
-              </m.div>
-            </div>
-            <AnimatePresence>
-              {s.hit && !reduced
-                ? BURST.map((b, i) => (
+          {/* you: the "?" card, which flips when you get it */}
+          <div className="-translate-x-1/2 absolute bottom-[3%] left-1/2 flex flex-col items-center">
+            <m.div
+              className="relative w-[38.5cqh] sm:w-[39.5cqh]"
+              {...floating(0.4)}
+            >
+              <div className="perspective-[800px]">
+                <m.div
+                  className="relative transform-3d"
+                  animate={{ rotateY: s.hit ? 180 : 0 }}
+                  transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <div className="flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-surface font-display font-extrabold text-[23.5cqh] text-sky shadow-pop backface-hidden">
                     <m.span
-                      // biome-ignore lint/suspicious/noArrayIndexKey: a fixed burst
-                      key={i}
-                      className={cn(
-                        "absolute top-1/2 left-1/2 size-[3.2cqh] rounded-pill",
-                        b.color,
-                      )}
-                      initial={{ x: 0, y: 0, opacity: 1, scale: 0.4 }}
-                      animate={{
-                        x: `${b.x * 1100}%`,
-                        y: `${b.y * 900}%`,
-                        opacity: 0,
-                        scale: 1,
-                      }}
-                      exit={{ opacity: 0 }}
-                      transition={{
-                        duration: 0.9,
-                        delay: 0.45,
-                        ease: "easeOut",
-                      }}
-                    />
-                  ))
-                : null}
-            </AnimatePresence>
-          </m.div>
-          <Creature
-            dna={YOU.dna}
-            color={YOU.color}
-            className="-mt-[4cqh] size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-whoami),0_0_0_6px_var(--sky)]"
-          />
-        </div>
-      </m.div>
+                      animate={
+                        reduced || s.ask !== "guess" || s.hit
+                          ? { rotate: 0 }
+                          : { rotate: [0, -10, 10, -6, 0] }
+                      }
+                      transition={{ duration: 0.6 }}
+                    >
+                      ?
+                    </m.span>
+                  </div>
+                  <div className="absolute inset-0 rotate-y-180 rounded-[14%/11%] outline-[3px] outline-yes outline-solid backface-hidden">
+                    <HeldCard figure={YOU.figure} fill />
+                  </div>
+                </m.div>
+              </div>
+              <AnimatePresence>
+                {s.hit && !reduced
+                  ? BURST.map((b, i) => (
+                      <m.span
+                        // biome-ignore lint/suspicious/noArrayIndexKey: a fixed burst
+                        key={i}
+                        className={cn(
+                          "absolute top-1/2 left-1/2 size-[3.2cqh] rounded-pill",
+                          b.color,
+                        )}
+                        initial={{ x: 0, y: 0, opacity: 1, scale: 0.4 }}
+                        animate={{
+                          x: `${b.x * 1100}%`,
+                          y: `${b.y * 900}%`,
+                          opacity: 0,
+                          scale: 1,
+                        }}
+                        exit={{ opacity: 0 }}
+                        transition={{
+                          duration: 0.9,
+                          delay: 0.45,
+                          ease: "easeOut",
+                        }}
+                      />
+                    ))
+                  : null}
+              </AnimatePresence>
+            </m.div>
+            <Creature
+              dna={YOU.dna}
+              color={YOU.color}
+              className="-mt-[4cqh] size-[17cqh] rounded-pill shadow-[0_0_0_3px_var(--art-whoami),0_0_0_6px_var(--sky)]"
+            />
+          </div>
+        </m.div>
+      </BannerRow>
     </div>
   );
 }

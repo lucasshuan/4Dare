@@ -2,8 +2,10 @@
 
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Creature, FigureArt } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
+import { BannerRow, SCENE_WIDTH } from "@/features/home/banner-row";
 import { cn } from "@/lib/cn";
 import type { Figure } from "@/lib/figures";
 import { useShuffle } from "@/lib/hooks/use-shuffle";
@@ -171,7 +173,7 @@ function Coin() {
  * mission is stuck on in its place. Transforms, opacity and shadows only;
  * the still frame for reduced motion.
  */
-export function LineupBanner() {
+export function LineupBanner({ aside }: { aside: ReactNode }) {
   const t = useTranslations("home.games.whatFor");
   const reduced = useReducedMotion() ?? false;
   const { step, loop } = useStepLoop(STEPS, STILL, reduced);
@@ -192,14 +194,13 @@ export function LineupBanner() {
 
   return (
     <div
-      aria-hidden="true"
       className={cn(
-        "relative isolate select-none overflow-hidden art-lineup",
+        "relative isolate overflow-hidden art-lineup",
         UNDER_TOPBAR,
       )}
     >
       {/* the wall's light and chalk marks */}
-      <div className="-inset-10 -z-10 absolute">
+      <div aria-hidden="true" className="-inset-10 -z-10 absolute select-none">
         <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-white/10 blur-3xl dark:hidden" />
         <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-gold/15 blur-3xl" />
         {MARKS.map(([left, top, size, seconds, glyph]) => (
@@ -242,277 +243,289 @@ export function LineupBanner() {
         }}
       />
 
-      <div className="relative isolate mx-auto h-[clamp(180px,min(22vw,27vh),230px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[210px]">
-        {/* the pitch board, as tall as the banner allows, hovering slowly;
-            what is stuck on it rides along */}
-        <m.div
-          className="-translate-x-1/2 absolute top-[2cqh] left-1/2 z-10 aspect-[3/2] w-[min(129cqh,74cqw)]"
-          {...(reduced
-            ? {}
-            : {
-                animate: { y: [0, -7, 0], rotate: [-0.6, 0.6, -0.6] },
-                transition: {
-                  duration: 6.5,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "easeInOut",
-                },
-              })}
+      <BannerRow aside={aside}>
+        <div
+          aria-hidden="true"
+          className={cn(
+            "relative isolate h-[clamp(180px,min(22vw,27vh),230px)] select-none [container-type:size] max-sm:h-[210px]",
+            SCENE_WIDTH,
+          )}
         >
-          {/* the frame and its slate, the standing board's own finish */}
-          <div
-            className="absolute inset-0 rounded-[3.4cqh] p-[2.8cqh]"
-            style={{
-              background:
-                "linear-gradient(150deg, var(--wood), var(--wood-deep))",
-              boxShadow:
-                "inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -2px 0 rgba(0,0,0,0.2), 0 14px 30px rgba(18,22,31,0.28)",
-            }}
+          {/* the pitch board, as tall as the banner allows, hovering slowly;
+            what is stuck on it rides along */}
+          <m.div
+            className="-translate-x-1/2 absolute top-[2cqh] left-1/2 z-10 aspect-[3/2] w-[min(129cqh,74cqw)]"
+            {...(reduced
+              ? {}
+              : {
+                  animate: { y: [0, -7, 0], rotate: [-0.6, 0.6, -0.6] },
+                  transition: {
+                    duration: 6.5,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                  },
+                })}
           >
+            {/* the frame and its slate, the standing board's own finish */}
             <div
-              className="relative size-full overflow-hidden rounded-[2cqh]"
+              className="absolute inset-0 rounded-[3.4cqh] p-[2.8cqh]"
               style={{
-                background: SLATE,
+                background:
+                  "linear-gradient(150deg, var(--wood), var(--wood-deep))",
                 boxShadow:
-                  "inset 0 0 0 2px rgba(0,0,0,0.25), inset 0 5px 14px rgba(0,0,0,0.35)",
+                  "inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -2px 0 rgba(0,0,0,0.2), 0 14px 30px rgba(18,22,31,0.28)",
               }}
             >
-              <PitchLines />
+              <div
+                className="relative size-full overflow-hidden rounded-[2cqh]"
+                style={{
+                  background: SLATE,
+                  boxShadow:
+                    "inset 0 0 0 2px rgba(0,0,0,0.25), inset 0 5px 14px rgba(0,0,0,0.35)",
+                }}
+              >
+                <PitchLines />
+              </div>
             </div>
-          </div>
 
-          {/* the lot, taped on in front; a leaving lot and the next share one cell */}
-          <div className="-translate-x-1/2 absolute top-[14cqh] left-1/2 grid">
+            {/* the lot, taped on in front; a leaving lot and the next share one cell */}
+            <div className="-translate-x-1/2 absolute top-[14cqh] left-1/2 grid">
+              <AnimatePresence>
+                {s.open || s.clear ? null : (
+                  <m.div
+                    key={`lot-${loop}`}
+                    className="relative w-[46cqh] rounded-[1cqh] bg-white p-[1.7cqh] [grid-area:1/1]"
+                    style={{ boxShadow: FLAT }}
+                    initial={
+                      reduced
+                        ? false
+                        : {
+                            opacity: 0,
+                            y: "-45%",
+                            rotate: -14,
+                            scale: 1.18,
+                            boxShadow: LIFTED,
+                          }
+                    }
+                    animate={{
+                      opacity: 1,
+                      y: "0%",
+                      rotate: -3,
+                      scale: 1,
+                      boxShadow: FLAT,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      x: `${away * 130}%`,
+                      y: "80%",
+                      rotate: away * 30,
+                      scale: 0.35,
+                      boxShadow: LIFTED,
+                      transition: { duration: 0.5, ease: [0.5, 0, 0.75, 0] },
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 17,
+                      opacity: { duration: 0.2 },
+                      boxShadow: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+                    }}
+                  >
+                    <FigureArt
+                      figure={lot}
+                      className="aspect-4/5 rounded-[0.6cqh]"
+                    />
+                    <Tape
+                      className="-rotate-3 top-[-2.2cqh] left-[27%] w-[46%] origin-left"
+                      delay={0.3}
+                      reduced={reduced}
+                    />
+                    {/* the price, bumped up bid by bid */}
+                    <m.span
+                      key={top}
+                      className="absolute -right-[3.6cqh] -bottom-[2.6cqh] rounded-[1.2cqh] bg-kraft px-[2.2cqh] font-bold font-mono text-[7.4cqh] text-kraft-ink leading-[1.3] shadow-card"
+                      initial={
+                        reduced || !top ? false : { scale: 1.4, rotate: -10 }
+                      }
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 520,
+                        damping: 14,
+                      }}
+                    >
+                      {top || "–"}
+                    </m.span>
+                    <AnimatePresence>
+                      {s.sold ? (
+                        <m.span
+                          key="sold"
+                          initial={
+                            reduced
+                              ? { opacity: 0 }
+                              : { opacity: 0, scale: 2.4, rotate: -18 }
+                          }
+                          animate={{ opacity: 1, scale: 1, rotate: -10 }}
+                          exit={{ opacity: 0 }}
+                          transition={{
+                            duration: 0.35,
+                            ease: [0.34, 1.56, 0.64, 1],
+                          }}
+                          className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 whitespace-nowrap rounded-md bg-wax px-[3cqh] py-[1cqh] font-display font-extrabold text-[9cqh] text-white uppercase shadow-pop"
+                        >
+                          {t("banner.sold")}
+                        </m.span>
+                      ) : null}
+                    </AnimatePresence>
+                  </m.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* the mission, stuck on in the lot's place once it's gone */}
             <AnimatePresence>
-              {s.open || s.clear ? null : (
+              {s.open ? (
                 <m.div
-                  key={`lot-${loop}`}
-                  className="relative w-[46cqh] rounded-[1cqh] bg-white p-[1.7cqh] [grid-area:1/1]"
-                  style={{ boxShadow: FLAT }}
+                  key={`mission-${loop}`}
+                  className="-translate-x-1/2 absolute top-[22cqh] left-1/2 w-[104cqh] rounded-[2cqh] bg-kraft px-[4.4cqh] pt-[5cqh] pb-[4.6cqh] text-center"
+                  style={{
+                    boxShadow: FLAT,
+                    backgroundImage:
+                      "linear-gradient(170deg, rgba(255,255,255,0.14), transparent 45%)",
+                  }}
                   initial={
                     reduced
                       ? false
                       : {
                           opacity: 0,
-                          y: "-45%",
-                          rotate: -14,
-                          scale: 1.18,
+                          y: "-60%",
+                          rotate: 10,
+                          scale: 1.12,
                           boxShadow: LIFTED,
                         }
                   }
                   animate={{
                     opacity: 1,
                     y: "0%",
-                    rotate: -3,
+                    rotate: -2.5,
                     scale: 1,
                     boxShadow: FLAT,
                   }}
                   exit={{
                     opacity: 0,
-                    x: `${away * 130}%`,
-                    y: "80%",
-                    rotate: away * 30,
-                    scale: 0.35,
+                    y: "-12%",
+                    rotate: -7,
+                    scale: 1.05,
                     boxShadow: LIFTED,
-                    transition: { duration: 0.5, ease: [0.5, 0, 0.75, 0] },
+                    transition: { duration: 0.3 },
                   }}
                   transition={{
                     type: "spring",
-                    stiffness: 260,
-                    damping: 17,
-                    opacity: { duration: 0.2 },
-                    boxShadow: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+                    stiffness: 240,
+                    damping: 18,
+                    delay: reduced ? 0 : 0.2,
+                    opacity: { duration: 0.2, delay: reduced ? 0 : 0.2 },
+                    boxShadow: {
+                      duration: 0.55,
+                      delay: reduced ? 0 : 0.2,
+                      ease: [0.22, 1, 0.36, 1],
+                    },
                   }}
                 >
-                  <FigureArt
-                    figure={lot}
-                    className="aspect-4/5 rounded-[0.6cqh]"
-                  />
                   <Tape
-                    className="-rotate-3 top-[-2.2cqh] left-[27%] w-[46%] origin-left"
-                    delay={0.3}
+                    className="-left-[5cqh] -rotate-[28deg] top-[-0.8cqh] w-[16cqh] origin-right"
+                    delay={0.6}
                     reduced={reduced}
                   />
-                  {/* the price, bumped up bid by bid */}
+                  <Tape
+                    className="-right-[5cqh] top-[-0.8cqh] w-[16cqh] origin-left rotate-[28deg]"
+                    delay={0.7}
+                    reduced={reduced}
+                  />
+                  <span className="block font-bold font-display text-[clamp(11px,4.8cqh,14px)] text-kraft-ink/70 uppercase tracking-[0.06em]">
+                    {t("banner.what")}
+                  </span>
+                  <span className="block text-balance font-bold font-display text-[clamp(14px,7.6cqh,19px)] text-kraft-ink leading-[1.15]">
+                    {line}
+                  </span>
+                  {/* the seal, broken as it lands */}
                   <m.span
-                    key={top}
-                    className="absolute -right-[3.6cqh] -bottom-[2.6cqh] rounded-[1.2cqh] bg-kraft px-[2.2cqh] font-bold font-mono text-[7.4cqh] text-kraft-ink leading-[1.3] shadow-card"
-                    initial={
-                      reduced || !top ? false : { scale: 1.4, rotate: -10 }
-                    }
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", stiffness: 520, damping: 14 }}
+                    className="-translate-x-1/2 absolute top-[-5cqh] left-1/2 grid size-[10cqh] place-items-center rounded-pill bg-wax font-black text-[5.4cqh] text-white shadow-card"
+                    initial={reduced ? false : { scale: 1 }}
+                    animate={reduced ? { scale: 1 } : { scale: [1, 1.3, 0] }}
+                    transition={{ delay: 0.75, duration: 0.4 }}
                   >
-                    {top || "–"}
+                    ?
                   </m.span>
-                  <AnimatePresence>
-                    {s.sold ? (
-                      <m.span
-                        key="sold"
-                        initial={
-                          reduced
-                            ? { opacity: 0 }
-                            : { opacity: 0, scale: 2.4, rotate: -18 }
-                        }
-                        animate={{ opacity: 1, scale: 1, rotate: -10 }}
-                        exit={{ opacity: 0 }}
-                        transition={{
-                          duration: 0.35,
-                          ease: [0.34, 1.56, 0.64, 1],
-                        }}
-                        className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 whitespace-nowrap rounded-md bg-wax px-[3cqh] py-[1cqh] font-display font-extrabold text-[9cqh] text-white uppercase shadow-pop"
-                      >
-                        {t("banner.sold")}
-                      </m.span>
-                    ) : null}
-                  </AnimatePresence>
                 </m.div>
-              )}
+              ) : null}
             </AnimatePresence>
-          </div>
+          </m.div>
 
-          {/* the mission, stuck on in the lot's place once it's gone */}
-          <AnimatePresence>
-            {s.open ? (
-              <m.div
-                key={`mission-${loop}`}
-                className="-translate-x-1/2 absolute top-[22cqh] left-1/2 w-[104cqh] rounded-[2cqh] bg-kraft px-[4.4cqh] pt-[5cqh] pb-[4.6cqh] text-center"
-                style={{
-                  boxShadow: FLAT,
-                  backgroundImage:
-                    "linear-gradient(170deg, rgba(255,255,255,0.14), transparent 45%)",
-                }}
-                initial={
-                  reduced
-                    ? false
-                    : {
-                        opacity: 0,
-                        y: "-60%",
-                        rotate: 10,
-                        scale: 1.12,
-                        boxShadow: LIFTED,
-                      }
-                }
-                animate={{
-                  opacity: 1,
-                  y: "0%",
-                  rotate: -2.5,
-                  scale: 1,
-                  boxShadow: FLAT,
-                }}
-                exit={{
-                  opacity: 0,
-                  y: "-12%",
-                  rotate: -7,
-                  scale: 1.05,
-                  boxShadow: LIFTED,
-                  transition: { duration: 0.3 },
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 240,
-                  damping: 18,
-                  delay: reduced ? 0 : 0.2,
-                  opacity: { duration: 0.2, delay: reduced ? 0 : 0.2 },
-                  boxShadow: {
-                    duration: 0.55,
-                    delay: reduced ? 0 : 0.2,
-                    ease: [0.22, 1, 0.36, 1],
-                  },
-                }}
-              >
-                <Tape
-                  className="-left-[5cqh] -rotate-[28deg] top-[-0.8cqh] w-[16cqh] origin-right"
-                  delay={0.6}
-                  reduced={reduced}
-                />
-                <Tape
-                  className="-right-[5cqh] top-[-0.8cqh] w-[16cqh] origin-left rotate-[28deg]"
-                  delay={0.7}
-                  reduced={reduced}
-                />
-                <span className="block font-bold font-display text-[clamp(11px,4.8cqh,14px)] text-kraft-ink/70 uppercase tracking-[0.06em]">
-                  {t("banner.what")}
-                </span>
-                <span className="block text-balance font-bold font-display text-[clamp(14px,7.6cqh,19px)] text-kraft-ink leading-[1.15]">
-                  {line}
-                </span>
-                {/* the seal, broken as it lands */}
-                <m.span
-                  className="-translate-x-1/2 absolute top-[-5cqh] left-1/2 grid size-[10cqh] place-items-center rounded-pill bg-wax font-black text-[5.4cqh] text-white shadow-card"
-                  initial={reduced ? false : { scale: 1 }}
-                  animate={reduced ? { scale: 1 } : { scale: [1, 1.3, 0] }}
-                  transition={{ delay: 0.75, duration: 0.4 }}
-                >
-                  ?
-                </m.span>
-              </m.div>
-            ) : null}
-          </AnimatePresence>
-        </m.div>
-
-        {/* the bidders on the wall, each under the coins they put up */}
-        {SEATS.map((p) => {
-          const bid = s.bids[part(p.seat, cast)] ?? 0;
-          const leads = bid > 0 && bid === top;
-          return (
-            <div
-              key={p.seat}
-              className={cn(
-                "-translate-x-1/2 absolute bottom-[12%] flex flex-col items-center transition-opacity duration-500",
-                p.place,
-                s.open && "opacity-60",
-              )}
-            >
-              <div className="flex min-h-[26cqh] flex-col-reverse items-center pb-[1cqh]">
-                <AnimatePresence>
-                  {Array.from({ length: bid }, (_, k) => (
-                    <m.span
-                      // biome-ignore lint/suspicious/noArrayIndexKey: one per coin in the tower
-                      key={k}
-                      className="block"
-                      initial={reduced ? false : { opacity: 0, y: -14 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      // the tower comes down from the top, coin by coin
-                      exit={{
-                        opacity: 0,
-                        y: 6,
-                        scale: 0.85,
-                        transition: {
-                          duration: 0.28,
-                          ease: "easeIn",
-                          delay: reduced ? 0 : (bid - 1 - k) * 0.04,
-                        },
-                      }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 520,
-                        damping: 22,
-                        delay: reduced ? 0 : k * 0.05,
-                      }}
-                    >
-                      <Coin />
-                    </m.span>
-                  ))}
-                </AnimatePresence>
-              </div>
-              <span
+          {/* the bidders on the wall, each under the coins they put up */}
+          {SEATS.map((p) => {
+            const bid = s.bids[part(p.seat, cast)] ?? 0;
+            const leads = bid > 0 && bid === top;
+            return (
+              <div
+                key={p.seat}
                 className={cn(
-                  "block rounded-pill transition-shadow duration-300",
-                  leads
-                    ? "shadow-[0_0_0_3px_var(--gold),0_0_18px_var(--gold)]"
-                    : "shadow-[0_0_0_3px_var(--wood),0_6px_14px_rgba(42,29,12,0.22)]",
+                  "-translate-x-1/2 absolute bottom-[12%] flex flex-col items-center transition-opacity duration-500",
+                  p.place,
+                  s.open && "opacity-60",
                 )}
               >
-                <Creature
-                  dna={p.dna}
-                  color={p.color}
-                  className="size-[16cqh] rounded-pill"
-                />
-              </span>
-            </div>
-          );
-        })}
-      </div>
+                <div className="flex min-h-[26cqh] flex-col-reverse items-center pb-[1cqh]">
+                  <AnimatePresence>
+                    {Array.from({ length: bid }, (_, k) => (
+                      <m.span
+                        // biome-ignore lint/suspicious/noArrayIndexKey: one per coin in the tower
+                        key={k}
+                        className="block"
+                        initial={reduced ? false : { opacity: 0, y: -14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        // the tower comes down from the top, coin by coin
+                        exit={{
+                          opacity: 0,
+                          y: 6,
+                          scale: 0.85,
+                          transition: {
+                            duration: 0.28,
+                            ease: "easeIn",
+                            delay: reduced ? 0 : (bid - 1 - k) * 0.04,
+                          },
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 520,
+                          damping: 22,
+                          delay: reduced ? 0 : k * 0.05,
+                        }}
+                      >
+                        <Coin />
+                      </m.span>
+                    ))}
+                  </AnimatePresence>
+                </div>
+                <span
+                  className={cn(
+                    "block rounded-pill transition-shadow duration-300",
+                    leads
+                      ? "shadow-[0_0_0_3px_var(--gold),0_0_18px_var(--gold)]"
+                      : "shadow-[0_0_0_3px_var(--wood),0_6px_14px_rgba(42,29,12,0.22)]",
+                  )}
+                >
+                  <Creature
+                    dna={p.dna}
+                    color={p.color}
+                    className="size-[16cqh] rounded-pill"
+                  />
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </BannerRow>
     </div>
   );
 }
