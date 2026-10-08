@@ -12,7 +12,7 @@ import { CardFace } from "./card";
 const MIN_SHOWN = 3;
 
 export function Priciest() {
-  const t = useTranslations("home.games.whatFor.priciest");
+  const t = useTranslations("home.games.whatFor");
   const format = useFormatter();
   const lang = useLocale();
   const { data } = useQuery({
@@ -28,8 +28,10 @@ export function Priciest() {
   return (
     <section className="mt-4 flex flex-col gap-3">
       <div className="flex flex-col">
-        <h2 className="font-bold font-display text-xl">{t("title")}</h2>
-        <p className="text-[13px] text-ink-muted">{t("hint")}</p>
+        <h2 className="font-bold font-display text-xl">
+          {t("priciest.title")}
+        </h2>
+        <p className="text-[13px] text-ink-muted">{t("priciest.hint")}</p>
       </div>
       <ol className="grid grid-cols-4 gap-x-3 gap-y-4 sm:grid-cols-4">
         {data.map((c, i) => (
@@ -44,7 +46,7 @@ export function Priciest() {
               {c.name}
             </span>
             <span className="rounded-[5px] bg-kraft px-1.5 font-mono font-semibold text-[12px] text-kraft-ink">
-              {t("avg", {
+              {t("priciest.avg", {
                 coins: format.number(c.avg, { maximumFractionDigits: 1 }),
               })}
             </span>
