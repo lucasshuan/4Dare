@@ -50,7 +50,7 @@ const part = (seat: Seat, cast: number) =>
 
 /**
  * In a row under the board, measured from its middle in the banner's height
- * (the board is 102 wide); phones keep one on each side.
+ * (the board is 105 wide); phones keep one on each side.
  */
 const SEATS: { seat: Seat; place: string; dna: string; color: string }[] = [
   {
@@ -156,7 +156,7 @@ function Coin() {
     <svg
       viewBox="0 0 48 15"
       aria-hidden="true"
-      className="-mt-[1.4cqh] block w-[9.5cqh]"
+      className="-mt-[1.2cqh] block w-[8cqh]"
     >
       <path d="M1 4.2V10.6A23 3.6 0 0 0 47 10.6V4.2Z" fill="var(--gold-deep)" />
       <ellipse cx={24} cy={4.2} rx={23} ry={3.6} fill="var(--gold)" />
@@ -242,11 +242,11 @@ export function LineupBanner() {
         }}
       />
 
-      <div className="relative isolate mx-auto h-[clamp(220px,min(28vw,35vh),320px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[250px]">
+      <div className="relative isolate mx-auto h-[clamp(300px,min(40vw,50vh),420px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[300px]">
         {/* the pitch board, hovering slowly above the bidders; what is stuck
             on it rides along */}
         <m.div
-          className="-translate-x-1/2 absolute top-[3cqh] left-1/2 z-10 h-[68cqh] w-[102cqh]"
+          className="-translate-x-1/2 absolute top-[3cqh] left-1/2 z-10 h-[70cqh] w-[105cqh]"
           {...(reduced
             ? {}
             : {
@@ -286,7 +286,7 @@ export function LineupBanner() {
               {s.open || s.clear ? null : (
                 <m.div
                   key={`lot-${loop}`}
-                  className="relative w-[37cqh] rounded-[0.8cqh] bg-white p-[1.4cqh] [grid-area:1/1]"
+                  className="relative w-[38cqh] rounded-[0.8cqh] bg-white p-[1.4cqh] [grid-area:1/1]"
                   style={{ boxShadow: FLAT }}
                   initial={
                     reduced
@@ -375,7 +375,7 @@ export function LineupBanner() {
             {s.open ? (
               <m.div
                 key={`mission-${loop}`}
-                className="-translate-x-1/2 absolute top-[10cqh] left-1/2 w-[84cqh] rounded-[1.6cqh] bg-kraft px-[3.4cqh] pt-[4cqh] pb-[3.6cqh] text-center"
+                className="-translate-x-1/2 absolute top-[17cqh] left-1/2 w-[86cqh] rounded-[1.6cqh] bg-kraft px-[3.4cqh] pt-[4cqh] pb-[3.6cqh] text-center"
                 style={{
                   boxShadow: FLAT,
                   backgroundImage:
@@ -430,10 +430,10 @@ export function LineupBanner() {
                   delay={0.7}
                   reduced={reduced}
                 />
-                <span className="block font-bold font-display text-[4.6cqh] text-kraft-ink/70 uppercase tracking-[0.06em]">
+                <span className="block font-bold font-display text-[clamp(11px,4cqh,15px)] text-kraft-ink/70 uppercase tracking-[0.06em]">
                   {t("banner.what")}
                 </span>
-                <span className="block text-balance font-bold font-display text-[clamp(13px,6.4cqh,18px)] text-kraft-ink leading-[1.15]">
+                <span className="block text-balance font-bold font-display text-[clamp(14px,6.2cqh,22px)] text-kraft-ink leading-[1.15]">
                   {line}
                 </span>
                 {/* the seal, broken as it lands */}
@@ -463,7 +463,7 @@ export function LineupBanner() {
                 s.open && "opacity-60 transition-opacity duration-500",
               )}
             >
-              <div className="flex min-h-[12cqh] flex-col-reverse items-center pb-[1cqh]">
+              <div className="flex min-h-[10cqh] flex-col-reverse items-center pb-[1cqh]">
                 <AnimatePresence>
                   {Array.from({ length: bid }, (_, k) => (
                     <m.span
@@ -496,7 +496,7 @@ export function LineupBanner() {
                 <Creature
                   dna={p.dna}
                   color={p.color}
-                  className="size-[14cqh] rounded-pill"
+                  className="size-[12cqh] rounded-pill"
                 />
               </span>
             </div>
