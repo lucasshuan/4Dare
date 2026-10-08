@@ -320,12 +320,9 @@ export function ImpostorBanner() {
         ))}
       </m.div>
 
-      {/* melts into the page below through the ground's own hue, not grey, behind the table so the faces stay sharp; not with the lights down, which reach the edge */}
+      {/* melts into the page below through the ground's own hue, not grey, behind the table so the faces stay sharp; the lights down fade out over it too */}
       <span
-        className={cn(
-          "pointer-events-none absolute inset-x-0 bottom-0 h-8 transition-opacity duration-500",
-          s.caught && "opacity-0",
-        )}
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-8"
         style={{
           background:
             "linear-gradient(in oklch to bottom, transparent, color-mix(in oklch, var(--art-impostor) 45%, var(--canvas)) 60%, var(--canvas))",
@@ -394,11 +391,16 @@ export function ImpostorBanner() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.5 }}
-                      // one gradient wide enough for any screen: no seam round the light
-                      className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[45%] left-1/2 size-[400vmax]"
+                      // one gradient wide enough for any screen: no seam round the light;
+                      // its middle sits 32.6cqh above this seat's foot (the card's
+                      // middle), so the banner's foot is 35.6cqh below it, and the
+                      // dark fades out over the banner's last 2rem as the ground does
+                      className="-translate-x-1/2 pointer-events-none absolute bottom-[32.6cqh] left-1/2 size-[400vmax] translate-y-1/2"
                       style={{
                         background:
                           "radial-gradient(circle, rgba(246,227,161,0.14), transparent 31cqh, var(--art-impostor-dim) 48cqh)",
+                        maskImage:
+                          "linear-gradient(to bottom, #000 calc(50% + 35.6cqh - 2rem), transparent calc(50% + 35.6cqh))",
                       }}
                     />
                   ) : null}
