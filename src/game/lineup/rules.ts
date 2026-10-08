@@ -140,6 +140,8 @@ export const GUESS_MAX = 80;
 export const WHY = { min: 8, max: 100 } as const;
 /** The most lots the presenter can line up at once. */
 export const QUEUE_MAX = 12;
+/** The presenter's remote plays one sound this often at most. */
+export const CUE_GAP_MS = 3000;
 
 /** The crowd's prize needs at least this many reactions. */
 export const CROWD_MIN = 3;

@@ -14,6 +14,7 @@ import type { LuCard, LuDeck } from "@/game/lineup/types";
 import {
   type Character,
   GameError,
+  type GameEvent,
   type Lang,
   type PlayerId,
   type RoomState,
@@ -21,6 +22,7 @@ import {
 import { getBackend } from "./backend";
 import { entryId } from "./backend/seed-format";
 import { background } from "./background";
+import type { QueueItem } from "./contract";
 import { dispatch, seated } from "./rooms";
 
 /** A drawn character as a card on the table, in the room's language. */
@@ -66,17 +68,23 @@ export async function lineupDecks(
   const mine = roomPool(pool, on);
   if (mine.length < Math.min(MIN_POOL, pool.length) || !mine.length)
     throw new GameError("few_cards");
-  const missions = pickMissions(
+  // with a presenter, three missions a round to choose from (the first stands in)
+  const each = s.mode === "host" ? 3 : 1;
+  const drawnMissions = pickMissions(
     bank,
     {
       heavy: s.heavy,
       off: s.offMissions,
       recent: state.recentMissions ?? [],
-      rounds,
+      rounds: rounds * each,
     },
     random,
   );
-  if (missions.length < rounds) throw new GameError("invalid_input");
+  if (drawnMissions.length < rounds) throw new GameError("invalid_input");
+  const options = Array.from({ length: rounds }, (_, r) =>
+    drawnMissions.filter((_, k) => k % rounds === r),
+  );
+  const missions = options.map((o) => o[0]);
   // spares for teams left empty: one per seat
   const used = new Set<string>();
   const drawn = missions.map(() =>
@@ -95,7 +103,12 @@ export async function lineupDecks(
       return c?.imageUrl ? [charCard(l, c)] : [];
     });
     if (cards.length < lots) throw new GameError("few_cards");
-    return { cards, lots, mission };
+    return {
+      cards,
+      lots,
+      mission,
+      ...(each > 1 ? { options: options[r] } : {}),
+    };
   });
 }
 
@@ -144,4 +157,109 @@ export async function reactOnStage(
     throw e;
   }
   background(() => getBackend().notify.reacted(code, { board, counts }));
+}
+
+const fail = (): never => {
+  throw new GameError("invalid_input");
+};
+
+/** A name written on a paper card: up to this many characters. */
+export const PAPER_MAX = 40;
+
+/** The paper card for a name written by hand: its id follows the name, so one name is one card. */
+export function paperCard(raw: string): LuCard | null {
+  const name = raw.replace(/\s+/g, " ").trim();
+  if (!name || [...name].length > PAPER_MAX) return null;
+  const key = name
+    .toLocaleLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-");
+  return {
+    id: `paper:${key}`,
+    name,
+    origin: null,
+    imageUrl: null,
+    emoji: "✍️",
+    tint: "#fff6e2",
+  };
+}
+
+/**
+ * The presenter's queue, made into cards in the deck's language (the
+ * host's): dealt ones as they are, library characters with their name and
+ * picture (never one of the blocked), extras, paper cards.
+ */
+export function queueLots(
+  code: string,
+  playerId: PlayerId,
+  items: QueueItem[],
+) {
+  const { lineup, characters } = getBackend();
+  return dispatch(code, async (s): Promise<GameEvent> => {
+    if (!seated(s, playerId)) throw new GameError("not_member");
+    const lu = s.lu ?? fail();
+    const deck = lu.decks[lu.round - 1] ?? fail();
+    const lang: Lang = s.players.find((p) => p.id === s.hostId)?.lang ?? "en";
+    const ids = items.flatMap((x) => (x.kind === "char" ? [x.id] : []));
+    const [found, extras, blocked] = await Promise.all([
+      ids.length
+        ? characters.getMany(
+            ids.map((id) => entryId(lang, id)),
+            lang,
+          )
+        : [],
+      items.some((x) => x.kind === "extra") ? lineup.extras() : [],
+      ids.length ? lineup.blocked() : new Set<string>(),
+    ]);
+    const byId = new Map(found.map((c) => [c.id, c]));
+    const card = (x: QueueItem): LuCard | undefined => {
+      if (x.kind === "deal") return deck.cards[x.i];
+      if (x.kind === "paper") return paperCard(x.name) ?? undefined;
+      if (x.kind === "extra") {
+        const extra = extras.find((e) => e.id === x.id);
+        return extra && extraCard(extra, lang);
+      }
+      const c = blocked.has(x.id) ? undefined : byId.get(entryId(lang, x.id));
+      return (
+        c && {
+          id: x.id,
+          name: c.name,
+          origin: c.origin ?? null,
+          imageUrl: c.imageUrl ?? null,
+          ...(c.imageUrl ? {} : { emoji: "✍️", tint: "#fff6e2" }),
+        }
+      );
+    };
+    const cards = items.map((x) => card(x) ?? fail());
+    return { type: "QUEUE", playerId, cards };
+  });
+}
+
+/** "What for ____": a player's guess while the presenter chooses; nobody else sees it before the envelope. */
+export function sendHunch(code: string, playerId: PlayerId, text: string) {
+  return dispatch(
+    code,
+    (s) => {
+      if (!seated(s, playerId)) throw new GameError("not_member");
+      return { type: "HUNCH", playerId, text };
+    },
+    { quiet: true },
+  );
+}
+
+/** The presenter's verdict: a draft quietly (only they see it), the final one for everyone. */
+export function sendVerdict(
+  code: string,
+  playerId: PlayerId,
+  v: { ownerId: PlayerId; why: string; final: boolean },
+) {
+  return dispatch(
+    code,
+    (s) => {
+      if (!seated(s, playerId)) throw new GameError("not_member");
+      return { type: "VERDICT", playerId, ...v };
+    },
+    { quiet: !v.final },
+  );
 }

@@ -234,7 +234,8 @@
       "guessHit": "Guess the crew's card on the last chance",
       "roundWon": "Each round won, alone or tied",
       "vote": "Each vote your board gets",
-      "crowd": "The crowd's prize (most reactions)"
+      "crowd": "The crowd's prize (most reactions)",
+      "presented": "Each round presented from the booth"
     },
     "groups": {
       "general": "General",
@@ -267,7 +268,8 @@
       "coach": "Coach",
       "bargain": "Bargain",
       "allIn": "All in",
-      "stage": "Showstopper"
+      "stage": "Showstopper",
+      "booth": "In the booth"
     },
     "goals": {
       "matches": "{n} matches",
@@ -288,7 +290,8 @@
       "coach": "Win {n} rounds",
       "bargain": "{n, plural, one {# round won} other {# rounds won}} with a team of 4 coins or less",
       "allIn": "10 coins on one character {n, plural, one {# time} other {# times}}",
-      "stage": "{n, plural, one {# crowd prize} other {# crowd prizes}}"
+      "stage": "{n, plural, one {# crowd prize} other {# crowd prizes}}",
+      "booth": "Present {n, plural, one {# match} other {# matches}}"
     }
   },
   "boards": {

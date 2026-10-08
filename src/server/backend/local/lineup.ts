@@ -25,6 +25,9 @@ export function localLineup(): LineupStore {
         .map(({ id, gostos }, i): PoolCard => ({ id, gostos, rank: i + 1 }));
     },
     async count() {},
+    async blocked() {
+      return new Set<string>();
+    },
     async priciest() {
       return [];
     },

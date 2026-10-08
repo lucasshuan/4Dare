@@ -234,7 +234,8 @@
       "guessHit": "Acertar la carta de la tripulación en la última oportunidad",
       "roundWon": "Cada ronda ganada, solo o empatado",
       "vote": "Cada voto que recibe tu tablero",
-      "crowd": "Premio del público (más reacciones)"
+      "crowd": "Premio del público (más reacciones)",
+      "presented": "Cada ronda presentada desde la cabina"
     },
     "groups": {
       "general": "Generales",
@@ -267,7 +268,8 @@
       "coach": "Entrenador",
       "bargain": "Ganga",
       "allIn": "Todo a uno",
-      "stage": "Escenario"
+      "stage": "Escenario",
+      "booth": "En la cabina"
     },
     "goals": {
       "matches": "{n} partidas",
@@ -288,7 +290,8 @@
       "coach": "Ganar {n} rondas",
       "bargain": "{n, plural, one {# ronda ganada} other {# rondas ganadas}} con un equipo de hasta 4 monedas",
       "allIn": "10 monedas por un personaje {n, plural, one {# vez} other {# veces}}",
-      "stage": "{n, plural, one {# premio del público} other {# premios del público}}"
+      "stage": "{n, plural, one {# premio del público} other {# premios del público}}",
+      "booth": "Presentar {n, plural, one {# partida} other {# partidas}}"
     }
   },
   "boards": {

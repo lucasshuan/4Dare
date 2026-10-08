@@ -85,6 +85,7 @@ describe("badges", () => {
       bargain: 0,
       allIn: 0,
       stage: 0,
+      booth: 0,
       pictures: 4,
       covers: 1,
       characters: 0,
@@ -200,6 +201,7 @@ describe("badges: what for?", () => {
       votes: 3,
       crowd: 1,
       avgSpent: 8,
+      presented: 0,
     });
   });
 });

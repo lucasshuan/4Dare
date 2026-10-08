@@ -10,7 +10,8 @@ import { DEFAULT_SETTINGS, GameError } from "@/game/types";
 
 process.env.DARE_DATA_DIR = mkdtempSync(join(tmpdir(), "dare-lineup-"));
 
-const { lineupDecks } = await import("./lineup");
+const { lineupDecks, paperCard, queueLots } = await import("./lineup");
+const { getBackend } = await import("./backend");
 
 const room = (players: number, settings = {}) => {
   const ctx = { now: 1000, random: rng(1) };
@@ -68,5 +69,53 @@ describe("what for?: the deal", () => {
     await expect(lineupDecks(state)).rejects.toEqual(
       new GameError("few_cards"),
     );
+  });
+});
+
+describe("what for?: with a presenter", () => {
+  it("deals three missions a round to choose from", async () => {
+    const decks = await lineupDecks(room(4, { mode: "host" }), rng(4));
+    for (const d of decks) {
+      expect(d.options).toHaveLength(3);
+      expect(d.mission).toEqual(d.options?.[0]);
+    }
+    const all = decks.flatMap((d) => d.options?.map((m) => m.id) ?? []);
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it("makes a paper card of a name written by hand, one card per name", () => {
+    expect(paperCard("  Tia   Joana ")).toMatchObject({
+      id: "paper:tia-joana",
+      name: "Tia Joana",
+      imageUrl: null,
+    });
+    expect(paperCard("Tía joana")?.id).toBe("paper:tia-joana");
+    expect(paperCard("   ")).toBeNull();
+    expect(paperCard("x".repeat(41))).toBeNull();
+  });
+
+  it("lines up dealt cards, extras and paper cards as the presenter's lots", async () => {
+    const ctx = { now: 2000, random: rng(2) };
+    const state = room(4, { mode: "host", rounds: 1 });
+    const decks = await lineupDecks(state, rng(4));
+    let s = reduce(state, { type: "START", playerId: "p1", decks }, ctx);
+    const host = s.lu?.presenter as string;
+    const { rooms } = getBackend();
+    await rooms.create(s);
+    const [extra] = await getBackend().lineup.extras();
+    const { state: after } = await queueLots(s.code, host, [
+      { kind: "deal", i: 5 },
+      { kind: "extra", id: extra.id },
+      { kind: "paper", name: "Tia Joana" },
+    ]);
+    s = after;
+    expect(s.lu?.queue.map((c) => c.id)).toEqual([
+      decks[0].cards[5].id,
+      `x:${extra.id}`,
+      "paper:tia-joana",
+    ]);
+    await expect(
+      queueLots(s.code, host, [{ kind: "char", id: "wd-Qnobody" }]),
+    ).rejects.toEqual(new GameError("invalid_input"));
   });
 });

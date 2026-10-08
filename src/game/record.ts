@@ -48,6 +48,8 @@ export interface PlayerRecord {
   impostor?: ImpostorPlayerRecord;
   /** A What for? match: their boards, round by round. */
   lineup?: LineupRoundPart[];
+  /** "host": presented the match (What for?), no seat nor points. */
+  role?: "player" | "host";
 }
 
 export interface MatchRecord {
@@ -66,6 +68,8 @@ export interface MatchRecord {
   players: PlayerRecord[];
   /** A What for? match: its rounds (mission, lots, trades). */
   lineup?: { rounds: LineupRoundRecord[] };
+  /** A What for? match: everyone played, or someone presented. */
+  mode?: "classic" | "host";
 }
 
 /** What a player's part of a match gives: nothing for leaving. */
@@ -98,7 +102,12 @@ export function matchRecord(s: RoomState, now: number): MatchRecord | null {
     finishedAt: now,
     dayBonus: XP.dayFirst,
     players,
-    ...(s.lu ? { lineup: { rounds: lineupRounds(s.lu) } } : {}),
+    ...(s.lu
+      ? {
+          lineup: { rounds: lineupRounds(s.lu) },
+          mode: s.lu.presenter ? ("host" as const) : ("classic" as const),
+        }
+      : {}),
   };
 }
 
@@ -131,6 +140,7 @@ function lineupPlayers(
         timeMs: Math.max(0, now - startedAt),
         xp: part.xp,
         lineup: part.rounds,
+        ...(part.role === "host" ? { role: "host" as const } : {}),
       },
     ];
   });

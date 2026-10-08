@@ -25,6 +25,7 @@ import {
   boardOf,
   breaksFor,
   CROWD_MIN,
+  CUE_GAP_MS,
   cleanBoard,
   GUESS_MAX,
   HOST_MIN_PEOPLE,
@@ -42,13 +43,19 @@ import {
   WIN_POINTS,
 } from "./rules";
 import {
+  CUES,
   type LineupMatch,
+  LU_PHASES,
   type LuCard,
+  type LuCue,
   type LuDeck,
   type LuOffer,
   type LuRound,
   REACTIONS,
 } from "./types";
+
+/** What for?'s steps, for the presenter's remote. */
+const LU_PHASE_SET = new Set<string>(LU_PHASES);
 
 /** The most cards one side of a trade can carry. */
 const TRADE_MAX = 9;
@@ -284,6 +291,16 @@ export function hunch(s: RoomState, playerId: PlayerId, raw: string) {
   else delete lu.guesses[playerId];
 }
 
+/** The presenter's remote: a sound everyone hears, one every CUE_GAP_MS at most. */
+export function cue(s: RoomState, playerId: PlayerId, kind: LuCue, ctx: Ctx) {
+  if (!LU_PHASE_SET.has(s.phase)) fail("wrong_phase");
+  requirePresenter(s, playerId);
+  if (!CUES.includes(kind)) fail("invalid_input");
+  const lu = match(s);
+  if (lu.cue && ctx.now - lu.cue.at < CUE_GAP_MS) fail("too_early");
+  lu.cue = { kind, at: ctx.now, n: (lu.cue?.n ?? 0) + 1 };
+}
+
 /** Cards that already went under the hammer in this match (the lot on air included). */
 function auctioned(s: RoomState) {
   const lu = match(s);
@@ -298,6 +315,16 @@ function auctioned(s: RoomState) {
             : lu.lot + 1
           : 0;
     for (const c of deck.cards.slice(0, Math.max(0, upTo))) ids.add(c.id);
+  });
+  return ids;
+}
+
+/** Cards that went under the hammer before lot `i` of this round, and in the rounds before. */
+function usedBefore(lu: LineupMatch, i: number) {
+  const ids = new Set<string>();
+  lu.decks.forEach((deck, r) => {
+    const upTo = r + 1 < lu.round ? deck.lots : r + 1 === lu.round ? i : 0;
+    for (const c of deck.cards.slice(0, upTo)) ids.add(c.id);
   });
   return ids;
 }
@@ -371,6 +398,17 @@ function openLot(s: RoomState, ctx: Ctx, i: number, dealt = false) {
       s.phase = "queueing";
       startStep(s, ctx, i === 0 ? LU_CLOCKS.firstLot : LU_CLOCKS.nextLot);
       return;
+    }
+  } else if (lu.presenter) {
+    // the deal's card, unless the presenter already put it under the hammer
+    const used = usedBefore(lu, i);
+    const queued = new Set(lu.queue.map((c) => c.id));
+    if (used.has(deck.cards[i].id)) {
+      const k = deck.cards.findIndex(
+        (c, j) => j > i && !used.has(c.id) && !queued.has(c.id),
+      );
+      if (k > 0)
+        [deck.cards[i], deck.cards[k]] = [deck.cards[k], deck.cards[i]];
     }
   }
   s.phase = "bidding";

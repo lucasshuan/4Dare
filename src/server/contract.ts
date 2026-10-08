@@ -118,6 +118,17 @@ export interface LineupCatalog {
   cards: Record<string, number>;
 }
 
+/**
+ * A lot What for?'s presenter lines up: one of this round's dealt cards (by
+ * index), a library character, an extra, or a name written by hand (a paper
+ * card, this match only).
+ */
+export type QueueItem =
+  | { kind: "deal"; i: number }
+  | { kind: "char"; id: string }
+  | { kind: "extra"; id: string }
+  | { kind: "paper"; name: string };
+
 /** A card on What for?'s page among the dearest: its average price and how often it sold (GET /api/lineup/priciest). */
 export type PriciestCard = LuCard & { avg: number; sold: number };
 

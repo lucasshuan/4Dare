@@ -14,6 +14,7 @@ import type {
   LineupMatch,
   LineupView,
   LuCard,
+  LuCue,
   LuDeck,
   LuOffer,
 } from "./lineup/types";
@@ -691,6 +692,8 @@ export type GameEvent =
     }
   /** What for?, the presenter: the lots to come, in order (the server makes the cards). */
   | { type: "QUEUE"; playerId: PlayerId; cards: LuCard[] }
+  /** What for?, the presenter's remote: a sound for everyone (one every few seconds). */
+  | { type: "CUE"; playerId: PlayerId; kind: LuCue }
   /** What for?, a player waiting on the presenter: "What for ____" (empty takes it back). */
   | { type: "HUNCH"; playerId: PlayerId; text: string }
   /** What for?, the presenter: the winning board and why; not `final` keeps it as a draft. */

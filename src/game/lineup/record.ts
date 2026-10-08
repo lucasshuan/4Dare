@@ -55,6 +55,10 @@ export interface LineupRoundRecord {
   missionId: string | null;
   /** A mission somebody wrote: then there is no id. */
   missionText: string | null;
+  /** With a presenter: who, the board they picked and why. */
+  hostId: PlayerId | null;
+  verdictFor: PlayerId | null;
+  verdictWhy: string | null;
   /** The lots in auction order: the card, who paid (null: nobody bid) and how much. */
   lots: { card: string; buyer: PlayerId | null; price: number }[];
   /** Trades that went through, by card id. */
@@ -134,18 +138,42 @@ export function lineupXp(
   );
 }
 
-/** Each player dealt in: their rounds, place and whether they left. */
+/** Each player dealt in (their rounds, place and whether they left), and the presenter. */
 export function lineupPlayers(s: RoomState) {
   const lu = s.lu;
   if (!lu) return [];
   const places = luPlaces(lu);
   const still = new Set(inPlay(s));
-  return lu.dealt.map((id) => {
+  const played = lu.dealt.map((id) => {
     const rounds = lineupPart(lu, id);
     const left = !still.has(id);
     const place = left ? null : (places[id] ?? null);
-    return { id, rounds, place, left, xp: lineupXp(rounds, place, left) };
+    return {
+      id,
+      role: "player" as const,
+      rounds,
+      place,
+      left,
+      xp: lineupXp(rounds, place, left),
+    };
   });
+  if (!lu.presenter) return played;
+  // the presenter: no seat, no points; XP for each round they saw to the score
+  const left = !s.players.some((p) => p.id === lu.presenter && !p.away);
+  const presented = lu.rounds.filter(
+    (r) => Object.keys(r.points).length > 0,
+  ).length;
+  return [
+    ...played,
+    {
+      id: lu.presenter,
+      role: "host" as const,
+      rounds: [],
+      place: null,
+      left,
+      xp: left ? 0 : GAME_XP.lineup.presented * presented,
+    },
+  ];
 }
 
 /** The match's rounds played to the score: missions, lots and trades. */
@@ -161,6 +189,9 @@ export function lineupRounds(lu: LineupMatch): LineupRoundRecord[] {
           round: r.n,
           missionId: deck.mission.id,
           missionText: deck.mission.id ? null : deck.mission.text.en,
+          hostId: lu.presenter,
+          verdictFor: r.verdict?.final ? r.verdict.for : null,
+          verdictWhy: r.verdict?.final ? r.verdict.why || null : null,
           lots: deck.cards.slice(0, deck.lots).map((card, i) => {
             const tag = r.tags[i];
             return {

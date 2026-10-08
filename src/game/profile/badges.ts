@@ -8,6 +8,7 @@ import {
   impostorParts,
   lineupRounds,
   type PlayedMatch,
+  presentedMatches,
 } from "./history";
 
 export const TIERS = ["bronze", "silver", "gold"] as const;
@@ -39,6 +40,7 @@ export const BADGES = [
   { id: "bargain", group: "lineup", goals: [1, 5, 20] },
   { id: "allIn", group: "lineup", goals: [1, 5, 20] },
   { id: "stage", group: "lineup", goals: [5, 20, 75] },
+  { id: "booth", group: "lineup", goals: [3, 10, 30] },
   { id: "pictures", group: "library", goals: [1, 10, 50] },
   { id: "covers", group: "library", goals: [1, 5, 20] },
   { id: "characters", group: "library", goals: [1, 10, 50] },
@@ -109,6 +111,8 @@ export function badgeValues(
     bargain: lus.filter((r) => r.won && r.spent <= BARGAIN_COINS).length,
     allIn: lus.filter((r) => r.topPrice >= ALL_IN_COINS).length,
     stage: lus.filter((r) => r.crowd).length,
+    // matches presented from the TV chair
+    booth: presentedMatches(matches),
     pictures: made.pictures,
     covers: made.covers,
     characters: made.characters,

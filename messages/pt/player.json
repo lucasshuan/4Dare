@@ -234,7 +234,8 @@
       "guessHit": "Acertar a carta da tripulação na última chance",
       "roundWon": "Cada rodada vencida, sozinho ou empatado",
       "vote": "Cada voto que seu quadro recebe",
-      "crowd": "Prêmio do público (mais reações)"
+      "crowd": "Prêmio do público (mais reações)",
+      "presented": "Cada rodada apresentada da cabine"
     },
     "groups": {
       "general": "Gerais",
@@ -267,7 +268,8 @@
       "coach": "Técnico",
       "bargain": "Pechincha",
       "allIn": "Tudo num só",
-      "stage": "Palco"
+      "stage": "Palco",
+      "booth": "Na cabine"
     },
     "goals": {
       "matches": "{n} partidas",
@@ -288,7 +290,8 @@
       "coach": "Vencer {n} rodadas",
       "bargain": "{n, plural, one {# rodada vencida} other {# rodadas vencidas}} com um time de até 4 moedas",
       "allIn": "{n, plural, one {# vez} other {# vezes}} 10 moedas num personagem",
-      "stage": "{n, plural, one {# prêmio do público} other {# prêmios do público}}"
+      "stage": "{n, plural, one {# prêmio do público} other {# prêmios do público}}",
+      "booth": "Apresentar {n, plural, one {# partida} other {# partidas}}"
     }
   },
   "boards": {

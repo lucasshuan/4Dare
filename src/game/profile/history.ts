@@ -70,9 +70,11 @@ export interface LineupRoundStat {
   cards: number;
 }
 
-/** What for?'s part of a player's match: their rounds. */
+/** What for?'s part of a player's match: their rounds, or the rounds they presented. */
 export interface LineupPart {
   rounds: LineupRoundStat[];
+  /** Rounds presented (from the TV chair): no board, no points. */
+  presented?: number;
 }
 
 interface MatchBase {
@@ -105,6 +107,11 @@ export const lineupRounds = (matches: readonly PlayedMatch[]) =>
   matches.flatMap((m) =>
     m.game === "lineup" && m.details ? m.details.rounds : [],
   );
+
+/** What for? matches presented from the TV chair. */
+export const presentedMatches = (matches: readonly PlayedMatch[]) =>
+  matches.filter((m) => m.game === "lineup" && (m.details?.presented ?? 0) > 0)
+    .length;
 
 /** A round won with a team this cheap or cheaper is a bargain. */
 export const BARGAIN_COINS = 4;
@@ -169,6 +176,8 @@ export function lineupNumbers(matches: readonly PlayedMatch[]) {
     roundsWon: rounds.filter((r) => r.won).length,
     votes: rounds.reduce((sum, r) => sum + r.votes + (r.tieVotes ?? 0), 0),
     crowd: rounds.filter((r) => r.crowd).length,
+    /** Matches presented from the TV chair. */
+    presented: presentedMatches(matches),
     /** Coins a board cost, on average. */
     avgSpent: spent.length
       ? spent.reduce((a, b) => a + b, 0) / spent.length

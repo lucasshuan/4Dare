@@ -17,6 +17,7 @@ import {
   Tag,
   Target,
   Trophy,
+  Tv,
   UserRoundPlus,
   Users,
   VenetianMask,
@@ -48,6 +49,7 @@ const ICON: Record<BadgeId, LucideIcon> = {
   bargain: Tag,
   allIn: Coins,
   stage: Laugh,
+  booth: Tv,
   pictures: Camera,
   covers: ImageUp,
   characters: UserRoundPlus,
@@ -148,6 +150,7 @@ function LevelCard({ xp }: { xp: number }) {
         <Rule label={tb("rules.roundWon")} xp={GAME_XP.lineup.roundWon} />
         <Rule label={tb("rules.vote")} xp={GAME_XP.lineup.vote} />
         <Rule label={tb("rules.crowd")} xp={GAME_XP.lineup.crowd} />
+        <Rule label={tb("rules.presented")} xp={GAME_XP.lineup.presented} />
       </ul>
     </section>
   );

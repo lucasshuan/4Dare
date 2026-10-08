@@ -7,9 +7,11 @@ import { boardsOf, hosted, inPlay, leaderOf, reactionsOn } from "./engine";
 import { luTotals } from "./places";
 import { boardOf, REACT_MAX } from "./rules";
 import {
+  type LineupMatch,
   type LineupView,
   type LuBoard,
   type LuCard,
+  type LuDeck,
   type LuRound,
   type LuRoundView,
   REACTIONS,
@@ -147,6 +149,11 @@ export function luView(s: RoomState, viewer: PlayerId): LineupView | null {
         ? structuredClone(deck.options ?? [])
         : null,
     queue: isPresenter ? structuredClone(lu.queue) : null,
+    cue: lu.cue ? { ...lu.cue } : null,
+    deal:
+      isPresenter && (auction || before)
+        ? dealLeft(lu, deck, before ? lu.lot - 1 : lu.lot)
+        : null,
     guesses: MISSION_OUT.has(phase)
       ? { ...lu.guesses }
       : lu.guesses[viewer]
@@ -214,6 +221,21 @@ export function luView(s: RoomState, viewer: PlayerId): LineupView | null {
     totals: luTotals(lu),
     rated: round.rated[viewer] ?? null,
   };
+}
+
+/**
+ * The presenter's suggestions: this round's dealt lots after `last`, but
+ * the ones they already queued or put under the hammer.
+ */
+function dealLeft(lu: LineupMatch, deck: LuDeck, last: number) {
+  const taken = new Set([
+    ...lu.queue.map((c) => c.id),
+    ...deck.cards.slice(0, last + 1).map((c) => c.id),
+  ]);
+  return deck.cards
+    .slice(0, deck.lots)
+    .map((card, i) => ({ i, card: structuredClone(card) }))
+    .filter(({ i, card }) => i > last && !taken.has(card.id));
 }
 
 /** A player's status in a What for? step, or null outside them. */

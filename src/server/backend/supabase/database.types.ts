@@ -681,6 +681,7 @@ export type Database = {
           place: number | null;
           questions: number | null;
           result: string | null;
+          role: string;
           time_ms: number | null;
           user_id: string;
           was_guest: boolean;
@@ -700,6 +701,7 @@ export type Database = {
           place?: number | null;
           questions?: number | null;
           result?: string | null;
+          role?: string;
           time_ms?: number | null;
           user_id: string;
           was_guest: boolean;
@@ -719,6 +721,7 @@ export type Database = {
           place?: number | null;
           questions?: number | null;
           result?: string | null;
+          role?: string;
           time_ms?: number | null;
           user_id?: string;
           was_guest?: boolean;
@@ -739,6 +742,7 @@ export type Database = {
           finished_at: string;
           game: string;
           id: string;
+          mode: string | null;
           room_code: string;
           round: number;
           started_at: string;
@@ -749,6 +753,7 @@ export type Database = {
           finished_at: string;
           game?: string;
           id: string;
+          mode?: string | null;
           room_code: string;
           round: number;
           started_at: string;
@@ -759,6 +764,7 @@ export type Database = {
           finished_at?: string;
           game?: string;
           id?: string;
+          mode?: string | null;
           room_code?: string;
           round?: number;
           started_at?: string;

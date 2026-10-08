@@ -12,8 +12,10 @@ import {
   COINS,
   LOTS_PER_SEAT,
   OFF_MISSIONS_MAX,
+  QUEUE_MAX,
   ROUNDS,
 } from "@/game/lineup/rules";
+import { CUES, type LuCue } from "@/game/lineup/types";
 import { parseSynced } from "@/game/options";
 import { themeId } from "@/game/theme-id";
 import {
@@ -34,6 +36,7 @@ import {
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
   type RoomSettings,
+  type RoomState,
   type RoomView,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
@@ -49,11 +52,12 @@ import {
   fail,
   type Me,
   ok,
+  type QueueItem,
   type Result,
 } from "./contract";
 import { readImage } from "./images";
 import { impostorRound } from "./impostor";
-import { lineupDecks } from "./lineup";
+import { lineupDecks, queueLots, sendHunch, sendVerdict } from "./lineup";
 import { deleteLine, postLine, reportLine } from "./mural";
 import { countPick, nameWithPicture, sendPicture, wearing } from "./pictures";
 import {
@@ -118,6 +122,20 @@ async function act(
   const code = roomCode(rawCode);
   const who = await me();
   const { state, version } = await dispatch(code, () => build(who.id));
+  return toView(state, version, who.id, Date.now(), await lang());
+}
+
+/** Like act, through a server function that dispatches on its own. */
+async function actVia(
+  rawCode: string,
+  go: (
+    code: string,
+    id: string,
+  ) => Promise<{ state: RoomState; version: number }>,
+): Promise<RoomView> {
+  const code = roomCode(rawCode);
+  const who = await me();
+  const { state, version } = await go(code, who.id);
   return toView(state, version, who.id, Date.now(), await lang());
 }
 
@@ -515,6 +533,101 @@ export async function rateMission(
       up: up === null ? null : up === true,
     })),
   );
+}
+
+// --- what for?, with a presenter ------------------------------------------------
+
+/** The TV chair in the lobby: `seat` sits there (yourself; anyone, for the host), null empties it. */
+export async function sitChair(
+  code: string,
+  seat: string | null,
+): Promise<Result<RoomView>> {
+  return run(() =>
+    act(code, (id) => ({
+      type: "CHAIR",
+      playerId: id,
+      seat: seat === null ? null : playerId(seat),
+    })),
+  );
+}
+
+/** The presenter's mission: one of the three (`pick`), or their own words. */
+export async function chooseMission(
+  code: string,
+  choice: { pick: number } | { text: string },
+): Promise<Result<RoomView>> {
+  return run(() => {
+    const pick = "pick" in choice ? choice.pick : null;
+    const text = "text" in choice ? choice.text : null;
+    if (pick !== null && (!Number.isInteger(pick) || pick < 0 || pick > 2))
+      bad();
+    if (text !== null && (typeof text !== "string" || text.length > 400)) bad();
+    return act(code, (id) => ({ type: "MISSION", playerId: id, pick, text }));
+  });
+}
+
+const queueSchema = z
+  .array(
+    z.discriminatedUnion("kind", [
+      z.object({ kind: z.literal("deal"), i: z.number().int().min(0).max(60) }),
+      z.object({ kind: z.literal("char"), id: z.string().min(1).max(120) }),
+      z.object({ kind: z.literal("extra"), id: z.string().min(1).max(80) }),
+      z.object({ kind: z.literal("paper"), name: z.string().min(1).max(80) }),
+    ]),
+  )
+  .max(QUEUE_MAX);
+
+/** The presenter's lots to come, the whole list in order. */
+export async function lineUpLots(
+  code: string,
+  items: QueueItem[],
+): Promise<Result<RoomView>> {
+  return run(() => {
+    const parsed = queueSchema.safeParse(items);
+    if (!parsed.success) bad();
+    return actVia(code, (c, id) => queueLots(c, id, parsed.data ?? []));
+  });
+}
+
+/** "What for ____" while the presenter chooses (empty takes it back). */
+export async function guessWhatFor(
+  code: string,
+  text: string,
+): Promise<Result<RoomView>> {
+  return run(() => {
+    if (typeof text !== "string" || text.length > 200) bad();
+    return actVia(code, (c, id) => sendHunch(c, id, text));
+  });
+}
+
+/** The presenter's verdict: the winning board and why; `final` false keeps it as a draft. */
+export async function giveVerdict(
+  code: string,
+  ownerId: string,
+  why: string,
+  final: boolean,
+): Promise<Result<RoomView>> {
+  return run(() => {
+    if (typeof why !== "string" || why.length > 300) bad();
+    return actVia(code, (c, id) =>
+      sendVerdict(c, id, {
+        ownerId: playerId(ownerId),
+        why,
+        final: final === true,
+      }),
+    );
+  });
+}
+
+/** The presenter's remote: a sound for everyone. */
+export async function playCue(
+  code: string,
+  kind: LuCue,
+): Promise<Result<RoomView>> {
+  return run(() => {
+    if (!CUES.includes(kind)) bad();
+    return act(code, (id) => ({ type: "CUE", playerId: id, kind }));
+  });
 }
 
 // --- match ------------------------------------------------------------------

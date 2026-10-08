@@ -164,6 +164,8 @@ export interface LineupMatch {
   queue: LuCard[];
   /** "What for ____": each player's guess while the presenter chooses, shown with the envelope. */
   guesses: Record<PlayerId, string>;
+  /** The presenter's latest sound effect, for everyone; `n` counts them. */
+  cue?: { kind: LuCue; at: number; n: number };
   decks: LuDeck[];
   /** The round under way, 1-based. */
   round: number;
@@ -186,6 +188,10 @@ export interface LineupMatch {
   /** The board on stage (index into the round's order). */
   showing: number;
 }
+
+/** The presenter's remote: a drum roll, applause, a horn, a gasp. */
+export const CUES = ["drum", "clap", "horn", "gasp"] as const;
+export type LuCue = (typeof CUES)[number];
 
 /** The reactions on stage, in order. */
 export const REACTIONS = ["😂", "🔥", "💀", "👏"] as const;
@@ -232,6 +238,10 @@ export interface LineupView {
   guesses: Record<PlayerId, string>;
   /** With a presenter: their pick (a draft only they see) and, once given, their verdict. */
   verdict: (LuVerdict & { final: boolean }) | null;
+  /** The presenter's latest sound effect. */
+  cue: { kind: LuCue; at: number; n: number } | null;
+  /** The presenter's: this round's dealt cards still to come (their suggestions); null for everyone else. */
+  deal: { i: number; card: LuCard }[] | null;
   /** Everyone dealt in: they bid, defend and vote. */
   dealtIds: PlayerId[];
   coins: Record<PlayerId, number>;

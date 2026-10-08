@@ -85,6 +85,9 @@ function playedMatch(m: MatchRecord, p: PlayerRecord): PlayedMatch {
       game: "lineup",
       details: p.lineup
         ? {
+            ...(p.role === "host"
+              ? { presented: m.lineup?.rounds.length ?? 0 }
+              : {}),
             rounds: p.lineup.map((r) => ({
               round: r.round,
               missionId:

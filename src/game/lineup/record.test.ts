@@ -170,3 +170,86 @@ describe("what for?: the record", () => {
     expect(first?.lineup?.[0].won).toBe(true);
   });
 });
+
+describe("what for?: the record, with a presenter", () => {
+  it("keeps who presented, their verdict and their XP", () => {
+    const g = new Game(4, 1, {
+      game: "lineup",
+      seats: 8,
+      mode: "host",
+      rounds: 1,
+      interval: false,
+      trades: false,
+    });
+    const lots = lotsFor(3, g.state.settings.lotsPerSeat);
+    g.do({
+      type: "START",
+      playerId: g.state.hostId,
+      decks: [
+        {
+          ...deck(lots),
+          options: [
+            deck(lots).mission,
+            { id: "fix-car", text: deck(lots).mission.text },
+          ],
+        },
+      ],
+    });
+    g.skipReveal();
+    const lu = () => {
+      const m = g.state.lu;
+      if (!m) throw new Error("no lineup match");
+      return m;
+    };
+    const host = lu().presenter as string;
+    g.do({ type: "MISSION", playerId: host, pick: 1, text: null });
+    // the presenter's queue stays empty: the deal's cards come in, nobody bids
+    while (g.state.phase === "queueing" || g.state.phase === "bidding") {
+      if (g.state.phase === "queueing") g.timeout();
+      else
+        for (const id of lu().dealt)
+          if (g.state.phase === "bidding") g.do({ type: "FOLD", playerId: id });
+      g.skipReveal();
+    }
+    for (const id of lu().dealt)
+      if (g.state.phase === "defending")
+        g.do({ type: "DONE", playerId: id, done: true });
+    g.skipReveal();
+    while (g.state.phase === "presenting") {
+      g.do({
+        type: "PRESENTED",
+        playerId: lu().rounds[0].order[lu().showing],
+      });
+      g.skipReveal();
+    }
+    const [winner] = lu().dealt;
+    g.do({
+      type: "VERDICT",
+      playerId: host,
+      ownerId: winner,
+      why: "The only one who'd show up",
+      final: true,
+    });
+    g.skipReveal();
+    for (const id of lu().dealt)
+      if (g.state.phase === "scoring")
+        g.do({ type: "DONE", playerId: id, done: true });
+    g.skipReveal();
+    expect(g.state.phase).toBe("finished");
+    const record = matchRecord(g.state, g.now);
+    expect(record?.mode).toBe("host");
+    expect(record?.lineup?.rounds[0]).toMatchObject({
+      missionId: "fix-car",
+      hostId: host,
+      verdictFor: winner,
+      verdictWhy: "The only one who'd show up",
+    });
+    const presenter = record?.players.find((p) => p.userId === host);
+    expect(presenter).toMatchObject({
+      role: "host",
+      place: null,
+      xp: GAME_XP.lineup.presented,
+    });
+    expect(record?.players.find((p) => p.userId === winner)?.place).toBe(1);
+  });
+});

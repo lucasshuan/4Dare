@@ -66,6 +66,13 @@ export function supabaseLineup(): LineupStore {
       name: { en: r.en, es: r.es, ja: r.ja, pt: r.pt },
     }));
   });
+  const blocked = cached(async () => {
+    const { data, error } = await db()
+      .from("lineup_blocked")
+      .select("character_id");
+    if (error) throw error;
+    return new Set((data ?? []).map((r) => r.character_id));
+  });
   const pools = new Map<Lang, () => Promise<PoolCard[]>>();
   const dearest = new Map<
     Lang,
@@ -74,6 +81,7 @@ export function supabaseLineup(): LineupStore {
   return {
     missions,
     extras,
+    blocked,
     pool(lang) {
       let read = pools.get(lang);
       if (!read) {

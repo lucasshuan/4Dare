@@ -35,6 +35,7 @@ import {
   giveVerdict,
   hunch,
   judge,
+  cue as luCue,
   luLeft,
   luTimeout,
   markDone,
@@ -834,6 +835,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       return chooseMission(s, e.playerId, e.pick, e.text, ctx);
     case "QUEUE":
       return setQueue(s, e.playerId, e.cards, ctx);
+    case "CUE":
+      return luCue(s, e.playerId, e.kind, ctx);
     case "HUNCH":
       return hunch(s, e.playerId, e.text);
     case "VERDICT":
