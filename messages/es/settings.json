@@ -59,6 +59,16 @@
           "label": "Carta oculta",
           "hint": "Tu carta queda boca abajo hasta que la mantienes pulsada: para pantallas que otros ven"
         }
+      },
+      "lineup": {
+        "plainLetters": {
+          "label": "Letra simple",
+          "hint": "Los tableros sin la letra de tiza: más fácil de leer"
+        },
+        "hideReactions": {
+          "label": "Ocultar reacciones",
+          "hint": "Sin emojis flotando sobre el tablero en el escenario"
+        }
       }
     }
   },

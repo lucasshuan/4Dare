@@ -59,6 +59,16 @@
           "label": "Hidden card",
           "hint": "Your card stays face down until you hold it: for screens others can see"
         }
+      },
+      "lineup": {
+        "plainLetters": {
+          "label": "Plain letters",
+          "hint": "The boards without the chalk lettering: easier to read"
+        },
+        "hideReactions": {
+          "label": "Hide reactions",
+          "hint": "No emoji floating over the board on stage"
+        }
       }
     }
   },

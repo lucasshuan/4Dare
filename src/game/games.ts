@@ -8,7 +8,11 @@ export const DEFAULT_GAME: GameKey = "who-am-i";
  * The games anyone can pick: a game still being built stays off the menus
  * and the server won't make a room for it.
  */
-export const OPEN_GAMES: readonly GameKey[] = ["who-am-i", "impostor"];
+export const OPEN_GAMES: readonly GameKey[] = [
+  "who-am-i",
+  "impostor",
+  "lineup",
+];
 
 /**
  * How many seats a room of each game can have; the host opens and closes

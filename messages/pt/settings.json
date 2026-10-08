@@ -59,6 +59,16 @@
           "label": "Carta escondida",
           "hint": "A sua carta fica virada até você segurar: para telas que outros veem"
         }
+      },
+      "lineup": {
+        "plainLetters": {
+          "label": "Letra simples",
+          "hint": "Os quadros sem a letra de giz: mais fácil de ler"
+        },
+        "hideReactions": {
+          "label": "Esconder reações",
+          "hint": "Nada de emojis flutuando sobre o quadro no palco"
+        }
       }
     }
   },
