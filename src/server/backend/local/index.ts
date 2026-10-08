@@ -7,11 +7,11 @@ import { localCharacters } from "./characters";
 import { localChat } from "./chat";
 import { localFiles } from "./files";
 import { localImages } from "./images";
+import { localImpostor } from "./impostor";
 import { localLineup } from "./lineup";
 import { localMatches } from "./matches";
 import { localMural } from "./mural";
 import { localProfiles } from "./profiles";
-import { localQuestions } from "./questions";
 import { localRooms } from "./rooms";
 import { localThemes } from "./themes";
 
@@ -26,7 +26,7 @@ export function localBackend(): Backend {
     rooms: localRooms(),
     matches: localMatches(),
     characters,
-    questions: localQuestions(),
+    impostor: localImpostor(),
     lineup: localLineup(),
     images: localImages(characters),
     themes: themes(localThemes()),

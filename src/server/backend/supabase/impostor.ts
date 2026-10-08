@@ -6,13 +6,13 @@ import {
 } from "@/game/impostor/questions";
 import { QUESTION_KINDS, type QuestionKind } from "@/game/impostor/types";
 import type { ThemeSet } from "@/game/theme-sets";
-import type { QuestionStore } from "../types";
+import type { ImpostorStore } from "../types";
 import { serviceClient } from "./clients";
 
 /** The bank changes by hand, rarely: one read per server every ten minutes. */
 const TTL_MS = 10 * 60_000;
 
-export function supabaseQuestions(): QuestionStore {
+export function supabaseImpostor(): ImpostorStore {
   const db = () => serviceClient();
   let cached: { at: number; list: Promise<BankQuestion[]> } | null = null;
   const read = async (): Promise<BankQuestion[]> => {

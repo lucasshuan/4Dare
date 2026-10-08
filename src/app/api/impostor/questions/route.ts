@@ -7,7 +7,7 @@ import { getBackend } from "@/server/backend";
  * minutes and CDNs an hour.
  */
 export async function GET() {
-  const questions = await getBackend().questions.list();
+  const questions = await getBackend().impostor.list();
   return Response.json(
     { questions },
     {

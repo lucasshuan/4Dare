@@ -276,7 +276,7 @@ function saveMatch(state: RoomState) {
   const lang = state.players.find((p) => p.id === state.hostId)?.lang ?? "en";
   if (parts.length)
     background(() =>
-      getBackend().questions.count(parts.map((p) => ({ ...p, lang }))),
+      getBackend().impostor.count(parts.map((p) => ({ ...p, lang }))),
     );
   // what each What for? mission and card did, in the deck's language
   if (state.lu) {

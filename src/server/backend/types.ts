@@ -132,7 +132,7 @@ export interface QuestionCount {
 }
 
 /** The Impostor's question bank: the live questions, and what they did in play. */
-export interface QuestionStore {
+export interface ImpostorStore {
   /** Every live question (cached). */
   list(): Promise<BankQuestion[]>;
   count(rows: QuestionCount[]): Promise<void>;
@@ -508,7 +508,7 @@ export interface Backend {
   rooms: RoomStore;
   matches: MatchStore;
   characters: CharacterStore;
-  questions: QuestionStore;
+  impostor: ImpostorStore;
   lineup: LineupStore;
   images: ImageStore;
   themes: ThemeSource;

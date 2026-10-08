@@ -207,12 +207,12 @@ export async function impostorRound(
   avoid: Theme[],
   random: () => number = Math.random,
 ): Promise<{ themes: Theme[]; deals: ImpDeal[] }> {
-  const { themes, questions } = getBackend();
+  const { themes, impostor } = getBackend();
   const host = state.players.find((p) => p.id === state.hostId);
   const lang: Lang = host?.lang ?? "en";
   const [candidates, bank] = await Promise.all([
     themes.draw(avoid, CANDIDATES, roomFilter(state)),
-    questions.list().catch(() => [] as BankQuestion[]),
+    impostor.list().catch(() => [] as BankQuestion[]),
   ]);
   const dealt = await Promise.all(
     candidates.map((t) =>

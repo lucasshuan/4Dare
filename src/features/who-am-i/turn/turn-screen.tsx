@@ -20,12 +20,6 @@ import { useStage } from "@/features/stage/stage-context";
 import { PHONE, useStageTimeline } from "@/features/stage/use-stage-timeline";
 import { CastScene } from "@/features/who-am-i/scenes/cast-scene";
 import {
-  endsWithQuestionMark,
-  questionMark,
-  withoutQuestionMark,
-  withQuestionMark,
-} from "@/game/who-am-i/question";
-import {
   type AnswerValue,
   type Lang,
   MAX_GUESS,
@@ -33,6 +27,12 @@ import {
   MAX_QUESTION,
   type PlayerView,
 } from "@/game/types";
+import {
+  endsWithQuestionMark,
+  questionMark,
+  withoutQuestionMark,
+  withQuestionMark,
+} from "@/game/who-am-i/question";
 import { cn } from "@/lib/cn";
 import { focusIsFree } from "@/lib/focus";
 import { dur, ease, gs } from "@/lib/motion";

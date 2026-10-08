@@ -1,6 +1,6 @@
 import "server-only";
 import type { BankQuestion } from "@/game/impostor/questions";
-import type { QuestionCount, QuestionStore } from "../types";
+import type { ImpostorStore, QuestionCount } from "../types";
 import { readJson, writeJson } from "./disk";
 import { LOCAL_QUESTIONS } from "./impostor-questions";
 
@@ -9,7 +9,7 @@ const STATS_FILE = "impostor-question-stats.json";
 type Stats = Record<string, Omit<QuestionCount, "id" | "lang">>;
 
 /** The whole first lot of the bank, as the table had it; counts kept on disk. */
-export function localQuestions(): QuestionStore {
+export function localImpostor(): ImpostorStore {
   return {
     async list(): Promise<BankQuestion[]> {
       return LOCAL_QUESTIONS;
