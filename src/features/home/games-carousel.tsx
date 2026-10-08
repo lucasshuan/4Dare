@@ -14,13 +14,14 @@ import { cn } from "@/lib/cn";
 
 /**
  * Game cards side by side, scrolling sideways (snap, swipe, arrows) instead of
- * wrapping, so more games never push the page into a vertical scroll.
+ * wrapping, so more games never push the page into a vertical scroll; phones
+ * get a grid of two a row.
  */
 export function GamesCarousel({ children }: { children: ReactNode }) {
   const t = useTranslations("home.games");
   const track = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ start: true, end: true });
-  // Only a row wider than the screen scrolls: a scrolling box clips the cards' shadows.
+  // Only a row wider than the screen scrolls.
   const [overflowing, setOverflowing] = useState(false);
 
   const measure = useCallback(() => {
@@ -47,7 +48,7 @@ export function GamesCarousel({ children }: { children: ReactNode }) {
     const card = el?.firstElementChild as HTMLElement | null;
     if (!el || !card) return;
     el.scrollBy({
-      left: direction * (card.offsetWidth + 20),
+      left: direction * card.offsetWidth,
       behavior: "smooth",
     });
   };
@@ -75,9 +76,8 @@ export function GamesCarousel({ children }: { children: ReactNode }) {
       <div
         ref={track}
         onScroll={measure}
-        // when it scrolls, the padding leaves room for the cards' lift and shadow
         className={cn(
-          "-mx-4 -mt-4 -mb-12 flex gap-5 px-4 pt-4 pb-12 sm:-mx-8 sm:px-8",
+          "group/games grid grid-cols-2 gap-[3px] sm:-mx-8 sm:flex sm:gap-0 sm:px-8",
           overflowing
             ? "snap-x snap-mandatory scroll-px-4 overflow-x-auto scroll-smooth sm:scroll-px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             : "overflow-visible",

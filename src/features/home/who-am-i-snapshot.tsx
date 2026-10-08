@@ -64,7 +64,7 @@ export function WhoAmISnapshot({
     <div
       aria-hidden="true"
       className={cn(
-        "relative aspect-16/10 overflow-hidden rounded-lg art-whoami",
+        "relative aspect-square overflow-hidden art-whoami",
         className,
       )}
     >
@@ -73,7 +73,7 @@ export function WhoAmISnapshot({
       <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/50 blur-2xl" />
 
       <m.div
-        className="absolute bottom-[-6%] left-[8%] w-[26%]"
+        className="absolute bottom-[23%] left-[9%] w-[29%]"
         style={{ rotate: -10 }}
         {...(still
           ? {}
@@ -89,7 +89,7 @@ export function WhoAmISnapshot({
         <MiniCard figure="lady" />
       </m.div>
       <m.div
-        className="absolute right-[8%] bottom-[-6%] w-[26%]"
+        className="absolute right-[9%] bottom-[23%] w-[29%]"
         style={{ rotate: 10 }}
         {...(still
           ? {}
@@ -107,7 +107,7 @@ export function WhoAmISnapshot({
       </m.div>
 
       {/* your card: "?" on the front, a character on the back */}
-      <div className="absolute bottom-[4%] left-1/2 w-[30%] -translate-x-1/2 perspective-[800px]">
+      <div className="absolute bottom-[25%] left-1/2 w-[33%] -translate-x-1/2 perspective-[800px]">
         <m.div
           className="relative transform-3d"
           {...(still
@@ -136,13 +136,13 @@ export function WhoAmISnapshot({
 
       {/* the question, then the answer */}
       <m.div
-        className="absolute top-[9%] left-[7%] max-w-[52%] origin-bottom-left rounded-lg rounded-bl-sm bg-surface px-3 py-2 font-bold font-display text-[clamp(13px,1.6vw,16px)] text-ink leading-tight shadow-card"
+        className="absolute top-[6%] left-[7%] max-w-[52%] origin-bottom-left rounded-lg rounded-bl-sm bg-surface px-3 py-2 font-bold font-display text-[clamp(13px,1.6vw,16px)] text-ink leading-tight shadow-card"
         {...(still ? {} : popIn(0.06))}
       >
         {t("demoQuestion")}
       </m.div>
       <m.div
-        className="absolute top-[11%] right-[7%] origin-left"
+        className="absolute top-[8%] right-[7%] origin-left"
         {...(still ? {} : popIn(0.22))}
       >
         <AnswerChip value="yes" small pressed />

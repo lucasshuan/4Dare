@@ -10,13 +10,13 @@ import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 /** The cards on the table, left to right: left edge (% of the box) and tilt. */
 const CARDS = [
-  { x: 9, tilt: -8 },
-  { x: 31, tilt: -3 },
-  { x: 53, tilt: 3 },
-  { x: 75, tilt: 8 },
+  { x: 6, tilt: -8 },
+  { x: 26.5, tilt: -3 },
+  { x: 46.5, tilt: 3 },
+  { x: 67, tilt: 8 },
 ] as const;
 /** A card's width, in % of the box. */
-const W = 22;
+const W = 27;
 /** The crew's card and the odd one, its neighbour. */
 const CREW = "lion";
 const ODD = "giraffe";
@@ -74,7 +74,7 @@ export function ImpostorSnapshot({
     <div
       aria-hidden="true"
       className={cn(
-        "relative isolate aspect-16/10 overflow-hidden rounded-lg art-impostor [container-type:size]",
+        "relative isolate aspect-square overflow-hidden art-impostor [container-type:size]",
         className,
       )}
     >
@@ -82,11 +82,11 @@ export function ImpostorSnapshot({
       <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/10 blur-2xl" />
       <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/20 blur-2xl" />
       <VenetianMask
-        className="absolute top-[10%] right-[8%] size-[16cqh] rotate-12 text-no opacity-20"
+        className="absolute top-[6%] right-[8%] size-[10cqh] rotate-12 text-no opacity-20"
         strokeWidth={2.25}
       />
       <VenetianMask
-        className="absolute top-[38%] left-[3%] size-[10cqh] -rotate-12 text-apricot opacity-25"
+        className="absolute top-[76%] left-[9%] size-[6cqh] -rotate-12 text-apricot opacity-25"
         strokeWidth={2.25}
       />
 
@@ -97,7 +97,7 @@ export function ImpostorSnapshot({
           <m.div
             // biome-ignore lint/suspicious/noArrayIndexKey: four fixed seats
             key={i}
-            className="absolute bottom-[7%]"
+            className="absolute bottom-[31%]"
             style={{ left: `${c.x}%`, width: `${W}%`, rotate: c.tilt }}
             animate={
               step === 0 && !still
@@ -142,7 +142,7 @@ export function ImpostorSnapshot({
         {s.dark ? (
           <m.span
             key={`spot-${loop}`}
-            className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[58%] size-[78cqh] rounded-pill shadow-[0_0_0_200vmax_var(--art-impostor-dim)]"
+            className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[50%] size-[64cqh] rounded-pill shadow-[0_0_0_200vmax_var(--art-impostor-dim)]"
             style={{
               background:
                 "radial-gradient(circle, rgba(246,227,161,0.16), transparent 48%, var(--art-impostor-dim) 72%)",
@@ -166,7 +166,7 @@ export function ImpostorSnapshot({
         {s.caught ? (
           <m.span
             key={`stamp-${loop}`}
-            className="-translate-x-1/2 -translate-y-1/2 absolute top-[58%] whitespace-nowrap rounded-md bg-no px-[3cqh] py-[1.2cqh] font-display font-extrabold text-[clamp(13px,8cqh,20px)] text-on-no uppercase tracking-[0.02em] shadow-pop"
+            className="-translate-x-1/2 -translate-y-1/2 absolute top-[49%] whitespace-nowrap rounded-md bg-no px-[2cqh] py-[0.8cqh] font-display font-extrabold text-[clamp(13px,5cqh,20px)] text-on-no uppercase tracking-[0.02em] shadow-pop"
             style={{ left: spot }}
             initial={
               still ? { opacity: 0 } : { opacity: 0, scale: 2.4, rotate: -16 }

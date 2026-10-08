@@ -10,12 +10,12 @@ import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
 /** The team bought at auction, in a new order every loop. */
 const TEAM: Figure[] = ["fox", "robot", "pirate", "witch"];
-/** Where the photos land, left to right: price, left edge (% of the board) and tilt. */
-const SLOTS: { price: number; x: number; tilt: number }[] = [
-  { price: 5, x: 6, tilt: -5 },
-  { price: 1, x: 29, tilt: 4 },
-  { price: 3, x: 52, tilt: -3 },
-  { price: 1, x: 75, tilt: 5 },
+/** Where the photos land, left to right: price, left and top edges (% of the board) and tilt. */
+const SLOTS: { price: number; x: number; y: number; tilt: number }[] = [
+  { price: 5, x: 6, y: 24, tilt: -5 },
+  { price: 1, x: 29, y: 28, tilt: 4 },
+  { price: 3, x: 52, y: 23, tilt: -3 },
+  { price: 1, x: 75, y: 27, tilt: 5 },
 ];
 const COINS = 10;
 
@@ -84,24 +84,24 @@ export function LineupSnapshot({
     <div
       aria-hidden="true"
       className={cn(
-        "relative isolate aspect-16/10 overflow-hidden rounded-lg art-lineup [container-type:size]",
+        "relative isolate aspect-square overflow-hidden art-lineup [container-type:size]",
         className,
       )}
     >
       <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/15 blur-2xl" />
 
       {/* the board, in its frame */}
-      <div className="absolute inset-x-[6%] top-[12%] bottom-[10%] rounded-[3cqh] bg-wood p-[2.4cqh] shadow-card">
-        <div className="relative size-full overflow-hidden rounded-[1.6cqh] bg-board">
-          <span className="absolute top-[9%] left-[5%] h-[2.6cqh] w-[34%] rounded-pill bg-chalk/80" />
-          <span className="absolute inset-[5%] rounded-[1cqh] border border-chalk/20" />
+      <div className="absolute inset-x-[6%] top-[13%] bottom-[29%] rounded-[3.4cqh] bg-wood p-[2.6cqh] shadow-card">
+        <div className="relative size-full overflow-hidden rounded-[2cqh] bg-board">
+          <span className="absolute top-[9%] left-[5%] h-[1.6cqh] w-[34%] rounded-pill bg-chalk/80" />
+          <span className="absolute inset-[5%] rounded-[1.4cqh] border border-chalk/20" />
           {SLOTS.map((c, i) => (
             <AnimatePresence key={c.x}>
               {i < s.team ? (
                 <m.div
                   key={`${c.x}-${loop}`}
-                  className="absolute top-[26%] w-[19%]"
-                  style={{ left: `${c.x}%` }}
+                  className="absolute w-[19%]"
+                  style={{ left: `${c.x}%`, top: `${c.y}%` }}
                   initial={
                     still ? false : { opacity: 0, scale: 1.6, y: "-30%" }
                   }
@@ -115,7 +115,7 @@ export function LineupSnapshot({
                       className="aspect-4/5"
                     />
                     <span className="-translate-x-1/2 absolute -top-[5%] left-1/2 h-[9%] w-[44%] bg-butter/85" />
-                    <span className="absolute -right-[14%] -bottom-[8%] rounded-[0.8cqh] bg-kraft px-[1.4cqh] font-bold font-mono text-[6cqh] text-kraft-ink leading-[1.3]">
+                    <span className="absolute -right-[14%] -bottom-[8%] rounded-[0.5cqh] bg-kraft px-[0.9cqh] font-bold font-mono text-[3.75cqh] text-kraft-ink leading-[1.3]">
                       {c.price}
                     </span>
                   </div>
@@ -127,8 +127,8 @@ export function LineupSnapshot({
       </div>
 
       {/* the purse emptying */}
-      <div className="absolute top-[3%] left-[7%] flex items-center gap-[1cqh] rounded-pill bg-surface px-[2cqh] py-[0.6cqh] font-bold font-mono text-[6.5cqh] text-ink shadow-card">
-        <Coin className="h-[4cqh] w-[8cqh]" />
+      <div className="absolute top-[3%] left-[7%] flex items-center gap-[0.6cqh] rounded-pill bg-surface px-[1.25cqh] py-[0.4cqh] font-bold font-mono text-[4cqh] text-ink shadow-card">
+        <Coin className="h-[2.5cqh] w-[5cqh]" />
         <m.span
           key={spent}
           initial={still ? false : { y: -6, opacity: 0 }}
@@ -143,20 +143,20 @@ export function LineupSnapshot({
         {s.open ? (
           <m.div
             key={`envelope-${loop}`}
-            className="absolute right-[6%] bottom-[8%] w-[46%] origin-bottom-right"
+            className="absolute right-[5%] bottom-[27%] w-[54%] origin-bottom-right"
             initial={still ? false : { opacity: 0, y: "-60%", rotate: 18 }}
             animate={{ opacity: 1, y: "0%", rotate: -4 }}
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <div className="relative rounded-[1.4cqh] bg-kraft px-[3cqh] pt-[2.4cqh] pb-[3cqh] shadow-pop">
-              <span className="block font-bold font-display text-[5.5cqh] text-kraft-ink/70 uppercase tracking-[0.04em]">
+            <div className="relative rounded-[0.9cqh] bg-kraft px-[4cqh] pt-[3.6cqh] pb-[4cqh] shadow-pop">
+              <span className="block font-bold font-display text-[3.6cqh] text-kraft-ink/70 uppercase tracking-[0.04em]">
                 {t("banner.what")}
               </span>
-              <span className="block font-bold font-display text-[8cqh] text-kraft-ink leading-[1.1] [text-wrap:balance]">
+              <span className="block font-bold font-display text-[5.6cqh] text-kraft-ink leading-[1.1] [text-wrap:balance]">
                 {line}
               </span>
-              <span className="-top-[7cqh] absolute right-[8%] grid size-[11cqh] place-items-center rounded-pill bg-wax font-black text-[6cqh] text-white shadow-card">
+              <span className="-top-[5cqh] absolute right-[8%] grid size-[9.5cqh] place-items-center rounded-pill bg-wax font-black text-[4.5cqh] text-white shadow-card">
                 ?
               </span>
             </div>

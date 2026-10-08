@@ -17,10 +17,12 @@ import { HubActions, HubBrand } from "./hub-actions";
 import { useAuthErrorToast } from "./use-auth-error";
 
 /**
- * Card width follows the window height, so the whole hub fits on screen
- * without a vertical scroll (340px from about a 730px-tall window up, less below).
+ * Square tiles, side by side with no gap. On wider screens their width
+ * follows the window height, so the whole hub fits on screen without a
+ * vertical scroll (344px from about a 730px-tall window up, less below);
+ * phones get two a row.
  */
-const CARD = "w-[clamp(220px,calc((100dvh_-_370px)_*_1.6),340px)]";
+const CARD = "w-full sm:w-[clamp(220px,calc((100dvh_-_370px)_*_1.6),344px)]";
 
 /** The hub: logo and who you are on top, then the games. */
 export function HomeScreen() {
@@ -51,7 +53,7 @@ export function HomeScreen() {
               opacity: 1,
               transition: { delay: 0.2 + OPEN_GAMES.length * 0.08 },
             }}
-            className={`${CARD} flex h-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-line-strong border-dashed p-6 font-semibold text-ink-muted`}
+            className={`${CARD} flex aspect-square flex-col items-center justify-center gap-2 border-[1.5px] border-line-strong border-dashed p-4 text-center font-semibold text-ink-muted text-sm sm:hidden`}
           >
             <Sparkles className="size-5" strokeWidth={1.75} />
             {t("games.soon")}
@@ -75,29 +77,34 @@ function GameCard({ game, delay }: { game: GameKey; delay: number }) {
       }}
       className={CARD}
     >
+      {/* Spotlight: hovering (or focusing) a tile dims the others, lights a
+          beam on it and raises its name; phones keep a small caption on */}
       <Link
         href={GAME_PATHS[game]}
-        className="group flex flex-col gap-3 rounded-xl bg-surface p-3 pb-4 shadow-card transition-[transform,box-shadow] duration-300 ease-soft hover:-translate-y-1 focus-visible:-translate-y-1"
+        className="group/tile relative block aspect-square overflow-hidden bg-surface-sunken outline-offset-[-3px]! transition-[filter] duration-500 ease-soft [container-type:inline-size] group-has-[a:focus-visible]/games:[&:not(:focus-visible)]:brightness-42 group-has-[a:focus-visible]/games:[&:not(:focus-visible)]:saturate-35 sm:group-has-[a:hover]/games:[&:not(:hover)]:brightness-42 sm:group-has-[a:hover]/games:[&:not(:hover)]:saturate-35"
       >
-        <Art className="transition-transform duration-500 ease-soft group-hover:scale-[1.02]" />
-        <div className="flex items-end justify-between gap-3 px-1.5">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <h3 className="truncate font-bold font-display text-2xl tracking-[-0.01em]">
-              {t("name")}
-            </h3>
-            <span className="inline-flex items-center gap-1.5 font-medium text-[13px] text-ink-muted">
-              <UsersRound className="size-4" strokeWidth={1.75} />
-              {t("players")}
+        <Art />
+        <span className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-[78%] bg-[linear-gradient(rgb(255_240_190/0.34),rgb(255_240_190/0)_85%)] opacity-0 mix-blend-screen transition-opacity duration-400 ease-soft [clip-path:polygon(34%_0,66%_0,100%_100%,0_100%)] group-hover/tile:opacity-100 group-focus-visible/tile:opacity-100 max-sm:hidden" />
+        <div className="absolute inset-x-0 bottom-0 z-[6] flex flex-col gap-0.5 bg-[linear-gradient(to_top,rgb(12_14_22/0.82),rgb(12_14_22/0))] px-3 pt-[30px] pb-[11px] text-white sm:top-0 sm:justify-end sm:gap-3.5 sm:bg-[linear-gradient(to_top,rgb(12_14_22/0.9),rgb(12_14_22/0.62)_34%,rgb(12_14_22/0)_62%)] sm:p-6 sm:opacity-0 sm:transition-opacity sm:duration-350 sm:ease-soft sm:group-hover/tile:opacity-100 sm:group-focus-visible/tile:opacity-100 [&>*]:transition-transform [&>*]:duration-450 [&>*]:ease-soft sm:[&>*]:translate-y-3 sm:group-hover/tile:[&>*]:translate-y-0 sm:group-focus-visible/tile:[&>*]:translate-y-0">
+          <h3 className="truncate font-display font-extrabold text-lg leading-[1.05] tracking-[-0.01em] sm:text-[min(38px,11cqw)] sm:leading-none">
+            {t("name")}
+          </h3>
+          <div className="flex items-end justify-between gap-3 delay-40">
+            <div className="flex min-w-0 flex-col gap-1 font-medium text-white/86 text-xs sm:text-sm">
+              <span className="inline-flex items-center gap-1.5 max-sm:hidden">
+                <UsersRound className="size-4" strokeWidth={1.75} />
+                {t("players")}
+              </span>
+              <OnlineNow game={game} />
+            </div>
+            <span className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-pill bg-white px-[18px] font-semibold text-[#1e2433] text-[15px] max-sm:hidden">
+              {t("play")}
+              <ArrowRight
+                className="size-4 transition-transform duration-300 ease-soft group-hover/tile:translate-x-0.5"
+                strokeWidth={2}
+              />
             </span>
-            <OnlineNow game={game} />
           </div>
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-pill bg-ink px-4 py-2 font-semibold text-on-ink text-sm">
-            {t("play")}
-            <ArrowRight
-              className="size-4 transition-transform duration-300 ease-soft group-hover:translate-x-0.5"
-              strokeWidth={2}
-            />
-          </span>
         </div>
       </Link>
     </m.div>
@@ -111,8 +118,8 @@ function OnlineNow({ game }: { game: GameKey }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 font-medium text-[13px] transition-opacity duration-300",
-        online ? "text-yes" : "text-ink-muted",
+        "inline-flex items-center gap-1.5 transition-opacity duration-300",
+        online ? "text-[#7ee0d8]" : "text-white/86",
         online === null && "invisible opacity-0",
       )}
     >
