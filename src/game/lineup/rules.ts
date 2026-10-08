@@ -137,6 +137,9 @@ function gridSize(n: number) {
   return n <= 1 ? 120 : n === 2 ? 104 : n <= 4 ? 92 : n <= 6 ? 80 : 70;
 }
 
+/** Photos lean a little as they come, each its own way. */
+const GRID_TILTS = [-4, 3, -2, 4, -3, 2, -1, 3, -4];
+
 /** Where `n` photos sit as they come from the auction: a centred grid. */
 export function gridSpots(n: number): Omit<LuSticker, "c">[] {
   const cols = n <= 1 ? 1 : n <= 4 ? 2 : 3;
@@ -152,7 +155,7 @@ export function gridSpots(n: number): Omit<LuSticker, "c">[] {
       x: Math.round((SLATE.w - inRow * colW) / 2 + (col + 0.5) * colW),
       y: Math.round(top + row * rowH + (size * 1.25) / 2 + 6),
       w: size,
-      r: 0,
+      r: GRID_TILTS[i % GRID_TILTS.length],
     };
   });
 }

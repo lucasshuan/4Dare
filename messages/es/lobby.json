@@ -41,7 +41,11 @@
     "validateSeconds": "Revisar",
     "replySeconds": "Responder",
     "talkSeconds": "Hablar",
-    "lastSeconds": "Última oportunidad"
+    "lastSeconds": "Última oportunidad",
+    "lotSeconds": "Lote",
+    "tradeSeconds": "Cambios",
+    "defendSeconds": "Armar el tablero",
+    "judgeSeconds": "Juzgar"
   },
   "timesLabel": "Tiempos",
   "start": "Empezar",

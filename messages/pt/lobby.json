@@ -41,7 +41,11 @@
     "validateSeconds": "Conferir",
     "replySeconds": "Responder",
     "talkSeconds": "Conversar",
-    "lastSeconds": "Última chance"
+    "lastSeconds": "Última chance",
+    "lotSeconds": "Lote",
+    "tradeSeconds": "Trocas",
+    "defendSeconds": "Montar o quadro",
+    "judgeSeconds": "Julgar"
   },
   "timesLabel": "Tempos",
   "start": "Começar",

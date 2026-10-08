@@ -1,0 +1,162 @@
+{
+  "deck": {
+    "prev": "Quadro anterior",
+    "next": "Próximo quadro",
+    "swipe": "Deslize para ver os outros quadros"
+  },
+  "opening": {
+    "round": "Rodada {n} de {of}",
+    "coins": "Cada um tem {coins} moedas.",
+    "auction": "Personagens vão a leilão.",
+    "secret": "Ninguém sabe pra quê.",
+    "defend": "Depois, defendam o seu time.",
+    "defendChalk": "o meu time é o melhor!",
+    "envelope": "A missão já está no envelope.",
+    "anything": "Pode ser qualquer coisa que um time faça junto.",
+    "examples": [
+      "Até dar banho num elefante.",
+      "Até empurrar um ônibus ladeira acima.",
+      "Até subir um piano pela escada.",
+      "Até carregar um sofá por três quarteirões.",
+      "Até fazer um castelo de areia do tamanho de uma casa.",
+      "Até assar um bolo para cem pessoas."
+    ],
+    "tips": [
+      "{coins} moedas acabam rápido.",
+      "O mais caro nem sempre é o melhor.",
+      "Um time de um também se defende.",
+      "Guarde umas moedas para o fim.",
+      "Um figurante barato pode salvar o time."
+    ],
+    "tip": "💡 Dica: {tip}"
+  },
+  "envelope": {
+    "whatFor": "Pra quê?"
+  },
+  "auction": {
+    "lot": "Lote {n} de {of}",
+    "next": "Próximo:",
+    "outbid": "{name} chegou antes. O lance agora é {price}.",
+    "watching": "Você assiste a este leilão.",
+    "extra": "Figurante",
+    "star": "Famoso",
+    "sold": "Vendido!",
+    "leftover": "Sobras",
+    "leads": "lidera",
+    "passed": "passou",
+    "seeTeam": "Ver o time de {name}",
+    "has": "{coins, plural, one {# moeda} other {# moedas}}",
+    "going": {
+      "once": "Dou-lhe uma…",
+      "twice": "Dou-lhe duas…",
+      "three": "Dou-lhe três!"
+    },
+    "broke": "Sem moedas: agora você assiste.",
+    "youLead": "Você lidera",
+    "tooHigh": "Esse lance já passou das suas moedas",
+    "offer": "Toque no valor que oferece",
+    "bidN": "Dar {n}",
+    "all": "tudo",
+    "passedYou": "Passou",
+    "pass": "Passo",
+    "teamOf": "Time de {name}",
+    "noTeam": "Ainda sem ninguém."
+  },
+  "break": {
+    "kicker": "Intervalo · metade do leilão",
+    "title": "Como estão os times?",
+    "left": "{n, plural, one {# lote até o fim} other {# lotes até o fim}}",
+    "go": "Continuar",
+    "waiting": "Esperando ({n} de {of})"
+  },
+  "wrap": {
+    "title": "Fim do leilão.",
+    "count": "{n, plural, one {# foto} other {# fotos}} · {left, plural, one {sobrou # moeda} other {sobraram # moedas}}",
+    "freebies": "Quem ficou sem time ganhou uma carta das sobras."
+  },
+  "trade": {
+    "kicker": "Trocas · antes do envelope",
+    "title": "A última jogada é trocar",
+    "how": "Escolha cartas suas, alguém e cartas dele. Uma proposta aberta por vez, e só vale quando o outro aceita.",
+    "offers": "{from} propõe a {to}",
+    "accept": "Aceitar",
+    "decline": "Recusar",
+    "withdraw": "Retirar proposta",
+    "give": "Você dá",
+    "get": "Em troca de, do time de {name}",
+    "pickSomeone": "Com quem você quer trocar?",
+    "propose": "Propor troca",
+    "done": "Pronto",
+    "waiting": "Esperando ({n} de {of})"
+  },
+  "defend": {
+    "title": "Por que o seu time é o certo para a missão?",
+    "teamName": "Nome do time",
+    "turn": "Girar",
+    "size": "Tamanho",
+    "write": "Escreva aqui",
+    "hintMove": "Arraste para mover",
+    "hintKnobs": "Bolinhas: tamanho e giro",
+    "hintWrite": "Toque no vazio para escrever",
+    "done": "Pronto",
+    "waiting": "Esperando ({n} de {of})"
+  },
+  "stage": {
+    "yourTurn": "Sua vez de falar!",
+    "talk": "Fala, {name}!",
+    "board": "Quadro {n} de {of}",
+    "done": "Terminei",
+    "react": {
+      "0": "Rir",
+      "1": "Fogo",
+      "2": "Morri",
+      "3": "Aplaudir"
+    },
+    "reactLeft": "{n, plural, =0 {Sem reações neste quadro} one {# reação} other {# reações}}"
+  },
+  "judge": {
+    "kicker": "Voto secreto",
+    "title": "Qual time cumpre melhor a missão?",
+    "tieKicker": "Desempate",
+    "tieTitle": "Escolha entre os empatados",
+    "noName": "Sem nome",
+    "yourTeam": "Seu time",
+    "yourVote": "Seu voto",
+    "tap": "Toque no quadro do meio para votar",
+    "change": "Toque em outro quadro para mudar",
+    "sending": "Votando…",
+    "tieWait": "Quem votou fora do empate decide",
+    "voted": "{n} de {of} votaram"
+  },
+  "tally": {
+    "title": "Votos",
+    "tieTitle": "Desempate",
+    "tie": "Empate!",
+    "tiedWin": "Empate!",
+    "winner": "Venceu!",
+    "nobody": "Ninguém votou"
+  },
+  "score": {
+    "kicker": "Rodada {n} de {of}",
+    "won": "{name} venceu!",
+    "tied": "Empate: campeões juntos!",
+    "nobody": "Sem vencedor nesta rodada",
+    "votes": "{n, plural, =0 {nenhum voto} one {# voto} other {# votos}}",
+    "crowd": "Prêmio do público",
+    "total": "{n} no total",
+    "goodMission": "Missão boa?",
+    "good": "Missão boa",
+    "bad": "Missão ruim",
+    "next": "Próxima rodada",
+    "podium": "Ver o placar final",
+    "waiting": "Esperando ({n} de {of})"
+  },
+  "result": {
+    "title": "Placar final",
+    "points": "{n, plural, one {# ponto} other {# pontos}}",
+    "champions": "Os quadros campeões",
+    "round": "Rodada {n}",
+    "toLobby": "Voltar para a sala",
+    "home": "Sair para o início"
+  }
+}

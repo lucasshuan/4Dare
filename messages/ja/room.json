@@ -1,6 +1,8 @@
 {
   "loading": "ルームを開いています…",
   "theme": "テーマ：",
+  "mission": "ミッション",
+  "coins": "コイン{n}枚",
   "goHome": "トップに戻る",
   "problem": {
     "not_found": {

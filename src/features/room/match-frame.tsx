@@ -7,6 +7,7 @@ import { ThemeTag } from "@/components/ui/screen";
 import { Timer } from "@/components/ui/timer";
 import { useRoomContext } from "@/features/data/room-context";
 import { MyCardButton } from "@/features/impostor/my-card";
+import { Purse } from "@/features/lineup/purse";
 import { useStage } from "@/features/stage/stage-context";
 import { GiveUpButton } from "@/features/turn/give-up-button";
 import {
@@ -132,6 +133,8 @@ const AWAITED = new Set<PlayerStatus>([
   "validating",
   "replying",
   "talking",
+  "working",
+  "judging",
 ]);
 
 /**
@@ -158,6 +161,12 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
   // the header comes in with the match (after the lobby leaves); joined later, it is just there
   const [arrives] = useState(() => frame.beat?.kind === "curtain");
   const theme = tagReached ? view.theme : null;
+  // What for?: the mission, once the envelope put it up; the purse during the auction
+  const mission = tagReached ? (view.lu?.mission ?? null) : null;
+  const purse =
+    view.lu && (view.phase === "bidding" || view.phase === "halftime")
+      ? (view.lu.coins[me.id] ?? null)
+      : null;
   // the Impostor: your card, from when the deal show has put it up
   const card =
     frame.screen === "imp" && frame.beat?.kind !== "card"
@@ -188,6 +197,24 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
           {card ? (
             <m.div key="card" {...TAG_POP} className="flex shrink-0">
               <MyCardButton card={card} />
+            </m.div>
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence initial={false}>
+          {purse !== null ? (
+            <m.div key="purse" {...TAG_POP} className="flex shrink-0">
+              <Purse coins={purse} />
+            </m.div>
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence initial={false}>
+          {mission ? (
+            <m.div key="mission" {...TAG_POP} className="flex min-w-0">
+              <ThemeTag
+                label={t("mission")}
+                theme={mission.text[lang]}
+                emoji="✉️"
+              />
             </m.div>
           ) : null}
         </AnimatePresence>

@@ -6,6 +6,7 @@
 import {
   type Beat,
   type Identity,
+  type Localized,
   type PlayerId,
   type Reveal,
   type RoomState,
@@ -46,7 +47,19 @@ export type SystemLine<P = ChatPerson> =
   /** "Order: [av]Bia, [av]Rafa, [av]you, [av]Leo" */
   | { type: "order"; players: P[] }
   /** "Match {n} · [av]Bia's turn" */
-  | { type: "firstTurn"; n: number; player: P };
+  | { type: "firstTurn"; n: number; player: P }
+  /** What for?: "🔨 Hulk to [av]Bia for 3" */
+  | { type: "sold"; card: string; player: P; price: number }
+  /** What for?: "Nobody wanted A pigeon: it goes to the leftovers" */
+  | { type: "leftover"; card: string }
+  /** What for?: "[av]Rafa gets A pigeon from the leftovers" */
+  | { type: "freebie"; card: string; player: P }
+  /** What for?: "⇄ [av]Rafa gave Black Panther to [av]Leo for A baby, A clown" */
+  | { type: "trade"; from: P; to: P; gave: string[]; got: string[] }
+  /** What for?: "✉️ What for? Change a tire, in the rain." */
+  | { type: "mission"; text: Localized }
+  /** What for?: "🏆 Round 1: [av]Bia" (or several, tied) */
+  | { type: "roundWon"; n: number; players: P[] };
 
 /** A line as it is kept (ChatPerson) or as the browser gets it (ShownPerson, see ShownLine). */
 export interface ChatMessage<P = ChatPerson> {
@@ -175,6 +188,97 @@ export function systemLines(
         },
         showAt: (cast?.until ?? after.playStartedAt) + SHOW_MARKS.turnLine,
       });
+  }
+  lines.push(...lineupLines(before, after, now, scale));
+  return lines;
+}
+
+/** What for?'s lines: each hammer, the leftovers, the trades, the mission, the winners. */
+function lineupLines(
+  before: RoomState,
+  after: RoomState,
+  now: number,
+  scale: number,
+): NewChatMessage[] {
+  const a = after.lu;
+  const b = before.lu;
+  if (!a) return [];
+  const lines: NewChatMessage[] = [];
+  const round = a.rounds.at(-1);
+  const deck = a.decks[a.round - 1];
+  if (!round || !deck) return lines;
+  const same = b?.round === a.round ? b.rounds.at(-1) : undefined;
+  const person = (id: PlayerId | null) => {
+    const p = id ? after.players.find((x) => x.id === id) : undefined;
+    return p ? chatPerson(p) : null;
+  };
+  const name = (c: number) => deck.cards[c]?.name ?? "";
+  const sold = show(after.reveal, "sold");
+  const soldAt = sold ? sold.startsAt + Math.round(600 * scale) : now;
+  for (const [key, tag] of Object.entries(round.tags)) {
+    const c = Number(key);
+    if (same?.tags[c]) continue;
+    if (tag.by && tag.price > 0) {
+      const p = person(tag.by);
+      if (p)
+        lines.push({
+          system: { type: "sold", card: name(c), player: p, price: tag.price },
+          showAt: soldAt,
+        });
+    } else {
+      const owner = Object.entries(round.hands).find(([, h]) => h.includes(c));
+      const p = person(owner?.[0] ?? null);
+      if (p)
+        lines.push({
+          system: { type: "freebie", card: name(c), player: p },
+          showAt: show(after.reveal, "wrap")?.startsAt ?? now,
+        });
+    }
+  }
+  for (const c of round.leftovers.slice(same?.leftovers.length ?? 0))
+    if (!Object.values(round.hands).some((h) => h.includes(c)))
+      lines.push({
+        system: { type: "leftover", card: name(c) },
+        showAt: soldAt,
+      });
+  for (const tr of round.trades.slice(same?.trades.length ?? 0)) {
+    const from = person(tr.from);
+    const to = person(tr.to);
+    if (from && to)
+      lines.push({
+        system: {
+          type: "trade",
+          from,
+          to,
+          gave: tr.give.map(name),
+          got: tr.get.map(name),
+        },
+        showAt: now,
+      });
+  }
+  if (after.phase === "defending" && before.phase !== "defending") {
+    const env = show(after.reveal, "envelope");
+    const beat = beatOf(env, "envelope");
+    lines.push({
+      system: { type: "mission", text: deck.mission.text },
+      showAt: beat ? at(beat, SHOW_MARKS.missionTag, scale) : now,
+    });
+  }
+  if (
+    after.phase === "scoring" &&
+    before.phase !== "scoring" &&
+    round.winners.length
+  ) {
+    const tally = show(after.reveal, "tally");
+    const stamp = beatOf(tally, "stamp");
+    lines.push({
+      system: {
+        type: "roundWon",
+        n: round.n,
+        players: round.winners.flatMap((id) => person(id) ?? []),
+      },
+      showAt: stamp?.startsAt ?? now,
+    });
   }
   return lines;
 }

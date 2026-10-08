@@ -52,7 +52,9 @@
       "guessing": "Dê seu palpite!",
       "validating": "Confira um palpite!",
       "replying": "Responda pela sua carta!",
-      "talking": "Vote em alguém!"
+      "talking": "Vote em alguém!",
+      "working": "Sua jogada!",
+      "judging": "Vote num quadro!"
     }
   },
   "rooms": {

@@ -17,6 +17,7 @@ const ROOM_ONLY = [
   "pickCard",
   "chat",
   "impostor",
+  "lineup",
   "meta",
 ];
 

@@ -3,6 +3,7 @@
 // Pure: the room, the lab and the tests all derive it from (view, server time), so every
 // screen lands on the same frame, after a reload too.
 
+import { LU_PHASES } from "@/game/lineup/types";
 import { SEAT_COLORS } from "@/game/seat-colors";
 import {
   type Beat,
@@ -10,6 +11,7 @@ import {
   type Phase,
   type RevealView,
   type RoomView,
+  SHOW_KINDS,
   SHOW_MARKS,
   type ShowView,
 } from "@/game/types";
@@ -18,7 +20,7 @@ import { type Look, NO_LOOK, seatLook, type Tone } from "./stage-backdrop";
 export type { Look } from "./stage-backdrop";
 
 export type StageArea = "lobby" | "match" | "result" | "closed";
-export type StageScreen = "theming" | "vote" | "pick" | "turn" | "imp";
+export type StageScreen = "theming" | "vote" | "pick" | "turn" | "imp" | "lu";
 
 export interface StageFrame {
   area: StageArea;
@@ -59,20 +61,19 @@ const IMP_PHASES: ReadonlySet<Phase> = new Set([
   "talking",
   "last_chance",
 ]);
+/** What for?'s steps: one screen plays them all. */
+const LU_STEPS: ReadonlySet<Phase> = new Set(LU_PHASES);
 const MATCH_PHASES: ReadonlySet<Phase> = new Set([
   "theming",
   "voting",
   "picking",
   ...TURN_PHASES,
   ...IMP_PHASES,
+  ...LU_STEPS,
 ]);
 
 export const isShow = (r: RevealView | null | undefined): r is ShowView =>
-  !!r &&
-  (r.kind === "opening" ||
-    r.kind === "theme" ||
-    r.kind === "cast" ||
-    r.kind === "deal");
+  !!r && (SHOW_KINDS as readonly string[]).includes(r.kind);
 
 /** A guess's result or a pass on the whole screen: the next turn waits for it. */
 export const isGuessScene = (r: RevealView | null | undefined) =>
@@ -138,6 +139,8 @@ function beatScreen(
   show: ShowView,
   kind: BeatKind,
 ): StageScreen {
+  // What for? plays every show on its own screen
+  if (view.lu) return "lu";
   if (show.kind === "opening") return view.vote ? "vote" : "theming";
   // the Impostor's deal: the vote's result, then your card on the play screen
   if (show.kind === "deal")
@@ -156,6 +159,7 @@ function phaseScreen(phase: Phase): StageScreen | null {
   if (phase === "voting") return "vote";
   if (phase === "picking") return "pick";
   if (IMP_PHASES.has(phase)) return "imp";
+  if (LU_STEPS.has(phase)) return "lu";
   return TURN_PHASES.has(phase) ? "turn" : null;
 }
 
@@ -181,7 +185,16 @@ export function stageFrame(view: RoomView, now: number): StageFrame {
 
   // the theme tag: hidden until the theme beat's mark while a theme show is ahead or on
   let themeFrom: number | null = null;
-  if (area === "match" && view.theme) {
+  if (area === "match" && view.lu?.mission) {
+    // What for?'s mission: up in the header from the envelope's mark
+    const envelope = showOfKind(view, "envelope");
+    const beat = beatOf(envelope, "envelope");
+    themeFrom = envelope
+      ? beat
+        ? markAt(beat, SHOW_MARKS.missionTag)
+        : envelope.startsAt
+      : 0;
+  } else if (area === "match" && view.theme) {
     const theme = showOfKind(view, "theme") ?? showOfKind(view, "deal");
     const beat = beatOf(theme, "theme");
     themeFrom = theme
@@ -268,6 +281,20 @@ const BUTTER: Look = {
 };
 
 const seatTone = (seat: number) => `seat-${(seat % SEAT_COLORS) + 1}` as Tone;
+/** What for?'s slate: the rules, the boards side by side, the envelope, the votes. */
+const SLATE: Look = {
+  tone: "board",
+  glyphs: "q",
+  glyphColor: "var(--chalk)",
+  fade: 0.8,
+};
+/** What for?'s auction and trades: a kraft wash with coins and envelopes. */
+const AUCTION: Look = {
+  tone: "kraft",
+  glyphs: "lineup",
+  glyphColor: "var(--kraft-ink)",
+  fade: 0.8,
+};
 /** The Impostor's talk: the theme's coral, with "?" marks. */
 const TALK: Look = {
   tone: "theme",
@@ -305,6 +332,12 @@ export function stageLook(
     const beat = on.beat ?? show.beats[0];
     const t = on.beat ? now : beat.startsAt;
     const until = on.beat ? beat.until : show.startsAt;
+    if (view.lu && beat.kind !== "curtain" && beat.kind !== "round")
+      return {
+        look:
+          beat.kind === "sold" || beat.kind === "entrance" ? AUCTION : SLATE,
+        next: until,
+      };
     /** Look `a` until the mark, `b` from it. */
     const split = (ms: number, a: Look, b: Look) => {
       const m = markAt(beat, ms);
@@ -358,6 +391,25 @@ export function stageLook(
   // the Impostor's vote result: lights down while it shows
   if (r?.kind === "out" && now < r.until && IMP_PHASES.has(view.phase))
     return { look: BRAND, next: r.until };
+  // What for?: the auction on kraft, the slate between, everyone's own board in their colour
+  if (view.lu)
+    switch (view.phase) {
+      case "bidding":
+      case "trading":
+        return { look: AUCTION, next: null };
+      case "halftime":
+        return { look: SLATE, next: null };
+      case "defending":
+        return { look: mine(), next: null };
+      case "presenting":
+        return {
+          look: withQ(seatOf(view.lu.order[view.lu.showing])),
+          next: null,
+        };
+      case "judging":
+      case "tiebreak":
+        return { look: BUTTER, next: null };
+    }
   switch (view.phase) {
     case "theming":
     case "voting":

@@ -41,7 +41,11 @@
     "validateSeconds": "Check",
     "replySeconds": "Answer",
     "talkSeconds": "Talk",
-    "lastSeconds": "Last chance"
+    "lastSeconds": "Last chance",
+    "lotSeconds": "Lot",
+    "tradeSeconds": "Trades",
+    "defendSeconds": "Build the board",
+    "judgeSeconds": "Judge"
   },
   "timesLabel": "Times",
   "start": "Start match",

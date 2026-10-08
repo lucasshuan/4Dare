@@ -13,6 +13,9 @@ export type Tone =
   | "brand"
   | "butter"
   | "theme"
+  /** What for?'s slate, solid, and its kraft wash. */
+  | "board"
+  | "kraft"
   | "seat-1"
   | "seat-2"
   | "seat-3"
@@ -23,8 +26,8 @@ export type Tone =
   | "seat-8"
   | "seat-9"
   | "seat-10";
-/** The symbols bobbing on it: "?" marks, the theme set's emoji, or a typed theme's pen and "?". */
-export type Glyphs = "none" | "q" | "set" | "typed";
+/** The symbols bobbing on it: "?" marks, the theme set's emoji, a typed theme's pen and "?", or What for?'s auction things. */
+export type Glyphs = "none" | "q" | "set" | "typed" | "lineup";
 
 /** What the backdrop shows. A new look fades in over `fade` seconds. */
 export interface Look {
@@ -60,6 +63,8 @@ const TONES: Record<Exclude<Tone, "none">, { color: string; solid?: true }> = {
   brand: { color: "var(--brand-stage)", solid: true },
   butter: { color: "var(--butter)" },
   theme: { color: "var(--no)" },
+  board: { color: "var(--board)", solid: true },
+  kraft: { color: "var(--kraft)" },
   "seat-1": { color: "var(--seat-1)" },
   "seat-2": { color: "var(--seat-2)" },
   "seat-3": { color: "var(--seat-3)" },
@@ -84,6 +89,8 @@ const SPOTS: [number, number, number, number][] = [
 ];
 
 const MARKS = SPOTS.map(() => "?");
+/** What for?'s auction: coins, envelopes, price tags. */
+const LINEUP_GLYPHS = ["🪙", "✉️", "🏷️", "📌", "🪙", "🔨", "✉️"];
 
 /** Both layers crossfade the same way; the leaving one takes the new look's length. */
 const fade = {
@@ -121,9 +128,11 @@ export function StageBackdrop({
       ? null
       : look.glyphs === "q"
         ? { key: "q", list: MARKS }
-        : look.glyphs === "set" && set
-          ? { key: `set-${set}`, list: themeGlyphs(set) }
-          : { key: "typed", list: TYPED_GLYPHS };
+        : look.glyphs === "lineup"
+          ? { key: "lineup", list: LINEUP_GLYPHS }
+          : look.glyphs === "set" && set
+            ? { key: `set-${set}`, list: themeGlyphs(set) }
+            : { key: "typed", list: TYPED_GLYPHS };
   return createPortal(
     <div
       aria-hidden

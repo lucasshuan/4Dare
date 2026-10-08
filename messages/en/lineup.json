@@ -1,0 +1,162 @@
+{
+  "deck": {
+    "prev": "Previous board",
+    "next": "Next board",
+    "swipe": "Swipe to see the other boards"
+  },
+  "opening": {
+    "round": "Round {n} of {of}",
+    "coins": "Everyone has {coins} coins.",
+    "auction": "Characters go up for auction.",
+    "secret": "Nobody knows what for.",
+    "defend": "Then, defend your team.",
+    "defendChalk": "my team is the best!",
+    "envelope": "The mission is already in the envelope.",
+    "anything": "It can be anything a team does together.",
+    "examples": [
+      "Even giving an elephant a bath.",
+      "Even pushing a bus uphill.",
+      "Even carrying a piano up the stairs.",
+      "Even carrying a couch three blocks.",
+      "Even building a sandcastle the size of a house.",
+      "Even baking a cake for a hundred people."
+    ],
+    "tips": [
+      "{coins} coins go fast.",
+      "The priciest isn't always the best.",
+      "A team of one can still defend itself.",
+      "Save a few coins for the end.",
+      "A cheap extra can save the team."
+    ],
+    "tip": "💡 Tip: {tip}"
+  },
+  "envelope": {
+    "whatFor": "What for?"
+  },
+  "auction": {
+    "lot": "Lot {n} of {of}",
+    "next": "Next:",
+    "outbid": "{name} got there first. The bid is now {price}.",
+    "watching": "You're watching this auction.",
+    "extra": "Extra",
+    "star": "Famous",
+    "sold": "Sold!",
+    "leftover": "Leftovers",
+    "leads": "leads",
+    "passed": "passed",
+    "seeTeam": "See {name}'s team",
+    "has": "{coins, plural, one {# coin} other {# coins}}",
+    "going": {
+      "once": "Going once…",
+      "twice": "Going twice…",
+      "three": "Three!"
+    },
+    "broke": "Out of coins: you watch now.",
+    "youLead": "You lead",
+    "tooHigh": "The bid is past your coins",
+    "offer": "Tap the amount you offer",
+    "bidN": "Bid {n}",
+    "all": "all",
+    "passedYou": "Passed",
+    "pass": "Pass",
+    "teamOf": "{name}'s team",
+    "noTeam": "Nobody yet."
+  },
+  "break": {
+    "kicker": "Break · halfway through the auction",
+    "title": "How are the teams?",
+    "left": "{n, plural, one {# lot to go} other {# lots to go}}",
+    "go": "Continue",
+    "waiting": "Waiting ({n} of {of})"
+  },
+  "wrap": {
+    "title": "The auction is over.",
+    "count": "{n, plural, one {# photo} other {# photos}} · {left, plural, one {# coin left} other {# coins left}}",
+    "freebies": "Whoever had no team got a card from the leftovers."
+  },
+  "trade": {
+    "kicker": "Trades · before the envelope",
+    "title": "The last move is a trade",
+    "how": "Pick some of your cards, someone, and some of theirs. One open offer at a time, and it only counts when they accept.",
+    "offers": "{from} offers {to}",
+    "accept": "Accept",
+    "decline": "Decline",
+    "withdraw": "Withdraw offer",
+    "give": "You give",
+    "get": "In return, from {name}'s team",
+    "pickSomeone": "Who do you want to trade with?",
+    "propose": "Offer trade",
+    "done": "Done",
+    "waiting": "Waiting ({n} of {of})"
+  },
+  "defend": {
+    "title": "Why is your team the right one for the mission?",
+    "teamName": "Team name",
+    "turn": "Turn",
+    "size": "Size",
+    "write": "Write here",
+    "hintMove": "Drag to move",
+    "hintKnobs": "Knobs: size and turn",
+    "hintWrite": "Tap an empty spot to write",
+    "done": "Done",
+    "waiting": "Waiting ({n} of {of})"
+  },
+  "stage": {
+    "yourTurn": "Your turn to talk!",
+    "talk": "Go, {name}!",
+    "board": "Board {n} of {of}",
+    "done": "Done talking",
+    "react": {
+      "0": "Laugh",
+      "1": "Fire",
+      "2": "Dead",
+      "3": "Applause"
+    },
+    "reactLeft": "{n, plural, =0 {No reactions left for this board} one {# reaction} other {# reactions}}"
+  },
+  "judge": {
+    "kicker": "Secret vote",
+    "title": "Which team does the mission best?",
+    "tieKicker": "Tiebreak",
+    "tieTitle": "Pick one of the tied boards",
+    "noName": "No name",
+    "yourTeam": "Your team",
+    "yourVote": "Your vote",
+    "tap": "Tap the board in the middle to vote",
+    "change": "Tap another board to change it",
+    "sending": "Voting…",
+    "tieWait": "Those who voted outside the tie decide",
+    "voted": "{n} of {of} voted"
+  },
+  "tally": {
+    "title": "Votes",
+    "tieTitle": "Tiebreak",
+    "tie": "Tie!",
+    "tiedWin": "Tie!",
+    "winner": "Winner!",
+    "nobody": "Nobody voted"
+  },
+  "score": {
+    "kicker": "Round {n} of {of}",
+    "won": "{name} won!",
+    "tied": "A tie: champions together!",
+    "nobody": "No winner this round",
+    "votes": "{n, plural, =0 {no votes} one {# vote} other {# votes}}",
+    "crowd": "Crowd's prize",
+    "total": "{n} in total",
+    "goodMission": "Good mission?",
+    "good": "Good mission",
+    "bad": "Bad mission",
+    "next": "Next round",
+    "podium": "See the final score",
+    "waiting": "Waiting ({n} of {of})"
+  },
+  "result": {
+    "title": "Final score",
+    "points": "{n, plural, one {# point} other {# points}}",
+    "champions": "The winning boards",
+    "round": "Round {n}",
+    "toLobby": "Back to the room",
+    "home": "Leave to home"
+  }
+}

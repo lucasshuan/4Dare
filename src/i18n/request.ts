@@ -23,6 +23,8 @@ export const NAMESPACES = [
   "chat",
   // the Impostor's match screens
   "impostor",
+  // What for?'s match screens
+  "lineup",
 ] as const;
 
 // `locale` is set when a caller names it (share images, metadata). Then the request is

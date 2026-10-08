@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, m, type Variants } from "motion/react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { buttonClass } from "@/components/ui/button";
@@ -35,6 +36,10 @@ import {
 } from "./match-frame";
 import { RevealOverlay } from "./reveal-overlay";
 import { stepCall } from "./step-call";
+
+/** What for?'s screens come with its match: no other room loads them. */
+const loadLineup = () => import("@/features/lineup/lineup-screen");
+const LineupScreen = dynamic(() => loadLineup().then((m) => m.LineupScreen));
 
 /**
  * Everything a room shows once the player is seated (plan 1.2): one backdrop
@@ -144,6 +149,11 @@ function Areas() {
   useStepSound();
   usePresenceSound(view);
   usePreloadCards(view);
+  // a What for? room fetches its screens while the lobby fills
+  const lineup = view.settings.game === "lineup";
+  useEffect(() => {
+    if (lineup) void loadLineup();
+  }, [lineup]);
   return (
     <AnimatePresence mode="wait">
       {area === "lobby" ? (
@@ -196,6 +206,8 @@ function MatchScreen({ screen }: { screen: StageScreen | null }) {
       return <TurnScreen />;
     case "imp":
       return <ImpostorScreen />;
+    case "lu":
+      return <LineupScreen />;
     default:
       return null;
   }
@@ -242,6 +254,14 @@ const TAB_PHASE: Partial<Record<Phase, string>> = {
   replying: "playing",
   talking: "playing",
   last_chance: "playing",
+  bidding: "playing",
+  halftime: "playing",
+  trading: "playing",
+  defending: "playing",
+  presenting: "playing",
+  judging: "playing",
+  tiebreak: "playing",
+  scoring: "playing",
   finished: "finished",
 };
 /**

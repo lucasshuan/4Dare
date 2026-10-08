@@ -1,0 +1,162 @@
+{
+  "deck": {
+    "prev": "Tablero anterior",
+    "next": "Siguiente tablero",
+    "swipe": "Desliza para ver los otros tableros"
+  },
+  "opening": {
+    "round": "Ronda {n} de {of}",
+    "coins": "Cada uno tiene {coins} monedas.",
+    "auction": "Los personajes salen a subasta.",
+    "secret": "Nadie sabe para qué.",
+    "defend": "Después, defiendan su equipo.",
+    "defendChalk": "¡mi equipo es el mejor!",
+    "envelope": "La misión ya está en el sobre.",
+    "anything": "Puede ser cualquier cosa que un equipo haga junto.",
+    "examples": [
+      "Hasta bañar a un elefante.",
+      "Hasta empujar un autobús cuesta arriba.",
+      "Hasta subir un piano por la escalera.",
+      "Hasta cargar un sofá tres cuadras.",
+      "Hasta hacer un castillo de arena del tamaño de una casa.",
+      "Hasta hornear un pastel para cien personas."
+    ],
+    "tips": [
+      "{coins} monedas se acaban rápido.",
+      "El más caro no siempre es el mejor.",
+      "Un equipo de uno también se defiende.",
+      "Guarda unas monedas para el final.",
+      "Un extra barato puede salvar al equipo."
+    ],
+    "tip": "💡 Consejo: {tip}"
+  },
+  "envelope": {
+    "whatFor": "¿Para qué?"
+  },
+  "auction": {
+    "lot": "Lote {n} de {of}",
+    "next": "Siguiente:",
+    "outbid": "{name} llegó antes. La oferta ahora es {price}.",
+    "watching": "Estás mirando esta subasta.",
+    "extra": "Extra",
+    "star": "Famoso",
+    "sold": "¡Vendido!",
+    "leftover": "Sobras",
+    "leads": "va ganando",
+    "passed": "pasó",
+    "seeTeam": "Ver el equipo de {name}",
+    "has": "{coins, plural, one {# moneda} other {# monedas}}",
+    "going": {
+      "once": "A la una…",
+      "twice": "A las dos…",
+      "three": "¡A las tres!"
+    },
+    "broke": "Sin monedas: ahora miras.",
+    "youLead": "Vas ganando",
+    "tooHigh": "La oferta ya superó tus monedas",
+    "offer": "Toca el valor que ofreces",
+    "bidN": "Ofrecer {n}",
+    "all": "todo",
+    "passedYou": "Pasaste",
+    "pass": "Paso",
+    "teamOf": "Equipo de {name}",
+    "noTeam": "Todavía nadie."
+  },
+  "break": {
+    "kicker": "Pausa · mitad de la subasta",
+    "title": "¿Cómo van los equipos?",
+    "left": "{n, plural, one {queda # lote} other {quedan # lotes}}",
+    "go": "Continuar",
+    "waiting": "Esperando ({n} de {of})"
+  },
+  "wrap": {
+    "title": "Terminó la subasta.",
+    "count": "{n, plural, one {# foto} other {# fotos}} · {left, plural, one {sobró # moneda} other {sobraron # monedas}}",
+    "freebies": "Quien se quedó sin equipo recibió una carta de las sobras."
+  },
+  "trade": {
+    "kicker": "Intercambios · antes del sobre",
+    "title": "La última jugada es intercambiar",
+    "how": "Elige cartas tuyas, a alguien y cartas suyas. Una propuesta abierta a la vez, y solo vale si el otro acepta.",
+    "offers": "{from} le propone a {to}",
+    "accept": "Aceptar",
+    "decline": "Rechazar",
+    "withdraw": "Retirar propuesta",
+    "give": "Tú das",
+    "get": "A cambio de, del equipo de {name}",
+    "pickSomeone": "¿Con quién quieres intercambiar?",
+    "propose": "Proponer intercambio",
+    "done": "Listo",
+    "waiting": "Esperando ({n} de {of})"
+  },
+  "defend": {
+    "title": "¿Por qué tu equipo es el indicado para la misión?",
+    "teamName": "Nombre del equipo",
+    "turn": "Girar",
+    "size": "Tamaño",
+    "write": "Escribe aquí",
+    "hintMove": "Arrastra para mover",
+    "hintKnobs": "Bolitas: tamaño y giro",
+    "hintWrite": "Toca un espacio vacío para escribir",
+    "done": "Listo",
+    "waiting": "Esperando ({n} de {of})"
+  },
+  "stage": {
+    "yourTurn": "¡Te toca hablar!",
+    "talk": "¡Habla, {name}!",
+    "board": "Tablero {n} de {of}",
+    "done": "Terminé",
+    "react": {
+      "0": "Reír",
+      "1": "Fuego",
+      "2": "Me muero",
+      "3": "Aplaudir"
+    },
+    "reactLeft": "{n, plural, =0 {Sin reacciones para este tablero} one {# reacción} other {# reacciones}}"
+  },
+  "judge": {
+    "kicker": "Voto secreto",
+    "title": "¿Qué equipo cumple mejor la misión?",
+    "tieKicker": "Desempate",
+    "tieTitle": "Elige entre los empatados",
+    "noName": "Sin nombre",
+    "yourTeam": "Tu equipo",
+    "yourVote": "Tu voto",
+    "tap": "Toca el tablero del medio para votar",
+    "change": "Toca otro tablero para cambiarlo",
+    "sending": "Votando…",
+    "tieWait": "Deciden quienes votaron fuera del empate",
+    "voted": "Votaron {n} de {of}"
+  },
+  "tally": {
+    "title": "Votos",
+    "tieTitle": "Desempate",
+    "tie": "¡Empate!",
+    "tiedWin": "¡Empate!",
+    "winner": "¡Ganó!",
+    "nobody": "Nadie votó"
+  },
+  "score": {
+    "kicker": "Ronda {n} de {of}",
+    "won": "¡Ganó {name}!",
+    "tied": "Empate: ¡campeones juntos!",
+    "nobody": "Sin ganador en esta ronda",
+    "votes": "{n, plural, =0 {ningún voto} one {# voto} other {# votos}}",
+    "crowd": "Premio del público",
+    "total": "{n} en total",
+    "goodMission": "¿Buena misión?",
+    "good": "Buena misión",
+    "bad": "Mala misión",
+    "next": "Siguiente ronda",
+    "podium": "Ver el marcador final",
+    "waiting": "Esperando ({n} de {of})"
+  },
+  "result": {
+    "title": "Marcador final",
+    "points": "{n, plural, one {# punto} other {# puntos}}",
+    "champions": "Los tableros campeones",
+    "round": "Ronda {n}",
+    "toLobby": "Volver a la sala",
+    "home": "Salir al inicio"
+  }
+}

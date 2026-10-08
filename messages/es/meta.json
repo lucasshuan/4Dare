@@ -52,7 +52,9 @@
       "guessing": "¡Intenta adivinar!",
       "validating": "¡Revisa un intento!",
       "replying": "¡Responde por tu carta!",
-      "talking": "¡Vota a alguien!"
+      "talking": "¡Vota a alguien!",
+      "working": "¡Tu jugada!",
+      "judging": "¡Vota por un tablero!"
     }
   },
   "rooms": {

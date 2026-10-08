@@ -264,5 +264,42 @@ function SystemText({ line }: { line: SystemLine<ShownPerson> }) {
           name: n(live(line.player), line.player.id === me.id),
         }),
       );
+    case "sold":
+      return withNames((n) =>
+        t("sold", {
+          card: line.card,
+          name: n(live(line.player), line.player.id === me.id),
+          price: line.price,
+        }),
+      );
+    case "leftover":
+      return t("leftover", { card: line.card });
+    case "freebie":
+      return withNames((n) =>
+        t("freebie", {
+          card: line.card,
+          name: n(live(line.player), line.player.id === me.id),
+        }),
+      );
+    case "trade":
+      return withNames((n) =>
+        t("trade", {
+          from: n(live(line.from), line.from.id === me.id),
+          to: n(live(line.to), line.to.id === me.id),
+          gave: line.gave.join(lang === "ja" ? "、" : ", "),
+          got: line.got.join(lang === "ja" ? "、" : ", "),
+        }),
+      );
+    case "mission":
+      return t("mission", { text: line.text[lang] });
+    case "roundWon":
+      return withNames((n) =>
+        t("roundWon", {
+          n: line.n,
+          names: line.players
+            .map((p) => n(live(p), p.id === me.id))
+            .join(lang === "ja" ? "、" : ", "),
+        }),
+      );
   }
 }

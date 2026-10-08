@@ -1,6 +1,8 @@
 {
   "loading": "Opening the room…",
   "theme": "Theme:",
+  "mission": "Mission",
+  "coins": "{n, plural, one {# coin} other {# coins}}",
   "goHome": "Back to start",
   "problem": {
     "not_found": {

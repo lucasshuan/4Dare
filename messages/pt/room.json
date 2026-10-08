@@ -1,6 +1,8 @@
 {
   "loading": "Abrindo a sala…",
   "theme": "Tema:",
+  "mission": "Missão",
+  "coins": "{n, plural, one {# moeda} other {# moedas}}",
   "goHome": "Voltar ao início",
   "problem": {
     "not_found": {

@@ -193,10 +193,10 @@ export function luStatus(s: RoomState, p: RoomPlayer): PlayerStatus | null {
       return round?.order[lu.showing] === p.id ? "presenting" : "waiting";
     case "judging":
       if (!playing) return "waiting";
-      return round?.votes[p.id] !== undefined ? "voted" : "voting";
+      return round?.votes[p.id] !== undefined ? "judged" : "judging";
     case "tiebreak":
       if (!round?.tie?.voters.includes(p.id) || !playing) return "waiting";
-      return round.tie.votes[p.id] !== undefined ? "voted" : "voting";
+      return round.tie.votes[p.id] !== undefined ? "judged" : "judging";
     default:
       return null;
   }

@@ -15,6 +15,12 @@
     "started": "▶ Match started",
     "theme": "{emoji} Theme: {theme}",
     "order": "Order: {names}",
-    "firstTurn": "Match {n} · {name}'s turn"
+    "firstTurn": "Match {n} · {name}'s turn",
+    "sold": "🔨 {card} to {name} for {price}",
+    "leftover": "Nobody wanted {card}: it goes to the leftovers",
+    "freebie": "{name} gets {card} from the leftovers",
+    "trade": "⇄ {from} traded {gave} with {to} for {got}",
+    "mission": "✉️ What for? {text}",
+    "roundWon": "🏆 Round {n}: {names}"
   }
 }

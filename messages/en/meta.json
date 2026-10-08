@@ -52,7 +52,9 @@
       "guessing": "Make your guess!",
       "validating": "Check a guess!",
       "replying": "Answer for your card!",
-      "talking": "Vote someone out!"
+      "talking": "Vote someone out!",
+      "working": "Your move!",
+      "judging": "Vote for a board!"
     }
   },
   "rooms": {

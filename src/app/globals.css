@@ -304,6 +304,9 @@
     var(--font-figtree), var(--font-zen-maru, system-ui), system-ui, sans-serif;
   --font-mono:
     var(--font-dm-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* What for?'s chalk and handwriting, loaded on its screens only (lineup/chalk-font.tsx) */
+  --font-chalk: var(--lu-chalk, var(--font-bricolage)), system-ui, sans-serif;
+  --font-hand: var(--lu-hand, var(--font-figtree)), system-ui, sans-serif;
 
   /* The site's content column outside a match (Screen, max-w-page); the top bar spans the screen. */
   --container-page: 1600px;

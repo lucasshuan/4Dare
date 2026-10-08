@@ -8,6 +8,8 @@ const TURN_CALLS = new Set<PlayerStatus>([
   "validating",
   "replying",
   "talking",
+  "working",
+  "judging",
 ]);
 
 /**

@@ -15,6 +15,12 @@
     "started": "▶ 試合開始",
     "theme": "{emoji} テーマ：{theme}",
     "order": "順番：{names}",
-    "firstTurn": "第{n}戦・{name}さんの番"
+    "firstTurn": "第{n}戦・{name}さんの番",
+    "sold": "🔨 {card}を{name}が{price}で落札",
+    "leftover": "{card}は誰も入札せず売れ残りへ",
+    "freebie": "{name}が売れ残りから{card}をもらった",
+    "trade": "⇄ {from}が{to}と{gave}を{got}にトレード",
+    "mission": "✉️ 何のため？ {text}",
+    "roundWon": "🏆 ラウンド{n}：{names}"
   }
 }

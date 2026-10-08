@@ -52,7 +52,9 @@
       "guessing": "答えを当てよう！",
       "validating": "答えを確認しよう！",
       "replying": "カードになりきって答えて！",
-      "talking": "誰かに投票して！"
+      "talking": "誰かに投票して！",
+      "working": "あなたの番！",
+      "judging": "ボードに投票！"
     }
   },
   "rooms": {

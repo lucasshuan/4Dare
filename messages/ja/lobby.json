@@ -41,7 +41,11 @@
     "validateSeconds": "判定",
     "replySeconds": "回答",
     "talkSeconds": "相談",
-    "lastSeconds": "ラスト"
+    "lastSeconds": "ラスト",
+    "lotSeconds": "ロット",
+    "tradeSeconds": "トレード",
+    "defendSeconds": "ボード作り",
+    "judgeSeconds": "審査"
   },
   "timesLabel": "時間",
   "start": "始める",

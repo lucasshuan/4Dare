@@ -10,11 +10,13 @@ import { BACKEND, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/config";
 
 type Unsubscribe = () => void;
 
-/** What a ping carries: `version` (room), `at` (lobby), `id` (newest chat line). */
+/** What a ping carries: `version` (room), `at` (lobby), `id` (newest chat line), What for?'s reactions. */
 interface Payload {
   version?: number;
   at?: number;
   id?: number;
+  board?: string;
+  counts?: number[];
 }
 
 type OnPing = (payload: Payload) => void;
@@ -150,6 +152,12 @@ export const subscribeChat = (
   onChat: (payload: { id?: number }) => void,
   onStatus?: OnStatus,
 ) => listen(`room:${code}`, "chat", onChat, onStatus);
+
+/** What for?: reactions to the board on stage (`board`, its owner; `counts` per emoji). */
+export const subscribeReactions = (
+  code: string,
+  onReact: (payload: { board?: string; counts?: number[] }) => void,
+) => listen(`room:${code}`, "react", onReact);
 
 /** The public room list changed (`at` names its version). */
 export const subscribeLobby = (onChange: (payload: { at?: number }) => void) =>

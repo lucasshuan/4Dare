@@ -15,6 +15,12 @@
     "started": "▶ Empezó la partida",
     "theme": "{emoji} Tema: {theme}",
     "order": "Orden: {names}",
-    "firstTurn": "Partida {n} · turno de {name}"
+    "firstTurn": "Partida {n} · turno de {name}",
+    "sold": "🔨 {card} para {name} por {price}",
+    "leftover": "Nadie quiso {card}: va a las sobras",
+    "freebie": "{name} recibe {card} de las sobras",
+    "trade": "⇄ {from} cambió {gave} con {to} por {got}",
+    "mission": "✉️ ¿Para qué? {text}",
+    "roundWon": "🏆 Ronda {n}: {names}"
   }
 }

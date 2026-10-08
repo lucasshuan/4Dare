@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Trophy } from "lucide-react";
 import { m } from "motion/react";
+import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
@@ -68,9 +69,14 @@ export function LobbyCountdown() {
   );
 }
 
-/** End of the match: the Impostor's own, or everyone on a podium, cards revealed, the winner highest. */
+const LineupResult = dynamic(() =>
+  import("@/features/lineup/lineup-result").then((m) => m.LineupResult),
+);
+
+/** End of the match: the Impostor's own, What for?'s, or everyone on a podium, cards revealed, the winner highest. */
 export function ResultScreen() {
   const { view } = useRoomContext();
+  if (view.lu) return <LineupResult />;
   return view.imp?.end ? <ImpostorResult /> : <WhoAmIResult />;
 }
 
