@@ -49,31 +49,31 @@ const part = (seat: Seat, cast: number) =>
   cast & (seat === "b" || seat === "d" ? 1 : 2) ? PAIR[seat] : seat;
 
 /**
- * In a row under the board, measured from its middle in the banner's height
- * (the board is 105 wide); phones keep one on each side.
+ * Two on each side of the board, measured from its middle in the banner's
+ * height (the board is 129 wide); phones keep one on each side.
  */
 const SEATS: { seat: Seat; place: string; dna: string; color: string }[] = [
   {
     seat: "a",
-    place: "left-[calc(50%_-_88cqh)] max-sm:hidden",
+    place: "left-[calc(50%_-_114cqh)] max-sm:hidden",
     dna: "Fox..Curious..0",
     color: "#F3D3B8",
   },
   {
     seat: "b",
-    place: "left-[calc(50%_-_32cqh)] max-sm:left-[22%]",
+    place: "left-[calc(50%_-_80cqh)] max-sm:left-[8%]",
     dna: "Frog..Happy..0",
     color: "#BFE6C8",
   },
   {
     seat: "c",
-    place: "left-[calc(50%_+_32cqh)] max-sm:hidden",
+    place: "left-[calc(50%_+_80cqh)] max-sm:hidden",
     dna: "Penguin..Cozy..0",
     color: "#C9DDF6",
   },
   {
     seat: "d",
-    place: "left-[calc(50%_+_88cqh)] max-sm:left-[78%]",
+    place: "left-[calc(50%_+_114cqh)] max-sm:left-[92%]",
     dna: "Owl.Wizard...0",
     color: "#F2E3A8",
   },
@@ -140,7 +140,7 @@ function Tape({
   return (
     <m.span
       className={cn(
-        "absolute h-[3.8cqh] bg-butter/85 shadow-[0_1px_2px_rgba(0,0,0,0.15)]",
+        "absolute h-[4.4cqh] bg-butter/85 shadow-[0_1px_2px_rgba(0,0,0,0.15)]",
         className,
       )}
       initial={reduced ? false : { scaleX: 0, opacity: 0 }}
@@ -156,7 +156,7 @@ function Coin() {
     <svg
       viewBox="0 0 48 15"
       aria-hidden="true"
-      className="-mt-[1.2cqh] block w-[8cqh]"
+      className="-mt-[1.6cqh] block w-[11cqh]"
     >
       <path d="M1 4.2V10.6A23 3.6 0 0 0 47 10.6V4.2Z" fill="var(--gold-deep)" />
       <ellipse cx={24} cy={4.2} rx={23} ry={3.6} fill="var(--gold)" />
@@ -165,8 +165,8 @@ function Coin() {
 }
 
 /**
- * What for?'s page banner, on the kraft wall of its home card: a small pitch
- * board hovers above the bidders, a photo taped on it for auction while they
+ * What for?'s page banner, on the kraft wall of its home card: the pitch
+ * board hovers between the bidders, a photo taped on it for auction while they
  * raise their coin towers; "Sold!", the photo flies to its buyer and the
  * mission is stuck on in its place. Transforms, opacity and shadows only;
  * the still frame for reduced motion.
@@ -194,7 +194,7 @@ export function LineupBanner() {
     <div
       aria-hidden="true"
       className={cn(
-        "relative isolate select-none overflow-hidden pb-8 art-lineup",
+        "relative isolate select-none overflow-hidden art-lineup",
         UNDER_TOPBAR,
       )}
     >
@@ -235,18 +235,18 @@ export function LineupBanner() {
 
       {/* melts into the page below through the ground's own hue */}
       <span
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-8"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-6"
         style={{
           background:
             "linear-gradient(in oklch to bottom, transparent, color-mix(in oklch, var(--art-lineup-2) 45%, var(--canvas)) 60%, var(--canvas))",
         }}
       />
 
-      <div className="relative isolate mx-auto h-[clamp(300px,min(40vw,50vh),420px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[300px]">
-        {/* the pitch board, hovering slowly above the bidders; what is stuck
-            on it rides along */}
+      <div className="relative isolate mx-auto h-[clamp(180px,min(22vw,27vh),230px)] w-full max-w-[1040px] [container-type:size] max-sm:h-[210px]">
+        {/* the pitch board, as tall as the banner allows, hovering slowly;
+            what is stuck on it rides along */}
         <m.div
-          className="-translate-x-1/2 absolute top-[3cqh] left-1/2 z-10 h-[70cqh] w-[105cqh]"
+          className="-translate-x-1/2 absolute top-[2cqh] left-1/2 z-10 aspect-[3/2] w-[min(129cqh,74cqw)]"
           {...(reduced
             ? {}
             : {
@@ -260,7 +260,7 @@ export function LineupBanner() {
         >
           {/* the frame and its slate, the standing board's own finish */}
           <div
-            className="absolute inset-0 rounded-[3cqh] p-[2.4cqh]"
+            className="absolute inset-0 rounded-[3.4cqh] p-[2.8cqh]"
             style={{
               background:
                 "linear-gradient(150deg, var(--wood), var(--wood-deep))",
@@ -269,7 +269,7 @@ export function LineupBanner() {
             }}
           >
             <div
-              className="relative size-full overflow-hidden rounded-[1.6cqh]"
+              className="relative size-full overflow-hidden rounded-[2cqh]"
               style={{
                 background: SLATE,
                 boxShadow:
@@ -281,12 +281,12 @@ export function LineupBanner() {
           </div>
 
           {/* the lot, taped on in front; a leaving lot and the next share one cell */}
-          <div className="-translate-x-1/2 absolute top-[8cqh] left-1/2 grid">
+          <div className="-translate-x-1/2 absolute top-[14cqh] left-1/2 grid">
             <AnimatePresence>
               {s.open || s.clear ? null : (
                 <m.div
                   key={`lot-${loop}`}
-                  className="relative w-[38cqh] rounded-[0.8cqh] bg-white p-[1.4cqh] [grid-area:1/1]"
+                  className="relative w-[46cqh] rounded-[1cqh] bg-white p-[1.7cqh] [grid-area:1/1]"
                   style={{ boxShadow: FLAT }}
                   initial={
                     reduced
@@ -325,17 +325,17 @@ export function LineupBanner() {
                 >
                   <FigureArt
                     figure={lot}
-                    className="aspect-4/5 rounded-[0.5cqh]"
+                    className="aspect-4/5 rounded-[0.6cqh]"
                   />
                   <Tape
-                    className="-rotate-3 top-[-1.9cqh] left-[27%] w-[46%] origin-left"
+                    className="-rotate-3 top-[-2.2cqh] left-[27%] w-[46%] origin-left"
                     delay={0.3}
                     reduced={reduced}
                   />
                   {/* the price, bumped up bid by bid */}
                   <m.span
                     key={top}
-                    className="absolute -right-[3cqh] -bottom-[2.2cqh] rounded-[1cqh] bg-kraft px-[1.8cqh] font-bold font-mono text-[6cqh] text-kraft-ink leading-[1.3] shadow-card"
+                    className="absolute -right-[3.6cqh] -bottom-[2.6cqh] rounded-[1.2cqh] bg-kraft px-[2.2cqh] font-bold font-mono text-[7.4cqh] text-kraft-ink leading-[1.3] shadow-card"
                     initial={
                       reduced || !top ? false : { scale: 1.4, rotate: -10 }
                     }
@@ -359,7 +359,7 @@ export function LineupBanner() {
                           duration: 0.35,
                           ease: [0.34, 1.56, 0.64, 1],
                         }}
-                        className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 whitespace-nowrap rounded-md bg-wax px-[2.4cqh] py-[0.8cqh] font-display font-extrabold text-[7.5cqh] text-white uppercase shadow-pop"
+                        className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 whitespace-nowrap rounded-md bg-wax px-[3cqh] py-[1cqh] font-display font-extrabold text-[9cqh] text-white uppercase shadow-pop"
                       >
                         {t("banner.sold")}
                       </m.span>
@@ -375,7 +375,7 @@ export function LineupBanner() {
             {s.open ? (
               <m.div
                 key={`mission-${loop}`}
-                className="-translate-x-1/2 absolute top-[17cqh] left-1/2 w-[86cqh] rounded-[1.6cqh] bg-kraft px-[3.4cqh] pt-[4cqh] pb-[3.6cqh] text-center"
+                className="-translate-x-1/2 absolute top-[22cqh] left-1/2 w-[104cqh] rounded-[2cqh] bg-kraft px-[4.4cqh] pt-[5cqh] pb-[4.6cqh] text-center"
                 style={{
                   boxShadow: FLAT,
                   backgroundImage:
@@ -421,24 +421,24 @@ export function LineupBanner() {
                 }}
               >
                 <Tape
-                  className="-left-[4cqh] -rotate-[28deg] top-[-0.6cqh] w-[13cqh] origin-right"
+                  className="-left-[5cqh] -rotate-[28deg] top-[-0.8cqh] w-[16cqh] origin-right"
                   delay={0.6}
                   reduced={reduced}
                 />
                 <Tape
-                  className="-right-[4cqh] top-[-0.6cqh] w-[13cqh] origin-left rotate-[28deg]"
+                  className="-right-[5cqh] top-[-0.8cqh] w-[16cqh] origin-left rotate-[28deg]"
                   delay={0.7}
                   reduced={reduced}
                 />
-                <span className="block font-bold font-display text-[clamp(11px,4cqh,15px)] text-kraft-ink/70 uppercase tracking-[0.06em]">
+                <span className="block font-bold font-display text-[clamp(11px,4.8cqh,14px)] text-kraft-ink/70 uppercase tracking-[0.06em]">
                   {t("banner.what")}
                 </span>
-                <span className="block text-balance font-bold font-display text-[clamp(14px,6.2cqh,22px)] text-kraft-ink leading-[1.15]">
+                <span className="block text-balance font-bold font-display text-[clamp(14px,7.6cqh,19px)] text-kraft-ink leading-[1.15]">
                   {line}
                 </span>
                 {/* the seal, broken as it lands */}
                 <m.span
-                  className="-translate-x-1/2 absolute top-[-4cqh] left-1/2 grid size-[8cqh] place-items-center rounded-pill bg-wax font-black text-[4.4cqh] text-white shadow-card"
+                  className="-translate-x-1/2 absolute top-[-5cqh] left-1/2 grid size-[10cqh] place-items-center rounded-pill bg-wax font-black text-[5.4cqh] text-white shadow-card"
                   initial={reduced ? false : { scale: 1 }}
                   animate={reduced ? { scale: 1 } : { scale: [1, 1.3, 0] }}
                   transition={{ delay: 0.75, duration: 0.4 }}
@@ -450,7 +450,7 @@ export function LineupBanner() {
           </AnimatePresence>
         </m.div>
 
-        {/* the bidders on the wall below, each under the coins they put up */}
+        {/* the bidders on the wall, each under the coins they put up */}
         {SEATS.map((p) => {
           const bid = s.bids[part(p.seat, cast)] ?? 0;
           const leads = bid > 0 && bid === top;
@@ -458,12 +458,12 @@ export function LineupBanner() {
             <div
               key={p.seat}
               className={cn(
-                "-translate-x-1/2 absolute bottom-[2%] flex flex-col items-center",
+                "-translate-x-1/2 absolute bottom-[12%] flex flex-col items-center",
                 p.place,
                 s.open && "opacity-60 transition-opacity duration-500",
               )}
             >
-              <div className="flex min-h-[10cqh] flex-col-reverse items-center pb-[1cqh]">
+              <div className="flex min-h-[26cqh] flex-col-reverse items-center pb-[1cqh]">
                 <AnimatePresence>
                   {Array.from({ length: bid }, (_, k) => (
                     <m.span
@@ -496,7 +496,7 @@ export function LineupBanner() {
                 <Creature
                   dna={p.dna}
                   color={p.color}
-                  className="size-[12cqh] rounded-pill"
+                  className="size-[16cqh] rounded-pill"
                 />
               </span>
             </div>
