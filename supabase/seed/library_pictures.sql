@@ -113,7 +113,21 @@ with v(character_id, url) as (values
   ('hand-menino-maluquinho', 'https://upload.wikimedia.org/wikipedia/pt/d/da/O_Menino_Maluquinho.png'),
   ('hand-phoenix-mythology', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/Nuremberg_chronicles_-_Phoenix_%28CIIIIv%29.jpg/500px-Nuremberg_chronicles_-_Phoenix_%28CIIIIv%29.jpg'),
   ('hand-saint-george', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/Stgeorge-dragon.jpg/500px-Stgeorge-dragon.jpg'),
-  ('hand-tia-nastacia', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Benedita_Rodrigues_%28Tupi%29.jpg/500px-Benedita_Rodrigues_%28Tupi%29.jpg')
+  ('hand-tia-nastacia', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Benedita_Rodrigues_%28Tupi%29.jpg/500px-Benedita_Rodrigues_%28Tupi%29.jpg'),
+  ('hand-professor-layton', 'https://upload.wikimedia.org/wikipedia/en/9/90/Hershel_Layton.png'),
+  ('wd-Q1146291', 'https://upload.wikimedia.org/wikipedia/en/5/51/Albert_Wesker.png'),
+  ('wd-Q1408697', 'https://upload.wikimedia.org/wikipedia/en/2/23/Apu_Nahasapeemapetilon_%28The_Simpsons%29.png'),
+  ('wd-Q17222235', 'https://upload.wikimedia.org/wikipedia/en/3/3b/GoroMajimafive.jpg'),
+  ('wd-Q1945499', 'https://upload.wikimedia.org/wikipedia/en/5/53/Chun-Li.png'),
+  ('wd-Q2444720', 'https://upload.wikimedia.org/wikipedia/en/7/74/Ghostface_costume_cutout_%28Scream_VI%29.png'),
+  ('wd-Q2663841', 'https://upload.wikimedia.org/wikipedia/en/d/d7/John_Constantine_%28Modern%29.png'),
+  ('wd-Q2725594', 'https://upload.wikimedia.org/wikipedia/en/b/b7/Tommy_Vercetti_from_GTA_Vice_City.png'),
+  ('wd-Q58881083', 'https://upload.wikimedia.org/wikipedia/en/a/ac/Arthur_Morgan_-_Red_Dead_Redemption_2.png'),
+  ('wd-Q601244', 'https://upload.wikimedia.org/wikipedia/en/b/bc/Guile_%28SSFII%29.png'),
+  ('wd-Q613067', 'https://upload.wikimedia.org/wikipedia/en/f/f2/Namor_the_Sub-Mariner.png'),
+  ('wd-Q615565', 'https://upload.wikimedia.org/wikipedia/en/b/bb/Claire_Redfield.png'),
+  ('wd-Q691782', 'https://upload.wikimedia.org/wikipedia/en/b/b4/KungLaoartwork.png'),
+  ('wd-Q840368', 'https://upload.wikimedia.org/wikipedia/en/3/34/JillValentineRemake.png')
 ), added as (
   insert into public.character_images (character_id, url, status, bonus)
   select v.character_id, v.url, 'active', 20
@@ -236,5 +250,19 @@ from unnest(array[
   'hand-menino-maluquinho',
   'hand-phoenix-mythology',
   'hand-saint-george',
-  'hand-tia-nastacia'
+  'hand-tia-nastacia',
+  'hand-professor-layton',
+  'wd-Q1146291',
+  'wd-Q1408697',
+  'wd-Q17222235',
+  'wd-Q1945499',
+  'wd-Q2444720',
+  'wd-Q2663841',
+  'wd-Q2725594',
+  'wd-Q58881083',
+  'wd-Q601244',
+  'wd-Q613067',
+  'wd-Q615565',
+  'wd-Q691782',
+  'wd-Q840368'
 ]) as id;
