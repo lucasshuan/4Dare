@@ -27,7 +27,12 @@ import type { ErrorCode, Phase, RoomView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
-import { preloadMusic, useMusic, useMusicMuffle } from "@/lib/music";
+import {
+  preloadMusic,
+  type Track,
+  useMusic,
+  useMusicMuffle,
+} from "@/lib/music";
 import { useRoomTitle } from "@/lib/names";
 import { GAMES } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
@@ -144,6 +149,12 @@ const RISE = {
   exit: { opacity: 0, transition: { duration: dur.base, ease: ease.soft } },
 };
 
+/** The games with a take of their own; the rest keep the stage. */
+const GAME_MUSIC: Partial<Record<RoomView["settings"]["game"], Track>> = {
+  impostor: "impostor",
+  lineup: "lineup",
+};
+
 function Areas() {
   const { view } = useRoomContext();
   const { area, screen, finishedWait } = useStage();
@@ -151,13 +162,14 @@ function Areas() {
   useStepSound();
   usePresenceSound(view);
   useMusicMuffle(area === "lobby");
-  // an Impostor room plays the spy take instead of the stage, lobby (muffled) to
-  // results; picking the game in the lobby crossfades at the same point in the song,
-  // and the take is fetched on entering the room so the swap starts at once
+  // Impostor and What for? rooms play their own take instead of the stage, lobby
+  // (muffled) to results; picking the game in the lobby crossfades at the same point
+  // in the song, and the takes are fetched on entering the room so the swap starts at once
   useEffect(() => {
     preloadMusic("impostor");
+    preloadMusic("lineup");
   }, []);
-  useMusic(view.settings.game === "impostor" ? "impostor" : undefined, 1);
+  useMusic(GAME_MUSIC[view.settings.game], 1);
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
   const lineup = view.settings.game === "lineup";

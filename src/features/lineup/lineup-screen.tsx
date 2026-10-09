@@ -120,7 +120,7 @@ function useScene(): { key: string; node: React.ReactNode } | null {
 /**
  * The presenter hears the booth's radio take of the music from the moment
  * their picture glitches into the booth's TV (the chair scene) to the end of
- * the match; everyone else, the stage.
+ * the match; everyone else, the room's What for? take.
  */
 function useBoothMusic() {
   const { lu, me } = useLineup();
@@ -129,7 +129,7 @@ function useBoothMusic() {
   const now = beat?.startsAt ?? show?.startsAt ?? 0;
   const inBooth =
     lu.hosted && lu.presenterId === me.id && !(chair && now < chair.startsAt);
-  useMusic(inBooth ? "booth" : undefined, 1);
+  useMusic(inBooth ? "booth" : undefined, 2);
 }
 
 export function LineupScreen() {

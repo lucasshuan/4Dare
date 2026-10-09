@@ -14,8 +14,10 @@ const TRACKS = {
   stage: "/music/stage-loop.mp3",
   /** The same vamp on an old radio in the booth: What for?'s presenter. Mixed 6 dB under the stage. */
   booth: "/music/booth-loop.mp3",
-  /** The same vamp as hushed spy suspense: Impostor's matches. As loud as the stage. */
+  /** The same vamp as hushed spy suspense: Impostor's rooms. As loud as the stage. */
   impostor: "/music/impostor-loop.mp3",
+  /** The same vamp as a cheeky school auction: What for?'s rooms. As loud as the stage. */
+  lineup: "/music/lineup-loop.mp3",
 } as const;
 export type Track = keyof typeof TRACKS;
 
@@ -230,7 +232,9 @@ async function apply() {
   }
   const [buffer, sfx] = await Promise.all([
     load(TRACKS[want]),
-    want === "booth" && playing?.track === "stage" ? load(SWITCH_SFX) : null,
+    want === "booth" && playing && playing.track !== "booth"
+      ? load(SWITCH_SFX)
+      : null,
   ]);
   // a later call took over while this one loaded
   if (turn !== applying || !buffer || playing?.track === want) return;
