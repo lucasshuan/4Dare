@@ -147,11 +147,17 @@ export function LevelTag({
 export function XpBar({
   xp,
   note,
+  height = 6,
+  numbers = true,
   className,
 }: {
   xp: number;
   /** Beside the XP on the right (a streak). */
   note?: React.ReactNode;
+  /** The bar's thickness (px). */
+  height?: number;
+  /** False hides the numbers under the bar. */
+  numbers?: boolean;
   className?: string;
 }) {
   const t = useTranslations("profile.level");
@@ -159,18 +165,23 @@ export function XpBar({
   const { into, need } = levelOf(xp);
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <div className="h-1.5 overflow-hidden rounded-pill bg-sunken">
+      <div
+        className="overflow-hidden rounded-pill bg-sunken"
+        style={{ height }}
+      >
         <i
           className="block h-full rounded-pill bg-(--accent)"
           style={{ width: `${Math.max(2, (into / need) * 100)}%` }}
         />
       </div>
-      <div className="flex justify-between gap-2 font-semibold text-[12px] text-ink-muted">
-        <span className="font-mono tabular-nums">
-          {t("xp", { into: format.number(into), need: format.number(need) })}
-        </span>
-        {note}
-      </div>
+      {numbers ? (
+        <div className="flex justify-between gap-2 font-semibold text-[12px] text-ink-muted">
+          <span className="font-mono tabular-nums">
+            {t("xp", { into: format.number(into), need: format.number(need) })}
+          </span>
+          {note}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   Compass,
   Flame,
   Gamepad2,
+  ImagePlus,
   ImageUp,
   Laugh,
   type LucideIcon,
@@ -26,13 +27,14 @@ import {
   Zap,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { useId } from "react";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { isGameKey } from "@/game/games";
 import { type BadgeId, TIERS } from "@/game/profile/badges";
 import { GAME_XP, levelOf, XP } from "@/game/profile/xp";
 import { cn } from "@/lib/cn";
 import type { BadgeView, ProfileView } from "@/server/contract";
-import { LevelTag, XpBar } from "./level";
+import { XpBar } from "./level";
 import { accentStyle } from "./profile-body";
 
 const ICON: Record<BadgeId, LucideIcon> = {
@@ -58,62 +60,101 @@ const ICON: Record<BadgeId, LucideIcon> = {
   characters: UserRoundPlus,
 };
 
-/** Each tier's metal: the medal's fill, its rim and the ribbon's tint. */
+/** Each tier's metal: the medal's top and base, and the rim and ribbon. */
 const METAL = {
-  bronze: { from: "#F2B27C", to: "#B8692F", rim: "#8C4F22", soft: "#F7DCC4" },
-  silver: { from: "#F1F4F9", to: "#9AA6B8", rim: "#6E7A8E", soft: "#E3E8F0" },
-  gold: { from: "#FBE58A", to: "#D69E1C", rim: "#9C7210", soft: "#F8EDBE" },
+  bronze: { top: "#e3a878", base: "#b8733f", rim: "#7a431d" },
+  silver: { top: "#d3dae5", base: "#8f9bb0", rim: "#535e75" },
+  gold: { top: "#f7d97c", base: "#d6a11c", rim: "#8a650a" },
 } as const;
 
-/** Level, how XP comes, and every badge by group: every game's, each game's, the library's. */
+/** Level, what the colours mean, and every badge by group: every game's, each game's, the library's. */
 export function BadgesPanel({ view }: { view: ProfileView }) {
   const t = useTranslations("profile.badges");
   const gameName = useGameName();
   const groups = [...new Set(view.badges.map((b) => b.group))];
   return (
-    <div className="flex flex-col gap-4">
+    <div className="@container flex flex-col gap-4.5">
       <LevelCard xp={view.xp} accent={view.accent} />
-      {groups.map((group) => (
-        <section
-          key={group}
-          className="flex flex-col gap-4 rounded-xl bg-surface p-4 sm:p-5"
-        >
-          <h3 className="flex items-center gap-2 font-bold font-display text-[17px]">
-            {isGameKey(group) ? <GameThumb game={group} size="xs" /> : null}
-            {isGameKey(group) ? gameName(group) : t(`groups.${group}`)}
-          </h3>
-          <ul className="grid grid-cols-[repeat(auto-fill,minmax(132px,1fr))] gap-x-3 gap-y-5">
-            {view.badges
-              .filter((b) => b.group === group)
-              .map((b) => (
-                <Medal key={b.id} badge={b} />
+      <Legend />
+      {groups.map((group) => {
+        const badges = view.badges.filter((b) => b.group === group);
+        return (
+          <section key={group} className="flex flex-col gap-2.5">
+            <h3 className="flex items-center gap-2">
+              {isGameKey(group) ? (
+                <GameThumb game={group} size="tiny" />
+              ) : group === "general" ? (
+                <Sparkles className="size-4" strokeWidth={2} />
+              ) : (
+                <ImagePlus className="size-4" strokeWidth={2} />
+              )}
+              <span className="font-bold font-display text-[18px]">
+                {isGameKey(group) ? gameName(group) : t(`groups.${group}`)}
+              </span>
+              <span className="font-semibold text-[13px] text-ink-muted">
+                {t("count", {
+                  earned: badges.filter((b) => b.tier > 0).length,
+                  total: badges.length,
+                })}
+              </span>
+            </h3>
+            <ul className="m-0 grid list-none grid-cols-2 gap-2.5 p-0 @min-[760px]:grid-cols-4">
+              {badges.map((b) => (
+                <Badge key={b.id} badge={b} />
               ))}
-          </ul>
-        </section>
-      ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }
 
-/** The level and the bar to the next; how XP is earned opens beside them. */
+/** Bronze, silver and gold as diamonds, and what they mean. */
+function Legend() {
+  const t = useTranslations("profile.badges");
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 font-semibold text-[13px]">
+      {TIERS.map((tier) => (
+        <span key={tier} className="inline-flex items-center gap-2">
+          <i
+            className="block size-3 rotate-45 rounded-[3px]"
+            style={{ backgroundColor: METAL[tier].base }}
+          />
+          {t(`tiers.${tier}`)}
+        </span>
+      ))}
+      <span className="text-ink-muted">{t("legend")}</span>
+    </div>
+  );
+}
+
+/** The level in a ring of the XP into it, the bar to the next; how XP is earned opens beside them. */
 function LevelCard({ xp, accent }: { xp: number; accent: string | null }) {
   const t = useTranslations("profile.level");
   const tb = useTranslations("profile.badges");
   const format = useFormatter();
   const { level, into, need } = levelOf(xp);
+  const share = need ? into / need : 0;
   return (
-    <section className="flex flex-wrap items-center gap-4 rounded-xl bg-surface p-4 sm:p-5">
-      <LevelTag
-        level={level}
-        on="surface"
-        className="px-3.5 py-2.5 text-[26px]"
-      />
+    <section className="flex flex-wrap items-center gap-5 rounded-[24px] bg-surface p-5">
+      <span
+        aria-hidden="true"
+        className="grid size-21 shrink-0 place-items-center rounded-full"
+        style={{
+          background: `conic-gradient(var(--accent) ${share * 360}deg, var(--surface-sunken) 0)`,
+        }}
+      >
+        <span className="grid size-17 place-items-center rounded-full bg-surface font-display font-extrabold text-[30px] tabular-nums">
+          {level}
+        </span>
+      </span>
       <div className="flex min-w-[200px] flex-1 flex-col gap-2">
         <b className="font-bold font-display text-[22px]">
           {t("title", { n: level })}
         </b>
-        <XpBar xp={xp} />
-        <span className="text-[13px] text-ink-muted">
+        <XpBar xp={xp} height={10} numbers={false} />
+        <span className="font-semibold text-[13.5px] text-ink-muted">
           {t("left", {
             total: format.number(xp),
             left: format.number(need - into),
@@ -198,117 +239,164 @@ function Rule({ label, xp }: { label: string; xp: number }) {
   );
 }
 
-/** A hexagon pointing up, in a 100 × 112 box. */
-const HEX = "M50 3 L95 29 L95 83 L50 109 L5 83 L5 29 Z";
+/** A goal short enough for the ribbon: 1000 is "1K". */
+const short = (n: number) =>
+  n >= 1000 ? `${Math.round(n / 100) / 10}K` : String(n);
 
 /**
- * A badge as a medal: its tier's metal and the next goal on a ribbon; still
- * locked, a grey outline with how far it got.
+ * A badge: its medal beside the name and the goal it runs to now. Not yet
+ * gold, a thin bar of how far it got toward that goal.
  */
-function Medal({ badge }: { badge: BadgeView }) {
+function Badge({ badge }: { badge: BadgeView }) {
   const t = useTranslations("profile.badges");
   const format = useFormatter();
-  const Icon = ICON[badge.id];
   const tier = badge.tier ? TIERS[badge.tier - 1] : null;
-  const metal = tier ? METAL[tier] : null;
-  // the ribbon names the tier held; the bar runs to the next one
+  // the ribbon holds the tier's goal (the first one while locked); the text and bar run to the next
   const held = badge.goals[Math.max(0, badge.tier - 1)];
   const goal = badge.goals[Math.min(badge.tier, 2)];
-  const gradient = `medal-${badge.id}`;
   return (
-    <li className="flex flex-col items-center gap-2 text-center">
-      <span className="relative flex h-[78px] w-[70px] items-center justify-center">
-        <svg
-          viewBox="0 0 100 112"
-          aria-hidden="true"
-          className="absolute inset-0 size-full"
-        >
-          {metal ? (
-            <>
-              <defs>
-                <linearGradient id={gradient} x1="0" y1="0" x2="0.4" y2="1">
-                  <stop offset="0" stopColor={metal.from} />
-                  <stop offset="1" stopColor={metal.to} />
-                </linearGradient>
-              </defs>
-              <path
-                d={HEX}
-                fill={`url(#${gradient})`}
-                stroke={metal.rim}
-                strokeWidth="4"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M50 14 L85 34 L85 78 L50 98 L15 78 L15 34 Z"
-                fill="none"
-                stroke="rgba(255,255,255,.55)"
-                strokeWidth="2.5"
-                strokeLinejoin="round"
-              />
-            </>
-          ) : (
-            <path
-              d={HEX}
-              className="fill-sunken stroke-line-strong"
-              strokeWidth="3"
-              strokeDasharray="7 6"
-              strokeLinejoin="round"
-            />
-          )}
-        </svg>
-        <Icon
+    <li
+      className="grid grid-cols-[56px_1fr] items-center gap-3 rounded-[18px] bg-surface p-3.5"
+      title={
+        badge.earnedAt
+          ? t("since", {
+              date: format.dateTime(badge.earnedAt, {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              }),
+            })
+          : undefined
+      }
+    >
+      <Medal id={badge.id} tier={tier} goal={short(held)} />
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <b
           className={cn(
-            "relative size-7",
-            metal
-              ? "drop-shadow-[0_1px_0_rgba(255,255,255,.5)]"
-              : "text-ink-muted",
+            "font-semibold text-[14px] leading-tight",
+            !tier && "text-ink-muted",
           )}
-          style={metal ? { color: metal.rim } : undefined}
-          strokeWidth={2}
-        />
-      </span>
-      <b className="font-semibold text-[14px] leading-tight">
-        {t(`names.${badge.id}`)}
-      </b>
-      {tier && metal ? (
-        <span
-          className="rounded-pill px-2.5 py-0.5 font-semibold text-[11.5px]"
-          style={{ backgroundColor: metal.soft, color: metal.rim }}
-          title={
-            badge.earnedAt
-              ? t("since", {
-                  date: format.dateTime(badge.earnedAt, {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  }),
-                })
-              : undefined
-          }
         >
-          {t(`tiers.${tier}`)} · {t(`goals.${badge.id}`, { n: held })}
+          {t(`names.${badge.id}`)}
+        </b>
+        <span className="sr-only">
+          {tier ? t(`tiers.${tier}`) : t("locked")}
         </span>
-      ) : (
-        <span className="text-[11.5px] text-ink-muted">
-          {t(`goals.${badge.id}`, { n: held })}
+        <span className="text-[12.5px] text-ink-muted leading-[1.35]">
+          {t(`goals.${badge.id}`, { n: goal })}
         </span>
-      )}
+      </div>
       {badge.tier < 3 ? (
-        <span className="flex w-full max-w-[120px] flex-col gap-1">
-          <span className="h-1 overflow-hidden rounded-pill bg-sunken">
+        <div className="col-span-full flex items-center gap-2 font-medium font-mono text-[12px] text-ink-muted">
+          <span className="h-1.5 flex-1 overflow-hidden rounded-pill bg-sunken">
             <i
               className="block h-full rounded-pill bg-line-strong"
               style={{ width: `${Math.min(100, (badge.value / goal) * 100)}%` }}
             />
           </span>
-          <span className="font-mono text-[11px] text-ink-muted">
-            {t("progress", {
-              value: format.number(badge.value),
-              goal: format.number(goal),
-            })}
-          </span>
-        </span>
+          {t("progress", {
+            value: format.number(badge.value),
+            goal: format.number(goal),
+          })}
+        </div>
       ) : null}
     </li>
   );
 }
+
+/**
+ * The medal: a hexagon in its tier's metal with the badge's icon and the goal
+ * on a ribbon; locked, a dashed grey outline.
+ */
+function Medal({
+  id,
+  tier,
+  goal,
+}: {
+  id: BadgeId;
+  tier: (typeof TIERS)[number] | null;
+  goal: string;
+}) {
+  const gradient = useId();
+  const Icon = ICON[id];
+  const metal = tier ? METAL[tier] : null;
+  const ribbon = goal.length * 3.6 + 9;
+  return (
+    <svg
+      viewBox="0 0 48 54"
+      width={56}
+      height={63}
+      aria-hidden="true"
+      className="overflow-visible"
+    >
+      {metal ? (
+        <>
+          <defs>
+            <linearGradient id={gradient} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor={metal.top} />
+              <stop offset="1" stopColor={metal.base} />
+            </linearGradient>
+          </defs>
+          <path
+            d={HEX}
+            fill={`url(#${gradient})`}
+            stroke={metal.rim}
+            strokeWidth="3"
+            strokeLinejoin="round"
+          />
+          <path d={HEX_INNER} fill="#fff" opacity=".14" />
+          <ellipse
+            cx="17"
+            cy="13"
+            rx="6"
+            ry="2.6"
+            transform="rotate(-30 17 13)"
+            fill="#fff"
+            opacity=".3"
+          />
+        </>
+      ) : (
+        <path
+          d={HEX}
+          className="fill-sunken stroke-line-strong"
+          strokeWidth="3"
+          strokeDasharray="4 3"
+          strokeLinejoin="round"
+        />
+      )}
+      <Icon
+        x={14}
+        y={13}
+        size={20}
+        strokeWidth={2.2}
+        color={metal ? "#fff" : undefined}
+        className={metal ? undefined : "text-ink-muted"}
+      />
+      <rect
+        x={24 - ribbon / 2}
+        y="39.5"
+        width={ribbon}
+        height="13"
+        rx="6.5"
+        strokeWidth="1.5"
+        fill={metal?.rim}
+        className={metal ? "stroke-surface" : "fill-surface stroke-line-strong"}
+      />
+      <text
+        x="24"
+        y="49"
+        textAnchor="middle"
+        className={cn(
+          "font-display font-extrabold text-[9.5px]",
+          metal ? "fill-white" : "fill-ink-muted",
+        )}
+      >
+        {goal}
+      </text>
+    </svg>
+  );
+}
+
+/** The medal's hexagon and its lighter inner face, in a 48 × 54 box. */
+const HEX = "M24 4 41.32 14V34L24 44 6.68 34V14Z";
+const HEX_INNER = "M24 9.5 36.55 16.75V31.25L24 38.5 11.45 31.25V16.75Z";

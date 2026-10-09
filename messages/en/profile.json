@@ -248,7 +248,9 @@
     },
     "locked": "Not yet",
     "since": "Since {date}",
-    "progress": "{value} / {goal}",
+    "progress": "{value}/{goal}",
+    "legend": "The colour tells how far a badge has climbed; the group tells where it comes from",
+    "count": "{earned} of {total}",
     "names": {
       "matches": "Regular",
       "wins": "Podium",

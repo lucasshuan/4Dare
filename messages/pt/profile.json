@@ -248,7 +248,9 @@
     },
     "locked": "Ainda não",
     "since": "Desde {date}",
-    "progress": "{value} / {goal}",
+    "progress": "{value}/{goal}",
+    "legend": "A cor diz até onde a conquista já subiu; o grupo diz de onde ela vem",
+    "count": "{earned} de {total}",
     "names": {
       "matches": "Frequentador",
       "wins": "Pódio",

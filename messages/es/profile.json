@@ -248,7 +248,9 @@
     },
     "locked": "Todavía no",
     "since": "Desde {date}",
-    "progress": "{value} / {goal}",
+    "progress": "{value}/{goal}",
+    "legend": "El color dice hasta dónde subió el logro; el grupo dice de dónde viene",
+    "count": "{earned} de {total}",
     "names": {
       "matches": "Habitual",
       "wins": "Podio",

@@ -248,7 +248,9 @@
     },
     "locked": "未獲得",
     "since": "{date}に獲得",
-    "progress": "{value} / {goal}",
+    "progress": "{value}/{goal}",
+    "legend": "色は実績がどこまで進んだか、グループはどこで得たかを表します",
+    "count": "{total}個中{earned}個",
     "names": {
       "matches": "常連",
       "wins": "表彰台",
