@@ -310,7 +310,7 @@ for (const lang of LANGS) {
     });
 
   if (GAMES.includes("lineup"))
-    test(`what for? in ${lang}`, async ({ browser }) => {
+    test(`build the team in ${lang}`, async ({ browser }) => {
       test.setTimeout(900_000);
       const players = [
         await newPlayer(browser),

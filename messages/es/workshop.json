@@ -99,7 +99,7 @@
     "types": { "theme": "Tema", "question": "Pregunta", "mission": "Misión" },
     "goesTo": "Va a",
     "needGame": "Elige al menos un juego para enviar.",
-    "themeGamesHint": "El tema se sortea en ¿Quién soy? y en Impostor. ¿Para qué? no usa temas.",
+    "themeGamesHint": "El tema se sortea en ¿Quién soy? y en Impostor. Arma el equipo no usa temas.",
     "questionGamesHint": "Las preguntas solo existen en Impostor: todos responden sobre su propia carta.",
     "missionGamesHint": "La misión sale del sobre después de la subasta. Sirve para cualquier gusto: los lotes vienen de los gustos que la sala dejó activados.",
     "themeName": "Nombre del tema",

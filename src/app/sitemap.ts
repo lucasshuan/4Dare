@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import {
+  BUILD_THE_TEAM,
   CHARACTERS,
   GAMES,
   IMPOSTOR,
@@ -8,7 +9,6 @@ import {
   PRIVACY,
   ROOMS,
   TERMS,
-  WHAT_FOR,
   WHO_AM_I,
   WORKSHOP,
 } from "@/lib/routes";
@@ -19,7 +19,7 @@ const PAGES = [
   { path: GAMES, priority: 1 },
   { path: WHO_AM_I, priority: 0.9 },
   { path: IMPOSTOR, priority: 0.9 },
-  { path: WHAT_FOR, priority: 0.9 },
+  { path: BUILD_THE_TEAM, priority: 0.9 },
   { path: ROOMS, priority: 0.6 },
   { path: CHARACTERS, priority: 0.5 },
   { path: WORKSHOP, priority: 0.5 },

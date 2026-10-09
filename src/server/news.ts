@@ -27,10 +27,10 @@ const GAME_NAMES = {
     pt: "Impostor",
   },
   lineup: {
-    en: "What for?",
-    es: "¿Para qué?",
-    ja: "何のため？",
-    pt: "Pra quê?",
+    en: "Build the Team",
+    es: "Arma el equipo",
+    ja: "チームを組もう",
+    pt: "Monte a equipe",
   },
 } as const satisfies Record<string, Texts>;
 
@@ -50,10 +50,10 @@ const TITLE = {
     pt: "Pergunta nova no Impostor",
   },
   mission: {
-    en: "A new mission in What for?",
-    es: "Una misión nueva en ¿Para qué?",
-    ja: "「何のため？」に新しいミッション",
-    pt: "Missão nova no Pra quê?",
+    en: "A new mission in Build the Team",
+    es: "Una misión nueva en Arma el equipo",
+    ja: "「チームを組もう」に新しいミッション",
+    pt: "Missão nova no Monte a equipe",
   },
 } as const satisfies Record<string, Texts>;
 

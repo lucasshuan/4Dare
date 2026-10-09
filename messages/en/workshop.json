@@ -99,7 +99,7 @@
     "types": { "theme": "Theme", "question": "Question", "mission": "Mission" },
     "goesTo": "Goes to",
     "needGame": "Pick at least one game to send.",
-    "themeGamesHint": "Themes are drawn in Who am I? and Impostor. What for? doesn't use themes.",
+    "themeGamesHint": "Themes are drawn in Who am I? and Impostor. Build the Team doesn't use themes.",
     "questionGamesHint": "Questions only exist in Impostor: everyone answers about their own card.",
     "missionGamesHint": "The mission comes out of the envelope after the auction. It works for any taste: the lots come from the tastes the room left on.",
     "themeName": "Theme name",

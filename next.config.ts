@@ -40,6 +40,16 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SUPABASE_URL:
       process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "",
   },
+  // the game was called What for? at first
+  async redirects() {
+    return [
+      {
+        source: "/:locale(en|es|pt|ja)/what-for",
+        destination: "/:locale/build-the-team",
+        permanent: true,
+      },
+    ];
+  },
   experimental: {
     // character images are cropped in the browser and sent through a server action
     serverActions: { bodySizeLimit: "4mb" },

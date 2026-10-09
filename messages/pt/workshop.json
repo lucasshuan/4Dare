@@ -99,7 +99,7 @@
     "types": { "theme": "Tema", "question": "Pergunta", "mission": "Missão" },
     "goesTo": "Vai para",
     "needGame": "Escolha pelo menos um jogo para enviar.",
-    "themeGamesHint": "Tema é sorteado no Quem sou eu? e no Impostor. O Pra quê? não usa temas.",
+    "themeGamesHint": "Tema é sorteado no Quem sou eu? e no Impostor. Monte a equipe não usa temas.",
     "questionGamesHint": "Perguntas só existem no Impostor: todo mundo responde sobre a própria carta.",
     "missionGamesHint": "A missão sai do envelope depois do leilão. Vale para qualquer gosto: os lotes vêm dos gostos que a sala deixou ligados.",
     "themeName": "Nome do tema",
