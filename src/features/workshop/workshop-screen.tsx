@@ -17,12 +17,16 @@ import { Segmented } from "@/components/ui/segmented";
 import { Switch } from "@/components/ui/switch";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { type GameKey, OPEN_GAMES } from "@/game/games";
+import { type GameKey, isGameKey, OPEN_GAMES } from "@/game/games";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { WORKSHOP_REVIEW } from "@/lib/routes";
-import type { WorkshopItem, WorkshopKind } from "@/server/community-contract";
+import {
+  WORKSHOP_KINDS,
+  type WorkshopItem,
+  type WorkshopKind,
+} from "@/server/community-contract";
 import { Sema } from "./objects";
 import { Suggest } from "./suggest";
 import {
@@ -52,6 +56,43 @@ const ART: Record<GameKey, string> = {
   lineup: "var(--art-lineup)",
 };
 
+const DEFAULTS: WorkshopFilters = {
+  game: null,
+  kind: null,
+  status: "voting",
+  mine: false,
+  q: "",
+};
+
+/** The filters a link carries (?game=lineup&kind=mission&status=live&mine=1&q=cat), each optional. */
+function fromSearch(search: string): WorkshopFilters {
+  const p = new URLSearchParams(search);
+  const game = p.get("game");
+  const kind = p.get("kind");
+  const status = p.get("status");
+  const picked: WorkshopFilters = {
+    game: isGameKey(game) ? game : null,
+    kind: WORKSHOP_KINDS.find((k) => k === kind) ?? null,
+    status: STATUSES.find((s) => s === status) ?? DEFAULTS.status,
+    mine: p.get("mine") === "1",
+    q: (p.get("q") ?? "").slice(0, 80),
+  };
+  if (picked.kind && !fits(picked.kind, picked.game)) picked.kind = null;
+  return picked;
+}
+
+/** The filters as the link carries them: only what differs from the defaults. */
+function toSearch({ game, kind, status, mine, q }: WorkshopFilters) {
+  const p = new URLSearchParams();
+  if (game) p.set("game", game);
+  if (kind) p.set("kind", kind);
+  if (status !== DEFAULTS.status) p.set("status", status);
+  if (mine) p.set("mine", "1");
+  if (q.trim()) p.set("q", q.trim());
+  const s = p.toString();
+  return s ? `?${s}` : "";
+}
+
 /**
  * /workshop: the themes, questions and missions the games use. A game
  * filter, "only mine", tabs by kind and a traffic light by status (up for
@@ -62,18 +103,27 @@ export function WorkshopScreen({ focus = null }: { focus?: string | null }) {
   const t = useTranslations("workshop");
   const format = useFormatter();
   const gameName = useGameName();
-  const [filters, setFilters] = useState<WorkshopFilters>({
-    game: null,
-    kind: null,
-    status: "voting",
-    mine: false,
-    q: "",
-  });
+  const [filters, setFilters] = useState<WorkshopFilters>(DEFAULTS);
+  const [linked, setLinked] = useState(false);
   const q = useDeferredValue(filters.q);
   const query = useWorkshop({ ...filters, q });
   const focused = useWorkshopItem(focus);
   const [composing, setComposing] = useState(false);
   const [made, setMade] = useState<string | null>(null);
+
+  // The page is static: it starts with no filter, then takes the link's
+  // (a shared card's link has none: its card picks the tab below).
+  useEffect(() => {
+    if (!focus) setFilters(fromSearch(window.location.search));
+    setLinked(true);
+  }, [focus]);
+
+  // A reload or a shared link opens the same filters.
+  useEffect(() => {
+    if (!linked) return;
+    const next = `${window.location.pathname}${toSearch(filters)}`;
+    window.history.replaceState(window.history.state, "", next);
+  }, [linked, filters]);
 
   // a shared link opens on its card's own tab
   const opened = useRef(false);
