@@ -276,5 +276,96 @@
     "empty": "Nenhuma sala agora. Crie uma e ela aparece aqui.",
     "emptyFiltered": "Nenhuma sala com esses filtros.",
     "clearFilters": "Limpar filtros"
+  },
+  "gamePage": {
+    "actions": {
+      "label": "Mais deste jogo",
+      "howTo": "Como jogar",
+      "howToHint": "As regras em um minuto",
+      "characters": "Personagens",
+      "charactersHint": "Quem pode aparecer",
+      "workshop": "Ver na oficina",
+      "workshopHint": "Sugira e vote em cartas",
+      "ranking": "Ranking completo",
+      "rankingHint": "Todos os jogos e períodos"
+    },
+    "ranking": {
+      "title": "Ranking",
+      "period": "Período",
+      "periods": {
+        "week": "Semana",
+        "month": "Mês",
+        "ever": "Sempre"
+      },
+      "soon": "Em breve: quem mais somou XP neste jogo.",
+      "all": "Ver ranking"
+    },
+    "scenes": {
+      "label": "Uma partida de {game}, encenada",
+      "live": "Ao vivo",
+      "chat": "Chat",
+      "you": "Você",
+      "pause": "Pausar",
+      "play": "Continuar",
+      "whoAmI": {
+        "c1": "Todos veem as cartas dos outros. Menos a sua.",
+        "c2": "Na sua vez, pergunte. Os outros respondem sim, não ou talvez.",
+        "c3": "Acertou o palpite, descobriu. Quem descobre primeiro vence.",
+        "ask": "Eu uso uma arma?",
+        "guess": "Eu sou o Thor?",
+        "yes": "Sim",
+        "maybe": "Talvez",
+        "stamp": "Descobriu!",
+        "chat": {
+          "hi": "cheguei!! 👋",
+          "win": "bora que hoje eu ganho",
+          "theme": "🦸 Tema: <b>Super-heróis</b>",
+          "good": "pergunta boa 👀",
+          "lol": "sim kkkk",
+          "close": "tá chegando perto",
+          "done": "Você descobriu em 4 perguntas",
+          "no": "nãoooo 😭",
+          "gg": "gg"
+        }
+      },
+      "impostor": {
+        "c1": "Todo mundo recebe o mesmo personagem. Menos um.",
+        "c2": "Cada um responde do seu jeito. Quem destoa?",
+        "c3": "Votem em quem parece ter outro personagem.",
+        "yours": "Sua carta · só você vê",
+        "scale": "Quão corajoso é o seu personagem?",
+        "stamp": "Impostor!",
+        "chat": {
+          "warn": "quem for o impostor avisa kkk",
+          "nobody": "ninguém sabe, mei 😂",
+          "three": "mei deu 3 hein 👀",
+          "scared": "ué, ele é medroso 😳",
+          "coward": "medroso?? 🤔",
+          "was": "Mei era o impostor",
+          "me": "EU??? 😱",
+          "gg": "gg"
+        }
+      },
+      "whatFor": {
+        "c1": "Personagens vão a leilão. Ninguém sabe pra quê.",
+        "c2": "Depois vem a missão.",
+        "c3": "Cada um defende seu time. A sala vota.",
+        "lot": "Lote 1",
+        "sold": "Vendido!",
+        "coins": "{n} moedas",
+        "mission": "Trocar o pneu do carro, na chuva, à meia-noite.",
+        "won": "Leo venceu!",
+        "chat": {
+          "any": "batman serve pra qualquer coisa",
+          "pass": "passo. quero ver o próximo",
+          "sold": "🔨 Batman: Bia, 4 moedas",
+          "mission": "✉️ Missão: trocar o pneu do carro, na chuva, à meia-noite",
+          "fight": "EU COMPREI UM TIME DE LUTA 😭",
+          "lol": "kkkkkkk",
+          "self": "votei em mim. sem vergonha",
+          "no": "NÃO"
+        }
+      }
+    }
   }
 }
