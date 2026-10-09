@@ -210,7 +210,7 @@ export async function profileView(
     return {
       ...base,
       quote: null,
-      about: { time: null, langs: [] },
+      about: { times: [], langs: [] },
       showcase: [],
       xp: 0,
       matches: 0,

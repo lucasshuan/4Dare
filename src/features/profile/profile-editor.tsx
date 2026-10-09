@@ -2,19 +2,24 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  Check,
   ChevronDown,
+  Clock3,
   Eye,
   ImageIcon,
   Languages,
+  type LucideIcon,
+  Moon,
   MoonStar,
   Palette,
   Plus,
   Search,
+  Sun,
+  Sunrise,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChoiceGroup } from "@/components/ui/choice-group";
 import { Flag } from "@/components/ui/language-switch";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/toast";
@@ -30,6 +35,7 @@ import {
   type Banner,
   CAPTION_MAX,
   PLAY_TIMES,
+  type PlayTime,
   PRIVACY_KEYS,
   type Privacy,
   QUOTE_MAX,
@@ -379,35 +385,39 @@ export function ProfileEditor({
             </div>
 
             <div className="flex max-w-[640px] flex-col gap-2.5 rounded-[18px] bg-surface px-4 py-3.5">
-              <AboutRow icon={<MoonStar />} label={t("time")}>
-                <ChoiceGroup label={t("time")} className="flex-wrap">
-                  {[null, ...PLAY_TIMES].map((time) => (
-                    <button
-                      key={time ?? "none"}
-                      type="button"
-                      aria-pressed={about.time === time}
-                      onClick={() => setAbout((a) => ({ ...a, time }))}
-                      className={cn(
-                        "h-[30px] rounded-pill px-3 font-semibold text-[13px] transition-[background-color,color,box-shadow] duration-200 ease-soft",
-                        about.time === time
-                          ? "bg-surface text-ink shadow-card"
-                          : "text-ink-muted hover:text-ink",
-                      )}
-                    >
-                      {time ? t(`timeShort.${time}`) : t("timeNone")}
-                    </button>
-                  ))}
-                </ChoiceGroup>
+              <AboutRow icon={<Clock3 />} label={t("time")}>
+                <div className="flex flex-wrap gap-1.5">
+                  {PLAY_TIMES.map((time) => {
+                    const Icon = TIME_ICONS[time];
+                    const on = about.times.includes(time);
+                    return (
+                      <Toggle
+                        key={time}
+                        on={on}
+                        onClick={() =>
+                          setAbout((a) => ({
+                            ...a,
+                            times: PLAY_TIMES.filter((x) =>
+                              x === time ? !on : a.times.includes(x),
+                            ),
+                          }))
+                        }
+                      >
+                        <Icon className="size-4" strokeWidth={1.75} />
+                        {t(`timeShort.${time}`)}
+                      </Toggle>
+                    );
+                  })}
+                </div>
               </AboutRow>
               <AboutRow icon={<Languages />} label={t("langs")}>
                 <div className="flex flex-wrap gap-1.5">
                   {LANGS.map((l) => {
                     const on = about.langs.includes(l);
                     return (
-                      <button
+                      <Toggle
                         key={l}
-                        type="button"
-                        aria-pressed={on}
+                        on={on}
                         onClick={() =>
                           setAbout((a) => ({
                             ...a,
@@ -416,16 +426,10 @@ export function ProfileEditor({
                             ),
                           }))
                         }
-                        className={cn(
-                          "inline-flex h-[34px] items-center gap-2 rounded-pill border-[1.5px] bg-surface pr-3 pl-2 font-semibold text-[13px] transition-colors duration-150",
-                          on
-                            ? "border-ink text-ink"
-                            : "border-line text-ink-muted hover:border-line-strong",
-                        )}
                       >
                         <Flag lang={l} className="size-[18px]" />
                         {tc(`languages.${l}`)}
-                      </button>
+                      </Toggle>
                     );
                   })}
                 </div>
@@ -749,5 +753,42 @@ function AboutRow({
       </span>
       {children}
     </div>
+  );
+}
+
+const TIME_ICONS: Record<PlayTime, LucideIcon> = {
+  morning: Sunrise,
+  afternoon: Sun,
+  night: Moon,
+  dawn: MoonStar,
+};
+
+/** A chip that turns on and off, filled with the accent while on. */
+function Toggle({
+  on,
+  onClick,
+  children,
+}: {
+  on: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={on}
+      onClick={onClick}
+      className={cn(
+        "inline-flex h-[34px] items-center gap-2 rounded-pill border-[1.5px] pr-3 pl-2 font-semibold text-[13px] transition-colors duration-150",
+        on
+          ? "border-(--accent) bg-(--accent-soft) text-ink"
+          : "border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink",
+      )}
+    >
+      {children}
+      {on ? (
+        <Check className="-ml-0.5 size-3.5 text-(--accent)" strokeWidth={2.5} />
+      ) : null}
+    </button>
   );
 }

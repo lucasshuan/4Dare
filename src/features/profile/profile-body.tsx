@@ -424,9 +424,15 @@ function ProfileShow({
                       · {age(view.createdAt, now)}
                     </Chip>
                   ) : null}
-                  {view.about.time ? (
+                  {view.about.times.length ? (
                     <Chip icon={<MoonStar />}>
-                      {t(`times.${view.about.time}`)}
+                      {t("plays", {
+                        list: new Intl.ListFormat(locale, {
+                          type: "conjunction",
+                        }).format(
+                          view.about.times.map((x) => t(`timesAt.${x}`)),
+                        ),
+                      })}
                     </Chip>
                   ) : null}
                   {view.about.langs.length ? (

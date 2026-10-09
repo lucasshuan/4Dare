@@ -111,11 +111,12 @@
   "edit": "プロフィールを編集",
   "private": "非公開のプロフィール",
   "privateText": "{name}さんはプロフィールを一部の人にだけ公開しています。",
-  "times": {
-    "morning": "朝によく遊ぶ",
-    "afternoon": "昼によく遊ぶ",
-    "night": "夜によく遊ぶ",
-    "dawn": "深夜によく遊ぶ"
+  "plays": "{list}によく遊ぶ",
+  "timesAt": {
+    "morning": "朝",
+    "afternoon": "昼",
+    "night": "夜",
+    "dawn": "深夜"
   },
   "editor": {
     "changeCover": "カバーを変更",
@@ -164,7 +165,6 @@
     "about": "あなたについて",
     "aboutHint": "空欄はプロフィールに表示されません。",
     "time": "よく遊ぶ時間",
-    "timeNone": "言わない",
     "timeShort": {
       "morning": "朝",
       "afternoon": "昼",

@@ -60,9 +60,14 @@ describe("a profile's choices", () => {
   });
 
   it("starts with about empty and everything open", () => {
-    expect(parseAbout(null)).toEqual({ time: null, langs: [] });
+    expect(parseAbout(null)).toEqual({ times: [], langs: [] });
+    expect(parseAbout({ times: ["night", "morning", "noon"] })).toEqual({
+      times: ["morning", "night"],
+      langs: [],
+    });
+    // the first profiles kept one time
     expect(parseAbout({ time: "night", langs: ["ja", "xx", "pt"] })).toEqual({
-      time: "night",
+      times: ["night"],
       langs: ["ja", "pt"],
     });
     expect(parsePrivacy(undefined)).toEqual(DEFAULT_PRIVACY);

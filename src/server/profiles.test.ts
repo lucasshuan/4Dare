@@ -30,7 +30,7 @@ const profile = (
   accent: null,
   banner: null,
   showcase: [{ characterId: "wd-Q9", caption: "Amor da minha vida <3" }],
-  about: { time: "night", langs: ["pt"] },
+  about: { times: ["night"], langs: ["pt"] },
   privacy: { ...DEFAULT_PRIVACY, ...privacy },
   handleChangedAt: null,
 });
@@ -148,7 +148,7 @@ describe("profiles", () => {
       },
       own: null,
       quote: "Se for o Shrek, eu descubro",
-      about: { time: "night", langs: ["pt"] },
+      about: { times: ["night"], langs: ["pt"] },
       showcase: [
         {
           characterId: "wd-Q9",

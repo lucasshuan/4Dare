@@ -111,11 +111,12 @@
   "edit": "Edit profile",
   "private": "Closed profile",
   "privateText": "{name} shows their profile to some people only.",
-  "times": {
-    "morning": "Plays mostly in the morning",
-    "afternoon": "Plays mostly in the afternoon",
-    "night": "Plays mostly at night",
-    "dawn": "Plays mostly late at night"
+  "plays": "Plays mostly {list}",
+  "timesAt": {
+    "morning": "in the morning",
+    "afternoon": "in the afternoon",
+    "night": "at night",
+    "dawn": "late at night"
   },
   "editor": {
     "changeCover": "Change cover",
@@ -164,7 +165,6 @@
     "about": "About you",
     "aboutHint": "Whatever stays empty doesn't show on your profile.",
     "time": "When you usually play",
-    "timeNone": "Don't say",
     "timeShort": {
       "morning": "Morning",
       "afternoon": "Afternoon",

@@ -111,11 +111,12 @@
   "edit": "Editar perfil",
   "private": "Perfil cerrado",
   "privateText": "{name} muestra su perfil solo a algunas personas.",
-  "times": {
-    "morning": "Juega más por la mañana",
-    "afternoon": "Juega más por la tarde",
-    "night": "Juega más por la noche",
-    "dawn": "Juega más de madrugada"
+  "plays": "Juega más {list}",
+  "timesAt": {
+    "morning": "por la mañana",
+    "afternoon": "por la tarde",
+    "night": "por la noche",
+    "dawn": "de madrugada"
   },
   "editor": {
     "changeCover": "Cambiar portada",
@@ -164,7 +165,6 @@
     "about": "Sobre ti",
     "aboutHint": "Lo que quede vacío no aparece en el perfil.",
     "time": "Cuándo sueles jugar",
-    "timeNone": "No decir",
     "timeShort": {
       "morning": "Mañana",
       "afternoon": "Tarde",

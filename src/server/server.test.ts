@@ -467,7 +467,10 @@ describe("server, local mode", () => {
       quote: "  Se for o Shrek,   eu descubro  ",
       accent: "teal",
       banner: "pattern:waves:sky",
-      about: JSON.stringify({ time: "night", langs: ["pt", "ja"] }),
+      about: JSON.stringify({
+        times: ["night", "morning"],
+        langs: ["pt", "ja"],
+      }),
       showcase: JSON.stringify([
         { characterId: "wd-Q11934", caption: "Amor da minha vida <3" },
         { characterId: "nope-404", caption: "unknown" },
@@ -481,7 +484,7 @@ describe("server, local mode", () => {
       quote: "Se for o Shrek, eu descubro",
       accent: "teal",
       banner: { kind: "pattern", pattern: "waves", tint: "sky" },
-      about: { time: "night", langs: ["ja", "pt"] },
+      about: { times: ["morning", "night"], langs: ["ja", "pt"] },
       showcase: [
         { characterId: "wd-Q11934", caption: "Amor da minha vida <3" },
       ],

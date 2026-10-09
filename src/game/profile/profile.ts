@@ -84,7 +84,7 @@ export type PlayTime = (typeof PLAY_TIMES)[number];
 
 /** "About you": both empty until the owner fills them, and empty shows nothing. */
 export interface About {
-  time: PlayTime | null;
+  times: PlayTime[];
   langs: Lang[];
 }
 
@@ -176,7 +176,10 @@ export function parseAbout(raw: unknown): About {
   const langs = Array.isArray(r?.langs)
     ? LANGS.filter((l) => (r.langs as unknown[]).includes(l))
     : [];
-  return { time: oneOf(PLAY_TIMES, r?.time), langs };
+  // the first profiles kept one time, as "time"
+  const said = Array.isArray(r?.times) ? r.times : [r?.time];
+  const times = PLAY_TIMES.filter((t) => said.includes(t));
+  return { times, langs };
 }
 
 export function parsePrivacy(raw: unknown): Privacy {
