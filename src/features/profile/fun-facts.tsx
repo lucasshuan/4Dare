@@ -11,9 +11,12 @@ import {
   Zap,
 } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import { Modal } from "@/components/ui/dialog";
+import { Portrait } from "@/components/ui/portrait";
 import { GameThumb, useGameName } from "@/features/create/game-info";
+import { thumbUrl } from "@/game/character-search";
 import type { GameKey } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -31,7 +34,52 @@ type Fact = {
   value: ReactNode;
   sub: ReactNode;
   game: GameKey | null;
+  /** The fact's character, in the corner; a tap shows it big. */
+  picture?: Picture;
 };
+
+type Picture = { url: string; name: string; origin: string | null };
+
+/** Days the longest streak needs before it is worth a tile. */
+const STREAK_DAYS = 3;
+
+/** A character's picture as a small tilted card; a tap opens it big. */
+function FactPicture({ picture }: { picture: Picture }) {
+  const t = useTranslations("profile.facts");
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={t("fastestPicture", { name: picture.name })}
+        className="absolute right-3 bottom-3 w-12 rotate-6 overflow-hidden rounded-lg bg-surface p-0.5 shadow-card transition-transform duration-200 ease-soft hover:rotate-0 hover:scale-105"
+      >
+        <Portrait
+          src={thumbUrl(picture.url, 120)}
+          className="rounded-[6px] bg-transparent"
+        />
+      </button>
+      <Modal
+        open={open}
+        onOpenChange={setOpen}
+        title={picture.name}
+        size="compact"
+      >
+        <div className="flex flex-col items-center gap-2 p-5">
+          <div className="w-full max-w-[320px] overflow-hidden rounded-xl">
+            <Portrait src={thumbUrl(picture.url, 640)} />
+          </div>
+          {picture.origin ? (
+            <small className="font-semibold text-[13px] text-ink-muted">
+              {picture.origin}
+            </small>
+          ) : null}
+        </div>
+      </Modal>
+    </>
+  );
+}
 
 /**
  * The curiosities, each in its own small tinted tile under the profile's head:
@@ -80,9 +128,14 @@ export function FunFacts({
         tint: "bg-butter-soft text-on-butter",
         game: f.game,
         label: t("fastest"),
-        value:
-          f.timeMs === null ? t("fastestAt", { at: f.at }) : minutes(f.timeMs),
-        sub: f.characterName,
+        value: f.characterName,
+        sub:
+          f.timeMs === null
+            ? t("fastestAt", { at: f.at })
+            : `${minutes(f.timeMs)} · ${t("fastestAt", { at: f.at })}`,
+        picture: f.imageUrl
+          ? { url: f.imageUrl, name: f.characterName, origin: f.origin }
+          : undefined,
       });
     else if (f.kind === "hardest")
       items.push({
@@ -145,7 +198,7 @@ export function FunFacts({
         sub: t("bullseyeSub"),
       });
   }
-  if (streak.best >= 2 && streak.bestEnd !== null)
+  if (streak.best >= STREAK_DAYS && streak.bestEnd !== null)
     items.splice(facts[0]?.kind === "partner" ? 1 : 0, 0, {
       key: "streak",
       icon: <Flame />,
@@ -169,7 +222,7 @@ export function FunFacts({
             )}
           >
             {/* the icon again, big and faint in the corner */}
-            {it.key === "partner" ? null : (
+            {it.key === "partner" || it.picture ? null : (
               <span
                 aria-hidden
                 className="-right-3 -bottom-4 pointer-events-none absolute rotate-12 opacity-[0.12] [&_svg]:size-[84px] [&_svg]:stroke-[1.5]"
@@ -195,12 +248,23 @@ export function FunFacts({
                 </span>
               ) : null}
             </span>
-            <b className="relative mt-3 line-clamp-2 font-display font-extrabold text-[22px] text-ink leading-[1.1] tracking-[-0.01em]">
+            <b
+              className={cn(
+                "relative mt-3 line-clamp-2 font-display font-extrabold text-[22px] text-ink leading-[1.1] tracking-[-0.01em]",
+                it.picture && "pr-14",
+              )}
+            >
               {it.value}
             </b>
-            <span className="relative mt-1 truncate text-[12.5px] text-ink-muted">
+            <span
+              className={cn(
+                "relative mt-1 truncate text-[12.5px] text-ink-muted",
+                it.picture && "pr-14",
+              )}
+            >
               {it.sub}
             </span>
+            {it.picture ? <FactPicture picture={it.picture} /> : null}
           </li>
         ))}
       </ul>

@@ -85,6 +85,7 @@
     "partnerSub": "一緒に{together}試合",
     "streakValue": "{n}日",
     "fastestAt": "{at}手目",
+    "fastestPicture": "{name}の写真を見る",
     "hardestSub": "{questions}問でも当たらず",
     "themeSub": "{n}試合",
     "escapeSub": "{votes, plural, =0 {票ゼロ} other {#票}}",

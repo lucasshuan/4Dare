@@ -85,6 +85,7 @@
     "partnerSub": "{together} partidas juntos",
     "streakValue": "{n} dias",
     "fastestAt": "{at}ª jogada",
+    "fastestPicture": "Ver foto de {name}",
     "hardestSub": "{questions} perguntas e não saiu",
     "themeSub": "{n} partidas",
     "escapeSub": "{votes, plural, =0 {Nenhum voto} one {# voto} other {# votos}}",

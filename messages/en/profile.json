@@ -85,6 +85,7 @@
     "partnerSub": "{together} matches together",
     "streakValue": "{n} days",
     "fastestAt": "Play {at}",
+    "fastestPicture": "See {name}'s picture",
     "hardestSub": "{questions} questions, still a mystery",
     "themeSub": "{n} matches",
     "escapeSub": "{votes, plural, =0 {Not a single vote} one {# vote} other {# votes}}",

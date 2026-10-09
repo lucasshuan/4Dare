@@ -256,6 +256,13 @@ export async function profileView(
       )
     ).map((p) => [p.id, person(p, lang)]),
   );
+  const factCharacters = await charactersFor(
+    facts.flatMap((f) => {
+      const key = f.kind === "fastest" ? pickKey(f.characterId) : null;
+      return key ? [key] : [];
+    }),
+    lang,
+  );
   const factViews = facts.flatMap((f): FactView[] => {
     if (f.kind === "partner") {
       const { id, ...rest } = f;
@@ -264,6 +271,13 @@ export async function profileView(
     }
     if (f.kind === "hardest")
       return [{ ...f, to: f.to ? (named.get(f.to) ?? null) : null }];
+    if (f.kind === "fastest") {
+      const { characterId, ...rest } = f;
+      const c = factCharacters.get(pickKey(characterId));
+      return [
+        { ...rest, imageUrl: c?.imageUrl ?? null, origin: c?.origin ?? null },
+      ];
+    }
     return [f];
   });
 

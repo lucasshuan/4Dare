@@ -199,6 +199,7 @@ export type Fact =
   | {
       kind: "fastest";
       game: "who-am-i";
+      characterId: string | null;
       characterName: string;
       /** The jogada that discovered it (1 = the first). */
       at: number;
@@ -246,8 +247,19 @@ export type Fact =
       price: number;
     };
 
+/** Matches together before someone is the usual partner. */
+const PARTNER_MATCHES = 3;
+/** Discoveries before one of them is worth calling the fastest. */
+const FASTEST_AMONG = 2;
+/** Questions a card picked must have held out against to be the hardest. */
+const HARD_QUESTIONS = 5;
+/** Matches on a theme before it is the favourite. */
+const THEME_MATCHES = 3;
+
 /**
- * The curiosities: the account played with most; "Who am I?"'s fastest
+ * The curiosities, each only when it says something (one discovery is not
+ * the fastest, a card nobody asked about is not hard): the account played
+ * with most; "Who am I?"'s fastest
  * discovery, the card picked that held out longest and the favourite theme;
  * the Impostor's cleanest escape and latest last-chance hit.
  */
@@ -268,24 +280,26 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
   const partner = [...mates].sort(
     (a, b) => b[1].together - a[1].together || a[0].localeCompare(b[0]),
   )[0];
-  if (partner && partner[1].together >= 2)
+  if (partner && partner[1].together >= PARTNER_MATCHES)
     facts.push({ kind: "partner", game: null, id: partner[0], ...partner[1] });
 
   const parts = matches.flatMap((m) =>
     m.game === "who-am-i" && m.details ? [{ m, p: m.details }] : [],
   );
 
-  const fastest = parts
-    .filter(({ p }) => p.discoveredAt !== null && p.characterName)
-    .sort(
-      (a, b) =>
-        (a.p.discoveredAt ?? 0) - (b.p.discoveredAt ?? 0) ||
-        (a.m.timeMs ?? Infinity) - (b.m.timeMs ?? Infinity),
-    )[0];
-  if (fastest)
+  const discovered = parts.filter(
+    ({ p }) => p.discoveredAt !== null && p.characterName,
+  );
+  const fastest = [...discovered].sort(
+    (a, b) =>
+      (a.p.discoveredAt ?? 0) - (b.p.discoveredAt ?? 0) ||
+      (a.m.timeMs ?? Infinity) - (b.m.timeMs ?? Infinity),
+  )[0];
+  if (fastest && discovered.length >= FASTEST_AMONG)
     facts.push({
       kind: "fastest",
       game: "who-am-i",
+      characterId: fastest.p.characterId,
       characterName: fastest.p.characterName as string,
       at: fastest.p.discoveredAt as number,
       timeMs: fastest.m.timeMs,
@@ -293,12 +307,15 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
 
   const hardest = parts
     .flatMap(({ m, p }) =>
-      p.gave && p.gave.result !== "discovered" && p.gave.characterName
+      // someone who left gave up on the match, not on the card
+      p.gave &&
+      (p.gave.result === "gave_up" || p.gave.result === "not_found") &&
+      p.gave.characterName
         ? [{ m, gave: p.gave }]
         : [],
     )
     .sort((a, b) => b.gave.questions - a.gave.questions)[0];
-  if (hardest && hardest.gave.questions > 0) {
+  if (hardest && hardest.gave.questions >= HARD_QUESTIONS) {
     const to = hardest.m.others.find((o) => o.id === hardest.gave.to);
     facts.push({
       kind: "hardest",
@@ -317,7 +334,7 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
     themes.set(p.themeId, t);
   }
   const theme = [...themes.values()].sort((a, b) => b.count - a.count)[0];
-  if (theme && theme.count >= 2)
+  if (theme && theme.count >= THEME_MATCHES)
     facts.push({ kind: "theme", game: "who-am-i", ...theme });
 
   // newest first, so a tie goes to the latest
@@ -346,7 +363,7 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
   // newest first, so a tie goes to the latest
   const lus = lineupRounds(matches);
   const bargain = lus
-    .filter((r) => r.won)
+    .filter((r) => r.won && r.spent <= BARGAIN_COINS)
     .reduce<LineupRoundStat | null>(
       (best, r) => (!best || r.spent < best.spent ? r : best),
       null,

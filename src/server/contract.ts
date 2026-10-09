@@ -223,22 +223,20 @@ export type GameView = GameTotals &
     | ({ game: "lineup" } & ReturnType<typeof lineupNumbers>)
   );
 
-/** A curiosity with its people named. */
+/** A curiosity with its people named and its character pictured. */
 export type FactView =
   | (Omit<Extract<Fact, { kind: "partner" }>, "id"> & { person: PersonRef })
   | (Omit<Extract<Fact, { kind: "hardest" }>, "to"> & {
       to: PersonRef | null;
     })
+  | (Omit<Extract<Fact, { kind: "fastest" }>, "characterId"> & {
+      imageUrl: string | null;
+      origin: string | null;
+    })
   | Extract<
       Fact,
       {
-        kind:
-          | "fastest"
-          | "theme"
-          | "escape"
-          | "bullseye"
-          | "bargain"
-          | "splurge";
+        kind: "theme" | "escape" | "bullseye" | "bargain" | "splurge";
       }
     >;
 

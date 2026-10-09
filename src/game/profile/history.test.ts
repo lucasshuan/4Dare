@@ -84,13 +84,20 @@ describe("a profile's matches", () => {
     const guest = { id: "g1", place: null, guest: true };
     const rows = [
       match(
-        { result: "discovered", discoveredAt: 3, characterName: "Mario" },
+        {
+          result: "discovered",
+          discoveredAt: 3,
+          characterName: "Mario",
+          themeId: "villains",
+          theme: THEME,
+        },
         { place: 1, others: [bia, guest] },
       ),
       match(
         {
           result: "discovered",
           discoveredAt: 1,
+          characterId: "pt-wd-Q1",
           characterName: "Pikachu",
           themeId: "villains",
           theme: THEME,
@@ -124,6 +131,7 @@ describe("a profile's matches", () => {
       {
         kind: "fastest",
         game: "who-am-i",
+        characterId: "pt-wd-Q1",
         characterName: "Pikachu",
         at: 1,
         timeMs: 60_000,
@@ -135,7 +143,50 @@ describe("a profile's matches", () => {
         questions: 14,
         to: "bia",
       },
-      { kind: "theme", game: "who-am-i", theme: THEME, count: 2 },
+      { kind: "theme", game: "who-am-i", theme: THEME, count: 3 },
+    ]);
+  });
+
+  it("keeps quiet about what says nothing", () => {
+    const bia = { id: "bia", place: 2, guest: false };
+    const rows = [
+      // the only discovery is not the fastest
+      match(
+        { result: "discovered", discoveredAt: 4, characterName: "Yor" },
+        { others: [bia] },
+      ),
+      // two questions is not hard, and one who left gave up on the match
+      match(
+        {
+          themeId: "villains",
+          theme: THEME,
+          gave: {
+            to: "bia",
+            characterId: "x",
+            characterName: "Agent 47",
+            result: "not_found",
+            questions: 2,
+          },
+        },
+        { others: [bia] },
+      ),
+      match(
+        {
+          themeId: "villains",
+          theme: THEME,
+          gave: {
+            to: "bia",
+            characterId: "y",
+            characterName: "Totoro",
+            result: "left",
+            questions: 12,
+          },
+        },
+        { others: [{ ...bia, place: null }] },
+      ),
+    ];
+    expect(factsOf(rows)).toEqual([
+      { kind: "partner", game: null, id: "bia", together: 3, ahead: 0 },
     ]);
   });
 
