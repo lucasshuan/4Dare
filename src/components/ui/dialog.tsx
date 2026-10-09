@@ -9,15 +9,13 @@ import { cn } from "@/lib/cn";
 /**
  * The box a modal takes. It never changes with what is inside (a tab switch
  * keeps it still); the content scrolls instead. "panel": a fixed box in the
- * middle (settings, account), the whole screen on phones; "wide" a bigger one. "full": the whole
- * screen always (a profile).
+ * middle (settings, account), the whole screen on phones; "wide" a bigger one.
  */
-const SIZE = {
+export const MODAL_SIZE = {
   panel:
     "inset-0 m-auto h-[min(600px,calc(100dvh-2rem))] w-[min(800px,calc(100vw-2rem))] rounded-xl max-sm:h-dvh max-sm:w-screen max-sm:rounded-none",
-  /** A bigger fixed box (the room's advanced settings); the whole screen on phones. */
+  /** A bigger fixed box (the room's advanced settings, a profile); the whole screen on phones. */
   wide: "inset-0 m-auto h-[min(820px,calc(100dvh-2rem))] w-[min(1120px,calc(100vw-2rem))] rounded-xl max-sm:h-dvh max-sm:w-screen max-sm:rounded-none",
-  full: "inset-0 h-dvh w-screen",
 } as const;
 
 /** A modal with a title bar (its title and a close button) over a scrim; the body fills the rest. */
@@ -34,7 +32,7 @@ export function Modal({
   onOpenChange: (open: boolean) => void;
   title: ReactNode;
   icon?: ReactNode;
-  size?: keyof typeof SIZE;
+  size?: keyof typeof MODAL_SIZE;
   className?: string;
   children: ReactNode;
 }) {
@@ -46,7 +44,7 @@ export function Modal({
         <Dialog.Popup
           className={cn(
             "fixed z-50 flex flex-col overflow-hidden bg-surface text-ink shadow-pop outline-none transition-[scale,opacity] duration-200 ease-soft data-ending-style:scale-[0.97] data-starting-style:scale-[0.97] data-ending-style:opacity-0 data-starting-style:opacity-0",
-            SIZE[size],
+            MODAL_SIZE[size],
             className,
           )}
         >

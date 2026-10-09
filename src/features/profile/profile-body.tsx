@@ -124,10 +124,11 @@ export function ProfileCover({
         // top right, under the floating bar on the page; the avatar's row covers the bottom
         <div
           className={cn(
-            "absolute right-4 flex gap-2 sm:right-8",
+            "absolute flex gap-2",
             mode === "page"
-              ? "top-[72px] sm:top-[96px] sm:short:top-[80px]"
-              : "top-4",
+              ? "top-[72px] right-4 sm:top-[96px] sm:right-8 sm:short:top-[80px]"
+              : // left of the modal's close button
+                "top-3 right-16",
           )}
         >
           {children}
