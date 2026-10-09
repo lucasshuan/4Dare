@@ -57,7 +57,8 @@ export function GameRanking({
   const format = useFormatter();
   const { data, isPending } = useWeekRanking(game);
   const rows = data?.rows ?? [];
-  const bar = "rounded-pill bg-sunken";
+  // sunken is darker than the canvas on dark: ink tints show on both
+  const bar = "rounded-pill bg-ink/10";
   return (
     <section
       aria-labelledby="game-ranking-h"
