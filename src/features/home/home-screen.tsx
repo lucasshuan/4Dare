@@ -3,6 +3,7 @@
 import { ArrowRight, Sparkles, UsersRound } from "lucide-react";
 import { m } from "motion/react";
 import { useTranslations } from "next-intl";
+import type { CSSProperties } from "react";
 import { Screen } from "@/components/ui/screen";
 import { GAME_INFO } from "@/features/create/game-info";
 import { LiveDot } from "@/features/current-match/match-lock";
@@ -64,6 +65,13 @@ export function HomeScreen() {
   );
 }
 
+/** Each caption fades up from its game's second ground colour, darkened, not from black. */
+const TILE_GROUND: Record<GameKey, string> = {
+  "who-am-i": "var(--art-whoami-2)",
+  impostor: "var(--art-impostor-2)",
+  lineup: "var(--art-lineup-2)",
+};
+
 function GameCard({ game, delay }: { game: GameKey; delay: number }) {
   const { messages, Art } = GAME_INFO[game];
   const t = useTranslations(`home.games.${messages}`);
@@ -90,7 +98,14 @@ function GameCard({ game, delay }: { game: GameKey; delay: number }) {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-[5] bg-canvas/60 transition-opacity duration-500 ease-soft max-sm:hidden dark:hidden group-hover/tile:opacity-0 group-focus-visible/tile:opacity-0"
         />
-        <div className="absolute inset-x-0 bottom-0 z-[6] flex flex-col gap-0.5 bg-[linear-gradient(to_top,rgb(12_14_22/0.82),rgb(12_14_22/0))] px-3 pt-[30px] pb-[11px] text-white sm:top-0 sm:justify-end sm:gap-3.5 sm:bg-[linear-gradient(to_top,rgb(12_14_22/0.9),rgb(12_14_22/0.62)_34%,rgb(12_14_22/0)_62%)] sm:p-6 sm:opacity-0 sm:transition-opacity sm:duration-350 sm:ease-soft sm:group-hover/tile:opacity-100 sm:group-focus-visible/tile:opacity-100 [&>*]:transition-transform [&>*]:duration-450 [&>*]:ease-soft sm:[&>*]:translate-y-3 sm:group-hover/tile:[&>*]:translate-y-0 sm:group-focus-visible/tile:[&>*]:translate-y-0">
+        <div
+          style={
+            {
+              "--shade": `color-mix(in oklch, ${TILE_GROUND[game]}, black var(--k))`,
+            } as CSSProperties
+          }
+          className="absolute inset-x-0 bottom-0 z-[6] flex flex-col gap-0.5 bg-[linear-gradient(to_top,color-mix(in_oklch,var(--shade)_82%,transparent),transparent)] px-3 pt-[30px] pb-[11px] text-white [--k:55%] dark:[--k:30%] sm:top-0 sm:justify-end sm:gap-3.5 sm:bg-[linear-gradient(to_top,color-mix(in_oklch,var(--shade)_90%,transparent),color-mix(in_oklch,var(--shade)_62%,transparent)_34%,transparent_62%)] sm:p-6 sm:opacity-0 sm:transition-opacity sm:duration-350 sm:ease-soft sm:group-hover/tile:opacity-100 sm:group-focus-visible/tile:opacity-100 [&>*]:transition-transform [&>*]:duration-450 [&>*]:ease-soft sm:[&>*]:translate-y-3 sm:group-hover/tile:[&>*]:translate-y-0 sm:group-focus-visible/tile:[&>*]:translate-y-0"
+        >
           <h3 className="truncate font-display font-extrabold text-lg leading-[1.05] tracking-[-0.01em] sm:text-[min(38px,11cqw)] sm:leading-none">
             {t("name")}
           </h3>
