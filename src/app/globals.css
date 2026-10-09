@@ -549,10 +549,16 @@ body {
   }
 }
 
-/* Keyboard focus: one ring everywhere; a page over a coloured backdrop (the lobby) sets --focus-ring to keep it visible. */
-:focus-visible {
-  outline: 3px solid var(--focus-ring, var(--sky));
-  outline-offset: 2px;
+/*
+ * Keyboard focus: one ring everywhere; a page over a coloured backdrop (the
+ * lobby) sets --focus-ring to keep it visible. In base, so a field that shows
+ * focus its own way (outline-none) wins over it.
+ */
+@layer base {
+  :focus-visible {
+    outline: 3px solid var(--focus-ring, var(--sky));
+    outline-offset: 2px;
+  }
 }
 
 /*

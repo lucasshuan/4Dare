@@ -95,7 +95,7 @@ export function RoomTitle({
           onFocus={(e) => e.target.select()}
           className={cn(
             className,
-            "-mx-1 w-full rounded-sm bg-transparent px-1 shadow-[inset_0_-3px_0_var(--sky)] outline-none!",
+            "-mx-1 w-full rounded-sm bg-transparent px-1 shadow-[inset_0_-3px_0_var(--sky)] outline-none",
           )}
         />
       </form>
