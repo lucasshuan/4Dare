@@ -163,7 +163,7 @@ export function TvChair({
             <Popover.Trigger
               aria-label={t("seatSomeone")}
               className={cn(
-                "grid size-9 shrink-0 place-items-center rounded-pill text-ink-muted hover:bg-sunken",
+                "ml-auto grid size-9 shrink-0 place-items-center rounded-pill text-ink-muted hover:bg-sunken",
                 open && "bg-sunken",
               )}
             >
