@@ -32,15 +32,14 @@ export type Settings = {
 };
 
 export const DEFAULT_SETTINGS: Settings = {
-  volume: 0.8,
+  volume: 0.5,
   muted: false,
   sounds: {
-    // the music sits under everything else, so it starts at half
     music: { on: true, volume: 0.5 },
-    match: { on: true, volume: 1 },
-    clock: { on: true, volume: 1 },
-    chat: { on: true, volume: 1 },
-    room: { on: true, volume: 1 },
+    match: { on: true, volume: 0.5 },
+    clock: { on: true, volume: 0.5 },
+    chat: { on: true, volume: 0.5 },
+    room: { on: true, volume: 0.5 },
   },
   chatBubbles: true,
   games: {

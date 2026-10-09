@@ -20,9 +20,9 @@ describe("loopPosition", () => {
 });
 
 describe("musicVolume", () => {
-  it("starts at half the overall volume", () => {
+  it("starts at half, like the overall volume", () => {
     expect(DEFAULT_SETTINGS.sounds.music).toEqual({ on: true, volume: 0.5 });
-    expect(musicVolume(DEFAULT_SETTINGS)).toBeCloseTo(0.5 * 0.8);
+    expect(musicVolume(DEFAULT_SETTINGS)).toBeCloseTo(0.5 * 0.5);
   });
 
   it("is silent when muted or when the music is off", () => {
