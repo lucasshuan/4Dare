@@ -394,6 +394,7 @@ export function ProfileEditor({
                     item={item}
                     index={i}
                     className="w-[132px]"
+                    still
                   >
                     <textarea
                       value={item.caption}
@@ -416,7 +417,6 @@ export function ProfileEditor({
                         )
                       }
                       className="mt-3 w-full resize-none rounded-xl border-[1.5px] border-line-strong bg-surface px-2 py-1.5 font-semibold text-[12.5px] outline-none focus-visible:border-sky"
-                      style={{ rotate: "0deg" }}
                     />
                     <span className="mt-1 flex gap-1">
                       <button

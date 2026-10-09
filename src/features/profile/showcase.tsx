@@ -16,18 +16,21 @@ export function ShowcaseCard({
   index,
   children,
   className,
+  still = false,
 }: {
   item: Pick<ShowcaseView, "caption" | "character">;
   index: number;
   /** Replaces the caption (the editor's field). */
   children?: React.ReactNode;
   className?: string;
+  /** Upright (the editor: its field and buttons must not lean). */
+  still?: boolean;
 }) {
   const c = item.character;
   return (
     <figure
       className={cn("m-0 flex w-[116px] shrink-0 flex-col", className)}
-      style={{ rotate: TILT[index % TILT.length] }}
+      style={still ? undefined : { rotate: TILT[index % TILT.length] }}
     >
       <div
         className="rounded-[18px] p-1.5 pb-2 shadow-card"
