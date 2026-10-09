@@ -278,38 +278,46 @@
     "clearFilters": "Borrar filtros"
   },
   "gamePage": {
-    "actions": {
-      "label": "Más de este juego",
-      "characters": "Personajes",
-      "workshop": "Taller",
-      "ranking": "Ranking"
+    "panel": {
+      "label": "Sobre este juego",
+      "title": "Cómo se juega",
+      "steps": {
+        "who-am-i": {
+          "pick": "Cada uno elige el personaje de otra persona.",
+          "turn": "En tu turno, pregunta. Solo tú no ves tu carta.",
+          "found": "Acertaste: lo descubriste."
+        },
+        "impostor": {
+          "question": "Todos responden sobre su propia carta.",
+          "vote": "¿Quién es el impostor? La sala vota.",
+          "caught": "Atrapado, con un último intento con la carta de la tripulación."
+        },
+        "lineup": {
+          "auction": "Los personajes salen a subasta. Nadie sabe para qué.",
+          "boards": "Se abre la misión. Cada uno arma su equipo.",
+          "score": "La sala vota por el mejor equipo."
+        }
+      },
+      "links": {
+        "label": "Más de este juego",
+        "characters": {
+          "name": "Personajes",
+          "hint": "Mira quién puede salir"
+        },
+        "workshop": {
+          "name": "Taller",
+          "hint": "Crea temas, preguntas y misiones"
+        },
+        "contributions": {
+          "name": "Contribuciones",
+          "hint": "Lo que aportó la comunidad"
+        }
+      }
     },
     "ranking": {
       "title": "Ranking semanal",
       "all": "Ver todo",
       "xp": "{n} XP"
-    },
-    "shots": {
-      "label": "Momentos de una partida",
-      "prev": "Anterior",
-      "next": "Siguiente",
-      "who-am-i": {
-        "pick": "Cada uno elige el personaje de otra persona.",
-        "turn": "En tu turno, pregunta. Solo tú no ves tu carta.",
-        "found": "Acertaste: lo descubriste."
-      },
-      "impostor": {
-        "question": "Todos responden sobre su propia carta.",
-        "vote": "¿Quién es el impostor? La sala vota.",
-        "caught": "Atrapado, con un último intento con la carta de la tripulación."
-      },
-      "lineup": {
-        "auction": "Los personajes salen a subasta. Nadie sabe para qué.",
-        "boards": "Se abre la misión. Cada uno arma su equipo.",
-        "score": "La sala vota por el mejor equipo."
-      },
-      "close": "Cerrar",
-      "open": "Abrir la foto: {caption}"
     }
   }
 }

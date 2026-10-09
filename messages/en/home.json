@@ -278,38 +278,46 @@
     "clearFilters": "Clear filters"
   },
   "gamePage": {
-    "actions": {
-      "label": "More of this game",
-      "characters": "Characters",
-      "workshop": "Workshop",
-      "ranking": "Ranking"
+    "panel": {
+      "label": "About this game",
+      "title": "How it plays",
+      "steps": {
+        "who-am-i": {
+          "pick": "Everyone picks a character for someone else.",
+          "turn": "On your turn, ask. Only you can't see your card.",
+          "found": "Right guess: you found out."
+        },
+        "impostor": {
+          "question": "Everyone answers about their own card.",
+          "vote": "Who's the impostor? The room votes.",
+          "caught": "Caught, with one last guess at the crew's card."
+        },
+        "lineup": {
+          "auction": "Characters go up for auction. Nobody knows what for.",
+          "boards": "The mission opens. Each one builds a team.",
+          "score": "The room votes for the best team."
+        }
+      },
+      "links": {
+        "label": "More of this game",
+        "characters": {
+          "name": "Characters",
+          "hint": "See who can show up"
+        },
+        "workshop": {
+          "name": "Workshop",
+          "hint": "Make themes, questions and missions"
+        },
+        "contributions": {
+          "name": "Contributions",
+          "hint": "What the community added"
+        }
+      }
     },
     "ranking": {
       "title": "Weekly ranking",
       "all": "See all",
       "xp": "{n} XP"
-    },
-    "shots": {
-      "label": "Moments of a match",
-      "prev": "Previous",
-      "next": "Next",
-      "who-am-i": {
-        "pick": "Everyone picks a character for someone else.",
-        "turn": "On your turn, ask. Only you can't see your card.",
-        "found": "Right guess: you found out."
-      },
-      "impostor": {
-        "question": "Everyone answers about their own card.",
-        "vote": "Who's the impostor? The room votes.",
-        "caught": "Caught, with one last guess at the crew's card."
-      },
-      "lineup": {
-        "auction": "Characters go up for auction. Nobody knows what for.",
-        "boards": "The mission opens. Each one builds a team.",
-        "score": "The room votes for the best team."
-      },
-      "close": "Close",
-      "open": "Open the photo: {caption}"
     }
   }
 }
