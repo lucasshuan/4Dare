@@ -63,12 +63,7 @@ import {
   Swatch,
 } from "./editor-parts";
 import { LevelAvatar } from "./level";
-import {
-  FRAME,
-  ProfileCover,
-  type ProfileMode,
-  useLangList,
-} from "./profile-body";
+import { FRAME, ProfileCover, type ProfileMode } from "./profile-body";
 import { profilePath } from "./profile-link";
 import { ShowcaseCard } from "./showcase";
 import { profileKey } from "./use-profile";
@@ -113,7 +108,6 @@ export function ProfileEditor({
   const t = useTranslations("profile.editor");
   const tc = useTranslations("common");
   const format = useFormatter();
-  const langList = useLangList();
   const toast = useToast();
   const router = useRouter();
   const client = useQueryClient();
@@ -449,7 +443,6 @@ export function ProfileEditor({
               </AboutRow>
               <span className="font-medium text-[12.5px] text-ink-muted">
                 {t("aboutHint")}
-                {about.langs.length ? ` · ${langList(about.langs)}` : null}
               </span>
             </div>
           </div>
