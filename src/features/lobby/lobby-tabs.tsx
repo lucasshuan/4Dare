@@ -118,6 +118,7 @@ export function LobbyTabs({
           {tabs.map((tab, i) => {
             const on = i === index;
             const Icon = tab.icon;
+            // one height for all, with a count or without
             return (
               <button
                 key={tab.key}
@@ -132,7 +133,7 @@ export function LobbyTabs({
                 tabIndex={on ? 0 : -1}
                 onClick={() => choose(i)}
                 className={cn(
-                  "group relative flex min-w-0 flex-col items-center gap-1 rounded-lg px-1 pt-3 pb-2.5 font-semibold text-[12px] leading-tight transition-colors duration-200 ease-soft",
+                  "group relative flex h-[88px] min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 font-semibold text-[12px] leading-tight transition-colors duration-200 ease-soft",
                   on ? "text-ink" : "text-ink-muted hover:text-ink",
                 )}
               >
