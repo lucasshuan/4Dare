@@ -278,41 +278,17 @@
     "clearFilters": "条件をクリア"
   },
   "gamePage": {
-    "panel": {
-      "label": "このゲームについて",
-      "title": "遊び方",
-      "steps": {
-        "who-am-i": {
-          "pick": "みんな他の人のキャラクターを選ぶ。",
-          "turn": "自分の番に質問。自分のカードだけ見えない。",
-          "found": "当たり：正解！"
-        },
-        "impostor": {
-          "question": "みんな自分のカードについて答える。",
-          "vote": "インポスターは誰？ 部屋で投票。",
-          "caught": "見つかった。最後にクルーのカードを当てるチャンス。"
-        },
-        "lineup": {
-          "auction": "キャラクターが競りに。何のためかは誰も知らない。",
-          "boards": "ミッションが開く。それぞれチームを組む。",
-          "score": "部屋で一番のチームに投票。"
-        }
-      },
-      "links": {
-        "label": "このゲームをもっと",
-        "characters": {
-          "name": "キャラクター",
-          "hint": "登場するキャラクターを見る"
-        },
-        "workshop": {
-          "name": "工房",
-          "hint": "お題・質問・ミッションを作る"
-        },
-        "contributions": {
-          "name": "貢献",
-          "hint": "みんなの投稿を見る"
-        }
-      }
+    "facts": {
+      "title": "このゲームでは",
+      "themes": "お題",
+      "questions": "質問",
+      "missions": "ミッション",
+      "characters": "キャラクター",
+      "contributors": "貢献者",
+      "suggest": "工房で提案",
+      "browse": "すべて見る",
+      "month": "今月のトップ",
+      "feed": "貢献を見る"
     },
     "ranking": {
       "title": "週間ランキング",

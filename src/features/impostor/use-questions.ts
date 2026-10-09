@@ -5,9 +5,12 @@ import { useLocale } from "next-intl";
 import type { BankQuestion, QuestionLabel } from "@/game/impostor/questions";
 import type { Lang } from "@/game/types";
 
-/** The question bank by id: the match carries ids, the words come from here (cached). */
-export function useQuestionBank(): Map<string, BankQuestion> | undefined {
+/** The question bank by id: the match carries ids, the words come from here (cached); undefined until it arrives (or while not `enabled`). */
+export function useQuestionBank(
+  enabled = true,
+): Map<string, BankQuestion> | undefined {
   const { data } = useQuery({
+    enabled,
     queryKey: ["impostor-questions"],
     queryFn: async () => {
       const res = await fetch("/api/impostor/questions");

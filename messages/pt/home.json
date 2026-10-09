@@ -278,41 +278,17 @@
     "clearFilters": "Limpar filtros"
   },
   "gamePage": {
-    "panel": {
-      "label": "Sobre este jogo",
-      "title": "Como se joga",
-      "steps": {
-        "who-am-i": {
-          "pick": "Cada um escolhe o personagem de outra pessoa.",
-          "turn": "Na sua vez, pergunte. Só você não vê sua carta.",
-          "found": "Acertou o palpite: descobriu."
-        },
-        "impostor": {
-          "question": "Todos respondem sobre a própria carta.",
-          "vote": "Quem é o impostor? A sala vota.",
-          "caught": "Pego, com um último palpite na carta da tripulação."
-        },
-        "lineup": {
-          "auction": "Personagens vão a leilão. Ninguém sabe pra quê.",
-          "boards": "A missão abre. Cada um monta seu time.",
-          "score": "A sala vota no melhor time."
-        }
-      },
-      "links": {
-        "label": "Mais deste jogo",
-        "characters": {
-          "name": "Personagens",
-          "hint": "Veja quem pode aparecer"
-        },
-        "workshop": {
-          "name": "Oficina",
-          "hint": "Crie temas, perguntas e missões"
-        },
-        "contributions": {
-          "name": "Contribuições",
-          "hint": "O que a comunidade enviou"
-        }
-      }
+    "facts": {
+      "title": "Neste jogo",
+      "themes": "Temas",
+      "questions": "Perguntas",
+      "missions": "Missões",
+      "characters": "Personagens",
+      "contributors": "Contribuidores",
+      "suggest": "Sugerir na Oficina",
+      "browse": "Ver todos",
+      "month": "Destaques do mês",
+      "feed": "Ver contribuições"
     },
     "ranking": {
       "title": "Ranking semanal",

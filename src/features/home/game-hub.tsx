@@ -9,7 +9,7 @@ import { Screen } from "@/components/ui/screen";
 import { GAME_INFO, useGameName } from "@/features/create/game-info";
 import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
-import { GamePanel } from "@/features/game-page/game-panel";
+import { GameFacts } from "@/features/game-page/game-facts";
 import { GameRanking } from "@/features/game-page/game-ranking";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { PublicRooms } from "@/features/home/public-rooms";
@@ -23,7 +23,7 @@ import { JoinByCode } from "./join-by-code";
 
 /**
  * A game's own page: its banner, name and pitch, create or join by code,
- * its ranking and panel (how it plays, where to go next), and its public rooms.
+ * its ranking and what it is made of, and its public rooms.
  */
 export function GameHub({
   game,
@@ -49,7 +49,7 @@ export function GameHub({
     >
       {/*
         the main column: the pitch, then the ranking
-        and the game's panel; the public rooms beside it. On a desktop it
+        and the game's facts; the public rooms beside it. On a desktop it
         all fits the window under the banner.
       */}
       <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
@@ -82,7 +82,7 @@ export function GameHub({
           </m.section>
           <div className="grid items-start gap-x-8 gap-y-8 md:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
             <GameRanking game={game} />
-            <GamePanel game={game} />
+            <GameFacts game={game} />
           </div>
         </div>
 
