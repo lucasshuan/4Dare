@@ -9,12 +9,14 @@ import { cn } from "@/lib/cn";
 /**
  * The box a modal takes. It never changes with what is inside (a tab switch
  * keeps it still); the content scrolls instead. "panel": a fixed box in the
- * middle (settings, account), the whole screen on phones. "full": the whole
+ * middle (settings, account), the whole screen on phones; "wide" a bigger one. "full": the whole
  * screen always (a profile).
  */
 const SIZE = {
   panel:
     "inset-0 m-auto h-[min(600px,calc(100dvh-2rem))] w-[min(800px,calc(100vw-2rem))] rounded-xl max-sm:h-dvh max-sm:w-screen max-sm:rounded-none",
+  /** A bigger fixed box (the room's advanced settings); the whole screen on phones. */
+  wide: "inset-0 m-auto h-[min(820px,calc(100dvh-2rem))] w-[min(1120px,calc(100vw-2rem))] rounded-xl max-sm:h-dvh max-sm:w-screen max-sm:rounded-none",
   full: "inset-0 h-dvh w-screen",
 } as const;
 

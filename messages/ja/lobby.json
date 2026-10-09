@@ -26,6 +26,7 @@
   "kickYes": "外す",
   "cancel": "キャンセル",
   "matches": "対戦",
+  "settings": "設定",
   "noMatches": "このルームの対戦がここに表示されます。",
   "matchWinner": "{name}さんの勝ち",
   "matchWinners": "{names}が引き分け",

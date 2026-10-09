@@ -26,6 +26,7 @@
   "kickYes": "Sacar",
   "cancel": "Cancelar",
   "matches": "Partidas",
+  "settings": "Ajustes",
   "noMatches": "Las partidas de esta sala aparecen aquí.",
   "matchWinner": "{name} ganó",
   "matchWinners": "{names} empataron",

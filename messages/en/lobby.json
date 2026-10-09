@@ -26,6 +26,7 @@
   "kickYes": "Remove",
   "cancel": "Cancel",
   "matches": "Matches",
+  "settings": "Settings",
   "noMatches": "This room's matches show up here.",
   "matchWinner": "{name} won",
   "matchWinners": "{names} tied",
