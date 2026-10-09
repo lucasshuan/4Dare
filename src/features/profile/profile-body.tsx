@@ -264,7 +264,6 @@ function ProfileShow({
   const format = useFormatter();
   const age = useAge();
   const langList = useLangList();
-  const gameName = useGameName();
   const toast = useToast();
   const locale = useLocale();
   const wide = useMedia("(min-width: 640px)");

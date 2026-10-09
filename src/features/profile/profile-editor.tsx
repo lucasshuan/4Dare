@@ -4,17 +4,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   Eye,
+  ImageIcon,
   Languages,
   MoonStar,
   Palette,
-  Pencil,
   Plus,
-  Quote,
-  Sparkles,
+  Search,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { Flag } from "@/components/ui/language-switch";
@@ -56,6 +54,7 @@ import {
   initialAvatar,
   Swatch,
 } from "./editor-parts";
+import { LevelAvatar } from "./level";
 import {
   accentStyle,
   FRAME,
@@ -166,19 +165,23 @@ export function ProfileEditor({
   const shownAvatar =
     me && avatar ? avatarOf(avatar, me, avatarBlobUrl) : view.avatar;
 
-  const snapshot = JSON.stringify({
+  // each part as text, so the save bar can count what changed
+  const parts: Record<string, string> = {
     name: name.trim(),
     handle: normalizeHandle(handle),
     quote: quote.trim(),
-    accent,
+    accent: accent ?? "",
     cover: cover.kind,
-    avatar,
-    about,
-    showcase: showcase.map((s) => [s.characterId, s.caption]),
-    privacy,
-  });
-  const [initial] = useState(snapshot);
-  const dirty = snapshot !== initial;
+    avatar: JSON.stringify(avatar),
+    about: JSON.stringify(about),
+    showcase: JSON.stringify(showcase.map((s) => [s.characterId, s.caption])),
+    privacy: JSON.stringify(privacy),
+  };
+  const [initial] = useState(parts);
+  const changes = Object.keys(parts).filter(
+    (k) => parts[k] !== initial[k],
+  ).length;
+  const dirty = changes > 0;
   const handleOk =
     ("kind" in handleState && handleState.kind === "same") ||
     ("ok" in handleState && handleState.ok);
@@ -250,9 +253,6 @@ export function ProfileEditor({
     return { tone: "no", text: t(`handleStatus.${handleState.problem}`) };
   })();
 
-  const field =
-    "h-11 w-full rounded-lg border-[1.5px] border-line-strong bg-surface px-3.5 font-semibold outline-none transition-colors focus-visible:border-sky";
-
   return (
     <div style={accentStyle(accent)} className="flex flex-col">
       <ProfileCover
@@ -265,9 +265,10 @@ export function ProfileEditor({
         <CoverPicker avatarColor={shownAvatar.color} onPick={setCover} />
       </ProfileCover>
       <div className={cn("flex flex-col", FRAME[mode].root)}>
+        {/* the profile's own header, its name and @handle as fields */}
         <div
           className={cn(
-            "relative grid items-start gap-x-4 gap-y-3 px-(--pad) sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-x-5",
+            "relative grid grid-cols-[auto_minmax(0,1fr)] items-end gap-x-4 gap-y-3 px-(--pad) sm:gap-x-5",
             FRAME[mode].overlap,
           )}
         >
@@ -275,66 +276,70 @@ export function ProfileEditor({
             type="button"
             onClick={() => setAvatarOpen(true)}
             aria-label={t("changeAvatar")}
-            className="group relative justify-self-start rounded-pill bg-canvas p-[5px] shadow-[0_0_0_2px_var(--canvas)]"
+            className="group relative justify-self-start rounded-pill"
           >
-            <Avatar
+            <LevelAvatar
               avatar={shownAvatar}
-              className="size-20 text-[32px] sm:size-28 sm:text-[44px]"
+              xp={view.xp}
+              stroke={5}
+              tag="none"
+              avatarClass="size-22 text-[34px] sm:size-28 sm:text-[44px]"
             />
-            <span className="absolute right-1 bottom-1 flex size-8 items-center justify-center rounded-pill bg-ink text-on-ink shadow-card transition-transform duration-150 group-hover:scale-110">
-              <Pencil className="size-4" strokeWidth={2} />
+            <span className="absolute inset-[7px] flex items-center justify-center rounded-pill bg-[rgb(18_22_31/0.45)] text-white transition-colors duration-150 group-hover:bg-[rgb(18_22_31/0.6)]">
+              <ImageIcon className="size-7" strokeWidth={1.75} />
             </span>
           </button>
-          {/* under the cover: its picture would hide the labels */}
-          <div
-            className={cn(
-              "grid min-w-0 gap-3 sm:grid-cols-2",
-              FRAME[mode].belowCover,
-            )}
-          >
-            <label className="flex min-w-0 flex-col gap-1">
-              <span className="font-semibold text-[13px] text-ink-muted">
-                {t("name")}
-              </span>
+          <div className="flex min-w-0 flex-wrap items-start gap-x-3.5 gap-y-2.5 pb-1 max-sm:col-span-2">
+            <label className="flex w-60 max-w-full flex-col gap-1">
               <input
                 value={name}
                 maxLength={MAX_NAME}
                 onChange={(e) => setName(e.target.value)}
                 autoComplete="nickname"
-                className={cn(field, "font-display text-lg")}
+                aria-label={t("name")}
+                className={cn(
+                  FIELD,
+                  "h-[54px] px-3 font-display font-extrabold text-[30px] tracking-[-0.02em] sm:text-[34px]",
+                )}
               />
-              <span className="text-[12px] text-ink-muted">
+              <span
+                className={cn(
+                  "pl-1 text-[12.5px]",
+                  name.trim()
+                    ? "font-semibold text-yes"
+                    : "font-semibold text-no",
+                )}
+              >
                 {name.trim().length}/{MAX_NAME}
               </span>
             </label>
-            <label className="flex min-w-0 flex-col gap-1">
-              <span className="font-semibold text-[13px] text-ink-muted">
-                {t("handle")}
-              </span>
-              <span className="relative flex">
-                <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 font-mono text-ink-muted">
-                  @
-                </span>
+            <label className="flex w-[230px] max-w-full flex-col gap-1">
+              <span
+                className={cn(
+                  FIELD,
+                  "flex h-[54px] items-center px-3 font-medium font-mono text-[18px] focus-within:border-sky focus-within:shadow-[0_0_0_3px_var(--sky-soft)]",
+                  "ok" in handleState && !handleState.ok && "border-no",
+                )}
+              >
+                <span className="text-ink-muted">@</span>
                 <input
                   value={handle}
                   maxLength={HANDLE_MAX + 1}
                   spellCheck={false}
                   autoCapitalize="none"
                   autoComplete="off"
+                  aria-label={t("handle")}
                   onChange={(e) =>
                     setHandle(e.target.value.replace(/\s/g, "").toLowerCase())
                   }
                   aria-invalid={"ok" in handleState && !handleState.ok}
-                  className={cn(
-                    field,
-                    "pl-8 font-medium font-mono aria-invalid:border-no",
-                  )}
+                  className="min-w-0 flex-1 bg-transparent outline-none"
                 />
               </span>
               <span
                 aria-live="polite"
                 className={cn(
-                  "truncate text-[12px]",
+                  "truncate pl-1 text-[12.5px]",
                   handleNote.tone === "yes"
                     ? "font-semibold text-yes"
                     : handleNote.tone === "no"
@@ -348,9 +353,10 @@ export function ProfileEditor({
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 px-(--pad) pt-6 pb-4">
-          <Card title={t("quote")} icon={<Quote strokeWidth={1.75} />}>
-            <div className="flex flex-col gap-1">
+        {/* what the profile shows under its name, each part in place */}
+        <div className="grid gap-x-8 gap-y-3.5 px-(--pad) pt-[18px] md:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="flex min-w-0 flex-col gap-3.5">
+            <div className="flex w-full max-w-[560px] flex-col gap-1">
               <textarea
                 value={quote}
                 rows={2}
@@ -358,99 +364,16 @@ export function ProfileEditor({
                 placeholder={t("quotePlaceholder")}
                 onChange={(e) => setQuote(e.target.value.replace(/\n/g, " "))}
                 aria-label={t("quote")}
-                className="w-full resize-none rounded-lg border-[1.5px] border-line-strong bg-surface px-3.5 py-2.5 font-medium text-[17px] outline-none focus-visible:border-sky"
+                className="w-full resize-none rounded-[16px] border-[1.5px] border-line-strong bg-surface px-3.5 py-2.5 font-medium text-[17px] leading-snug outline-none focus-visible:border-sky focus-visible:shadow-[0_0_0_3px_var(--sky-soft)]"
               />
               <span className="self-end font-mono text-[12px] text-ink-muted">
                 {quote.length} / {QUOTE_MAX}
               </span>
             </div>
-          </Card>
 
-          <Card
-            title={t("showcase")}
-            icon={<Sparkles strokeWidth={1.75} />}
-            end={<Hint>{t("showcaseHint")}</Hint>}
-          >
-            <div className="flex flex-wrap justify-center gap-6 pt-1 pb-2 sm:justify-start">
-              {Array.from({ length: SHOWCASE_MAX }, (_, i) => {
-                const item = showcase[i];
-                if (!item)
-                  return (
-                    <button
-                      // biome-ignore lint/suspicious/noArrayIndexKey: the slots are fixed
-                      key={i}
-                      type="button"
-                      disabled={i > showcase.length}
-                      onClick={() => setPicking(i)}
-                      className="flex h-[188px] w-[116px] flex-col items-center justify-center gap-2 rounded-[18px] border-[1.5px] border-line-strong border-dashed px-2 text-center font-semibold text-[13px] text-ink-muted transition-colors duration-150 hover:border-ink hover:text-ink disabled:opacity-40"
-                    >
-                      <Plus className="size-5" strokeWidth={2} />
-                      {t("pick")}
-                    </button>
-                  );
-                return (
-                  <ShowcaseCard
-                    key={item.characterId}
-                    item={item}
-                    index={i}
-                    className="w-[132px]"
-                    still
-                  >
-                    <textarea
-                      value={item.caption}
-                      rows={3}
-                      maxLength={CAPTION_MAX}
-                      placeholder={t("captionPlaceholder")}
-                      aria-label={t("caption", {
-                        name: item.character?.name ?? "?",
-                      })}
-                      onChange={(e) =>
-                        setShowcase((all) =>
-                          all.map((s, j) =>
-                            j === i
-                              ? {
-                                  ...s,
-                                  caption: e.target.value.replace(/\n/g, " "),
-                                }
-                              : s,
-                          ),
-                        )
-                      }
-                      className="mt-3 w-full resize-none rounded-xl border-[1.5px] border-line-strong bg-surface px-2 py-1.5 font-semibold text-[12.5px] outline-none focus-visible:border-sky"
-                    />
-                    <span className="mt-1 flex gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setPicking(i)}
-                        className="rounded-pill px-2 py-1 font-semibold text-[12px] text-ink-muted hover:bg-sunken hover:text-ink"
-                      >
-                        {t("swap")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowcase((all) => all.filter((_, j) => j !== i))
-                        }
-                        className="rounded-pill px-2 py-1 font-semibold text-[12px] text-ink-muted hover:bg-no-soft hover:text-no"
-                      >
-                        {t("remove")}
-                      </button>
-                    </span>
-                  </ShowcaseCard>
-                );
-              })}
-            </div>
-          </Card>
-
-          <Card
-            title={t("about")}
-            icon={<MoonStar strokeWidth={1.75} />}
-            end={<Hint>{t("aboutHint")}</Hint>}
-          >
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <span className="font-semibold text-sm">{t("time")}</span>
-                <ChoiceGroup label={t("time")} className="flex-wrap self-start">
+            <div className="flex max-w-[640px] flex-col gap-2.5 rounded-[18px] bg-surface px-4 py-3.5">
+              <AboutRow icon={<MoonStar />} label={t("time")}>
+                <ChoiceGroup label={t("time")} className="flex-wrap">
                   {[null, ...PLAY_TIMES].map((time) => (
                     <button
                       key={time ?? "none"}
@@ -458,7 +381,7 @@ export function ProfileEditor({
                       aria-pressed={about.time === time}
                       onClick={() => setAbout((a) => ({ ...a, time }))}
                       className={cn(
-                        "h-9 rounded-pill px-4 font-semibold text-sm transition-[background-color,color,box-shadow] duration-200 ease-soft",
+                        "h-[30px] rounded-pill px-3 font-semibold text-[13px] transition-[background-color,color,box-shadow] duration-200 ease-soft",
                         about.time === time
                           ? "bg-surface text-ink shadow-card"
                           : "text-ink-muted hover:text-ink",
@@ -468,13 +391,9 @@ export function ProfileEditor({
                     </button>
                   ))}
                 </ChoiceGroup>
-              </div>
-              <fieldset className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0">
-                <legend className="mb-2 flex items-center gap-2 font-semibold text-sm">
-                  <Languages className="size-4" strokeWidth={1.75} />
-                  {t("langs")}
-                </legend>
-                <div className="flex flex-wrap gap-2">
+              </AboutRow>
+              <AboutRow icon={<Languages />} label={t("langs")}>
+                <div className="flex flex-wrap gap-1.5">
                   {LANGS.map((l) => {
                     const on = about.langs.includes(l);
                     return (
@@ -491,45 +410,124 @@ export function ProfileEditor({
                           }))
                         }
                         className={cn(
-                          "inline-flex h-10 items-center gap-2 rounded-pill border-[1.5px] px-3.5 font-semibold text-sm transition-colors duration-150",
+                          "inline-flex h-[34px] items-center gap-2 rounded-pill border-[1.5px] bg-surface pr-3 pl-2 font-semibold text-[13px] transition-colors duration-150",
                           on
-                            ? "border-ink bg-surface"
+                            ? "border-ink text-ink"
                             : "border-line text-ink-muted hover:border-line-strong",
                         )}
                       >
-                        <Flag lang={l} />
+                        <Flag lang={l} className="size-[18px]" />
                         {tc(`languages.${l}`)}
                       </button>
                     );
                   })}
                 </div>
-                {about.langs.length ? (
-                  <span className="text-[13px] text-ink-muted">
-                    {langList(about.langs)}
-                  </span>
-                ) : null}
-              </fieldset>
+              </AboutRow>
+              <AboutRow icon={<Palette />} label={t("accent")}>
+                <div className="flex flex-wrap gap-2">
+                  {ACCENTS.map((c, i) => (
+                    <Swatch
+                      key={c}
+                      color={c}
+                      pressed={(accent ?? ACCENTS[0]) === c}
+                      label={t("accentN", { n: i + 1 })}
+                      onClick={() => setAccent(i === 0 ? null : c)}
+                    />
+                  ))}
+                </div>
+              </AboutRow>
+              <span className="font-medium text-[12.5px] text-ink-muted">
+                {t("aboutHint")}
+                {about.langs.length ? ` · ${langList(about.langs)}` : null}
+              </span>
             </div>
-          </Card>
+          </div>
 
-          <Card
-            title={t("accent")}
-            icon={<Palette strokeWidth={1.75} />}
-            end={<Hint>{t("accentHint")}</Hint>}
-          >
-            <div className="flex flex-wrap gap-2.5">
-              {ACCENTS.map((c, i) => (
-                <Swatch
-                  key={c}
-                  color={c}
-                  pressed={(accent ?? ACCENTS[0]) === c}
-                  label={t("accentN", { n: i + 1 })}
-                  onClick={() => setAccent(i === 0 ? null : c)}
-                />
-              ))}
+          {/* the showcase where it shows, upright, its line under each card */}
+          <div className="relative flex min-w-0 flex-col gap-2 max-md:items-center">
+            <div className="flex items-center gap-2 self-end max-md:self-center">
+              <span className="text-[12.5px] text-ink-muted">
+                {t("showcaseHint")}
+              </span>
+              <AudienceSelect
+                label={t("privacyRows.showcase")}
+                value={privacy.showcase}
+                onChange={(v) => setPrivacy((p) => ({ ...p, showcase: v }))}
+                small
+              />
             </div>
-          </Card>
+            <div className="flex max-w-full justify-end gap-[18px] overflow-x-auto px-1 pt-1 pb-1.5">
+              {Array.from({ length: SHOWCASE_MAX }, (_, i) => {
+                const item = showcase[i];
+                if (!item)
+                  return (
+                    <button
+                      // biome-ignore lint/suspicious/noArrayIndexKey: the slots are fixed
+                      key={i}
+                      type="button"
+                      disabled={i > showcase.length}
+                      onClick={() => setPicking(i)}
+                      className="flex h-[188px] w-[116px] shrink-0 flex-col items-center justify-center gap-2 rounded-[18px] border-[1.5px] border-line-strong border-dashed px-2 text-center font-semibold text-[13px] text-ink-muted transition-colors duration-150 hover:border-ink hover:text-ink disabled:opacity-40"
+                    >
+                      <Plus className="size-5" strokeWidth={2} />
+                      {t("pick")}
+                    </button>
+                  );
+                return (
+                  <div key={item.characterId} className="relative shrink-0">
+                    <ShowcaseCard item={item} index={i} still>
+                      <textarea
+                        value={item.caption}
+                        rows={3}
+                        maxLength={CAPTION_MAX}
+                        placeholder={t("captionPlaceholder")}
+                        aria-label={t("caption", {
+                          name: item.character?.name ?? "?",
+                        })}
+                        onChange={(e) =>
+                          setShowcase((all) =>
+                            all.map((s, j) =>
+                              j === i
+                                ? {
+                                    ...s,
+                                    caption: e.target.value.replace(/\n/g, " "),
+                                  }
+                                : s,
+                            ),
+                          )
+                        }
+                        className="mt-2.5 w-full resize-none rounded-[12px] border-[1.5px] border-line-strong bg-surface px-2 py-1.5 font-display font-semibold text-[12.5px] leading-snug outline-none focus-visible:border-sky"
+                      />
+                    </ShowcaseCard>
+                    {/* over the picture: swap it, or take the card out */}
+                    <span className="absolute top-[38%] left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setPicking(i)}
+                        className="inline-flex h-7 items-center gap-1.5 rounded-pill bg-surface px-2.5 font-semibold text-[12px] shadow-pop transition-colors duration-150 hover:bg-sunken"
+                      >
+                        <Search className="size-3.5" strokeWidth={2} />
+                        {t("swap")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowcase((all) => all.filter((_, j) => j !== i))
+                        }
+                        className="inline-flex h-7 items-center rounded-pill bg-surface/90 px-2.5 font-semibold text-[12px] text-ink-muted shadow-card transition-colors duration-150 hover:bg-no-soft hover:text-no"
+                      >
+                        {t("remove")}
+                      </button>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
+        {/* who sees what, one row per part */}
+        <div className="px-(--pad) pt-6 pb-4">
           <Card
             title={t("privacy")}
             icon={<Eye strokeWidth={1.75} />}
@@ -594,7 +592,7 @@ export function ProfileEditor({
             )}
           >
             <span className="size-2 rounded-pill bg-apricot" />
-            {t("unsaved")}
+            {t("unsaved", { n: changes })}
           </span>
           <Button size="sm" variant="ghost" onClick={onClose}>
             {t("cancel")}
@@ -667,24 +665,43 @@ function PrivacyRow({
   );
 }
 
-/** Who sees a part: everyone, people who played with you, friends (soon), only you. */
+/**
+ * Who sees a part: everyone, people who played with you, friends (soon), only
+ * you. `small`: the chip beside a part (an eye before it).
+ */
 function AudienceSelect({
   label,
   value,
   onChange,
+  small = false,
 }: {
   label: string;
   value: Audience;
   onChange: (v: Audience) => void;
+  small?: boolean;
 }) {
   const t = useTranslations("profile.editor.audiences");
   return (
     <span className="relative inline-flex">
+      {small ? (
+        <Eye
+          className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-muted"
+          strokeWidth={2}
+        />
+      ) : null}
       <select
         aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value as Audience)}
-        className="h-10 appearance-none rounded-pill border-[1.5px] border-line-strong bg-surface pr-9 pl-4 font-semibold text-sm outline-none focus-visible:border-sky"
+        className={cn(
+          "appearance-none rounded-pill border-[1.5px] border-line-strong font-semibold outline-none focus-visible:border-sky",
+          small
+            ? cn(
+                "h-7 pr-7 pl-7 text-[12.5px]",
+                value === "me" ? "bg-sunken" : "bg-surface",
+              )
+            : "h-10 bg-surface pr-9 pl-4 text-sm",
+        )}
       >
         {AUDIENCES.map((a) => (
           <option key={a} value={a} disabled={a === "friends"}>
@@ -693,9 +710,37 @@ function AudienceSelect({
         ))}
       </select>
       <ChevronDown
-        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-ink-muted"
+        className={cn(
+          "pointer-events-none absolute top-1/2 -translate-y-1/2 text-ink-muted",
+          small ? "right-2 size-3.5" : "right-3 size-4",
+        )}
         strokeWidth={2}
       />
     </span>
+  );
+}
+
+/** A text field's frame, the same on the name and the @handle. */
+const FIELD =
+  "w-full rounded-[14px] border-[1.5px] border-line-strong bg-surface outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-sky focus-visible:shadow-[0_0_0_3px_var(--sky-soft)]";
+
+/** One line of "about you": its label on the left, its choices beside it. */
+function AboutRow({
+  icon,
+  label,
+  children,
+}: {
+  icon: ReactNode;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <span className="inline-flex min-w-[190px] items-center gap-2 font-semibold text-sm [&_svg]:size-4 [&_svg]:stroke-[1.75]">
+        {icon}
+        {label}
+      </span>
+      {children}
+    </div>
   );
 }

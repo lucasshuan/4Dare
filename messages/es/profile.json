@@ -191,9 +191,9 @@
       "friends": "Amigos (pronto)",
       "me": "Solo yo"
     },
-    "unsaved": "Cambios sin guardar",
-    "cancel": "Cancelar",
-    "save": "Guardar",
+    "unsaved": "{n, plural, one {# cambio sin guardar} other {# cambios sin guardar}}",
+    "cancel": "Descartar",
+    "save": "Guardar perfil",
     "saved": "Perfil guardado"
   },
   "mural": {

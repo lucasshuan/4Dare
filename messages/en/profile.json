@@ -191,9 +191,9 @@
       "friends": "Friends (soon)",
       "me": "Only me"
     },
-    "unsaved": "Unsaved changes",
-    "cancel": "Cancel",
-    "save": "Save",
+    "unsaved": "{n, plural, one {# unsaved change} other {# unsaved changes}}",
+    "cancel": "Discard",
+    "save": "Save profile",
     "saved": "Profile saved"
   },
   "mural": {

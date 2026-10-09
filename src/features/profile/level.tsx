@@ -29,7 +29,9 @@ export function LevelAvatar({
   xp: number;
   stroke: number;
   avatarClass: string;
-  tag?: "sm" | "md";
+  /** "none": the ring alone (the editor, where the face is a button). */
+  tag?: "sm" | "md" | "none";
+  /** What it sits on| "md";
   /** What it sits on: the gap and the outline take that colour. */
   on?: "canvas" | "surface";
   className?: string;
@@ -84,15 +86,17 @@ export function LevelAvatar({
         />
       </svg>
       <Avatar avatar={avatar} className={avatarClass} />
-      <LevelTag
-        level={level}
-        size={tag}
-        on={on}
-        className={cn(
-          "absolute",
-          tag === "md" ? "right-0 bottom-1.5" : "-right-0.5 -bottom-0.5",
-        )}
-      />
+      {tag === "none" ? null : (
+        <LevelTag
+          level={level}
+          size={tag}
+          on={on}
+          className={cn(
+            "absolute",
+            tag === "md" ? "right-0 bottom-1.5" : "-right-0.5 -bottom-0.5",
+          )}
+        />
+      )}
     </span>
   );
 }
