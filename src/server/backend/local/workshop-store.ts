@@ -72,7 +72,7 @@ export function localWorkshopStore(): WorkshopStore {
     },
     async vote(id, user, vote) {
       const s = data.suggestions.find((x) => x.id === id);
-      if (!s || s.status !== "voting") throw new Error("closed");
+      if (s?.status !== "voting") throw new Error("closed");
       data.votes = data.votes.filter((v) => !(v.id === id && v.user === user));
       if (vote !== null) data.votes.push({ id, user, vote });
       const mine = data.votes.filter((v) => v.id === id);

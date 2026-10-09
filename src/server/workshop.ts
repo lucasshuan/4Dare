@@ -917,7 +917,7 @@ export async function markReview(id: string) {
   const me = await curatorOnly();
   const { workshop } = getBackend();
   const s = await workshop.suggestion(id);
-  if (!s || s.status !== "voting") throw new GameError("not_found");
+  if (s?.status !== "voting") throw new GameError("not_found");
   await workshop.decide(id, {
     status: "review",
     reason: null,

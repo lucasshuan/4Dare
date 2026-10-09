@@ -392,7 +392,7 @@ function Pictures({
       setBusy(false);
     }
   };
-  const canReport = shown && shown.author && !shown.mine;
+  const canReport = shown?.author && !shown.mine;
   return (
     <section className="grid gap-3">
       <SectionHead title={t("pictures")} count={pictures.length}>
