@@ -1,7 +1,9 @@
 "use client";
 
+import { Popover } from "@base-ui/react/popover";
 import {
   Camera,
+  CircleHelp,
   Coins,
   Compass,
   Flame,
@@ -31,6 +33,7 @@ import { GAME_XP, levelOf, XP } from "@/game/profile/xp";
 import { cn } from "@/lib/cn";
 import type { BadgeView, ProfileView } from "@/server/contract";
 import { LevelTag, XpBar } from "./level";
+import { accentStyle } from "./profile-body";
 
 const ICON: Record<BadgeId, LucideIcon> = {
   matches: Gamepad2,
@@ -69,7 +72,7 @@ export function BadgesPanel({ view }: { view: ProfileView }) {
   const groups = [...new Set(view.badges.map((b) => b.group))];
   return (
     <div className="flex flex-col gap-4">
-      <LevelCard xp={view.xp} />
+      <LevelCard xp={view.xp} accent={view.accent} />
       {groups.map((group) => (
         <section
           key={group}
@@ -92,67 +95,97 @@ export function BadgesPanel({ view }: { view: ProfileView }) {
   );
 }
 
-/** The level, the bar to the next and how XP is earned. */
-function LevelCard({ xp }: { xp: number }) {
+/** The level and the bar to the next; how XP is earned opens beside them. */
+function LevelCard({ xp, accent }: { xp: number; accent: string | null }) {
   const t = useTranslations("profile.level");
   const tb = useTranslations("profile.badges");
   const format = useFormatter();
-  const gameName = useGameName();
   const { level, into, need } = levelOf(xp);
   return (
-    <section className="grid gap-5 rounded-xl bg-surface p-4 sm:p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,300px)]">
-      <div className="flex items-center gap-4">
-        <LevelTag
-          level={level}
-          on="surface"
-          className="px-3.5 py-2.5 text-[26px]"
-        />
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <b className="font-bold font-display text-[22px]">
-            {t("title", { n: level })}
-          </b>
-          <XpBar xp={xp} />
-          <span className="text-[13px] text-ink-muted">
-            {t("left", {
-              total: format.number(xp),
-              left: format.number(need - into),
-              next: level + 1,
-            })}
-          </span>
-        </div>
+    <section className="flex flex-wrap items-center gap-4 rounded-xl bg-surface p-4 sm:p-5">
+      <LevelTag
+        level={level}
+        on="surface"
+        className="px-3.5 py-2.5 text-[26px]"
+      />
+      <div className="flex min-w-[200px] flex-1 flex-col gap-2">
+        <b className="font-bold font-display text-[22px]">
+          {t("title", { n: level })}
+        </b>
+        <XpBar xp={xp} />
+        <span className="text-[13px] text-ink-muted">
+          {t("left", {
+            total: format.number(xp),
+            left: format.number(need - into),
+            next: level + 1,
+          })}
+        </span>
       </div>
-      <ul className="m-0 flex flex-col gap-1.5 rounded-lg bg-canvas px-3.5 py-3 text-[13px]">
-        <li className="font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
-          {tb("xpRules")} · {tb("everyGame")}
-        </li>
-        <Rule label={tb("rules.finish")} xp={XP.finish} />
-        <Rule label={tb("rules.first")} xp={XP.first} />
-        <Rule label={tb("rules.dayFirst")} xp={XP.dayFirst} />
-        <li className="mt-1 flex items-center gap-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
-          <GameThumb game="who-am-i" size="tiny" />
-          {gameName("who-am-i")}
-        </li>
-        <Rule
-          label={tb("rules.discovered")}
-          xp={GAME_XP["who-am-i"].discovered}
-        />
-        <li className="mt-1 flex items-center gap-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
-          <GameThumb game="impostor" size="tiny" />
-          {gameName("impostor")}
-        </li>
-        <Rule label={tb("rules.rightVote")} xp={GAME_XP.impostor.rightVote} />
-        <Rule label={tb("rules.survived")} xp={GAME_XP.impostor.survived} />
-        <Rule label={tb("rules.guessHit")} xp={GAME_XP.impostor.guessHit} />
-        <li className="mt-1 flex items-center gap-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
-          <GameThumb game="lineup" size="tiny" />
-          {gameName("lineup")}
-        </li>
-        <Rule label={tb("rules.roundWon")} xp={GAME_XP.lineup.roundWon} />
-        <Rule label={tb("rules.vote")} xp={GAME_XP.lineup.vote} />
-        <Rule label={tb("rules.crowd")} xp={GAME_XP.lineup.crowd} />
-        <Rule label={tb("rules.presented")} xp={GAME_XP.lineup.presented} />
-      </ul>
+      <Popover.Root>
+        <Popover.Trigger className="inline-flex h-9 shrink-0 items-center gap-2 rounded-pill border-[1.5px] border-line-strong bg-surface px-3.5 font-semibold text-sm transition-colors duration-150 hover:bg-sunken data-popup-open:bg-sunken [&_svg]:size-4">
+          <CircleHelp strokeWidth={1.75} />
+          {tb("xpRules")}
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Positioner
+            side="bottom"
+            align="end"
+            sideOffset={8}
+            collisionPadding={12}
+            className="z-[60]"
+          >
+            <Popover.Popup
+              style={accentStyle(accent)}
+              className="w-[min(320px,calc(100vw-1.5rem))] origin-[var(--transform-origin)] rounded-xl bg-surface p-4 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0"
+            >
+              <Popover.Title className="m-0 mb-2 font-semibold text-sm">
+                {tb("xpRules")}
+              </Popover.Title>
+              <XpRules />
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
     </section>
+  );
+}
+
+/** Every way to earn XP: in every game, then each game's own. */
+function XpRules() {
+  const tb = useTranslations("profile.badges");
+  const gameName = useGameName();
+  return (
+    <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[13px]">
+      <li className="font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
+        {tb("everyGame")}
+      </li>
+      <Rule label={tb("rules.finish")} xp={XP.finish} />
+      <Rule label={tb("rules.first")} xp={XP.first} />
+      <Rule label={tb("rules.dayFirst")} xp={XP.dayFirst} />
+      <li className="mt-1 flex items-center gap-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
+        <GameThumb game="who-am-i" size="tiny" />
+        {gameName("who-am-i")}
+      </li>
+      <Rule
+        label={tb("rules.discovered")}
+        xp={GAME_XP["who-am-i"].discovered}
+      />
+      <li className="mt-1 flex items-center gap-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
+        <GameThumb game="impostor" size="tiny" />
+        {gameName("impostor")}
+      </li>
+      <Rule label={tb("rules.rightVote")} xp={GAME_XP.impostor.rightVote} />
+      <Rule label={tb("rules.survived")} xp={GAME_XP.impostor.survived} />
+      <Rule label={tb("rules.guessHit")} xp={GAME_XP.impostor.guessHit} />
+      <li className="mt-1 flex items-center gap-1.5 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
+        <GameThumb game="lineup" size="tiny" />
+        {gameName("lineup")}
+      </li>
+      <Rule label={tb("rules.roundWon")} xp={GAME_XP.lineup.roundWon} />
+      <Rule label={tb("rules.vote")} xp={GAME_XP.lineup.vote} />
+      <Rule label={tb("rules.crowd")} xp={GAME_XP.lineup.crowd} />
+      <Rule label={tb("rules.presented")} xp={GAME_XP.lineup.presented} />
+    </ul>
   );
 }
 
