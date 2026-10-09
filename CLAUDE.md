@@ -16,5 +16,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Migrations: run them, no asking. After: `pnpm db:types` (or MCP `generate_typescript_types` → `src/server/backend/supabase/database.types.ts`, Biome) + Supabase advisors.
 - No AI calls in app/build; only Sightengine (player pictures) and MyMemory (the Workshop wand, on a press, after the game banks).
 - Verify: `pnpm check` + `pnpm test:changed` (`origin/main` once committed). Whole suite and e2e: CI only; red → `get_job_logs`. Local e2e only for a changed browser flow units can't reach, one spec: `pnpm test:e2e e2e/<name>.spec.ts` (cloud: `PW_CHROMIUM=/opt/pw-browsers/chromium-*/chrome-linux/chrome`).
+- News: a feature a player can see gets an entry on top of `NEWS_POSTS` (`src/server/news-posts.ts`), same commit, four languages.
 - knip findings: delete, or `/** @public */` on a planned export.
 - Commits: Conventional, English, `type(scope): summary`, lowercase, no period, ≤72 chars. Types feat fix refactor test docs chore style perf; scopes (opt) game server ui app data i18n. Body only if why unclear. One per coherent change; never `.env`/secrets.

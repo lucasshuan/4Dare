@@ -109,4 +109,4 @@ Tick = done and committed.
 - [x] No cookie banner (only needed cookies)
 - [x] Two-layer license: personal stuff leaves with account, game content stays unnamed
 - [ ] Public room chat: report a line, host mutes/kicks, chat off switch
-- [x] News: `news_posts` in four languages, filters by game and kind, reactions, a link per post, Workshop posts write themselves; menu dot vs last seen
+- [x] News: posts in `news-posts.ts` in four languages, same-size cards, filters by game and kind, reactions, a link per post, Workshop posts write themselves; menu dot vs last seen

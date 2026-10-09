@@ -211,16 +211,15 @@ export interface WorkshopStore {
   isCurator(user: PlayerId): Promise<boolean>;
 }
 
-export const NEWS_REACTIONS = ["love", "party", "laugh", "wow"] as const;
+export const NEWS_REACTIONS = ["love", "party", "wow"] as const;
 export type NewsReaction = (typeof NEWS_REACTIONS)[number];
 
-/** A post of the news page (table news_posts). */
+/** A post of the news page, as a Workshop suggestion going live stores it (table news_posts). */
 export interface StoredNews {
   id: string;
   publishedAt: number;
   kind: "new" | "better" | "fix" | "workshop" | "notice";
   game: "who-am-i" | "impostor" | "lineup" | "site";
-  featured: boolean;
   /** By language; a fix may have none. */
   title: Partial<Record<Lang, string>>;
   /** By language; "{by}" stands for the suggestion's author. */

@@ -12,7 +12,7 @@ export function supabaseNewsStore(): NewsStore {
       const { data, error } = await db()
         .from("news_posts")
         .select(
-          "id, published_at, kind, game, featured, title, body, action, suggestion_id",
+          "id, published_at, kind, game, title, body, action, suggestion_id",
         )
         .eq("hidden", false)
         .lte("published_at", new Date().toISOString())
@@ -25,7 +25,6 @@ export function supabaseNewsStore(): NewsStore {
           publishedAt: new Date(r.published_at).getTime(),
           kind: r.kind as StoredNews["kind"],
           game: r.game as StoredNews["game"],
-          featured: r.featured,
           title: (r.title ?? {}) as Texts,
           body: (r.body ?? {}) as Texts,
           action: (r.action ?? null) as StoredNews["action"],
@@ -42,7 +41,7 @@ export function supabaseNewsStore(): NewsStore {
             published_at: new Date(post.publishedAt).toISOString(),
             kind: post.kind,
             game: post.game,
-            featured: post.featured,
+            featured: false,
             title: json(post.title),
             body: json(post.body),
             action: json(post.action),

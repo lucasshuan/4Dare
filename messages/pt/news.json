@@ -1,7 +1,7 @@
 {
   "eyebrow": "Ajuda",
   "title": "Novidades",
-  "lead": "O que mudou no 4Dare. Mudança grande ganha destaque; ajuste pequeno vira uma linha.",
+  "lead": "O que mudou no 4Dare, dia a dia.",
   "gameLabel": "Jogo",
   "kindLabel": "Tipo",
   "all": "Tudo",
@@ -14,7 +14,6 @@
     "workshop": "Da Oficina",
     "notice": "Aviso"
   },
-  "fixes": "Ajustes",
   "today": "Hoje",
   "yesterday": "Ontem",
   "empty": "Nada com esse filtro.",
@@ -24,7 +23,6 @@
   "reactions": {
     "love": "Amei",
     "party": "Que festa",
-    "laugh": "Rindo",
     "wow": "Uau"
   },
   "signIn": "Entre com uma conta para reagir.",

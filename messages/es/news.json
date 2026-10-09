@@ -1,7 +1,7 @@
 {
   "eyebrow": "Ayuda",
   "title": "Novedades",
-  "lead": "Qué cambió en 4Dare. Los cambios grandes se destacan; los ajustes pequeños son una línea.",
+  "lead": "Qué cambió en 4Dare, día a día.",
   "gameLabel": "Juego",
   "kindLabel": "Tipo",
   "all": "Todo",
@@ -14,7 +14,6 @@
     "workshop": "Del Taller",
     "notice": "Aviso"
   },
-  "fixes": "Ajustes",
   "today": "Hoy",
   "yesterday": "Ayer",
   "empty": "Nada con este filtro.",
@@ -24,7 +23,6 @@
   "reactions": {
     "love": "Me encanta",
     "party": "Fiesta",
-    "laugh": "Jaja",
     "wow": "Guau"
   },
   "signIn": "Entra con una cuenta para reaccionar.",

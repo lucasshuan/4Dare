@@ -10,11 +10,11 @@ import { useWithNames } from "@/components/ui/player-name";
 import { Screen } from "@/components/ui/screen";
 import { Segmented } from "@/components/ui/segmented";
 import { useToast } from "@/components/ui/toast";
-import { GAME_INFO, GameThumb, useGameName } from "@/features/create/game-info";
+import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { GamePill } from "@/features/workshop/objects";
-import { type GameKey, OPEN_GAMES } from "@/game/games";
+import { OPEN_GAMES } from "@/game/games";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
@@ -33,7 +33,6 @@ type KindFilter = "all" | "new" | "better" | "fix";
 const REACTIONS: { key: NewsReactionKey; emoji: string }[] = [
   { key: "love", emoji: "❤️" },
   { key: "party", emoji: "🎉" },
-  { key: "laugh", emoji: "😂" },
   { key: "wow", emoji: "😮" },
 ];
 
@@ -52,9 +51,9 @@ const fits = (n: NewsItem, kind: KindFilter) =>
 
 /**
  * /news: what changed, by day. A filter by game (and 4Dare itself) and by
- * kind; big changes get a wide card with the game's art, the rest a card
- * each, fixes a line in "Tweaks". Each post has its link and reactions for
- * accounts; what the Workshop put live credits who suggested it.
+ * kind. Every post is a card of the same size; each has its link and
+ * reactions for accounts, and what the Workshop put live credits who
+ * suggested it.
  */
 export function NewsScreen() {
   const t = useTranslations("news");
@@ -190,9 +189,6 @@ export function NewsScreen() {
       ) : (
         <div className="grid gap-9">
           {days.map((d) => {
-            const featured = d.items.filter((n) => n.featured);
-            const mid = d.items.filter((n) => !n.featured && n.kind !== "fix");
-            const fixes = d.items.filter((n) => n.kind === "fix");
             const rel = dayLabel(d.at);
             const date = format.dateTime(d.at, {
               day: "numeric",
@@ -212,59 +208,16 @@ export function NewsScreen() {
                     <small className="text-[13px] text-ink-muted">{date}</small>
                   ) : null}
                 </div>
-                <div className="grid gap-3">
-                  {featured.map((n) => (
+                <div className="grid items-stretch gap-3 sm:grid-cols-2">
+                  {d.items.map((n) => (
                     <Post
                       key={n.id}
                       item={n}
-                      big
                       index={index++}
                       signedIn={data.signedIn}
                       flash={focus === n.id}
                     />
                   ))}
-                  {mid.length ? (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {mid.map((n) => (
-                        <Post
-                          key={n.id}
-                          item={n}
-                          index={index++}
-                          signedIn={data.signedIn}
-                          flash={focus === n.id}
-                        />
-                      ))}
-                    </div>
-                  ) : null}
-                  {fixes.length ? (
-                    <m.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.4,
-                        ease: ease.soft,
-                        delay: index++ * 0.04,
-                      }}
-                      className="grid gap-2 rounded-[20px] bg-sunken p-4"
-                    >
-                      <span className="font-semibold text-[12px] text-ink-muted uppercase tracking-[0.08em]">
-                        {t("fixes")}
-                      </span>
-                      <ul className="grid gap-2">
-                        {fixes.map((n) => (
-                          <li
-                            id={n.id}
-                            key={n.id}
-                            className="flex flex-wrap items-center gap-2 text-[14px]"
-                          >
-                            <KindTag kind="fix" />
-                            <GameTag game={n.game} />
-                            <span>{n.body}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </m.div>
-                  ) : null}
                 </div>
               </section>
             );
@@ -307,13 +260,11 @@ function GameTag({ game }: { game: NewsGame }) {
 
 function Post({
   item,
-  big = false,
   index,
   signedIn,
   flash,
 }: {
   item: NewsItem;
-  big?: boolean;
   index: number;
   signedIn: boolean;
   flash: boolean;
@@ -336,8 +287,6 @@ function Post({
       // the browser refused the clipboard
     }
   };
-  const art: GameKey | null = item.game === "site" ? null : item.game;
-  const Art = art ? GAME_INFO[art].Art : null;
   return (
     <m.article
       id={item.id}
@@ -360,11 +309,10 @@ function Post({
         delay: Math.min(index, 10) * 0.04,
       }}
       className={cn(
-        "scroll-mt-28 overflow-hidden rounded-[24px] border border-line bg-surface",
-        big && "grid sm:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]",
+        "flex h-full scroll-mt-28 flex-col overflow-hidden rounded-[24px] border border-line bg-surface",
       )}
     >
-      <div className="flex flex-col gap-2.5 p-5">
+      <div className="flex flex-1 flex-col gap-2.5 p-5">
         <div className="flex flex-wrap items-center gap-1.5">
           <KindTag kind={item.kind} />
           <GameTag game={item.game} />
@@ -379,12 +327,7 @@ function Post({
           </button>
         </div>
         {item.title ? (
-          <h3
-            className={cn(
-              "font-display font-extrabold leading-[1.1] tracking-[-0.015em]",
-              big ? "text-[26px]" : "text-[19px]",
-            )}
-          >
+          <h3 className="font-display font-extrabold text-[19px] leading-[1.1] tracking-[-0.015em]">
             {item.title}
           </h3>
         ) : null}
@@ -402,25 +345,6 @@ function Post({
           <Reactions item={item} signedIn={signedIn} />
         </div>
       </div>
-      {big && Art ? (
-        <div className="relative min-h-[180px] overflow-hidden [container-type:inline-size] max-sm:order-first">
-          <Art wide className="absolute inset-0" />
-        </div>
-      ) : big ? (
-        <div className="relative grid min-h-[180px] place-items-center bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--line-strong)_35%,transparent)_1px,transparent_1.5px)] bg-[length:18px_18px] bg-sunken text-[64px] max-sm:order-first">
-          <m.span
-            aria-hidden="true"
-            animate={{ rotate: [-6, 6, -6] }}
-            transition={{
-              duration: 4,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-            }}
-          >
-            {KIND_EMOJI[item.kind]}
-          </m.span>
-        </div>
-      ) : null}
     </m.article>
   );
 }

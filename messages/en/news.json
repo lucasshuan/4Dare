@@ -1,7 +1,7 @@
 {
   "eyebrow": "Help",
   "title": "What's new",
-  "lead": "What changed in 4Dare. Big changes get a spotlight; small tweaks get a line.",
+  "lead": "What changed in 4Dare, by day.",
   "gameLabel": "Game",
   "kindLabel": "Kind",
   "all": "All",
@@ -14,7 +14,6 @@
     "workshop": "From the Workshop",
     "notice": "Notice"
   },
-  "fixes": "Tweaks",
   "today": "Today",
   "yesterday": "Yesterday",
   "empty": "Nothing with this filter.",
@@ -24,7 +23,6 @@
   "reactions": {
     "love": "Love it",
     "party": "Party",
-    "laugh": "Haha",
     "wow": "Wow"
   },
   "signIn": "Sign in with an account to react.",

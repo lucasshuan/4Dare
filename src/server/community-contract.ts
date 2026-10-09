@@ -224,7 +224,7 @@ export interface WorkshopCheck {
 
 export type NewsKind = "new" | "better" | "fix" | "workshop" | "notice";
 export type NewsGame = GameKey | "site";
-export type NewsReactionKey = "love" | "party" | "laugh" | "wow";
+export type NewsReactionKey = "love" | "party" | "wow";
 
 /** A post of the news page, in the reader's language. */
 export interface NewsItem {
@@ -232,7 +232,6 @@ export interface NewsItem {
   at: number;
   kind: NewsKind;
   game: NewsGame;
-  featured: boolean;
   /** A fix may have none. */
   title: string | null;
   /** "{by}" stands for `by`, shown with their face. */
