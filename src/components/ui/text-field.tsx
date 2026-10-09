@@ -1,7 +1,11 @@
+"use client";
+
 import {
   type InputHTMLAttributes,
   type TextareaHTMLAttributes,
+  useEffect,
   useId,
+  useState,
 } from "react";
 import { cn } from "@/lib/cn";
 
@@ -16,22 +20,39 @@ interface Common {
   className?: string;
 }
 
+/**
+ * Whether the browser masks a text field's letters with CSS. Then a secret is
+ * a text field drawn as dots: masked, but not a password field the browser
+ * would offer to save as a login.
+ */
+function useMasksText() {
+  const [masks, setMasks] = useState(true);
+  useEffect(() => {
+    setMasks(CSS.supports("-webkit-text-security", "disc"));
+  }, []);
+  return masks;
+}
+
 export function TextField({
   label,
   hint,
   max,
   suffix,
   suffixHidden = false,
+  secret = false,
   className,
   value,
   ...props
 }: Common & {
+  /** Never shown as typed (a room's password): dots, as a password field's. */
+  secret?: boolean;
   /** Fixed text at the end of the field (e.g. "?"): shown, counted in `max`, never deleted. */
   suffix?: string;
   /** Hide the suffix for now, e.g. while the typed text already ends with it. */
   suffixHidden?: boolean;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "className">) {
   const id = useId();
+  const masks = useMasksText();
   const typed = typeof value === "string" ? value.length : 0;
   const extra = suffix?.length ?? 0;
   const input = (
@@ -39,12 +60,15 @@ export function TextField({
       id={id}
       value={value}
       maxLength={max === undefined ? undefined : max - extra}
-      className={
+      className={cn(
         suffix
           ? "h-full min-w-0 flex-1 bg-transparent placeholder:text-ink-muted focus-visible:outline-none!"
-          : cn(FIELD, "h-13 short:h-11")
-      }
+          : cn(FIELD, "h-13 short:h-11"),
+        secret && masks && "[-webkit-text-security:disc]",
+      )}
       {...props}
+      // where CSS can't mask, a password field does
+      {...(secret && !masks ? { type: "password" } : {})}
     />
   );
   return (

@@ -194,6 +194,7 @@ export function SettingsFields({
               className="w-full max-w-60 sm:w-60"
             >
               <TextField
+                secret
                 label={t("password")}
                 placeholder={t("passwordPlaceholder")}
                 value={value.password}
