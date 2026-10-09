@@ -569,24 +569,45 @@ export function ProfileEditor({
           </Card>
         </div>
       </div>
-      {/* the whole width, at the bottom of what scrolls: the page, or the modal */}
-      <div className="sticky bottom-0 z-20 mt-2 flex flex-wrap items-center justify-end gap-2.5 border-line border-t bg-surface px-4 py-3 sm:px-6">
-        <span
+      {/* the whole width at the bottom: of the window on the page (its content
+          lines up with the page's), of what scrolls in the modal */}
+      {mode === "page" ? <div aria-hidden="true" className="h-16" /> : null}
+      <div
+        className={cn(
+          "bottom-0 z-20 border-line border-t bg-surface py-3",
+          mode === "page"
+            ? "fixed inset-x-0 px-4 sm:px-8"
+            : "sticky mt-2 px-4 sm:px-6",
+        )}
+      >
+        <div
           className={cn(
-            "mr-auto inline-flex items-center gap-2 font-semibold text-ink-muted text-sm",
-            // on phones it gives its room back to the buttons
-            !dirty && "invisible max-sm:hidden",
+            "flex flex-wrap items-center justify-end gap-2.5",
+            mode === "page" && "mx-auto w-full max-w-page",
           )}
         >
-          <span className="size-2 rounded-pill bg-apricot" />
-          {t("unsaved")}
-        </span>
-        <Button size="sm" variant="ghost" onClick={onClose}>
-          {t("cancel")}
-        </Button>
-        <Button size="sm" variant="primary" disabled={!canSave} onClick={save}>
-          {t("save")}
-        </Button>
+          <span
+            className={cn(
+              "mr-auto inline-flex items-center gap-2 font-semibold text-ink-muted text-sm",
+              // on phones it gives its room back to the buttons
+              !dirty && "invisible max-sm:hidden",
+            )}
+          >
+            <span className="size-2 rounded-pill bg-apricot" />
+            {t("unsaved")}
+          </span>
+          <Button size="sm" variant="ghost" onClick={onClose}>
+            {t("cancel")}
+          </Button>
+          <Button
+            size="sm"
+            variant="primary"
+            disabled={!canSave}
+            onClick={save}
+          >
+            {t("save")}
+          </Button>
+        </div>
       </div>
 
       {me && avatar ? (
