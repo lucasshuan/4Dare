@@ -283,20 +283,8 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
         >
           <Dialog.Title className="sr-only">{t("menu")}</Dialog.Title>
           {/* the logo where the page's is; the X floats above (after the popup) */}
-          {/* laid out as the top bar, so the logo sits where the page's does */}
-          <div className="h-[72px] shrink-0 px-4 pt-4 sm:h-[88px] sm:px-8 sm:pt-6 sm:short:h-[72px] sm:short:pt-4">
-            <div className="flex items-center gap-2 sm:gap-4">
-              {/* room for the X, which stays put above the sliding menu */}
-              <span className={cn(burgerClass, "invisible")} />
-              <Link
-                href="/"
-                onClick={() => pick("home")}
-                className="flex rounded-sm"
-              >
-                <Logo className="h-8 w-auto max-sm:h-7" />
-              </Link>
-            </div>
-          </div>
+          {/* room for the X and the logo, which stay put above the sliding menu */}
+          <div className="h-[72px] shrink-0 sm:h-[88px] sm:short:h-[72px]" />
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pt-2 pb-3">
             <Stagger i={0}>
               {me ? (
@@ -372,14 +360,21 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
             </LayoutMotion>
           </div>
         </Dialog.Popup>
-        {/* the page's three bars, in their spot, folding into an X over the menu as it slides in */}
-        <div className="pointer-events-none fixed top-0 left-0 z-50 px-4 pt-4 sm:px-8 sm:pt-6 sm:short:pt-4">
-          <Dialog.Close
-            aria-label={t("close")}
-            className={cn(burgerClass, "pointer-events-auto")}
-          >
+        {/*
+          the page's bars and logo, in their spots (laid out as the top bar),
+          over the menu as it slides in: the bars fold into an X
+        */}
+        <div className="pointer-events-none fixed top-0 left-0 z-50 flex items-center gap-2 px-4 pt-4 sm:gap-4 sm:px-8 sm:pt-6 sm:short:pt-4 [&>*]:pointer-events-auto">
+          <Dialog.Close aria-label={t("close")} className={burgerClass}>
             <Bars open={open} unfoldsIn />
           </Dialog.Close>
+          <Link
+            href="/"
+            onClick={() => pick("home")}
+            className="flex rounded-sm"
+          >
+            <Logo className="h-8 w-auto max-sm:h-7" />
+          </Link>
         </div>
       </Dialog.Portal>
     </Dialog.Root>
