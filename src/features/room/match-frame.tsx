@@ -116,7 +116,9 @@ export function MatchFrame({ children }: { children: ReactNode }) {
               : null
           }
         />
-        <main className="w-full min-w-0 flex-1">{children}</main>
+        <main className="mx-auto w-full min-w-0 max-w-room flex-1">
+          {children}
+        </main>
       </div>
       {wide ? null : <HistoryDrawer open={open} onClose={close} />}
     </m.div>
@@ -187,7 +189,7 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
       initial={arrives ? { opacity: 0 } : false}
       animate={{ opacity: 1, transition: { duration: 0.4 } }}
       // over the turn band and a guess's scene: the clock, the theme and the buttons stay
-      className="relative z-[38] flex w-full flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-[18px] sm:short:py-3"
+      className="relative z-[38] mx-auto flex w-full max-w-room flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-[18px] sm:short:py-3"
     >
       {/* no own width (the tag truncates): the header wraps only when the tag would get under 6rem */}
       <div className="flex min-w-24 flex-1 basis-0 items-center gap-2.5">

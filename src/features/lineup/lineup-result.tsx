@@ -55,7 +55,7 @@ export function LineupResult() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center gap-6 px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-6">
-      <header className="flex w-full justify-end">
+      <header className="flex w-full max-w-room justify-end">
         <RoomControls />
       </header>
       <CoinDefs />

@@ -44,7 +44,7 @@ export function Screen({
   right?: ReactNode;
   /** Full width, right under the top bar; it should start with UNDER_TOPBAR. */
   banner?: ReactNode;
-  /** No top bar: the page carries its own controls (the lobby). */
+  /** No top bar: the page carries its own controls (the lobby), in a room's wider column. */
   bare?: boolean;
   children: ReactNode;
   className?: string;
@@ -57,7 +57,7 @@ export function Screen({
           <m.main
             variants={CONTENT_LEAVES}
             className={cn(
-              "mx-auto w-full max-w-page flex-1 lg:flex lg:min-h-0 lg:flex-col",
+              "mx-auto w-full max-w-room flex-1 lg:flex lg:min-h-0 lg:flex-col",
               className,
             )}
           >

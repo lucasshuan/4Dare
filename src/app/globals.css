@@ -342,6 +342,8 @@
 
   /* The site's content column outside a match (Screen, max-w-page); the top bar spans the screen. */
   --container-page: 1600px;
+  /* A room's column (lobby, match, results): wider than the site's, still capped so an ultrawide doesn't stretch it. */
+  --container-room: 1920px;
 
   --radius-sm: 10px;
   --radius-md: 16px;

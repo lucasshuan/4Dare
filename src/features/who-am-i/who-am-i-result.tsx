@@ -81,7 +81,7 @@ export function WhoAmIResult() {
 
   return (
     <div className="flex min-h-dvh flex-col gap-5 px-4 pt-4 sm:px-8 sm:pt-6">
-      <header className="mx-auto flex w-full max-w-[1120px] items-center gap-4">
+      <header className="mx-auto flex w-full max-w-room items-center gap-4">
         {view.theme ? (
           <ThemeTag
             label={tr("theme")}

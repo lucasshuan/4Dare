@@ -68,7 +68,7 @@ export function ImpostorResult() {
   const guesses = end.outs.filter((o) => o.guess);
   return (
     <div className="flex min-h-dvh flex-col gap-8 px-4 pt-4 pb-8 max-sm:pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-6">
-      <header className="flex justify-end">
+      <header className="mx-auto flex w-full max-w-room justify-end">
         <RoomControls />
       </header>
       <div className="flex flex-col items-center gap-2 text-center">
