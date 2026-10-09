@@ -275,6 +275,21 @@ export async function kickPlayer(
   });
 }
 
+/** Host only, lobby only: makes `targetId` the room's host. */
+export async function transferHost(
+  code: string,
+  targetId: string,
+): Promise<Result<RoomView>> {
+  return run(async () => {
+    if (typeof targetId !== "string" || !targetId) bad();
+    return act(code, (id) => ({
+      type: "TRANSFER_HOST",
+      playerId: id,
+      targetId,
+    }));
+  });
+}
+
 /**
  * Host only, 2+ players. Draws the themes everyone votes on (or the host's
  * ideas, when they type the theme), avoiding the last vote's. A room's first

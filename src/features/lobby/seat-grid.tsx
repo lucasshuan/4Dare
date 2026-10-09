@@ -50,6 +50,7 @@ export function SeatGrid({
   canClose,
   onSeats,
   onKick,
+  onMakeHost,
 }: {
   players: PlayerView[];
   /** Open seats, the taken ones included. */
@@ -61,6 +62,7 @@ export function SeatGrid({
   canClose: boolean;
   onSeats: (seats: number) => void;
   onKick: (id: string) => void;
+  onMakeHost: (id: string) => void;
 }) {
   const t = useTranslations("lobby");
   const name = useDisplayName();
@@ -78,6 +80,16 @@ export function SeatGrid({
           yes: t("kickYes"),
         },
         run: () => onKick(p.id),
+      };
+      const makeHost: SeatAction = {
+        label: t("makeHost"),
+        icon: Crown,
+        confirm: {
+          title: t("makeHostTitle", { name: p.name }),
+          body: t("makeHostBody"),
+          yes: t("makeHostYes"),
+        },
+        run: () => onMakeHost(p.id),
       };
       return (
         <m.div
@@ -124,7 +136,7 @@ export function SeatGrid({
               {host ? (
                 <SeatMenu
                   label={t("playerActions", { name: p.name })}
-                  actions={[kick]}
+                  actions={[makeHost, kick]}
                 />
               ) : null}
             </div>

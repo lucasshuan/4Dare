@@ -596,6 +596,8 @@ export type GameEvent =
   | { type: "SET_READY"; playerId: PlayerId; ready: boolean }
   /** The host removes someone from the lobby; they stay out for KICK_MS. */
   | { type: "KICK"; playerId: PlayerId; targetId: PlayerId }
+  /** The host hands the room to someone present, in the lobby; they become the host. */
+  | { type: "TRANSFER_HOST"; playerId: PlayerId; targetId: PlayerId }
   | {
       type: "UPDATE_SETTINGS";
       playerId: PlayerId;

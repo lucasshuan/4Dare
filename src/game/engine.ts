@@ -526,6 +526,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     }
     case "KICK":
       return kick(s, e.playerId, e.targetId, ctx);
+    case "TRANSFER_HOST":
+      return transferHost(s, e.playerId, e.targetId);
     case "UPDATE_SETTINGS": {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
@@ -824,6 +826,19 @@ function kick(s: RoomState, hostId: PlayerId, targetId: PlayerId, ctx: Ctx) {
   );
   s.kicked = Object.fromEntries([...kicked, [targetId, ctx.now + KICK_MS]]);
   if (s.players.length < 2) stopClock(s);
+}
+
+/** The host hands the room to someone else here: they take over, ready like any host. */
+function transferHost(s: RoomState, hostId: PlayerId, targetId: PlayerId) {
+  const old = requireSeated(s, hostId);
+  if (hostId !== s.hostId) fail("not_host");
+  if (s.phase !== "lobby") fail("wrong_phase");
+  if (targetId === hostId) fail("invalid_input");
+  const target = requireSeated(s, targetId);
+  if (!isPresent(target)) fail("invalid_input");
+  s.hostId = targetId;
+  target.ready = true;
+  old.ready = false;
 }
 
 /**

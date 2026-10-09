@@ -312,6 +312,31 @@ describe("the host's lobby", () => {
     expect(kick("p1", "p2")).toBe("wrong_phase");
   });
 
+  it("hands the room to someone else here, who takes over as host", () => {
+    const g = new Game(3);
+    g.do({ type: "TRANSFER_HOST", playerId: "p1", targetId: "p2" });
+    expect(g.state.hostId).toBe("p2");
+    const ready = (id: string) =>
+      g.state.players.find((p) => p.id === id)?.ready;
+    expect(ready("p2")).toBe(true);
+    expect(ready("p1")).toBe(false);
+    // the old host no longer holds the controls
+    expect(
+      code(() => g.do({ type: "KICK", playerId: "p1", targetId: "p3" })),
+    ).toBe("not_host");
+  });
+
+  it("only the host hands the room over, to someone else, only in the lobby", () => {
+    const g = new Game(3);
+    const hand = (playerId: string, targetId: string) =>
+      code(() => g.do({ type: "TRANSFER_HOST", playerId, targetId }));
+    expect(hand("p2", "p3")).toBe("not_host");
+    expect(hand("p1", "p1")).toBe("invalid_input");
+    expect(hand("p1", "nobody")).toBe("not_member");
+    g.start();
+    expect(hand("p1", "p2")).toBe("wrong_phase");
+  });
+
   it("opens and closes seats within the game's range, never under who is seated", () => {
     const g = new Game(3);
     const seats = (n: number) =>

@@ -40,6 +40,7 @@ import {
   setReady,
   sitChair,
   startGame,
+  transferHost,
   updateSettings,
 } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
@@ -188,6 +189,10 @@ export function LobbyScreen() {
     setKicking((ids) => ids.filter((x) => x !== id));
   };
 
+  const makeHost = async (id: string) => {
+    await act(() => transferHost(code, id));
+  };
+
   const copy = async (text: string, done: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -303,6 +308,7 @@ export function LobbyScreen() {
                       canClose={canClose}
                       onSeats={setSeats}
                       onKick={kick}
+                      onMakeHost={makeHost}
                     />
                   ),
                 },
