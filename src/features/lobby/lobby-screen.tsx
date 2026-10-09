@@ -319,8 +319,8 @@ export function LobbyScreen() {
                   icon: SlidersHorizontal,
                   panel: (
                     <div className="@container flex flex-col gap-4">
-                      {/* plain rows on hairlines, in up to three columns as the panel widens */}
-                      <ul className="grid @4xl:grid-cols-3 @xl:grid-cols-2 gap-x-8 [&>li]:flex [&>li]:min-h-14 [&>li]:min-w-0 [&>li]:items-center [&>li]:border-line [&>li]:border-b [&>li]:py-2">
+                      {/* plain rows on hairlines, all one height, in up to three columns as the panel widens */}
+                      <ul className="grid auto-rows-fr @4xl:grid-cols-3 @xl:grid-cols-2 gap-x-8 [&>li]:flex [&>li]:min-h-14 [&>li]:min-w-0 [&>li]:items-center [&>li]:border-line [&>li]:border-b">
                         <VisibilityRow
                           settings={view.settings}
                           editable={me.isHost}

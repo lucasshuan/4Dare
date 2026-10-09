@@ -152,7 +152,7 @@ function EditRow({
   const [open, setOpen] = useState(false);
   if (!editable)
     return (
-      <li className="flex items-center gap-3">
+      <li className="flex items-center gap-3 py-2.5">
         {icon}
         <span className="min-w-0">{text}</span>
       </li>
@@ -169,7 +169,8 @@ function EditRow({
         <Popover.Trigger
           aria-label={label}
           className={cn(
-            "-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-sm px-2 py-1 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
+            // the whole row, top to bottom, so its highlight meets the lines around it
+            "group/row -mx-2 flex w-[calc(100%+1rem)] items-center gap-3 self-stretch rounded-md px-2 py-2.5 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
             open && "bg-sunken",
           )}
         >
@@ -263,7 +264,7 @@ export function VisibilityRow({
           {t(isPublic ? "public" : "private")}
           {/* the host shares the password; nobody else gets it */}
           {!isPublic && settings.password ? (
-            <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px]">
+            <span className="ml-1.5 rounded-sm bg-sunken px-1.5 py-0.5 font-mono text-[13px] transition-colors duration-200 ease-soft group-hover/row:bg-surface group-aria-expanded/row:bg-surface">
               {settings.password}
             </span>
           ) : null}
@@ -410,7 +411,7 @@ export function TimesRow({
             {steps.map((step) => (
               <span
                 key={step}
-                className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm"
+                className="inline-flex items-baseline gap-1.5 rounded-sm bg-sunken px-2 py-0.5 text-sm transition-colors duration-200 ease-soft group-hover/row:bg-surface group-aria-expanded/row:bg-surface"
               >
                 {t(`times.${step}`)}
                 <span className="font-medium font-mono text-[13px] tabular-nums">
