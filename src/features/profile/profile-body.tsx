@@ -7,6 +7,7 @@ import {
   Flame,
   ImagePlus,
   Lock,
+  Maximize2,
   MessageCircle,
   MoonStar,
   Pencil,
@@ -355,6 +356,17 @@ function ProfileShow({
               <Share2 strokeWidth={1.75} />
               {t("share")}
             </Button>
+            {mode === "modal" ? (
+              // a full load, so the address opens the page and not this modal again
+              <a
+                href={`/${locale}${profilePath(view.handle)}`}
+                aria-label={t("openPage")}
+                title={t("openPage")}
+                className={buttonClass("secondary", "sm", "aspect-square px-0")}
+              >
+                <Maximize2 strokeWidth={1.75} />
+              </a>
+            ) : null}
           </div>
         </div>
 

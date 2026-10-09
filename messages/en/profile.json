@@ -18,6 +18,7 @@
   "publicRoomUnnamed": "Public room · {taken} of {seats} seats",
   "joinRoom": "Join the room",
   "share": "Share",
+  "openPage": "Open as a page",
   "copied": "Link copied",
   "tabsLabel": "Profile sections",
   "tabs": {
