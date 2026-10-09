@@ -568,31 +568,25 @@ export function ProfileEditor({
             </div>
           </Card>
         </div>
-
-        {/* stays at the bottom of what scrolls: the page, or the modal */}
-        <div className="sticky bottom-0 z-20 mt-2 flex flex-wrap items-center justify-end gap-2.5 border-line border-t bg-surface px-4 py-3 sm:px-6">
-          <span
-            className={cn(
-              "mr-auto inline-flex items-center gap-2 font-semibold text-ink-muted text-sm",
-              // on phones it gives its room back to the buttons
-              !dirty && "invisible max-sm:hidden",
-            )}
-          >
-            <span className="size-2 rounded-pill bg-apricot" />
-            {t("unsaved")}
-          </span>
-          <Button size="sm" variant="ghost" onClick={onClose}>
-            {t("cancel")}
-          </Button>
-          <Button
-            size="sm"
-            variant="primary"
-            disabled={!canSave}
-            onClick={save}
-          >
-            {t("save")}
-          </Button>
-        </div>
+      </div>
+      {/* the whole width, at the bottom of what scrolls: the page, or the modal */}
+      <div className="sticky bottom-0 z-20 mt-2 flex flex-wrap items-center justify-end gap-2.5 border-line border-t bg-surface px-4 py-3 sm:px-6">
+        <span
+          className={cn(
+            "mr-auto inline-flex items-center gap-2 font-semibold text-ink-muted text-sm",
+            // on phones it gives its room back to the buttons
+            !dirty && "invisible max-sm:hidden",
+          )}
+        >
+          <span className="size-2 rounded-pill bg-apricot" />
+          {t("unsaved")}
+        </span>
+        <Button size="sm" variant="ghost" onClick={onClose}>
+          {t("cancel")}
+        </Button>
+        <Button size="sm" variant="primary" disabled={!canSave} onClick={save}>
+          {t("save")}
+        </Button>
       </div>
 
       {me && avatar ? (
