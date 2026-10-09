@@ -67,7 +67,7 @@ export function LevelAvatar({
           style={ring}
           fill="none"
           strokeWidth={stroke}
-          className="stroke-line"
+          className="stroke-sunken"
         />
         <circle
           cx="50%"
@@ -88,7 +88,10 @@ export function LevelAvatar({
         level={level}
         size={tag}
         on={on}
-        className="absolute -right-0.5 -bottom-0.5"
+        className={cn(
+          "absolute",
+          tag === "md" ? "right-0 bottom-1.5" : "-right-0.5 -bottom-0.5",
+        )}
       />
     </span>
   );
@@ -111,17 +114,26 @@ export function LevelTag({
     <span
       aria-hidden="true"
       className={cn(
-        "inline-flex items-baseline gap-0.5 rounded-pill bg-(--accent) font-bold text-(--on-accent) leading-none tabular-nums",
+        "inline-flex items-baseline gap-0.5 rounded-pill bg-(--accent) text-(--on-accent) leading-none tabular-nums",
         on === "canvas"
           ? "shadow-[0_0_0_2px_var(--canvas)]"
           : "shadow-[0_0_0_2px_var(--surface)]",
         size === "md"
-          ? "px-2 py-[5px] text-[13px]"
-          : "px-1.5 py-[3px] text-[11px]",
+          ? "h-[26px] items-center px-[9px] font-display font-extrabold text-[14px]"
+          : "px-1.5 py-[3px] font-bold text-[11px]",
         className,
       )}
     >
-      <small className="font-bold text-[0.78em] opacity-85">{t("tag")}</small>
+      <small
+        className={cn(
+          "font-bold opacity-85",
+          size === "md"
+            ? "font-sans text-[11px] tracking-[0.02em]"
+            : "text-[0.78em]",
+        )}
+      >
+        {t("tag")}
+      </small>
       {level}
     </span>
   );

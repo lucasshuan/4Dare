@@ -6,13 +6,13 @@ import {
   CalendarDays,
   Flame,
   ImagePlus,
-  Link2,
   Lock,
   MessageCircle,
   MoonStar,
   Pencil,
   Presentation,
   Quote,
+  Share2,
   Sprout,
 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -286,8 +286,13 @@ function ProfileShow({
         : !view.hidden[value],
   );
 
-  const copyLink = async () => {
+  // the phone's share sheet where there is one, else the link to the clipboard
+  const share = async () => {
     const url = `${window.location.origin}/${locale}${profilePath(view.handle)}`;
+    if (navigator.share && !wide) {
+      await navigator.share({ title: view.name, url }).catch(() => {});
+      return;
+    }
     try {
       await navigator.clipboard.writeText(url);
       toast(t("copied"));
@@ -321,7 +326,7 @@ function ProfileShow({
             <span className="rounded-pill bg-canvas p-[5px] shadow-[0_0_0_2px_var(--canvas)]">
               <Avatar
                 avatar={view.avatar}
-                className="size-20 text-[32px] sm:size-28 sm:text-[44px]"
+                className="size-22 text-[34px] sm:size-28 sm:text-[44px]"
               />
             </span>
           ) : (
@@ -329,11 +334,11 @@ function ProfileShow({
               avatar={view.avatar}
               xp={view.xp}
               stroke={5}
-              avatarClass="size-20 text-[32px] sm:size-28 sm:text-[44px]"
+              avatarClass="size-22 text-[34px] sm:size-28 sm:text-[44px]"
             />
           )}
           <div className="flex min-w-0 flex-col gap-1 pb-1">
-            <h1 className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-display font-extrabold text-[30px] leading-none tracking-[-0.02em] sm:text-[40px]">
+            <h1 className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-display font-extrabold text-[32px] leading-none tracking-[-0.02em] sm:text-[40px]">
               <span className="min-w-0 break-words">{view.name}</span>
               <span className="font-medium font-mono text-[15px] text-ink-muted tracking-normal">
                 @{view.handle}
@@ -347,9 +352,9 @@ function ProfileShow({
                 {t("edit")}
               </Button>
             ) : null}
-            <Button size="sm" onClick={copyLink}>
-              <Link2 strokeWidth={1.75} />
-              {t("copyLink")}
+            <Button size="sm" onClick={share}>
+              <Share2 strokeWidth={1.75} />
+              {t("share")}
             </Button>
           </div>
         </div>
