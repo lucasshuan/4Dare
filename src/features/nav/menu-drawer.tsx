@@ -6,9 +6,9 @@ import {
   CircleQuestionMark,
   Clock,
   GalleryVerticalEnd,
-  Lightbulb,
   House,
   LayoutGrid,
+  Lightbulb,
   LogOut,
   Plus,
   Search,
@@ -142,7 +142,8 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
       : path === "/"
         ? "home"
         : // a page under a section marks the section (a character's sheet)
-          ([CHARACTERS, WORKSHOP].find((root) => path.startsWith(`${root}/`)) ?? path);
+          ([CHARACTERS, WORKSHOP].find((root) => path.startsWith(`${root}/`)) ??
+          path);
 
   const groups: { key: GroupKey; items: Item[]; games?: boolean }[] = [
     {

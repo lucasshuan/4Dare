@@ -1046,11 +1046,7 @@ function Composer({
           <Dialog.Close
             render={<Button variant="ghost">{tc("cancel")}</Button>}
           />
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={sending}
-          >
+          <Button type="submit" variant="primary" disabled={sending}>
             {tc("send")}
           </Button>
         </div>
