@@ -6,6 +6,7 @@ import {
   CircleQuestionMark,
   Clock,
   GalleryVerticalEnd,
+  Lightbulb,
   House,
   LayoutGrid,
   LogOut,
@@ -53,6 +54,7 @@ import {
   NEW_ROOM,
   ROOMS,
   SETTINGS,
+  WORKSHOP,
 } from "@/lib/routes";
 import { signOut } from "@/server/actions";
 import type { MenuCounts } from "@/server/menu";
@@ -67,6 +69,7 @@ type ItemKey =
   | "matches"
   | "settings"
   | "characters"
+  | "workshop"
   | "howTo";
 
 interface Item {
@@ -139,7 +142,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
       : path === "/"
         ? "home"
         : // a page under a section marks the section (a character's sheet)
-          ([CHARACTERS].find((root) => path.startsWith(`${root}/`)) ?? path);
+          ([CHARACTERS, WORKSHOP].find((root) => path.startsWith(`${root}/`)) ?? path);
 
   const groups: { key: GroupKey; items: Item[]; games?: boolean }[] = [
     {
@@ -190,6 +193,15 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           href: CHARACTERS,
           Icon: GalleryVerticalEnd,
           meta: counts ? format.number(counts.characters) : undefined,
+          newUntil: "2026-11-08",
+        },
+        {
+          key: "workshop",
+          href: WORKSHOP,
+          Icon: Lightbulb,
+          meta: counts?.voting
+            ? t("meta.voting", { n: counts.voting })
+            : undefined,
           newUntil: "2026-11-08",
         },
       ],

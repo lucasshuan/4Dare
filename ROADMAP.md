@@ -62,15 +62,15 @@ Tick = done and committed.
 
 ## Workshop (`/workshop`)
 
-- [ ] One page for themes, questions, missions; tabs hide per game filter
+- [x] One page for themes, questions, missions; tabs hide per game filter
 - [ ] "In the Workshop" strip on each game page, opens filtered
-- [ ] Traffic light: amber voting (votes, % want), green live, red refused with reason
-- [ ] States `voting`, `review`, `live`, `refused`; themes get them too; `suggestion_votes` table
-- [ ] Suggest form asks what each bank stores (theme: set, games, characters; question: type, scope, audience, spice; mission: mood, heavy)
-- [ ] Silent curation on suggest: look-alike names/texts, starter overlap, missing photos, blocked words, format, 3 per week. Rules only, no AI
-- [ ] Preview switches language by flag, shows Who am I? opening rule
-- [ ] Translation wand: needs all 4 languages; fills from own theme bank, Apertium for rest, Japanese by hand
-- [ ] Review queue sorted by votes; going live inserts theme starters, deletes nothing
+- [x] Traffic light: amber voting (votes, % want), green live, red refused with reason
+- [x] States `voting`, `review`, `live`, `refused` in `workshop_suggestions` (banks only get what goes live) and `workshop_votes`
+- [x] Suggest form asks what each bank stores (theme: set, games, characters; question: type, scope, audience, spice; mission: mood, heavy)
+- [x] Silent curation on suggest: look-alike names/texts, starter overlap, missing photos, blocked words, format, 3 per week. Rules only, no AI
+- [x] Preview switches language by flag, shows Who am I? opening rule
+- [x] Translation wand: game banks and theme patterns first, MyMemory for the rest; curator completes all 4 languages
+- [x] Review queue sorted by votes; going live inserts theme starters, deletes nothing
 
 ## Community
 

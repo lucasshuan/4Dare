@@ -14,10 +14,12 @@ import { supabaseLibraryStore } from "./supabase/library-store";
 import { supabaseLineup } from "./supabase/lineup";
 import { supabaseMatches } from "./supabase/matches";
 import { supabaseMural } from "./supabase/mural";
+import { supabaseNewsStore } from "./supabase/news-store";
 import { supabaseNotify } from "./supabase/notify";
 import { supabaseProfiles } from "./supabase/profiles";
 import { supabaseRooms } from "./supabase/rooms";
 import { supabaseThemes } from "./supabase/themes";
+import { supabaseWorkshopStore } from "./supabase/workshop-store";
 import type { Backend } from "./types";
 
 let backend: Backend | null = null;
@@ -42,6 +44,8 @@ export function getBackend(): Backend {
       notify: supabaseNotify(),
       chat: supabaseChat(),
       library: supabaseLibraryStore(),
+      workshop: supabaseWorkshopStore(),
+      news: supabaseNewsStore(),
     };
     return backend;
   }

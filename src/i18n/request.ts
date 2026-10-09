@@ -16,6 +16,7 @@ const SHARED = [
   "nav",
   "howTo",
   "library",
+  "workshop",
 ] as const;
 
 // Each game's own, everything its match shows, at messages/<locale>/games/<namespace>.json:

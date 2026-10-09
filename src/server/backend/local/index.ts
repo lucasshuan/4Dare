@@ -12,9 +12,11 @@ import { localLibraryStore } from "./library-store";
 import { localLineup } from "./lineup";
 import { localMatches } from "./matches";
 import { localMural } from "./mural";
+import { localNewsStore } from "./news-store";
 import { localProfiles } from "./profiles";
 import { localRooms } from "./rooms";
 import { localThemes } from "./themes";
+import { localWorkshopStore } from "./workshop-store";
 
 // Local mode (no Supabase keys) in one module: a build made with the keys
 // swaps it for off.ts (next.config.ts), so production ships none of it.
@@ -45,5 +47,7 @@ export function localBackend(): Backend {
     },
     chat: localChat(),
     library: localLibraryStore(characters),
+    workshop: localWorkshopStore(),
+    news: localNewsStore(),
   };
 }

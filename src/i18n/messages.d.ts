@@ -15,6 +15,7 @@ import type nav from "../../messages/en/nav.json";
 import type profile from "../../messages/en/profile.json";
 import type room from "../../messages/en/room.json";
 import type settings from "../../messages/en/settings.json";
+import type workshop from "../../messages/en/workshop.json";
 
 declare module "next-intl" {
   interface AppConfig {
@@ -30,6 +31,7 @@ declare module "next-intl" {
       profile: typeof profile;
       room: typeof room;
       settings: typeof settings;
+      workshop: typeof workshop;
       whoAmI: typeof whoAmI;
       impostor: typeof impostor;
       lineup: typeof lineup;

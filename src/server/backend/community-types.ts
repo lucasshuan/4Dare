@@ -118,3 +118,130 @@ export interface LibraryStore {
   /** How many characters the library has. */
   total(): Promise<number>;
 }
+
+/** A Workshop suggestion as kept (table workshop_suggestions). */
+export interface StoredSuggestion {
+  id: string;
+  kind: "theme" | "question" | "mission";
+  status: "voting" | "review" | "live" | "refused";
+  lang: Lang;
+  /** ThemeDraft, QuestionDraft or MissionDraft (community-contract.ts). */
+  payload: unknown;
+  /** Other languages' texts, by language then piece. */
+  translations: Partial<Record<Lang, Record<string, string>>>;
+  createdBy: PlayerId | null;
+  yes: number;
+  no: number;
+  reason: string | null;
+  bankId: string | null;
+  decidedBy: PlayerId | null;
+  decidedAt: number | null;
+  createdAt: number;
+}
+
+/** A row the curator puts into a bank when a suggestion goes live. */
+export type BankInsert =
+  | {
+      kind: "theme";
+      id: string;
+      names: Record<Lang, string>;
+      set: string;
+      games: string[];
+      starters: { characterId: string; lang: Lang | "all"; position: number }[];
+    }
+  | {
+      kind: "question";
+      id: string;
+      questionKind: string;
+      scope: "general" | "set" | "theme";
+      set: string | null;
+      themeId: string | null;
+      audience: string;
+      spice: number;
+      texts: Record<Lang, string>;
+      options: unknown;
+      createdBy: PlayerId | null;
+    }
+  | {
+      kind: "mission";
+      id: string;
+      tone: string;
+      heavy: boolean;
+      texts: Record<Lang, string>;
+      createdBy: PlayerId | null;
+    };
+
+export interface WorkshopStore {
+  /** Every suggestion, newest first (a few hundred at most). */
+  suggestions(): Promise<StoredSuggestion[]>;
+  suggestion(id: string): Promise<StoredSuggestion | null>;
+  /** The new one's id; null past the weekly limit. */
+  create(
+    kind: StoredSuggestion["kind"],
+    lang: Lang,
+    payload: unknown,
+    translations: StoredSuggestion["translations"],
+    author: PlayerId,
+  ): Promise<string | null>;
+  /** Casts, changes or (null) takes back a vote; the counts after it. Fails once it is no longer up for votes. */
+  vote(
+    id: string,
+    user: PlayerId,
+    vote: boolean | null,
+  ): Promise<{ yes: number; no: number }>;
+  /** A voter's votes, by suggestion. */
+  votesOf(user: PlayerId): Promise<Map<string, boolean>>;
+  /** How many suggestions an account sent since Monday (UTC). */
+  sentThisWeek(author: PlayerId): Promise<number>;
+  decide(
+    id: string,
+    patch: {
+      status: StoredSuggestion["status"];
+      reason: string | null;
+      bankId: string | null;
+      translations: StoredSuggestion["translations"];
+      by: PlayerId;
+    },
+  ): Promise<void>;
+  /** Inserts a suggestion into its bank (insert only, never an update). */
+  insertBank(row: BankInsert): Promise<void>;
+  /** Whether a bank id is taken. */
+  bankIdTaken(kind: BankInsert["kind"], id: string): Promise<boolean>;
+  /** Whether an account reviews suggestions. */
+  isCurator(user: PlayerId): Promise<boolean>;
+}
+
+export const NEWS_REACTIONS = ["love", "party", "laugh", "wow"] as const;
+export type NewsReaction = (typeof NEWS_REACTIONS)[number];
+
+/** A post of the news page (table news_posts). */
+export interface StoredNews {
+  id: string;
+  publishedAt: number;
+  kind: "new" | "better" | "fix" | "workshop" | "notice";
+  game: "who-am-i" | "impostor" | "lineup" | "site";
+  featured: boolean;
+  /** By language; a fix may have none. */
+  title: Partial<Record<Lang, string>>;
+  /** By language; "{by}" stands for the suggestion's author. */
+  body: Partial<Record<Lang, string>>;
+  /** Where it leads: a path, and its button's words by language. */
+  action: { href: string; label: Partial<Record<Lang, string>> } | null;
+  suggestionId: string | null;
+}
+
+export interface NewsStore {
+  /** Every post that shows, newest first. */
+  list(): Promise<StoredNews[]>;
+  insert(post: StoredNews): Promise<void>;
+  /** Puts or takes back one reaction; every reaction's count on the post after it. */
+  toggle(
+    postId: string,
+    user: PlayerId,
+    reaction: NewsReaction,
+  ): Promise<Partial<Record<NewsReaction, number>>>;
+  /** Every post's reaction counts. */
+  counts(): Promise<Map<string, Partial<Record<NewsReaction, number>>>>;
+  /** A reader's reactions, by post. */
+  mine(user: PlayerId): Promise<Map<string, NewsReaction[]>>;
+}

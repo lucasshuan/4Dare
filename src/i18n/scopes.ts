@@ -22,6 +22,7 @@ const ROOM_ONLY: readonly (keyof Messages)[] = [
 export const PAGE_ONLY = [
   "howTo",
   "library",
+  "workshop",
 ] as const satisfies readonly (keyof Messages)[];
 export type PageNamespace = (typeof PAGE_ONLY)[number];
 

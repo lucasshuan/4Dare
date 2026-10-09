@@ -37,7 +37,7 @@ import type {
 } from "@/game/types";
 import type { Account, AccountInfo } from "../contract";
 import type { FitVote, PickStat } from "../theme-picks";
-import type { LibraryStore } from "./community-types";
+import type { LibraryStore, NewsStore, WorkshopStore } from "./community-types";
 
 export interface StoredRoom {
   state: RoomState;
@@ -522,4 +522,6 @@ export interface Backend {
   notify: Notifier;
   chat: ChatStore;
   library: LibraryStore;
+  workshop: WorkshopStore;
+  news: NewsStore;
 }

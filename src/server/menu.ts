@@ -1,10 +1,13 @@
 import "server-only";
 import { getBackend } from "./backend";
+import { votingCount } from "./workshop";
 
 /** What the side menu shows beside its rows. */
 export interface MenuCounts {
   /** Characters in the library. */
   characters: number;
+  /** Workshop suggestions up for votes. */
+  voting: number;
 }
 
 let cached: { at: number; counts: Promise<MenuCounts> } | null = null;
@@ -15,7 +18,11 @@ export function menuCounts(): Promise<MenuCounts> {
   if (cached && Date.now() - cached.at < TTL) return cached.counts;
   const counts = (async (): Promise<MenuCounts> => {
     const { library } = getBackend();
-    return { characters: await library.total() };
+    const [characters, voting] = await Promise.all([
+      library.total(),
+      votingCount(),
+    ]);
+    return { characters, voting };
   })();
   cached = { at: Date.now(), counts };
   counts.catch(() => {

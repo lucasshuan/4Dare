@@ -1,5 +1,10 @@
 // What the community pages' routes send (the characters page first).
+import type { GameKey } from "@/game/games";
+import type { Audience } from "@/game/impostor/questions";
+import type { QuestionKind } from "@/game/impostor/types";
+import type { Tone } from "@/game/lineup/bank";
 import type { Taste } from "@/game/tastes";
+import type { ThemeSet } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 import type { PersonRef } from "./contract";
 
@@ -85,4 +90,164 @@ export interface AliasHistoryEntry {
   after: string | null;
   by: PersonRef | null;
   at: number;
+}
+
+// Workshop ------------------------------------------------------------------
+
+export const WORKSHOP_KINDS = ["theme", "question", "mission"] as const;
+export type WorkshopKind = (typeof WORKSHOP_KINDS)[number];
+
+/** voting: up for votes; review: a curator is looking at it; live: in the game; refused: left out. */
+export type WorkshopStatus = "voting" | "review" | "live" | "refused";
+
+/** A scale's end or a pick's option, as typed: an emoji and a few words. */
+export interface DraftLabel {
+  emoji: string;
+  text: string;
+}
+
+/** What a theme suggestion keeps, in the language it was written in. */
+export interface ThemeDraft {
+  name: string;
+  set: ThemeSet;
+  games: ("who-am-i" | "impostor")[];
+  /** Language-free library ids, 3 to 5. */
+  starters: string[];
+  /** "all": the examples work in every language; else only in this one. */
+  startersLang: "all" | Lang;
+}
+
+export interface QuestionDraft {
+  kind: QuestionKind;
+  text: string;
+  low: DraftLabel | null;
+  high: DraftLabel | null;
+  choices: DraftLabel[];
+  scope: "general" | "set" | "theme";
+  set: ThemeSet | null;
+  themeId: string | null;
+  audience: Audience;
+  spice: 1 | 2 | 3;
+}
+
+export interface MissionDraft {
+  text: string;
+  tone: Tone;
+  heavy: boolean;
+}
+
+export type WorkshopDraft =
+  | { kind: "theme"; theme: ThemeDraft }
+  | { kind: "question"; question: QuestionDraft }
+  | { kind: "mission"; mission: MissionDraft };
+
+/** The texts a suggestion carries, by piece: name, text, low, high, c0, c1… */
+export type Pieces = Record<string, string>;
+
+/** Other languages' texts, by language then piece. */
+export type Translations = Partial<Record<Lang, Pieces>>;
+
+/** A theme's starter as a card shows it. */
+export interface StarterCard {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  taste: Taste | null;
+}
+
+/** One card of the Workshop: a suggestion, or something live in a game's bank. */
+export interface WorkshopItem {
+  /** A suggestion's id, or "bank:<kind>:<bank id>" for what was always live. */
+  id: string;
+  kind: WorkshopKind;
+  status: WorkshopStatus;
+  /** Its texts in the reader's language when there are some, else in the one it was written in. */
+  lang: Lang;
+  theme: {
+    name: string;
+    set: ThemeSet | null;
+    games: GameKey[];
+    starters: StarterCard[];
+  } | null;
+  question:
+    | (Omit<QuestionDraft, "themeId"> & { themeName: string | null })
+    | null;
+  mission: MissionDraft | null;
+  /** Who suggested it; null for the bank's own. */
+  by: PersonRef | null;
+  /** When it was suggested; null for the bank's own. */
+  at: number | null;
+  votes: { yes: number; no: number; mine: boolean | null } | null;
+  reason: string | null;
+  mine: boolean;
+}
+
+export interface WorkshopCounts {
+  voting: number;
+  live: number;
+  refused: number;
+}
+
+/** GET /api/workshop: one page of cards and the numbers on the filters. */
+export interface WorkshopPage {
+  items: WorkshopItem[];
+  next: number | null;
+  /** By kind, with the page's game and "mine" filters. */
+  counts: Record<WorkshopKind, WorkshopCounts>;
+  /** Suggestions the reader may still send this week; null for a guest. */
+  left: number | null;
+  curator: boolean;
+}
+
+/** POST /api/workshop/translate: the wand's answer, by language then piece, and where each came from. */
+export interface WandResult {
+  translations: Translations;
+  sources: Partial<
+    Record<Lang, Record<string, "bank" | "pattern" | "service">>
+  >;
+}
+
+/** What the composer's live check says: a slot to show it under, and the message's key and values. */
+export interface WorkshopCheck {
+  slot: "name" | "starters" | "text";
+  code:
+    | "near_theme"
+    | "same_starters"
+    | "no_picture"
+    | "near_text"
+    | "blocked_word";
+  /** The theme, question or mission it is near, or the character without a picture. */
+  ref: string;
+}
+
+// News ----------------------------------------------------------------------
+
+export type NewsKind = "new" | "better" | "fix" | "workshop" | "notice";
+export type NewsGame = GameKey | "site";
+export type NewsReactionKey = "love" | "party" | "laugh" | "wow";
+
+/** A post of the news page, in the reader's language. */
+export interface NewsItem {
+  id: string;
+  at: number;
+  kind: NewsKind;
+  game: NewsGame;
+  featured: boolean;
+  /** A fix may have none. */
+  title: string | null;
+  /** "{by}" stands for `by`, shown with their face. */
+  body: string;
+  action: { href: string; label: string } | null;
+  /** Who suggested it, for what came from the Workshop. */
+  by: PersonRef | null;
+  reactions: Partial<Record<NewsReactionKey, number>>;
+  /** The reader's own reactions. */
+  mine: NewsReactionKey[];
+}
+
+/** GET /api/news. */
+export interface NewsPage {
+  items: NewsItem[];
+  /** Guests read; accounts react. */
+  signedIn: boolean;
 }

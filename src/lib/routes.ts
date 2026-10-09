@@ -31,3 +31,16 @@ export const HOW_TO_PLAY = "/how-to-play";
 /** The characters page, and one character's sheet (over the list from inside the app). */
 export const CHARACTERS = "/characters";
 export const characterPath = (id: string) => `${CHARACTERS}/${id}`;
+
+/** The Workshop, one suggestion in it (a shared link), and the curators' queue. */
+export const WORKSHOP = "/workshop";
+export const workshopPath = (id: string) => `${WORKSHOP}/${id}`;
+export const WORKSHOP_REVIEW = "/workshop/review";
+
+/** The community pages and the help ones. */
+export const RANKINGS = "/rankings";
+export const PLAYERS = "/players";
+export const CONTRIBUTIONS = "/contributions";
+export const NEWS = "/news";
+export const PRIVACY = "/privacy";
+export const TERMS = "/terms";
