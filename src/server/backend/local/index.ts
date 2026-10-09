@@ -8,6 +8,7 @@ import { localChat } from "./chat";
 import { localFiles } from "./files";
 import { localImages } from "./images";
 import { localImpostor } from "./impostor";
+import { localLibraryStore } from "./library-store";
 import { localLineup } from "./lineup";
 import { localMatches } from "./matches";
 import { localMural } from "./mural";
@@ -43,5 +44,6 @@ export function localBackend(): Backend {
       reacted: async () => {},
     },
     chat: localChat(),
+    library: localLibraryStore(characters),
   };
 }

@@ -10,6 +10,7 @@ import { supabaseChat } from "./supabase/chat";
 import { supabaseFiles } from "./supabase/files";
 import { supabaseImages } from "./supabase/images";
 import { supabaseImpostor } from "./supabase/impostor";
+import { supabaseLibraryStore } from "./supabase/library-store";
 import { supabaseLineup } from "./supabase/lineup";
 import { supabaseMatches } from "./supabase/matches";
 import { supabaseMural } from "./supabase/mural";
@@ -40,6 +41,7 @@ export function getBackend(): Backend {
       badges: supabaseBadges(),
       notify: supabaseNotify(),
       chat: supabaseChat(),
+      library: supabaseLibraryStore(),
     };
     return backend;
   }

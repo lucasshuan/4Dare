@@ -54,11 +54,11 @@ Tick = done and committed.
 
 ## Characters (`/characters`)
 
-- [ ] Whole library per language: search by name, work, alias; filter by tastes
-- [ ] Sheet opens over list (`@modal`), close keeps scroll; direct link = full page
-- [ ] New character modal: name first, shows look-alikes; live card preview
-- [ ] Player aliases (`character_aliases`): author, language, history, 3 reports hide; library names locked
-- [ ] Photos from sheet, same route as card (auto check, pending for sender)
+- [x] Whole library per language: search by name, work, alias; filter by tastes
+- [x] Sheet opens over list (`@modal`), close keeps scroll; direct link = full page
+- [x] New character modal: name first, shows look-alikes; live card preview
+- [x] Player aliases (`character_aliases`): author, language, history, 3 reports hide; library names locked
+- [x] Photos from sheet, same route as card (auto check, pending for sender)
 
 ## Workshop (`/workshop`)
 

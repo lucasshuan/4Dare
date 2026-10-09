@@ -8,6 +8,7 @@ import type lineup from "../../messages/en/games/lineup.json";
 import type whoAmI from "../../messages/en/games/whoAmI.json";
 import type home from "../../messages/en/home.json";
 import type howTo from "../../messages/en/howTo.json";
+import type library from "../../messages/en/library.json";
 import type lobby from "../../messages/en/lobby.json";
 import type meta from "../../messages/en/meta.json";
 import type nav from "../../messages/en/nav.json";
@@ -22,6 +23,7 @@ declare module "next-intl" {
       common: typeof common;
       home: typeof home;
       howTo: typeof howTo;
+      library: typeof library;
       lobby: typeof lobby;
       meta: typeof meta;
       nav: typeof nav;

@@ -71,7 +71,8 @@
     "kicked": "The host removed you from this room. Come back in 2 minutes.",
     "handle_taken": "Someone else already has that @.",
     "handle_wait": "You changed your @ recently. You can change it again 30 days later.",
-    "unknown": "Something went wrong. Try again."
+    "unknown": "Something went wrong. Try again.",
+    "sign_in_needed": "Sign in with an account to do this."
   },
   "image": {
     "choose": "Choose a picture",

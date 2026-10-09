@@ -774,6 +774,8 @@ export const ERROR_CODES = [
   "handle_taken",
   /** The @handle changed less than HANDLE_CHANGE_DAYS ago. */
   "handle_wait",
+  /** Only an account can do this (vote, suggest, give a nickname). */
+  "sign_in_needed",
   "unknown",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

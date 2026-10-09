@@ -71,7 +71,8 @@
     "kicked": "El anfitrión te sacó de la sala. Vuelve dentro de 2 minutos.",
     "handle_taken": "Esa @ ya es de otra persona.",
     "handle_wait": "Cambiaste tu @ hace poco. Puedes cambiarla de nuevo 30 días después.",
-    "unknown": "Algo salió mal. Inténtalo de nuevo."
+    "unknown": "Algo salió mal. Inténtalo de nuevo.",
+    "sign_in_needed": "Entra con una cuenta para hacer esto."
   },
   "image": {
     "choose": "Elegir imagen",
