@@ -271,9 +271,9 @@ async function apply() {
   publishPulse();
 }
 
-/** In the lobby the music plays through the wall: 800 Hz low-pass, 8 dB down. */
-const MUFFLE_HZ = 800;
-const MUFFLE_GAIN = 0.4;
+/** In the lobby the music plays through the wall: 450 Hz low-pass, 3 dB down (about 3 LU under the open room). */
+const MUFFLE_HZ = 450;
+const MUFFLE_GAIN = 0.7;
 const OPEN_HZ = 20000;
 
 function setMuffle(now = false) {
