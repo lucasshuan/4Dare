@@ -22,6 +22,19 @@ Tick = done and committed.
 - [ ] Room actions get sounds
 - [ ] Full sound set in every game
 
+## Narrator
+
+- [ ] Record 315 lines per language (en, pt, es, ja), file per ID: `<lang>/<id>.mp3`
+- [ ] Narration on/off switch
+- [ ] Lines play by moment: shared, theme vote, per-game hook and rules
+- [ ] Max one line per 45 s, no repeat in a match, never same line twice in a row
+- [ ] Collisions: only top one plays (ending > discovery/vote > give up > check > wrong guess > pass > stall)
+- [ ] Two-player Who am I? skips `whoami.lastOne`
+- [ ] What for? presenter mode: presenter and room hear own `whatfor.host.*` lines
+- [ ] Auctioneer countdown (`goingOnce/Twice/Sold`): optional, off by default
+- [ ] Cold open ~11000 ms when narration on (`OPENING.intro`)
+- [ ] Impostor stops showing Who am I?'s cold-open text
+
 ## Languages
 
 - [ ] Korean
@@ -61,8 +74,14 @@ Tick = done and committed.
 ## Community
 
 - [ ] Rankings: one view per game and period
-- [ ] Players page
+- [ ] Players page: search; all, played with me, playing now
 - [ ] Contributions feed (photos, characters, aliases, suggestions), no new table
+
+## Badges
+
+- [ ] Badges tab on profile (`/u/<name>?tab=badges`)
+- [ ] Tiers bronze, silver, gold with progress (e.g. Collector: 23/30 photos)
+- [ ] Menu shows count of new badges since last visit
 
 ## Legal and news
 
