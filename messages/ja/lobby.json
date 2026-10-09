@@ -26,6 +26,7 @@
   "kickYes": "外す",
   "cancel": "キャンセル",
   "matches": "対戦",
+  "settings": "設定",
   "noMatches": "このルームの対戦がここに表示されます。",
   "matchWinner": "{name}さんの勝ち",
   "matchWinners": "{names}が引き分け",
@@ -60,7 +61,7 @@
     "wait": "待つ"
   },
   "readyButton": "準備OK",
-  "leave": "ルームを出る",
+  "readyCount": "{total}人中{ready}人が準備OK",
   "editSettings": "詳細設定を変更",
   "rename": "ルーム名を変える",
   "editVisibility": "入れる人を変える",

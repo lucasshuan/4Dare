@@ -24,7 +24,12 @@ export const GAME_INFO: Record<
      * cover its bottom ~40% (on hover; always on phones), so keep the scene up
      * and centred; size it in % or cq units so it scales.
      */
-    Art: ComponentType<{ className?: string; still?: boolean }>;
+    Art: ComponentType<{
+      className?: string;
+      still?: boolean;
+      /** Laid out for a 2:1 strip instead (the lobby's game panel). */
+      wide?: boolean;
+    }>;
     /** Drawn for small boxes (16:10): fills whatever box it is given. */
     Thumb: ComponentType;
   }

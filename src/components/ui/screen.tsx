@@ -36,6 +36,7 @@ export function Screen({
   left,
   right,
   banner,
+  bare = false,
   children,
   className,
 }: {
@@ -43,9 +44,29 @@ export function Screen({
   right?: ReactNode;
   /** Full width, right under the top bar; it should start with UNDER_TOPBAR. */
   banner?: ReactNode;
+  /** No top bar: the page carries its own controls (the lobby), in a room's wider column. */
+  bare?: boolean;
   children: ReactNode;
   className?: string;
 }) {
+  if (bare) {
+    // on a desktop the page is exactly the window: what doesn't fit scrolls inside it, never the page
+    return (
+      <div className="flex min-h-dvh flex-col lg:h-dvh lg:min-h-0">
+        <div className="flex flex-1 flex-col px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-6 sm:pb-[calc(3rem+var(--dock))] sm:short:pt-4 sm:short:pb-[calc(1.5rem+var(--dock))] lg:min-h-0">
+          <m.main
+            variants={CONTENT_LEAVES}
+            className={cn(
+              "mx-auto w-full max-w-room flex-1 lg:flex lg:min-h-0 lg:flex-col",
+              className,
+            )}
+          >
+            {children}
+          </m.main>
+        </div>
+      </div>
+    );
+  }
   const bar = (
     <>
       <div className="flex min-w-0 items-center gap-2 sm:gap-4">

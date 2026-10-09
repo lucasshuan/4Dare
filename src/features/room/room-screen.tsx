@@ -7,6 +7,7 @@ import { Button, buttonClass } from "@/components/ui/button";
 import { PageLoader } from "@/components/ui/loader";
 import { Screen } from "@/components/ui/screen";
 import { MatchLockPage } from "@/features/current-match/match-lock";
+import { stayInRoom, useDeparting } from "@/features/data/departing";
 import { RoomProvider } from "@/features/data/room-context";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { useRoom } from "@/features/data/use-room";
@@ -31,7 +32,15 @@ let leaving: { code: string; timer: number } | null = null;
 
 /** /r/CODE: joins if needed, then shows the screen for the current phase. */
 export function RoomScreen({ code }: { code: string }) {
-  const { data, error, elsewhere, refresh, apply } = useRoom(code);
+  const live = useRoom(code);
+  // after a "Leave", the room holds what it showed until the next page does
+  const departing = useDeparting(code);
+  const held = useRef(live);
+  if (!departing) held.current = live;
+  const { data, error, elsewhere, refresh, apply } = departing
+    ? held.current
+    : live;
+  useEffect(() => stayInRoom(code), [code]);
   const te = useTranslations("common.errors");
   const router = useRouter();
   const [joinError, setJoinError] = useState<ErrorCode | null>(null);

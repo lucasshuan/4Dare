@@ -11,20 +11,19 @@ import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { ThemeTag } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
+import { useLeaveRoom } from "@/features/data/use-current-match";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { PersonCard } from "@/features/profile/person-card";
 import { LobbyCountdown } from "@/features/result/lobby-countdown";
+import { RoomControls } from "@/features/room/room-controls";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang, PlayerView } from "@/game/types";
-import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { useAction } from "@/lib/hooks/use-action";
 import { ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import { GAME_PATHS } from "@/lib/routes";
 import { onSeat, seatColor, seatInk, seatSoft } from "@/lib/seats";
 import { playSound } from "@/lib/sound";
-import { backToLobby, leaveRoom } from "@/server/actions";
+import { backToLobby } from "@/server/actions";
 
 const PLINTH = { 1: 136, 2: 96, 3: 60 } as Record<number, number>;
 
@@ -43,9 +42,8 @@ export function WhoAmIResult() {
   const listFormat = new Intl.ListFormat(lang, { type: "conjunction" });
   const name = useDisplayName();
   const withNames = useWithNames();
-  const router = useRouter();
   const { view, me, code, playerById } = useRoomContext();
-  const { run } = useAction();
+  const { leave } = useLeaveRoom();
   const { act, pending } = useRoomAction();
   const ranked = [...view.players].sort(
     (a, b) =>
@@ -80,7 +78,7 @@ export function WhoAmIResult() {
 
   return (
     <div className="flex min-h-dvh flex-col gap-5 px-4 pt-4 sm:px-8 sm:pt-6">
-      <header className="mx-auto flex w-full max-w-[1120px] items-center gap-4">
+      <header className="mx-auto flex w-full max-w-room items-center gap-4">
         {view.theme ? (
           <ThemeTag
             label={tr("theme")}
@@ -90,6 +88,7 @@ export function WhoAmIResult() {
             }
           />
         ) : null}
+        <RoomControls className="ml-auto" />
       </header>
       <div className="mx-auto grid w-full max-w-[1120px] flex-1 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-12">
         <div className="flex flex-col gap-3 lg:self-center lg:pb-16">
@@ -143,8 +142,7 @@ export function WhoAmIResult() {
               variant="ghost"
               className="-ml-6"
               onClick={async () => {
-                await run(() => leaveRoom(code));
-                router.push(GAME_PATHS[view.settings.game]);
+                await leave(code, view.settings.game);
               }}
             >
               {t("home")}

@@ -26,6 +26,7 @@
   "kickYes": "Sacar",
   "cancel": "Cancelar",
   "matches": "Partidas",
+  "settings": "Ajustes",
   "noMatches": "Las partidas de esta sala aparecen aquí.",
   "matchWinner": "{name} ganó",
   "matchWinners": "{names} empataron",
@@ -60,7 +61,7 @@
     "wait": "Esperar"
   },
   "readyButton": "Listo",
-  "leave": "Salir de la sala",
+  "readyCount": "{ready} de {total} listos",
   "editSettings": "Editar configuración avanzada",
   "rename": "Renombrar sala",
   "editVisibility": "Cambiar quién puede entrar",

@@ -26,6 +26,7 @@
   "kickYes": "Remove",
   "cancel": "Cancel",
   "matches": "Matches",
+  "settings": "Settings",
   "noMatches": "This room's matches show up here.",
   "matchWinner": "{name} won",
   "matchWinners": "{names} tied",
@@ -60,7 +61,7 @@
     "wait": "Wait"
   },
   "readyButton": "Ready",
-  "leave": "Leave room",
+  "readyCount": "{ready} of {total} ready",
   "editSettings": "Edit advanced settings",
   "rename": "Rename room",
   "editVisibility": "Change who can join",

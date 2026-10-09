@@ -44,13 +44,11 @@ export const backClass =
   "-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink";
 
 /**
- * Editing a room from the lobby: back, the title with the
- * game select and the submit button on its far right, then the settings in
- * tabs: room, the game's rules, the gostos and the themes they leave.
+ * Editing a room from the lobby, in its modal: the game select with the
+ * submit button on its far right, then the settings in tabs: room, the game's
+ * rules, the gostos and the themes they leave.
  */
 export function RoomSetup({
-  back,
-  title,
   submit,
   value,
   onChange,
@@ -58,8 +56,6 @@ export function RoomSetup({
   pending,
   minSeats,
 }: {
-  back: ReactNode;
-  title: string;
   submit: string;
   /** null while the last setup is still being read. */
   value: CreateRoomInput | null;
@@ -95,19 +91,15 @@ export function RoomSetup({
 
   return (
     <form
-      className="flex max-w-[1040px] flex-col gap-6 sm:tiny:gap-4"
+      className="flex flex-col gap-6 sm:tiny:gap-4"
       onSubmit={(e: FormEvent) => {
         e.preventDefault();
         if (value && !problemTab) onSubmit(value);
       }}
     >
       <div className="flex flex-col gap-4 sm:tiny:gap-2">
-        {back}
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-          <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em] sm:tiny:text-[36px] sm:tiny:leading-10">
-            {title}
-          </h1>
-          <div className="ml-auto flex items-center gap-3 max-sm:w-full max-sm:flex-col max-sm:items-stretch">
+          <div className="flex w-full items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch">
             {value ? (
               <GameField
                 seated={minSeats}

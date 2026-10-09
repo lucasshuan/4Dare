@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { loopPosition, musicVolume } from "./music";
+import {
+  beatDelay,
+  loopPosition,
+  MUSIC_BEAT,
+  MUSIC_FIRST_BEAT,
+  musicVolume,
+} from "./music";
 import { DEFAULT_SETTINGS, parseSettings } from "./settings";
 
 describe("loopPosition", () => {
@@ -24,5 +30,17 @@ describe("musicVolume", () => {
     expect(
       musicVolume(parseSettings({ sounds: { music: { on: false } } })),
     ).toBe(0);
+  });
+});
+
+describe("beatDelay", () => {
+  it("lines a beat animation up with the music's first beat", () => {
+    // the song started 10 s before the animation does
+    expect(beatDelay(1000, 11000)).toBeCloseTo(-10 + MUSIC_FIRST_BEAT);
+    // started at the same moment: the first beat is 0.5333 s away
+    expect(beatDelay(5000, 5000)).toBeCloseTo(MUSIC_FIRST_BEAT);
+  });
+  it("keeps 192 beats to the loop, so the beat survives each wrap", () => {
+    expect((129.2721 - 8.1062) / MUSIC_BEAT).toBeCloseTo(192, 1);
   });
 });

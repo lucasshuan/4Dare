@@ -10,16 +10,15 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { fireConfetti } from "@/components/ui/confetti";
 import { useRoomContext } from "@/features/data/room-context";
+import { useLeaveRoom } from "@/features/data/use-current-match";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { LobbyCountdown } from "@/features/result/lobby-countdown";
+import { RoomControls } from "@/features/room/room-controls";
 import type { Lang } from "@/game/types";
-import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { useAction } from "@/lib/hooks/use-action";
 import { useDisplayName } from "@/lib/names";
-import { GAME_PATHS } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
-import { backToLobby, leaveRoom } from "@/server/actions";
+import { backToLobby } from "@/server/actions";
 import { BoardView, FitBoard } from "./board";
 import { CoinDefs } from "./coin";
 
@@ -27,10 +26,9 @@ export function LineupResult() {
   const t = useTranslations("lineup.result");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
-  const router = useRouter();
   const { view, me, code, playerById } = useRoomContext();
   const { act, pending } = useRoomAction();
-  const { run } = useAction();
+  const { leave } = useLeaveRoom();
   const lu = view.lu;
 
   useEffect(() => {
@@ -53,7 +51,10 @@ export function LineupResult() {
     1 + ranked.filter((p) => (lu.totals[p.id] ?? 0) > points).length;
 
   return (
-    <div className="flex min-h-dvh flex-col items-center gap-6 px-4 pt-6 pb-[calc(2rem+var(--dock))] sm:px-8">
+    <div className="flex min-h-dvh flex-col items-center gap-6 px-4 pt-4 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-6">
+      <header className="flex w-full max-w-room justify-end">
+        <RoomControls />
+      </header>
       <CoinDefs />
       <h1 className="m-0 text-center font-display font-extrabold text-[clamp(30px,5vw,48px)] leading-tight">
         {t("title")}
@@ -134,8 +135,7 @@ export function LineupResult() {
         <Button
           variant="ghost"
           onClick={async () => {
-            await run(() => leaveRoom(code));
-            router.push(GAME_PATHS[view.settings.game]);
+            await leave(code, view.settings.game);
           }}
         >
           {t("home")}

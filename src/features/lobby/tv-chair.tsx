@@ -65,6 +65,7 @@ export function TvChair({
   pending,
   onSeat,
   onDraw,
+  className,
 }: {
   players: PlayerView[];
   /** How many people are here: a presenter needs HOST_MIN_PEOPLE. */
@@ -76,6 +77,7 @@ export function TvChair({
   pending: boolean;
   onSeat: (seat: string | null) => void;
   onDraw: () => void;
+  className?: string;
 }) {
   const t = useTranslations("lobby");
   const name = useDisplayName();
@@ -88,6 +90,7 @@ export function TvChair({
     <div
       className={cn(
         "flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[22px] p-3.5 sm:flex-nowrap sm:px-4.5 sm:py-4",
+        className,
         !ring && "bg-surface shadow-[inset_0_0_0_2px_var(--line-strong)]",
       )}
       style={

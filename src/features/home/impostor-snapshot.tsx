@@ -17,6 +17,14 @@ const CARDS = [
 ] as const;
 /** A card's width, in % of the box. */
 const W = 27;
+/** The same in a 2:1 strip: the cards to the right, smaller, the line to their left. */
+const WIDE_CARDS = [
+  { x: 34, tilt: -8 },
+  { x: 48, tilt: -3 },
+  { x: 62, tilt: 3 },
+  { x: 76, tilt: 8 },
+] as const;
+const WIDE_W = 19;
 /** The crew's card and the odd one, its neighbour. */
 const CREW = "lion";
 const ODD = "giraffe";
@@ -46,7 +54,8 @@ const STEPS: {
 const STILL = 4;
 
 /** The middle of card `i`, in % of the box. */
-const centre = (i: number) => CARDS[i].x + W / 2;
+const centre = (i: number, wide: boolean) =>
+  wide ? WIDE_CARDS[i].x + WIDE_W / 2 : CARDS[i].x + W / 2;
 
 /**
  * The Impostor's card art: four cards face down; the lights go down, a
@@ -57,9 +66,12 @@ const centre = (i: number) => CARDS[i].x + W / 2;
 export function ImpostorSnapshot({
   className,
   still: forceStill = false,
+  wide = false,
 }: {
   className?: string;
   still?: boolean;
+  /** Laid out for a 2:1 strip (the lobby's game panel): the cards right, the line left. */
+  wide?: boolean;
 }) {
   const t = useTranslations("home.games.impostor");
   const reduced = useReducedMotion() ?? false;
@@ -68,13 +80,16 @@ export function ImpostorSnapshot({
 
   const s = STEPS[step];
   const odd = ODD_AT[loop % ODD_AT.length];
-  const spot = `${centre(odd)}%`;
+  const spot = `${centre(odd, wide)}%`;
+  const cards = wide ? WIDE_CARDS : CARDS;
+  const width = wide ? WIDE_W : W;
 
   return (
     <div
       aria-hidden="true"
       className={cn(
-        "relative isolate aspect-square overflow-hidden art-impostor [container-type:size]",
+        "relative isolate overflow-hidden art-impostor [container-type:size]",
+        !wide && "aspect-square",
         className,
       )}
     >
@@ -82,23 +97,31 @@ export function ImpostorSnapshot({
       <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/10 blur-2xl" />
       <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/20 blur-2xl dark:bg-butter/6" />
       <VenetianMask
-        className="absolute top-[6%] right-[8%] size-[10cqh] rotate-12 text-no opacity-20"
+        className={cn(
+          "absolute top-[6%] right-[8%] rotate-12 text-no opacity-20",
+          wide ? "right-[4%] size-[16cqh]" : "size-[10cqh]",
+        )}
         strokeWidth={2.25}
       />
       <VenetianMask
-        className="absolute top-[76%] left-[9%] size-[6cqh] -rotate-12 text-apricot opacity-25"
+        className={cn(
+          "-rotate-12 absolute text-apricot opacity-25",
+          wide
+            ? "top-[70%] left-[8%] size-[12cqh]"
+            : "top-[76%] left-[9%] size-[6cqh]",
+        )}
         strokeWidth={2.25}
       />
 
-      {CARDS.map((c, i) => {
+      {cards.map((c, i) => {
         const theOdd = i === odd;
         const card = theOdd ? ODD : CREW;
         return (
           <m.div
             // biome-ignore lint/suspicious/noArrayIndexKey: four fixed seats
             key={i}
-            className="absolute bottom-[31%]"
-            style={{ left: `${c.x}%`, width: `${W}%`, rotate: c.tilt }}
+            className={cn("absolute", wide ? "bottom-[8%]" : "bottom-[31%]")}
+            style={{ left: `${c.x}%`, width: `${width}%`, rotate: c.tilt }}
             animate={
               step === 0 && !still
                 ? {
@@ -142,7 +165,10 @@ export function ImpostorSnapshot({
         {s.dark ? (
           <m.span
             key={`spot-${loop}`}
-            className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-[50%] size-[64cqh] rounded-pill shadow-[0_0_0_200vmax_var(--art-impostor-dim)]"
+            className={cn(
+              "-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute rounded-pill shadow-[0_0_0_200vmax_var(--art-impostor-dim)]",
+              wide ? "top-[65%] size-[90cqh]" : "top-[50%] size-[64cqh]",
+            )}
             style={{
               background:
                 "radial-gradient(circle, rgba(246,227,161,0.16), transparent 48%, var(--art-impostor-dim) 72%)",
@@ -166,7 +192,12 @@ export function ImpostorSnapshot({
         {s.caught ? (
           <m.span
             key={`stamp-${loop}`}
-            className="-translate-x-1/2 -translate-y-1/2 absolute top-[49%] whitespace-nowrap rounded-md bg-no px-[2cqh] py-[0.8cqh] font-display font-extrabold text-[clamp(13px,5cqh,20px)] text-on-no uppercase tracking-[0.02em] shadow-pop"
+            className={cn(
+              "-translate-x-1/2 -translate-y-1/2 absolute whitespace-nowrap rounded-md bg-no font-display font-extrabold text-[clamp(13px,5cqh,20px)] text-on-no uppercase tracking-[0.02em] shadow-pop",
+              wide
+                ? "top-[64%] px-[3cqh] py-[1.2cqh]"
+                : "top-[49%] px-[2cqh] py-[0.8cqh]",
+            )}
             style={{ left: spot }}
             initial={
               still ? { opacity: 0 } : { opacity: 0, scale: 2.4, rotate: -16 }
@@ -189,7 +220,12 @@ export function ImpostorSnapshot({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
             transition={{ type: "spring", stiffness: 420, damping: 26 }}
-            className="absolute top-[8%] left-[7%] max-w-[60%] origin-bottom-left rounded-lg rounded-bl-sm bg-surface px-3 py-2 font-bold font-display text-[clamp(13px,1.6vw,16px)] text-ink leading-tight shadow-card"
+            className={cn(
+              "absolute origin-bottom-left rounded-lg rounded-bl-sm bg-surface px-3 py-2 font-bold font-display text-[clamp(13px,1.6vw,16px)] text-ink leading-tight shadow-card",
+              wide
+                ? "top-[8%] left-[4%] max-w-[33%]"
+                : "top-[8%] left-[7%] max-w-[60%]",
+            )}
           >
             {t("demoLine")}
           </m.div>

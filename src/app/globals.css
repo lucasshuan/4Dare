@@ -35,6 +35,22 @@
   --no: #c2412f;
   --on-no: #ffffff;
   --no-soft: #fadfd8;
+  /* the lobby's backdrop: three fills it turns through, each leaning a little toward the canvas, and the vivid takes it flares to on the beat */
+  --aurora-1: #2b69c8;
+  --aurora-2: #7356c4;
+  --aurora-3: #1a8599;
+  --aurora-vivid-1: #1662ff;
+  --aurora-vivid-2: #8640ff;
+  --aurora-vivid-3: #00b2d1;
+  --aurora-lean: 22%;
+  --aurora-glow-1: #ffffff;
+  --aurora-glow-2: #c9b5f5;
+  --aurora-glow-3: #8ee0ec;
+  --aurora-glow-mix: 26%;
+  --aurora-mark: 0.14;
+  --aurora-mark-lit: 0.5;
+  --aurora-beat: 0.24;
+  --aurora-bar: 0.42;
   /* each game's art (home card, page banner): livelier grounds than the soft tints; the Impostor's a plum room, night-dark in the dark theme */
   --art-whoami: #b4cff7;
   --art-whoami-2: #cdbff6;
@@ -205,6 +221,19 @@
   --no: #f28b76;
   --on-no: #2b0d07;
   --no-soft: #4a1d14;
+  --aurora-1: #1d4a93;
+  --aurora-2: #46348c;
+  --aurora-3: #135f70;
+  --aurora-vivid-1: #1f5fe0;
+  --aurora-vivid-2: #6a34d9;
+  --aurora-vivid-3: #0089a6;
+  --aurora-glow-1: #86b4f7;
+  --aurora-glow-2: #b79cf2;
+  --aurora-glow-3: #6ccbda;
+  --aurora-glow-mix: 22%;
+  --aurora-mark: 0.1;
+  --aurora-mark-lit: 0.4;
+  --aurora-beat: 0.26;
   --art-whoami: #21406e;
   --art-whoami-2: #362d68;
   --art-impostor: #32165a;
@@ -313,6 +342,8 @@
 
   /* The site's content column outside a match (Screen, max-w-page); the top bar spans the screen. */
   --container-page: 1600px;
+  /* A room's column (lobby, match, results): wider than the site's, still capped so an ultrawide doesn't stretch it. */
+  --container-room: 1920px;
 
   --radius-sm: 10px;
   --radius-md: 16px;
@@ -493,10 +524,190 @@ body {
   }
 }
 
-/* Keyboard focus: one ring everywhere. */
+/* Keyboard focus: one ring everywhere; a page over a coloured backdrop (the lobby) sets --focus-ring to keep it visible. */
 :focus-visible {
-  outline: 3px solid var(--sky);
+  outline: 3px solid var(--focus-ring, var(--sky));
   outline-offset: 2px;
+}
+
+/*
+ * The lobby's backdrop (LobbyBackdrop): always one full colour turning every 4
+ * bars, soft lights roaming and "?" marks wandering; while the music plays,
+ * the whole page flares on each beat and each mark lights on its own. Beat
+ * lengths come from the tune (95.08 BPM: 0.63107 s a beat, 2.5243 s a bar).
+ */
+.aurora-fill {
+  position: absolute;
+  inset: 0;
+  background-color: color-mix(
+    in oklab,
+    var(--aurora-1),
+    var(--canvas) var(--aurora-lean)
+  );
+  animation: aurora-turn 30.2916s linear infinite;
+}
+.aurora-flash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-color: color-mix(
+    in oklab,
+    var(--aurora-vivid-1),
+    var(--canvas) var(--aurora-lean)
+  );
+}
+.aurora-flash[data-on="beat"] {
+  animation:
+    aurora-beat 0.63107s ease-out infinite,
+    aurora-turn-vivid 30.2916s linear infinite;
+}
+.aurora-flash[data-on="bar"] {
+  animation:
+    aurora-bar 2.5243s ease-out infinite,
+    aurora-turn-vivid 30.2916s linear infinite;
+}
+.aurora-glow {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--glow) var(--aurora-glow-mix), transparent),
+    transparent
+  );
+  animation: aurora-roam 30s ease-in-out infinite;
+}
+.aurora-wander {
+  position: absolute;
+  animation: aurora-wander 21s ease-in-out infinite alternate;
+}
+.aurora-mark {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  animation: aurora-bob 6s ease-in-out infinite;
+}
+.aurora-mark > span {
+  display: block;
+  opacity: var(--aurora-mark);
+}
+[data-beating] .aurora-mark > span {
+  animation: aurora-mark 20.1944s ease-out infinite;
+}
+@keyframes aurora-turn {
+  0%,
+  25%,
+  100% {
+    background-color: color-mix(
+      in oklab,
+      var(--aurora-1),
+      var(--canvas) var(--aurora-lean)
+    );
+  }
+  33.333%,
+  58.333% {
+    background-color: color-mix(
+      in oklab,
+      var(--aurora-2),
+      var(--canvas) var(--aurora-lean)
+    );
+  }
+  66.667%,
+  91.667% {
+    background-color: color-mix(
+      in oklab,
+      var(--aurora-3),
+      var(--canvas) var(--aurora-lean)
+    );
+  }
+}
+@keyframes aurora-turn-vivid {
+  0%,
+  25%,
+  100% {
+    background-color: color-mix(
+      in oklab,
+      var(--aurora-vivid-1),
+      var(--canvas) var(--aurora-lean)
+    );
+  }
+  33.333%,
+  58.333% {
+    background-color: color-mix(
+      in oklab,
+      var(--aurora-vivid-2),
+      var(--canvas) var(--aurora-lean)
+    );
+  }
+  66.667%,
+  91.667% {
+    background-color: color-mix(
+      in oklab,
+      var(--aurora-vivid-3),
+      var(--canvas) var(--aurora-lean)
+    );
+  }
+}
+@keyframes aurora-beat {
+  0% {
+    opacity: var(--aurora-beat);
+  }
+  55%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes aurora-bar {
+  0% {
+    opacity: var(--aurora-bar);
+  }
+  18%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes aurora-roam {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(var(--dx), var(--dy)) scale(1.14);
+  }
+  66% {
+    transform: translate(calc(var(--dx) * -0.7), calc(var(--dy) * 0.8))
+      scale(0.92);
+  }
+}
+@keyframes aurora-wander {
+  to {
+    transform: translate(var(--wx), var(--wy));
+  }
+}
+@keyframes aurora-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-16deg);
+  }
+  50% {
+    transform: translateY(-38px) rotate(16deg);
+  }
+}
+@keyframes aurora-mark {
+  0% {
+    opacity: var(--aurora-mark);
+    transform: scale(1);
+  }
+  1.5% {
+    opacity: var(--aurora-mark-lit);
+    transform: scale(1.18);
+  }
+  7%,
+  100% {
+    opacity: var(--aurora-mark);
+    transform: scale(1);
+  }
 }
 
 /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must beat every component's own timing */
@@ -507,6 +718,14 @@ body {
     animation-duration: 1ms !important;
     transition-duration: 1ms !important;
     scroll-behavior: auto !important;
+  }
+  /* the lobby's backdrop holds still on its first colour, with no flares (a 1 ms loop would flicker) */
+  [class^="aurora-"],
+  .aurora-mark > span {
+    animation: none !important;
+  }
+  .aurora-flash {
+    display: none;
   }
 }
 /* biome-ignore-end lint/complexity/noImportantStyles: see above */

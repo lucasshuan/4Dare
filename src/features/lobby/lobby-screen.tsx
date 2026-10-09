@@ -1,38 +1,42 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { Check, ChevronLeft, Link as LinkIcon, Settings } from "lucide-react";
-import { m } from "motion/react";
+import {
+  Check,
+  History,
+  Link as LinkIcon,
+  Settings,
+  SlidersHorizontal,
+  Users,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useRef, useState } from "react";
 import { Button, keyClass } from "@/components/ui/button";
+import { Modal } from "@/components/ui/dialog";
 import { useWithNames } from "@/components/ui/player-name";
 import { RoomQr } from "@/components/ui/room-qr";
 import { Screen } from "@/components/ui/screen";
 import { useToast } from "@/components/ui/toast";
 import { usePrefetchCharacterIndex } from "@/features/characters/use-character-index";
 import {
+  GAME_INFO,
   GameField,
   GameThumb,
   useGameName,
 } from "@/features/create/game-field";
 import { saveSetup } from "@/features/create/last-setup";
 import { useLineupCount } from "@/features/create/lineup-catalog";
-import { backClass, RoomSetup } from "@/features/create/room-setup";
+import { RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { HubActions, HubBrand } from "@/features/home/hub-actions";
+import { RoomControls } from "@/features/room/room-controls";
 import { GAME_SEATS } from "@/game/games";
 import type { Lang } from "@/game/types";
-import { useRouter } from "@/i18n/navigation";
-import { useAction } from "@/lib/hooks/use-action";
-import { riseIn } from "@/lib/motion";
+import { cn } from "@/lib/cn";
 import { useDisplayName, useRoomTitle } from "@/lib/names";
-import { GAME_PATHS } from "@/lib/routes";
 import {
   drawChair,
   kickPlayer,
-  leaveRoom,
   setReady,
   sitChair,
   startGame,
@@ -58,7 +62,13 @@ import { StartDialog } from "./start-dialog";
 import { TvChair } from "./tv-chair";
 
 const titleClass =
-  "max-w-[560px] font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]";
+  "font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]";
+
+/** The lobby's panels: the invite, the players and the room's settings, each lifted off the backdrop. */
+const panelClass = "rounded-lg bg-surface p-6 max-sm:p-4";
+
+/** How askew each tile of the room code sits, in degrees. */
+const TILE_TILT = [-3, 2, -1.5, 2.5, -2];
 
 /** Only what the host can change (the server rejects anything else). */
 const editable = ({
@@ -123,15 +133,12 @@ const editable = ({
 
 export function LobbyScreen() {
   const t = useTranslations("lobby");
-  const tCreate = useTranslations("home.createRoom");
   const _name = useDisplayName();
   const roomTitle = useRoomTitle();
   const withNames = useWithNames();
   const toast = useToast();
-  const router = useRouter();
   const { view, me, code } = useRoomContext();
   const { act, pending } = useRoomAction();
-  const leaving = useAction();
   // "Ready" flips at once; the server confirms in the background.
   const [readyGuess, setReadyGuess] = useState<boolean | null>(null);
   const myReady = readyGuess ?? me.ready;
@@ -155,6 +162,7 @@ export function LobbyScreen() {
   );
   const { game, name: roomName, seats, themeMode } = view.settings;
   const gameName = useGameName();
+  const GameArt = GAME_INFO[game].Art;
   // The host sees every seat the game allows, and their changes show at once;
   // the server confirms in the background (a refusal puts things back).
   const range = GAME_SEATS[game];
@@ -206,59 +214,22 @@ export function LobbyScreen() {
         }),
       );
 
-  // The host changes the room here; a new room skips this screen and starts with the last setup.
-  if (editing) {
-    return (
-      <Screen left={<HubBrand />} right={<HubActions />}>
-        <m.div {...riseIn}>
-          <RoomSetup
-            back={
-              <button
-                type="button"
-                onClick={() => setEditing(false)}
-                className={backClass}
-              >
-                <ChevronLeft className="size-4" strokeWidth={2} />
-                {tCreate("back")}
-              </button>
-            }
-            title={t("settingsTitle")}
-            submit={t("saveSettings")}
-            value={draft}
-            onChange={setDraft}
-            minSeats={view.players.length}
-            pending={pending}
-            onSubmit={async (v) => {
-              const r = await act(() => updateSettings(code, v));
-              if (r.ok) {
-                setEditing(false);
-                saveSetup(v);
-                toast(t("settingsSaved"));
-              }
-            }}
-          />
-        </m.div>
-      </Screen>
-    );
-  }
-
   return (
-    <Screen left={<HubBrand />} right={<HubActions />}>
-      <div className="flex flex-wrap items-start gap-10 lg:gap-16">
-        <section className="flex min-w-0 flex-[1_1_480px] flex-col gap-7 short:gap-5 tiny:gap-4">
-          <div className="flex flex-col gap-3">
-            <button
-              type="button"
-              onClick={async () => {
-                await leaving.run(() => leaveRoom(code));
-                router.push(GAME_PATHS[game]);
-              }}
-              className={backClass}
-            >
-              <ChevronLeft className="size-4" strokeWidth={2} />
-              {t("leave")}
-            </button>
-            {/* the room leads with its name; the greeting drops to a line under it */}
+    <Screen bare>
+      {/* no top bar here: the lobby is the game's waiting room, with only sound, theme and the way out, top right like a match's "Leave" */}
+      <RoomControls className="mb-3 justify-end" />
+      {/* on a desktop the lobby fits the window and never scrolls: the lists and the settings scroll inside their panels.
+          Narrower, one column whose panels mix both sides: the invite, the game and its key, who is here, the settings */}
+      <div className="flex flex-col gap-5 short:gap-4 lg:min-h-0 lg:flex-1 lg:flex-row lg:gap-8">
+        {/* the rest of the page's width, the same whatever the open tab holds, so its right edge meets the controls' */}
+        <section className="max-lg:contents lg:flex lg:min-h-0 lg:min-w-0 lg:flex-1 lg:flex-col lg:gap-5 lg:short:gap-4">
+          {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right (not on phones) */}
+          <div
+            className={cn(
+              panelClass,
+              "flex shrink-0 flex-col gap-4 max-lg:order-1",
+            )}
+          >
             <RoomTitle
               title={title}
               name={nameGuess ?? roomName}
@@ -266,7 +237,6 @@ export function LobbyScreen() {
               className={titleClass}
               onRename={rename}
             />
-            {/* the greeting sits close to the code it explains; the QR code to their right (not on phones) */}
             <div className="flex items-center gap-6">
               <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3">
                 <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
@@ -274,6 +244,7 @@ export function LobbyScreen() {
                 </p>
                 {/* desktop: "Copy link" right of the code; phones: under it */}
                 <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                  {/* the code as game tiles, each a little askew */}
                   <div className="flex gap-2">
                     <span className="sr-only">
                       {t("codeLabel", { code: code.split("").join(" ") })}
@@ -283,7 +254,10 @@ export function LobbyScreen() {
                         // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
                         key={i}
                         aria-hidden="true"
-                        className="flex h-20 w-14 items-center justify-center rounded-md border border-line bg-surface font-medium font-mono text-[40px] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
+                        style={{
+                          rotate: `${TILE_TILT[i % TILE_TILT.length]}deg`,
+                        }}
+                        className="flex h-20 w-14 items-center justify-center rounded-md bg-sunken font-display font-extrabold text-[40px] text-ink shadow-[inset_0_-5px_0_var(--line)] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
                       >
                         {c}
                       </span>
@@ -308,6 +282,7 @@ export function LobbyScreen() {
           {/* What for?'s presenter chair, over the lists */}
           {game === "lineup" && view.settings.mode === "host" ? (
             <TvChair
+              className="max-lg:order-3"
               players={shownPlayers}
               here={shownPlayers.filter((p) => !p.away).length}
               chairId={view.chairId}
@@ -318,39 +293,183 @@ export function LobbyScreen() {
               onDraw={() => void act(() => drawChair(code))}
             />
           ) : null}
-          {/* who is here, and the room's past matches */}
-          <LobbyTabs
-            label={t("listsLabel")}
-            tabs={[
-              {
-                key: "players",
-                label: t("players"),
-                count: `${shownPlayers.length}/${shownSeats}`,
-                panel: (
-                  <SeatGrid
-                    players={shownPlayers}
-                    seats={shownSeats}
-                    slots={me.isHost ? range.max : shownSeats}
-                    host={me.isHost}
-                    canClose={canClose}
-                    onSeats={setSeats}
-                    onKick={kick}
-                  />
-                ),
-              },
-              {
-                key: "matches",
-                label: t("matches"),
-                count: String(view.matches.length),
-                panel: <PastMatches matches={view.matches} />,
-              },
-            ]}
-          />
+          {/* who is here, and the room's past matches: always takes what is left of the window, and scrolls inside */}
+          <div
+            className={cn(
+              panelClass,
+              "flex flex-col max-lg:order-3 lg:min-h-0 lg:flex-1",
+            )}
+          >
+            <LobbyTabs
+              label={t("listsLabel")}
+              tabs={[
+                {
+                  key: "players",
+                  label: t("players"),
+                  icon: Users,
+                  count: `${shownPlayers.length}/${shownSeats}`,
+                  panel: (
+                    <SeatGrid
+                      players={shownPlayers}
+                      seats={shownSeats}
+                      slots={me.isHost ? range.max : shownSeats}
+                      host={me.isHost}
+                      canClose={canClose}
+                      onSeats={setSeats}
+                      onKick={kick}
+                    />
+                  ),
+                },
+                {
+                  key: "matches",
+                  label: t("matches"),
+                  icon: History,
+                  count: String(view.matches.length),
+                  panel: <PastMatches matches={view.matches} />,
+                },
+                {
+                  key: "settings",
+                  label: t("settings"),
+                  icon: SlidersHorizontal,
+                  panel: (
+                    <div className="@container flex flex-col gap-4">
+                      <ul className="grid @xl:grid-cols-2 @4xl:grid-cols-3 gap-3 [&>li]:flex [&>li]:min-w-0 [&>li]:items-center [&>li]:rounded-lg [&>li]:border [&>li]:border-line [&>li]:p-3">
+                        <VisibilityRow
+                          settings={view.settings}
+                          editable={me.isHost}
+                          pending={pending}
+                          onSave={async (v) =>
+                            (await act(() => updateSettings(code, v))).ok
+                          }
+                        />
+                        <SeatsRow
+                          game={game}
+                          seats={shownSeats}
+                          seated={shownPlayers.length}
+                          editable={me.isHost}
+                          pending={pending}
+                          onSave={async (n) => {
+                            await setSeats(n);
+                            return true;
+                          }}
+                        />
+                        <TimesRow
+                          settings={view.settings}
+                          editable={me.isHost}
+                          pending={pending}
+                          onSave={async (times) =>
+                            (await act(() => updateSettings(code, times))).ok
+                          }
+                        />
+                        <GostosRow
+                          settings={view.settings}
+                          editable={me.isHost}
+                          pending={pending}
+                          onSave={async (v) =>
+                            (await act(() => updateSettings(code, v))).ok
+                          }
+                        />
+                        {game === "impostor" ? (
+                          <ImpostorsRow
+                            value={view.settings.impostors}
+                            seats={shownSeats}
+                            players={view.players.length}
+                            editable={me.isHost}
+                            pending={pending}
+                            onSave={async (impostors) =>
+                              (
+                                await act(() =>
+                                  updateSettings(code, { impostors }),
+                                )
+                              ).ok
+                            }
+                          />
+                        ) : null}
+                        {game === "lineup" ? (
+                          <>
+                            <ModeRow
+                              value={view.settings.mode}
+                              seats={shownSeats}
+                              editable={me.isHost}
+                              pending={pending}
+                              onSave={async (mode) =>
+                                (
+                                  await act(() =>
+                                    updateSettings(code, { mode }),
+                                  )
+                                ).ok
+                              }
+                            />
+                            <AuctionRow
+                              settings={view.settings}
+                              players={shownPlayers.length}
+                              editable={me.isHost}
+                              pending={pending}
+                              onSave={async (v) =>
+                                (await act(() => updateSettings(code, v))).ok
+                              }
+                            />
+                            <MissionsRow
+                              settings={view.settings}
+                              editable={me.isHost}
+                              pending={pending}
+                              onSave={async (v) =>
+                                (await act(() => updateSettings(code, v))).ok
+                              }
+                            />
+                          </>
+                        ) : null}
+                        {game === "who-am-i" ? (
+                          <ThemeModeRow
+                            value={themeMode}
+                            editable={me.isHost}
+                            pending={pending}
+                            onSave={async (next) =>
+                              (
+                                await act(() =>
+                                  updateSettings(code, { themeMode: next }),
+                                )
+                              ).ok
+                            }
+                          />
+                        ) : null}
+                      </ul>
+                      {me.isHost ? (
+                        <Button
+                          className="self-start"
+                          onClick={() => {
+                            setDraft(editable(view.settings));
+                            setEditing(true);
+                          }}
+                        >
+                          <Settings strokeWidth={1.75} />
+                          {t("editSettings")}
+                        </Button>
+                      ) : null}
+                    </div>
+                  ),
+                },
+              ]}
+            />
+          </div>
         </section>
 
-        <div className="flex w-full flex-col gap-4 lg:max-w-[416px] lg:flex-[1_1_360px]">
-          {/* the game and the main action, above the room's settings; the host can switch the game there */}
-          <div className="flex flex-wrap items-center gap-3">
+        {/* the sidebar, on the left on a desktop, growing a little with the window: the game on stage, the start key, then the room's settings */}
+        <div className="max-lg:contents lg:order-first lg:flex lg:min-h-0 lg:w-[clamp(416px,30%,520px)] lg:shrink-0 lg:flex-col lg:gap-4">
+          {/* the game on stage: its art over the panel's top, its name (the host can switch it there), the main action and who is ready */}
+          <div
+            className={cn(
+              panelClass,
+              "flex shrink-0 flex-col gap-4 overflow-hidden max-lg:order-2",
+            )}
+          >
+            <div
+              aria-hidden="true"
+              className="relative -mx-6 -mt-6 aspect-[2/1] overflow-hidden max-sm:-mx-4 max-sm:-mt-4"
+            >
+              {/* the home tile's animated scene, laid out for this strip */}
+              <GameArt key={game} wide className="absolute inset-0" />
+            </div>
             {me.isHost ? (
               <GameField
                 value={game}
@@ -359,15 +478,15 @@ export function LobbyScreen() {
                   if (next !== game)
                     void act(() => updateSettings(code, { game: next }));
                 }}
-                className="min-w-0 flex-1 basis-56 pr-4 sm:w-auto"
+                className="w-full pr-4 sm:w-full"
               />
             ) : (
-              <>
+              <div className="flex items-center gap-3">
                 <GameThumb game={game} size="sm" />
-                <span className="min-w-20 grow-999 basis-0 font-bold font-display text-lg leading-tight">
+                <span className="min-w-0 flex-1 font-bold font-display text-xl leading-tight">
                   {gameName(game)}
                 </span>
-              </>
+              </div>
             )}
             {/* keys like "Create room": the host's starts the match; a guest's stays pressed down once ready */}
             {me.isHost ? (
@@ -385,7 +504,7 @@ export function LobbyScreen() {
                     type="button"
                     className={keyClass("yes", {
                       bounce: true,
-                      className: "min-h-14 w-full px-6 text-lg",
+                      className: "min-h-16 w-full px-6 text-2xl",
                     })}
                     disabled={!view.canStart || !!cards?.tooFew || pending}
                     onClick={() =>
@@ -409,7 +528,7 @@ export function LobbyScreen() {
                 className={keyClass(myReady ? "yes" : "apricot", {
                   pressed: myReady,
                   bounce: true,
-                  className: "min-h-14 grow px-6 text-lg",
+                  className: "min-h-16 w-full px-6 text-2xl",
                 })}
                 aria-pressed={myReady}
                 disabled={pending}
@@ -420,114 +539,45 @@ export function LobbyScreen() {
                 {t("readyButton")}
               </button>
             )}
-          </div>
-          <aside className="flex flex-col gap-4 rounded-lg bg-surface p-6">
-            <ul className="flex flex-col gap-3">
-              <VisibilityRow
-                settings={view.settings}
-                editable={me.isHost}
-                pending={pending}
-                onSave={async (v) =>
-                  (await act(() => updateSettings(code, v))).ok
-                }
+            {others.length ? (
+              <ReadyMeter
+                ready={others.length - waiting.length}
+                total={others.length}
+                label={t("readyCount", {
+                  ready: others.length - waiting.length,
+                  total: others.length,
+                })}
               />
-              <SeatsRow
-                game={game}
-                seats={shownSeats}
-                seated={shownPlayers.length}
-                editable={me.isHost}
-                pending={pending}
-                onSave={async (n) => {
-                  await setSeats(n);
-                  return true;
-                }}
-              />
-              <TimesRow
-                settings={view.settings}
-                editable={me.isHost}
-                pending={pending}
-                onSave={async (times) =>
-                  (await act(() => updateSettings(code, times))).ok
-                }
-              />
-              <GostosRow
-                settings={view.settings}
-                editable={me.isHost}
-                pending={pending}
-                onSave={async (v) =>
-                  (await act(() => updateSettings(code, v))).ok
-                }
-              />
-              {game === "impostor" ? (
-                <ImpostorsRow
-                  value={view.settings.impostors}
-                  seats={shownSeats}
-                  players={view.players.length}
-                  editable={me.isHost}
-                  pending={pending}
-                  onSave={async (impostors) =>
-                    (await act(() => updateSettings(code, { impostors }))).ok
-                  }
-                />
-              ) : null}
-              {game === "lineup" ? (
-                <>
-                  <ModeRow
-                    value={view.settings.mode}
-                    seats={shownSeats}
-                    editable={me.isHost}
-                    pending={pending}
-                    onSave={async (mode) =>
-                      (await act(() => updateSettings(code, { mode }))).ok
-                    }
-                  />
-                  <AuctionRow
-                    settings={view.settings}
-                    players={shownPlayers.length}
-                    editable={me.isHost}
-                    pending={pending}
-                    onSave={async (v) =>
-                      (await act(() => updateSettings(code, v))).ok
-                    }
-                  />
-                  <MissionsRow
-                    settings={view.settings}
-                    editable={me.isHost}
-                    pending={pending}
-                    onSave={async (v) =>
-                      (await act(() => updateSettings(code, v))).ok
-                    }
-                  />
-                </>
-              ) : null}
-              {game === "who-am-i" ? (
-                <ThemeModeRow
-                  value={themeMode}
-                  editable={me.isHost}
-                  pending={pending}
-                  onSave={async (next) =>
-                    (await act(() => updateSettings(code, { themeMode: next })))
-                      .ok
-                  }
-                />
-              ) : null}
-            </ul>
-            {me.isHost ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setDraft(editable(view.settings));
-                  setEditing(true);
-                }}
-                className="inline-flex items-center gap-1.5 self-start font-semibold text-sky text-sm underline underline-offset-2"
-              >
-                <Settings className="size-4" strokeWidth={2} />
-                {t("editSettings")}
-              </button>
             ) : null}
-          </aside>
+          </div>
         </div>
       </div>
+      {/* the host changes the room in a modal over the lobby; a new room skips it and starts with the last setup */}
+      <Modal
+        open={editing}
+        onOpenChange={setEditing}
+        title={t("settingsTitle")}
+        icon={<Settings strokeWidth={1.75} />}
+        size="wide"
+      >
+        <div className="min-h-0 flex-1 overflow-y-auto p-6 max-sm:p-4">
+          <RoomSetup
+            submit={t("saveSettings")}
+            value={draft}
+            onChange={setDraft}
+            minSeats={view.players.length}
+            pending={pending}
+            onSubmit={async (v) => {
+              const r = await act(() => updateSettings(code, v));
+              if (r.ok) {
+                setEditing(false);
+                saveSetup(v);
+                toast(t("settingsSaved"));
+              }
+            }}
+          />
+        </div>
+      </Modal>
     </Screen>
   );
 }
@@ -567,5 +617,36 @@ function StartBlocked({
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>
+  );
+}
+
+/** Who is ready, under the start key: a pip per guest, filled once they confirm, and the count. */
+function ReadyMeter({
+  ready,
+  total,
+  label,
+}: {
+  ready: number;
+  total: number;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <span aria-hidden="true" className="flex gap-1.5">
+        {Array.from({ length: total }, (_, i) => (
+          <span
+            // biome-ignore lint/suspicious/noArrayIndexKey: one pip per guest, in order
+            key={i}
+            className={cn(
+              "size-2.5 rounded-pill transition-colors duration-300 ease-soft",
+              i < ready ? "bg-yes" : "bg-line",
+            )}
+          />
+        ))}
+      </span>
+      <span className="font-semibold text-ink-muted text-sm tabular-nums">
+        {label}
+      </span>
+    </div>
   );
 }
