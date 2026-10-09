@@ -12,7 +12,7 @@ import { Screen } from "@/components/ui/screen";
 import { Segmented } from "@/components/ui/segmented";
 import { useGameName } from "@/features/create/game-info";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { profilePath } from "@/features/profile/profile-link";
+import { ProfileLink } from "@/features/profile/profile-link";
 import { type GameKey, OPEN_GAMES } from "@/game/games";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -143,9 +143,8 @@ export function RankingsScreen() {
                     delay: i * 0.06,
                   }}
                 >
-                  <Link
-                    href={profilePath(h.person.handle)}
-                    scroll={false}
+                  <ProfileLink
+                    handle={h.person.handle}
                     className="flex items-center gap-2.5 rounded-[14px] text-[14px] transition-colors hover:bg-sunken"
                   >
                     <Avatar avatar={h.person.avatar} size={32} />
@@ -161,7 +160,7 @@ export function RankingsScreen() {
                     <span className="font-medium font-mono text-[13px] tabular-nums">
                       {h.total}
                     </span>
-                  </Link>
+                  </ProfileLink>
                 </m.div>
               ))
             ) : (
@@ -195,10 +194,9 @@ function Podium({ rows }: { rows: RankingRow[] }) {
       {order.map((i, o) => {
         const r = rows[i];
         return (
-          <Link
+          <ProfileLink
             key={r.person.id}
-            href={profilePath(r.person.handle)}
-            scroll={false}
+            handle={r.person.handle}
             style={{ gridColumn: i === 0 ? 2 : i === 1 ? 1 : 3 }}
             className="grid min-w-0 justify-items-center gap-2 text-center"
           >
@@ -236,7 +234,7 @@ function Podium({ rows }: { rows: RankingRow[] }) {
             >
               {i + 1}
             </m.div>
-          </Link>
+          </ProfileLink>
         );
       })}
     </div>
@@ -265,9 +263,8 @@ function Row({
       }}
       className={cn(me && "sticky bottom-3 mt-1.5")}
     >
-      <Link
-        href={profilePath(row.person.handle)}
-        scroll={false}
+      <ProfileLink
+        handle={row.person.handle}
         className={cn(
           "grid grid-cols-[40px_36px_minmax(0,1fr)_auto] items-center gap-3 rounded-[16px] py-2 pr-3.5 pl-2.5 transition-colors sm:grid-cols-[40px_36px_minmax(0,1fr)_auto_auto]",
           me ? "bg-sky-soft shadow-pop" : "bg-surface hover:bg-sunken",
@@ -296,7 +293,7 @@ function Row({
         <span className="text-right font-medium font-mono text-[14px] tabular-nums">
           {format.number(row.xp)}
         </span>
-      </Link>
+      </ProfileLink>
     </m.div>
   );
 }

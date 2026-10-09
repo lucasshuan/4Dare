@@ -63,6 +63,7 @@ import {
   Swatch,
 } from "./editor-parts";
 import { LevelAvatar } from "./level";
+import { openProfile } from "./open-profile";
 import { FRAME, ProfileCover, type ProfileMode } from "./profile-body";
 import { profilePath } from "./profile-link";
 import { ShowcaseCard } from "./showcase";
@@ -230,8 +231,11 @@ export function ProfileEditor({
     const next = r.data.handle ?? view.handle;
     await client.invalidateQueries({ queryKey: profileKey(view.handle) });
     void client.invalidateQueries({ queryKey: ["player-card", view.id] });
-    if (next !== view.handle) router.replace(profilePath(next));
-    else onClose();
+    if (next !== view.handle) {
+      // a modal has no address: it shows the new handle's profile
+      if (mode === "modal") openProfile(next);
+      else router.replace(profilePath(next));
+    } else onClose();
   };
 
   const handleNote = (() => {

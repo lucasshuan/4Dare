@@ -6,18 +6,17 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { MODAL_SIZE } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { closeProfile } from "./open-profile";
 import { ProfileLoader } from "./profile-screen-view";
 
 /**
  * A profile opened from a link inside the app: a modal over the page it came
- * from (a match keeps going behind it). The close button floats over the
- * cover; the profile scrolls under it. Closing goes back.
+ * from (a match keeps going behind it), with no address of its own. The close
+ * button floats over the cover; the profile scrolls under it.
  */
 export function ProfileModal({ handle }: { handle: string }) {
   const t = useTranslations("common");
-  const router = useRouter();
   const [open, setOpen] = useState(true);
   return (
     <Dialog.Root
@@ -27,7 +26,7 @@ export function ProfileModal({ handle }: { handle: string }) {
         setOpen(false);
       }}
       onOpenChangeComplete={(next) => {
-        if (!next) router.back();
+        if (!next) closeProfile();
       }}
     >
       <Dialog.Portal>

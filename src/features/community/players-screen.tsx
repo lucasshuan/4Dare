@@ -12,7 +12,7 @@ import { Segmented } from "@/components/ui/segmented";
 import { useGameName } from "@/features/create/game-info";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
-import { profilePath } from "@/features/profile/profile-link";
+import { ProfileLink } from "@/features/profile/profile-link";
 import { Link } from "@/i18n/navigation";
 import { ease } from "@/lib/motion";
 import type {
@@ -130,21 +130,17 @@ function Tile({ tile, index }: { tile: PlayerTile; index: number }) {
       transition={{ duration: 0.4, ease: ease.soft, delay: index * 0.024 }}
       className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-[20px] border border-line bg-surface p-3.5 transition-[translate,box-shadow] duration-200 ease-soft hover:-translate-y-0.5 hover:shadow-card"
     >
-      <Link
-        href={profilePath(p.handle)}
-        scroll={false}
-        className="flex rounded-pill"
-      >
+      <ProfileLink handle={p.handle} className="flex rounded-pill">
         <LevelFace person={p} level={tile.level} size={44} />
-      </Link>
+      </ProfileLink>
       <span className="min-w-0">
-        <Link href={profilePath(p.handle)} scroll={false} className="block">
+        <ProfileLink handle={p.handle} className="block">
           <b className="block truncate font-bold text-[15px]">{p.name}</b>
           <small className="block truncate text-[12.5px] text-ink-muted">
             @{p.handle}
             {tile.together ? ` · ${t("together", { n: tile.together })}` : ""}
           </small>
-        </Link>
+        </ProfileLink>
         {tile.playing ? (
           <span className="mt-0.5 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 font-bold text-[12px] text-yes">

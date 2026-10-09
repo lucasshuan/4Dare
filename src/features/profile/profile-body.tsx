@@ -46,6 +46,7 @@ const BoardsPanel = dynamic(() =>
   import("./boards-panel").then((m) => m.BoardsPanel),
 );
 
+import { closeProfile } from "./open-profile";
 import { profilePath } from "./profile-link";
 import { Showcase } from "./showcase";
 
@@ -255,8 +256,10 @@ function ProfileShow({
   const toast = useToast();
   const locale = useLocale();
   const wide = useMedia("(min-width: 640px)");
-  // ?tab= opens a section first (the menu's Badges and Matches); picking one writes it back
+  // ?tab= opens a section first (the menu's Badges and Matches); picking one
+  // writes it back. A modal has no address of its own.
   const askedTab = useSearchParams().get("tab");
+  const linked = mode === "page";
   // the time the page was read: the garden and the ages count from it
   const [now] = useState(() => Date.now());
   const run = useMemo(() => streaks(view.plays, now), [view.plays, now]);
@@ -346,15 +349,16 @@ function ProfileShow({
               {t("share")}
             </Button>
             {mode === "modal" ? (
-              // a full load, so the address opens the page and not this modal again
-              <a
-                href={`/${locale}${profilePath(view.handle)}`}
+              // the page leaves the modal behind
+              <Link
+                href={profilePath(view.handle)}
+                onClick={closeProfile}
                 aria-label={t("openPage")}
                 title={t("openPage")}
                 className={buttonClass("secondary", "sm", "aspect-square px-0")}
               >
                 <Maximize2 strokeWidth={1.75} />
-              </a>
+              </Link>
             ) : null}
           </div>
         </div>
@@ -476,10 +480,11 @@ function ProfileShow({
             {tabs.length ? (
               <Tabs.Root
                 defaultValue={
-                  tabs.find(({ value }) => value === askedTab)?.value ??
-                  tabs[0].value
+                  tabs.find(({ value }) => linked && value === askedTab)
+                    ?.value ?? tabs[0].value
                 }
                 onValueChange={(tab) => {
+                  if (!linked) return;
                   const url = new URL(window.location.href);
                   url.searchParams.set("tab", String(tab));
                   window.history.replaceState(null, "", url);

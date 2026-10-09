@@ -35,7 +35,9 @@ export function ProfileLoader({
       </div>
     );
   // the data only comes in the browser, so the address can be read here
+  // (a modal has no address of its own)
   const editing =
+    mode === "page" &&
     new URLSearchParams(window.location.search).get("edit") === "1";
   return (
     <ProfileBody

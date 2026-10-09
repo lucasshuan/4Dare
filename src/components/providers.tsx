@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import { ThemeProvider } from "next-themes";
 import { type ReactNode, useState } from "react";
+import { ProfileModalHost } from "@/features/profile/profile-modal-host";
 import { SettingsSync } from "@/features/settings/settings-sync";
 import { ToastProvider } from "./ui/toast";
 
@@ -25,6 +26,7 @@ export function Providers({ children }: { children: ReactNode }) {
             <ToastProvider>
               {children}
               <SettingsSync />
+              <ProfileModalHost />
             </ToastProvider>
           </LazyMotion>
         </MotionConfig>

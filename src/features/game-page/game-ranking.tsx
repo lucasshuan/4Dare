@@ -5,7 +5,7 @@ import { ArrowRight, Crown } from "lucide-react";
 import { m } from "motion/react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
-import { profilePath } from "@/features/profile/profile-link";
+import { ProfileLink } from "@/features/profile/profile-link";
 import type { GameKey } from "@/game/games";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -105,9 +105,8 @@ export function GameRanking({
                   }}
                   className="flex min-w-0 max-w-full"
                 >
-                  <Link
-                    href={profilePath(r.person.handle)}
-                    scroll={false}
+                  <ProfileLink
+                    handle={r.person.handle}
                     className="flex min-w-0 max-w-full flex-col items-center gap-1"
                   >
                     {i === 0 ? (
@@ -131,7 +130,7 @@ export function GameRanking({
                     <small className="font-medium font-mono text-[11.5px] text-ink-muted">
                       {t("xp", { n: format.number(r.xp) })}
                     </small>
-                  </Link>
+                  </ProfileLink>
                 </m.span>
               ) : (
                 <>

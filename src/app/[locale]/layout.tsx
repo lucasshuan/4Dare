@@ -81,7 +81,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={hubMessages(await getMessages())}>
           <Providers>
             {children}
-            {/* a profile opened from inside the app, over the page (@modal/(.)u) */}
+            {/* a character opened from inside the app, over the page (@modal/(.)characters) */}
             {modal}
           </Providers>
         </NextIntlClientProvider>
