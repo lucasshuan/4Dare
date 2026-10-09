@@ -63,9 +63,12 @@ function Coin({ className }: { className?: string }) {
 export function LineupSnapshot({
   className,
   still: forceStill = false,
+  wide = false,
 }: {
   className?: string;
   still?: boolean;
+  /** Laid out for a 2:1 strip (the lobby's game panel): the board left, the envelope beside it. */
+  wide?: boolean;
 }) {
   const t = useTranslations("home.games.whatFor");
   const reduced = useReducedMotion() ?? false;
@@ -84,15 +87,28 @@ export function LineupSnapshot({
     <div
       aria-hidden="true"
       className={cn(
-        "relative isolate aspect-square overflow-hidden art-lineup [container-type:size]",
+        "relative isolate overflow-hidden art-lineup [container-type:size]",
+        !wide && "aspect-square",
         className,
       )}
     >
       <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/15 blur-2xl dark:hidden" />
 
       {/* the board, in its frame */}
-      <div className="absolute inset-x-[6%] top-[13%] bottom-[29%] rounded-[3.4cqh] bg-wood p-[2.6cqh] shadow-card">
-        <div className="relative size-full overflow-hidden rounded-[2cqh] bg-board">
+      <div
+        className={cn(
+          "absolute bg-wood shadow-card",
+          wide
+            ? "top-[17%] right-[40%] bottom-[8%] left-[4%] rounded-[5cqh] p-[4cqh]"
+            : "inset-x-[6%] top-[13%] bottom-[29%] rounded-[3.4cqh] p-[2.6cqh]",
+        )}
+      >
+        <div
+          className={cn(
+            "relative size-full overflow-hidden bg-board",
+            wide ? "rounded-[3cqh]" : "rounded-[2cqh]",
+          )}
+        >
           <span className="absolute top-[9%] left-[5%] h-[1.6cqh] w-[34%] rounded-pill bg-chalk/80" />
           <span className="absolute inset-[5%] rounded-[1.4cqh] border border-chalk/20" />
           {SLOTS.map((c, i) => (
@@ -100,7 +116,7 @@ export function LineupSnapshot({
               {i < s.team ? (
                 <m.div
                   key={`${c.x}-${loop}`}
-                  className="absolute w-[19%]"
+                  className={cn("absolute", wide ? "w-[21%]" : "w-[19%]")}
                   style={{ left: `${c.x}%`, top: `${c.y}%` }}
                   initial={
                     still ? false : { opacity: 0, scale: 1.6, y: "-30%" }
@@ -115,7 +131,14 @@ export function LineupSnapshot({
                       className="aspect-4/5"
                     />
                     <span className="-translate-x-1/2 absolute -top-[5%] left-1/2 h-[9%] w-[44%] bg-butter/85" />
-                    <span className="absolute -right-[14%] -bottom-[8%] rounded-[0.5cqh] bg-kraft px-[0.9cqh] font-bold font-mono text-[3.75cqh] text-kraft-ink leading-[1.3]">
+                    <span
+                      className={cn(
+                        "absolute -right-[14%] -bottom-[8%] bg-kraft font-bold font-mono text-kraft-ink leading-[1.3]",
+                        wide
+                          ? "rounded-[0.8cqh] px-[1.4cqh] text-[5.5cqh]"
+                          : "rounded-[0.5cqh] px-[0.9cqh] text-[3.75cqh]",
+                      )}
+                    >
                       {c.price}
                     </span>
                   </div>
@@ -127,8 +150,17 @@ export function LineupSnapshot({
       </div>
 
       {/* the purse emptying */}
-      <div className="absolute top-[3%] left-[7%] flex items-center gap-[0.6cqh] rounded-pill bg-surface px-[1.25cqh] py-[0.4cqh] font-bold font-mono text-[4cqh] text-ink shadow-card">
-        <Coin className="h-[2.5cqh] w-[5cqh]" />
+      <div
+        className={cn(
+          "absolute flex items-center rounded-pill bg-surface font-bold font-mono text-ink shadow-card",
+          wide
+            ? "top-[4%] left-[4%] gap-[1cqh] px-[2.2cqh] py-[0.6cqh] text-[7cqh]"
+            : "top-[3%] left-[7%] gap-[0.6cqh] px-[1.25cqh] py-[0.4cqh] text-[4cqh]",
+        )}
+      >
+        <Coin
+          className={wide ? "h-[4.5cqh] w-[9cqh]" : "h-[2.5cqh] w-[5cqh]"}
+        />
         <m.span
           key={spent}
           initial={still ? false : { y: -6, opacity: 0 }}
@@ -143,20 +175,49 @@ export function LineupSnapshot({
         {s.open ? (
           <m.div
             key={`envelope-${loop}`}
-            className="absolute right-[5%] bottom-[27%] w-[54%] origin-bottom-right"
+            className={cn(
+              "absolute origin-bottom-right",
+              wide
+                ? "right-[3%] bottom-[10%] w-[35%]"
+                : "right-[5%] bottom-[27%] w-[54%]",
+            )}
             initial={still ? false : { opacity: 0, y: "-60%", rotate: 18 }}
             animate={{ opacity: 1, y: "0%", rotate: -4 }}
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <div className="relative rounded-[0.9cqh] bg-kraft px-[4cqh] pt-[3.6cqh] pb-[4cqh] shadow-pop">
-              <span className="block font-bold font-display text-[3.6cqh] text-kraft-ink/70 uppercase tracking-[0.04em]">
+            <div
+              className={cn(
+                "relative bg-kraft shadow-pop",
+                wide
+                  ? "rounded-[1.4cqh] px-[5cqh] pt-[5cqh] pb-[5.5cqh]"
+                  : "rounded-[0.9cqh] px-[4cqh] pt-[3.6cqh] pb-[4cqh]",
+              )}
+            >
+              <span
+                className={cn(
+                  "block font-bold font-display text-kraft-ink/70 uppercase tracking-[0.04em]",
+                  wide ? "text-[5.5cqh]" : "text-[3.6cqh]",
+                )}
+              >
                 {t("banner.what")}
               </span>
-              <span className="block font-bold font-display text-[5.6cqh] text-kraft-ink leading-[1.1] [text-wrap:balance]">
+              <span
+                className={cn(
+                  "block font-bold font-display text-kraft-ink leading-[1.1] [text-wrap:balance]",
+                  wide ? "text-[8cqh]" : "text-[5.6cqh]",
+                )}
+              >
                 {line}
               </span>
-              <span className="-top-[5cqh] absolute right-[8%] grid size-[9.5cqh] place-items-center rounded-pill bg-wax font-black text-[4.5cqh] text-white shadow-card">
+              <span
+                className={cn(
+                  "absolute right-[8%] grid place-items-center rounded-pill bg-wax font-black text-white shadow-card",
+                  wide
+                    ? "-top-[7cqh] size-[14cqh] text-[7cqh]"
+                    : "-top-[5cqh] size-[9.5cqh] text-[4.5cqh]",
+                )}
+              >
                 ?
               </span>
             </div>
