@@ -80,7 +80,7 @@ export function ScrollArea({
           aria-hidden
           onPointerDown={drag}
           style={{ top: thumb.top, height: thumb.height }}
-          className="group absolute right-0 z-20 flex w-3 cursor-default touch-none justify-center"
+          className="group absolute right-0 z-20 flex w-3 cursor-default touch-none justify-end pr-px"
         >
           <span className="w-1.5 rounded-pill bg-(--scroll-thumb) transition-[width,background-color] duration-150 group-hover:w-2 group-hover:bg-(--scroll-thumb-hover) group-active:w-2 group-active:bg-(--scroll-thumb-hover)" />
         </div>
