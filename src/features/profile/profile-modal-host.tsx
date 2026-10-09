@@ -12,9 +12,16 @@ const ProfileModal = dynamic(() =>
 
 /** Where the profile modal opens: once, for every page. Going to another page closes it. */
 export function ProfileModalHost() {
-  const handle = useOpenProfile();
+  const open = useOpenProfile();
   const path = usePathname();
   // biome-ignore lint/correctness/useExhaustiveDependencies: a new path is the trigger
   useEffect(() => closeProfile(), [path]);
-  return handle ? <ProfileModal key={handle} handle={handle} /> : null;
+  return open ? (
+    <ProfileModal
+      key={open.handle}
+      handle={open.handle}
+      tab={open.tab}
+      edit={open.edit}
+    />
+  ) : null;
 }

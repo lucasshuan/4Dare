@@ -17,10 +17,15 @@ export function ProfileLoader({
   handle,
   mode,
   coverSlot,
+  tab,
+  edit,
 }: {
   handle: string;
   mode: ProfileMode;
   coverSlot?: HTMLElement | null;
+  /** The modal's: a section to open first, or the editor (the page reads its address). */
+  tab?: string;
+  edit?: boolean;
 }) {
   const t = useTranslations("profile");
   const tc = useTranslations("common");
@@ -36,16 +41,16 @@ export function ProfileLoader({
     );
   // the data only comes in the browser, so the address can be read here
   // (a modal has no address of its own)
-  const editing =
-    mode === "page" &&
-    new URLSearchParams(window.location.search).get("edit") === "1";
+  const asked =
+    mode === "page" ? new URLSearchParams(window.location.search) : null;
   return (
     <ProfileBody
       key={view.id}
       view={view}
       mode={mode}
       coverSlot={coverSlot}
-      startEditing={editing}
+      startEditing={asked ? asked.get("edit") === "1" : !!edit}
+      tab={asked ? asked.get("tab") : (tab ?? null)}
     />
   );
 }

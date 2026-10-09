@@ -17,12 +17,15 @@ export function ProfileLink({
   style,
   children,
   onClick,
+  ...label
 }: {
   handle: string;
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
   onClick?: () => void;
+  "aria-label"?: string;
+  title?: string;
 }) {
   return (
     <Link
@@ -30,6 +33,7 @@ export function ProfileLink({
       scroll={false}
       className={className}
       style={style}
+      {...label}
       onClick={(e) => {
         onClick?.();
         if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)

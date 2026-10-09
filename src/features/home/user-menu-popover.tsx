@@ -22,7 +22,8 @@ import { Avatar } from "@/components/ui/avatar";
 import { useMe } from "@/features/data/use-me";
 import { accentStyle } from "@/features/profile/cover-paint";
 import { XpBar } from "@/features/profile/level";
-import { profilePath } from "@/features/profile/profile-link";
+import { openProfile } from "@/features/profile/open-profile";
+import { ProfileLink } from "@/features/profile/profile-link";
 import { usePlayerCard } from "@/features/profile/use-profile";
 import { AccountDialog } from "@/features/settings/account-dialog";
 import { SettingsDialog } from "@/features/settings/settings-dialog";
@@ -109,16 +110,15 @@ export function UserMenuPopover({
                   >
                     {/* an account's face opens its profile, like "My profile" */}
                     {me.handle && !me.isGuest ? (
-                      <Link
-                        href={profilePath(me.handle)}
-                        scroll={false}
+                      <ProfileLink
+                        handle={me.handle}
                         aria-label={t("myProfile")}
                         title={t("myProfile")}
                         onClick={() => onOpenChange(false)}
                         className="flex rounded-pill transition-[scale] duration-200 ease-soft hover:scale-105"
                       >
                         {face}
-                      </Link>
+                      </ProfileLink>
                     ) : (
                       face
                     )}
@@ -210,20 +210,21 @@ export function UserMenuPopover({
                     {me.handle ? (
                       <MenuItem
                         icon={<UserRound strokeWidth={1.75} />}
-                        href={profilePath(me.handle)}
-                        onClick={() => onOpenChange(false)}
+                        onClick={() => {
+                          onOpenChange(false);
+                          if (me.handle) openProfile(me.handle);
+                        }}
                       >
                         {t("myProfile")}
                       </MenuItem>
                     ) : null}
                     <MenuItem
                       icon={<UserRoundPen strokeWidth={1.75} />}
-                      href={
-                        me.handle
-                          ? `${profilePath(me.handle)}?edit=1`
-                          : "/profile"
-                      }
-                      onClick={() => onOpenChange(false)}
+                      href={me.handle ? undefined : "/profile"}
+                      onClick={() => {
+                        onOpenChange(false);
+                        if (me.handle) openProfile(me.handle, { edit: true });
+                      }}
                     >
                       {t("editProfile")}
                     </MenuItem>

@@ -15,7 +15,15 @@ import { ProfileLoader } from "./profile-screen-view";
  * from (a match keeps going behind it), with no address of its own. The close
  * button floats over the cover; the profile scrolls under it.
  */
-export function ProfileModal({ handle }: { handle: string }) {
+export function ProfileModal({
+  handle,
+  tab,
+  edit,
+}: {
+  handle: string;
+  tab?: string;
+  edit?: boolean;
+}) {
   const t = useTranslations("common");
   const [open, setOpen] = useState(true);
   return (
@@ -46,7 +54,7 @@ export function ProfileModal({ handle }: { handle: string }) {
           </Dialog.Close>
           {/* a floating bar: the browser's gutter left a strip beside the cover */}
           <ScrollArea className="flex-1">
-            <ProfileLoader handle={handle} mode="modal" />
+            <ProfileLoader handle={handle} mode="modal" tab={tab} edit={edit} />
           </ScrollArea>
         </Dialog.Popup>
       </Dialog.Portal>

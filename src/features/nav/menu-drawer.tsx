@@ -42,6 +42,7 @@ import { useSignIn } from "@/features/home/use-sign-in";
 import { useNewsFresh } from "@/features/news/news-seen";
 import { accentStyle } from "@/features/profile/cover-paint";
 import { XpBar } from "@/features/profile/level";
+import { openProfile } from "@/features/profile/open-profile";
 import { profilePath } from "@/features/profile/profile-link";
 import { usePlayerCard } from "@/features/profile/use-profile";
 import { type GameKey, OPEN_GAMES } from "@/game/games";
@@ -466,7 +467,15 @@ function Row({
       scroll={item.key !== "badges" && item.key !== "matches"}
       data-nav-row
       aria-current={marked ? "page" : undefined}
-      onClick={onPick}
+      onClick={(e) => {
+        onPick();
+        // the profile rows open as a modal, at the section they name
+        const own = item.href.match(/^\/u\/([^?]+)(?:\?tab=(\w+))?$/);
+        if (!own || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey)
+          return;
+        e.preventDefault();
+        openProfile(own[1], own[2] ? { tab: own[2] } : undefined);
+      }}
       className={cn(
         "relative isolate flex h-11 w-full items-center gap-3 rounded-[14px] px-3 text-left font-medium text-[15px] outline-none transition-colors duration-150 ease-soft focus-visible:outline-3 focus-visible:outline-sky",
         marked ? "font-bold" : "hover:bg-sunken/75",
@@ -584,7 +593,12 @@ function MeCard({ onPick }: { onPick: () => void }) {
       <div className="flex items-start">
         <Link
           href={me.handle ? profilePath(me.handle) : "/profile"}
-          onClick={onPick}
+          onClick={(e) => {
+            onPick();
+            if (!me.handle || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+            e.preventDefault();
+            openProfile(me.handle);
+          }}
           className="group flex min-w-0 flex-1 items-center gap-3 rounded-[20px] p-3 pr-1 pb-2 text-left outline-none focus-visible:outline-3 focus-visible:outline-sky"
         >
           <Avatar avatar={me.avatar} size={52} />

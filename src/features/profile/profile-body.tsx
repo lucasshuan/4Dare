@@ -17,7 +17,6 @@ import {
   Sprout,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { lazy, type ReactNode, Suspense, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -196,11 +195,14 @@ export function ProfileBody({
   mode,
   coverSlot = null,
   startEditing = false,
+  tab = null,
 }: {
   view: ProfileView;
   mode: ProfileMode;
   coverSlot?: HTMLElement | null;
   startEditing?: boolean;
+  /** The section to open first. */
+  tab?: string | null;
 }) {
   const [editing, setEditing] = useState(startEditing && view.isMe);
   if (editing && view.isMe)
@@ -219,6 +221,7 @@ export function ProfileBody({
       view={view}
       mode={mode}
       coverSlot={coverSlot}
+      askedTab={tab}
       onEdit={() => setEditing(true)}
     />
   );
@@ -242,11 +245,13 @@ function ProfileShow({
   view,
   mode,
   coverSlot,
+  askedTab,
   onEdit,
 }: {
   view: ProfileView;
   mode: ProfileMode;
   coverSlot: HTMLElement | null;
+  askedTab: string | null;
   onEdit: () => void;
 }) {
   const t = useTranslations("profile");
@@ -256,9 +261,7 @@ function ProfileShow({
   const toast = useToast();
   const locale = useLocale();
   const wide = useMedia("(min-width: 640px)");
-  // ?tab= opens a section first (the menu's Badges and Matches); picking one
-  // writes it back. A modal has no address of its own.
-  const askedTab = useSearchParams().get("tab");
+  // picking a section writes it to the address (?tab=); a modal has none
   const linked = mode === "page";
   // the time the page was read: the garden and the ages count from it
   const [now] = useState(() => Date.now());
@@ -480,8 +483,8 @@ function ProfileShow({
             {tabs.length ? (
               <Tabs.Root
                 defaultValue={
-                  tabs.find(({ value }) => linked && value === askedTab)
-                    ?.value ?? tabs[0].value
+                  tabs.find(({ value }) => value === askedTab)?.value ??
+                  tabs[0].value
                 }
                 onValueChange={(tab) => {
                   if (!linked) return;
