@@ -32,6 +32,7 @@ import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { useSignIn } from "@/features/home/use-sign-in";
+import { accentStyle } from "@/features/profile/cover-paint";
 import { LevelAvatar, XpBar } from "@/features/profile/level";
 import { profilePath } from "@/features/profile/profile-link";
 import { usePlayerCard } from "@/features/profile/use-profile";
@@ -250,7 +251,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-300 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
         <Dialog.Popup
           initialFocus={searchRef}
-          className="fixed inset-y-0 left-0 z-50 flex w-[min(372px,88vw)] flex-col rounded-r-[28px] bg-surface text-ink shadow-pop outline-none transition-transform duration-[420ms] ease-soft data-ending-style:-translate-x-[104%] data-starting-style:-translate-x-[104%] data-ending-style:duration-[260ms] data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]"
+          className="fixed inset-y-0 left-0 z-50 flex w-[min(372px,88vw)] flex-col bg-surface text-ink shadow-pop outline-none transition-transform duration-[420ms] ease-soft data-ending-style:-translate-x-[104%] data-starting-style:-translate-x-[104%] data-ending-style:duration-[260ms] data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]"
         >
           <Dialog.Title className="sr-only">{t("menu")}</Dialog.Title>
           {/* the page's three bars, in the same spot, folded into an X */}
@@ -340,7 +341,6 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
               </div>
             </LayoutMotion>
           </div>
-          <Foot />
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
@@ -502,41 +502,47 @@ function MeCard({ onPick }: { onPick: () => void }) {
   const xp = card?.numbers?.xp ?? 0;
   const { into, need } = levelOf(xp);
   return (
-    <Link
-      href={me.handle ? profilePath(me.handle) : "/profile"}
-      onClick={(e) => {
-        onPick();
-        if (me.handle) asPage(e);
-      }}
-      className="mx-3 mb-2.5 flex items-center gap-3 rounded-[20px] bg-sunken p-3 text-left outline-none transition-colors duration-150 hover:bg-line/60 focus-visible:outline-3 focus-visible:outline-sky"
+    <div
+      style={accentStyle(card?.accent ?? null, me.avatar.color)}
+      className="mx-3 mb-2.5 flex flex-col rounded-[20px] bg-sunken"
     >
-      <LevelAvatar
-        avatar={me.avatar}
-        xp={xp}
-        stroke={3}
-        tag="sm"
-        on="canvas"
-        avatarClass="size-[42px] text-lg"
-      />
-      <span className="grid min-w-0 flex-1 gap-0.5">
-        <b className="truncate font-bold text-[15px] leading-tight">
-          {name(meNamed(me))}
-        </b>
-        {me.handle ? (
-          <small className="truncate text-[12.5px] text-ink-muted">
-            {t("me", { handle: me.handle, into, need })}
-          </small>
-        ) : null}
-        <XpBar xp={xp} numbers={false} className="mt-1" />
-      </span>
-    </Link>
+      <Link
+        href={me.handle ? profilePath(me.handle) : "/profile"}
+        onClick={(e) => {
+          onPick();
+          if (me.handle) asPage(e);
+        }}
+        className="group flex items-center gap-3 rounded-[20px] p-3 pb-2 text-left outline-none focus-visible:outline-3 focus-visible:outline-sky"
+      >
+        <LevelAvatar
+          avatar={me.avatar}
+          xp={xp}
+          stroke={3}
+          tag="sm"
+          on="sunken"
+          avatarClass="size-[42px] text-lg"
+        />
+        <span className="grid min-w-0 flex-1 gap-0.5">
+          <b className="truncate font-bold text-[15px] leading-tight underline-offset-2 group-hover:underline">
+            {name(meNamed(me))}
+          </b>
+          {me.handle ? (
+            <small className="truncate text-[12.5px] text-ink-muted">
+              {t("me", { handle: me.handle, into, need })}
+            </small>
+          ) : null}
+          <XpBar xp={xp} numbers={false} className="mt-1" />
+        </span>
+      </Link>
+      <SignOut />
+    </div>
   );
 }
 
-/** Sign out for an account; the Esc hint on a keyboard. */
-function Foot() {
+/** Sign out, at the account card's bottom right. */
+function SignOut() {
   const t = useTranslations("nav");
-  const { me, refresh } = useMe();
+  const { refresh } = useMe();
   const router = useRouter();
   const { run, pending } = useAction();
   const leave = async () => {
@@ -546,21 +552,14 @@ function Foot() {
     }
   };
   return (
-    <div className="flex shrink-0 items-center gap-2 border-line border-t px-3 py-2.5">
-      {me && !me.isGuest ? (
-        <button
-          type="button"
-          disabled={pending}
-          onClick={leave}
-          className="inline-flex h-9 items-center gap-2 rounded-pill px-3.5 font-semibold text-ink-muted text-sm transition-colors duration-150 ease-soft hover:bg-no-soft hover:text-no disabled:opacity-45"
-        >
-          <LogOut className="size-4" strokeWidth={2} />
-          {t("signOut")}
-        </button>
-      ) : null}
-      <span className="ml-auto font-medium font-mono text-[11.5px] text-ink-muted [@media(pointer:coarse)]:hidden">
-        {t("escCloses")}
-      </span>
-    </div>
+    <button
+      type="button"
+      disabled={pending}
+      onClick={leave}
+      className="mr-2 mb-2 inline-flex h-8 items-center gap-1.5 self-end rounded-pill px-3 font-semibold text-[13px] text-ink-muted transition-colors duration-150 ease-soft hover:bg-no-soft hover:text-no disabled:opacity-45"
+    >
+      <LogOut className="size-3.5" strokeWidth={2} />
+      {t("signOut")}
+    </button>
   );
 }

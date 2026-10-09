@@ -10,6 +10,26 @@ import { cn } from "@/lib/cn";
 /** The gap between the face and the ring, and the outline around it all (px). */
 const GAP = 2;
 
+/** What a ring or a tag sits on: its gap and outline take that colour. */
+type On = "canvas" | "surface" | "sunken";
+const GROUND: Record<On, { bg: string; color: string; outline: string }> = {
+  canvas: {
+    bg: "bg-canvas",
+    color: "var(--canvas)",
+    outline: "shadow-[0_0_0_2px_var(--canvas)]",
+  },
+  surface: {
+    bg: "bg-surface",
+    color: "var(--surface)",
+    outline: "shadow-[0_0_0_2px_var(--surface)]",
+  },
+  sunken: {
+    bg: "bg-sunken",
+    color: "var(--surface-sunken)",
+    outline: "shadow-[0_0_0_2px_var(--surface-sunken)]",
+  },
+};
+
 /**
  * A face inside its level's ring: a thick neutral track, the XP into the
  * level in the accent (round ends), the level on a tag at the bottom right.
@@ -31,9 +51,8 @@ export function LevelAvatar({
   avatarClass: string;
   /** "none": the ring alone (the editor, where the face is a button). */
   tag?: "sm" | "md" | "none";
-  /** What it sits on| "md";
   /** What it sits on: the gap and the outline take that colour. */
-  on?: "canvas" | "surface";
+  on?: On;
   className?: string;
 }) {
   const t = useTranslations("profile.level");
@@ -51,12 +70,12 @@ export function LevelAvatar({
       })}
       className={cn(
         "relative inline-flex shrink-0 rounded-pill",
-        on === "canvas" ? "bg-canvas" : "bg-surface",
+        GROUND[on].bg,
         className,
       )}
       style={{
         padding: GAP + stroke,
-        boxShadow: `0 0 0 ${GAP}px var(--${on})`,
+        boxShadow: `0 0 0 ${GAP}px ${GROUND[on].color}`,
       }}
     >
       <svg
@@ -110,7 +129,7 @@ export function LevelTag({
 }: {
   level: number;
   size?: "sm" | "md";
-  on?: "canvas" | "surface";
+  on?: On;
   className?: string;
 }) {
   const t = useTranslations("profile.level");
@@ -119,9 +138,7 @@ export function LevelTag({
       aria-hidden="true"
       className={cn(
         "inline-flex items-baseline gap-0.5 rounded-pill bg-(--accent) text-(--on-accent) leading-none tabular-nums",
-        on === "canvas"
-          ? "shadow-[0_0_0_2px_var(--canvas)]"
-          : "shadow-[0_0_0_2px_var(--surface)]",
+        GROUND[on].outline,
         size === "md"
           ? "h-[26px] items-center px-[9px] font-display font-extrabold text-[14px]"
           : "px-1.5 py-[3px] font-bold text-[11px]",
