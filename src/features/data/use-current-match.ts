@@ -5,9 +5,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { useToast } from "@/components/ui/toast";
 import { BACKEND } from "@/config";
+import type { GameKey } from "@/game/games";
+import { useRouter } from "@/i18n/navigation";
 import { useAction } from "@/lib/hooks/use-action";
+import { GAME_PATHS } from "@/lib/routes";
 import { leaveRoom } from "@/server/actions";
 import type { CurrentMatch } from "@/server/contract";
+import { departRoom, stayInRoom } from "./departing";
 
 const key = ["current-match"] as const;
 
@@ -43,13 +47,35 @@ export function useLeaveMatch() {
   const { run, pending } = useAction();
   const leave = useCallback(
     async (code: string) => {
+      departRoom(code);
       const r = await run(() => leaveRoom(code));
-      if (!r.ok) return false;
+      if (!r.ok) {
+        stayInRoom(code);
+        return false;
+      }
       client.setQueryData(key, null);
       toast(t("left"));
       return true;
     },
     [run, client, toast, t],
+  );
+  return { leave, pending };
+}
+
+/**
+ * Leaves a room where nothing is lost by it (the lobby, the results), then goes
+ * to the game's page; the room keeps its screen until that page shows.
+ */
+export function useLeaveRoom() {
+  const router = useRouter();
+  const { run, pending } = useAction();
+  const leave = useCallback(
+    async (code: string, game: GameKey) => {
+      departRoom(code);
+      await run(() => leaveRoom(code));
+      router.push(GAME_PATHS[game]);
+    },
+    [run, router],
   );
   return { leave, pending };
 }

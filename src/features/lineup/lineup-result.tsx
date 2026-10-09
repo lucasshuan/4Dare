@@ -10,17 +10,15 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { fireConfetti } from "@/components/ui/confetti";
 import { useRoomContext } from "@/features/data/room-context";
+import { useLeaveRoom } from "@/features/data/use-current-match";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { LobbyCountdown } from "@/features/result/lobby-countdown";
 import { RoomControls } from "@/features/room/room-controls";
 import type { Lang } from "@/game/types";
-import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { useAction } from "@/lib/hooks/use-action";
 import { useDisplayName } from "@/lib/names";
-import { GAME_PATHS } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
-import { backToLobby, leaveRoom } from "@/server/actions";
+import { backToLobby } from "@/server/actions";
 import { BoardView, FitBoard } from "./board";
 import { CoinDefs } from "./coin";
 
@@ -28,10 +26,9 @@ export function LineupResult() {
   const t = useTranslations("lineup.result");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
-  const router = useRouter();
   const { view, me, code, playerById } = useRoomContext();
   const { act, pending } = useRoomAction();
-  const { run } = useAction();
+  const { leave } = useLeaveRoom();
   const lu = view.lu;
 
   useEffect(() => {
@@ -138,8 +135,7 @@ export function LineupResult() {
         <Button
           variant="ghost"
           onClick={async () => {
-            await run(() => leaveRoom(code));
-            router.push(GAME_PATHS[view.settings.game]);
+            await leave(code, view.settings.game);
           }}
         >
           {t("home")}

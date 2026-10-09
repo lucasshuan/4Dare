@@ -10,19 +10,17 @@ import { CharacterCard } from "@/components/ui/character-card";
 import { fireConfetti } from "@/components/ui/confetti";
 import { ThemeTag } from "@/components/ui/screen";
 import { useRoomContext } from "@/features/data/room-context";
+import { useLeaveRoom } from "@/features/data/use-current-match";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { LobbyCountdown } from "@/features/result/lobby-countdown";
 import { RoomControls } from "@/features/room/room-controls";
 import { themeSetEmoji } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
-import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { useAction } from "@/lib/hooks/use-action";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import { GAME_PATHS } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
-import { backToLobby, leaveRoom } from "@/server/actions";
+import { backToLobby } from "@/server/actions";
 
 /**
  * The end of an Impostor match: who won and why, the two cards side by side
@@ -35,10 +33,9 @@ export function ImpostorResult() {
   const tr = useTranslations("room");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
-  const router = useRouter();
   const { view, me, code, playerById } = useRoomContext();
   const { act, pending } = useRoomAction();
-  const { run } = useAction();
+  const { leave } = useLeaveRoom();
   const end = view.imp?.end;
   const mineImpostor = end?.impostorIds.includes(me.id) ?? false;
   const won = !!end && mineImpostor === (end.winner === "impostors");
@@ -202,8 +199,7 @@ export function ImpostorResult() {
         <Button
           variant="ghost"
           onClick={async () => {
-            await run(() => leaveRoom(code));
-            router.push(GAME_PATHS[view.settings.game]);
+            await leave(code, view.settings.game);
           }}
         >
           {t("home")}

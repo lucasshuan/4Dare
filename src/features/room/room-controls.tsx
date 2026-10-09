@@ -5,11 +5,8 @@ import type { ReactNode } from "react";
 import { SoundToggle } from "@/components/ui/sound-toggle";
 import { ThemeSwitch, ThemeToggle } from "@/components/ui/theme-toggle";
 import { useRoomContext } from "@/features/data/room-context";
-import { useRouter } from "@/i18n/navigation";
+import { useLeaveRoom } from "@/features/data/use-current-match";
 import { cn } from "@/lib/cn";
-import { useAction } from "@/lib/hooks/use-action";
-import { GAME_PATHS } from "@/lib/routes";
-import { leaveRoom } from "@/server/actions";
 import { LeaveIcon, leaveButtonClass } from "./leave-match-button";
 
 /**
@@ -42,16 +39,12 @@ export function RoomControls({
 function LeaveRoomButton() {
   const t = useTranslations("common.currentMatch");
   const { view, code } = useRoomContext();
-  const router = useRouter();
-  const { run, pending } = useAction();
+  const { leave, pending } = useLeaveRoom();
   return (
     <button
       type="button"
       disabled={pending}
-      onClick={async () => {
-        await run(() => leaveRoom(code));
-        router.push(GAME_PATHS[view.settings.game]);
-      }}
+      onClick={() => void leave(code, view.settings.game)}
       className={leaveButtonClass}
     >
       <LeaveIcon />
