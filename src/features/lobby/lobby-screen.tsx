@@ -65,6 +65,13 @@ const panelClass = "rounded-lg bg-surface p-6 max-sm:p-4";
 /** How askew each tile of the room code sits, in degrees. */
 const TILE_TILT = [-3, 2, -1.5, 2.5, -2];
 
+/** Each game's art backdrop, so the banner runs on past its square scene. */
+const ART_BACKDROP = {
+  "who-am-i": "art-whoami",
+  impostor: "art-impostor",
+  lineup: "art-lineup",
+} as const;
+
 /** Only what the host can change (the server rejects anything else). */
 const editable = ({
   game,
@@ -373,12 +380,15 @@ export function LobbyScreen() {
           >
             <div
               aria-hidden="true"
-              className="relative -mx-6 -mt-6 aspect-[5/3] overflow-hidden bg-sunken short:aspect-[2/1] max-sm:-mx-4 max-sm:-mt-4"
+              className={cn(
+                "relative -mx-6 -mt-6 aspect-[5/2] overflow-hidden short:aspect-[3/1] max-sm:-mx-4 max-sm:-mt-4",
+                ART_BACKDROP[game],
+              )}
             >
-              {/* the home tile's animated scene: a square kept to its upper part, where the scene sits */}
+              {/* the home tile's animated scene, its upper part (where the scene sits) the banner's height, its sides fading into the same backdrop */}
               <GameArt
                 key={game}
-                className="absolute inset-x-0 top-0 w-full short:top-[-6%]"
+                className="-translate-x-1/2 absolute top-[-6%] left-1/2 w-[66%] [mask-image:linear-gradient(to_right,transparent,black_16%,black_84%,transparent)] short:w-[55%]"
               />
             </div>
             {me.isHost ? (
