@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { MODAL_SIZE } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ProfileLoader } from "./profile-screen-view";
@@ -44,10 +45,10 @@ export function ProfileModal({ handle }: { handle: string }) {
           >
             <X className="size-5" strokeWidth={1.75} />
           </Dialog.Close>
-          {/* no scrollbar: its gutter left a strip of the modal beside the cover */}
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {/* a floating bar: the browser's gutter left a strip beside the cover */}
+          <ScrollArea className="flex-1">
             <ProfileLoader handle={handle} mode="modal" />
-          </div>
+          </ScrollArea>
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
