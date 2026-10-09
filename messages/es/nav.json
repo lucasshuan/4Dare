@@ -1,0 +1,62 @@
+{
+  "open": "Abrir el menú",
+  "close": "Cerrar el menú",
+  "menu": "Menú",
+  "fresh": "Hay novedades",
+  "search": "Ir a…",
+  "searchLabel": "Ir a una página",
+  "empty": "Nada con “{q}”. Prueba “temas” o “fotos”.",
+  "new": "nuevo",
+  "escCloses": "Esc cierra",
+  "signOut": "Salir",
+  "guest": {
+    "title": "Jugando como invitado",
+    "hint": "Entra con Discord o Google para guardar tu nivel y tus logros."
+  },
+  "me": "@{handle} · {into} de {need} XP",
+  "groups": {
+    "play": "Jugar",
+    "you": "Tú",
+    "community": "Comunidad",
+    "library": "Biblioteca",
+    "help": "Ayuda"
+  },
+  "items": {
+    "home": "Inicio",
+    "rooms": "Salas abiertas",
+    "newRoom": "Crear sala",
+    "profile": "Perfil",
+    "badges": "Logros",
+    "matches": "Partidas",
+    "settings": "Ajustes",
+    "rankings": "Clasificación",
+    "players": "Jugadores",
+    "contributions": "Contribuciones",
+    "characters": "Personajes",
+    "workshop": "Taller",
+    "howTo": "Cómo jugar",
+    "news": "Novedades",
+    "legal": "Privacidad y términos"
+  },
+  "meta": {
+    "rooms": "{n, plural, =0 {ninguna abierta} one {# abierta} other {# abiertas}}",
+    "voting": "{n} en votación"
+  },
+  "keys": {
+    "home": "inicio juegos",
+    "rooms": "salas abiertas publicas",
+    "newRoom": "crear sala nueva anfitrion",
+    "profile": "perfil muro yo",
+    "badges": "logros medallas insignias",
+    "matches": "partidas historial actividad jardin",
+    "settings": "ajustes opciones sonido tema idioma",
+    "rankings": "clasificacion ranking xp tabla top",
+    "players": "jugadores personas usuarios amigos",
+    "contributions": "contribuciones fotos apodos",
+    "characters": "personajes biblioteca apodos fotos",
+    "workshop": "taller temas preguntas misiones sugerir votar",
+    "howTo": "como jugar reglas ayuda",
+    "news": "novedades cambios actualizaciones",
+    "legal": "privacidad terminos legal cookies datos"
+  }
+}

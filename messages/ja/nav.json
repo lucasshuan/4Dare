@@ -1,0 +1,62 @@
+{
+  "open": "メニューを開く",
+  "close": "メニューを閉じる",
+  "menu": "メニュー",
+  "fresh": "お知らせがあります",
+  "search": "移動先…",
+  "searchLabel": "ページへ移動",
+  "empty": "「{q}」に合うものはありません。「テーマ」や「写真」で試してみて。",
+  "new": "new",
+  "escCloses": "Escで閉じる",
+  "signOut": "ログアウト",
+  "guest": {
+    "title": "ゲストでプレイ中",
+    "hint": "DiscordかGoogleでログインすると、レベルとバッジが残ります。"
+  },
+  "me": "@{handle} · {into} / {need} XP",
+  "groups": {
+    "play": "遊ぶ",
+    "you": "あなた",
+    "community": "コミュニティ",
+    "library": "ライブラリ",
+    "help": "ヘルプ"
+  },
+  "items": {
+    "home": "ホーム",
+    "rooms": "公開ルーム",
+    "newRoom": "ルームを作る",
+    "profile": "プロフィール",
+    "badges": "バッジ",
+    "matches": "対戦",
+    "settings": "設定",
+    "rankings": "ランキング",
+    "players": "プレイヤー",
+    "contributions": "貢献",
+    "characters": "キャラクター",
+    "workshop": "工房",
+    "howTo": "遊び方",
+    "news": "お知らせ",
+    "legal": "プライバシーと規約"
+  },
+  "meta": {
+    "rooms": "{n, plural, =0 {なし} other {#件}}",
+    "voting": "投票中 {n}"
+  },
+  "keys": {
+    "home": "ホーム ゲーム home",
+    "rooms": "ルーム 公開 rooms",
+    "newRoom": "ルーム 作成 新規",
+    "profile": "プロフィール 掲示板",
+    "badges": "バッジ 実績",
+    "matches": "対戦 履歴 アクティビティ",
+    "settings": "設定 サウンド テーマ 言語",
+    "rankings": "ランキング xp",
+    "players": "プレイヤー 人 友達",
+    "contributions": "貢献 写真 ニックネーム",
+    "characters": "キャラクター ライブラリ 写真 ニックネーム",
+    "workshop": "工房 テーマ 質問 ミッション 提案 投票",
+    "howTo": "遊び方 ルール ヘルプ",
+    "news": "お知らせ 更新 新着",
+    "legal": "プライバシー 規約 クッキー データ"
+  }
+}

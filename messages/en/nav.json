@@ -1,0 +1,62 @@
+{
+  "open": "Open the menu",
+  "close": "Close the menu",
+  "menu": "Menu",
+  "fresh": "Something new in What's new",
+  "search": "Go to…",
+  "searchLabel": "Go to a page",
+  "empty": "Nothing for “{q}”. Try “themes” or “photos”.",
+  "new": "new",
+  "escCloses": "Esc closes",
+  "signOut": "Sign out",
+  "guest": {
+    "title": "Playing as a guest",
+    "hint": "Sign in with Discord or Google to keep your level and badges."
+  },
+  "me": "@{handle} · {into} of {need} XP",
+  "groups": {
+    "play": "Play",
+    "you": "You",
+    "community": "Community",
+    "library": "Library",
+    "help": "Help"
+  },
+  "items": {
+    "home": "Home",
+    "rooms": "Open rooms",
+    "newRoom": "Create room",
+    "profile": "Profile",
+    "badges": "Badges",
+    "matches": "Matches",
+    "settings": "Settings",
+    "rankings": "Rankings",
+    "players": "Players",
+    "contributions": "Contributions",
+    "characters": "Characters",
+    "workshop": "Workshop",
+    "howTo": "How to play",
+    "news": "What's new",
+    "legal": "Privacy and terms"
+  },
+  "meta": {
+    "rooms": "{n, plural, =0 {none open} one {# open} other {# open}}",
+    "voting": "{n} voting"
+  },
+  "keys": {
+    "home": "home start games",
+    "rooms": "rooms public open lobby",
+    "newRoom": "create new room host",
+    "profile": "profile mural wall me",
+    "badges": "badges achievements medals",
+    "matches": "matches history activity garden",
+    "settings": "settings options sound theme language presets",
+    "rankings": "rankings ranking xp leaderboard top",
+    "players": "players people users friends",
+    "contributions": "contributions feed photos pictures nicknames",
+    "characters": "characters library nicknames photos pictures",
+    "workshop": "workshop themes questions missions suggest vote",
+    "howTo": "how to play rules help",
+    "news": "news what's new updates changelog",
+    "legal": "privacy terms legal cookies data"
+  }
+}

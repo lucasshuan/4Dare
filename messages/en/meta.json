@@ -66,5 +66,45 @@
   "rooms": {
     "title": "Rooms",
     "description": "Every room waiting for players on 4Dare: find one by game, name or host, public or with a password."
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Sound, look, game options and language for 4Dare."
+  },
+  "howTo": {
+    "title": "How to play",
+    "description": "The rules of Who am I?, Impostor and What for? on one page."
+  },
+  "characters": {
+    "title": "Characters",
+    "description": "Every character you can pick in 4Dare's games. Search, add a new one, give nicknames and send pictures."
+  },
+  "workshop": {
+    "title": "Workshop",
+    "description": "The themes, questions and missions 4Dare's games use. See what is live, vote on what is coming and suggest your own."
+  },
+  "rankings": {
+    "title": "Rankings",
+    "description": "Who earned the most XP in 4Dare, per game and per period."
+  },
+  "players": {
+    "title": "Players",
+    "description": "Find people to play 4Dare with."
+  },
+  "contributions": {
+    "title": "Contributions",
+    "description": "Everything the community added to 4Dare's library and Workshop."
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "description": "What 4Dare keeps, why, and how to download or delete your data. The essentials in 30 seconds."
+  },
+  "terms": {
+    "title": "Terms of use",
+    "description": "The rules for playing 4Dare, in plain words. The essentials in 30 seconds."
+  },
+  "news": {
+    "title": "What's new",
+    "description": "What changed in 4Dare: new games, improvements and fixes."
   }
 }

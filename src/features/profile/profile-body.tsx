@@ -17,6 +17,7 @@ import {
   Sprout,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import {
   type CSSProperties,
@@ -269,6 +270,8 @@ function ProfileShow({
   const toast = useToast();
   const locale = useLocale();
   const wide = useMedia("(min-width: 640px)");
+  // ?tab= opens a section first (the menu's Badges and Matches)
+  const askedTab = useSearchParams().get("tab");
   // the time the page was read: the garden and the ages count from it
   const [now] = useState(() => Date.now());
   const run = useMemo(() => streaks(view.plays, now), [view.plays, now]);
@@ -483,7 +486,10 @@ function ProfileShow({
 
             {tabs.length ? (
               <Tabs.Root
-                defaultValue={tabs[0].value}
+                defaultValue={
+                  tabs.find(({ value }) => value === askedTab)?.value ??
+                  tabs[0].value
+                }
                 orientation={wide ? "vertical" : "horizontal"}
                 className="mt-[22px] grid border-line border-t sm:grid-cols-[88px_minmax(0,1fr)]"
               >

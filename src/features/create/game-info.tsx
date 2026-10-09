@@ -55,6 +55,8 @@ const THUMB = {
   sm: "h-10 w-16",
   xs: "h-6 w-[38.4px]",
   tiny: "h-[15px] w-6 rounded-[4px]",
+  /** As wide as its box (the side menu's tiles). */
+  fill: "aspect-[16/10] w-full",
 } as const;
 
 /** The game's small thumbnail, its own drawing (the card art turns to mush scaled this far down). */

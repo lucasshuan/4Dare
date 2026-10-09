@@ -52,7 +52,6 @@ export function SettingsDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("settings");
-  const wide = useMedia("(min-width: 640px)");
   return (
     <Modal
       open={open}
@@ -60,37 +59,49 @@ export function SettingsDialog({
       title={t("title")}
       icon={<SettingsIcon strokeWidth={1.75} />}
     >
-      <Tabs.Root
-        defaultValue="sound"
-        orientation={wide ? "vertical" : "horizontal"}
-        className="flex min-h-0 flex-1 flex-col sm:grid sm:grid-cols-[200px_minmax(0,1fr)]"
-      >
-        <Tabs.List className="flex shrink-0 gap-1 overflow-x-auto border-line bg-canvas p-3 max-sm:border-b sm:flex-col sm:border-r">
-          {TABS.map(({ value, Icon }) => (
-            <Tabs.Tab
-              key={value}
-              value={value}
-              className="flex h-11 shrink-0 items-center gap-2.5 rounded-lg px-3 font-semibold text-[15px] text-ink-muted outline-none transition-colors duration-200 ease-soft hover:text-ink focus-visible:outline-3 focus-visible:outline-sky data-active:bg-surface data-active:text-ink data-active:shadow-card"
-            >
-              <Icon className="size-[18px]" strokeWidth={1.75} />
-              {t(`tabs.${value}`)}
-            </Tabs.Tab>
-          ))}
-        </Tabs.List>
-        <Pane value="sound">
-          <SoundPane />
-        </Pane>
-        <Pane value="look">
-          <LookPane />
-        </Pane>
-        <Pane value="game">
-          <GamePane />
-        </Pane>
-        <Pane value="language">
-          <LanguagePane />
-        </Pane>
-      </Tabs.Root>
+      <SettingsTabs />
     </Modal>
+  );
+}
+
+/** The tabs themselves, in the dialog or on the settings page. */
+export function SettingsTabs({ className }: { className?: string }) {
+  const t = useTranslations("settings");
+  const wide = useMedia("(min-width: 640px)");
+  return (
+    <Tabs.Root
+      defaultValue="sound"
+      orientation={wide ? "vertical" : "horizontal"}
+      className={cn(
+        "flex min-h-0 flex-1 flex-col sm:grid sm:grid-cols-[200px_minmax(0,1fr)]",
+        className,
+      )}
+    >
+      <Tabs.List className="flex shrink-0 gap-1 overflow-x-auto border-line bg-canvas p-3 max-sm:border-b sm:flex-col sm:border-r">
+        {TABS.map(({ value, Icon }) => (
+          <Tabs.Tab
+            key={value}
+            value={value}
+            className="flex h-11 shrink-0 items-center gap-2.5 rounded-lg px-3 font-semibold text-[15px] text-ink-muted outline-none transition-colors duration-200 ease-soft hover:text-ink focus-visible:outline-3 focus-visible:outline-sky data-active:bg-surface data-active:text-ink data-active:shadow-card"
+          >
+            <Icon className="size-[18px]" strokeWidth={1.75} />
+            {t(`tabs.${value}`)}
+          </Tabs.Tab>
+        ))}
+      </Tabs.List>
+      <Pane value="sound">
+        <SoundPane />
+      </Pane>
+      <Pane value="look">
+        <LookPane />
+      </Pane>
+      <Pane value="game">
+        <GamePane />
+      </Pane>
+      <Pane value="language">
+        <LanguagePane />
+      </Pane>
+    </Tabs.Root>
   );
 }
 

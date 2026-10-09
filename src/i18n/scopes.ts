@@ -15,10 +15,21 @@ const ROOM_ONLY: readonly (keyof Messages)[] = [
   "meta",
 ];
 
+/**
+ * Namespaces only their own page shows (long texts: rules, legal pages).
+ * The page hands them down itself, with `PageMessages`.
+ */
+export const PAGE_ONLY = [
+  "howTo",
+] as const satisfies readonly (keyof Messages)[];
+export type PageNamespace = (typeof PAGE_ONLY)[number];
+
 /** The messages a hub page needs in the browser. */
 export const hubMessages = (all: Messages): Partial<Messages> =>
   Object.fromEntries(
     Object.entries(all).filter(
-      ([ns]) => !ROOM_ONLY.includes(ns as keyof Messages),
+      ([ns]) =>
+        !ROOM_ONLY.includes(ns as keyof Messages) &&
+        !(PAGE_ONLY as readonly string[]).includes(ns),
     ),
   );

@@ -45,9 +45,10 @@ Tick = done and committed.
 ## Menu
 
 - [ ] Burger left of logo opens drawer: Play, You, Community, Library, Help
-- [ ] Drawer top: face, level, XP bar; guest sees Discord/Google sign-in
-- [ ] "Go to" filter, arrow keys, Esc closes, focus back to button
-- [ ] Hidden during matches
+- [x] Drawer top: face, level, XP bar; guest sees Discord/Google sign-in
+- [x] "Go to" filter, arrow keys, Esc closes, focus back to button
+- [x] Hidden during matches
+- [x] Own pages for settings (`/settings`) and the three games' rules (`/how-to-play`)
 - [ ] Avatar menu keeps account, theme, sign out only
 - [ ] Blue dot: suggestion moved or new achievement
 

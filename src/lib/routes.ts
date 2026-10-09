@@ -23,3 +23,7 @@ export const ROOMS = "/rooms";
 /** The room list, filtered to `game` when given. */
 export const roomsOf = (game?: GameKey) =>
   game ? `${ROOMS}?game=${game}` : ROOMS;
+
+/** Pages of the side menu outside the games. */
+export const SETTINGS = "/settings";
+export const HOW_TO_PLAY = "/how-to-play";

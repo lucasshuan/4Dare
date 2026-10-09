@@ -1,0 +1,104 @@
+{
+  "eyebrow": "Ajuda",
+  "title": "Como jogar",
+  "lead": "Três jogos para jogar com amigos no navegador, sem instalar nada. Cada um tem a sua cena de abertura, que explica a regra na hora. Aqui vai tudo de uma vez.",
+  "jump": "Ir para",
+  "create": "Criar sala",
+  "page": "Página do jogo",
+  "step": "Passo {n}",
+  "games": {
+    "whoAmI": {
+      "steps": [
+        {
+          "t": "Um tema para a rodada",
+          "x": "A sala vota entre quatro temas, ou o anfitrião escreve um. Todo personagem tem que caber nele."
+        },
+        {
+          "t": "Escolha para outra pessoa",
+          "x": "Cada um escolhe um personagem para outro jogador. A abertura mostra quem escolhe para quem."
+        },
+        {
+          "t": "Você vê as cartas dos outros",
+          "x": "Todo mundo vê as cartas na mesa, menos a própria. A sua fica virada para você."
+        },
+        {
+          "t": "Perguntas de sim ou não",
+          "x": "Na sua vez, pergunte sobre a sua carta. Os outros respondem sim, não ou talvez."
+        },
+        {
+          "t": "Chute quando souber",
+          "x": "Acertou, descobriu. Quem descobre primeiro sobe no pódio."
+        }
+      ],
+      "tip": "Dica: apelidos contam como acerto. “Homem-Morcego” vale para Batman."
+    },
+    "impostor": {
+      "steps": [
+        {
+          "t": "A mesma carta, menos uma",
+          "x": "Todos recebem o mesmo personagem. O impostor recebe outro, parecido, e nem sabe que é o impostor. Com 7 ou mais, são dois."
+        },
+        {
+          "t": "Responda com um toque",
+          "x": "Uma pergunta sobre a sua carta: escala, cor, emoji, escolha ou uma palavra. Ninguém fala o nome."
+        },
+        {
+          "t": "As respostas chegam juntas",
+          "x": "Todo mundo vê o que cada um respondeu. Quem destoa?"
+        },
+        {
+          "t": "Conversem e votem",
+          "x": "Aponte suspeitos e confirme o voto. Quem tiver mais votos sai. Empate, ninguém sai."
+        },
+        {
+          "t": "Última chance",
+          "x": "Impostor pego tenta adivinhar a carta do grupo. O grupo vence quando todos os impostores saem."
+        }
+      ],
+      "tip": "Dica: não conhece a carta? “Não conheço” troca as cartas de todos, até duas vezes, antes de qualquer resposta."
+    },
+    "whatFor": {
+      "steps": [
+        {
+          "t": "Leilão de personagens",
+          "x": "Cada um começa com moedas e dá lances, um lote por vez. Lance nos últimos 5 segundos devolve 5 segundos ao relógio."
+        },
+        {
+          "t": "Monte o time sem saber pra quê",
+          "x": "Ninguém sabe a missão ainda. Dá para trocar personagens no fim do leilão."
+        },
+        {
+          "t": "O envelope abre",
+          "x": "Sai a missão, como “convencer um gato a descer da geladeira”."
+        },
+        {
+          "t": "Defenda o seu quadro",
+          "x": "Arrume as fotos e escreva no quadro. Cada um apresenta o seu time."
+        },
+        {
+          "t": "Voto secreto",
+          "x": "Cada voto vale ponto, e quem vence a rodada ganha mais. Com 3 ou mais, alguém pode apresentar e dar o veredito."
+        }
+      ],
+      "tip": "Dica: missões pesadas só saem em salas que ligam essa opção."
+    }
+  },
+  "common": {
+    "title": "Vale para todos",
+    "items": [
+      { "e": "🎮", "x": "Dá para jogar sem conta, como convidado." },
+      {
+        "e": "🔗",
+        "x": "Chame amigos pelo código ou pelo link da sala, ou entre numa sala pública."
+      },
+      {
+        "e": "⏱️",
+        "x": "O anfitrião ajusta relógios, gostos e temas antes de começar."
+      },
+      {
+        "e": "⭐",
+        "x": "Toda partida dá XP. Com conta, o nível e as conquistas ficam no perfil."
+      }
+    ]
+  }
+}

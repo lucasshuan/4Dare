@@ -66,5 +66,45 @@
   "rooms": {
     "title": "ルーム",
     "description": "4だれで参加者を待っているルーム一覧。ゲーム、名前、ホストで探せます。公開ルームもパスワード付きも。"
+  },
+  "settings": {
+    "title": "設定",
+    "description": "4Dareのサウンド、見た目、ゲームのオプション、言語。"
+  },
+  "howTo": {
+    "title": "遊び方",
+    "description": "「だれ？」「インポスター」「何のため？」のルールを1ページで。"
+  },
+  "characters": {
+    "title": "キャラクター",
+    "description": "4Dareのゲームで選べるすべてのキャラクター。検索、新規追加、ニックネーム、写真の投稿ができます。"
+  },
+  "workshop": {
+    "title": "工房",
+    "description": "4Dareのゲームで使うテーマ、質問、ミッション。公開中のものを見て、これからのものに投票し、自分の案を出そう。"
+  },
+  "rankings": {
+    "title": "ランキング",
+    "description": "4Dareでいちばん XP を集めた人。ゲーム別・期間別。"
+  },
+  "players": {
+    "title": "プレイヤー",
+    "description": "4Dareを一緒に遊ぶ人を探そう。"
+  },
+  "contributions": {
+    "title": "貢献",
+    "description": "コミュニティが4Dareのライブラリと工房に加えたもの。"
+  },
+  "privacy": {
+    "title": "プライバシーポリシー",
+    "description": "4Dareが何を保存し、なぜ必要か。データのダウンロードと削除の方法。要点は30秒で。"
+  },
+  "terms": {
+    "title": "利用規約",
+    "description": "4Dareで遊ぶためのルールを、わかりやすい言葉で。要点は30秒で。"
+  },
+  "news": {
+    "title": "お知らせ",
+    "description": "4Dareで変わったこと：新しいゲーム、改善、修正。"
   }
 }

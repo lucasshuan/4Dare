@@ -66,5 +66,45 @@
   "rooms": {
     "title": "Salas",
     "description": "Todas as salas esperando jogadores no 4Dare: encontre por jogo, nome ou anfitrião, públicas ou com senha."
+  },
+  "settings": {
+    "title": "Configurações",
+    "description": "Som, visual, opções de jogo e idioma do 4Dare."
+  },
+  "howTo": {
+    "title": "Como jogar",
+    "description": "As regras do Quem sou eu?, do Impostor e do Pra quê? numa página só."
+  },
+  "characters": {
+    "title": "Personagens",
+    "description": "Todos os personagens que dá para escolher nos jogos do 4Dare. Busque, crie um novo, dê apelidos e mande fotos."
+  },
+  "workshop": {
+    "title": "Oficina",
+    "description": "Temas, perguntas e missões que os jogos do 4Dare usam. Veja o que está no ar, vote no que está chegando e sugira o seu."
+  },
+  "rankings": {
+    "title": "Rankings",
+    "description": "Quem mais somou XP no 4Dare, por jogo e por período."
+  },
+  "players": {
+    "title": "Jogadores",
+    "description": "Encontre gente para jogar 4Dare."
+  },
+  "contributions": {
+    "title": "Contribuições",
+    "description": "Tudo o que a comunidade pôs na biblioteca e na Oficina do 4Dare."
+  },
+  "privacy": {
+    "title": "Política de privacidade",
+    "description": "O que o 4Dare guarda, por quê, e como baixar ou apagar seus dados. O essencial em 30 segundos."
+  },
+  "terms": {
+    "title": "Termos de uso",
+    "description": "As regras para jogar 4Dare, em português claro. O essencial em 30 segundos."
+  },
+  "news": {
+    "title": "Novidades",
+    "description": "O que mudou no 4Dare: jogos novos, melhorias e correções."
   }
 }

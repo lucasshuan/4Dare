@@ -2,12 +2,14 @@ import { LanguageSwitch } from "@/components/ui/language-switch";
 import { Wordmark } from "@/components/ui/screen";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CurrentMatchBadge } from "@/features/current-match/match-lock";
+import { MenuButton } from "@/features/nav/menu-button";
 import { UserMenu } from "./user-menu";
 
-/** Top left of the hub screens: the logo, then the match you are in, if any. */
+/** Top left of the hub screens: the side menu, the logo, then the match you are in, if any. */
 export function HubBrand() {
   return (
     <>
+      <MenuButton />
       <Wordmark />
       <CurrentMatchBadge />
     </>
