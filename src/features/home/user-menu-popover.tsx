@@ -5,18 +5,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Dices,
   LogOut,
-  Moon,
   Settings,
-  Sun,
   UserRound,
   UserRoundCog,
   UserRoundPen,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import { type ReactNode, useState } from "react";
 import {
   AuthButton,
@@ -37,7 +32,6 @@ import { useAction } from "@/lib/hooks/use-action";
 import type { DeferredProps } from "@/lib/hooks/use-deferred";
 import { dur, ease } from "@/lib/motion";
 import { meNamed, useDisplayName } from "@/lib/names";
-import { updateSettings, useSettings } from "@/lib/settings";
 import { rerollGuest, signOut } from "@/server/actions";
 import { useSignIn } from "./use-sign-in";
 import { UserMenuFace, userMenuTrigger } from "./user-menu";
@@ -325,10 +319,7 @@ function MenuItem({
   );
 }
 
-const ICON_BUTTON =
-  "flex size-9 items-center justify-center rounded-pill text-ink-muted transition-colors duration-150 ease-soft hover:bg-sunken hover:text-ink aria-pressed:bg-sunken aria-pressed:text-ink [&_svg]:size-[18px]";
-
-/** The last row: settings, sound on or off, light or dark, then whatever the caller adds (sign out). */
+/** The last row: settings, then whatever the caller adds (sign out). */
 function QuickRow({
   onSettings,
   children,
@@ -337,10 +328,6 @@ function QuickRow({
   children?: ReactNode;
 }) {
   const t = useTranslations("home.user");
-  const tTheme = useTranslations("common.theme");
-  const { muted } = useSettings();
-  const { resolvedTheme, setTheme } = useTheme();
-  const dark = resolvedTheme === "dark";
   return (
     <div className="-mx-1 flex items-center gap-1">
       <button
@@ -350,29 +337,6 @@ function QuickRow({
       >
         <Settings strokeWidth={1.75} />
         {t("settings")}
-      </button>
-      <button
-        type="button"
-        aria-pressed={!muted}
-        aria-label={muted ? t("soundOff") : t("soundOn")}
-        title={muted ? t("soundOff") : t("soundOn")}
-        onClick={() => updateSettings((s) => ({ ...s, muted: !s.muted }))}
-        className={ICON_BUTTON}
-      >
-        {muted ? (
-          <VolumeX strokeWidth={1.75} />
-        ) : (
-          <Volume2 strokeWidth={1.75} />
-        )}
-      </button>
-      <button
-        type="button"
-        aria-label={dark ? tTheme("light") : tTheme("dark")}
-        title={dark ? tTheme("light") : tTheme("dark")}
-        onClick={() => setTheme(dark ? "light" : "dark")}
-        className={ICON_BUTTON}
-      >
-        {dark ? <Sun strokeWidth={1.75} /> : <Moon strokeWidth={1.75} />}
       </button>
       {children}
     </div>
