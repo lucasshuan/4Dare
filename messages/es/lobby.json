@@ -6,6 +6,11 @@
   "codeLabel": "Código de la sala: {code}",
   "linkCopied": "Enlace copiado",
   "copyLink": "Copiar enlace",
+  "settingsGroups": {
+    "room": "Sala",
+    "rules": "Reglas",
+    "content": "Contenido"
+  },
   "qrOpen": "Mostrar el código QR más grande",
   "qrTitle": "Apunta la cámara de un teléfono aquí",
   "qrBody": "Abre la sala directamente en el navegador, sin escribir el código.",

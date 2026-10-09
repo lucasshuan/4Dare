@@ -6,6 +6,7 @@
   "codeLabel": "Room code: {code}",
   "linkCopied": "Link copied",
   "copyLink": "Copy link",
+  "settingsGroups": { "room": "Room", "rules": "Rules", "content": "Content" },
   "qrOpen": "Show the QR code bigger",
   "qrTitle": "Point a phone camera here",
   "qrBody": "It opens the room right in the browser, no code to type.",

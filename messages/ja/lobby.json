@@ -6,6 +6,11 @@
   "codeLabel": "ルームコード：{code}",
   "linkCopied": "リンクをコピーしました",
   "copyLink": "リンクをコピー",
+  "settingsGroups": {
+    "room": "ルーム",
+    "rules": "ルール",
+    "content": "コンテンツ"
+  },
   "qrOpen": "QRコードを大きく表示",
   "qrTitle": "スマホのカメラで読み取ってね",
   "qrBody": "コードを入力しなくても、ブラウザでルームが開きます。",

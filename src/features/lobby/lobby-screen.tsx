@@ -319,8 +319,8 @@ export function LobbyScreen() {
                   icon: SlidersHorizontal,
                   panel: (
                     <div className="@container flex flex-col gap-4">
-                      {/* plain rows on hairlines, all one height, in up to three columns as the panel widens */}
-                      <ul className="grid auto-rows-fr @4xl:grid-cols-3 @xl:grid-cols-2 gap-x-8 [&>li]:flex [&>li]:min-h-14 [&>li]:min-w-0 [&>li]:items-center [&>li]:border-line [&>li]:border-b">
+                      {/* by kind: the room, the rules, what comes in it */}
+                      <SettingsGroup title={t("settingsGroups.room")}>
                         <VisibilityRow
                           settings={view.settings}
                           editable={me.isHost}
@@ -340,20 +340,14 @@ export function LobbyScreen() {
                             return true;
                           }}
                         />
+                      </SettingsGroup>
+                      <SettingsGroup title={t("settingsGroups.rules")}>
                         <TimesRow
                           settings={view.settings}
                           editable={me.isHost}
                           pending={pending}
                           onSave={async (times) =>
                             (await act(() => updateSettings(code, times))).ok
-                          }
-                        />
-                        <TastesRow
-                          settings={view.settings}
-                          editable={me.isHost}
-                          pending={pending}
-                          onSave={async (v) =>
-                            (await act(() => updateSettings(code, v))).ok
                           }
                         />
                         {game === "impostor" ? (
@@ -396,14 +390,6 @@ export function LobbyScreen() {
                                 (await act(() => updateSettings(code, v))).ok
                               }
                             />
-                            <MissionsRow
-                              settings={view.settings}
-                              editable={me.isHost}
-                              pending={pending}
-                              onSave={async (v) =>
-                                (await act(() => updateSettings(code, v))).ok
-                              }
-                            />
                           </>
                         ) : null}
                         {game === "who-am-i" ? (
@@ -420,7 +406,27 @@ export function LobbyScreen() {
                             }
                           />
                         ) : null}
-                      </ul>
+                      </SettingsGroup>
+                      <SettingsGroup title={t("settingsGroups.content")}>
+                        <TastesRow
+                          settings={view.settings}
+                          editable={me.isHost}
+                          pending={pending}
+                          onSave={async (v) =>
+                            (await act(() => updateSettings(code, v))).ok
+                          }
+                        />
+                        {game === "lineup" ? (
+                          <MissionsRow
+                            settings={view.settings}
+                            editable={me.isHost}
+                            pending={pending}
+                            onSave={async (v) =>
+                              (await act(() => updateSettings(code, v))).ok
+                            }
+                          />
+                        ) : null}
+                      </SettingsGroup>
                       {me.isHost ? (
                         <Button
                           className="self-start"
@@ -654,5 +660,25 @@ function ReadyMeter({
         {label}
       </span>
     </div>
+  );
+}
+
+/** A kind of setting under its name: plain rows on hairlines, all one height, in up to three columns as the panel widens. */
+function SettingsGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-1">
+      <h3 className="m-0 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.07em]">
+        {title}
+      </h3>
+      <ul className="grid auto-rows-fr @4xl:grid-cols-3 @xl:grid-cols-2 gap-x-8 [&>li]:flex [&>li]:min-h-14 [&>li]:min-w-0 [&>li]:items-center [&>li]:border-line [&>li]:border-b">
+        {children}
+      </ul>
+    </section>
   );
 }
