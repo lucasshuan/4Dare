@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Flag } from "@/components/ui/language-switch";
 import { useToast } from "@/components/ui/toast";
 import { GameThumb, useGameName } from "@/features/create/game-info";
+import type { GameKey } from "@/game/games";
 import type { Banner } from "@/game/profile/profile";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -102,6 +103,7 @@ export function ProfileCover({
   mode,
   slot,
   children,
+  footer,
 }: {
   banner: Banner | null;
   avatarColor: string;
@@ -109,6 +111,8 @@ export function ProfileCover({
   mode: ProfileMode;
   slot: HTMLElement | null;
   children?: ReactNode;
+  /** Along the cover's bottom, right of the avatar (wider screens only). */
+  footer?: ReactNode;
 }) {
   const cover = (
     <div
@@ -132,6 +136,27 @@ export function ProfileCover({
           )}
         >
           {children}
+        </div>
+      ) : null}
+      {footer ? (
+        // lined up with the profile under it: the page's width, or the modal's frame
+        <div
+          className={cn(
+            "absolute inset-x-0 bottom-3 max-sm:hidden",
+            mode === "page" && "px-8",
+          )}
+        >
+          <div
+            className={cn(
+              "mx-auto flex",
+              // past the avatar: its width and the gap to the name
+              mode === "page"
+                ? "max-w-page pl-[148px]"
+                : "max-w-[1080px] pr-7 pl-[176px]",
+            )}
+          >
+            {footer}
+          </div>
         </div>
       ) : null}
     </div>
@@ -279,6 +304,11 @@ function ProfileShow({
         accent={view.accent}
         mode={mode}
         slot={coverSlot}
+        footer={
+          view.playing && !view.hidden.profile ? (
+            <PlayingNow game={view.playing} className="flex-1" />
+          ) : null
+        }
       />
       <div className={cn("flex flex-col", FRAME[mode].root)}>
         <div
@@ -421,16 +451,11 @@ function ProfileShow({
             </div>
 
             {view.playing ? (
-              <div className="mx-(--pad) mt-[18px] flex flex-wrap items-center gap-3 rounded-xl bg-surface py-2.5 pr-2.5 pl-3.5">
-                <span className="inline-flex items-center gap-1.5 rounded-pill bg-yes-soft px-2.5 py-1 font-bold text-[12px] text-yes uppercase tracking-[0.06em]">
-                  <span className="size-2 animate-pulse rounded-pill bg-yes" />
-                  {t("playing")}
-                </span>
-                <span className="inline-flex items-center gap-2 font-semibold text-sm">
-                  <GameThumb game={view.playing} size="tiny" />
-                  {gameName(view.playing)}
-                </span>
-              </div>
+              // on phones under the profile; wider, along the cover's bottom
+              <PlayingNow
+                game={view.playing}
+                className="mx-(--pad) mt-[18px] sm:hidden"
+              />
             ) : null}
 
             {tabs.length ? (
@@ -525,5 +550,34 @@ export function Chip({
       {icon}
       {children}
     </span>
+  );
+}
+
+/** The game this account is in right now. */
+function PlayingNow({
+  game,
+  className,
+}: {
+  game: GameKey;
+  className?: string;
+}) {
+  const t = useTranslations("profile");
+  const gameName = useGameName();
+  return (
+    <div
+      className={cn(
+        "flex flex-wrap items-center gap-3 rounded-xl bg-surface/90 py-2.5 pr-2.5 pl-3.5 shadow-card backdrop-blur-md",
+        className,
+      )}
+    >
+      <span className="inline-flex items-center gap-1.5 rounded-pill bg-yes-soft px-2.5 py-1 font-bold text-[12px] text-yes uppercase tracking-[0.06em]">
+        <span className="size-2 animate-pulse rounded-pill bg-yes" />
+        {t("playing")}
+      </span>
+      <span className="inline-flex items-center gap-2 font-semibold text-sm">
+        <GameThumb game={game} size="tiny" />
+        {gameName(game)}
+      </span>
+    </div>
   );
 }
