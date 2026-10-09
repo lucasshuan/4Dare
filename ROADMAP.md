@@ -18,6 +18,11 @@ Tick = done and committed.
 - [ ] New game inspired by Ito
 - [ ] Character generator
 
+## Sound
+
+- [ ] Room actions get sounds
+- [ ] Full sound set in every game
+
 ## Languages
 
 - [ ] Korean
