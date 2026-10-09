@@ -611,8 +611,13 @@ function StartBlocked({
         {children}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="top" sideOffset={8} className="z-50">
+        <Popover.Positioner side="bottom" sideOffset={10} className="z-50">
           <Popover.Popup className="w-max max-w-[min(300px,calc(100vw-2rem))] origin-(--transform-origin) rounded-md bg-surface px-3 py-2 font-medium text-[13px] text-ink-muted leading-snug shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+            <Popover.Arrow className="data-[side=bottom]:-top-2 data-[side=top]:-bottom-2 data-[side=top]:rotate-180">
+              <svg width="16" height="8" viewBox="0 0 16 8" aria-hidden="true">
+                <path d="M0 8 L8 0 L16 8 Z" className="fill-surface" />
+              </svg>
+            </Popover.Arrow>
             {reason}
           </Popover.Popup>
         </Popover.Positioner>
