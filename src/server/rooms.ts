@@ -538,6 +538,30 @@ export async function currentMatch(id: PlayerId): Promise<CurrentMatch | null> {
   return null;
 }
 
+/** Where a player can be found: a lobby, or a match under way. */
+const PRESENT: readonly Phase[] = ["lobby", ...LIVE];
+
+/**
+ * The room `id` is in now, for their profile: a match they have not left
+ * (as currentMatch), or a lobby they still have open and the room list shows.
+ */
+export async function presentRoom(id: PlayerId): Promise<RoomState | null> {
+  const now = Date.now();
+  for (const code of await getBackend().rooms.withPlayer(id, PRESENT)) {
+    const state = (await applyDueTimeouts(code))?.state;
+    const me = state?.players.find((p) => p.id === id);
+    if (!state || !me || me.away) continue;
+    if (LIVE.includes(state.phase)) return state;
+    if (
+      state.phase === "lobby" &&
+      me.goneAt == null &&
+      toPublicRoom(state, now)
+    )
+      return state;
+  }
+  return null;
+}
+
 /** Every room `player` still sits in, open or closed to newcomers: where a new name or avatar must show. */
 const SEATED: readonly Phase[] = ["lobby", ...LIVE, "finished"];
 

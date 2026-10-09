@@ -14,6 +14,9 @@
     "streak": "day streak"
   },
   "playing": "Playing now",
+  "publicRoom": "Public room <b>{name}</b> · {taken} of {seats} seats",
+  "publicRoomUnnamed": "Public room · {taken} of {seats} seats",
+  "joinRoom": "Join the room",
   "share": "Share",
   "copied": "Link copied",
   "tabsLabel": "Profile sections",
@@ -183,7 +186,7 @@
     "privacyHints": {
       "profile": "A closed profile shows only name and avatar",
       "activity": "Numbers, garden and fun facts",
-      "playing": "The game of the match you're in"
+      "playing": "The game of the room or match you're in, and the room if it's public"
     },
     "audiences": {
       "all": "Everyone",

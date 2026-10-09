@@ -2,6 +2,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PlayedMatch } from "@/game/profile/history";
 import { DEFAULT_PRIVACY, type Privacy } from "@/game/profile/profile";
+import { Game, ident } from "@/game/test-utils";
+import type { RoomSettings, RoomState } from "@/game/types";
 import type { StoredProfile } from "./backend/types";
 import { playerCard, profileView } from "./profiles";
 
@@ -55,6 +57,7 @@ const store = vi.hoisted(() => ({
   history: [] as PlayedMatch[],
   pictures: [] as unknown[],
   granted: [] as string[],
+  room: null as RoomState | null,
 }));
 
 vi.mock("./backend", () => ({
@@ -100,10 +103,11 @@ vi.mock("./backend", () => ({
     },
   }),
 }));
-vi.mock("./rooms", () => ({ currentMatch: async () => null }));
+vi.mock("./rooms", () => ({ presentRoom: async () => store.room }));
 
 beforeEach(() => {
   store.granted = [];
+  store.room = null;
   store.profiles = [profile(MEI, "mei", "Mei"), profile(BIA, "bia", "Bia")];
   store.history = [played(1, { place: 1 }), played(2), played(400)];
   store.pictures = [
@@ -248,5 +252,56 @@ describe("profiles", () => {
       value: 1,
     });
     expect(store.granted).toContain("covers.bronze");
+  });
+
+  /** Mei sits in a room: a lobby, or a match under way. */
+  const seatMei = (settings: Partial<RoomSettings> = {}, started = false) => {
+    const g = new Game(1, 1, { name: "Noite de anime", ...settings });
+    for (const id of ["p2", MEI])
+      g.do({ type: "JOIN", player: ident(id), password: settings.password });
+    if (started) g.start();
+    // the room list only keeps rooms touched lately
+    g.state.updatedAt = Date.now();
+    store.room = g.state;
+  };
+
+  it("shows a public room someone sits in, with a way in while a seat is free", async () => {
+    seatMei();
+    const view = await profileView("mei", BIA, "pt");
+    expect(view?.playing).toEqual({
+      game: "who-am-i",
+      room: {
+        code: "ABCDE",
+        name: "Noite de anime",
+        taken: 3,
+        seats: 4,
+        open: true,
+      },
+    });
+    // the owner already sits there
+    expect((await profileView("mei", MEI, "pt"))?.playing?.room?.open).toBe(
+      false,
+    );
+    // a match under way takes nobody new
+    seatMei({}, true);
+    expect((await profileView("mei", BIA, "pt"))?.playing?.room).toMatchObject({
+      code: "ABCDE",
+      open: false,
+    });
+  });
+
+  it("keeps a private room's name and code to itself, and all of it when asked", async () => {
+    seatMei({ visibility: "private", password: "pizza" });
+    const view = await profileView("mei", BIA, "pt");
+    expect(view?.playing).toEqual({ game: "who-am-i", room: null });
+    const sent = JSON.stringify(view);
+    expect(sent).not.toContain("ABCDE");
+    expect(sent).not.toContain("Noite de anime");
+    // "playing now" off: nothing at all, but the owner still sees it
+    store.profiles[0] = profile(MEI, "mei", "Mei", { playing: false });
+    expect((await profileView("mei", BIA, "pt"))?.playing).toBeNull();
+    expect((await profileView("mei", MEI, "pt"))?.playing?.game).toBe(
+      "who-am-i",
+    );
   });
 });

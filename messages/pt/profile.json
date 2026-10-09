@@ -14,6 +14,9 @@
     "streak": "dias seguidos"
   },
   "playing": "Jogando agora",
+  "publicRoom": "Sala pública <b>{name}</b> · {taken} de {seats} lugares",
+  "publicRoomUnnamed": "Sala pública · {taken} de {seats} lugares",
+  "joinRoom": "Entrar na sala",
   "share": "Compartilhar",
   "copied": "Link copiado",
   "tabsLabel": "Seções do perfil",
@@ -183,7 +186,7 @@
     "privacyHints": {
       "profile": "Quem fecha o perfil mostra só nome e avatar",
       "activity": "Números, canteiro e curiosidades",
-      "playing": "O jogo da partida em que você está"
+      "playing": "O jogo da sala ou partida em que você está, e a sala se for pública"
     },
     "audiences": {
       "all": "Todos",

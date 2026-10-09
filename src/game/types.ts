@@ -1133,6 +1133,22 @@ export type ListedRoom = Omit<PublicRoom, "host"> & {
   >;
 };
 
+/** Where a player is now, as their profile tells someone else. */
+export interface PlayingNow {
+  game: GameKey;
+  /** The room, only when it is public: a private one keeps its name and code to itself. */
+  room: {
+    code: string;
+    /** Empty when the host left it unnamed. */
+    name: string;
+    /** Players seated. */
+    taken: number;
+    seats: number;
+    /** The reader can take a seat: a lobby with one free that they don't hold already. */
+    open: boolean;
+  } | null;
+}
+
 /** Just what counting the players online needs from a room. */
 export interface ActiveRoom {
   game: GameKey;

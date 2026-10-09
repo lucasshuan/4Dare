@@ -14,6 +14,9 @@
     "streak": "連続日数"
   },
   "playing": "プレイ中",
+  "publicRoom": "公開ルーム <b>{name}</b> · {taken}/{seats}席",
+  "publicRoomUnnamed": "公開ルーム · {taken}/{seats}席",
+  "joinRoom": "ルームに入る",
   "share": "共有",
   "copied": "リンクをコピーしました",
   "tabsLabel": "プロフィールの項目",
@@ -183,7 +186,7 @@
     "privacyHints": {
       "profile": "非公開にすると名前とアバターだけ表示されます",
       "activity": "数字・花壇・トリビア",
-      "playing": "いま遊んでいる試合のゲーム"
+      "playing": "いるルームや試合のゲーム（公開ルームならルームも）"
     },
     "audiences": {
       "all": "全員",

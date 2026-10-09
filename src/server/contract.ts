@@ -28,6 +28,7 @@ import type {
   Localized,
   Phase,
   PlayerId,
+  PlayingNow,
 } from "@/game/types";
 
 export type Result<T = void> =
@@ -287,8 +288,8 @@ export interface ProfileView extends PersonRef {
   matches: number;
   wins: number;
   timeMs: number;
-  /** The game of the match they are in now. */
-  playing: GameKey | null;
+  /** The lobby or match they are in now: its game, and the room when it is public. */
+  playing: PlayingNow | null;
   /** The last year's matches, for the garden: when, which game, won. */
   plays: { at: number; game: GameKey; won: boolean }[];
   games: GameView[];

@@ -33,6 +33,7 @@ import {
   type PlayerId,
   type PlayerStatus,
   type PlayerView,
+  type PlayingNow,
   type PublicRoom,
   type Reveal,
   type RevealView,
@@ -555,6 +556,32 @@ export function toPublicRoom(state: RoomState, now: number): ListedRoom | null {
     tradeSeconds: s.settings.tradeSeconds,
     defendSeconds: s.settings.defendSeconds,
     judgeSeconds: s.settings.judgeSeconds,
+  };
+}
+
+/**
+ * The room a player sits in, as their profile tells `readerId`: always the
+ * game; the room itself only when it is public and on the list. It is open to
+ * the reader in a lobby with a free seat: a match under way takes nobody new.
+ */
+export function playingNow(
+  s: RoomState,
+  readerId: PlayerId,
+  now: number,
+): PlayingNow {
+  const listed = toPublicRoom(s, now);
+  return {
+    game: s.settings.game,
+    room:
+      listed && !listed.locked
+        ? {
+            code: listed.code,
+            name: listed.name,
+            taken: listed.players,
+            seats: listed.seats,
+            open: listed.status === "open" && !findPlayer(s, readerId),
+          }
+        : null,
   };
 }
 

@@ -27,13 +27,13 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Flag } from "@/components/ui/language-switch";
 import { useToast } from "@/components/ui/toast";
 import { GameThumb, useGameName } from "@/features/create/game-info";
-import type { GameKey } from "@/game/games";
 import type { Banner } from "@/game/profile/profile";
-import type { Lang } from "@/game/types";
+import type { Lang, PlayingNow as PlayingNowView } from "@/game/types";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
 import type { ProfileView } from "@/server/contract";
@@ -310,7 +310,7 @@ function ProfileShow({
         slot={coverSlot}
         footer={
           view.playing && !view.hidden.profile ? (
-            <PlayingNow game={view.playing} className="flex-1" />
+            <PlayingNow playing={view.playing} className="flex-1" />
           ) : null
         }
       />
@@ -457,7 +457,7 @@ function ProfileShow({
             {view.playing ? (
               // on phones under the profile; wider, along the cover's bottom
               <PlayingNow
-                game={view.playing}
+                playing={view.playing}
                 className="mx-(--pad) mt-[18px] sm:hidden"
               />
             ) : null}
@@ -557,12 +557,12 @@ export function Chip({
   );
 }
 
-/** The game this account is in right now. */
+/** The lobby or match this account is in right now; a public room shows itself, with a way in while it has a seat free. */
 function PlayingNow({
-  game,
+  playing: { game, room },
   className,
 }: {
-  game: GameKey;
+  playing: PlayingNowView;
   className?: string;
 }) {
   const t = useTranslations("profile");
@@ -574,14 +574,34 @@ function PlayingNow({
         className,
       )}
     >
-      <span className="inline-flex items-center gap-1.5 rounded-pill bg-yes-soft px-2.5 py-1 font-bold text-[12px] text-yes uppercase tracking-[0.06em]">
-        <span className="size-2 animate-pulse rounded-pill bg-yes" />
+      <span className="inline-flex h-6.5 items-center gap-1.5 rounded-pill bg-yes-soft px-2.5 font-semibold text-[12.5px] text-ink">
+        <span className="size-1.75 rounded-pill bg-yes" />
         {t("playing")}
       </span>
-      <span className="inline-flex items-center gap-2 font-semibold text-sm">
+      <span className="inline-flex h-6.5 items-center gap-1.5 rounded-pill bg-sky-soft pr-2.5 pl-1 font-semibold text-[12.5px] text-ink">
         <GameThumb game={game} size="tiny" />
         {gameName(game)}
       </span>
+      {room ? (
+        <span className="min-w-0 text-ink-muted text-sm">
+          {t.rich(room.name ? "publicRoom" : "publicRoomUnnamed", {
+            name: room.name,
+            taken: room.taken,
+            seats: room.seats,
+            b: (chunks) => (
+              <strong className="font-semibold text-ink">{chunks}</strong>
+            ),
+          })}
+        </span>
+      ) : null}
+      {room?.open ? (
+        <Link
+          href={`/r/${room.code}`}
+          className={buttonClass("primary", "sm", "ml-auto")}
+        >
+          {t("joinRoom")}
+        </Link>
+      ) : null}
     </div>
   );
 }

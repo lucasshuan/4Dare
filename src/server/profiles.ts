@@ -18,6 +18,7 @@ import {
 } from "@/game/profile/history";
 import { sees } from "@/game/profile/profile";
 import type { Character, Lang, PlayerId } from "@/game/types";
+import { playingNow } from "@/game/view";
 import { getBackend } from "./backend";
 import { entryId } from "./backend/seed-format";
 import type { StoredProfile } from "./backend/types";
@@ -32,7 +33,7 @@ import type {
   ProfileBoard,
   ProfileView,
 } from "./contract";
-import { currentMatch } from "./rooms";
+import { presentRoom } from "./rooms";
 import { pickKey } from "./theme-picks";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -225,7 +226,7 @@ export async function profileView(
     };
 
   const [playing, pictures, made, shown] = await Promise.all([
-    privacy.playing || isMe ? currentMatch(profile.id) : null,
+    privacy.playing || isMe ? presentRoom(profile.id) : null,
     hidden.contributions
       ? []
       : backend.images.byAuthor(profile.id, isMe, COUNTED),
@@ -317,7 +318,7 @@ export async function profileView(
           return { ...s, character: c ? dto(c) : null };
         }),
     ...totalsOf(activity),
-    playing: playing?.game ?? null,
+    playing: playing ? playingNow(playing, viewer, now) : null,
     plays: activity
       .filter((m) => m.finishedAt > now - GARDEN_MS)
       .map((m) => ({ at: m.finishedAt, game: m.game, won: m.place === 1 })),
