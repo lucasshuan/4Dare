@@ -16,7 +16,6 @@ Tick = done and committed.
 - [ ] Who am I?: up to 6 players
 - [ ] Every game gets own intro screen
 - [ ] New game inspired by Ito
-- [ ] Character generator
 
 ## Sound
 
