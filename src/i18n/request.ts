@@ -18,6 +18,8 @@ const SHARED = [
   "library",
   "workshop",
   "community",
+  "legal",
+  "news",
 ] as const;
 
 // Each game's own, everything its match shows, at messages/<locale>/games/<namespace>.json:

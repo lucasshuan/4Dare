@@ -12,8 +12,10 @@ import {
   LayoutGrid,
   Lightbulb,
   LogOut,
+  Megaphone,
   Plus,
   Search,
+  Shield,
   SlidersHorizontal,
   Trophy,
   UserRound,
@@ -39,6 +41,7 @@ import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { useSignIn } from "@/features/home/use-sign-in";
+import { useNewsFresh } from "@/features/news/news-seen";
 import { accentStyle } from "@/features/profile/cover-paint";
 import { XpBar } from "@/features/profile/level";
 import { profilePath } from "@/features/profile/profile-link";
@@ -57,10 +60,13 @@ import {
   GAME_PATHS,
   HOW_TO_PLAY,
   NEW_ROOM,
+  NEWS,
   PLAYERS,
+  PRIVACY,
   RANKINGS,
   ROOMS,
   SETTINGS,
+  TERMS,
   WORKSHOP,
 } from "@/lib/routes";
 import { signOut } from "@/server/actions";
@@ -80,7 +86,9 @@ type ItemKey =
   | "contributions"
   | "characters"
   | "workshop"
-  | "howTo";
+  | "howTo"
+  | "news"
+  | "legal";
 
 interface Item {
   key: ItemKey;
@@ -88,6 +96,8 @@ interface Item {
   Icon: ComponentType<{ className?: string; strokeWidth?: number }>;
   /** Grey text at the right (how many rooms are open). */
   meta?: string;
+  /** A blue dot at the right: something new there. */
+  dot?: boolean;
   /** Shows the "new" tag until this day (a page that just arrived). */
   newUntil?: string;
 }
@@ -140,6 +150,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
   const navRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
+  const newsFresh = useNewsFresh(counts?.news);
   const handle = me && !me.isGuest ? me.handle : null;
   const ownProfile = handle ? profilePath(handle) : null;
   const current =
@@ -151,9 +162,12 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           : "profile"
       : path === "/"
         ? "home"
-        : // a page under a section marks the section (a character's sheet)
-          ([CHARACTERS, WORKSHOP].find((root) => path.startsWith(`${root}/`)) ??
-          path);
+        : path === TERMS
+          ? PRIVACY
+          : // a page under a section marks the section (a character's sheet)
+            ([CHARACTERS, WORKSHOP].find((root) =>
+              path.startsWith(`${root}/`),
+            ) ?? path);
 
   const groups: { key: GroupKey; items: Item[]; games?: boolean }[] = [
     {
@@ -244,6 +258,8 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           Icon: CircleQuestionMark,
           newUntil: "2026-11-08",
         },
+        { key: "news", href: NEWS, Icon: Megaphone, dot: newsFresh },
+        { key: "legal", href: PRIVACY, Icon: Shield },
       ],
     },
   ];
@@ -372,6 +388,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
                             marked={marked === key}
                             fresh={!!item.newUntil && today < item.newUntil}
                             newLabel={t("new")}
+                            dotLabel={t("fresh")}
                             onPick={() => pick(key)}
                           />
                         );
@@ -453,6 +470,7 @@ function Row({
   marked,
   fresh,
   newLabel,
+  dotLabel,
   onPick,
 }: {
   item: Item;
@@ -460,6 +478,7 @@ function Row({
   marked: boolean;
   fresh: boolean;
   newLabel: string;
+  dotLabel: string;
   onPick: () => void;
 }) {
   const { Icon } = item;
@@ -491,6 +510,13 @@ function Row({
         <span className="ml-auto inline-flex h-[18px] shrink-0 items-center rounded-pill bg-ink px-[7px] font-bold text-[10px] text-on-ink uppercase tracking-[0.06em]">
           {newLabel}
         </span>
+      ) : null}
+      {item.dot ? (
+        <span
+          role="img"
+          aria-label={dotLabel}
+          className="ml-auto size-2 shrink-0 rounded-pill bg-sky"
+        />
       ) : null}
       {item.meta ? (
         <span

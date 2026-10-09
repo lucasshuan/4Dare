@@ -1,0 +1,32 @@
+{
+  "eyebrow": "Ayuda",
+  "title": "Novedades",
+  "lead": "Qué cambió en 4Dare. Los cambios grandes se destacan; los ajustes pequeños son una línea.",
+  "gameLabel": "Juego",
+  "kindLabel": "Tipo",
+  "all": "Todo",
+  "site": "4Dare",
+  "kinds": {
+    "all": "Todo",
+    "new": "Nuevo",
+    "better": "Mejoró",
+    "fix": "Arreglado",
+    "workshop": "Del Taller",
+    "notice": "Aviso"
+  },
+  "fixes": "Ajustes",
+  "today": "Hoy",
+  "yesterday": "Ayer",
+  "empty": "Nada con este filtro.",
+  "emptyHint": "Prueba otro juego o tipo.",
+  "copy": "Copiar enlace",
+  "copied": "Enlace copiado.",
+  "reactions": {
+    "love": "Me encanta",
+    "party": "Fiesta",
+    "laugh": "Jaja",
+    "wow": "Guau"
+  },
+  "signIn": "Entra con una cuenta para reaccionar.",
+  "nothing": "Todavía no hay novedades aquí."
+}

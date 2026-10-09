@@ -1,12 +1,17 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import {
+  CHARACTERS,
   GAMES,
   HOW_TO_PLAY,
   IMPOSTOR,
+  NEWS,
+  PRIVACY,
   ROOMS,
+  TERMS,
   WHAT_FOR,
   WHO_AM_I,
+  WORKSHOP,
 } from "@/lib/routes";
 import { HREFLANG, localePath, SITE_URL } from "@/server/seo";
 
@@ -18,6 +23,11 @@ const PAGES = [
   { path: WHAT_FOR, priority: 0.9 },
   { path: ROOMS, priority: 0.6 },
   { path: HOW_TO_PLAY, priority: 0.5 },
+  { path: CHARACTERS, priority: 0.5 },
+  { path: WORKSHOP, priority: 0.5 },
+  { path: NEWS, priority: 0.4 },
+  { path: PRIVACY, priority: 0.2 },
+  { path: TERMS, priority: 0.2 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

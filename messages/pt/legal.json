@@ -1,0 +1,427 @@
+{
+  "eyebrow": "Ajuda",
+  "title": "Privacidade e termos",
+  "lead": "O essencial em 30 segundos no topo. Depois, o texto inteiro, em português claro.",
+  "docLabel": "Documento",
+  "tabs": { "privacy": "Privacidade", "terms": "Termos de uso" },
+  "toc": "Nesta página",
+  "help": "Ficou alguma dúvida?",
+  "helpLine": "Escreva para <mail></mail>",
+  "updated": "Atualizada em {date}",
+  "read": "{n} min de leitura",
+  "version": "Versão {n}",
+  "essentials": "O essencial",
+  "seconds": "30 s",
+  "seeTerms": "Veja também os <go to=\"terms\">termos de uso</go>.",
+  "seePrivacy": "Veja também a <go to=\"privacy\">política de privacidade</go>.",
+  "acts": {
+    "export": "Baixar meus dados",
+    "delete": "Apagar conta",
+    "mail": "Escrever para nós",
+    "guest": "Entre com sua conta para baixar ou apagar seus dados."
+  },
+  "privacy": {
+    "title": "Política de privacidade",
+    "readMinutes": 4,
+    "tldr": [
+      {
+        "e": "🎮",
+        "x": "Dá para jogar sem conta. Convidado não vira cadastro."
+      },
+      {
+        "e": "🚫",
+        "x": "Sem anúncios. Não vendemos dados nem seguimos você por outros sites."
+      },
+      {
+        "e": "🍪",
+        "x": "Só cookies necessários. Por isso não tem aviso de cookies."
+      },
+      {
+        "e": "🖼️",
+        "x": "Fotos passam por um filtro automático antes de aparecer."
+      },
+      { "e": "👀", "x": "Você escolhe quem vê cada parte do seu perfil." },
+      {
+        "e": "🗑️",
+        "x": "Baixe ou apague seus dados no menu Conta, quando quiser."
+      }
+    ],
+    "sections": [
+      {
+        "id": "who",
+        "t": "Quem cuida dos seus dados",
+        "blocks": [
+          {
+            "p": "O 4Dare é mantido pela equipe do 4Dare, que decide como os dados são usados (o controlador, na LGPD). Para qualquer assunto de privacidade, inclusive falar com o encarregado, escreva para <mail></mail>. Respondemos em até 15 dias."
+          }
+        ]
+      },
+      {
+        "id": "data",
+        "t": "O que guardamos e por quê",
+        "blocks": [
+          {
+            "table": {
+              "head": ["O quê", "Para quê", "Base legal"],
+              "rows": [
+                [
+                  "Convidado: nome e rosto sorteados, cookie assinado",
+                  "Jogar sem cadastro",
+                  "Interesse legítimo <law>art. 7º, IX</law>"
+                ],
+                [
+                  "Conta: e-mail, ID do Discord ou Google, nome e @",
+                  "Entrar e manter sua conta",
+                  "Execução do serviço <law>art. 7º, V</law>"
+                ],
+                [
+                  "Perfil: frase, vitrine, capa, “sobre você”, preferências",
+                  "Mostrar o perfil do jeito que você montou",
+                  "Execução do serviço"
+                ],
+                [
+                  "Partidas: resultados, XP, escolhas e votos",
+                  "Placar, conquistas, rankings e sorteios melhores",
+                  "Interesse legítimo"
+                ],
+                [
+                  "O que você envia: fotos, personagens, apelidos, sugestões, mural e chat",
+                  "Mostrar no jogo e moderar",
+                  "Execução do serviço e interesse legítimo"
+                ],
+                [
+                  "Técnicos: IP, navegador e registros do servidor",
+                  "Segurança, erros e contar visitas sem cookies",
+                  "Interesse legítimo"
+                ]
+              ]
+            }
+          },
+          {
+            "p": "Não pedimos nada além do que o jogo precisa. Nada de idade, telefone, endereço ou documento."
+          }
+        ]
+      },
+      {
+        "id": "not",
+        "t": "O que não fazemos",
+        "blocks": [
+          {
+            "ul": [
+              "Não mostramos anúncios e não vendemos nem alugamos dados.",
+              "Não montamos perfil seu para publicidade nem seguimos você em outros sites.",
+              "Não usamos o que você envia para treinar inteligência artificial."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "shared",
+        "t": "Quem mais recebe dados",
+        "blocks": [
+          {
+            "p": "Só serviços que fazem o 4Dare funcionar, e só o necessário (operadores, na LGPD)."
+          },
+          {
+            "table": {
+              "head": ["Serviço", "Faz o quê", "Onde"],
+              "rows": [
+                [
+                  "Supabase",
+                  "Banco de dados, login e fotos",
+                  "São Paulo, Brasil"
+                ],
+                [
+                  "Vercel",
+                  "Hospeda o site e conta visitas sem cookies",
+                  "São Paulo, Brasil, e EUA"
+                ],
+                [
+                  "Sightengine",
+                  "Checa fotos antes de aparecerem",
+                  "França (União Europeia)"
+                ],
+                [
+                  "MyMemory",
+                  "Sugere traduções na Oficina, só quando você toca na varinha (recebe só o texto)",
+                  "Itália (União Europeia)"
+                ],
+                [
+                  "Discord ou Google",
+                  "Login, só se você entrar com eles",
+                  "EUA"
+                ]
+              ]
+            }
+          },
+          {
+            "p": "Quando um dado sai do Brasil, a transferência segue contratos com cláusulas de proteção <law>art. 33</law>. Autoridades só recebem dados com ordem judicial."
+          }
+        ]
+      },
+      {
+        "id": "sees",
+        "t": "Quem vê o quê",
+        "blocks": [
+          {
+            "ul": [
+              "<b>Perfil:</b> cada parte segue a sua escolha: todos, quem jogou com você ou só você.",
+              "<b>Convidado:</b> os outros veem só o nome e o rosto.",
+              "<b>Fotos:</b> aparecem para todos depois do filtro. Na dúvida, só você vê até a nova checagem.",
+              "<b>Chat da sala:</b> só quem está na sala. Some quando a sala fecha.",
+              "<b>Mural:</b> segue a privacidade do perfil.",
+              "<b>Rankings e contribuições:</b> só aparecem as contas que mostram a atividade e as contribuições para todos."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "keep",
+        "t": "Quanto tempo guardamos",
+        "blocks": [
+          {
+            "ul": [
+              "<b>Conta:</b> até você apagar.",
+              "<b>Ao apagar a conta:</b> perfil, mural, denúncias e conquistas somem na hora. Partidas ficam sem seu nome, para não quebrar o placar dos outros.",
+              "<b>Contribuições que entraram no jogo</b> (fotos, personagens, apelidos, temas, perguntas e missões): ficam, sem seu nome.",
+              "<b>Chat:</b> até a sala fechar.",
+              "<b>Registros técnicos:</b> pelo prazo curto da hospedagem, salvo ordem judicial."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "rights",
+        "t": "Seus direitos",
+        "blocks": [
+          {
+            "p": "Pela LGPD <law>art. 18</law> e, se você mora na Europa, pelo GDPR, você pode:"
+          },
+          {
+            "ul": [
+              "Ver e baixar seus dados <law>Conta › Baixar meus dados</law>",
+              "Corrigir o que estiver errado <law>Perfil › Editar</law>",
+              "Apagar a conta e o que é só seu <law>Conta › Apagar conta</law>",
+              "Levar seus dados para outro serviço: o arquivo baixado é JSON.",
+              "Saber com quem compartilhamos (item 4) e se opor a um uso."
+            ]
+          },
+          { "acts": true },
+          {
+            "p": "Se não resolvermos, reclame na <ext href=\"https://www.gov.br/anpd\">ANPD</ext> ou na autoridade de dados do seu país."
+          }
+        ]
+      },
+      {
+        "id": "minors",
+        "t": "Crianças e adolescentes",
+        "blocks": [
+          {
+            "p": "Conta só a partir de 16 anos. Não perguntamos a idade de ninguém: criar conta é declarar que tem 16 ou mais. Com menos que isso, jogue como convidado, de preferência com um responsável por perto."
+          },
+          {
+            "p": "Pedimos só o necessário para jogar. Se soubermos de uma conta de alguém com menos de 16 anos, apagamos a conta. Pais e responsáveis podem escrever para <mail></mail>."
+          }
+        ]
+      },
+      {
+        "id": "cookies",
+        "t": "Cookies",
+        "blocks": [
+          {
+            "table": {
+              "head": ["Cookie", "Para quê"],
+              "rows": [
+                ["Sessão", "Manter você conectado"],
+                ["Convidado", "Lembrar seu nome e rosto sorteados"]
+              ]
+            }
+          },
+          {
+            "p": "Tema e som ficam no próprio navegador. Nada de cookie de anúncio ou de rastreio, e a contagem de visitas da Vercel não usa cookies."
+          }
+        ]
+      },
+      {
+        "id": "security",
+        "t": "Segurança",
+        "blocks": [
+          {
+            "p": "Conexão sempre com HTTPS. No banco, cada linha só abre para quem pode ver. Chaves ficam só no servidor. Limites contra spam e o filtro de fotos ajudam a manter o jogo limpo."
+          },
+          {
+            "p": "Se um incidente puder prejudicar você, avisamos você e a ANPD."
+          }
+        ]
+      },
+      {
+        "id": "changes",
+        "t": "Mudanças nesta política",
+        "blocks": [
+          {
+            "p": "A data no topo mostra a versão atual. Mudança importante aparece em <go to=\"news\">Novidades</go> e no app antes de valer."
+          }
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "title": "Termos de uso",
+    "readMinutes": 4,
+    "tldr": [
+      { "e": "🎁", "x": "Grátis, no navegador, sem compras." },
+      {
+        "e": "🪪",
+        "x": "Conta a partir de 16 anos. Antes disso, jogue como convidado."
+      },
+      {
+        "e": "🤝",
+        "x": "Respeite quem joga: nada de ódio, assédio ou conteúdo sexual."
+      },
+      {
+        "e": "🖼️",
+        "x": "O que você envia continua seu. Você deixa o 4Dare mostrar."
+      },
+      {
+        "e": "📚",
+        "x": "Contribuição aprovada vira parte do jogo e fica, mesmo se você sair."
+      },
+      {
+        "e": "🚩",
+        "x": "Filtros e denúncias tiram do ar o que passa do ponto."
+      }
+    ],
+    "sections": [
+      {
+        "id": "deal",
+        "t": "O acordo",
+        "blocks": [
+          {
+            "p": "Estes termos valem entre você e a equipe do 4Dare, que mantém o 4Dare. Jogar, mesmo como convidado, é aceitar estes termos e a <go to=\"privacy\">política de privacidade</go>. Se não concordar, não use o 4Dare."
+          }
+        ]
+      },
+      {
+        "id": "service",
+        "t": "O serviço",
+        "blocks": [
+          {
+            "p": "O 4Dare é grátis, roda no navegador e não vende nada. Ele pode mudar, ganhar ou perder jogos, ficar fora do ar ou acabar. Mudança grande aparece em <go to=\"news\">Novidades</go>."
+          }
+        ]
+      },
+      {
+        "id": "account",
+        "t": "Idade e conta",
+        "blocks": [
+          {
+            "ul": [
+              "Conta só a partir de 16 anos. Não perguntamos a idade: criar conta é declarar isso.",
+              "Com menos de 16, jogue como convidado.",
+              "Uma conta por pessoa. Não venda nem empreste a sua.",
+              "Você responde pelo que acontece na sua conta.",
+              "Apague quando quiser, em Conta › Apagar conta."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "rules",
+        "t": "Regras de convivência",
+        "blocks": [
+          {
+            "p": "Valem no chat, no mural, nos nomes, nas fotos e em tudo o que você envia. Não pode:"
+          },
+          {
+            "ul": [
+              "Ódio, assédio, ameaça ou humilhação.",
+              "Nudez, sexo ou violência real explícita.",
+              "Qualquer conteúdo sexual com menores. É crime e vai para as autoridades.",
+              "Expor dados de alguém, como endereço, telefone ou foto sem permissão.",
+              "Se passar por outra pessoa.",
+              "Spam, bots, trapaça ou explorar falhas. Achou um bug? Conte para a gente."
+            ]
+          },
+          {
+            "p": "Perguntas apimentadas e missões pesadas só saem em salas que ligam essa opção. Respeite quem deixou desligado."
+          }
+        ]
+      },
+      {
+        "id": "content",
+        "t": "O que você envia",
+        "blocks": [
+          {
+            "p": "Fotos, personagens, apelidos, temas, perguntas, missões, mural e chat continuam seus. Ao enviar, você dá ao 4Dare uma licença gratuita, não exclusiva e mundial para guardar, mostrar, adaptar (recortar, redimensionar, traduzir) e usar esse conteúdo no jogo e para divulgar o 4Dare."
+          },
+          {
+            "ul": [
+              "<b>Coisas pessoais</b> (perfil, mural, chat): a licença acaba quando você apaga.",
+              "<b>Contribuições que entraram no jogo</b> (biblioteca e Oficina): a licença é permanente, porque outras pessoas passam a jogar com elas. Elas podem ser editadas e ficam sem seu nome se você apagar a conta."
+            ]
+          },
+          {
+            "p": "Envie só o que você pode compartilhar, e nada de dados pessoais de outras pessoas."
+          }
+        ]
+      },
+      {
+        "id": "brands",
+        "t": "Personagens e marcas",
+        "blocks": [
+          {
+            "p": "Personagens, nomes e imagens pertencem aos seus donos. O 4Dare é um jogo de fãs, sem ligação com eles, e usa nomes e imagens só para identificar os personagens nas partidas. Tem direitos sobre algo e quer que saia? Escreva para <mail></mail>: tiramos do ar rápido."
+          }
+        ]
+      },
+      {
+        "id": "moderation",
+        "t": "Moderação e denúncias",
+        "blocks": [
+          {
+            "ul": [
+              "Fotos passam por um filtro automático antes de aparecer.",
+              "Três denúncias escondem uma foto, um apelido ou uma linha do mural.",
+              "Sugestões da Oficina passam por verificação antes de entrar no jogo.",
+              "Podemos remover conteúdo e limitar ou suspender contas que quebrem estas regras.",
+              "Quando removermos algo seu, dizemos o motivo e se a decisão foi automática ou de uma pessoa. Você pode pedir revisão pelo contato.",
+              "Conteúdo que fere direitos de crianças e adolescentes sai assim que formos avisados, sem esperar ordem judicial."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "warranty",
+        "t": "Sem garantias",
+        "blocks": [
+          {
+            "p": "O 4Dare é feito com carinho e oferecido como está. Pode ter bugs, sair do ar ou perder uma partida no meio. Na medida em que a lei permite, não respondemos por danos indiretos, como perda de partidas ou de progresso. Nada aqui tira direitos que o Código de Defesa do Consumidor ou a lei do seu país garantem."
+          }
+        ]
+      },
+      {
+        "id": "changes",
+        "t": "Mudanças nos termos",
+        "blocks": [
+          {
+            "p": "A data no topo mostra a versão atual. Mudança importante aparece em <go to=\"news\">Novidades</go> com antecedência. Continuar jogando depois disso é aceitar a nova versão."
+          }
+        ]
+      },
+      {
+        "id": "law",
+        "t": "Lei e foro",
+        "blocks": [
+          {
+            "p": "Vale a lei brasileira. Conflitos vão para o foro do seu domicílio, como garante o Código de Defesa do Consumidor. Se você mora em outro país, as proteções obrigatórias de lá continuam valendo."
+          }
+        ]
+      },
+      {
+        "id": "contact",
+        "t": "Contato",
+        "blocks": [{ "p": "<mail></mail>. Respondemos em até 15 dias." }]
+      }
+    ]
+  }
+}

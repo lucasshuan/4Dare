@@ -1,0 +1,32 @@
+{
+  "eyebrow": "Help",
+  "title": "What's new",
+  "lead": "What changed in 4Dare. Big changes get a spotlight; small tweaks get a line.",
+  "gameLabel": "Game",
+  "kindLabel": "Kind",
+  "all": "All",
+  "site": "4Dare",
+  "kinds": {
+    "all": "All",
+    "new": "New",
+    "better": "Better",
+    "fix": "Fixed",
+    "workshop": "From the Workshop",
+    "notice": "Notice"
+  },
+  "fixes": "Tweaks",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "empty": "Nothing with this filter.",
+  "emptyHint": "Try another game or kind.",
+  "copy": "Copy link",
+  "copied": "Link copied.",
+  "reactions": {
+    "love": "Love it",
+    "party": "Party",
+    "laugh": "Haha",
+    "wow": "Wow"
+  },
+  "signIn": "Sign in with an account to react.",
+  "nothing": "Nothing new here yet."
+}
