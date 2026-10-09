@@ -1,6 +1,13 @@
 "use client";
 
-import { AnimatePresence, m, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  m,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+} from "motion/react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Creature, FigureArt } from "@/components/ui/figure-art";
@@ -81,14 +88,18 @@ const SEATS: { seat: Seat; place: string; dna: string; color: string }[] = [
   },
 ];
 
-/** Chalk marks drifting behind: [left %, top %, size px, seconds, glyph]. */
-const MARKS: [number, number, number, number, string][] = [
-  [4, 20, 26, 9, "?"],
-  [17, 64, 20, 7.5, "✉"],
-  [41, 6, 18, 8, "?"],
-  [58, 70, 22, 9.5, "?"],
-  [78, 10, 24, 8.5, "✉"],
-  [95, 56, 20, 7, "?"],
+/** Question marks and envelopes drifting behind, across the whole width: [left %, top %, size px, colour, seconds, glyph]. */
+const MARKS: [number, number, number, string, number, string][] = [
+  [3, 56, 50, "text-wax", 8, "✉"],
+  [10, 16, 24, "text-wood", 9, "?"],
+  [20, 70, 22, "text-gold-deep", 7.5, "?"],
+  [24, 26, 34, "text-wax", 10, "?"],
+  [40, 8, 20, "text-wood", 8, "✉"],
+  [60, 14, 26, "text-gold-deep", 9.5, "?"],
+  [78, 28, 36, "text-wood", 8.5, "✉"],
+  [81, 72, 24, "text-wax", 7, "?"],
+  [93, 18, 30, "text-gold-deep", 9, "?"],
+  [97, 62, 46, "text-wax", 10.5, "✉"],
 ];
 
 /**
@@ -170,13 +181,24 @@ function Coin() {
  * What for?'s page banner, on the kraft wall of its home card: the pitch
  * board hovers between the bidders, a photo taped on it for auction while they
  * raise their coin towers; "Sold!", the photo flies to its buyer and the
- * mission is stuck on in its place. Transforms, opacity and shadows only;
- * the still frame for reduced motion.
+ * mission is stuck on in its place. Layers drift with the pointer; transforms,
+ * opacity and shadows only; the still frame for reduced motion.
  */
 export function LineupBanner({ aside }: { aside: ReactNode }) {
   const t = useTranslations("home.games.whatFor");
   const reduced = useReducedMotion() ?? false;
   const { step, loop } = useStepLoop(STEPS, STILL, reduced);
+
+  // Pointer parallax: -0.5..0.5 across the banner, eased by a spring.
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const sx = useSpring(px, { stiffness: 110, damping: 20 });
+  const sy = useSpring(py, { stiffness: 110, damping: 20 });
+  const backX = useTransform(sx, (v) => v * -36);
+  const backY = useTransform(sy, (v) => v * -18);
+  const frontX = useTransform(sx, (v) => v * 14);
+  const frontY = useTransform(sy, (v) => v * 6);
+
   const s = STEPS[step];
   const top = Math.max(0, ...Object.values(s.bids));
   // the missions and the lots each in a random order, a new one each loop
@@ -194,19 +216,36 @@ export function LineupBanner({ aside }: { aside: ReactNode }) {
 
   return (
     <div
+      onPointerMove={(e) => {
+        if (reduced || e.pointerType !== "mouse") return;
+        const r = e.currentTarget.getBoundingClientRect();
+        px.set((e.clientX - r.left) / r.width - 0.5);
+        py.set((e.clientY - r.top) / r.height - 0.5);
+      }}
+      onPointerLeave={() => {
+        px.set(0);
+        py.set(0);
+      }}
       className={cn(
         "relative isolate overflow-hidden art-lineup",
         UNDER_TOPBAR,
       )}
     >
-      {/* the wall's light and chalk marks */}
-      <div aria-hidden="true" className="-inset-10 -z-10 absolute select-none">
+      {/* the wall's light and marks, drifting the other way */}
+      <m.div
+        style={{ x: backX, y: backY }}
+        aria-hidden="true"
+        className="-inset-10 -z-10 absolute select-none"
+      >
         <span className="absolute top-[-30%] left-[-5%] h-[90%] w-[45%] rounded-pill bg-white/10 blur-3xl dark:hidden" />
         <span className="absolute right-[-8%] bottom-[-40%] h-[90%] w-[50%] rounded-pill bg-gold/15 blur-3xl dark:bg-gold/3" />
-        {MARKS.map(([left, top, size, seconds, glyph]) => (
+        {MARKS.map(([left, top, size, color, seconds, glyph]) => (
           <m.span
             key={`${left}-${top}`}
-            className="absolute font-display font-extrabold text-chalk leading-none opacity-[0.14]"
+            className={cn(
+              "absolute font-display font-extrabold leading-none opacity-[0.16]",
+              color,
+            )}
             style={{ left: `${left}%`, top: `${top}%`, fontSize: size }}
             {...(reduced
               ? {}
@@ -222,7 +261,7 @@ export function LineupBanner({ aside }: { aside: ReactNode }) {
             {glyph}
           </m.span>
         ))}
-      </div>
+      </m.div>
 
       {/* a chalk haze in the top left corner, where the logo sits; it fades
           out slowly so it reads as the wall's own light; none in the dark */}
@@ -244,7 +283,8 @@ export function LineupBanner({ aside }: { aside: ReactNode }) {
       />
 
       <BannerRow aside={aside}>
-        <div
+        <m.div
+          style={{ x: frontX, y: frontY }}
           aria-hidden="true"
           className={cn(
             "relative isolate h-[clamp(180px,min(22vw,27vh),230px)] select-none [container-type:size] max-sm:h-[210px]",
@@ -524,7 +564,7 @@ export function LineupBanner({ aside }: { aside: ReactNode }) {
               </div>
             );
           })}
-        </div>
+        </m.div>
       </BannerRow>
     </div>
   );
