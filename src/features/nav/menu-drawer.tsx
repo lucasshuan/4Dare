@@ -471,15 +471,7 @@ function Row({
       scroll={item.key !== "badges" && item.key !== "matches"}
       data-nav-row
       aria-current={marked ? "page" : undefined}
-      onClick={(e) => {
-        onPick();
-        // the profile rows open as a modal, at the section they name
-        const own = item.href.match(/^\/u\/([^?]+)(?:\?tab=(\w+))?$/);
-        if (!own || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey)
-          return;
-        e.preventDefault();
-        openProfile(own[1], own[2] ? { tab: own[2] } : undefined);
-      }}
+      onClick={onPick}
       className={cn(
         "relative isolate flex h-11 w-full items-center gap-3 rounded-[14px] px-3 text-left font-medium text-[15px] outline-none transition-colors duration-150 ease-soft focus-visible:outline-3 focus-visible:outline-sky",
         marked ? "font-bold" : "hover:bg-sunken/75",
