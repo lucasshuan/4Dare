@@ -89,7 +89,7 @@ export function TvChair({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[22px] p-3.5 sm:flex-nowrap sm:px-4.5 sm:py-4",
+        "flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[22px] p-4 sm:p-5",
         className,
         !ring && "bg-surface shadow-[inset_0_0_0_2px_var(--line-strong)]",
       )}
@@ -115,7 +115,8 @@ export function TvChair({
         <span className="font-mono font-semibold text-[11px] text-ink-muted uppercase tracking-[0.08em]">
           {t("chairTitle")}
         </span>
-        <b className="truncate font-display font-extrabold text-[17px] leading-[1.1] sm:text-[21px]">
+        {/* wraps rather than cut a long name: the sidebar is narrow */}
+        <b className="font-display font-extrabold text-[17px] leading-[1.15] [overflow-wrap:anywhere] [text-wrap:balance] sm:text-[19px]">
           {sitting
             ? t("chairOf", { name: name(sitting, sitting.isYou) })
             : t("chairWho")}
@@ -124,13 +125,14 @@ export function TvChair({
           {few ? t("chairFew") : sitting ? t("chairSeated") : t("chairEmpty")}
         </small>
       </span>
-      <span className="flex items-center gap-1.5 max-sm:w-full max-sm:justify-end">
+      {/* the keys on a row of their own under the chair, as wide as the sidebar */}
+      <span className="flex w-full items-center gap-1.5">
         {!sitting && host ? (
           <Button
             size="sm"
             disabled={pending || few}
             onClick={onDraw}
-            className="shrink-0"
+            className="flex-1"
           >
             <Dices strokeWidth={2} className="size-4.5!" />
             {t("drawChair")}
@@ -141,7 +143,7 @@ export function TvChair({
             size="sm"
             disabled={pending}
             onClick={() => onSeat(null)}
-            className="shrink-0"
+            className="flex-1"
           >
             {t("stand")}
           </Button>
@@ -151,7 +153,7 @@ export function TvChair({
             variant="primary"
             disabled={pending}
             onClick={() => onSeat(meId)}
-            className="shrink-0"
+            className="flex-1"
           >
             {t("sit")}
           </Button>
