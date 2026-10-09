@@ -629,7 +629,7 @@ function MeCard({ onPick }: { onPick: () => void }) {
         </Link>
         <SignOut />
       </div>
-      <XpBar xp={xp} numbers={false} className="px-3 pb-3" />
+      <XpBar xp={xp} className="px-3 pb-3" />
     </div>
   );
 }
