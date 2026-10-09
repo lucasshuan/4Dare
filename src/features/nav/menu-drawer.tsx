@@ -276,7 +276,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
                   onKeyDown={onSearchKey}
                   placeholder={t("search")}
                   autoComplete="off"
-                  className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none"
+                  className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none focus-visible:outline-none"
                 />
               </label>
             </Stagger>

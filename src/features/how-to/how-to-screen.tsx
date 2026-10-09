@@ -88,7 +88,7 @@ function GamePart({ game }: { game: GameKey }) {
         className="flex flex-col gap-4 lg:sticky lg:top-28 lg:self-start"
       >
         <div className="relative aspect-[2/1] overflow-hidden rounded-xl bg-sunken shadow-card [container-type:inline-size]">
-          <Art wide />
+          <Art wide className="absolute inset-0" />
         </div>
         <div className="flex flex-col gap-1.5">
           <span className="font-semibold text-[13px] text-ink-muted">
