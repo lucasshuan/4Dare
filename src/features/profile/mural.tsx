@@ -154,7 +154,7 @@ function Composer({
             if (length && length <= BODY_MAX && !pending) void send();
           }
         }}
-        className="w-full resize-none rounded-lg border-0 bg-transparent px-1 py-1 font-medium text-[15px] outline-none placeholder:text-ink-muted"
+        className="w-full resize-none rounded-[12px] border-0 bg-transparent px-1 py-1 font-medium text-[15px] outline-none placeholder:text-ink-muted"
       />
       <div className="flex items-center justify-end gap-2">
         <span
