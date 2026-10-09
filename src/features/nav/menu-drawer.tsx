@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 import {
   type ComponentType,
   type KeyboardEvent,
+  type MouseEvent,
   type ReactNode,
   useRef,
   useState,
@@ -79,6 +80,18 @@ const fold = (s: string) =>
 
 /** How long the picked row's marker shows before the menu slides away (ms). */
 const CLOSE_AFTER = 230;
+
+/**
+ * A profile link inside the app opens the profile as a modal over the page
+ * (@modal/(.)u). From the menu it goes to the profile's own page, which only
+ * a full load gets past the interception for.
+ */
+const asPage = (e: MouseEvent<HTMLAnchorElement>) => {
+  if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
+    return;
+  e.preventDefault();
+  window.location.assign(e.currentTarget.href);
+};
 
 /**
  * The side menu: who you are, a "go to" filter and every page in five
@@ -381,7 +394,10 @@ function Row({
       scroll={item.key !== "badges" && item.key !== "matches"}
       data-nav-row
       aria-current={marked ? "page" : undefined}
-      onClick={onPick}
+      onClick={(e) => {
+        onPick();
+        if (item.href.startsWith("/u/")) asPage(e);
+      }}
       className={cn(
         "relative isolate flex h-11 w-full items-center gap-3 rounded-[14px] px-3 text-left font-medium text-[15px] outline-none transition-colors duration-150 ease-soft focus-visible:outline-3 focus-visible:outline-sky",
         marked ? "font-bold" : "hover:bg-sunken/75",
@@ -488,7 +504,10 @@ function MeCard({ onPick }: { onPick: () => void }) {
   return (
     <Link
       href={me.handle ? profilePath(me.handle) : "/profile"}
-      onClick={onPick}
+      onClick={(e) => {
+        onPick();
+        if (me.handle) asPage(e);
+      }}
       className="mx-3 mb-2.5 flex items-center gap-3 rounded-[20px] bg-sunken p-3 text-left outline-none transition-colors duration-150 hover:bg-line/60 focus-visible:outline-3 focus-visible:outline-sky"
     >
       <LevelAvatar
