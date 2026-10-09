@@ -31,7 +31,7 @@ export function MenuButton() {
 }
 
 export const burgerClass =
-  "group/burger relative flex size-11 shrink-0 items-center justify-center rounded-pill text-ink transition-colors duration-150 ease-soft hover:bg-sunken focus-visible:outline-3 focus-visible:outline-sky -ml-2 sm:-ml-2.5";
+  "group/burger relative flex size-10 shrink-0 items-center justify-center rounded-pill sm:size-11 text-ink transition-colors duration-150 ease-soft hover:bg-sunken focus-visible:outline-3 focus-visible:outline-sky -ml-2 sm:-ml-2.5";
 
 /**
  * Three bars that fold into an X when `open`. `unfoldsIn`: the menu's own

@@ -2,10 +2,11 @@
 
 import { m, type Variants } from "motion/react";
 import { type ReactNode, useEffect, useState } from "react";
+import { APP_NAME } from "@/config";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
-import { Logo } from "./logo";
+import { Logo, LogoMark } from "./logo";
 
 /**
  * Room a banner leaves at its top for the top bar, which floats over it.
@@ -69,10 +70,10 @@ export function Screen({
   }
   const bar = (
     <>
-      <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+      <div className="flex min-w-0 items-center gap-1.5 sm:gap-4">
         {left === undefined ? <Wordmark /> : left}
       </div>
-      <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
+      <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-3">
         {right}
       </div>
     </>
@@ -143,7 +144,7 @@ function TopBar({
           "max-sm:border-transparent max-sm:bg-transparent max-sm:backdrop-blur-none",
       )}
     >
-      <div className="flex w-full items-center justify-between gap-3">
+      <div className="flex w-full items-center justify-between gap-2 sm:gap-3">
         {children}
       </div>
     </m.header>
@@ -152,9 +153,14 @@ function TopBar({
 
 export function Wordmark() {
   return (
-    <Link href="/" className="group min-w-0 rounded-sm">
-      {/* smaller on phones, and shrinks further so it never runs under the language, theme and user menu */}
-      <Logo className="h-8 w-auto max-sm:h-7" />
+    <Link
+      href="/"
+      aria-label={APP_NAME}
+      className="group min-w-0 rounded-sm max-sm:shrink-0"
+    >
+      {/* phones keep only the "4" bubble: beside the menu's bars, the language, theme and user menu leave no room for the word */}
+      <Logo className="h-8 w-auto max-sm:hidden" />
+      <LogoMark className="h-7 w-auto shrink-0 sm:hidden" />
     </Link>
   );
 }

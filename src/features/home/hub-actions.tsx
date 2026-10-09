@@ -1,6 +1,6 @@
 import { LanguageSwitch } from "@/components/ui/language-switch";
 import { Wordmark } from "@/components/ui/screen";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemeSwitch, ThemeToggle } from "@/components/ui/theme-toggle";
 import { CurrentMatchBadge } from "@/features/current-match/match-lock";
 import { MenuButton } from "@/features/nav/menu-button";
 import { UserMenu } from "./user-menu";
@@ -21,7 +21,11 @@ export function HubActions() {
   return (
     <>
       <LanguageSwitch />
-      <ThemeToggle />
+      {/* phones get the one-key switch: the bar also holds the menu's bars */}
+      <span className="contents max-sm:hidden">
+        <ThemeToggle />
+      </span>
+      <ThemeSwitch className="sm:hidden" />
       <UserMenu />
     </>
   );
