@@ -14,6 +14,158 @@ export type Database = {
   };
   public: {
     Tables: {
+      character_alias_events: {
+        Row: {
+          action: string;
+          actor: string | null;
+          after: string | null;
+          alias_id: number;
+          before: string | null;
+          character_id: string;
+          created_at: string;
+          id: number;
+        };
+        Insert: {
+          action: string;
+          actor?: string | null;
+          after?: string | null;
+          alias_id: number;
+          before?: string | null;
+          character_id: string;
+          created_at?: string;
+          id?: never;
+        };
+        Update: {
+          action?: string;
+          actor?: string | null;
+          after?: string | null;
+          alias_id?: number;
+          before?: string | null;
+          character_id?: string;
+          created_at?: string;
+          id?: never;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "character_alias_events_actor_fkey";
+            columns: ["actor"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "character_alias_events_alias_id_fkey";
+            columns: ["alias_id"];
+            isOneToOne: false;
+            referencedRelation: "character_aliases";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "character_alias_events_character_id_fkey";
+            columns: ["character_id"];
+            isOneToOne: false;
+            referencedRelation: "characters";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      character_alias_reports: {
+        Row: {
+          alias_id: number;
+          created_at: string;
+          reporter_id: string;
+        };
+        Insert: {
+          alias_id: number;
+          created_at?: string;
+          reporter_id: string;
+        };
+        Update: {
+          alias_id?: number;
+          created_at?: string;
+          reporter_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "character_alias_reports_alias_id_fkey";
+            columns: ["alias_id"];
+            isOneToOne: false;
+            referencedRelation: "character_aliases";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "character_alias_reports_reporter_id_fkey";
+            columns: ["reporter_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      character_aliases: {
+        Row: {
+          character_id: string;
+          created_at: string;
+          created_by: string | null;
+          edited_by: string | null;
+          hidden: boolean;
+          id: number;
+          lang: string;
+          name: string;
+          norm: string;
+          removed: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          character_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          edited_by?: string | null;
+          hidden?: boolean;
+          id?: never;
+          lang: string;
+          name: string;
+          norm: string;
+          removed?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          character_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          edited_by?: string | null;
+          hidden?: boolean;
+          id?: never;
+          lang?: string;
+          name?: string;
+          norm?: string;
+          removed?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "character_aliases_character_id_fkey";
+            columns: ["character_id"];
+            isOneToOne: false;
+            referencedRelation: "characters";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "character_aliases_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "character_aliases_edited_by_fkey";
+            columns: ["edited_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       character_image_picks: {
         Row: {
           chosen: boolean;
@@ -773,6 +925,92 @@ export type Database = {
         };
         Relationships: [];
       };
+      news_posts: {
+        Row: {
+          action: Json | null;
+          body: Json;
+          created_at: string;
+          featured: boolean;
+          game: string;
+          hidden: boolean;
+          id: string;
+          kind: string;
+          published_at: string;
+          suggestion_id: string | null;
+          title: Json;
+        };
+        Insert: {
+          action?: Json | null;
+          body: Json;
+          created_at?: string;
+          featured?: boolean;
+          game: string;
+          hidden?: boolean;
+          id: string;
+          kind: string;
+          published_at?: string;
+          suggestion_id?: string | null;
+          title?: Json;
+        };
+        Update: {
+          action?: Json | null;
+          body?: Json;
+          created_at?: string;
+          featured?: boolean;
+          game?: string;
+          hidden?: boolean;
+          id?: string;
+          kind?: string;
+          published_at?: string;
+          suggestion_id?: string | null;
+          title?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "news_posts_suggestion_id_fkey";
+            columns: ["suggestion_id"];
+            isOneToOne: false;
+            referencedRelation: "workshop_suggestions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      news_reactions: {
+        Row: {
+          created_at: string;
+          post_id: string;
+          reaction: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          post_id: string;
+          reaction: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          post_id?: string;
+          reaction?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "news_reactions_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "news_posts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "news_reactions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       origin_labels: {
         Row: {
           label: string;
@@ -906,6 +1144,7 @@ export type Database = {
           avatar: Json;
           banner: Json | null;
           created_at: string;
+          curator: boolean;
           guest_number: number;
           handle: string | null;
           handle_changed_at: string | null;
@@ -925,6 +1164,7 @@ export type Database = {
           avatar: Json;
           banner?: Json | null;
           created_at?: string;
+          curator?: boolean;
           guest_number: number;
           handle?: string | null;
           handle_changed_at?: string | null;
@@ -944,6 +1184,7 @@ export type Database = {
           avatar?: Json;
           banner?: Json | null;
           created_at?: string;
+          curator?: boolean;
           guest_number?: number;
           handle?: string | null;
           handle_changed_at?: string | null;
@@ -1302,6 +1543,108 @@ export type Database = {
         };
         Relationships: [];
       };
+      workshop_suggestions: {
+        Row: {
+          bank_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          decided_at: string | null;
+          decided_by: string | null;
+          id: string;
+          kind: string;
+          lang: string;
+          no: number;
+          payload: Json;
+          reason: string | null;
+          status: string;
+          translations: Json;
+          yes: number;
+        };
+        Insert: {
+          bank_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          kind: string;
+          lang: string;
+          no?: number;
+          payload: Json;
+          reason?: string | null;
+          status?: string;
+          translations?: Json;
+          yes?: number;
+        };
+        Update: {
+          bank_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          kind?: string;
+          lang?: string;
+          no?: number;
+          payload?: Json;
+          reason?: string | null;
+          status?: string;
+          translations?: Json;
+          yes?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workshop_suggestions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workshop_suggestions_decided_by_fkey";
+            columns: ["decided_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      workshop_votes: {
+        Row: {
+          created_at: string;
+          suggestion_id: string;
+          user_id: string;
+          vote: boolean;
+        };
+        Insert: {
+          created_at?: string;
+          suggestion_id: string;
+          user_id: string;
+          vote: boolean;
+        };
+        Update: {
+          created_at?: string;
+          suggestion_id?: string;
+          user_id?: string;
+          vote?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workshop_votes_suggestion_id_fkey";
+            columns: ["suggestion_id"];
+            isOneToOne: false;
+            referencedRelation: "workshop_suggestions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workshop_votes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       character_entries: {
@@ -1453,6 +1796,16 @@ export type Database = {
       };
     };
     Functions: {
+      add_character_alias: {
+        Args: {
+          p_actor: string;
+          p_character: string;
+          p_lang: string;
+          p_name: string;
+          p_norm: string;
+        };
+        Returns: number;
+      };
       add_room_message: {
         Args: {
           p_author: string;
@@ -1479,9 +1832,45 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      change_character_alias: {
+        Args: {
+          p_action: string;
+          p_actor: string;
+          p_id: number;
+          p_name: string;
+          p_norm: string;
+        };
+        Returns: string;
+      };
       character_tastes: {
         Args: { c: Database["public"]["Tables"]["characters"]["Row"] };
         Returns: Database["public"]["Enums"]["taste"][];
+      };
+      contribution_feed: {
+        Args: {
+          p_before: string;
+          p_kind: string;
+          p_limit: number;
+          p_user: string;
+        };
+        Returns: {
+          at: string;
+          character_id: string;
+          detail: Json;
+          kind: string;
+          ref: string;
+          user_id: string;
+        }[];
+      };
+      create_workshop_suggestion: {
+        Args: {
+          p_author: string;
+          p_kind: string;
+          p_lang: string;
+          p_payload: Json;
+          p_translations: Json;
+        };
+        Returns: string;
       };
       delete_old_rooms: { Args: never; Returns: number };
       impostor_count_questions: { Args: { p_rows: Json }; Returns: undefined };
@@ -1611,6 +2000,10 @@ export type Database = {
         Args: { p_character: string };
         Returns: undefined;
       };
+      report_character_alias: {
+        Args: { p_id: number; p_reporter: string };
+        Returns: boolean;
+      };
       report_character_image: {
         Args: { p_hide_at: number; p_image: string; p_reporter: string };
         Returns: string;
@@ -1658,6 +2051,31 @@ export type Database = {
           picks: number;
         }[];
       };
+      toggle_news_reaction: {
+        Args: { p_post: string; p_reaction: string; p_user: string };
+        Returns: {
+          reaction: string;
+          total: number;
+        }[];
+      };
+      top_contributors: {
+        Args: { p_limit: number; p_since: string };
+        Returns: {
+          aliases: number;
+          characters: number;
+          live: number;
+          pictures: number;
+          total: number;
+          user_id: string;
+        }[];
+      };
+      vote_workshop_suggestion: {
+        Args: { p_suggestion: string; p_user: string; p_vote: boolean };
+        Returns: {
+          no: number;
+          yes: number;
+        }[];
+      };
       whoami_pick_key: { Args: { p_id: string }; Returns: string };
       whoami_theme_stats: {
         Args: { p_limit: number; p_theme: string };
@@ -1668,6 +2086,24 @@ export type Database = {
           misfits: number;
           picks: number;
           suggested: number;
+        }[];
+      };
+      xp_ranking: {
+        Args: { p_game: string; p_limit: number; p_since: string };
+        Returns: {
+          matches: number;
+          user_id: string;
+          wins: number;
+          xp: number;
+        }[];
+      };
+      xp_ranking_place: {
+        Args: { p_game: string; p_since: string; p_user: string };
+        Returns: {
+          matches: number;
+          place: number;
+          wins: number;
+          xp: number;
         }[];
       };
     };
