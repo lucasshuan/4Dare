@@ -169,8 +169,8 @@ function EditRow({
         <Popover.Trigger
           aria-label={label}
           className={cn(
-            // the whole row, top to bottom, so its highlight meets the lines around it
-            "group/row flex w-full items-center gap-3 self-stretch rounded-md px-2 py-2.5 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
+            // the whole row, top to bottom, with a hair of space so its highlight sits just inside the lines around it
+            "group/row flex w-full items-center gap-3 my-0.5 self-stretch rounded-md px-2 py-2.5 text-left transition-colors duration-200 ease-soft hover:bg-sunken",
             open && "bg-sunken",
           )}
         >
