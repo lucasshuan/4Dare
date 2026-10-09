@@ -1,5 +1,7 @@
 {
   "title": "Ajustes",
+  "lead": "Sonido, apariencia, opciones de cada juego e idioma. Con sesión iniciada, la apariencia y las opciones de juego siguen a tu cuenta.",
+  "jump": "Ir a",
   "tabs": {
     "sound": "Sonido",
     "look": "Apariencia",

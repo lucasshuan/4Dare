@@ -1,5 +1,7 @@
 {
   "title": "Settings",
+  "lead": "Sound, look, each game's options and language. Signed in, your look and game options follow your account.",
+  "jump": "Jump to",
   "tabs": {
     "sound": "Sound",
     "look": "Look",

@@ -1,5 +1,7 @@
 {
   "title": "Configurações",
+  "lead": "Som, aparência, opções de cada jogo e idioma. Com login, aparência e opções de jogo acompanham sua conta.",
+  "jump": "Ir para",
   "tabs": {
     "sound": "Som",
     "look": "Aparência",

@@ -26,7 +26,10 @@ export function Slider({
       step={5}
       disabled={disabled}
       onValueChange={(v) => onValueChange(Array.isArray(v) ? v[0] : v)}
-      className={cn("data-disabled:opacity-40", className)}
+      className={cn(
+        "cursor-pointer data-disabled:cursor-default data-disabled:opacity-40",
+        className,
+      )}
     >
       <BaseSlider.Control className="flex w-full touch-none select-none items-center py-2.5">
         <BaseSlider.Track className="h-1.5 w-full select-none rounded-pill bg-sunken">

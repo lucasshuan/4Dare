@@ -33,7 +33,8 @@ import {
 } from "@/lib/settings";
 import { playSound } from "@/lib/sound";
 
-const TABS = [
+/** The parts, in order: the dialog's tabs, the page's sections. */
+export const SETTINGS_PARTS = [
   { value: "sound", Icon: Volume2 },
   { value: "look", Icon: Palette },
   { value: "game", Icon: Gamepad2 },
@@ -64,7 +65,7 @@ export function SettingsDialog({
   );
 }
 
-/** The tabs themselves, in the dialog or on the settings page. */
+/** The dialog's tabs; the settings page lays the same parts out as sections. */
 export function SettingsTabs({ className }: { className?: string }) {
   const t = useTranslations("settings");
   const wide = useMedia("(min-width: 640px)");
@@ -78,7 +79,7 @@ export function SettingsTabs({ className }: { className?: string }) {
       )}
     >
       <Tabs.List className="flex shrink-0 gap-1 overflow-x-auto border-line bg-canvas p-3 max-sm:border-b sm:flex-col sm:border-r">
-        {TABS.map(({ value, Icon }) => (
+        {SETTINGS_PARTS.map(({ value, Icon }) => (
           <Tabs.Tab
             key={value}
             value={value}
@@ -141,7 +142,7 @@ function Row({
 
 const percent = (v: number) => Math.round(v * 100);
 
-function SoundPane() {
+export function SoundPane() {
   const t = useTranslations("settings.sound");
   const s = useSettings();
   const set = (change: (s: Settings) => Settings) => updateSettings(change);
@@ -167,7 +168,7 @@ function SoundPane() {
           value={percent(s.volume)}
           disabled={s.muted}
           onValueChange={(v) => set((x) => ({ ...x, volume: v / 100 }))}
-          className="min-w-32 flex-1"
+          className="min-w-20 flex-1"
         />
         <span className="w-12 text-right font-medium font-mono tabular-nums">
           {percent(s.volume)}%
@@ -227,7 +228,7 @@ function SoundPane() {
   );
 }
 
-function LookPane() {
+export function LookPane() {
   const t = useTranslations("settings.look");
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -266,7 +267,7 @@ type OptionKey = {
 }[GameKey];
 
 /** The game first, then that game's own options: each game brings its own. */
-function GamePane() {
+export function GamePane() {
   const t = useTranslations("settings.game");
   const gameName = useGameName();
   const [game, setGame] = useState<GameKey>(OPEN_GAMES[0]);
@@ -322,7 +323,7 @@ function GamePane() {
   );
 }
 
-function LanguagePane() {
+export function LanguagePane() {
   const t = useTranslations("common");
   const locale = useLocale() as Lang;
   const switchLanguage = useSwitchLanguage();
