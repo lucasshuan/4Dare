@@ -86,9 +86,9 @@ Tick = done and committed.
 
 ## Legal and news
 
-- [ ] Privacy and terms pages (short; lawyer check before publish)
-- [ ] Accounts 16+ only, under 16 play as guest; reported minor account deleted
-- [ ] No cookie banner (only needed cookies)
-- [ ] Two-layer license: personal stuff leaves with account, game content stays unnamed
+- [x] Privacy and terms pages (short, essentials in 30 s, index; lawyer check before publish)
+- [x] Accounts 16+ only, under 16 play as guest; reported minor account deleted (in the terms)
+- [x] No cookie banner (only needed cookies)
+- [x] Two-layer license: personal stuff leaves with account, game content stays unnamed
 - [ ] Public room chat: report a line, host mutes/kicks, chat off switch
-- [ ] News: hand-written `messages/<lang>/news.json`, blue dot vs last seen
+- [x] News: `news_posts` in four languages, filters by game and kind, reactions, a link per post, Workshop posts write themselves; menu dot vs last seen

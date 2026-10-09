@@ -79,6 +79,15 @@ Next.js 16, React 19, Tailwind 4, TypeScript. pnpm, Biome, Vitest, Playwright.
 - Names: server sends them ready in reader's language (`?lang=` on routes, request locale in actions; `displayName`). `guestNumber` never leaves server; guest name lists load only in stage lab.
 - Match end: one record per player (`src/game/record.ts`), saved after response. `matches.game` names the game; `match_players` keeps what every game has (place, time, XP), `whoami_match_players` what only "Who am I?" has (0030). XP (`src/game/profile/xp.ts`): 10 for finishing (none for leaving), 15 for first place, 10 for discovering, 5 for the day's first match (added by `record_match`).
 
+## Community pages
+
+- Side menu (`src/features/nav`): burger left of the logo on every page outside a match; groups Play, You, Community, Library, Help; "go to" filter; counts from `/api/menu` (library size, suggestions voting, newest news, a dot against the last one seen in `localStorage`). `/settings` and `/how-to-play` are pages of their own.
+- Long texts ship only on their page: `PAGE_ONLY` namespaces (`src/i18n/scopes.ts`) handed down with `PageMessages`.
+- Characters (`/characters`, `src/features/library`): `character_catalog` (0046) read in pages and kept 5 min per instance (`src/server/catalog.ts`); search, tastes, needs (no picture, a language without names, not reviewed). Sheet over the list (`@modal/(.)characters/[id]`), a page when opened anew. New characters are `hand-<slug>` with `created_by` and a name in every language. Players' nicknames live in `character_aliases` (0045: history, 3 reports hide, 30 changes an hour) and join search and guesses through `character_entries` (0047); the first one in a language without a name becomes its name.
+- Workshop (`/workshop`, `src/server/workshop.ts`): suggestions live in `workshop_suggestions` (voting, review, live, refused) with `workshop_votes`; the banks only get what a curator (`profiles.curator`) puts live at `/workshop/review`, inserted with all four languages, and a news post credits the author. Live check while typing (near names and texts, starters another theme has, starters without a picture, blocked words, 3 a week). Wand (`workshop-wand.ts`): game banks, then theme patterns, then MyMemory.
+- Rankings, players, contributions (`src/server/community.ts`): `xp_ranking`, `contribution_feed`, `top_contributors` (0045), `co_players` (0048); only accounts whose privacy shows activity or contributions to everyone.
+- Privacy and terms (`/privacy`, `/terms`, `messages/<lang>/legal.json`), contact `contato@4dare.com`. News (`/news`): `news_posts` and `news_reactions` (0045, first posts in 0049).
+
 ## Chat
 
 - `room_messages` (0012; per-author limit inside insert function) via `/api/rooms/[code]/messages`. Server posts system lines at their scene. Pings carry ids only. Room close clears chat.
