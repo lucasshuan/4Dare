@@ -279,20 +279,6 @@ export function LobbyScreen() {
               <RoomQr code={code} className="max-sm:hidden" />
             </div>
           </div>
-          {/* What for?'s presenter chair, over the lists */}
-          {game === "lineup" && view.settings.mode === "host" ? (
-            <TvChair
-              className="max-lg:order-3"
-              players={shownPlayers}
-              here={shownPlayers.filter((p) => !p.away).length}
-              chairId={view.chairId}
-              meId={me.id}
-              host={me.isHost}
-              pending={pending}
-              onSeat={(seat) => void act(() => sitChair(code, seat))}
-              onDraw={() => void act(() => drawChair(code))}
-            />
-          ) : null}
           {/* who is here, and the room's past matches: always takes what is left of the window, and scrolls inside */}
           <div
             className={cn(
@@ -333,7 +319,8 @@ export function LobbyScreen() {
                   icon: SlidersHorizontal,
                   panel: (
                     <div className="@container flex flex-col gap-4">
-                      <ul className="grid @xl:grid-cols-2 @4xl:grid-cols-3 gap-3 [&>li]:flex [&>li]:min-w-0 [&>li]:items-center [&>li]:rounded-lg [&>li]:border [&>li]:border-line [&>li]:p-3">
+                      {/* plain rows on hairlines, in up to three columns as the panel widens */}
+                      <ul className="grid @4xl:grid-cols-3 @xl:grid-cols-2 gap-x-8 [&>li]:flex [&>li]:min-h-14 [&>li]:min-w-0 [&>li]:items-center [&>li]:border-line [&>li]:border-b [&>li]:py-2">
                         <VisibilityRow
                           settings={view.settings}
                           editable={me.isHost}
@@ -454,7 +441,7 @@ export function LobbyScreen() {
           </div>
         </section>
 
-        {/* the sidebar, on the left on a desktop, growing a little with the window: the game on stage, the start key, then the room's settings */}
+        {/* the sidebar, on the left on a desktop, growing a little with the window: the game on stage and the start key */}
         <div className="max-lg:contents lg:order-first lg:flex lg:min-h-0 lg:w-[clamp(416px,30%,520px)] lg:shrink-0 lg:flex-col lg:gap-4">
           {/* the game on stage: its art over the panel's top, its name (the host can switch it there), the main action and who is ready */}
           <div
@@ -550,6 +537,20 @@ export function LobbyScreen() {
               />
             ) : null}
           </div>
+          {/* What for?'s presenter chair, under the game */}
+          {game === "lineup" && view.settings.mode === "host" ? (
+            <TvChair
+              className="max-lg:order-2"
+              players={shownPlayers}
+              here={shownPlayers.filter((p) => !p.away).length}
+              chairId={view.chairId}
+              meId={me.id}
+              host={me.isHost}
+              pending={pending}
+              onSeat={(seat) => void act(() => sitChair(code, seat))}
+              onDraw={() => void act(() => drawChair(code))}
+            />
+          ) : null}
         </div>
       </div>
       {/* the host changes the room in a modal over the lobby; a new room skips it and starts with the last setup */}
