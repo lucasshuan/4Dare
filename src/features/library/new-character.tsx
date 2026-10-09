@@ -9,6 +9,7 @@ import { AuthButton } from "@/components/ui/auth-button";
 import { Button } from "@/components/ui/button";
 import { ImageDrop, type ImageDropHandle } from "@/components/ui/image-drop";
 import { Portrait } from "@/components/ui/portrait";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/toast";
 import { useMe } from "@/features/data/use-me";
 import { useSignIn } from "@/features/home/use-sign-in";
@@ -272,7 +273,10 @@ function Form({
             <X className="size-5" strokeWidth={1.75} />
           </Dialog.Close>
         </div>
-        <div className="grid min-h-0 flex-1 auto-rows-max content-start gap-[18px] overflow-y-auto overscroll-contain px-5 pt-1 pb-5 sm:px-7">
+        <ScrollArea
+          className="flex-1"
+          contentClassName="grid auto-rows-max content-start gap-[18px] px-5 pt-1 pb-5 sm:px-7"
+        >
           <Field label={t("name")}>
             <input
               value={name}
@@ -441,7 +445,7 @@ function Form({
               </m.p>
             ) : null}
           </AnimatePresence>
-        </div>
+        </ScrollArea>
         <div className="flex shrink-0 items-center gap-2.5 border-line border-t px-5 py-3.5 sm:pl-7">
           <span className="mr-auto text-[13px] text-ink-muted max-sm:hidden">
             {t("author")}

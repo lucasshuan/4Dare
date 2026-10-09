@@ -35,6 +35,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { buttonClass } from "@/components/ui/button";
 import { LayoutMotion } from "@/components/ui/layout-motion";
 import { Logo } from "@/components/ui/logo";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
@@ -321,7 +322,10 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           {/* the logo where the page's is; the X floats above (after the popup) */}
           {/* room for the X and the logo, which stay put above the sliding menu */}
           <div className="h-[72px] shrink-0 sm:h-[88px] sm:short:h-[72px]" />
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pt-2 pb-3">
+          <ScrollArea
+            className="flex-1"
+            contentClassName="flex flex-col pt-2 pb-3"
+          >
             <Stagger i={0}>
               {me ? (
                 <MeCard onPick={() => pick("profile")} />
@@ -395,7 +399,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
                 ) : null}
               </div>
             </LayoutMotion>
-          </div>
+          </ScrollArea>
         </Dialog.Popup>
         {/*
           the page's bars and logo, in their spots (laid out as the top bar),

@@ -547,6 +547,11 @@ body {
       scrollbar-color: var(--scroll-thumb) transparent;
     }
   }
+
+  /* the page's bar is drawn by PageScrollbar (ui/scroll-area) */
+  html[data-floating-bar] {
+    scrollbar-width: none;
+  }
 }
 
 /*

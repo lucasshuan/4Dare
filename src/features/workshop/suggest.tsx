@@ -18,6 +18,7 @@ import { AuthButton } from "@/components/ui/auth-button";
 import { Button } from "@/components/ui/button";
 import { Flag } from "@/components/ui/language-switch";
 import { Portrait } from "@/components/ui/portrait";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Segmented } from "@/components/ui/segmented";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/toast";
@@ -535,7 +536,10 @@ function Composer({
             <X className="size-5" strokeWidth={1.75} />
           </Dialog.Close>
         </div>
-        <div className="grid min-h-0 flex-1 auto-rows-max content-start gap-[18px] overflow-y-auto overscroll-contain px-5 pt-1 pb-5 sm:px-7">
+        <ScrollArea
+          className="flex-1"
+          contentClassName="grid auto-rows-max content-start gap-[18px] px-5 pt-1 pb-5 sm:px-7"
+        >
           <Segmented
             label={tc("type")}
             options={["theme", "question", "mission"] as const}
@@ -1038,7 +1042,7 @@ function Composer({
               </m.p>
             ) : null}
           </AnimatePresence>
-        </div>
+        </ScrollArea>
         <div className="flex shrink-0 items-center gap-2.5 border-line border-t px-5 py-3.5 sm:pl-7">
           <span className="mr-auto text-[13px] text-ink-muted max-sm:hidden">
             {left === null ? null : tc("left", { n: left })}

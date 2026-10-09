@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { type ReactNode, useState } from "react";
 import { ProfileModalHost } from "@/features/profile/profile-modal-host";
 import { SettingsSync } from "@/features/settings/settings-sync";
+import { PageScrollbar } from "./ui/scroll-area";
 import { ToastProvider } from "./ui/toast";
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -27,6 +28,7 @@ export function Providers({ children }: { children: ReactNode }) {
               {children}
               <SettingsSync />
               <ProfileModalHost />
+              <PageScrollbar />
             </ToastProvider>
           </LazyMotion>
         </MotionConfig>

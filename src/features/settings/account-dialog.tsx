@@ -8,6 +8,7 @@ import { PROVIDER_NAME, ProviderLogo } from "@/components/ui/auth-button";
 import { Avatar } from "@/components/ui/avatar";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/toast";
 import { meKey } from "@/features/data/use-me";
 import { useRouter } from "@/i18n/navigation";
@@ -70,7 +71,10 @@ export function AccountDialog({
       title={t("title")}
       icon={<UserRoundCog strokeWidth={1.75} />}
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-5 sm:p-6">
+      <ScrollArea
+        className="flex-1"
+        contentClassName="flex flex-col gap-6 p-5 sm:p-6"
+      >
         <div className="flex items-center gap-3">
           <Avatar avatar={me.avatar} size={52} />
           <div className="flex min-w-0 flex-col">
@@ -203,7 +207,7 @@ export function AccountDialog({
             {t("deleteNow")}
           </Button>
         </section>
-      </div>
+      </ScrollArea>
     </Modal>
   );
 }

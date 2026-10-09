@@ -15,6 +15,7 @@ import { useTheme } from "next-themes";
 import { type ReactNode, useEffect, useState } from "react";
 import { Modal } from "@/components/ui/dialog";
 import { Flag } from "@/components/ui/language-switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { GameThumb, useGameName } from "@/features/create/game-info";
@@ -110,9 +111,14 @@ function Pane({ value, children }: { value: string; children: ReactNode }) {
   return (
     <Tabs.Panel
       value={value}
-      className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-5 outline-none sm:p-6"
+      className="flex min-h-0 flex-1 flex-col outline-none"
     >
-      {children}
+      <ScrollArea
+        className="flex-1"
+        contentClassName="flex flex-col gap-5 p-5 sm:p-6"
+      >
+        {children}
+      </ScrollArea>
     </Tabs.Panel>
   );
 }
