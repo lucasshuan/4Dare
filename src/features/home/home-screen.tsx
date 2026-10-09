@@ -77,14 +77,12 @@ function GameCard({ game, delay }: { game: GameKey; delay: number }) {
       }}
       className={CARD}
     >
-      {/* Spotlight: hovering (or focusing) a tile dims the others, lights a
-          beam on it and raises its name; phones keep a small caption on */}
+      {/* hovering (or focusing) a tile raises its name; phones keep a small caption on */}
       <Link
         href={GAME_PATHS[game]}
-        className="group/tile relative block aspect-square overflow-hidden bg-surface-sunken outline-offset-[-3px]! transition-[filter] duration-500 ease-soft [container-type:inline-size] group-has-[a:focus-visible]/games:[&:not(:focus-visible)]:brightness-42 group-has-[a:focus-visible]/games:[&:not(:focus-visible)]:saturate-35 sm:group-has-[a:hover]/games:[&:not(:hover)]:brightness-42 sm:group-has-[a:hover]/games:[&:not(:hover)]:saturate-35"
+        className="group/tile relative block aspect-square overflow-hidden bg-surface-sunken outline-offset-[-3px]! [container-type:inline-size]"
       >
         <Art />
-        <span className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-[78%] bg-[linear-gradient(rgb(255_240_190/0.34),rgb(255_240_190/0)_85%)] opacity-0 mix-blend-screen transition-opacity duration-400 ease-soft [clip-path:polygon(34%_0,66%_0,100%_100%,0_100%)] group-hover/tile:opacity-100 group-focus-visible/tile:opacity-100 max-sm:hidden" />
         <div className="absolute inset-x-0 bottom-0 z-[6] flex flex-col gap-0.5 bg-[linear-gradient(to_top,rgb(12_14_22/0.82),rgb(12_14_22/0))] px-3 pt-[30px] pb-[11px] text-white sm:top-0 sm:justify-end sm:gap-3.5 sm:bg-[linear-gradient(to_top,rgb(12_14_22/0.9),rgb(12_14_22/0.62)_34%,rgb(12_14_22/0)_62%)] sm:p-6 sm:opacity-0 sm:transition-opacity sm:duration-350 sm:ease-soft sm:group-hover/tile:opacity-100 sm:group-focus-visible/tile:opacity-100 [&>*]:transition-transform [&>*]:duration-450 [&>*]:ease-soft sm:[&>*]:translate-y-3 sm:group-hover/tile:[&>*]:translate-y-0 sm:group-focus-visible/tile:[&>*]:translate-y-0">
           <h3 className="truncate font-display font-extrabold text-lg leading-[1.05] tracking-[-0.01em] sm:text-[min(38px,11cqw)] sm:leading-none">
             {t("name")}
