@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  factsOf,
   type ImpostorPart,
   impostorNumbers,
   type PlayedMatch,
@@ -8,22 +7,6 @@ import {
   type WhoAmIPart,
   whoAmINumbers,
 } from "./history";
-
-const THEME = {
-  en: "Villains",
-  es: "Villanos",
-  ja: "悪役",
-  pt: "Vilões",
-  set: null,
-};
-
-/** The facts without their scores, after checking they come most telling first. */
-function told(rows: PlayedMatch[]) {
-  const facts = factsOf(rows);
-  const scores = facts.map((f) => f.score);
-  expect(scores).toEqual([...scores].sort((a, b) => b - a));
-  return facts.map(({ score, ...f }) => f);
-}
 
 let n = 0;
 function match(
@@ -87,119 +70,7 @@ describe("a profile's matches", () => {
     expect(whoAmINumbers([]).discoverRate).toBeNull();
   });
 
-  it("finds the partner, the fastest discovery, the hardest card and the theme", () => {
-    const bia = { id: "bia", place: 2, guest: false };
-    const guest = { id: "g1", place: null, guest: true };
-    const rows = [
-      match(
-        {
-          result: "discovered",
-          discoveredAt: 3,
-          characterName: "Mario",
-          themeId: "villains",
-          theme: THEME,
-        },
-        { place: 1, others: [bia, guest] },
-      ),
-      match(
-        {
-          result: "discovered",
-          discoveredAt: 1,
-          characterId: "pt-wd-Q1",
-          characterName: "Pikachu",
-          themeId: "villains",
-          theme: THEME,
-          gave: {
-            to: "bia",
-            characterId: "x",
-            characterName: "Sherlock",
-            result: "gave_up",
-            questions: 14,
-          },
-        },
-        { place: 2, others: [{ ...bia, place: 1 }] },
-      ),
-      match(
-        {
-          themeId: "villains",
-          theme: THEME,
-          gave: {
-            to: "g1",
-            characterId: "y",
-            characterName: "Totoro",
-            result: "not_found",
-            questions: 9,
-          },
-        },
-        { others: [bia, guest] },
-      ),
-    ];
-    expect(told(rows)).toEqual([
-      { kind: "partner", game: null, id: "bia", together: 3, ahead: 1 },
-      {
-        kind: "fastest",
-        game: "who-am-i",
-        characterId: "pt-wd-Q1",
-        characterName: "Pikachu",
-        at: 1,
-        timeMs: 60_000,
-      },
-      {
-        kind: "hardest",
-        game: "who-am-i",
-        characterId: "x",
-        characterName: "Sherlock",
-        questions: 14,
-        to: "bia",
-      },
-      { kind: "theme", game: "who-am-i", theme: THEME, count: 3 },
-    ]);
-  });
-
-  it("keeps quiet about what says nothing", () => {
-    const bia = { id: "bia", place: 2, guest: false };
-    const rows = [
-      // the only discovery is not the fastest
-      match(
-        { result: "discovered", discoveredAt: 4, characterName: "Yor" },
-        { others: [bia] },
-      ),
-      // two questions is not hard, and one who left gave up on the match
-      match(
-        {
-          themeId: "villains",
-          theme: THEME,
-          gave: {
-            to: "bia",
-            characterId: "x",
-            characterName: "Agent 47",
-            result: "not_found",
-            questions: 2,
-          },
-        },
-        { others: [bia] },
-      ),
-      match(
-        {
-          themeId: "villains",
-          theme: THEME,
-          gave: {
-            to: "bia",
-            characterId: "y",
-            characterName: "Totoro",
-            result: "left",
-            questions: 12,
-          },
-        },
-        { others: [{ ...bia, place: null }] },
-      ),
-    ];
-    expect(told(rows)).toEqual([
-      { kind: "partner", game: null, id: "bia", together: 3, ahead: 0 },
-    ]);
-  });
-
-  it("counts the Impostor's numbers and finds its curiosities", () => {
+  it("counts the Impostor's numbers", () => {
     const imp = (
       fields: Partial<ImpostorPart>,
       place: number | null = null,
@@ -236,67 +107,7 @@ describe("a profile's matches", () => {
       asImpostor: 3,
       escapeRate: 2 / 3,
     });
-    // a last-chance hit is rarer than an escape with a vote against
-    expect(told(rows)).toEqual([
-      { kind: "bullseye", game: "impostor", guess: "Luffy" },
-      { kind: "escape", game: "impostor", characterName: "Sanji", votes: 1 },
-    ]);
     // "Who am I?"'s numbers leave the Impostor's matches out
     expect(whoAmINumbers(rows).discoverRate).toBeNull();
-  });
-
-  it("puts first the facts of the game the player plays most", () => {
-    const leo = { id: "leo", place: 1, guest: false };
-    const imp = (place: number | null, fields: Partial<ImpostorPart> = {}) =>
-      ({
-        ...match({}, { place, others: [leo] }),
-        game: "impostor",
-        details: {
-          themeId: null,
-          theme: null,
-          impostor: false,
-          outRound: null,
-          left: false,
-          rightVotes: 0,
-          firstRight: false,
-          votesTaken: 0,
-          guess: null,
-          guessHit: null,
-          characterName: "Zoro",
-          ...fields,
-        },
-      }) as PlayedMatch;
-    const rows = [
-      imp(1),
-      imp(1),
-      imp(1),
-      imp(2, { impostor: true, outRound: 1, guess: "Luffy", guessHit: true }),
-      imp(2),
-      imp(2),
-      // a tougher card than the hit is rare, but in a game played twice
-      match({
-        gave: {
-          to: "g",
-          characterId: "y",
-          characterName: "Totoro",
-          result: "gave_up",
-          questions: 13,
-        },
-      }),
-      match({}),
-    ];
-    const kinds = told(rows).map((f) => f.kind);
-    expect(kinds).toContain("winStreak");
-    expect(kinds).toContain("favoriteGame");
-    // leo beat them more often, but the partner is never the rival too
-    expect(kinds).toContain("partner");
-    expect(kinds).not.toContain("rival");
-    expect(kinds.indexOf("bullseye")).toBeLessThan(kinds.indexOf("hardest"));
-  });
-
-  it("tells nothing from one match with guests", () => {
-    expect(
-      factsOf([match({}, { others: [{ id: "g", place: 1, guest: true }] })]),
-    ).toEqual([]);
   });
 });

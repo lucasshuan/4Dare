@@ -7,7 +7,6 @@ import type { LuCard } from "@/game/lineup/types";
 import type { SyncedSettings } from "@/game/options";
 import type { BadgeGroup, BadgeId } from "@/game/profile/badges";
 import type {
-  Fact,
   impostorNumbers,
   lineupNumbers,
   whoAmINumbers,
@@ -178,7 +177,7 @@ export const AVATAR_COLORS = [
   "#D7DDE8",
 ] as const;
 
-/** An account as a profile names it: in a curiosity, on the mural. */
+/** An account as a profile names it: on the mural. */
 export interface PersonRef {
   id: PlayerId;
   handle: string;
@@ -222,40 +221,6 @@ export type GameView = GameTotals &
     | ({ game: "impostor" } & ReturnType<typeof impostorNumbers>)
     | ({ game: "lineup" } & ReturnType<typeof lineupNumbers>)
   );
-
-/** A curiosity with its people named and its character pictured. */
-export type FactView =
-  | (Omit<Extract<Fact, { kind: "partner" }>, "id"> & { person: PersonRef })
-  | (Omit<Extract<Fact, { kind: "rival" }>, "id"> & { person: PersonRef })
-  | (Omit<Extract<Fact, { kind: "hardest" }>, "to" | "characterId"> & {
-      to: PersonRef | null;
-      picture: FactPicture | null;
-    })
-  | (Omit<Extract<Fact, { kind: "fastest" }>, "characterId"> & {
-      picture: FactPicture | null;
-    })
-  | Extract<
-      Fact,
-      {
-        kind:
-          | "winStreak"
-          | "favoriteGame"
-          | "sharpEye"
-          | "theme"
-          | "escape"
-          | "bullseye"
-          | "firstVote"
-          | "bargain"
-          | "splurge"
-          | "crowd";
-      }
-    >;
-
-/** A fact's character, pictured. */
-export interface FactPicture {
-  url: string;
-  origin: string | null;
-}
 
 /** A picture someone sent for a character, as their profile lists it. */
 export interface ContributedPicture {
@@ -309,7 +274,6 @@ export interface ProfileView extends PersonRef {
   /** The last year's matches, for the garden: when, which game, won. */
   plays: { at: number; game: GameKey; won: boolean }[];
   games: GameView[];
-  facts: FactView[];
   pictures: ContributedPicture[];
   characters: CharacterDTO[];
   badges: BadgeView[];

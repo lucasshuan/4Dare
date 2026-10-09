@@ -161,16 +161,6 @@ describe("profiles", () => {
     expect(view?.games).toMatchObject([
       { game: "who-am-i", matches: 3, wins: 1, recent: 2 },
     ]);
-    expect(view?.facts).toEqual([
-      {
-        kind: "partner",
-        game: null,
-        person: { id: BIA, handle: "bia", name: "Bia", avatar },
-        together: 3,
-        ahead: 0,
-        score: 1,
-      },
-    ]);
   });
 
   it("shows a picture waiting on the detector to its author only", async () => {
@@ -211,7 +201,7 @@ describe("profiles", () => {
     // a stranger sees neither
     const stranger = await profileView("mei", STRANGER, "pt");
     expect(stranger?.hidden).toMatchObject({ activity: true, showcase: true });
-    expect(stranger).toMatchObject({ matches: 0, plays: [], facts: [] });
+    expect(stranger).toMatchObject({ matches: 0, plays: [] });
     const card = await playerCard(MEI, STRANGER, "pt");
     expect(card?.numbers).toBeNull();
     // the owner sees it all, with what the editor needs

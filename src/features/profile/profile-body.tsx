@@ -35,7 +35,6 @@ import { ActivityPanel, hours } from "./activity";
 import { BadgesPanel } from "./badges";
 import { ContributionsPanel } from "./contributions";
 import { accentStyle, CoverPaint } from "./cover-paint";
-import { FunFacts } from "./fun-facts";
 import { streaks } from "./garden-days";
 import { LevelAvatar } from "./level";
 import { MuralPanel } from "./mural";
@@ -475,10 +474,6 @@ function ProfileShow({
                 className="mx-(--pad) mt-[18px] sm:hidden"
               />
             ) : null}
-
-            {view.hidden.activity ? null : (
-              <FunFacts facts={view.facts} streak={run} className="mt-[22px]" />
-            )}
 
             {tabs.length ? (
               <Tabs.Root
