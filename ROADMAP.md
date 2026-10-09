@@ -16,6 +16,9 @@ Tick = done and committed.
 - [ ] Who am I?: up to 6 players
 - [ ] Every game gets own intro screen
 - [ ] New game inspired by Ito
+- [ ] Who am I?: polish, fix transitions
+- [ ] Impostor: polish, fix transitions
+- [ ] What for?: polish, fix transitions
 
 ## Sound
 
@@ -51,6 +54,7 @@ Tick = done and committed.
 - [x] Own pages for settings (`/settings`) and the three games' rules (`/how-to-play`)
 - [ ] Avatar menu keeps account, theme, sign out only
 - [ ] Blue dot: suggestion moved or new achievement
+- [ ] Drop `/how-to-play` page
 
 ## Characters (`/characters`)
 
@@ -77,6 +81,19 @@ Tick = done and committed.
 - [x] Rankings: per game and period (week, month, ever), podium, own place, top helpers
 - [x] Players page: search; all, played with me, playing now
 - [x] Contributions feed (photos, characters, aliases, suggestions), own numbers and the pictures badge
+- [ ] Empty ranking (under 3 players): better skeleton
+
+## Social
+
+- [ ] Notifications
+- [ ] Friends
+- [ ] Friend chat
+- [ ] Clans
+
+## Profile
+
+- [ ] Better trivia
+- [ ] Better activity, matches included
 
 ## Badges
 
