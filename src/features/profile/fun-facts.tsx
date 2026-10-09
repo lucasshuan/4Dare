@@ -186,7 +186,7 @@ export function FunFacts({
               >
                 {it.icon}
               </span>
-              <span className="min-w-0 flex-1 truncate font-semibold text-[12.5px] text-ink-muted">
+              <span className="line-clamp-2 min-w-0 flex-1 font-semibold text-[12.5px] text-ink-muted leading-tight">
                 {it.label}
               </span>
               {it.game ? (
