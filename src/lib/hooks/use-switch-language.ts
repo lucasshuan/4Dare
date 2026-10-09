@@ -6,12 +6,15 @@ import { getPathname, usePathname } from "@/i18n/navigation";
 /**
  * Moves to the same page in another language. A full load, not a client
  * navigation: the whole app (its <html> included) lives under the locale, and
- * re-rendering it on the client trips React over the theme script.
+ * re-rendering it on the client trips React over the theme script. The query
+ * and the hash go along, so the page reopens where it was (a tab, a section).
  */
 export function useSwitchLanguage() {
   const pathname = usePathname();
   return (lang: Lang) =>
     window.location.assign(
-      getPathname({ href: pathname, locale: lang }) + window.location.search,
+      getPathname({ href: pathname, locale: lang }) +
+        window.location.search +
+        window.location.hash,
     );
 }

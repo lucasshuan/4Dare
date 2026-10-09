@@ -255,7 +255,7 @@ function ProfileShow({
   const toast = useToast();
   const locale = useLocale();
   const wide = useMedia("(min-width: 640px)");
-  // ?tab= opens a section first (the menu's Badges and Matches)
+  // ?tab= opens a section first (the menu's Badges and Matches); picking one writes it back
   const askedTab = useSearchParams().get("tab");
   // the time the page was read: the garden and the ages count from it
   const [now] = useState(() => Date.now());
@@ -484,6 +484,11 @@ function ProfileShow({
                   tabs.find(({ value }) => value === askedTab)?.value ??
                   tabs[0].value
                 }
+                onValueChange={(tab) => {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("tab", String(tab));
+                  window.history.replaceState(null, "", url);
+                }}
                 orientation={wide ? "vertical" : "horizontal"}
                 className="mt-[22px] grid border-line border-t sm:grid-cols-[88px_minmax(0,1fr)]"
               >

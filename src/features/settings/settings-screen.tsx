@@ -28,11 +28,21 @@ const PANES: Record<Part, () => ReactNode> = {
 /**
  * /settings: the settings box's parts as one page, a section each, with an
  * index beside them (chips over them on phones) that marks the part in view.
+ * The part in view goes into the address (#look), so a reload (a new
+ * language) comes back to it.
  */
 export function SettingsScreen() {
   const t = useTranslations("settings");
   const tNav = useTranslations("nav");
   const current = useInView(IDS);
+  useEffect(() => {
+    if (!current) return;
+    const url = new URL(window.location.href);
+    const hash = current === IDS[0] ? "" : `#${current}`;
+    if (url.hash === hash) return;
+    url.hash = hash;
+    window.history.replaceState(window.history.state, "", url);
+  }, [current]);
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
       <PageHead
@@ -49,10 +59,10 @@ export function SettingsScreen() {
             <a
               key={value}
               href={`#${value}`}
-              aria-current={current === value ? "true" : undefined}
+              aria-current={(current ?? IDS[0]) === value ? "true" : undefined}
               className={cn(
                 "flex h-10 shrink-0 items-center gap-2.5 rounded-pill px-3.5 font-semibold text-[14.5px] transition-colors duration-150 ease-soft lg:rounded-lg",
-                current === value
+                (current ?? IDS[0]) === value
                   ? "bg-surface text-ink shadow-card"
                   : "text-ink-muted hover:bg-sunken hover:text-ink",
               )}
@@ -89,27 +99,41 @@ export function SettingsScreen() {
   );
 }
 
-/** The section nearest the top of the window, among those showing. */
+/**
+ * The section read now: the last one whose top passed the top bar, or the
+ * last of all once the page is scrolled to its end; at first, the one the
+ * address names (#game), which the page may not scroll far enough to reach.
+ * Null until measured.
+ */
 function useInView(ids: readonly string[]) {
-  const [current, setCurrent] = useState(ids[0]);
+  const [current, setCurrent] = useState<string | null>(null);
   useEffect(() => {
-    const showing = new Set<string>();
-    const watch = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries)
-          if (e.isIntersecting) showing.add(e.target.id);
-          else showing.delete(e.target.id);
-        const first = ids.find((id) => showing.has(id));
-        if (first) setCurrent(first);
-      },
-      // a band across the upper part of the window
-      { rootMargin: "-96px 0px -55% 0px" },
-    );
-    for (const id of ids) {
-      const el = document.getElementById(id);
-      if (el) watch.observe(el);
-    }
-    return () => watch.disconnect();
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const atEnd =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 2;
+      let found = ids[0];
+      for (const id of ids) {
+        const top = document.getElementById(id)?.getBoundingClientRect().top;
+        if (top !== undefined && top <= 120) found = id;
+      }
+      setCurrent(atEnd ? ids[ids.length - 1] : found);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+    const asked = window.location.hash.slice(1);
+    if (ids.includes(asked)) setCurrent(asked);
+    else measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [ids]);
   return current;
 }
