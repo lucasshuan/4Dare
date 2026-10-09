@@ -158,7 +158,7 @@ export function LobbyScreen() {
   );
   const { game, name: roomName, seats, themeMode } = view.settings;
   const gameName = useGameName();
-  const GameArt = GAME_INFO[game].Thumb;
+  const GameArt = GAME_INFO[game].Art;
   // The host sees every seat the game allows, and their changes show at once;
   // the server confirms in the background (a refusal puts things back).
   const range = GAME_SEATS[game];
@@ -373,12 +373,13 @@ export function LobbyScreen() {
           >
             <div
               aria-hidden="true"
-              className="relative -mx-6 -mt-6 h-44 overflow-hidden bg-sunken short:h-32 max-sm:-mx-4 max-sm:-mt-4 max-sm:h-32"
+              className="relative -mx-6 -mt-6 aspect-[5/3] overflow-hidden bg-sunken short:aspect-[2/1] max-sm:-mx-4 max-sm:-mt-4"
             >
-              {/* the game's own picture, drawn to fill any box */}
-              <div className="absolute inset-0 [&_svg]:size-full">
-                <GameArt />
-              </div>
+              {/* the home tile's animated scene: a square kept to its upper part, where the scene sits */}
+              <GameArt
+                key={game}
+                className="absolute inset-x-0 top-0 w-full short:top-[-6%]"
+              />
             </div>
             {me.isHost ? (
               <GameField
