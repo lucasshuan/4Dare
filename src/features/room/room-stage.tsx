@@ -151,12 +151,13 @@ function Areas() {
   useStepSound();
   usePresenceSound(view);
   useMusicMuffle(area === "lobby");
-  // an Impostor match swaps the stage for its spy take, at the same point in the song
-  const impostor = view.settings.game === "impostor";
+  // an Impostor room plays the spy take instead of the stage, lobby (muffled) to
+  // results; picking the game in the lobby crossfades at the same point in the song,
+  // and the take is fetched on entering the room so the swap starts at once
   useEffect(() => {
-    if (impostor) preloadMusic("impostor");
-  }, [impostor]);
-  useMusic(area === "match" && impostor ? "impostor" : undefined, 1);
+    preloadMusic("impostor");
+  }, []);
+  useMusic(view.settings.game === "impostor" ? "impostor" : undefined, 1);
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
   const lineup = view.settings.game === "lineup";
