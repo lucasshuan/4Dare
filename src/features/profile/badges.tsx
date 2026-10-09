@@ -31,11 +31,12 @@ import { useId } from "react";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { isGameKey } from "@/game/games";
 import { type BadgeId, TIERS } from "@/game/profile/badges";
+import type { Tint } from "@/game/profile/profile";
 import { GAME_XP, levelOf, XP } from "@/game/profile/xp";
 import { cn } from "@/lib/cn";
 import type { BadgeView, ProfileView } from "@/server/contract";
+import { accentStyle } from "./cover-paint";
 import { XpBar } from "./level";
-import { accentStyle } from "./profile-body";
 
 const ICON: Record<BadgeId, LucideIcon> = {
   matches: Gamepad2,
@@ -74,7 +75,11 @@ export function BadgesPanel({ view }: { view: ProfileView }) {
   const groups = [...new Set(view.badges.map((b) => b.group))];
   return (
     <div className="@container flex flex-col gap-4.5">
-      <LevelCard xp={view.xp} accent={view.accent} />
+      <LevelCard
+        xp={view.xp}
+        accent={view.accent}
+        avatarColor={view.avatar.color}
+      />
       <Legend />
       {groups.map((group) => {
         const badges = view.badges.filter((b) => b.group === group);
@@ -130,7 +135,15 @@ function Legend() {
 }
 
 /** The level in a ring of the XP into it, the bar to the next; how XP is earned opens beside them. */
-function LevelCard({ xp, accent }: { xp: number; accent: string | null }) {
+function LevelCard({
+  xp,
+  accent,
+  avatarColor,
+}: {
+  xp: number;
+  accent: Tint | null;
+  avatarColor: string;
+}) {
   const t = useTranslations("profile.level");
   const tb = useTranslations("profile.badges");
   const format = useFormatter();
@@ -176,7 +189,7 @@ function LevelCard({ xp, accent }: { xp: number; accent: string | null }) {
             className="z-[60]"
           >
             <Popover.Popup
-              style={accentStyle(accent)}
+              style={accentStyle(accent, avatarColor)}
               className="w-[min(320px,calc(100vw-1.5rem))] origin-[var(--transform-origin)] rounded-xl bg-surface p-4 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0"
             >
               <Popover.Title className="m-0 mb-2 font-semibold text-sm">

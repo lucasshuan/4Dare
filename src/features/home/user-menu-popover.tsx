@@ -20,8 +20,8 @@ import {
 } from "@/components/ui/auth-button";
 import { Avatar } from "@/components/ui/avatar";
 import { useMe } from "@/features/data/use-me";
+import { accentStyle } from "@/features/profile/cover-paint";
 import { LevelAvatar, XpBar } from "@/features/profile/level";
-import { accentStyle } from "@/features/profile/profile-body";
 import { profilePath } from "@/features/profile/profile-link";
 import { usePlayerCard } from "@/features/profile/use-profile";
 import { AccountDialog } from "@/features/settings/account-dialog";
@@ -103,7 +103,7 @@ export function UserMenuPopover({
         <Popover.Portal>
           <Popover.Positioner sideOffset={8} align="end" className="z-50">
             <Popover.Popup
-              style={accentStyle(card?.accent ?? null)}
+              style={accentStyle(card?.accent ?? null, me.avatar.color)}
               className="flex w-[min(340px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-4 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0"
             >
               <div className="flex items-center gap-3">

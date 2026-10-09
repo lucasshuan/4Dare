@@ -119,17 +119,20 @@
   },
   "editor": {
     "changeCover": "カバーを変更",
-    "covers": "カバー",
-    "noCover": "アバターの色",
+    "cover": "カバー",
+    "pattern": "柄",
+    "colour": "色",
     "uploadCover": "画像をアップロード",
     "coverTitle": "カバー画像",
-    "coverNames": {
-      "dawn": "夜明け",
-      "meadow": "草原",
-      "sea": "海",
-      "dusk": "夕暮れ",
-      "candy": "キャンディ",
-      "night": "夜"
+    "patterns": {
+      "plain": "無地",
+      "dots": "ドット",
+      "stripes": "ストライプ",
+      "checks": "チェック",
+      "waves": "波",
+      "zigzag": "ジグザグ",
+      "stars": "星",
+      "questions": "はてな"
     },
     "changeAvatar": "アバターを変更",
     "avatarTitle": "アバター",
@@ -171,7 +174,17 @@
     "langs": "話せる言語",
     "accent": "アクセントカラー",
     "accentHint": "レベルのリング、タブ、花壇の花に使われます。",
-    "accentN": "色{n}",
+    "tints": {
+      "avatar": "アバターの色",
+      "sky": "青",
+      "teal": "青緑",
+      "apricot": "オレンジ",
+      "rose": "ピンク",
+      "violet": "紫",
+      "green": "緑",
+      "gold": "金",
+      "slate": "グレー"
+    },
     "privacy": "プライバシー",
     "privacyHint": "プロフィールの各部分を誰に見せるか。",
     "privacyRows": {

@@ -119,17 +119,20 @@
   },
   "editor": {
     "changeCover": "Change cover",
-    "covers": "Covers",
-    "noCover": "Avatar colour",
+    "cover": "Cover",
+    "pattern": "Pattern",
+    "colour": "Colour",
     "uploadCover": "Upload picture",
     "coverTitle": "Cover picture",
-    "coverNames": {
-      "dawn": "Dawn",
-      "meadow": "Meadow",
-      "sea": "Sea",
-      "dusk": "Dusk",
-      "candy": "Candy",
-      "night": "Night"
+    "patterns": {
+      "plain": "Plain",
+      "dots": "Dots",
+      "stripes": "Stripes",
+      "checks": "Checks",
+      "waves": "Waves",
+      "zigzag": "Zigzag",
+      "stars": "Stars",
+      "questions": "Questions"
     },
     "changeAvatar": "Change avatar",
     "avatarTitle": "Avatar",
@@ -171,7 +174,17 @@
     "langs": "Languages you speak",
     "accent": "Accent colour",
     "accentHint": "On the level ring, the tabs and the garden's flowers.",
-    "accentN": "Colour {n}",
+    "tints": {
+      "avatar": "Avatar colour",
+      "sky": "Blue",
+      "teal": "Teal",
+      "apricot": "Orange",
+      "rose": "Pink",
+      "violet": "Violet",
+      "green": "Green",
+      "gold": "Gold",
+      "slate": "Slate"
+    },
     "privacy": "Privacy",
     "privacyHint": "Who sees each part of your profile.",
     "privacyRows": {

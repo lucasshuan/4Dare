@@ -9,9 +9,8 @@ import { buttonClass } from "@/components/ui/button";
 import type { Avatar as AvatarData } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { hours } from "./activity";
-import { bannerStyle } from "./banners";
+import { accentStyle, CoverPaint } from "./cover-paint";
 import { LevelAvatar } from "./level";
-import { accentStyle } from "./profile-body";
 import { ProfileLink } from "./profile-link";
 import { usePlayerCard } from "./use-profile";
 
@@ -98,11 +97,16 @@ export function PersonCardBody({
     );
 
   return (
-    <div style={accentStyle(card?.accent ?? null)} className="flex flex-col">
-      <div
-        className="h-12"
-        style={bannerStyle(card?.banner ?? null, person.avatar.color)}
-      />
+    <div
+      style={accentStyle(card?.accent ?? null, person.avatar.color)}
+      className="flex flex-col"
+    >
+      <div className="relative h-12">
+        <CoverPaint
+          banner={card?.banner ?? null}
+          avatarColor={person.avatar.color}
+        />
+      </div>
       <div className="-mt-5 flex flex-col gap-3 px-4 pb-4">
         <div className="flex items-end gap-3">
           {card?.numbers ? (

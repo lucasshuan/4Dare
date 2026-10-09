@@ -194,6 +194,19 @@
     var(--line-strong) 85%,
     transparent
   );
+  /* a profile's colours (its cover, its accent): the palette, and how the avatar's pastel deepens into one; text on them, and the ground a cover mixes them into */
+  --tint-sky: #2b69c8;
+  --tint-teal: #0b7a75;
+  --tint-apricot: #cf7024;
+  --tint-rose: #c2417a;
+  --tint-violet: #7a5af5;
+  --tint-green: #3f9a3a;
+  --tint-gold: #b8860b;
+  --tint-slate: #566075;
+  --tint-avatar-l: 0.54;
+  --tint-avatar-c: 3.2;
+  --on-tint: #ffffff;
+  --cover-base: #ffffff;
   color-scheme: light;
 }
 
@@ -283,6 +296,18 @@
     0 2px 6px rgba(0, 0, 0, 0.5), 0 24px 56px rgba(0, 0, 0, 0.5);
   --shadow-dock-value:
     0 -2px 6px rgba(0, 0, 0, 0.4), 0 -16px 40px rgba(0, 0, 0, 0.45);
+  --tint-sky: #86b4f7;
+  --tint-teal: #5ccfc6;
+  --tint-apricot: #f0a566;
+  --tint-rose: #f08db5;
+  --tint-violet: #b4a2fa;
+  --tint-green: #8cd484;
+  --tint-gold: #e3c163;
+  --tint-slate: #a7b0c2;
+  --tint-avatar-l: 0.8;
+  --tint-avatar-c: 2.4;
+  --on-tint: #12161f;
+  --cover-base: #141927;
   color-scheme: dark;
 }
 

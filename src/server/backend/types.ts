@@ -17,6 +17,7 @@ import type {
   Banner,
   Privacy,
   ShowcaseItem,
+  Tint,
 } from "@/game/profile/profile";
 import type { MatchRecord } from "@/game/record";
 import type { Taste, ThemeFilter } from "@/game/tastes";
@@ -296,7 +297,7 @@ export interface StoredProfile {
   createdAt: number;
   quote: string | null;
   /** The colour of the XP ring, the tabs and the garden's flowers; null for the default. */
-  accent: string | null;
+  accent: Tint | null;
   banner: Banner | null;
   showcase: ShowcaseItem[];
   about: About;

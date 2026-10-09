@@ -25,7 +25,6 @@ import {
   normalizeHandle,
 } from "@/game/profile/handle";
 import {
-  ACCENTS,
   AUDIENCES,
   type Audience,
   type Banner,
@@ -35,6 +34,8 @@ import {
   type Privacy,
   QUOTE_MAX,
   SHOWCASE_MAX,
+  TINTS,
+  type Tint,
 } from "@/game/profile/profile";
 import { LANGS, MAX_NAME } from "@/game/types";
 import { useRouter } from "@/i18n/navigation";
@@ -44,6 +45,7 @@ import { checkHandle, saveProfile } from "@/server/actions";
 import type { ProfileView, ShowcaseView } from "@/server/contract";
 import type { HandleCheck } from "@/server/profile-edit";
 import { Card } from "./activity";
+import { accentStyle, tintColor } from "./cover-paint";
 import {
   AvatarDialog,
   type AvatarDraft,
@@ -56,7 +58,6 @@ import {
 } from "./editor-parts";
 import { LevelAvatar } from "./level";
 import {
-  accentStyle,
   FRAME,
   ProfileCover,
   type ProfileMode,
@@ -116,7 +117,7 @@ export function ProfileEditor({
   const [name, setName] = useState(me?.name ?? view.name);
   const [handle, setHandle] = useState(view.handle);
   const [quote, setQuote] = useState(view.quote ?? "");
-  const [accent, setAccent] = useState<string | null>(view.accent);
+  const [accent, setAccent] = useState<Tint | null>(view.accent);
   const [cover, setCover] = useState<CoverChoice>({ kind: "keep" });
   const [avatar, setAvatar] = useState<AvatarDraft | null>(() =>
     me ? initialAvatar(me) : null,
@@ -143,11 +144,9 @@ export function ProfileEditor({
   const shownBanner: Banner | null =
     cover.kind === "keep"
       ? view.banner
-      : cover.kind === "none"
-        ? null
-        : cover.kind === "preset"
-          ? { kind: "preset", id: cover.id }
-          : { kind: "image", url: cover.url };
+      : cover.kind === "pattern"
+        ? { kind: "pattern", pattern: cover.pattern, tint: cover.tint }
+        : { kind: "image", url: cover.url };
   useEffect(
     () => () => {
       if (cover.kind === "upload") URL.revokeObjectURL(cover.url);
@@ -171,7 +170,8 @@ export function ProfileEditor({
     handle: normalizeHandle(handle),
     quote: quote.trim(),
     accent: accent ?? "",
-    cover: cover.kind,
+    cover:
+      cover.kind === "pattern" ? `${cover.pattern}:${cover.tint}` : cover.kind,
     avatar: JSON.stringify(avatar),
     about: JSON.stringify(about),
     showcase: JSON.stringify(showcase.map((s) => [s.characterId, s.caption])),
@@ -200,8 +200,8 @@ export function ProfileEditor({
     if (cover.kind === "upload") {
       form.set("banner", "upload");
       form.set("bannerImage", cover.blob, "banner.webp");
-    } else if (cover.kind === "preset") {
-      form.set("banner", `preset:${cover.id}`);
+    } else if (cover.kind === "pattern") {
+      form.set("banner", `pattern:${cover.pattern}:${cover.tint}`);
     } else {
       form.set("banner", cover.kind);
     }
@@ -254,7 +254,10 @@ export function ProfileEditor({
   })();
 
   return (
-    <div style={accentStyle(accent)} className="flex flex-col">
+    <div
+      style={accentStyle(accent, shownAvatar.color)}
+      className="flex flex-col"
+    >
       <ProfileCover
         banner={shownBanner}
         avatarColor={shownAvatar.color}
@@ -262,7 +265,11 @@ export function ProfileEditor({
         mode={mode}
         slot={coverSlot}
       >
-        <CoverPicker avatarColor={shownAvatar.color} onPick={setCover} />
+        <CoverPicker
+          banner={shownBanner}
+          avatarColor={shownAvatar.color}
+          onPick={setCover}
+        />
       </ProfileCover>
       <div className={cn("flex flex-col", FRAME[mode].root)}>
         {/* the profile's own header, its name and @handle as fields */}
@@ -425,13 +432,13 @@ export function ProfileEditor({
               </AboutRow>
               <AboutRow icon={<Palette />} label={t("accent")}>
                 <div className="flex flex-wrap gap-2">
-                  {ACCENTS.map((c, i) => (
+                  {TINTS.map((k) => (
                     <Swatch
-                      key={c}
-                      color={c}
-                      pressed={(accent ?? ACCENTS[0]) === c}
-                      label={t("accentN", { n: i + 1 })}
-                      onClick={() => setAccent(i === 0 ? null : c)}
+                      key={k}
+                      color={tintColor(k, shownAvatar.color)}
+                      pressed={(accent ?? "sky") === k}
+                      label={t(`tints.${k}`)}
+                      onClick={() => setAccent(k === "sky" ? null : k)}
                     />
                   ))}
                 </div>

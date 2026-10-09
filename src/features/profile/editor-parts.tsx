@@ -19,7 +19,14 @@ import { Modal } from "@/components/ui/dialog";
 import { ImageDrop } from "@/components/ui/image-drop";
 import { Portrait } from "@/components/ui/portrait";
 import { thumbUrl } from "@/game/character-search";
-import { BANNER_PRESETS, type BannerPreset } from "@/game/profile/profile";
+import {
+  type Banner,
+  DEFAULT_COVER,
+  PATTERNS,
+  type Pattern,
+  TINTS,
+  type Tint,
+} from "@/game/profile/profile";
 import type { Avatar as AvatarData } from "@/game/types";
 import { randomDna } from "@/lib/avatar";
 import { cn } from "@/lib/cn";
@@ -29,28 +36,33 @@ import {
   type CharacterSearchResponse,
   type Me,
 } from "@/server/contract";
-import { BANNER_PAINT } from "./banners";
+import { CoverPaint, tintColor } from "./cover-paint";
 
-/** The cover the editor will save: as it is, none, a preset, or a picture just picked. */
+/** The cover the editor will save: as it is, a pattern in a colour, or a picture just picked. */
 export type CoverChoice =
   | { kind: "keep" }
-  | { kind: "none" }
-  | { kind: "preset"; id: BannerPreset }
+  | { kind: "pattern"; pattern: Pattern; tint: Tint }
   | { kind: "upload"; blob: Blob; url: string };
 
-/** "Change cover": the app's covers, the avatar's colour, or a picture (cropped 10:3). */
+/**
+ * "Change cover": a pattern and a colour (the avatar's or the palette's),
+ * each shown at once on the cover, or a picture (cropped 10:3).
+ */
 export function CoverPicker({
+  banner,
   avatarColor,
   onPick,
 }: {
+  banner: Banner | null;
   avatarColor: string;
   onPick: (choice: CoverChoice) => void;
 }) {
   const t = useTranslations("profile.editor");
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const tile =
-    "flex flex-col items-center gap-1.5 rounded-lg p-1 font-semibold text-[12px] text-ink-muted transition-colors duration-150 hover:bg-sunken hover:text-ink";
+  const image = banner?.kind === "image";
+  const { pattern, tint } = banner?.kind === "pattern" ? banner : DEFAULT_COVER;
+  const label = "px-0.5 font-semibold text-[13px] text-ink-muted";
   return (
     <>
       <Popover.Root open={open} onOpenChange={setOpen}>
@@ -66,55 +78,63 @@ export function CoverPicker({
             collisionPadding={12}
             className="z-[60]"
           >
-            <Popover.Popup className="flex w-[min(340px,calc(100vw-1.5rem))] origin-[var(--transform-origin)] flex-col gap-3 rounded-xl bg-surface p-3 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
-              <Popover.Title className="m-0 px-1 font-semibold text-sm">
-                {t("covers")}
+            <Popover.Popup className="flex w-[min(352px,calc(100vw-1.5rem))] origin-[var(--transform-origin)] flex-col gap-3 rounded-xl bg-surface p-4 shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+              <Popover.Title className="m-0 font-bold font-display text-[17px]">
+                {t("cover")}
               </Popover.Title>
-              <div className="grid grid-cols-3 gap-1">
-                <button
-                  type="button"
-                  className={tile}
-                  onClick={() => {
-                    onPick({ kind: "none" });
-                    setOpen(false);
-                  }}
-                >
-                  <span
-                    className="h-11 w-full rounded-md"
-                    style={{
-                      background: `linear-gradient(120deg, ${avatarColor}, color-mix(in oklab, ${avatarColor} 55%, var(--accent)))`,
-                    }}
-                  />
-                  {t("noCover")}
-                </button>
-                {BANNER_PRESETS.map((id) => (
+              <span className={label}>{t("pattern")}</span>
+              <div className="grid grid-cols-4 gap-2">
+                {PATTERNS.map((p) => (
                   <button
-                    key={id}
+                    key={p}
                     type="button"
-                    className={tile}
-                    onClick={() => {
-                      onPick({ kind: "preset", id });
-                      setOpen(false);
-                    }}
+                    aria-pressed={!image && p === pattern}
+                    aria-label={t(`patterns.${p}`)}
+                    title={t(`patterns.${p}`)}
+                    onClick={() =>
+                      onPick({ kind: "pattern", pattern: p, tint })
+                    }
+                    className={cn(
+                      "relative h-12 overflow-hidden rounded-lg shadow-[0_0_0_1px_var(--line)] transition-shadow duration-200",
+                      !image &&
+                        p === pattern &&
+                        "shadow-[0_0_0_2px_var(--surface),0_0_0_4px_var(--ink)]",
+                    )}
                   >
-                    <span
-                      className="h-11 w-full rounded-md"
-                      style={{ background: BANNER_PAINT[id] }}
+                    <CoverPaint
+                      banner={{ kind: "pattern", pattern: p, tint }}
+                      avatarColor={avatarColor}
                     />
-                    {t(`coverNames.${id}`)}
                   </button>
                 ))}
               </div>
-              <Button
-                size="sm"
-                onClick={() => {
-                  setOpen(false);
-                  setUploading(true);
-                }}
-              >
-                <Upload strokeWidth={1.75} />
-                {t("uploadCover")}
-              </Button>
+              <span className={cn(label, "mt-1")}>{t("colour")}</span>
+              <div className="flex flex-wrap gap-2">
+                {TINTS.map((k) => (
+                  <Swatch
+                    key={k}
+                    color={tintColor(k, avatarColor)}
+                    pressed={!image && k === tint}
+                    label={t(`tints.${k}`)}
+                    onClick={() =>
+                      onPick({ kind: "pattern", pattern, tint: k })
+                    }
+                  />
+                ))}
+              </div>
+              <div className="mt-1 border-line border-t pt-3">
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    setOpen(false);
+                    setUploading(true);
+                  }}
+                >
+                  <Upload strokeWidth={1.75} />
+                  {t("uploadCover")}
+                </Button>
+              </div>
             </Popover.Popup>
           </Popover.Positioner>
         </Popover.Portal>
@@ -124,8 +144,9 @@ export function CoverPicker({
         onOpenChange={setUploading}
         title={t("coverTitle")}
         icon={<ImageIcon strokeWidth={1.75} />}
+        size="compact"
       >
-        <div className="overflow-y-auto p-5 sm:p-6">
+        <div className="overflow-y-auto p-5">
           <ImageDrop
             shape="banner"
             onDone={(blob) => {

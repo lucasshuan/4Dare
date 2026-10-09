@@ -19,21 +19,14 @@ import {
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import {
-  type CSSProperties,
-  lazy,
-  type ReactNode,
-  Suspense,
-  useMemo,
-  useState,
-} from "react";
+import { lazy, type ReactNode, Suspense, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Avatar } from "@/components/ui/avatar";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Flag } from "@/components/ui/language-switch";
 import { useToast } from "@/components/ui/toast";
 import { GameThumb, useGameName } from "@/features/create/game-info";
-import type { Banner } from "@/game/profile/profile";
+import type { Banner, Tint } from "@/game/profile/profile";
 import type { Lang, PlayingNow as PlayingNowView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -41,8 +34,8 @@ import { useMedia } from "@/lib/hooks/use-media";
 import type { ProfileView } from "@/server/contract";
 import { ActivityPanel, hours } from "./activity";
 import { BadgesPanel } from "./badges";
-import { bannerStyle } from "./banners";
 import { ContributionsPanel } from "./contributions";
+import { accentStyle, CoverPaint } from "./cover-paint";
 import { FunFacts } from "./fun-facts";
 import { streaks } from "./garden-days";
 import { LevelAvatar } from "./level";
@@ -60,15 +53,6 @@ import { Showcase } from "./showcase";
 const ProfileEditor = lazy(() =>
   import("./profile-editor").then((m) => ({ default: m.ProfileEditor })),
 );
-
-/** The profile's accent (the XP ring, the tabs, the garden's flowers) and its soft tint. */
-export const accentStyle = (accent: string | null) =>
-  ({
-    "--accent": accent ?? "var(--sky)",
-    // the palette's accents are dark enough for white; the default follows the theme
-    "--on-accent": accent ? "#fff" : "var(--on-sky)",
-    "--accent-soft": `color-mix(in oklab, ${accent ?? "var(--sky)"} 18%, var(--surface))`,
-  }) as CSSProperties;
 
 /**
  * Where the profile sits: its own page (the cover goes into the page's banner,
@@ -110,7 +94,7 @@ export function ProfileCover({
 }: {
   banner: Banner | null;
   avatarColor: string;
-  accent: string | null;
+  accent: Tint | null;
   mode: ProfileMode;
   slot: HTMLElement | null;
   children?: ReactNode;
@@ -119,7 +103,7 @@ export function ProfileCover({
 }) {
   const cover = (
     <div
-      style={{ ...accentStyle(accent), ...bannerStyle(banner, avatarColor) }}
+      style={accentStyle(accent, avatarColor)}
       className={cn(
         "relative w-full shrink-0",
         mode === "page"
@@ -127,6 +111,7 @@ export function ProfileCover({
           : "h-[150px] sm:h-[190px]",
       )}
     >
+      <CoverPaint banner={banner} avatarColor={avatarColor} />
       {children ? (
         // top right, under the floating bar on the page; the avatar's row covers the bottom
         <div
@@ -303,7 +288,10 @@ function ProfileShow({
   };
 
   return (
-    <div style={accentStyle(view.accent)} className="flex flex-col">
+    <div
+      style={accentStyle(view.accent, view.avatar.color)}
+      className="flex flex-col"
+    >
       <ProfileCover
         banner={view.banner}
         avatarColor={view.avatar.color}

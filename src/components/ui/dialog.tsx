@@ -9,13 +9,16 @@ import { cn } from "@/lib/cn";
 /**
  * The box a modal takes. It never changes with what is inside (a tab switch
  * keeps it still); the content scrolls instead. "panel": a fixed box in the
- * middle (settings, account), the whole screen on phones; "wide" a bigger one.
+ * middle (settings, account), the whole screen on phones; "wide" a bigger one;
+ * "compact" as tall as its content, on phones too.
  */
 export const MODAL_SIZE = {
   panel:
     "inset-0 m-auto h-[min(600px,calc(100dvh-2rem))] w-[min(800px,calc(100vw-2rem))] rounded-xl max-sm:h-dvh max-sm:w-screen max-sm:rounded-none",
   /** A bigger fixed box (the room's advanced settings, a profile); the whole screen on phones. */
   wide: "inset-0 m-auto h-[min(820px,calc(100dvh-2rem))] w-[min(1120px,calc(100vw-2rem))] rounded-xl max-sm:h-dvh max-sm:w-screen max-sm:rounded-none",
+  compact:
+    "top-1/2 left-1/2 max-h-[calc(100dvh-2rem)] w-[min(600px,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl",
 } as const;
 
 /** A modal with a title bar (its title and a close button) over a scrim; the body fills the rest. */

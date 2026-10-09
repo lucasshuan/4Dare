@@ -1004,7 +1004,7 @@ export async function createCharacter(
 
 /**
  * The profile editor's save, accounts only. FormData: name, handle, quote,
- * accent, banner ("none" | "keep" | "preset:<id>" | "upload" + bannerImage),
+ * accent, banner ("none" | "keep" | "pattern:<pattern>:<tint>" | "upload" + bannerImage),
  * about, showcase and privacy (JSON), and the avatar: color, avatar
  * ("creature" + dna | "provider" | "upload" + image | "keep").
  */

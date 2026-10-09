@@ -8,33 +8,70 @@ export const QUOTE_MAX = 80;
 export const SHOWCASE_MAX = 3;
 export const CAPTION_MAX = 60;
 
-/** Covers drawn by the app (src/features/profile/banners.ts paints them). */
-export const BANNER_PRESETS = [
-  "dawn",
-  "meadow",
-  "sea",
-  "dusk",
-  "candy",
-  "night",
+/**
+ * The colours a cover and the accent take: the avatar's own (a deeper take on
+ * its pastel) or one of the palette's. Each has a light and a dark value
+ * (src/app/globals.css, --tint-*).
+ */
+export const TINTS = [
+  "avatar",
+  "sky",
+  "teal",
+  "apricot",
+  "rose",
+  "violet",
+  "green",
+  "gold",
+  "slate",
 ] as const;
-export type BannerPreset = (typeof BANNER_PRESETS)[number];
+export type Tint = (typeof TINTS)[number];
 
-/** One of the app's covers, or a picture the owner sent. Null: the avatar's pastel. */
+/** The patterns drawn over a cover's colour (src/features/profile/cover-paint.tsx). */
+export const PATTERNS = [
+  "plain",
+  "dots",
+  "stripes",
+  "checks",
+  "waves",
+  "zigzag",
+  "stars",
+  "questions",
+] as const;
+export type Pattern = (typeof PATTERNS)[number];
+
+/** A pattern in a colour, or a picture the owner sent. Null: plain, in the avatar's colour. */
 export type Banner =
-  | { kind: "preset"; id: BannerPreset }
+  | { kind: "pattern"; pattern: Pattern; tint: Tint }
   | { kind: "image"; url: string };
 
-/** The accent colours: the XP ring, the tabs, the garden's flowers. */
-export const ACCENTS = [
-  "#2B69C8",
-  "#0B7A75",
-  "#CF7024",
-  "#C2417A",
-  "#7A5AF5",
-  "#3F9A3A",
-  "#B8860B",
-  "#566075",
-] as const;
+/** A cover left as it came: plain, in the avatar's colour. */
+export const DEFAULT_COVER = {
+  pattern: "plain",
+  tint: "avatar",
+} as const satisfies {
+  pattern: Pattern;
+  tint: Tint;
+};
+
+// what the first covers and accents (hex colours) turn into
+const OLD_PRESETS: Record<string, [Pattern, Tint]> = {
+  dawn: ["plain", "apricot"],
+  meadow: ["plain", "green"],
+  sea: ["waves", "sky"],
+  dusk: ["plain", "violet"],
+  candy: ["stripes", "rose"],
+  night: ["stars", "sky"],
+};
+const OLD_ACCENTS: Record<string, Tint> = {
+  "#2B69C8": "sky",
+  "#0B7A75": "teal",
+  "#CF7024": "apricot",
+  "#C2417A": "rose",
+  "#7A5AF5": "violet",
+  "#3F9A3A": "green",
+  "#B8860B": "gold",
+  "#566075": "slate",
+};
 
 /** A character on the showcase (language-free id: "wd-Q302", "u-…") and what the owner says of it. */
 export interface ShowcaseItem {
@@ -96,16 +133,24 @@ const oneOf = <T extends string>(list: readonly T[], v: unknown): T | null =>
 export function parseBanner(raw: unknown): Banner | null {
   const r = record(raw);
   if (!r) return null;
-  if (r.kind === "preset") {
-    const id = oneOf(BANNER_PRESETS, r.id);
-    return id ? { kind: "preset", id } : null;
+  if (r.kind === "pattern") {
+    const pattern = oneOf(PATTERNS, r.pattern);
+    const tint = oneOf(TINTS, r.tint);
+    return pattern && tint ? { kind: "pattern", pattern, tint } : null;
+  }
+  if (r.kind === "preset" && typeof r.id === "string" && OLD_PRESETS[r.id]) {
+    const [pattern, tint] = OLD_PRESETS[r.id];
+    return { kind: "pattern", pattern, tint };
   }
   if (r.kind === "image" && typeof r.url === "string" && r.url)
     return { kind: "image", url: r.url };
   return null;
 }
 
-export const parseAccent = (raw: unknown): string | null => oneOf(ACCENTS, raw);
+/** A palette colour, or null (the default, sky). */
+export const parseAccent = (raw: unknown): Tint | null =>
+  oneOf(TINTS, raw) ??
+  (typeof raw === "string" ? (OLD_ACCENTS[raw.toUpperCase()] ?? null) : null);
 
 /** Up to three different characters, captions trimmed to the limit. */
 export function parseShowcase(raw: unknown): ShowcaseItem[] {

@@ -465,8 +465,8 @@ describe("server, local mode", () => {
       color: me.avatar.color,
       avatar: "keep",
       quote: "  Se for o Shrek,   eu descubro  ",
-      accent: "#0B7A75",
-      banner: "preset:sea",
+      accent: "teal",
+      banner: "pattern:waves:sky",
       about: JSON.stringify({ time: "night", langs: ["pt", "ja"] }),
       showcase: JSON.stringify([
         { characterId: "wd-Q11934", caption: "Amor da minha vida <3" },
@@ -479,8 +479,8 @@ describe("server, local mode", () => {
     const view = await profileView(me.handle as string, me.id, "pt");
     expect(view).toMatchObject({
       quote: "Se for o Shrek, eu descubro",
-      accent: "#0B7A75",
-      banner: { kind: "preset", id: "sea" },
+      accent: "teal",
+      banner: { kind: "pattern", pattern: "waves", tint: "sky" },
       about: { time: "night", langs: ["ja", "pt"] },
       showcase: [
         { characterId: "wd-Q11934", caption: "Amor da minha vida <3" },

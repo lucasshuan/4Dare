@@ -12,17 +12,27 @@ import {
 
 describe("a profile's choices", () => {
   it("reads a cover, an accent and a quote, and nothing it does not know", () => {
+    expect(
+      parseBanner({ kind: "pattern", pattern: "dots", tint: "avatar" }),
+    ).toEqual({ kind: "pattern", pattern: "dots", tint: "avatar" });
+    // the first covers turn into a pattern
     expect(parseBanner({ kind: "preset", id: "sea" })).toEqual({
-      kind: "preset",
-      id: "sea",
+      kind: "pattern",
+      pattern: "waves",
+      tint: "sky",
     });
+    expect(
+      parseBanner({ kind: "pattern", pattern: "lava", tint: "sky" }),
+    ).toBeNull();
     expect(parseBanner({ kind: "image", url: "https://x/y.webp" })).toEqual({
       kind: "image",
       url: "https://x/y.webp",
     });
     expect(parseBanner({ kind: "preset", id: "lava" })).toBeNull();
     expect(parseBanner("sea")).toBeNull();
-    expect(parseAccent("#0B7A75")).toBe("#0B7A75");
+    expect(parseAccent("rose")).toBe("rose");
+    // the first accents were hex colours
+    expect(parseAccent("#0B7A75")).toBe("teal");
     expect(parseAccent("#123456")).toBeNull();
     expect(cleanQuote("  Se for o   Shrek,\n eu descubro  ")).toBe(
       "Se for o Shrek, eu descubro",

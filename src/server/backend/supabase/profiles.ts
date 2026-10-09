@@ -1,6 +1,7 @@
 import "server-only";
 import {
   parseAbout,
+  parseAccent,
   parseBanner,
   parsePrivacy,
   parseShowcase,
@@ -44,7 +45,7 @@ const toProfile = (r: Row): StoredProfile[] =>
           avatar: r.avatar as unknown as Avatar,
           createdAt: Date.parse(r.created_at),
           quote: r.quote,
-          accent: r.accent,
+          accent: parseAccent(r.accent),
           banner: parseBanner(r.banner),
           showcase: parseShowcase(r.showcase),
           about: parseAbout(r.about),

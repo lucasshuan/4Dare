@@ -19,7 +19,7 @@ import { cropToWebp, useImageIntake } from "./use-image-intake";
 const SHAPES = {
   portrait: { w: 640, h: 800 },
   square: { w: 256, h: 256 },
-  banner: { w: 1600, h: 480 },
+  banner: { w: 2400, h: 720 },
 } as const;
 
 /** Exports the current crop on demand: forms call it when they submit, so the latest crop always goes. */
@@ -31,7 +31,7 @@ export interface ImageDropHandle {
 /**
  * Pick a picture (click, drag-and-drop or paste, also from a web page), then crop it.
  * Portrait 4:5 → 640×800 for characters; square → 256×256 for avatars;
- * banner 10:3 → 1600×480 for profile covers.
+ * banner 10:3 → 2400×720 for profile covers (sharp on wide screens).
  * With `onDone` the person confirms the crop with a button; with `onChange` every crop is
  * sent shortly after it settles (null when the picture is removed), as a preview for forms with
  * their own save button; those forms take the picture itself from `ref` when they submit.
@@ -121,7 +121,10 @@ export function ImageDrop({
             </div>
             <label
               htmlFor={`${id}-zoom`}
-              className="flex max-w-[320px] items-center gap-3 font-semibold text-sm"
+              className={cn(
+                "flex max-w-[320px] items-center gap-3 font-semibold text-sm",
+                shape === "banner" && "max-w-[560px]",
+              )}
             >
               {t("zoom")}
               <input

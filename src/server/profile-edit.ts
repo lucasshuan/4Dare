@@ -9,12 +9,11 @@ import {
   normalizeHandle,
 } from "@/game/profile/handle";
 import {
-  BANNER_PRESETS,
   type Banner,
-  type BannerPreset,
   cleanQuote,
   parseAbout,
   parseAccent,
+  parseBanner,
   parsePrivacy,
   parseShowcase,
 } from "@/game/profile/profile";
@@ -111,7 +110,7 @@ async function avatarFrom(
   return bad();
 }
 
-/** "none", "keep", "preset:<id>" or "upload" (with bannerImage). */
+/** "none", "keep", "pattern:<pattern>:<tint>" or "upload" (with bannerImage). */
 async function bannerFrom(
   form: FormData,
   current: Banner | null,
@@ -121,10 +120,10 @@ async function bannerFrom(
   if (raw === "none") return null;
   if (raw === "upload")
     return { kind: "image", url: await keepPicture(form.get("bannerImage")) };
-  if (typeof raw === "string" && raw.startsWith("preset:")) {
-    const id = raw.slice("preset:".length);
-    if ((BANNER_PRESETS as readonly string[]).includes(id))
-      return { kind: "preset", id: id as BannerPreset };
+  if (typeof raw === "string" && raw.startsWith("pattern:")) {
+    const [, pattern, tint] = raw.split(":");
+    const banner = parseBanner({ kind: "pattern", pattern, tint });
+    if (banner) return banner;
   }
   return bad();
 }

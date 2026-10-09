@@ -17,6 +17,7 @@ import type {
   Banner,
   Privacy,
   ShowcaseItem,
+  Tint,
 } from "@/game/profile/profile";
 import type { Taste } from "@/game/tastes";
 import type { ThemeSet } from "@/game/theme-sets";
@@ -187,7 +188,7 @@ export interface PersonRef {
 
 /** What the quick card shows of an account, opened from its avatar. */
 export interface PlayerCard extends PersonRef {
-  accent: string | null;
+  accent: Tint | null;
   banner: Banner | null;
   quote: string | null;
   createdAt: number;
@@ -266,7 +267,7 @@ export interface BadgeView {
 
 /** An account's profile page. */
 export interface ProfileView extends PersonRef {
-  accent: string | null;
+  accent: Tint | null;
   banner: Banner | null;
   quote: string | null;
   createdAt: number;

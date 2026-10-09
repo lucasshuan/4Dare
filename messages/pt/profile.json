@@ -119,17 +119,20 @@
   },
   "editor": {
     "changeCover": "Trocar capa",
-    "covers": "Capas",
-    "noCover": "Cor do avatar",
+    "cover": "Capa",
+    "pattern": "Estampa",
+    "colour": "Cor",
     "uploadCover": "Enviar imagem",
     "coverTitle": "Imagem da capa",
-    "coverNames": {
-      "dawn": "Amanhecer",
-      "meadow": "Campo",
-      "sea": "Mar",
-      "dusk": "Entardecer",
-      "candy": "Doce",
-      "night": "Noite"
+    "patterns": {
+      "plain": "Lisa",
+      "dots": "Bolinhas",
+      "stripes": "Listras",
+      "checks": "Xadrez",
+      "waves": "Ondas",
+      "zigzag": "Zigue-zague",
+      "stars": "Estrelas",
+      "questions": "Perguntas"
     },
     "changeAvatar": "Trocar avatar",
     "avatarTitle": "Avatar",
@@ -171,7 +174,17 @@
     "langs": "Idiomas que fala",
     "accent": "Cor de destaque",
     "accentHint": "No anel de nível, nas abas e nas flores do canteiro.",
-    "accentN": "Cor {n}",
+    "tints": {
+      "avatar": "Cor do avatar",
+      "sky": "Azul",
+      "teal": "Verde-água",
+      "apricot": "Laranja",
+      "rose": "Rosa",
+      "violet": "Violeta",
+      "green": "Verde",
+      "gold": "Dourado",
+      "slate": "Grafite"
+    },
     "privacy": "Privacidade",
     "privacyHint": "Quem vê cada parte do seu perfil.",
     "privacyRows": {
