@@ -4,20 +4,22 @@ import { useEffect, useId, useSyncExternalStore } from "react";
 import { getSettings, type Settings, subscribeSettings } from "./settings";
 
 /**
- * The background music: one tune in two takes that share a timeline (same
- * tempo, same bars, same loop), so one can take over from the other at the
+ * The background music: one tune in several takes that share a timeline (same
+ * tempo, same bars, same loop), so one can take over from another at the
  * same point in the song. Played through WebAudio, so the loop has no gap and
- * both takes start sample-exact.
+ * every take starts sample-exact.
  */
 const TRACKS = {
   /** The show's lounge vamp: the room, the lobby and every match. */
   stage: "/music/stage-loop.mp3",
   /** The same vamp on an old radio in the booth: What for?'s presenter. Mixed 6 dB under the stage. */
   booth: "/music/booth-loop.mp3",
+  /** The same vamp as hushed spy suspense: Impostor's matches. As loud as the stage. */
+  impostor: "/music/impostor-loop.mp3",
 } as const;
 export type Track = keyof typeof TRACKS;
 
-/** Both files loop over the same 48 bars (seconds); what comes before plays once. */
+/** Every file loops over the same 48 bars (seconds); what comes before plays once. */
 const LOOP_START = 8.1062;
 const LOOP_END = 129.2721;
 const LOOP = LOOP_END - LOOP_START;
@@ -131,6 +133,11 @@ function load(src: string): Promise<AudioBuffer | null> {
     buffers.set(src, p);
   }
   return p;
+}
+
+/** Fetches and decodes a take ahead of time, so asking for it later swaps at once. */
+export function preloadMusic(track: Track) {
+  void load(TRACKS[track]);
 }
 
 /** The song position (seconds on the shared timeline) at a context time. */

@@ -27,7 +27,7 @@ import type { ErrorCode, Phase, RoomView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
-import { useMusicMuffle } from "@/lib/music";
+import { preloadMusic, useMusic, useMusicMuffle } from "@/lib/music";
 import { useRoomTitle } from "@/lib/names";
 import { GAMES } from "@/lib/routes";
 import { playSound } from "@/lib/sound";
@@ -151,6 +151,12 @@ function Areas() {
   useStepSound();
   usePresenceSound(view);
   useMusicMuffle(area === "lobby");
+  // an Impostor match swaps the stage for its spy take, at the same point in the song
+  const impostor = view.settings.game === "impostor";
+  useEffect(() => {
+    if (impostor) preloadMusic("impostor");
+  }, [impostor]);
+  useMusic(area === "match" && impostor ? "impostor" : undefined, 1);
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
   const lineup = view.settings.game === "lineup";
