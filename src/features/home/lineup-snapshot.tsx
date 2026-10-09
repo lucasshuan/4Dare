@@ -179,7 +179,7 @@ export function LineupSnapshot({
               "absolute origin-bottom-right",
               wide
                 ? "right-[3%] bottom-[10%] w-[35%]"
-                : "right-[5%] bottom-[27%] w-[54%]",
+                : "right-[5%] bottom-[33%] w-[54%]",
             )}
             initial={still ? false : { opacity: 0, y: "-60%", rotate: 18 }}
             animate={{ opacity: 1, y: "0%", rotate: -4 }}
