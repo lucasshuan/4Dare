@@ -21,13 +21,15 @@ import type { FactView } from "@/server/contract";
 import type { streaks } from "./garden-days";
 import { ProfileLink } from "./profile-link";
 
+/** A tile: what the fact is (small), the fact itself (big), a word more. */
 type Fact = {
   key: string;
   icon: ReactNode;
   /** The tile's ground and its icon's colour. */
   tint: string;
-  title: ReactNode;
-  text: ReactNode;
+  label: string;
+  value: ReactNode;
+  sub: ReactNode;
   game: GameKey | null;
 };
 
@@ -37,12 +39,10 @@ type Fact = {
  */
 export function FunFacts({
   facts,
-  owner,
   streak,
   className,
 }: {
   facts: FactView[];
-  owner: string;
   streak: ReturnType<typeof streaks>;
   className?: string;
 }) {
@@ -62,18 +62,16 @@ export function FunFacts({
         icon: <Avatar avatar={f.person.avatar} size={30} />,
         tint: "bg-surface",
         game: null,
-        title: t.rich("partner", {
-          name: f.person.name,
-          link: (chunks) => (
-            <ProfileLink
-              handle={f.person.handle}
-              className="underline-offset-2 hover:underline"
-            >
-              {chunks}
-            </ProfileLink>
-          ),
-        }),
-        text: t("partnerText", { together: f.together, ahead: f.ahead, owner }),
+        label: t("partnerLabel"),
+        value: (
+          <ProfileLink
+            handle={f.person.handle}
+            className="underline-offset-2 hover:underline"
+          >
+            {f.person.name}
+          </ProfileLink>
+        ),
+        sub: t("partnerSub", { together: f.together }),
       });
     else if (f.kind === "fastest")
       items.push({
@@ -81,15 +79,10 @@ export function FunFacts({
         icon: <Zap />,
         tint: "bg-butter-soft text-on-butter",
         game: f.game,
-        title: t("fastest"),
-        text:
-          f.timeMs === null
-            ? t("fastestText", { name: f.characterName, at: f.at })
-            : t("fastestTime", {
-                name: f.characterName,
-                at: f.at,
-                time: minutes(f.timeMs),
-              }),
+        label: t("fastest"),
+        value:
+          f.timeMs === null ? t("fastestAt", { at: f.at }) : minutes(f.timeMs),
+        sub: f.characterName,
       });
     else if (f.kind === "hardest")
       items.push({
@@ -97,12 +90,9 @@ export function FunFacts({
         icon: <ShieldCheck />,
         tint: "bg-(--accent-soft) text-(--accent)",
         game: f.game,
-        title: t("hardest"),
-        text: t("hardestText", {
-          name: f.characterName,
-          to: f.to?.name ?? t("aGuest"),
-          questions: f.questions,
-        }),
+        label: t("hardest"),
+        value: f.characterName,
+        sub: t("hardestSub", { questions: f.questions }),
       });
     else if (f.kind === "theme")
       items.push({
@@ -110,11 +100,9 @@ export function FunFacts({
         icon: <Palette />,
         tint: "bg-yes-soft text-yes",
         game: f.game,
-        title: t("theme"),
-        text: t("themeText", {
-          theme: f.theme[lang] || f.theme.en,
-          n: f.count,
-        }),
+        label: t("theme"),
+        value: f.theme[lang] || f.theme.en,
+        sub: t("themeSub", { n: f.count }),
       });
     else if (f.kind === "escape")
       items.push({
@@ -122,8 +110,9 @@ export function FunFacts({
         icon: <VenetianMask />,
         tint: "bg-no-soft text-no",
         game: f.game,
-        title: t("escape"),
-        text: t("escapeText", { name: f.characterName, votes: f.votes }),
+        label: t("escape"),
+        value: f.characterName,
+        sub: t("escapeSub", { votes: f.votes }),
       });
     else if (f.kind === "bargain")
       items.push({
@@ -131,8 +120,9 @@ export function FunFacts({
         icon: <Tag />,
         tint: "bg-yes-soft text-yes",
         game: f.game,
-        title: t("bargain"),
-        text: t("bargainText", { coins: f.spent, votes: f.votes }),
+        label: t("bargain"),
+        value: t("bargainValue", { coins: f.spent }),
+        sub: t("bargainSub"),
       });
     else if (f.kind === "splurge")
       items.push({
@@ -140,8 +130,9 @@ export function FunFacts({
         icon: <Coins />,
         tint: "bg-butter-soft text-on-butter",
         game: f.game,
-        title: t("splurge"),
-        text: t("splurgeText", { coins: f.price }),
+        label: t("splurge"),
+        value: t("splurgeValue", { coins: f.price }),
+        sub: t("splurgeSub"),
       });
     else
       items.push({
@@ -149,8 +140,9 @@ export function FunFacts({
         icon: <Target />,
         tint: "bg-sky-soft text-sky",
         game: f.game,
-        title: t("bullseye"),
-        text: t("bullseyeText", { name: f.guess }),
+        label: t("bullseye"),
+        value: f.guess,
+        sub: t("bullseyeSub"),
       });
   }
   if (streak.best >= 2 && streak.bestEnd !== null)
@@ -159,25 +151,20 @@ export function FunFacts({
       icon: <Flame />,
       tint: "bg-apricot-soft text-apricot",
       game: null,
-      title: t("streak"),
-      text: t("streakText", {
-        n: streak.best,
-        month: format.dateTime(streak.bestEnd, {
-          month: "long",
-          year: "numeric",
-        }),
-      }),
+      label: t("streak"),
+      value: t("streakValue", { n: streak.best }),
+      sub: format.dateTime(streak.bestEnd, { month: "long", year: "numeric" }),
     });
   if (items.length === 0) return null;
   return (
     <section aria-label={t("title")} className={className}>
       {/* a swipeable row on phones, a grid of tiles wider */}
-      <ul className="flex snap-x snap-mandatory gap-2 overflow-x-auto px-(--pad) pb-1 [scrollbar-width:none] sm:grid sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] sm:overflow-visible sm:pb-0">
+      <ul className="flex snap-x snap-mandatory gap-2 overflow-x-auto px-(--pad) pb-1 [scrollbar-width:none] sm:grid sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] sm:overflow-visible sm:pb-0">
         {items.map((it) => (
           <li
             key={it.key}
             className={cn(
-              "relative flex w-[232px] shrink-0 snap-start flex-col gap-2 overflow-hidden rounded-xl p-3.5 sm:w-auto",
+              "relative flex w-[200px] shrink-0 snap-start flex-col overflow-hidden rounded-xl p-3.5 sm:w-auto",
               it.tint,
             )}
           >
@@ -190,27 +177,29 @@ export function FunFacts({
                 {it.icon}
               </span>
             )}
-            <span className="flex items-center justify-between gap-2">
+            <span className="relative flex items-center gap-2">
               <span
                 className={cn(
-                  "flex size-8 items-center justify-center rounded-pill [&_svg]:size-[18px] [&_svg]:stroke-2",
+                  "flex size-7 shrink-0 items-center justify-center rounded-pill [&_svg]:size-4 [&_svg]:stroke-2",
                   it.key === "partner" ? "" : "bg-surface/70",
                 )}
               >
                 {it.icon}
               </span>
+              <span className="min-w-0 flex-1 truncate font-semibold text-[12.5px] text-ink-muted">
+                {it.label}
+              </span>
               {it.game ? (
-                <span className="inline-flex items-center gap-1.5 rounded-pill bg-surface/70 py-0.5 pr-2 pl-0.5 font-semibold text-[11.5px] text-ink-muted">
+                <span title={gameName(it.game)} className="flex shrink-0">
                   <GameThumb game={it.game} size="tiny" />
-                  {gameName(it.game)}
                 </span>
               ) : null}
             </span>
-            <b className="relative font-bold font-display text-[15px] text-ink leading-tight">
-              {it.title}
+            <b className="relative mt-3 line-clamp-2 font-display font-extrabold text-[22px] text-ink leading-[1.1] tracking-[-0.01em]">
+              {it.value}
             </b>
-            <span className="relative text-[13px] text-ink-muted leading-snug">
-              {it.text}
+            <span className="relative mt-1 truncate text-[12.5px] text-ink-muted">
+              {it.sub}
             </span>
           </li>
         ))}

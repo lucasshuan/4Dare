@@ -470,12 +470,7 @@ function ProfileShow({
             ) : null}
 
             {view.hidden.activity ? null : (
-              <FunFacts
-                facts={view.facts}
-                owner={view.name}
-                streak={run}
-                className="mt-[22px]"
-              />
+              <FunFacts facts={view.facts} streak={run} className="mt-[22px]" />
             )}
 
             {tabs.length ? (
