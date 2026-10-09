@@ -11,7 +11,7 @@ import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { GameActions } from "@/features/game-page/game-actions";
 import { GameRanking } from "@/features/game-page/game-ranking";
-import { GameScenes } from "@/features/game-page/game-scenes";
+import { GameShots } from "@/features/game-page/game-shots";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { PublicRooms } from "@/features/home/public-rooms";
 import { useAuthErrorToast } from "@/features/home/use-auth-error";
@@ -24,7 +24,7 @@ import { JoinByCode } from "./join-by-code";
 
 /**
  * A game's own page: its banner, name and pitch, create or join by code,
- * where to go next, its ranking, a match played out, and its public rooms.
+ * where to go next, its ranking, photos of a match, and its public rooms.
  */
 export function GameHub({
   game,
@@ -50,11 +50,12 @@ export function GameHub({
     >
       {/*
         the main column: the pitch and where to go next, then the ranking
-        and the match played out; the public rooms beside it
+        and photos of a match; the public rooms beside it. On a desktop it
+        all fits the window under the banner.
       */}
-      <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,500px)]">
-        <div className="flex min-w-0 flex-col gap-6">
-          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
+        <div className="flex min-w-0 flex-col gap-7">
+          <div className="grid items-start gap-x-8 gap-y-5 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
             <m.section
               initial={{ opacity: 0, y: 12 }}
               animate={{
@@ -62,7 +63,7 @@ export function GameHub({
                 y: 0,
                 transition: { duration: 0.5, ease: ease.soft },
               }}
-              className="flex flex-col gap-4"
+              className="flex flex-col gap-3"
             >
               <Link
                 href={GAMES}
@@ -81,11 +82,11 @@ export function GameHub({
               <Start game={game} off={!!match} className="mt-2 xl:hidden" />
               {extra}
             </m.section>
-            <GameActions game={game} className="lg:mt-9" />
+            <GameActions game={game} className="lg:mt-8" />
           </div>
-          <div className="grid items-start gap-4 md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
+          <div className="grid items-start gap-x-8 gap-y-8 md:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
             <GameRanking game={game} />
-            <GameScenes game={game} />
+            <GameShots game={game} />
           </div>
         </div>
 

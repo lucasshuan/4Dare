@@ -280,92 +280,36 @@
   "gamePage": {
     "actions": {
       "label": "Más de este juego",
-      "howTo": "Cómo jugar",
-      "howToHint": "Las reglas en un minuto",
       "characters": "Personajes",
-      "charactersHint": "Quién puede aparecer",
-      "workshop": "Ver en el taller",
-      "workshopHint": "Sugiere y vota cartas",
-      "ranking": "Ranking completo",
-      "rankingHint": "Todos los juegos y periodos"
+      "workshop": "Taller",
+      "ranking": "Ranking"
     },
     "ranking": {
-      "title": "Ranking",
-      "period": "Periodo",
-      "periods": {
-        "week": "Semana",
-        "month": "Mes",
-        "ever": "Siempre"
-      },
-      "soon": "Pronto: quién sumó más XP en este juego.",
-      "all": "Ver ranking"
+      "title": "Ranking semanal",
+      "all": "Ver todo",
+      "xp": "{n} XP"
     },
-    "scenes": {
-      "label": "Una partida de {game}, en escena",
-      "live": "En vivo",
-      "chat": "Chat",
-      "you": "Tú",
-      "pause": "Pausar",
-      "play": "Seguir",
-      "whoAmI": {
-        "c1": "Todos ven las cartas de los demás. Menos la suya.",
-        "c2": "En tu turno, pregunta. Los demás responden sí, no o quizás.",
-        "c3": "Si aciertas, lo descubriste. Quien descubre primero gana.",
-        "ask": "¿Uso un arma?",
-        "guess": "¿Soy Thor?",
-        "yes": "Sí",
-        "maybe": "Quizás",
-        "stamp": "¡Descubierto!",
-        "chat": {
-          "hi": "¡¡llegué!! 👋",
-          "win": "hoy gano yo",
-          "theme": "🦸 Tema: <b>Superhéroes</b>",
-          "good": "buena pregunta 👀",
-          "lol": "sí jajaja",
-          "close": "te estás acercando",
-          "done": "Descubriste en 4 preguntas",
-          "no": "noooo 😭",
-          "gg": "gg"
-        }
+    "shots": {
+      "label": "Momentos de una partida",
+      "prev": "Anterior",
+      "next": "Siguiente",
+      "who-am-i": {
+        "pick": "Cada uno elige el personaje de otra persona.",
+        "turn": "En tu turno, pregunta. Solo tú no ves tu carta.",
+        "found": "Acertaste: lo descubriste."
       },
       "impostor": {
-        "c1": "Todos reciben el mismo personaje. Menos uno.",
-        "c2": "Cada uno responde a su manera. ¿Quién desentona?",
-        "c3": "Voten por quien parezca tener otro personaje.",
-        "yours": "Tu carta · solo tú la ves",
-        "scale": "¿Qué tan valiente es tu personaje?",
-        "stamp": "¡Impostor!",
-        "chat": {
-          "warn": "el impostor que avise jaja",
-          "nobody": "nadie sabe, mei 😂",
-          "three": "mei puso 3 eh 👀",
-          "scared": "eh, es miedoso 😳",
-          "coward": "¿¿miedoso?? 🤔",
-          "was": "Mei era el impostor",
-          "me": "¿¿¿YO??? 😱",
-          "gg": "gg"
-        }
+        "question": "Todos responden sobre su propia carta.",
+        "vote": "¿Quién es el impostor? La sala vota.",
+        "caught": "Atrapado, con un último intento con la carta de la tripulación."
       },
-      "whatFor": {
-        "c1": "Los personajes salen a subasta. Nadie sabe para qué.",
-        "c2": "Después viene la misión.",
-        "c3": "Cada uno defiende su equipo. La sala vota.",
-        "lot": "Lote 1",
-        "sold": "¡Vendido!",
-        "coins": "{n} monedas",
-        "mission": "Cambiar la rueda del coche, bajo la lluvia, a medianoche.",
-        "won": "¡Ganó Leo!",
-        "chat": {
-          "any": "batman sirve para todo",
-          "pass": "paso. quiero ver el siguiente",
-          "sold": "🔨 Batman: Bia, 4 monedas",
-          "mission": "✉️ Misión: cambiar la rueda del coche, bajo la lluvia, a medianoche",
-          "fight": "COMPRÉ UN EQUIPO DE LUCHA 😭",
-          "lol": "jajajaja",
-          "self": "voté por mí. sin vergüenza",
-          "no": "NO"
-        }
-      }
+      "lineup": {
+        "auction": "Los personajes salen a subasta. Nadie sabe para qué.",
+        "boards": "Se abre la misión. Cada uno arma su equipo.",
+        "score": "La sala vota por el mejor equipo."
+      },
+      "close": "Cerrar",
+      "open": "Abrir la foto: {caption}"
     }
   }
 }

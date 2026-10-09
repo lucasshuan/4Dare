@@ -280,92 +280,36 @@
   "gamePage": {
     "actions": {
       "label": "More of this game",
-      "howTo": "How to play",
-      "howToHint": "The rules in a minute",
       "characters": "Characters",
-      "charactersHint": "Who can show up",
-      "workshop": "See in the workshop",
-      "workshopHint": "Suggest and vote on cards",
-      "ranking": "Full ranking",
-      "rankingHint": "Every game and period"
+      "workshop": "Workshop",
+      "ranking": "Ranking"
     },
     "ranking": {
-      "title": "Ranking",
-      "period": "Period",
-      "periods": {
-        "week": "Week",
-        "month": "Month",
-        "ever": "Ever"
-      },
-      "soon": "Coming soon: who scored the most XP in this game.",
-      "all": "See the ranking"
+      "title": "Weekly ranking",
+      "all": "See all",
+      "xp": "{n} XP"
     },
-    "scenes": {
-      "label": "A match of {game}, played out",
-      "live": "Live",
-      "chat": "Chat",
-      "you": "You",
-      "pause": "Pause",
-      "play": "Play",
-      "whoAmI": {
-        "c1": "Everyone sees the others' cards. Not their own.",
-        "c2": "On your turn, ask. The others answer yes, no or maybe.",
-        "c3": "Right guess, you found out. First to find out wins.",
-        "ask": "Do I use a weapon?",
-        "guess": "Am I Thor?",
-        "yes": "Yes",
-        "maybe": "Maybe",
-        "stamp": "Found out!",
-        "chat": {
-          "hi": "here!! 👋",
-          "win": "tonight I win",
-          "theme": "🦸 Theme: <b>Superheroes</b>",
-          "good": "good question 👀",
-          "lol": "yes lol",
-          "close": "getting close",
-          "done": "You found out in 4 questions",
-          "no": "nooooo 😭",
-          "gg": "gg"
-        }
+    "shots": {
+      "label": "Moments of a match",
+      "prev": "Previous",
+      "next": "Next",
+      "who-am-i": {
+        "pick": "Everyone picks a character for someone else.",
+        "turn": "On your turn, ask. Only you can't see your card.",
+        "found": "Right guess: you found out."
       },
       "impostor": {
-        "c1": "Everyone gets the same character. All but one.",
-        "c2": "Each one answers their own way. Who stands out?",
-        "c3": "Vote for whoever seems to have another character.",
-        "yours": "Your card · only you see it",
-        "scale": "How brave is your character?",
-        "stamp": "Impostor!",
-        "chat": {
-          "warn": "whoever's the impostor, tell us lol",
-          "nobody": "nobody knows, mei 😂",
-          "three": "mei gave a 3 huh 👀",
-          "scared": "uh, he's a coward 😳",
-          "coward": "a coward?? 🤔",
-          "was": "Mei was the impostor",
-          "me": "ME??? 😱",
-          "gg": "gg"
-        }
+        "question": "Everyone answers about their own card.",
+        "vote": "Who's the impostor? The room votes.",
+        "caught": "Caught, with one last guess at the crew's card."
       },
-      "whatFor": {
-        "c1": "Characters go up for auction. Nobody knows what for.",
-        "c2": "Then comes the mission.",
-        "c3": "Each one defends their team. The room votes.",
-        "lot": "Lot 1",
-        "sold": "Sold!",
-        "coins": "{n} coins",
-        "mission": "Change a car tyre, in the rain, at midnight.",
-        "won": "Leo wins!",
-        "chat": {
-          "any": "batman works for anything",
-          "pass": "pass. want to see the next one",
-          "sold": "🔨 Batman: Bia, 4 coins",
-          "mission": "✉️ Mission: change a car tyre, in the rain, at midnight",
-          "fight": "I BOUGHT A FIGHTING TEAM 😭",
-          "lol": "hahahaha",
-          "self": "voted for myself. no shame",
-          "no": "NO"
-        }
-      }
+      "lineup": {
+        "auction": "Characters go up for auction. Nobody knows what for.",
+        "boards": "The mission opens. Each one builds a team.",
+        "score": "The room votes for the best team."
+      },
+      "close": "Close",
+      "open": "Open the photo: {caption}"
     }
   }
 }
