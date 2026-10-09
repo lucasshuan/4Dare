@@ -30,7 +30,7 @@ import {
   isGameKey,
   OPEN_GAMES,
 } from "@/game/games";
-import { GOSTO_KEYS, GOSTOS, type Gosto } from "@/game/gostos";
+import { TASTE_KEYS, TASTES, type Taste } from "@/game/tastes";
 import { LANGS, type Lang } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { ease, riseIn } from "@/lib/motion";
@@ -48,8 +48,8 @@ export interface RoomFilters {
   access: Access;
   /** The host's languages to show; null: every language. By default only the viewer's. */
   langs: Lang[] | null;
-  /** Rooms with any of these gostos on stay out. */
-  hide: Gosto[];
+  /** Rooms with any of these tastes on stay out. */
+  hide: Taste[];
 }
 
 /** Case- and accent-insensitive, so "joao" finds "João". */
@@ -76,7 +76,7 @@ function toSearch({ game, q, access, langs, hide }: RoomFilters, locale: Lang) {
 /**
  * The filters a link carries (?game=who-am-i&q=crew&access=private&lang=pt,ja&hide=real),
  * each optional. `lang` is "all" or languages separated by commas; anything
- * else means the viewer's. `hide` is gostos separated by commas.
+ * else means the viewer's. `hide` is tastes separated by commas.
  */
 function fromSearch(search: string, locale: Lang): RoomFilters {
   const sp = new URLSearchParams(search);
@@ -90,7 +90,7 @@ function fromSearch(search: string, locale: Lang): RoomFilters {
     q: (sp.get("q") ?? "").slice(0, 50),
     access: access === "public" || access === "private" ? access : "all",
     langs: lang === "all" ? null : picked.length ? picked : [locale],
-    hide: GOSTO_KEYS.filter((g) => hide.includes(g)),
+    hide: TASTE_KEYS.filter((g) => hide.includes(g)),
   };
 }
 
@@ -129,7 +129,7 @@ export function RoomsScreen() {
           (filters.access === "all" ||
             (filters.access === "private") === r.locked) &&
           (!filters.langs || filters.langs.includes(r.host.lang)) &&
-          filters.hide.every((g) => r.offGostos.includes(g)) &&
+          filters.hide.every((g) => r.offTastes.includes(g)) &&
           (!q ||
             fold(r.name || tr("roomOf", { name: name(r.host) })).includes(q)),
       ),
@@ -504,27 +504,27 @@ function LangSelect({
   );
 }
 
-/** Gostos whose rooms stay out of the list, several at once; none: every room. */
+/** Tastes whose rooms stay out of the list, several at once; none: every room. */
 function HideSelect({
   value,
   onChange,
 }: {
-  value: Gosto[];
-  onChange: (hide: Gosto[]) => void;
+  value: Taste[];
+  onChange: (hide: Taste[]) => void;
 }) {
   const t = useTranslations("home.roomsPage");
-  const tg = useTranslations("common.gostos");
+  const tg = useTranslations("common.tastes");
   return (
     <Select.Root
       multiple
-      items={GOSTOS.map((g) => ({ value: g.key, label: tg(`${g.key}.name`) }))}
+      items={TASTES.map((g) => ({ value: g.key, label: tg(`${g.key}.name`) }))}
       value={value}
       onValueChange={(next) =>
-        // one stays shown: hiding every gosto would hide every room
+        // one stays shown: hiding every taste would hide every room
         onChange(
-          next.length === GOSTO_KEYS.length
+          next.length === TASTE_KEYS.length
             ? value
-            : GOSTO_KEYS.filter((g) => next.includes(g)),
+            : TASTE_KEYS.filter((g) => next.includes(g)),
         )
       }
     >
@@ -536,7 +536,7 @@ function HideSelect({
           {() =>
             value.length
               ? t("hiding", {
-                  gostos: GOSTOS.filter((g) => value.includes(g.key))
+                  tastes: TASTES.filter((g) => value.includes(g.key))
                     .map((g) => g.emoji)
                     .join(" "),
                 })
@@ -559,7 +559,7 @@ function HideSelect({
               {t("hide")}
             </span>
             <Select.List>
-              {GOSTOS.map((g) => (
+              {TASTES.map((g) => (
                 <Select.Item key={g.key} value={g.key} className={ITEM}>
                   <span
                     aria-hidden

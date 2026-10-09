@@ -80,8 +80,8 @@
     "less": "10 segundos menos",
     "more": "10 segundos más",
     "secondsUnit": "segundos",
-    "gostos": "Gustos",
-    "gostosHint": "Desactiva lo que nadie aquí quiere ver: esos personajes salen de los temas, y un tema que se queda con pocos sale de la sala.",
+    "tastes": "Gustos",
+    "tastesHint": "Desactiva lo que nadie aquí quiere ver: esos personajes salen de los temas, y un tema que se queda con pocos sale de la sala.",
     "themes": "Temas",
     "themesOn": "{on} de {total} temas",
     "needThemes": "Deja al menos 4 temas activados.",
@@ -98,7 +98,7 @@
     "searchThemes": "Buscar tema",
     "clearSearch": "Borrar la búsqueda",
     "noThemeFound": "Ningún tema con ese nombre.",
-    "hiddenByGostos": "{count, plural, one {# tema oculto} other {# temas ocultos}} por los gustos.",
+    "hiddenByTastes": "{count, plural, one {# tema oculto} other {# temas ocultos}} por los gustos.",
     "hostNoteTitle": "Tú escribes el tema",
     "hostNote": "Cuando empiece la partida, escribes el tema que quieras, con algunas ideas de los temas activados. Si pasan 30 s, todos votan.",
     "lineup": {
@@ -130,7 +130,7 @@
       },
       "cardsOn": "{count, plural, one {# personaje en la subasta} other {# personajes en la subasta}}",
       "needCards": "Pocos personajes: activa más gustos.",
-      "gostosHint": "Desactiva lo que nadie aquí quiere ver: esos personajes no salen a subasta."
+      "tastesHint": "Desactiva lo que nadie aquí quiere ver: esos personajes no salen a subasta."
     }
   },
   "presets": {
@@ -150,7 +150,7 @@
     "save": "Guardar",
     "replace": "Reemplazar",
     "full": "Hasta {max}: borra uno para guardar otro.",
-    "gostosOn": "{on} de {total} gustos",
+    "tastesOn": "{on} de {total} gustos",
     "themesOff": "{count, plural, one {# tema desactivado} other {# temas desactivados}}",
     "startsNew": "Las salas nuevas de {game} empiezan con {name}",
     "remove": "Borrar {name}"
@@ -171,7 +171,7 @@
     "noOpen": "No hay salas con lugar libre ahora. Crea una y aparecerá aquí.",
     "seeAll": "Ver todas",
     "locked": "Con contraseña",
-    "gostos": "Gustos"
+    "tastes": "Gustos"
   },
   "games": {
     "title": "Elige un juego",
@@ -265,7 +265,7 @@
     "lang": "Idioma de la sala",
     "hide": "Ocultar salas con",
     "hideNone": "Todos los gustos",
-    "hiding": "Sin {gostos}",
+    "hiding": "Sin {tastes}",
     "allLangs": "Todos los idiomas",
     "access": "Quién puede entrar",
     "accessOptions": {

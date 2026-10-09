@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import type { GameKey } from "@/game/games";
-import { GOSTOS, type Gosto } from "@/game/gostos";
 import { roomMissions } from "@/game/lineup/bank";
 import { MIN_POOL, roomDeck } from "@/game/lineup/deal";
+import { TASTES, type Taste } from "@/game/tastes";
 import type { Lang } from "@/game/types";
 import type { LineupCatalog } from "@/server/contract";
 
-/** What for?'s missions and the reader's deck by gostos: undefined until it arrives (or while not `enabled`). */
+/** What for?'s missions and the reader's deck by tastes: undefined until it arrives (or while not `enabled`). */
 export function useLineupCatalog(enabled = true): LineupCatalog | undefined {
   const lang = useLocale() as Lang;
   const { data } = useQuery({
@@ -29,29 +29,29 @@ export function useLineupCatalog(enabled = true): LineupCatalog | undefined {
 const NONE: readonly string[] = [];
 
 /**
- * What a What for? room's gostos and missions leave: the characters that can
+ * What a What for? room's tastes and missions leave: the characters that can
  * go to auction (the server wants MIN_POOL of them) and the missions it draws.
  */
 export function useLineupCount(room: {
   game: GameKey;
-  offGostos: readonly Gosto[];
+  offTastes: readonly Taste[];
   heavy?: boolean;
   offMissions?: readonly string[];
 }) {
   const catalog = useLineupCatalog(room.game === "lineup");
-  const { game, offGostos, heavy = true, offMissions = NONE } = room;
-  // the deck's cards with their gostos, once per catalog
+  const { game, offTastes, heavy = true, offMissions = NONE } = room;
+  // the deck's cards with their tastes, once per catalog
   const deck = useMemo(
     () =>
       (catalog?.deck ?? []).map((mask) => ({
-        gostos: GOSTOS.flatMap((g, i) => (mask & (1 << i) ? [g.key] : [])),
+        tastes: TASTES.flatMap((g, i) => (mask & (1 << i) ? [g.key] : [])),
       })),
     [catalog],
   );
   return useMemo(() => {
     // a catalog cached from the previous deploy has no deck yet
     if (!catalog?.deck || game !== "lineup") return null;
-    const cards = roomDeck(deck, offGostos).length;
+    const cards = roomDeck(deck, offTastes).length;
     const total = deck.length;
     const missions = roomMissions(catalog.missions, {
       heavy,
@@ -64,5 +64,5 @@ export function useLineupCount(room: {
       missions,
       allMissions: catalog.missions.length,
     };
-  }, [catalog, deck, game, offGostos, heavy, offMissions]);
+  }, [catalog, deck, game, offTastes, heavy, offMissions]);
 }

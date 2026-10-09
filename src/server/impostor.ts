@@ -1,5 +1,4 @@
 import "server-only";
-import { gostoAllowed, gostoReach } from "@/game/gostos";
 import {
   type Audience,
   type BankQuestion,
@@ -7,6 +6,7 @@ import {
 } from "@/game/impostor/questions";
 import type { ImpDeal, ImpPair } from "@/game/impostor/types";
 import { normalizeName } from "@/game/match";
+import { tasteAllowed, tasteReach } from "@/game/tastes";
 import { themeId } from "@/game/theme-id";
 import {
   type Character,
@@ -33,7 +33,7 @@ const FAME_SPAN = 8000;
 const FAME_FLOOR = 0.2;
 /** Pairs kept for "I don't know this one". */
 const SPARES = 2;
-/** Known: among a language's best known this many; deeper for a room that dropped gostos (gostoReach). */
+/** Known: among a language's best known this many; deeper for a room that dropped tastes (tasteReach). */
 const KNOWN_RANK = 2500;
 /** Themes tried for the vote's four: some have too few known characters. */
 const CANDIDATES = 8;
@@ -89,7 +89,7 @@ function drawPair(pool: Known[], used: Set<string>, random: () => number) {
   return impostor ? { crew, impostor } : null;
 }
 
-const isReal = (f: CharacterFacts) => !!f.gostos?.includes("real");
+const isReal = (f: CharacterFacts) => !!f.tastes?.includes("real");
 
 /** Questions that fit both cards: fiction, real people, or (one of each) both. */
 function audienceOf(a: CharacterFacts, b: CharacterFacts): Audience {
@@ -114,7 +114,7 @@ async function dealFor(
   fallback = false,
 ): Promise<ImpDeal | null> {
   const { characters } = getBackend();
-  const { offGostos } = roomFilter(state);
+  const { offTastes } = roomFilter(state);
   let ranked: ThemeFit[];
   if (fallback) {
     const popular = await characters.randomPopular(lang, 40);
@@ -134,14 +134,14 @@ async function dealFor(
       ranked.map((f) => f.id),
       lang,
     ),
-    characters.knownFloor(lang, Math.round(KNOWN_RANK * gostoReach(offGostos))),
+    characters.knownFloor(lang, Math.round(KNOWN_RANK * tasteReach(offTastes))),
   ]);
   const byId = new Map(facts.map((f) => [f.id, f]));
   const pool: Known[] = ranked.flatMap((fit) => {
     const f = byId.get(fit.id);
     if (!f || f.popularity === null) return [];
     if (floor !== null && f.popularity < floor) return [];
-    if (!gostoAllowed(f.gostos, offGostos)) return [];
+    if (!tasteAllowed(f.tastes, offTastes)) return [];
     return [{ fit, facts: f }];
   });
   const used = new Set<string>();

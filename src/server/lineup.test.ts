@@ -54,9 +54,9 @@ describe("what for?: the deal", () => {
     expect(started.lu?.decks).toHaveLength(2);
   });
 
-  it("refuses to deal from gostos with too few characters", async () => {
+  it("refuses to deal from tastes with too few characters", async () => {
     const state = room(2, {
-      offGostos: [
+      offTastes: [
         "anime",
         "animation",
         "live",

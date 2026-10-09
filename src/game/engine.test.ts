@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createRoom, isExpired, reduce } from "./engine";
-import { GOSTO_KEYS } from "./gostos";
 import { abandoned, presenceDue } from "./helpers";
 import { matchRecord } from "./record";
+import { TASTE_KEYS } from "./tastes";
 import { char, Game, ident, THEMES } from "./test-utils";
 import {
   type BeatKind,
@@ -137,8 +137,8 @@ describe("lobby", () => {
       { answerSeconds: 60.5 },
       { validateSeconds: "60" },
       { themeMode: "anyone" },
-      { offGostos: [...GOSTO_KEYS] },
-      { offGostos: ["anime", "nope"] },
+      { offTastes: [...TASTE_KEYS] },
+      { offTastes: ["anime", "nope"] },
       { offThemes: ["Villains"] },
     ];
     for (const patch of bad) {
@@ -165,12 +165,12 @@ describe("lobby", () => {
     );
   });
 
-  it("keeps what is switched off once, gostos in the screens' order", () => {
+  it("keeps what is switched off once, tastes in the screens' order", () => {
     const g = new Game(1, 1, {
-      offGostos: ["real", "anime", "real"],
+      offTastes: ["real", "anime", "real"],
       offThemes: ["villains", "robots", "villains"],
     });
-    expect(g.state.settings.offGostos).toEqual(["anime", "real"]);
+    expect(g.state.settings.offTastes).toEqual(["anime", "real"]);
     expect(g.state.settings.offThemes).toEqual(["robots", "villains"]);
   });
 

@@ -1,11 +1,11 @@
-import { GOSTOS } from "@/game/gostos";
+import { TASTES } from "@/game/tastes";
 import { LANGS, type Lang } from "@/game/types";
 import { getBackend } from "@/server/backend";
 import type { LineupCatalog } from "@/server/contract";
 
 /**
  * What for?'s live missions in every language and the deck of `?lang=`
- * (LineupCatalog): the room setup counts what a room's gostos and missions
+ * (LineupCatalog): the room setup counts what a room's tastes and missions
  * leave. The same for everyone and changed only in the database, so
  * browsers keep it ten minutes and CDNs an hour.
  */
@@ -18,8 +18,8 @@ export async function GET(request: Request) {
     lineup.pool(lang),
   ]);
   const deck = pool.map((c) =>
-    GOSTOS.reduce(
-      (m, g, i) => (c.gostos.includes(g.key) ? m | (1 << i) : m),
+    TASTES.reduce(
+      (m, g, i) => (c.tastes.includes(g.key) ? m | (1 << i) : m),
       0,
     ),
   );

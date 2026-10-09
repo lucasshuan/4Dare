@@ -15,13 +15,12 @@ import { type FormEvent, type ReactNode, useId, useState } from "react";
 import { keyClass } from "@/components/ui/button";
 import { LayoutMotion } from "@/components/ui/layout-motion";
 import { GAME_SEATS } from "@/game/games";
-import { GOSTOS } from "@/game/gostos";
+import { TASTES } from "@/game/tastes";
 import { GAME_STEP_TIMES } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
 import type { CreateRoomInput } from "@/server/contract";
 import { GameField } from "./game-field";
-import { GostoFields } from "./gosto-fields";
 import { DEFAULT_SETUP } from "./last-setup";
 import { useLineupCount } from "./lineup-catalog";
 import { MissionFields } from "./lineup-fields";
@@ -32,6 +31,7 @@ import {
   RulesFields,
   SettingsFields,
 } from "./settings-fields";
+import { TasteFields } from "./taste-fields";
 import { useThemeCount } from "./theme-catalog";
 import { ThemeFields } from "./theme-fields";
 
@@ -46,7 +46,7 @@ export const backClass =
 /**
  * Editing a room from the lobby, in its modal: the game select with the
  * submit button on its far right, then the settings in tabs: room, the game's
- * rules, the gostos and the themes they leave.
+ * rules, the tastes and the themes they leave.
  */
 export function RoomSetup({
   submit,
@@ -168,8 +168,8 @@ export function RoomSetup({
                 active={tab === "style"}
                 icon={Heart}
                 tone="bg-no-soft text-no"
-                label={t("gostos")}
-                summary={GOSTOS.filter((g) => !value.offGostos.includes(g.key))
+                label={t("tastes")}
+                summary={TASTES.filter((g) => !value.offTastes.includes(g.key))
                   .map((g) => g.emoji)
                   .join(" ")}
                 problem={problems.style}
@@ -236,9 +236,9 @@ export function RoomSetup({
           </Tabs.Panel>
           <Tabs.Panel value="style" className="outline-none">
             <PanelIn>
-              <GostoFields
+              <TasteFields
                 value={value}
-                onChange={(offGostos) => onChange({ ...value, offGostos })}
+                onChange={(offTastes) => onChange({ ...value, offTastes })}
               />
             </PanelIn>
           </Tabs.Panel>

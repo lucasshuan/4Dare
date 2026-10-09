@@ -6,14 +6,14 @@ import { useTranslations } from "next-intl";
 import { useId } from "react";
 import { HintLabel } from "@/components/ui/hint-label";
 import type { GameKey } from "@/game/games";
-import { GOSTO_KEYS, GOSTOS, type Gosto } from "@/game/gostos";
+import { TASTE_KEYS, TASTES, type Taste } from "@/game/tastes";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
 import { useLineupCount } from "./lineup-catalog";
 import { useThemeCount } from "./theme-catalog";
 
 const spring = { type: "spring", stiffness: 420, damping: 32 } as const;
-/** Pastel tile behind each gosto's emoji. */
+/** Pastel tile behind each taste's emoji. */
 const TONES = [
   "bg-sky-soft",
   "bg-butter-soft",
@@ -22,31 +22,31 @@ const TONES = [
   "bg-no-soft",
 ];
 
-/** Turns one gosto on or off; the last one on stays on. */
-export function toggleGosto(off: readonly Gosto[], key: Gosto): Gosto[] {
+/** Turns one taste on or off; the last one on stays on. */
+export function toggleTaste(off: readonly Taste[], key: Taste): Taste[] {
   if (off.includes(key)) return off.filter((k) => k !== key);
-  const next = GOSTO_KEYS.filter((k) => k === key || off.includes(k));
-  return next.length === GOSTO_KEYS.length ? [...off] : next;
+  const next = TASTE_KEYS.filter((k) => k === key || off.includes(k));
+  return next.length === TASTE_KEYS.length ? [...off] : next;
 }
 
-/** One gosto as a card: emoji, name and, when roomy, a few characters it covers. */
-function GostoCard({
+/** One taste as a card: emoji, name and, when roomy, a few characters it covers. */
+function TasteCard({
   index,
-  gosto,
+  taste,
   on,
   last,
   compact,
   onToggle,
 }: {
   index: number;
-  gosto: (typeof GOSTOS)[number];
+  taste: (typeof TASTES)[number];
   on: boolean;
   /** The only one still on: it can't go off. */
   last: boolean;
   compact: boolean;
   onToggle: () => void;
 }) {
-  const t = useTranslations("common.gostos");
+  const t = useTranslations("common.tastes");
   const still = useReducedMotion() ?? false;
   return (
     <m.button
@@ -88,15 +88,15 @@ function GostoCard({
           on ? TONES[index % TONES.length] : "bg-sunken",
         )}
       >
-        {gosto.emoji}
+        {taste.emoji}
       </m.span>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="line-clamp-2 font-semibold text-[13px] leading-4 [word-break:auto-phrase]">
-          {t(`${gosto.key}.name`)}
+          {t(`${taste.key}.name`)}
         </span>
         {compact ? null : (
           <span className="truncate text-[12px] text-ink-muted leading-4">
-            {t(`${gosto.key}.examples`)}
+            {t(`${taste.key}.examples`)}
           </span>
         )}
       </span>
@@ -120,17 +120,17 @@ function GostoCard({
   );
 }
 
-/** Every gosto as a card that turns on and off. */
-export function GostoGrid({
+/** Every taste as a card that turns on and off. */
+export function TasteGrid({
   off,
   onChange,
   compact = false,
 }: {
-  off: readonly Gosto[];
-  onChange: (off: Gosto[]) => void;
+  off: readonly Taste[];
+  onChange: (off: Taste[]) => void;
   compact?: boolean;
 }) {
-  const lastOn = off.length === GOSTO_KEYS.length - 1;
+  const lastOn = off.length === TASTE_KEYS.length - 1;
   return (
     <ul
       className={cn(
@@ -138,17 +138,17 @@ export function GostoGrid({
         compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
       )}
     >
-      {GOSTOS.map((g, i) => {
+      {TASTES.map((g, i) => {
         const on = !off.includes(g.key);
         return (
           <li key={g.key}>
-            <GostoCard
+            <TasteCard
               index={i}
-              gosto={g}
+              taste={g}
               on={on}
               last={on && lastOn}
               compact={compact}
-              onToggle={() => onChange(toggleGosto(off, g.key))}
+              onToggle={() => onChange(toggleTaste(off, g.key))}
             />
           </li>
         );
@@ -163,12 +163,12 @@ export function ThemeCountLine({
 }: {
   room: {
     game: GameKey;
-    offGostos: readonly Gosto[];
+    offTastes: readonly Taste[];
     offThemes: readonly string[];
   };
 }) {
   if (room.game === "lineup")
-    return <CardCountLine offGostos={room.offGostos} />;
+    return <CardCountLine offTastes={room.offTastes} />;
   return <ThemeCount room={room} />;
 }
 
@@ -177,7 +177,7 @@ function ThemeCount({
 }: {
   room: {
     game: GameKey;
-    offGostos: readonly Gosto[];
+    offTastes: readonly Taste[];
     offThemes: readonly string[];
   };
 }) {
@@ -210,10 +210,10 @@ function ThemeCount({
   );
 }
 
-/** What for?: how many characters the room's gostos send to auction, and a word when too few. */
-function CardCountLine({ offGostos }: { offGostos: readonly Gosto[] }) {
+/** What for?: how many characters the room's tastes send to auction, and a word when too few. */
+function CardCountLine({ offTastes }: { offTastes: readonly Taste[] }) {
   const t = useTranslations("home.createRoom.lineup");
-  const count = useLineupCount({ game: "lineup", offGostos });
+  const count = useLineupCount({ game: "lineup", offTastes });
   if (!count) return <p className="h-5" />;
   return (
     <p
@@ -228,13 +228,13 @@ function CardCountLine({ offGostos }: { offGostos: readonly Gosto[] }) {
   );
 }
 
-/** The "Style" tab: the gostos the room keeps. */
-export function GostoFields({
+/** The "Style" tab: the tastes the room keeps. */
+export function TasteFields({
   value,
   onChange,
 }: {
-  value: { game: GameKey; offGostos: Gosto[]; offThemes: string[] };
-  onChange: (offGostos: Gosto[]) => void;
+  value: { game: GameKey; offTastes: Taste[]; offThemes: string[] };
+  onChange: (offTastes: Taste[]) => void;
 }) {
   const t = useTranslations("home.createRoom");
   const hintId = useId();
@@ -242,14 +242,14 @@ export function GostoFields({
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-4 gap-y-1">
         <HintLabel
-          hint={t(value.game === "lineup" ? "lineup.gostosHint" : "gostosHint")}
+          hint={t(value.game === "lineup" ? "lineup.tastesHint" : "tastesHint")}
           hintId={hintId}
         >
-          {t("gostos")}
+          {t("tastes")}
         </HintLabel>
         <ThemeCountLine room={value} />
       </div>
-      <GostoGrid off={value.offGostos} onChange={onChange} />
+      <TasteGrid off={value.offTastes} onChange={onChange} />
     </div>
   );
 }

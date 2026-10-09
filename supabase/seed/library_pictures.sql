@@ -1,5 +1,5 @@
 -- Library pictures added by hand, 2026-10: characters What for?'s deck deals
--- (a language's best known, or a gosto's) that had none. Each is the lead
+-- (a language's best known, or a taste's) that had none. Each is the lead
 -- image of the character's Wikipedia article (English, or the language it is
 -- known in), as the library build takes them, looked at one by one; logos,
 -- posters crowded with text and the wrong version of a character were left

@@ -53,7 +53,7 @@ Tick = done and committed.
 
 ## Characters (`/characters`)
 
-- [ ] Whole library per language: search by name, work, alias; filter by gostos
+- [ ] Whole library per language: search by name, work, alias; filter by tastes
 - [ ] Sheet opens over list (`@modal`), close keeps scroll; direct link = full page
 - [ ] New character modal: name first, shows look-alikes; live card preview
 - [ ] Player aliases (`character_aliases`): author, language, history, 3 reports hide; library names locked

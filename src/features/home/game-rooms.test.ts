@@ -37,7 +37,7 @@ const room = (
   tradeSeconds: 30,
   defendSeconds: 90,
   judgeSeconds: 30,
-  offGostos: [],
+  offTastes: [],
 });
 
 describe("gameRooms", () => {

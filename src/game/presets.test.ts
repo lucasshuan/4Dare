@@ -18,7 +18,7 @@ const preset = (id: string, extra: object = {}) => ({
   setup: {
     ...setup,
     askSeconds: 90,
-    offGostos: ["real"],
+    offTastes: ["real"],
     offThemes: ["b", "a"],
   },
   isDefault: false,
@@ -38,7 +38,7 @@ describe("presets", () => {
         ...preset("bad4"),
         setup: {
           ...setup,
-          offGostos: [
+          offTastes: [
             "anime",
             "animation",
             "live",
@@ -62,12 +62,12 @@ describe("presets", () => {
     ).toHaveLength(PRESETS_MAX);
   });
 
-  it("applies whole in its game, only gostos and themes in another", () => {
+  it("applies whole in its game, only tastes and themes in another", () => {
     const [p] = parsePresets([preset("one")]);
     const room = { ...DEFAULT_SETTINGS, game: "who-am-i" as const };
     const same = applyPreset(room, p);
     expect(same.askSeconds).toBe(90);
-    expect(same.offGostos).toEqual(["real"]);
+    expect(same.offTastes).toEqual(["real"]);
     expect(matchesPreset(same, p)).toBe(true);
     expect(matchesPreset({ ...same, voteSeconds: 30 }, p)).toBe(false);
     const other = applyPreset(room, { ...p, game: "impostor" as never });

@@ -5,7 +5,7 @@ import {
   TONES,
   type Tone,
 } from "@/game/lineup/bank";
-import { DECK_PER_GOSTO, DECK_TOP, type PoolCard } from "@/game/lineup/deal";
+import { DECK_PER_TASTE, DECK_TOP, type PoolCard } from "@/game/lineup/deal";
 import type { Lang } from "@/game/types";
 import type { LineupStore } from "../types";
 import { type Db, serviceClient } from "./clients";
@@ -87,7 +87,7 @@ export function supabaseLineup(db: () => Db = serviceClient): LineupStore {
     pool(lang) {
       let read = pools.get(lang);
       if (!read) {
-        // as deep as a room reaches (DECK_TOP, each gosto's DECK_PER_GOSTO:
+        // as deep as a room reaches (DECK_TOP, each taste's DECK_PER_TASTE:
         // deckOf, in SQL), a page at a time (the id breaking popularity ties) until an
         // empty page: PostgREST hands out a thousand rows at most
         read = cached(async () => {
@@ -98,7 +98,7 @@ export function supabaseLineup(db: () => Db = serviceClient): LineupStore {
               .rpc("lineup_pool", {
                 p_lang: lang,
                 p_top: DECK_TOP,
-                p_per_gosto: DECK_PER_GOSTO,
+                p_per_taste: DECK_PER_TASTE,
               })
               .order("popularity", { ascending: false })
               .order("character_id", { ascending: true })
@@ -108,7 +108,7 @@ export function supabaseLineup(db: () => Db = serviceClient): LineupStore {
             for (const r of data)
               cards.push({
                 id: r.character_id,
-                gostos: r.gostos ?? [],
+                tastes: r.tastes ?? [],
                 rank: cards.length + 1,
               });
           }

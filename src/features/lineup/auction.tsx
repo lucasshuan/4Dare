@@ -1,6 +1,6 @@
 "use client";
 
-// The auction: the lot on top (its photo, name, work, gosto), the bid table
+// The auction: the lot on top (its photo, name, work, taste), the bid table
 // under it (one lane per player, each offer a tower of their coins that stays
 // standing when covered), and your rail: a key for every amount you can
 // offer, the minimum in orange, the last one "all". "Pass" takes you out of
@@ -13,8 +13,8 @@ import { useToast } from "@/components/ui/toast";
 import { useRoomContext } from "@/features/data/room-context";
 import { useStepStarted } from "@/features/room/match-frame";
 import { useStage } from "@/features/stage/stage-context";
-import { GOSTOS } from "@/game/gostos";
 import type { LuCard } from "@/game/lineup/types";
+import { TASTES } from "@/game/tastes";
 import type { ErrorCode, Lang, PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useServerClock } from "@/lib/hooks/use-server-clock";
@@ -222,7 +222,7 @@ function NextLot({ card }: { card: LuCard }) {
   );
 }
 
-/** The lot: its photo taped up, name, work and gosto; stamped when the hammer falls. */
+/** The lot: its photo taped up, name, work and taste; stamped when the hammer falls. */
 function LotCard({
   card,
   sold,
@@ -234,9 +234,9 @@ function LotCard({
 }) {
   const t = useTranslations("lineup.auction");
   const name = useDisplayName();
-  const tg = useTranslations("common.gostos");
+  const tg = useTranslations("common.tastes");
   if (!card) return null;
-  const gosto = GOSTOS.find((g) => g.key === card.gosto);
+  const taste = TASTES.find((g) => g.key === card.taste);
   return (
     <m.div
       className="relative flex flex-col items-center gap-1.5"
@@ -260,9 +260,9 @@ function LotCard({
         {card.origin ? (
           <span className="max-w-[60vw] truncate">{card.origin}</span>
         ) : null}
-        {gosto ? (
+        {taste ? (
           <span className="inline-flex h-6 items-center gap-1 rounded-pill bg-sunken px-2 text-ink">
-            {gosto.emoji} {tg(`${gosto.key}.name`)}
+            {taste.emoji} {tg(`${taste.key}.name`)}
           </span>
         ) : card.emoji ? (
           <span className="inline-flex h-6 items-center rounded-pill bg-kraft px-2 text-kraft-ink">

@@ -7,7 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { buttonClass } from "@/components/ui/button";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { PersonCard } from "@/features/profile/person-card";
-import { GOSTOS } from "@/game/gostos";
+import { TASTES } from "@/game/tastes";
 import { GAME_STEP_TIMES, type PublicRoom } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -60,12 +60,12 @@ export function RoomRow({
   const tc = useTranslations("common");
   const name = useDisplayName();
   const gameName = useGameName();
-  const tg = useTranslations("common.gostos");
+  const tg = useTranslations("common.tastes");
   const host = name(r.host);
   const title = r.name || t("roomOf", { name: host });
-  // a room that switched gostos off says which ones it keeps
-  const kept = r.offGostos.length
-    ? GOSTOS.filter((g) => !r.offGostos.includes(g.key))
+  // a room that switched tastes off says which ones it keeps
+  const kept = r.offTastes.length
+    ? TASTES.filter((g) => !r.offTastes.includes(g.key))
     : [];
   return (
     <m.li
@@ -132,7 +132,7 @@ export function RoomRow({
                 className="flex shrink-0 gap-px text-[12px] leading-none"
               >
                 <span className="sr-only">
-                  {`${t("gostos")}: ${kept.map((g) => tg(`${g.key}.name`)).join(", ")}`}
+                  {`${t("tastes")}: ${kept.map((g) => tg(`${g.key}.name`)).join(", ")}`}
                 </span>
                 {kept.map((g) => (
                   <span key={g.key} aria-hidden>

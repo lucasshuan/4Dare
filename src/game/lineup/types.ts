@@ -3,7 +3,7 @@
 // trades, the envelope with the mission, a board to defend the team, the
 // boards on stage one by one, and a secret vote. The room's shared parts
 // (seats, shows, clocks) are in ../types.ts.
-import type { Gosto } from "../gostos";
+import type { Taste } from "../tastes";
 import type { Localized, Phase, PlayerId } from "../types";
 
 /** What for?'s steps, from the first lot to the last score. */
@@ -35,7 +35,7 @@ export interface LuCard {
   imageUrl: string | null;
   emoji?: string;
   tint?: string;
-  gosto?: Gosto;
+  taste?: Taste;
   /** One of the language's best known: it pulls a fight. */
   star?: true;
 }

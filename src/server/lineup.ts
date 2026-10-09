@@ -1,6 +1,5 @@
 import "server-only";
 import { GAME_SEATS } from "@/game/games";
-import { GOSTO_KEYS } from "@/game/gostos";
 import { isPresent } from "@/game/helpers";
 import { extraCard, pickMissions } from "@/game/lineup/bank";
 import {
@@ -11,6 +10,7 @@ import {
 } from "@/game/lineup/deal";
 import { lotsFor, roundsFor } from "@/game/lineup/rules";
 import type { LuCard, LuDeck } from "@/game/lineup/types";
+import { TASTE_KEYS } from "@/game/tastes";
 import {
   type Character,
   GameError,
@@ -34,7 +34,7 @@ const charCard = (
   name: c.name,
   origin: c.origin,
   imageUrl: c.imageUrl,
-  gosto: lot.gosto,
+  taste: lot.taste,
   ...(lot.star ? { star: true as const } : {}),
 });
 
@@ -42,7 +42,7 @@ const charCard = (
  * Every round's cards and mission, in the host's language. Drawn for the
  * room's open seats and the most rounds it may play: whoever sits down or
  * leaves before the start changes nothing (the engine takes what it needs).
- * The gostos the room left on need MIN_POOL known characters.
+ * The tastes the room left on need MIN_POOL known characters.
  */
 export async function lineupDecks(
   state: RoomState,
@@ -64,8 +64,8 @@ export async function lineupDecks(
     lineup.extras(),
     lineup.missions(),
   ]);
-  const on = GOSTO_KEYS.filter((g) => !s.offGostos.includes(g));
-  const mine = roomDeck(pool, s.offGostos);
+  const on = TASTE_KEYS.filter((g) => !s.offTastes.includes(g));
+  const mine = roomDeck(pool, s.offTastes);
   if (mine.length < Math.min(MIN_POOL, pool.length) || !mine.length)
     throw new GameError("few_cards");
   // with a presenter, three missions a round to choose from (the first stands in)

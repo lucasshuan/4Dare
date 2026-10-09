@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import type { GameKey } from "@/game/games";
-import { type Gosto, letsIn } from "@/game/gostos";
+import { letsIn, type Taste } from "@/game/tastes";
 import { THEME_OPTIONS } from "@/game/types";
 import type { ThemeCatalogEntry } from "@/server/contract";
 
@@ -30,16 +30,16 @@ export const FEW_THEMES = 12;
 /** How many themes a room lets in, and out of how many its game has (null for What for?, which has none). */
 export function useThemeCount(room: {
   game: GameKey;
-  offGostos: readonly Gosto[];
+  offTastes: readonly Taste[];
   offThemes: readonly string[];
 }) {
   const catalog = useThemeCatalog(room.game !== "lineup");
-  const { game, offGostos, offThemes } = room;
+  const { game, offTastes, offThemes } = room;
   return useMemo(() => {
     if (!catalog || game === "lineup") return null;
     const ofGame = catalog.filter((t) => t.games.includes(game));
     const on = ofGame.filter((t) =>
-      letsIn(t, { game, offGostos, offThemes }),
+      letsIn(t, { game, offTastes, offThemes }),
     ).length;
     return {
       on,
@@ -48,5 +48,5 @@ export function useThemeCount(room: {
       tooFew: on < THEME_OPTIONS,
       few: on < FEW_THEMES,
     };
-  }, [catalog, game, offGostos, offThemes]);
+  }, [catalog, game, offTastes, offThemes]);
 }

@@ -6,7 +6,6 @@
 import type { Category } from "@/game/categories";
 import type { ChatMessage, NewChatMessage } from "@/game/chat";
 import type { GameKey } from "@/game/games";
-import type { Gosto, ThemeFilter } from "@/game/gostos";
 import type { BankQuestion } from "@/game/impostor/questions";
 import type { BankExtra, BankMission } from "@/game/lineup/bank";
 import type { PoolCard } from "@/game/lineup/deal";
@@ -20,6 +19,7 @@ import type {
   ShowcaseItem,
 } from "@/game/profile/profile";
 import type { MatchRecord } from "@/game/record";
+import type { Taste, ThemeFilter } from "@/game/tastes";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
   ActiveRoom,
@@ -118,7 +118,7 @@ export interface CharacterFacts {
   /** Its work or job by its English label: two ids of one work match. */
   work: string | null;
   popularity: number | null;
-  gostos: Gosto[] | null;
+  tastes: Taste[] | null;
 }
 
 /** One question's part in a finished match, in the match's language. */
@@ -223,13 +223,13 @@ export interface ImageStore {
 
 /**
  * A theme as the list keeps it: its id (theme-id.ts), the games it serves
- * (one theme, both games, one name) and the gostos of its shared starters,
+ * (one theme, both games, one name) and the tastes of its shared starters,
  * clearest first (null for a starter with none yet).
  */
 export interface CatalogTheme extends Theme {
   id: string;
   games: GameKey[];
-  gostos: (Gosto[] | null)[];
+  tastes: (Taste[] | null)[];
 }
 
 /** Where the theme list lives: the fixtures locally, a table on Supabase. */

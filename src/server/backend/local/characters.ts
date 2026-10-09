@@ -1,7 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { gostosByRule } from "@/game/gostos";
 import { normalizeName } from "@/game/match";
+import { tastesByRule } from "@/game/tastes";
 import { type Character, LANGS, type Lang } from "@/game/types";
 import { entryId, libraryFor, parseEntryId } from "../seed-format";
 import type { CharacterStore } from "../types";
@@ -179,7 +179,7 @@ export function localCharacters(): LocalCharacterStore {
         work:
           LOCAL_ORIGINS.find((o) => o.id === c.origin)?.labels.en ?? c.origin,
         popularity: c.popularity?.[lang] ?? null,
-        gostos: gostosByRule(c.origin, c.category),
+        tastes: tastesByRule(c.origin, c.category),
       }));
     },
     // a few dozen characters, all well known

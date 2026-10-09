@@ -1,11 +1,11 @@
-// Presets: a room's advanced setup (clocks, theme mode, gostos, themes)
-// under a name, to start the next room the same way. A few come ready (gostos
+// Presets: a room's advanced setup (clocks, theme mode, tastes, themes)
+// under a name, to start the next room the same way. A few come ready (tastes
 // only, for any game); a person keeps up to PRESETS_MAX of their own, which
 // follow their account (src/game/options.ts). The names people read for the
 // ready ones live in messages/<lang>/home.json (presets.ready).
 import { type GameKey, isGameKey } from "./games";
-import { GOSTO_KEYS, type Gosto, isGosto } from "./gostos";
 import { cleanRules, type LineupRules } from "./lineup/rules";
+import { isTaste, TASTE_KEYS, type Taste } from "./tastes";
 import {
   DEFAULT_SETTINGS,
   OFF_THEMES_MAX,
@@ -19,10 +19,10 @@ import {
 export const PRESETS_MAX = 12;
 export const PRESET_NAME_MAX = 30;
 
-/** What a preset keeps: the room's rules, gostos and themes; never its name, password or seats. */
+/** What a preset keeps: the room's rules, tastes and themes; never its name, password or seats. */
 export type PresetSetup = Pick<
   RoomSettings,
-  StepTime | "themeMode" | "impostors" | "offGostos" | "offThemes"
+  StepTime | "themeMode" | "impostors" | "offTastes" | "offThemes"
 > &
   LineupRules;
 
@@ -36,17 +36,17 @@ export interface RoomPreset {
   isDefault: boolean;
 }
 
-/** The ready ones: only gostos, so any game takes them whole. */
+/** The ready ones: only tastes, so any game takes them whole. */
 export const READY_PRESETS = [
-  { key: "everything", on: GOSTO_KEYS },
+  { key: "everything", on: TASTE_KEYS },
   { key: "anime", on: ["anime", "animation", "games"] },
   { key: "tv", on: ["animation", "live", "real"] },
   { key: "real", on: ["real"] },
-] as const satisfies readonly { key: string; on: readonly Gosto[] }[];
+] as const satisfies readonly { key: string; on: readonly Taste[] }[];
 export type ReadyPreset = (typeof READY_PRESETS)[number];
 
-export const readyOff = (p: ReadyPreset): Gosto[] =>
-  GOSTO_KEYS.filter((k) => !(p.on as readonly Gosto[]).includes(k));
+export const readyOff = (p: ReadyPreset): Taste[] =>
+  TASTE_KEYS.filter((k) => !(p.on as readonly Taste[]).includes(k));
 
 /** The part of a room's setup a preset keeps. */
 export function presetSetup(s: PresetSetup): PresetSetup {
@@ -57,7 +57,7 @@ export function presetSetup(s: PresetSetup): PresetSetup {
     >),
     themeMode: s.themeMode,
     impostors: s.impostors ?? null,
-    offGostos: [...s.offGostos],
+    offTastes: [...s.offTastes],
     offThemes: [...s.offThemes].sort(),
     ...cleanRules(s as unknown as Record<string, unknown>),
   };
@@ -65,14 +65,14 @@ export function presetSetup(s: PresetSetup): PresetSetup {
 
 /**
  * A room's setup with a preset applied: whole in its own game; in another
- * game, only its gostos and themes (the rules belong to its game).
+ * game, only its tastes and themes (the rules belong to its game).
  */
 export function applyPreset<T extends PresetSetup & { game: GameKey }>(
   value: T,
   preset: Pick<RoomPreset, "game" | "setup">,
 ): T {
   const { setup } = preset;
-  const themes = { offGostos: setup.offGostos, offThemes: setup.offThemes };
+  const themes = { offTastes: setup.offTastes, offThemes: setup.offThemes };
   return preset.game === value.game
     ? { ...value, ...setup }
     : { ...value, ...themes };
@@ -114,9 +114,9 @@ function parseSetup(raw: unknown): PresetSetup | null {
       ? (r.impostors as number)
       : null;
   if (r.themeMode !== "vote" && r.themeMode !== "host") return null;
-  const off = Array.isArray(r.offGostos) ? r.offGostos.filter(isGosto) : [];
-  const offGostos = GOSTO_KEYS.filter((k) => off.includes(k));
-  if (offGostos.length === GOSTO_KEYS.length) return null;
+  const off = Array.isArray(r.offTastes) ? r.offTastes.filter(isTaste) : [];
+  const offTastes = TASTE_KEYS.filter((k) => off.includes(k));
+  if (offTastes.length === TASTE_KEYS.length) return null;
   const themes = Array.isArray(r.offThemes) ? r.offThemes : [];
   const offThemes = [
     ...new Set(
@@ -134,7 +134,7 @@ function parseSetup(raw: unknown): PresetSetup | null {
     >),
     themeMode: r.themeMode,
     impostors,
-    offGostos,
+    offTastes,
     offThemes,
     ...cleanRules(r),
   };

@@ -1,6 +1,5 @@
 // Shapes shared by server actions, route handlers and the UI.
 import type { GameKey } from "@/game/games";
-import type { Gosto } from "@/game/gostos";
 import type { Tone } from "@/game/lineup/bank";
 import type { LuKeptBoard } from "@/game/lineup/record";
 import type { LineupRules } from "@/game/lineup/rules";
@@ -19,6 +18,7 @@ import type {
   Privacy,
   ShowcaseItem,
 } from "@/game/profile/profile";
+import type { Taste } from "@/game/tastes";
 import type { ThemeSet } from "@/game/theme-sets";
 import type {
   Avatar,
@@ -102,8 +102,8 @@ export interface ThemeCatalogEntry {
   id: string;
   set: ThemeSet | null;
   games: GameKey[];
-  /** Its shared starters' gostos, clearest first; null for a starter with none yet. */
-  gostos: (Gosto[] | null)[];
+  /** Its shared starters' tastes, clearest first; null for a starter with none yet. */
+  tastes: (Taste[] | null)[];
   names: Localized;
 }
 
@@ -112,13 +112,13 @@ export interface LineupCatalog {
   missions: { id: string; tone: Tone; heavy: boolean; text: Localized }[];
   /**
    * The deck of the asked language as the store keeps it, best known first:
-   * each card's gostos as a bit mask over GOSTOS (bit i for GOSTOS[i]). A
+   * each card's tastes as a bit mask over TASTES (bit i for TASTES[i]). A
    * room's deck is cut from it as the server does (roomDeck).
    */
   deck: number[];
   /**
-   * The same deck by gostos (each key a mask, its value how many cards have
-   * exactly those gostos), for pages from the previous deploy.
+   * The same deck by tastes (each key a mask, its value how many cards have
+   * exactly those tastes), for pages from the previous deploy.
    */
   cards: Record<string, number>;
 }
@@ -160,7 +160,7 @@ export interface CreateRoomInput extends LineupRules {
   /** Impostor: null lets the seats decide. */
   impostors: number | null;
   themeMode: "vote" | "host";
-  offGostos: Gosto[];
+  offTastes: Taste[];
   offThemes: string[];
 }
 

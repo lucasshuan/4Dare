@@ -3,13 +3,13 @@ import { randomUUID } from "node:crypto";
 import { knownAs } from "@/game/character-search";
 import { systemLines } from "@/game/chat";
 import { isExpired, createRoom as newRoomState, reduce } from "@/game/engine";
-import type { ThemeFilter } from "@/game/gostos";
 import { displayName } from "@/game/guest-names";
 import { presenceDue } from "@/game/helpers";
 import { questionParts } from "@/game/impostor/record";
 import { cardCounts, missionCounts } from "@/game/lineup/record";
 import { LU_PHASES } from "@/game/lineup/types";
 import { matchRecord } from "@/game/record";
+import type { ThemeFilter } from "@/game/tastes";
 import { themeId } from "@/game/theme-id";
 import {
   type Character,
@@ -143,10 +143,10 @@ export async function dispatch(
   throw new GameError("conflict");
 }
 
-/** What the room lets into its draws: its game, its gostos and the themes it switched off. */
+/** What the room lets into its draws: its game, its tastes and the themes it switched off. */
 export function roomFilter(state: RoomState): ThemeFilter {
-  const { game, offGostos, offThemes } = state.settings;
-  return { game, offGostos: offGostos ?? [], offThemes: offThemes ?? [] };
+  const { game, offTastes, offThemes } = state.settings;
+  return { game, offTastes: offTastes ?? [], offThemes: offThemes ?? [] };
 }
 
 /**

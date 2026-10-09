@@ -47,12 +47,12 @@ import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
 import {
   AuctionRow,
-  GostosRow,
   ImpostorsRow,
   MissionsRow,
   ModeRow,
   RoomTitle,
   SeatsRow,
+  TastesRow,
   ThemeModeRow,
   TimesRow,
   VisibilityRow,
@@ -91,7 +91,7 @@ const editable = ({
   judgeSeconds,
   impostors,
   themeMode,
-  offGostos,
+  offTastes,
   offThemes,
   coins,
   lotsPerSeat,
@@ -120,7 +120,7 @@ const editable = ({
   judgeSeconds,
   impostors,
   themeMode,
-  offGostos,
+  offTastes,
   offThemes,
   coins,
   lotsPerSeat,
@@ -348,7 +348,7 @@ export function LobbyScreen() {
                             (await act(() => updateSettings(code, times))).ok
                           }
                         />
-                        <GostosRow
+                        <TastesRow
                           settings={view.settings}
                           editable={me.isHost}
                           pending={pending}
@@ -585,7 +585,7 @@ export function LobbyScreen() {
 
 /**
  * Wraps the host's start key: while the room can't start (short of players,
- * What for?'s gostos leaving too few characters), hovering or tapping it says
+ * What for?'s tastes leaving too few characters), hovering or tapping it says
  * why. A disabled button takes no pointer events, so the wrapper is the
  * trigger.
  */

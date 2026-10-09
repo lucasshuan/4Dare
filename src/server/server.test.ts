@@ -4,8 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { ChatMessage } from "@/game/chat";
-import { GOSTO_KEYS } from "@/game/gostos";
 import { DEFAULT_RULES } from "@/game/lineup/rules";
+import { TASTE_KEYS } from "@/game/tastes";
 import { themeId } from "@/game/theme-id";
 import {
   DEFAULT_SETTINGS,
@@ -59,7 +59,7 @@ const PRESET = {
     ...TIMES,
     themeMode: "vote",
     impostors: null,
-    offGostos: ["real"],
+    offTastes: ["real"],
     offThemes: [],
     ...DEFAULT_RULES,
   },
@@ -70,7 +70,7 @@ const ROOM = {
   name: "Test room",
   password: "",
   themeMode: DEFAULT_SETTINGS.themeMode,
-  offGostos: DEFAULT_SETTINGS.offGostos,
+  offTastes: DEFAULT_SETTINGS.offTastes,
   offThemes: DEFAULT_SETTINGS.offThemes,
   impostors: null,
   ...DEFAULT_RULES,
@@ -325,8 +325,8 @@ describe("server, local mode", () => {
       error: "invalid_input",
     });
     for (const off of [
-      { offGostos: [...GOSTO_KEYS] },
-      { offGostos: ["nope" as "anime"] },
+      { offTastes: [...TASTE_KEYS] },
+      { offTastes: ["nope" as "anime"] },
       { offThemes: ["Not an id"] },
     ])
       expect(

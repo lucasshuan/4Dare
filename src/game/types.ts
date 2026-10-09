@@ -1,6 +1,5 @@
 // The whole game in types. Everything else (engine, server, UI) is written against this file.
 import { DEFAULT_GAME, type GameKey } from "./games";
-import type { Gosto } from "./gostos";
 import type {
   ImpAnswer,
   ImpDeal,
@@ -18,6 +17,7 @@ import type {
   LuDeck,
   LuOffer,
 } from "./lineup/types";
+import type { Taste } from "./tastes";
 import type { ThemeSet } from "./theme-sets";
 
 export const LANGS = ["en", "es", "ja", "pt"] as const;
@@ -119,10 +119,10 @@ export interface RoomSettings {
    * the mission and the lots and gives the verdict (3 people or more).
    */
   mode: "classic" | "host";
-  /** "vote": everyone votes on themes the gostos and the theme list leave on. "host": the host types the theme. */
+  /** "vote": everyone votes on themes the tastes and the theme list leave on. "host": the host types the theme. */
   themeMode: "vote" | "host";
-  /** Gostos switched off: their characters leave every theme (gostos.ts). At least one stays on. */
-  offGostos: Gosto[];
+  /** Tastes switched off: their characters leave every theme (tastes.ts). At least one stays on. */
+  offTastes: Taste[];
   /** Themes switched off, by id (theme-id.ts): a theme added later comes in switched on. */
   offThemes: string[];
 }
@@ -149,7 +149,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   ...DEFAULT_RULES,
   mode: "host",
   themeMode: "vote",
-  offGostos: [],
+  offTastes: [],
   offThemes: [],
 };
 /** The most themes a room can switch off: about every theme there is. */
@@ -750,7 +750,7 @@ export const ERROR_CODES = [
   "gives_away",
   /** What for?: someone else's bid got there first; the lot costs more now. */
   "outbid",
-  /** What for?: the room's gostos leave too few known characters to deal from. */
+  /** What for?: the room's tastes leave too few known characters to deal from. */
   "few_cards",
   "already_done",
   "conflict",
@@ -1107,8 +1107,8 @@ export interface PublicRoom {
   host: Pick<Identity, "id" | "isGuest" | "avatar" | "lang"> & { name: string };
   players: number;
   seats: number;
-  /** The gostos the room switched off: the list shows them and filters by them. */
-  offGostos: Gosto[];
+  /** The tastes the room switched off: the list shows them and filters by them. */
+  offTastes: Taste[];
   /** When the room was made (server ms): the game page lists the oldest first. */
   createdAt: number;
   voteSeconds: number;

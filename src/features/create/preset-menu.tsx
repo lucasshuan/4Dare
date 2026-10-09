@@ -5,7 +5,6 @@ import { Bookmark, ChevronDown, Star, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { GOSTO_KEYS, GOSTOS, type Gosto } from "@/game/gostos";
 import {
   applyPreset,
   matchesPreset,
@@ -17,25 +16,26 @@ import {
   type RoomPreset,
   readyOff,
 } from "@/game/presets";
+import { TASTE_KEYS, TASTES, type Taste } from "@/game/tastes";
 import { cn } from "@/lib/cn";
 import { updateSettings, useSettings } from "@/lib/settings";
 import type { CreateRoomInput } from "@/server/contract";
 import { useGameName } from "./game-field";
 
-/** A ready preset as a preset of the room's own game: its gostos, every theme on. */
+/** A ready preset as a preset of the room's own game: its tastes, every theme on. */
 const asPreset = (p: ReadyPreset, value: CreateRoomInput) => ({
   game: value.game,
-  setup: { ...presetSetup(value), offGostos: readyOff(p), offThemes: [] },
+  setup: { ...presetSetup(value), offTastes: readyOff(p), offThemes: [] },
 });
 
 const newId = () =>
   `p-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
-/** The gostos a preset keeps on, as emojis. */
-function Emojis({ off }: { off: readonly Gosto[] }) {
+/** The tastes a preset keeps on, as emojis. */
+function Emojis({ off }: { off: readonly Taste[] }) {
   return (
     <span aria-hidden className="flex shrink-0 gap-px text-[13px] leading-none">
-      {GOSTOS.filter((g) => !off.includes(g.key)).map((g) => (
+      {TASTES.filter((g) => !off.includes(g.key)).map((g) => (
         <span key={g.key}>{g.emoji}</span>
       ))}
     </span>
@@ -189,9 +189,9 @@ export function PresetMenu({
                         <span className="truncate text-[12px] text-ink-muted">
                           {[
                             p.game === value.game ? null : gameName(p.game),
-                            t("gostosOn", {
-                              on: GOSTO_KEYS.length - p.setup.offGostos.length,
-                              total: GOSTO_KEYS.length,
+                            t("tastesOn", {
+                              on: TASTE_KEYS.length - p.setup.offTastes.length,
+                              total: TASTE_KEYS.length,
                             }),
                             p.setup.offThemes.length
                               ? t("themesOff", {
@@ -203,7 +203,7 @@ export function PresetMenu({
                             .join(" · ")}
                         </span>
                       </span>
-                      <Emojis off={p.setup.offGostos} />
+                      <Emojis off={p.setup.offTastes} />
                     </button>
                     <button
                       type="button"

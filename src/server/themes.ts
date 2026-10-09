@@ -1,6 +1,6 @@
 import "server-only";
 import { GAME_KEYS } from "@/game/games";
-import { letsIn, type ThemeFilter } from "@/game/gostos";
+import { letsIn, type ThemeFilter } from "@/game/tastes";
 import { themeId } from "@/game/theme-id";
 import { type Localized, THEME_OPTIONS, type Theme } from "@/game/types";
 import type { CatalogTheme, ThemeSource, ThemeStore } from "./backend/types";
@@ -9,7 +9,7 @@ const fallback = (t: Theme): CatalogTheme => ({
   ...t,
   id: themeId(t),
   games: [...GAME_KEYS],
-  gostos: [],
+  tastes: [],
 });
 
 /** Only while the store's list never arrived (a server's first moments, or the store down). */

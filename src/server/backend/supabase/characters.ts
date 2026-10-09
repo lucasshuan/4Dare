@@ -209,7 +209,7 @@ export function supabaseCharacters(): CharacterStore {
         category: r.category ?? null,
         work: r.work ?? null,
         popularity: r.popularity ?? null,
-        gostos: r.gostos?.length ? r.gostos : null,
+        tastes: r.tastes?.length ? r.tastes : null,
       }));
     },
     knownFloor(lang, rank) {

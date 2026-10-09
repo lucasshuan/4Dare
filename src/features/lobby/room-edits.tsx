@@ -20,7 +20,6 @@ import { useTranslations } from "next-intl";
 import { type FormEvent, type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
-import { GostoGrid, ThemeCountLine } from "@/features/create/gosto-fields";
 import { useLineupCount } from "@/features/create/lineup-catalog";
 import {
   AuctionFields,
@@ -29,12 +28,13 @@ import {
   MissionCountLine,
 } from "@/features/create/lineup-fields";
 import { SecondsField, Segmented } from "@/features/create/settings-fields";
+import { TasteGrid, ThemeCountLine } from "@/features/create/taste-fields";
 import { useThemeCount } from "@/features/create/theme-catalog";
 import { ImpostorsPicker } from "@/features/impostor/impostors-picker";
 import { GAME_SEATS, type GameKey } from "@/game/games";
-import { GOSTOS, type Gosto } from "@/game/gostos";
 import { impostorsFor } from "@/game/impostor/engine";
 import { HOST_MIN_PEOPLE, lotsFor, roundsFor } from "@/game/lineup/rules";
+import { TASTES, type Taste } from "@/game/tastes";
 import {
   GAME_STEP_TIMES,
   ROOM_NAME_MAX,
@@ -481,50 +481,50 @@ export function ThemeModeRow({
 }
 
 /**
- * The room's gostos: every emoji, the ones switched off faded, and how many
+ * The room's tastes: every emoji, the ones switched off faded, and how many
  * themes they leave; the host's row switches them.
  */
-export function GostosRow({
+export function TastesRow({
   settings,
   editable,
   pending,
   onSave,
 }: {
-  settings: Pick<RoomSettings, "game" | "offGostos" | "offThemes">;
+  settings: Pick<RoomSettings, "game" | "offTastes" | "offThemes">;
   editable: boolean;
   pending: boolean;
-  onSave: (v: Pick<RoomSettings, "offGostos">) => Promise<boolean>;
+  onSave: (v: Pick<RoomSettings, "offTastes">) => Promise<boolean>;
 }) {
   const t = useTranslations("lobby");
   const tc = useTranslations("home.createRoom");
-  const tg = useTranslations("common.gostos");
-  const [draft, setDraft] = useState<Gosto[]>(settings.offGostos);
+  const tg = useTranslations("common.tastes");
+  const [draft, setDraft] = useState<Taste[]>(settings.offTastes);
   const themes = useThemeCount(settings);
-  const draftThemes = useThemeCount({ ...settings, offGostos: draft });
+  const draftThemes = useThemeCount({ ...settings, offTastes: draft });
   // What for? counts the characters its auction draws from instead
   const cards = useLineupCount(settings);
-  const draftCards = useLineupCount({ ...settings, offGostos: draft });
+  const draftCards = useLineupCount({ ...settings, offTastes: draft });
   const count = cards
     ? { tooFew: cards.tooFew, text: t("cardsCount", { count: cards.cards }) }
     : themes
       ? { tooFew: themes.tooFew, text: t("themeCount", { count: themes.on }) }
       : null;
-  const on = GOSTOS.filter((g) => !settings.offGostos.includes(g.key));
+  const on = TASTES.filter((g) => !settings.offTastes.includes(g.key));
   return (
     <EditRow
       icon={rowIcon(Heart)}
       text={
         <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
           <span className="sr-only">
-            {`${tc("gostos")}: ${on.map((g) => tg(`${g.key}.name`)).join(", ")}`}
+            {`${tc("tastes")}: ${on.map((g) => tg(`${g.key}.name`)).join(", ")}`}
           </span>
           <span aria-hidden className="flex gap-0.5 text-[17px] leading-none">
-            {GOSTOS.map((g) => (
+            {TASTES.map((g) => (
               <span
                 key={g.key}
                 className={cn(
                   "transition-[filter,opacity] duration-200",
-                  settings.offGostos.includes(g.key) && "opacity-30 grayscale",
+                  settings.offTastes.includes(g.key) && "opacity-30 grayscale",
                 )}
               >
                 {g.emoji}
@@ -543,16 +543,16 @@ export function GostosRow({
           ) : null}
         </span>
       }
-      label={t("editGostos")}
+      label={t("editTastes")}
       editable={editable}
       pending={pending}
       canSave={!(draftThemes?.tooFew || draftCards?.tooFew)}
-      onOpen={() => setDraft(settings.offGostos)}
-      onSave={() => onSave({ offGostos: draft })}
+      onOpen={() => setDraft(settings.offTastes)}
+      onSave={() => onSave({ offTastes: draft })}
     >
-      <span className="font-semibold text-sm">{tc("gostos")}</span>
-      <GostoGrid off={draft} onChange={setDraft} compact />
-      <ThemeCountLine room={{ ...settings, offGostos: draft }} />
+      <span className="font-semibold text-sm">{tc("tastes")}</span>
+      <TasteGrid off={draft} onChange={setDraft} compact />
+      <ThemeCountLine room={{ ...settings, offTastes: draft }} />
     </EditRow>
   );
 }
@@ -674,7 +674,7 @@ export function MissionsRow({
 }) {
   const t = useTranslations("lobby");
   const [heavy, setHeavy] = useState(settings.heavy);
-  const count = useLineupCount({ game: "lineup", offGostos: [], ...settings });
+  const count = useLineupCount({ game: "lineup", offTastes: [], ...settings });
   return (
     <EditRow
       icon={rowIcon(Mail)}

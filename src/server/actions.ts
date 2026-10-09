@@ -6,7 +6,6 @@ import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { knownAs } from "@/game/character-search";
 import { GAME_KEYS, OPEN_GAMES } from "@/game/games";
-import { GOSTO_KEYS, type Gosto } from "@/game/gostos";
 import type { ImpAnswer } from "@/game/impostor/types";
 import {
   COINS,
@@ -17,6 +16,7 @@ import {
 } from "@/game/lineup/rules";
 import { CUES, type LuCue } from "@/game/lineup/types";
 import { parseSynced } from "@/game/options";
+import { TASTE_KEYS, type Taste } from "@/game/tastes";
 import { themeId } from "@/game/theme-id";
 import {
   ANSWERS,
@@ -165,9 +165,9 @@ const createSchema = z.object({
   impostors: z.number().int().min(1).max(3).nullable(),
   themeMode: z.enum(["vote", "host"]),
   mode: z.enum(["classic", "host"]).optional(),
-  offGostos: z
-    .array(z.enum(GOSTO_KEYS as [Gosto, ...Gosto[]]))
-    .max(GOSTO_KEYS.length - 1),
+  offTastes: z
+    .array(z.enum(TASTE_KEYS as [Taste, ...Taste[]]))
+    .max(TASTE_KEYS.length - 1),
   offThemes: z.array(z.string().regex(/^[a-z0-9-]{1,80}$/)).max(OFF_THEMES_MAX),
   coins: z.number().int().min(COINS.min).max(COINS.max),
   lotsPerSeat: z.number().int().min(LOTS_PER_SEAT.min).max(LOTS_PER_SEAT.max),

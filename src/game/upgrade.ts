@@ -4,8 +4,8 @@ import { DEFAULT_SETTINGS, type RoomSettings, type RoomState } from "./types";
 type Saved = Partial<RoomSettings> & { themeSets?: unknown };
 
 /**
- * A room saved before a setting existed takes its default: before gostos it
- * kept theme sets (they go, and every gosto and theme starts on), before the
+ * A room saved before a setting existed takes its default: before tastes it
+ * kept theme sets (they go, and every taste and theme starts on), before the
  * Impostor it had none of that game's clocks.
  */
 export function upgradeRoom(state: RoomState): RoomState {
@@ -20,7 +20,7 @@ export function upgradeRoom(state: RoomState): RoomState {
     settings: {
       ...DEFAULT_SETTINGS,
       ...settings,
-      offGostos: Array.isArray(saved.offGostos) ? saved.offGostos : [],
+      offTastes: Array.isArray(saved.offTastes) ? saved.offTastes : [],
       offThemes: Array.isArray(saved.offThemes) ? saved.offThemes : [],
     },
   };

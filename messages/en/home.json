@@ -80,8 +80,8 @@
     "less": "10 seconds less",
     "more": "10 seconds more",
     "secondsUnit": "seconds",
-    "gostos": "Tastes",
-    "gostosHint": "Turn off what nobody here wants to see: those characters leave the themes, and a theme left with too few leaves the room.",
+    "tastes": "Tastes",
+    "tastesHint": "Turn off what nobody here wants to see: those characters leave the themes, and a theme left with too few leaves the room.",
     "themes": "Themes",
     "themesOn": "{on} of {total} themes",
     "needThemes": "Keep at least 4 themes on.",
@@ -98,7 +98,7 @@
     "searchThemes": "Search themes",
     "clearSearch": "Clear search",
     "noThemeFound": "No theme by that name.",
-    "hiddenByGostos": "{count, plural, one {# theme hidden} other {# themes hidden}} by the tastes.",
+    "hiddenByTastes": "{count, plural, one {# theme hidden} other {# themes hidden}} by the tastes.",
     "hostNoteTitle": "You type the theme",
     "hostNote": "When the match starts, you write any theme you like, with a few ideas from the themes on. If 30 s go by, everyone votes instead.",
     "lineup": {
@@ -130,7 +130,7 @@
       },
       "cardsOn": "{count, plural, one {# character up for auction} other {# characters up for auction}}",
       "needCards": "Too few characters: turn more tastes on.",
-      "gostosHint": "Turn off what nobody here wants to see: those characters stay out of the auction."
+      "tastesHint": "Turn off what nobody here wants to see: those characters stay out of the auction."
     }
   },
   "presets": {
@@ -150,7 +150,7 @@
     "save": "Save",
     "replace": "Replace",
     "full": "Up to {max}: delete one to save another.",
-    "gostosOn": "{on} of {total} tastes",
+    "tastesOn": "{on} of {total} tastes",
     "themesOff": "{count, plural, one {# theme off} other {# themes off}}",
     "startsNew": "New {game} rooms start with {name}",
     "remove": "Delete {name}"
@@ -171,7 +171,7 @@
     "noOpen": "No room with a free seat right now. Create one and it shows up here.",
     "seeAll": "See all",
     "locked": "Has a password",
-    "gostos": "Tastes"
+    "tastes": "Tastes"
   },
   "games": {
     "title": "Pick a game",
@@ -265,7 +265,7 @@
     "lang": "Room language",
     "hide": "Hide rooms with",
     "hideNone": "Every taste",
-    "hiding": "No {gostos}",
+    "hiding": "No {tastes}",
     "allLangs": "All languages",
     "access": "Who can join",
     "accessOptions": {

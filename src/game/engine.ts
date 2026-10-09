@@ -4,7 +4,6 @@
 // no I/O of their own.
 
 import { GAME_SEATS, isGameKey } from "./games";
-import { GOSTO_KEYS, isGosto } from "./gostos";
 import { findPlayer, goneFor, isPresent, presenceDue } from "./helpers";
 import {
   accuse,
@@ -62,6 +61,7 @@ import {
   stepMs,
   stopClock,
 } from "./steps";
+import { isTaste, TASTE_KEYS } from "./tastes";
 import {
   type Ctx,
   DEFAULT_SETTINGS,
@@ -119,7 +119,7 @@ function mergeSettings(
     ...STEP_TIMES,
     "mode",
     "themeMode",
-    "offGostos",
+    "offTastes",
     "offThemes",
     "impostors",
     "coins",
@@ -142,7 +142,7 @@ function mergeSettings(
     next.seats = Math.min(range.max, Math.max(range.min, seated, next.seats));
   }
   const impostors: unknown = next.impostors;
-  const offGostos: unknown = next.offGostos ?? [];
+  const offTastes: unknown = next.offTastes ?? [];
   const offThemes: unknown = next.offThemes ?? [];
   const offMissions: unknown = next.offMissions ?? [];
   const rounds: unknown = next.rounds;
@@ -175,8 +175,8 @@ function mergeSettings(
         (impostors as number) >= 1 &&
         (impostors as number) <= Math.floor(GAME_SEATS.impostor.max / 3))) &&
     (next.themeMode === "vote" || next.themeMode === "host") &&
-    Array.isArray(offGostos) &&
-    offGostos.every(isGosto) &&
+    Array.isArray(offTastes) &&
+    offTastes.every(isTaste) &&
     Array.isArray(offThemes) &&
     offThemes.length <= OFF_THEMES_MAX &&
     offThemes.every((id) => typeof id === "string" && THEME_ID.test(id)) &&
@@ -190,10 +190,10 @@ function mergeSettings(
     offMissions.length <= OFF_MISSIONS_MAX &&
     offMissions.every((id) => typeof id === "string" && THEME_ID.test(id));
   if (!ok) fail("invalid_input");
-  // Each gosto once, in the order the screens show them; one stays on.
-  const off = GOSTO_KEYS.filter((k) => (offGostos as string[]).includes(k));
-  if (off.length === GOSTO_KEYS.length) fail("invalid_input");
-  // a room made before gostos carries its old theme sets: they go
+  // Each taste once, in the order the screens show them; one stays on.
+  const off = TASTE_KEYS.filter((k) => (offTastes as string[]).includes(k));
+  if (off.length === TASTE_KEYS.length) fail("invalid_input");
+  // a room made before tastes carries its old theme sets: they go
   const { themeSets: _sets, ...rest } = next as RoomSettings & {
     themeSets?: unknown;
   };
@@ -202,7 +202,7 @@ function mergeSettings(
     name: next.name.trim(),
     // a public room keeps no password around
     password: next.visibility === "private" ? next.password.trim() : "",
-    offGostos: off,
+    offTastes: off,
     offThemes: [...new Set(offThemes as string[])].sort(),
     offMissions: [...new Set(offMissions as string[])].sort(),
   };

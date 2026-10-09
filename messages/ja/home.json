@@ -80,8 +80,8 @@
     "less": "10秒減らす",
     "more": "10秒増やす",
     "secondsUnit": "秒",
-    "gostos": "好み",
-    "gostosHint": "だれも見たくないものはオフに：そのキャラクターはテーマから外れ、残りが少なくなったテーマはルームから外れます。",
+    "tastes": "好み",
+    "tastesHint": "だれも見たくないものはオフに：そのキャラクターはテーマから外れ、残りが少なくなったテーマはルームから外れます。",
     "themes": "テーマ",
     "themesOn": "{total}テーマ中{on}",
     "needThemes": "テーマを4つ以上オンにしてください。",
@@ -98,7 +98,7 @@
     "searchThemes": "テーマを検索",
     "clearSearch": "検索を消す",
     "noThemeFound": "その名前のテーマはありません。",
-    "hiddenByGostos": "好みで{count}テーマが非表示です。",
+    "hiddenByTastes": "好みで{count}テーマが非表示です。",
     "hostNoteTitle": "あなたがテーマを書きます",
     "hostNote": "試合が始まったら、好きなテーマを書きます（オンのテーマからアイデアも出ます）。30秒たつと、みんなの投票に切り替わります。",
     "lineup": {
@@ -130,7 +130,7 @@
       },
       "cardsOn": "オークションに{count}人",
       "needCards": "キャラクターが少なすぎます。好みを増やしてください。",
-      "gostosHint": "ここで誰も見たくないものはオフに。そのキャラクターはオークションに出ません。"
+      "tastesHint": "ここで誰も見たくないものはオフに。そのキャラクターはオークションに出ません。"
     }
   },
   "presets": {
@@ -150,7 +150,7 @@
     "save": "保存",
     "replace": "上書き",
     "full": "{max}個まで：保存するには1つ消してください。",
-    "gostosOn": "{total}の好み中{on}",
+    "tastesOn": "{total}の好み中{on}",
     "themesOff": "{count}テーマがオフ",
     "startsNew": "{game}の新しいルームは{name}で始まる",
     "remove": "{name}を消す"
@@ -171,7 +171,7 @@
     "noOpen": "いま空きのあるルームはありません。作るとここに表示されます。",
     "seeAll": "すべて見る",
     "locked": "パスワードあり",
-    "gostos": "好み"
+    "tastes": "好み"
   },
   "games": {
     "title": "ゲームを選ぶ",
@@ -265,7 +265,7 @@
     "lang": "ルームの言語",
     "hide": "非表示にするルーム",
     "hideNone": "すべての好み",
-    "hiding": "{gostos}なし",
+    "hiding": "{tastes}なし",
     "allLangs": "すべての言語",
     "access": "参加できる人",
     "accessOptions": {

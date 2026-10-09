@@ -15,18 +15,18 @@ import { useId, useMemo, useState } from "react";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { HintLabel } from "@/components/ui/hint-label";
 import { LayoutMotion } from "@/components/ui/layout-motion";
-import { letsIn } from "@/game/gostos";
+import { letsIn } from "@/game/tastes";
 import { THEME_SETS, type ThemeSet } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
 import type { CreateRoomInput, ThemeCatalogEntry } from "@/server/contract";
-import { ThemeCountLine } from "./gosto-fields";
+import { ThemeCountLine } from "./taste-fields";
 import { useThemeCatalog } from "./theme-catalog";
 
 type ThemeSettings = Pick<
   CreateRoomInput,
-  "game" | "themeMode" | "offGostos" | "offThemes"
+  "game" | "themeMode" | "offTastes" | "offThemes"
 >;
 
 const spring = { type: "spring", stiffness: 420, damping: 32 } as const;
@@ -125,7 +125,7 @@ export function Box({ state }: { state: boolean | "mixed" }) {
 type Group = {
   set: (typeof THEME_SETS)[number];
   index: number;
-  /** The set's themes the gostos leave, by name. */
+  /** The set's themes the tastes leave, by name. */
   themes: { id: string; name: string }[];
 };
 
@@ -263,19 +263,19 @@ function SetGroup({
   );
 }
 
-/** The sets the room's gostos leave, each with its themes in this language, A to Z. */
+/** The sets the room's tastes leave, each with its themes in this language, A to Z. */
 function useGroups(
   catalog: ThemeCatalogEntry[] | undefined,
   value: ThemeSettings,
 ): { groups: Group[]; hidden: number } {
   const lang = useLocale() as Lang;
-  const { game, offGostos } = value;
+  const { game, offTastes } = value;
   return useMemo(() => {
     if (!catalog) return { groups: [], hidden: 0 };
     const ofGame = catalog.filter((th) => th.games.includes(game));
-    // the room's own switched-off themes don't hide them: only the gostos
+    // the room's own switched-off themes don't hide them: only the tastes
     const kept = ofGame.filter((th) =>
-      letsIn(th, { game, offGostos, offThemes: [] }),
+      letsIn(th, { game, offTastes, offThemes: [] }),
     );
     const bySet = new Map<ThemeSet, Group["themes"]>();
     for (const th of kept) {
@@ -291,10 +291,10 @@ function useGroups(
       return [{ set, index, themes }];
     });
     return { groups, hidden: ofGame.length - kept.length };
-  }, [catalog, game, offGostos, lang]);
+  }, [catalog, game, offTastes, lang]);
 }
 
-/** Every theme the gostos leave, set by set: a box for each, and one for each whole set. */
+/** Every theme the tastes leave, set by set: a box for each, and one for each whole set. */
 function ThemeChecklist({
   value,
   onChange,
@@ -395,7 +395,7 @@ function ThemeChecklist({
       )}
       {hidden ? (
         <p className="text-[13px] text-ink-muted">
-          {t("hiddenByGostos", { count: hidden })}
+          {t("hiddenByTastes", { count: hidden })}
         </p>
       ) : null}
     </div>
@@ -426,7 +426,7 @@ function HostNote() {
 
 /**
  * The "Themes" tab: for "Who am I?", how the theme is chosen; then every
- * theme the gostos leave, picked by hand. Voting draws from them, and so do
+ * theme the tastes leave, picked by hand. Voting draws from them, and so do
  * the host's ideas.
  */
 export function ThemeFields({

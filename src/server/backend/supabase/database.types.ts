@@ -169,33 +169,33 @@ export type Database = {
           created_at: string;
           created_by: string | null;
           custom_origin: string | null;
-          gostos: Database["public"]["Enums"]["gosto"][] | null;
           id: string;
           image_url: string | null;
           kind: string | null;
           origin_id: string | null;
+          tastes: Database["public"]["Enums"]["taste"][] | null;
         };
         Insert: {
           category?: Database["public"]["Enums"]["character_category"] | null;
           created_at?: string;
           created_by?: string | null;
           custom_origin?: string | null;
-          gostos?: Database["public"]["Enums"]["gosto"][] | null;
           id: string;
           image_url?: string | null;
           kind?: string | null;
           origin_id?: string | null;
+          tastes?: Database["public"]["Enums"]["taste"][] | null;
         };
         Update: {
           category?: Database["public"]["Enums"]["character_category"] | null;
           created_at?: string;
           created_by?: string | null;
           custom_origin?: string | null;
-          gostos?: Database["public"]["Enums"]["gosto"][] | null;
           id?: string;
           image_url?: string | null;
           kind?: string | null;
           origin_id?: string | null;
+          tastes?: Database["public"]["Enums"]["taste"][] | null;
         };
         Relationships: [
           {
@@ -801,16 +801,16 @@ export type Database = {
       };
       origins: {
         Row: {
-          gostos: Database["public"]["Enums"]["gosto"][] | null;
           id: string;
+          tastes: Database["public"]["Enums"]["taste"][] | null;
         };
         Insert: {
-          gostos?: Database["public"]["Enums"]["gosto"][] | null;
           id: string;
+          tastes?: Database["public"]["Enums"]["taste"][] | null;
         };
         Update: {
-          gostos?: Database["public"]["Enums"]["gosto"][] | null;
           id?: string;
+          tastes?: Database["public"]["Enums"]["taste"][] | null;
         };
         Relationships: [];
       };
@@ -1353,9 +1353,9 @@ export type Database = {
         };
         Relationships: [];
       };
-      theme_starter_gostos: {
+      theme_starter_tastes: {
         Row: {
-          gostos: string[] | null;
+          tastes: string[] | null;
           theme_id: string | null;
         };
         Relationships: [
@@ -1479,30 +1479,19 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      character_gostos: {
+      character_tastes: {
         Args: { c: Database["public"]["Tables"]["characters"]["Row"] };
-        Returns: Database["public"]["Enums"]["gosto"][];
+        Returns: Database["public"]["Enums"]["taste"][];
       };
       delete_old_rooms: { Args: never; Returns: number };
-      gostos: {
-        Args: { c: Database["public"]["Tables"]["characters"]["Row"] };
-        Returns: Database["public"]["Enums"]["gosto"][];
-      };
-      gostos_by_rule: {
-        Args: {
-          p_category: Database["public"]["Enums"]["character_category"];
-          p_origin: string;
-        };
-        Returns: Database["public"]["Enums"]["gosto"][];
-      };
       impostor_count_questions: { Args: { p_rows: Json }; Returns: undefined };
       impostor_facts: {
         Args: { p_ids: string[]; p_lang: string };
         Returns: {
           category: Database["public"]["Enums"]["character_category"];
           character_id: string;
-          gostos: Database["public"]["Enums"]["gosto"][];
           popularity: number;
+          tastes: Database["public"]["Enums"]["taste"][];
           work: string;
         }[];
       };
@@ -1516,16 +1505,16 @@ export type Database = {
             Args: { p_lang: string };
             Returns: {
               character_id: string;
-              gostos: Database["public"]["Enums"]["gosto"][];
               popularity: number;
+              tastes: Database["public"]["Enums"]["taste"][];
             }[];
           }
         | {
-            Args: { p_lang: string; p_per_gosto: number; p_top: number };
+            Args: { p_lang: string; p_per_taste: number; p_top: number };
             Returns: {
               character_id: string;
-              gostos: Database["public"]["Enums"]["gosto"][];
               popularity: number;
+              tastes: Database["public"]["Enums"]["taste"][];
             }[];
           };
       lineup_priciest: {
@@ -1653,6 +1642,13 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      tastes_by_rule: {
+        Args: {
+          p_category: Database["public"]["Enums"]["character_category"];
+          p_origin: string;
+        };
+        Returns: Database["public"]["Enums"]["taste"][];
+      };
       theme_pick_scores: {
         Args: { p_limit: number; p_theme: string };
         Returns: {
@@ -1697,7 +1693,7 @@ export type Database = {
         | "art"
         | "business"
         | "other";
-      gosto:
+      taste:
         | "anime"
         | "animation"
         | "live"
@@ -1858,7 +1854,7 @@ export const Constants = {
         "business",
         "other",
       ],
-      gosto: [
+      taste: [
         "anime",
         "animation",
         "live",

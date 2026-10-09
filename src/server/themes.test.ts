@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GAME_KEYS } from "@/game/games";
-import type { Gosto, ThemeFilter } from "@/game/gostos";
+import type { Taste, ThemeFilter } from "@/game/tastes";
 import { themeId } from "@/game/theme-id";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import { THEME_OPTIONS, type Theme } from "@/game/types";
@@ -11,7 +11,7 @@ import { themes } from "./themes";
 const t = (
   en: string,
   set: Theme["set"] = "heroes",
-  gostos: (Gosto[] | null)[] = [],
+  tastes: (Taste[] | null)[] = [],
 ): CatalogTheme => ({
   en,
   es: en,
@@ -20,11 +20,11 @@ const t = (
   set,
   id: themeId({ en, es: en, pt: en, ja: en }),
   games: [...GAME_KEYS],
-  gostos,
+  tastes,
 });
 const room = (filter: Partial<ThemeFilter>): ThemeFilter => ({
   game: "who-am-i",
-  offGostos: [],
+  offTastes: [],
   offThemes: [],
   ...filter,
 });
@@ -64,7 +64,7 @@ describe("themes", () => {
   });
 
   it("draws what the room lets in, and the rest only when that runs short", async () => {
-    const anime: Gosto[] = ["anime"];
+    const anime: Taste[] = ["anime"];
     const list = [
       t("Pirates", "warriors"),
       t("Ninjas", "warriors", [anime, anime, ["live"], ["books"]]),
@@ -79,7 +79,7 @@ describe("themes", () => {
       const kept = await source.draw(
         [],
         3,
-        room({ offGostos: ["anime"], offThemes: ["mario"] }),
+        room({ offTastes: ["anime"], offThemes: ["mario"] }),
       );
       expect(
         kept

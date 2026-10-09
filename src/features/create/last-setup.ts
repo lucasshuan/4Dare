@@ -1,7 +1,7 @@
 // The last room setup, so the next room starts the same way. Kept in this browser only.
 import { DEFAULT_GAME } from "@/game/games";
-import { GOSTO_KEYS, isGosto } from "@/game/gostos";
 import { cleanRules, DEFAULT_RULES } from "@/game/lineup/rules";
+import { isTaste, TASTE_KEYS } from "@/game/tastes";
 import {
   DEFAULT_SETTINGS,
   OFF_THEMES_MAX,
@@ -32,7 +32,7 @@ export const DEFAULT_SETUP: CreateRoomInput = {
   judgeSeconds: DEFAULT_SETTINGS.judgeSeconds,
   impostors: DEFAULT_SETTINGS.impostors,
   themeMode: DEFAULT_SETTINGS.themeMode,
-  offGostos: [],
+  offTastes: [],
   offThemes: [],
   ...DEFAULT_RULES,
 };
@@ -40,10 +40,10 @@ export const DEFAULT_SETUP: CreateRoomInput = {
 const oneOf = <T>(value: unknown, options: readonly T[], fallback: T): T =>
   options.includes(value as T) ? (value as T) : fallback;
 
-/** What was switched off, as saved: gostos keep their order and one stays on; themes are ids. */
-export function cleanOff(gostos: unknown, themes: unknown) {
-  const g = Array.isArray(gostos) ? gostos.filter(isGosto) : [];
-  const offGostos = GOSTO_KEYS.filter((k) => g.includes(k));
+/** What was switched off, as saved: tastes keep their order and one stays on; themes are ids. */
+export function cleanOff(tastes: unknown, themes: unknown) {
+  const g = Array.isArray(tastes) ? tastes.filter(isTaste) : [];
+  const offTastes = TASTE_KEYS.filter((k) => g.includes(k));
   const offThemes = Array.isArray(themes)
     ? [
         ...new Set(
@@ -55,7 +55,7 @@ export function cleanOff(gostos: unknown, themes: unknown) {
       ].slice(0, OFF_THEMES_MAX)
     : [];
   return {
-    offGostos: offGostos.length === GOSTO_KEYS.length ? [] : offGostos,
+    offTastes: offTastes.length === TASTE_KEYS.length ? [] : offTastes,
     offThemes,
   };
 }
@@ -100,8 +100,8 @@ export function loadSetup(): CreateRoomInput {
     judgeSeconds: seconds(saved.judgeSeconds, d.judgeSeconds),
     impostors: oneOf(saved.impostors, [1, 2, 3], null),
     themeMode: oneOf(saved.themeMode, ["vote", "host"], d.themeMode),
-    // saved as what is switched off, so a gosto or theme added later starts on
-    ...cleanOff(saved.offGostos, saved.offThemes),
+    // saved as what is switched off, so a taste or theme added later starts on
+    ...cleanOff(saved.offTastes, saved.offThemes),
     ...cleanRules(saved),
   };
 }

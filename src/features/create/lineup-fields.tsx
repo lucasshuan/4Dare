@@ -235,7 +235,7 @@ export function MissionCountLine({ room }: { room: MissionRules }) {
   const t = useTranslations("home.createRoom.lineup");
   const count = useLineupCount({
     game: "lineup",
-    offGostos: [],
+    offTastes: [],
     heavy: room.heavy,
     offMissions: room.offMissions,
   });
