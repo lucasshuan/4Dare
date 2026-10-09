@@ -226,19 +226,36 @@ export type GameView = GameTotals &
 /** A curiosity with its people named and its character pictured. */
 export type FactView =
   | (Omit<Extract<Fact, { kind: "partner" }>, "id"> & { person: PersonRef })
-  | (Omit<Extract<Fact, { kind: "hardest" }>, "to"> & {
+  | (Omit<Extract<Fact, { kind: "rival" }>, "id"> & { person: PersonRef })
+  | (Omit<Extract<Fact, { kind: "hardest" }>, "to" | "characterId"> & {
       to: PersonRef | null;
+      picture: FactPicture | null;
     })
   | (Omit<Extract<Fact, { kind: "fastest" }>, "characterId"> & {
-      imageUrl: string | null;
-      origin: string | null;
+      picture: FactPicture | null;
     })
   | Extract<
       Fact,
       {
-        kind: "theme" | "escape" | "bullseye" | "bargain" | "splurge";
+        kind:
+          | "winStreak"
+          | "favoriteGame"
+          | "sharpEye"
+          | "theme"
+          | "escape"
+          | "bullseye"
+          | "firstVote"
+          | "bargain"
+          | "splurge"
+          | "crowd";
       }
     >;
+
+/** A fact's character, pictured. */
+export interface FactPicture {
+  url: string;
+  origin: string | null;
+}
 
 /** A picture someone sent for a character, as their profile lists it. */
 export interface ContributedPicture {

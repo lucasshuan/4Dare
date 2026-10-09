@@ -9,6 +9,7 @@ import {
   tierOf,
 } from "@/game/profile/badges";
 import {
+  FACTS_SHOWN,
   factsOf,
   impostorNumbers,
   lineupNumbers,
@@ -242,12 +243,13 @@ export async function profileView(
   ]);
 
   const activity = hidden.activity ? [] : history;
-  const facts = factsOf(activity);
+  // the browser adds the streak and keeps the most telling FACTS_SHOWN
+  const facts = factsOf(activity).slice(0, FACTS_SHOWN);
   const named = new Map(
     (
       await backend.profiles.byIds(
         facts.flatMap((f) =>
-          f.kind === "partner"
+          f.kind === "partner" || f.kind === "rival"
             ? [f.id]
             : f.kind === "hardest" && f.to
               ? [f.to]
@@ -258,25 +260,37 @@ export async function profileView(
   );
   const factCharacters = await charactersFor(
     facts.flatMap((f) => {
-      const key = f.kind === "fastest" ? pickKey(f.characterId) : null;
+      const key =
+        f.kind === "fastest" || f.kind === "hardest"
+          ? pickKey(f.characterId)
+          : null;
       return key ? [key] : [];
     }),
     lang,
   );
+  const pictureOf = (characterId: string | null) => {
+    const c = factCharacters.get(pickKey(characterId));
+    return c?.imageUrl ? { url: c.imageUrl, origin: c.origin } : null;
+  };
   const factViews = facts.flatMap((f): FactView[] => {
-    if (f.kind === "partner") {
+    if (f.kind === "partner" || f.kind === "rival") {
       const { id, ...rest } = f;
       const who = named.get(id);
       return who ? [{ ...rest, person: who }] : [];
     }
-    if (f.kind === "hardest")
-      return [{ ...f, to: f.to ? (named.get(f.to) ?? null) : null }];
+    if (f.kind === "hardest") {
+      const { characterId, ...rest } = f;
+      return [
+        {
+          ...rest,
+          to: f.to ? (named.get(f.to) ?? null) : null,
+          picture: pictureOf(characterId),
+        },
+      ];
+    }
     if (f.kind === "fastest") {
       const { characterId, ...rest } = f;
-      const c = factCharacters.get(pickKey(characterId));
-      return [
-        { ...rest, imageUrl: c?.imageUrl ?? null, origin: c?.origin ?? null },
-      ];
+      return [{ ...rest, picture: pictureOf(characterId) }];
     }
     return [f];
   });

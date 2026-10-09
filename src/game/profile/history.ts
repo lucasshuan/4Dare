@@ -1,6 +1,7 @@
 // A player's finished matches as their profile reads them (player_matches in
 // migration 0030), and what the profile makes of them: each game's numbers
 // and the curiosities. Every game reads its own part of a match.
+import type { GameKey } from "../games";
 import type { PlayerResult } from "../record";
 import type { Theme } from "../types";
 
@@ -185,8 +186,8 @@ export function lineupNumbers(matches: readonly PlayedMatch[]) {
   };
 }
 
-/** Something a profile tells about its player; the browser words it. */
-export type Fact =
+/** What a fact tells, before it is weighed. */
+type FactBody =
   | {
       kind: "partner";
       game: null;
@@ -195,6 +196,25 @@ export type Fact =
       together: number;
       /** Matches where this player finished ahead of them. */
       ahead: number;
+    }
+  | {
+      kind: "rival";
+      game: null;
+      id: string;
+      together: number;
+      /** Matches where they finished ahead of this player. */
+      behind: number;
+    }
+  | {
+      kind: "winStreak";
+      game: null;
+      /** Matches won in a row, any game. */
+      wins: number;
+    }
+  | {
+      kind: "favoriteGame";
+      game: GameKey;
+      matches: number;
     }
   | {
       kind: "fastest";
@@ -208,10 +228,18 @@ export type Fact =
   | {
       kind: "hardest";
       game: "who-am-i";
+      characterId: string | null;
       characterName: string;
       questions: number;
       /** Who got the card: an account's id, or null for a guest. */
       to: string | null;
+    }
+  | {
+      kind: "sharpEye";
+      game: "who-am-i";
+      discovered: number;
+      /** Matches played to the end. */
+      tried: number;
     }
   | {
       kind: "theme";
@@ -234,6 +262,12 @@ export type Fact =
       guess: string;
     }
   | {
+      kind: "firstVote";
+      game: "impostor";
+      /** Matches where their first vote sent an impostor out. */
+      count: number;
+    }
+  | {
       kind: "bargain";
       game: "lineup";
       /** The cheapest board that won a round (the latest of the cheapest). */
@@ -245,9 +279,24 @@ export type Fact =
       game: "lineup";
       /** The most paid for one character. */
       price: number;
+    }
+  | {
+      kind: "crowd";
+      game: "lineup";
+      /** The crowd's prizes won. */
+      count: number;
     };
 
-/** Matches together before someone is the usual partner. */
+/** Something a profile tells about its player; the browser words it. */
+export type Fact = FactBody & {
+  /** How telling it is for this player, 0–1; the profile shows the highest first. */
+  score: number;
+};
+
+/** Facts a profile shows at most, the most telling ones. */
+export const FACTS_SHOWN = 6;
+
+/** Matches together before someone is the usual partner (or the rival). */
 const PARTNER_MATCHES = 3;
 /** Discoveries before one of them is worth calling the fastest. */
 const FASTEST_AMONG = 2;
@@ -255,33 +304,95 @@ const FASTEST_AMONG = 2;
 const HARD_QUESTIONS = 5;
 /** Matches on a theme before it is the favourite. */
 const THEME_MATCHES = 3;
+/** Wins in a row worth telling. */
+const WIN_STREAK = 3;
+/** Matches in a game before it is the favourite one. */
+const FAVORITE_GAME_MATCHES = 5;
+/** Cards tried, and the share discovered, before the player has a sharp eye. */
+const SHARP_EYE_TRIED = 5;
+const SHARP_EYE_RATE = 0.6;
+
+const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
+
+/** How telling the longest streak of days is (the browser counts it, in the reader's days). */
+export const streakScore = (days: number) => clamp01(days / 14);
 
 /**
  * The curiosities, each only when it says something (one discovery is not
- * the fastest, a card nobody asked about is not hard): the account played
- * with most; "Who am I?"'s fastest
- * discovery, the card picked that held out longest and the favourite theme;
- * the Impostor's cleanest escape and latest last-chance hit.
+ * the fastest, a card nobody asked about is not hard), most telling first.
+ * A fact's score is how remarkable it is (a discovery on the first jogada
+ * beats one on the fourth) times how much the player plays its game, so
+ * someone who mostly plays the Impostor sees its facts first.
  */
 export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
   const facts: Fact[] = [];
+  const played = new Map<GameKey, number>();
+  for (const m of matches) played.set(m.game, (played.get(m.game) ?? 0) + 1);
+  const weight = (game: GameKey | null) =>
+    game === null
+      ? 1
+      : 0.5 + (0.5 * (played.get(game) ?? 0)) / Math.max(1, matches.length);
+  const add = (body: FactBody, telling: number) =>
+    facts.push({ ...body, score: clamp01(telling) * weight(body.game) });
 
-  const mates = new Map<string, { together: number; ahead: number }>();
+  const mates = new Map<
+    string,
+    { together: number; ahead: number; behind: number }
+  >();
   for (const m of matches) {
     for (const o of m.others) {
       if (o.guest) continue;
-      const mate = mates.get(o.id) ?? { together: 0, ahead: 0 };
+      const mate = mates.get(o.id) ?? { together: 0, ahead: 0, behind: 0 };
       mate.together += 1;
       if (m.place !== null && (o.place === null || m.place < o.place))
         mate.ahead += 1;
+      if (o.place !== null && (m.place === null || o.place < m.place))
+        mate.behind += 1;
       mates.set(o.id, mate);
     }
   }
   const partner = [...mates].sort(
     (a, b) => b[1].together - a[1].together || a[0].localeCompare(b[0]),
   )[0];
-  if (partner && partner[1].together >= PARTNER_MATCHES)
-    facts.push({ kind: "partner", game: null, id: partner[0], ...partner[1] });
+  if (partner && partner[1].together >= PARTNER_MATCHES) {
+    const [id, { together, ahead }] = partner;
+    add(
+      { kind: "partner", game: null, id, together, ahead },
+      together / matches.length,
+    );
+  }
+  // the one who beats them most, when it is more often than they win
+  const rival = [...mates]
+    .filter(
+      ([id, x]) =>
+        id !== partner?.[0] &&
+        x.together >= PARTNER_MATCHES &&
+        x.behind > x.ahead,
+    )
+    .sort((a, b) => b[1].behind - a[1].behind || a[0].localeCompare(b[0]))[0];
+  if (rival) {
+    const [id, { together, behind }] = rival;
+    add(
+      { kind: "rival", game: null, id, together, behind },
+      0.4 + (0.5 * behind) / together,
+    );
+  }
+
+  let run = 0;
+  let wins = 0;
+  for (const m of matches) {
+    run = m.place === 1 ? run + 1 : 0;
+    wins = Math.max(wins, run);
+  }
+  if (wins >= WIN_STREAK)
+    add({ kind: "winStreak", game: null, wins }, wins / 8);
+
+  const favorite = [...played].sort((a, b) => b[1] - a[1])[0];
+  if (played.size >= 2 && favorite && favorite[1] >= FAVORITE_GAME_MATCHES)
+    add(
+      { kind: "favoriteGame", game: favorite[0], matches: favorite[1] },
+      0.3 + (0.4 * favorite[1]) / matches.length,
+    );
 
   const parts = matches.flatMap((m) =>
     m.game === "who-am-i" && m.details ? [{ m, p: m.details }] : [],
@@ -295,15 +406,23 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
       (a.p.discoveredAt ?? 0) - (b.p.discoveredAt ?? 0) ||
       (a.m.timeMs ?? Infinity) - (b.m.timeMs ?? Infinity),
   )[0];
-  if (fastest && discovered.length >= FASTEST_AMONG)
-    facts.push({
-      kind: "fastest",
-      game: "who-am-i",
-      characterId: fastest.p.characterId,
-      characterName: fastest.p.characterName as string,
-      at: fastest.p.discoveredAt as number,
-      timeMs: fastest.m.timeMs,
-    });
+  if (fastest && discovered.length >= FASTEST_AMONG) {
+    const at = fastest.p.discoveredAt as number;
+    const avg =
+      discovered.reduce((sum, { p }) => sum + (p.discoveredAt ?? 0), 0) /
+      discovered.length;
+    add(
+      {
+        kind: "fastest",
+        game: "who-am-i",
+        characterId: fastest.p.characterId,
+        characterName: fastest.p.characterName as string,
+        at,
+        timeMs: fastest.m.timeMs,
+      },
+      at === 1 ? 1 : Math.max(0.2, 1 - at / avg),
+    );
+  }
 
   const hardest = parts
     .flatMap(({ m, p }) =>
@@ -317,14 +436,30 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
     .sort((a, b) => b.gave.questions - a.gave.questions)[0];
   if (hardest && hardest.gave.questions >= HARD_QUESTIONS) {
     const to = hardest.m.others.find((o) => o.id === hardest.gave.to);
-    facts.push({
-      kind: "hardest",
-      game: "who-am-i",
-      characterName: hardest.gave.characterName as string,
-      questions: hardest.gave.questions,
-      to: to && !to.guest ? to.id : null,
-    });
+    add(
+      {
+        kind: "hardest",
+        game: "who-am-i",
+        characterId: hardest.gave.characterId,
+        characterName: hardest.gave.characterName as string,
+        questions: hardest.gave.questions,
+        to: to && !to.guest ? to.id : null,
+      },
+      hardest.gave.questions / 15,
+    );
   }
+
+  const eye = whoAmINumbers(matches);
+  const tried = parts.filter(({ p }) => p.result !== "left").length;
+  if (
+    tried >= SHARP_EYE_TRIED &&
+    eye.discoverRate !== null &&
+    eye.discoverRate >= SHARP_EYE_RATE
+  )
+    add(
+      { kind: "sharpEye", game: "who-am-i", discovered: eye.discovered, tried },
+      (eye.discoverRate - 0.5) * 2,
+    );
 
   const themes = new Map<string, { theme: Theme; count: number }>();
   for (const { p } of parts) {
@@ -335,7 +470,10 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
   }
   const theme = [...themes.values()].sort((a, b) => b.count - a.count)[0];
   if (theme && theme.count >= THEME_MATCHES)
-    facts.push({ kind: "theme", game: "who-am-i", ...theme });
+    add(
+      { kind: "theme", game: "who-am-i", ...theme },
+      (theme.count / parts.length) * Math.min(1, theme.count / 5),
+    );
 
   // newest first, so a tie goes to the latest
   const imps = impostorParts(matches);
@@ -346,19 +484,27 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
       null,
     );
   if (cleanest)
-    facts.push({
-      kind: "escape",
-      game: "impostor",
-      characterName: cleanest.characterName as string,
-      votes: cleanest.votesTaken,
-    });
+    add(
+      {
+        kind: "escape",
+        game: "impostor",
+        characterName: cleanest.characterName as string,
+        votes: cleanest.votesTaken,
+      },
+      0.9 / (cleanest.votesTaken + 1),
+    );
   const hit = imps.find((p) => p.guessHit && p.guess);
   if (hit)
-    facts.push({
-      kind: "bullseye",
-      game: "impostor",
-      guess: hit.guess as string,
-    });
+    add(
+      { kind: "bullseye", game: "impostor", guess: hit.guess as string },
+      0.85,
+    );
+  const { firstVote } = impostorNumbers(matches);
+  if (firstVote >= 2)
+    add(
+      { kind: "firstVote", game: "impostor", count: firstVote },
+      firstVote / 5,
+    );
 
   // newest first, so a tie goes to the latest
   const lus = lineupRounds(matches);
@@ -369,15 +515,24 @@ export function factsOf(matches: readonly PlayedMatch[]): Fact[] {
       null,
     );
   if (bargain)
-    facts.push({
-      kind: "bargain",
-      game: "lineup",
-      spent: bargain.spent,
-      votes: bargain.votes + (bargain.tieVotes ?? 0),
-    });
+    add(
+      {
+        kind: "bargain",
+        game: "lineup",
+        spent: bargain.spent,
+        votes: bargain.votes + (bargain.tieVotes ?? 0),
+      },
+      0.4 + (0.6 * (BARGAIN_COINS - bargain.spent)) / BARGAIN_COINS,
+    );
   const splurge = Math.max(0, ...lus.map((r) => r.topPrice));
   if (splurge >= 5)
-    facts.push({ kind: "splurge", game: "lineup", price: splurge });
+    add(
+      { kind: "splurge", game: "lineup", price: splurge },
+      splurge / (ALL_IN_COINS * 1.5),
+    );
+  const crowd = lus.filter((r) => r.crowd).length;
+  if (crowd >= 2)
+    add({ kind: "crowd", game: "lineup", count: crowd }, crowd / 5);
 
-  return facts;
+  return facts.sort((a, b) => b.score - a.score);
 }

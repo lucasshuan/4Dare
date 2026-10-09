@@ -168,6 +168,7 @@ describe("profiles", () => {
         person: { id: BIA, handle: "bia", name: "Bia", avatar },
         together: 3,
         ahead: 0,
+        score: 1,
       },
     ]);
   });
