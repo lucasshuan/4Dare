@@ -77,10 +77,12 @@ function GameCard({ game, delay }: { game: GameKey; delay: number }) {
       }}
       className={CARD}
     >
-      {/* hovering (or focusing) a tile raises its name; phones keep a small caption on */}
+      {/* the tiles rest dimmed; hovering (or focusing) one lights it and
+          raises its name. Phones have no hover: their tiles stay lit, with a
+          small caption on */}
       <Link
         href={GAME_PATHS[game]}
-        className="group/tile relative block aspect-square overflow-hidden bg-surface-sunken outline-offset-[-3px]! [container-type:inline-size]"
+        className="group/tile relative block aspect-square overflow-hidden bg-surface-sunken outline-offset-[-3px]! transition-[filter] duration-500 ease-soft [container-type:inline-size] sm:brightness-42 sm:saturate-35 sm:focus-visible:brightness-100 sm:focus-visible:saturate-100 sm:hover:brightness-100 sm:hover:saturate-100"
       >
         <Art />
         <div className="absolute inset-x-0 bottom-0 z-[6] flex flex-col gap-0.5 bg-[linear-gradient(to_top,rgb(12_14_22/0.82),rgb(12_14_22/0))] px-3 pt-[30px] pb-[11px] text-white sm:top-0 sm:justify-end sm:gap-3.5 sm:bg-[linear-gradient(to_top,rgb(12_14_22/0.9),rgb(12_14_22/0.62)_34%,rgb(12_14_22/0)_62%)] sm:p-6 sm:opacity-0 sm:transition-opacity sm:duration-350 sm:ease-soft sm:group-hover/tile:opacity-100 sm:group-focus-visible/tile:opacity-100 [&>*]:transition-transform [&>*]:duration-450 [&>*]:ease-soft sm:[&>*]:translate-y-3 sm:group-hover/tile:[&>*]:translate-y-0 sm:group-focus-visible/tile:[&>*]:translate-y-0">
