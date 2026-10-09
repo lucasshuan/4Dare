@@ -44,7 +44,8 @@ export function ProfileModal({ handle }: { handle: string }) {
           >
             <X className="size-5" strokeWidth={1.75} />
           </Dialog.Close>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {/* no scrollbar: its gutter left a strip of the modal beside the cover */}
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <ProfileLoader handle={handle} mode="modal" />
           </div>
         </Dialog.Popup>

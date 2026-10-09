@@ -95,7 +95,7 @@ export function Showcase({ items }: { items: ShowcaseView[] }) {
     <div className="flex flex-col items-center gap-2">
       <div
         ref={track}
-        className="flex w-full snap-x snap-mandatory gap-6 overflow-x-auto px-[calc(50%-70px)] py-3.5[scrollbar-width:none] sm:snap-none sm:justify-end sm:gap-[18px] sm:overflow-visible sm:px-1 [&::-webkit-scrollbar]:hidden"
+        className="flex w-full snap-x snap-mandatory gap-6 overflow-x-auto px-[calc(50%-70px)] py-3.5 [scrollbar-width:none] sm:snap-none sm:justify-end sm:gap-[18px] sm:overflow-visible sm:px-1 [&::-webkit-scrollbar]:hidden"
       >
         {items.map((item, i) => (
           <div
