@@ -42,6 +42,7 @@ import { ActivityPanel, hours } from "./activity";
 import { BadgesPanel } from "./badges";
 import { bannerStyle } from "./banners";
 import { ContributionsPanel } from "./contributions";
+import { FunFacts } from "./fun-facts";
 import { streaks } from "./garden-days";
 import { LevelAvatar } from "./level";
 import { MuralPanel } from "./mural";
@@ -270,10 +271,7 @@ function ProfileShow({
   const wide = useMedia("(min-width: 640px)");
   // the time the page was read: the garden and the ages count from it
   const [now] = useState(() => Date.now());
-  const streak = useMemo(
-    () => streaks(view.plays, now).current,
-    [view.plays, now],
-  );
+  const run = useMemo(() => streaks(view.plays, now), [view.plays, now]);
   const winRate = view.matches
     ? Math.round((view.wins / view.matches) * 100)
     : 0;
@@ -416,7 +414,7 @@ function ProfileShow({
                             className="size-4 text-apricot"
                             strokeWidth={2}
                           />
-                          {streak}
+                          {run.current}
                         </>
                       }
                       label={t("kpis.streak")}
@@ -473,6 +471,15 @@ function ProfileShow({
                 className="mx-(--pad) mt-[18px] sm:hidden"
               />
             ) : null}
+
+            {view.hidden.activity ? null : (
+              <FunFacts
+                facts={view.facts}
+                owner={view.name}
+                streak={run}
+                className="mt-[22px]"
+              />
+            )}
 
             {tabs.length ? (
               <Tabs.Root

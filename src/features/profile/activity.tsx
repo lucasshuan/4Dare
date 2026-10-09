@@ -3,34 +3,25 @@
 import {
   ChevronRight,
   CircleHelp,
-  Coins,
   Flame,
   Gamepad2,
   Medal,
-  Palette,
   Search,
-  ShieldCheck,
   Sparkles,
   Sprout,
-  Tag,
-  Target,
   Trophy,
   VenetianMask,
   Vote,
-  Zap,
 } from "lucide-react";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
-import { Avatar } from "@/components/ui/avatar";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import type { GameKey } from "@/game/games";
-import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
-import type { FactView, GameView, ProfileView } from "@/server/contract";
+import type { GameView, ProfileView } from "@/server/contract";
 import { Garden } from "./garden";
 import { streaks } from "./garden-days";
-import { ProfileLink } from "./profile-link";
 
 /** A box on the profile's canvas, with a titled head. */
 export function Card({
@@ -75,8 +66,8 @@ export const hours = (ms: number) => {
 };
 
 /**
- * The garden, each game's card and the curiosities, for every game or one:
- * picking a game shows only its matches, its numbers and its curiosities.
+ * The garden and each game's card, for every game or one:
+ * picking a game shows only its matches and its numbers.
  */
 export function ActivityPanel({
   view,
@@ -160,12 +151,6 @@ export function ActivityPanel({
           ))}
         </div>
       )}
-
-      <Facts
-        facts={view.facts.filter((f) => (game ? f.game === game : true))}
-        owner={view.name}
-        streak={game ? null : run}
-      />
     </div>
   );
 }
@@ -371,181 +356,5 @@ function Box({
         <span className="text-[12.5px] text-ink-muted">{note}</span>
       ) : null}
     </div>
-  );
-}
-
-/** The curiosities: the facts the server found, and the longest streak. */
-function Facts({
-  facts,
-  owner,
-  streak,
-}: {
-  facts: FactView[];
-  owner: string;
-  streak: ReturnType<typeof streaks> | null;
-}) {
-  const t = useTranslations("profile.facts");
-  const lang = useLocale() as Lang;
-  const format = useFormatter();
-  const gameName = useGameName();
-  const items: {
-    key: string;
-    icon: ReactNode;
-    tint: string;
-    title: ReactNode;
-    text: ReactNode;
-    game: GameKey | null;
-  }[] = [];
-  const minutes = (ms: number) => {
-    const s = Math.round(ms / 1000);
-    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-  };
-  for (const f of facts) {
-    if (f.kind === "partner")
-      items.push({
-        key: "partner",
-        icon: <Avatar avatar={f.person.avatar} size={30} />,
-        tint: "",
-        game: null,
-        title: (
-          <span>
-            {t.rich("partner", {
-              name: f.person.name,
-              link: (chunks) => (
-                <ProfileLink
-                  handle={f.person.handle}
-                  className="underline-offset-2 hover:underline"
-                >
-                  {chunks}
-                </ProfileLink>
-              ),
-            })}
-          </span>
-        ),
-        text: t("partnerText", { together: f.together, ahead: f.ahead, owner }),
-      });
-    else if (f.kind === "fastest")
-      items.push({
-        key: "fastest",
-        icon: <Zap />,
-        tint: "bg-butter-soft",
-        game: f.game,
-        title: t("fastest"),
-        text:
-          f.timeMs === null
-            ? t("fastestText", { name: f.characterName, at: f.at })
-            : t("fastestTime", {
-                name: f.characterName,
-                at: f.at,
-                time: minutes(f.timeMs),
-              }),
-      });
-    else if (f.kind === "hardest")
-      items.push({
-        key: "hardest",
-        icon: <ShieldCheck />,
-        tint: "bg-(--accent-soft)",
-        game: f.game,
-        title: t("hardest"),
-        text: t("hardestText", {
-          name: f.characterName,
-          to: f.to?.name ?? t("aGuest"),
-          questions: f.questions,
-        }),
-      });
-    else if (f.kind === "theme")
-      items.push({
-        key: "theme",
-        icon: <Palette />,
-        tint: "bg-yes-soft",
-        game: f.game,
-        title: t("theme"),
-        text: t("themeText", {
-          theme: f.theme[lang] || f.theme.en,
-          n: f.count,
-        }),
-      });
-    else if (f.kind === "escape")
-      items.push({
-        key: "escape",
-        icon: <VenetianMask />,
-        tint: "bg-no-soft",
-        game: f.game,
-        title: t("escape"),
-        text: t("escapeText", { name: f.characterName, votes: f.votes }),
-      });
-    else if (f.kind === "bargain")
-      items.push({
-        key: "bargain",
-        icon: <Tag />,
-        tint: "bg-yes-soft",
-        game: f.game,
-        title: t("bargain"),
-        text: t("bargainText", { coins: f.spent, votes: f.votes }),
-      });
-    else if (f.kind === "splurge")
-      items.push({
-        key: "splurge",
-        icon: <Coins />,
-        tint: "bg-butter-soft",
-        game: f.game,
-        title: t("splurge"),
-        text: t("splurgeText", { coins: f.price }),
-      });
-    else
-      items.push({
-        key: "bullseye",
-        icon: <Target />,
-        tint: "bg-sky-soft",
-        game: f.game,
-        title: t("bullseye"),
-        text: t("bullseyeText", { name: f.guess }),
-      });
-  }
-  if (streak && streak.best >= 2 && streak.bestEnd !== null)
-    items.splice(facts[0]?.kind === "partner" ? 1 : 0, 0, {
-      key: "streak",
-      icon: <Flame />,
-      tint: "bg-apricot-soft",
-      game: null,
-      title: t("streak"),
-      text: t("streakText", {
-        n: streak.best,
-        month: format.dateTime(streak.bestEnd, {
-          month: "long",
-          year: "numeric",
-        }),
-      }),
-    });
-  if (items.length === 0) return null;
-  return (
-    <Card title={t("title")} icon={<Sparkles strokeWidth={1.75} />}>
-      <ul className="flex flex-col gap-3">
-        {items.map((it) => (
-          <li key={it.key} className="flex items-center gap-3">
-            <span
-              className={cn(
-                "flex size-9 shrink-0 items-center justify-center rounded-pill [&_svg]:size-[18px] [&_svg]:stroke-[1.75]",
-                it.tint,
-              )}
-            >
-              {it.icon}
-            </span>
-            <div className="flex min-w-0 flex-col">
-              <b className="flex flex-wrap items-center gap-2 font-semibold text-[15px]">
-                {it.title}
-                {it.game ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-pill bg-sunken py-0.5 pr-2 pl-0.5 font-semibold text-[11.5px] text-ink-muted">
-                    <GameThumb game={it.game} size="tiny" />
-                    {gameName(it.game)}
-                  </span>
-                ) : null}
-              </b>
-              <span className="text-[13.5px] text-ink-muted">{it.text}</span>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </Card>
   );
 }
