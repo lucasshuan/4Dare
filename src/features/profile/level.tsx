@@ -12,18 +12,25 @@ const GAP = 2;
 
 /** What a ring or a tag sits on: its gap and outline take that colour. */
 type On = "canvas" | "surface" | "sunken";
-const GROUND: Record<On, { bg: string; color: string; outline: string }> = {
+const GROUND: Record<
+  On,
+  { bg: string; color: string; outline: string; track: string }
+> = {
   canvas: {
+    track: "stroke-sunken",
     bg: "bg-canvas",
     color: "var(--canvas)",
     outline: "shadow-[0_0_0_2px_var(--canvas)]",
   },
   surface: {
+    track: "stroke-sunken",
     bg: "bg-surface",
     color: "var(--surface)",
     outline: "shadow-[0_0_0_2px_var(--surface)]",
   },
   sunken: {
+    // the sunken track would vanish on a sunken ground
+    track: "stroke-line",
     bg: "bg-sunken",
     color: "var(--surface-sunken)",
     outline: "shadow-[0_0_0_2px_var(--surface-sunken)]",
@@ -88,7 +95,7 @@ export function LevelAvatar({
           style={ring}
           fill="none"
           strokeWidth={stroke}
-          className="stroke-sunken"
+          className={GROUND[on].track}
         />
         <circle
           cx="50%"

@@ -1,9 +1,11 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
+import { useQuery } from "@tanstack/react-query";
 import {
   CircleQuestionMark,
   Clock,
+  GalleryVerticalEnd,
   House,
   LayoutGrid,
   LogOut,
@@ -15,7 +17,7 @@ import {
 } from "lucide-react";
 import { m } from "motion/react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   type ComponentType,
   type KeyboardEvent,
@@ -33,7 +35,7 @@ import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { useSignIn } from "@/features/home/use-sign-in";
 import { accentStyle } from "@/features/profile/cover-paint";
-import { LevelAvatar, XpBar } from "@/features/profile/level";
+import { LevelAvatar } from "@/features/profile/level";
 import { profilePath } from "@/features/profile/profile-link";
 import { usePlayerCard } from "@/features/profile/use-profile";
 import { type GameKey, OPEN_GAMES } from "@/game/games";
@@ -45,6 +47,7 @@ import type { DeferredProps } from "@/lib/hooks/use-deferred";
 import { ease } from "@/lib/motion";
 import { meNamed, useDisplayName } from "@/lib/names";
 import {
+  CHARACTERS,
   GAME_PATHS,
   HOW_TO_PLAY,
   NEW_ROOM,
@@ -52,6 +55,7 @@ import {
   SETTINGS,
 } from "@/lib/routes";
 import { signOut } from "@/server/actions";
+import type { MenuCounts } from "@/server/menu";
 import { Bars, burgerClass } from "./menu-button";
 
 type ItemKey =
@@ -62,6 +66,7 @@ type ItemKey =
   | "badges"
   | "matches"
   | "settings"
+  | "characters"
   | "howTo";
 
 interface Item {
@@ -105,6 +110,16 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
   const gameName = useGameName();
   const { me } = useMe();
   const { rooms } = usePublicRooms();
+  const format = useFormatter();
+  const { data: counts } = useQuery({
+    queryKey: ["menu-counts"],
+    queryFn: async (): Promise<MenuCounts> => {
+      const res = await fetch("/api/menu");
+      if (!res.ok) throw new Error(`menu: ${res.status}`);
+      return (await res.json()) as MenuCounts;
+    },
+    staleTime: 60_000,
+  });
   const path = usePathname();
   const tab = useSearchParams().get("tab");
   const [q, setQ] = useState("");
@@ -123,7 +138,8 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           : "profile"
       : path === "/"
         ? "home"
-        : path;
+        : // a page under a section marks the section (a character's sheet)
+          ([CHARACTERS].find((root) => path.startsWith(`${root}/`)) ?? path);
 
   const groups: { key: GroupKey; items: Item[]; games?: boolean }[] = [
     {
@@ -162,6 +178,18 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           key: "settings",
           href: SETTINGS,
           Icon: SlidersHorizontal,
+          newUntil: "2026-11-08",
+        },
+      ],
+    },
+    {
+      key: "library",
+      items: [
+        {
+          key: "characters",
+          href: CHARACTERS,
+          Icon: GalleryVerticalEnd,
+          meta: counts ? format.number(counts.characters) : undefined,
           newUntil: "2026-11-08",
         },
       ],
@@ -251,13 +279,13 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-300 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
         <Dialog.Popup
           initialFocus={searchRef}
-          className="fixed inset-y-0 left-0 z-50 flex w-[min(372px,88vw)] flex-col bg-surface text-ink shadow-pop outline-none transition-transform duration-[420ms] ease-soft data-ending-style:-translate-x-[104%] data-starting-style:-translate-x-[104%] data-ending-style:duration-[260ms] data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]"
+          className="group/menu fixed inset-y-0 left-0 z-50 flex w-[min(372px,88vw)] flex-col bg-surface text-ink shadow-pop outline-none transition-transform duration-[420ms] ease-soft data-ending-style:-translate-x-[104%] data-starting-style:-translate-x-[104%] data-ending-style:duration-[260ms] data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]"
         >
           <Dialog.Title className="sr-only">{t("menu")}</Dialog.Title>
-          {/* the page's three bars, in the same spot, folded into an X */}
+          {/* the page's three bars, in the same spot, folding into an X as the menu slides in */}
           <div className="flex h-[72px] shrink-0 items-center gap-2 px-4 pt-4 sm:h-[88px] sm:px-8 sm:pt-6 sm:short:h-[72px] sm:short:pt-4">
             <Dialog.Close aria-label={t("close")} className={burgerClass}>
-              <Bars open />
+              <Bars inMenu />
             </Dialog.Close>
             <Link
               href="/"
@@ -531,7 +559,6 @@ function MeCard({ onPick }: { onPick: () => void }) {
               {t("me", { handle: me.handle, into, need })}
             </small>
           ) : null}
-          <XpBar xp={xp} numbers={false} className="mt-1" />
         </span>
       </Link>
       <SignOut />
