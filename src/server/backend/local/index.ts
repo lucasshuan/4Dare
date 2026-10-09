@@ -5,6 +5,7 @@ import { localAuth } from "./auth";
 import { localBadges } from "./badges";
 import { localCharacters } from "./characters";
 import { localChat } from "./chat";
+import { localCommunityStore } from "./community-store";
 import { localFiles } from "./files";
 import { localImages } from "./images";
 import { localImpostor } from "./impostor";
@@ -49,5 +50,6 @@ export function localBackend(): Backend {
     library: localLibraryStore(characters),
     workshop: localWorkshopStore(),
     news: localNewsStore(),
+    community: localCommunityStore(),
   };
 }

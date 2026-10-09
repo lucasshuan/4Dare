@@ -3,6 +3,7 @@
 // in request.ts.
 import type chat from "../../messages/en/chat.json";
 import type common from "../../messages/en/common.json";
+import type community from "../../messages/en/community.json";
 import type impostor from "../../messages/en/games/impostor.json";
 import type lineup from "../../messages/en/games/lineup.json";
 import type whoAmI from "../../messages/en/games/whoAmI.json";
@@ -22,6 +23,7 @@ declare module "next-intl" {
     Messages: {
       chat: typeof chat;
       common: typeof common;
+      community: typeof community;
       home: typeof home;
       howTo: typeof howTo;
       library: typeof library;

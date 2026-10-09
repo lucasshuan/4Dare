@@ -3,6 +3,8 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Activity,
+  ChartColumn,
   CircleQuestionMark,
   Clock,
   GalleryVerticalEnd,
@@ -15,6 +17,7 @@ import {
   SlidersHorizontal,
   Trophy,
   UserRound,
+  Users,
 } from "lucide-react";
 import { m } from "motion/react";
 import { useSearchParams } from "next/navigation";
@@ -49,9 +52,12 @@ import { ease } from "@/lib/motion";
 import { meNamed, useDisplayName } from "@/lib/names";
 import {
   CHARACTERS,
+  CONTRIBUTIONS,
   GAME_PATHS,
   HOW_TO_PLAY,
   NEW_ROOM,
+  PLAYERS,
+  RANKINGS,
   ROOMS,
   SETTINGS,
   WORKSHOP,
@@ -68,6 +74,9 @@ type ItemKey =
   | "badges"
   | "matches"
   | "settings"
+  | "rankings"
+  | "players"
+  | "contributions"
   | "characters"
   | "workshop"
   | "howTo";
@@ -182,6 +191,24 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           key: "settings",
           href: SETTINGS,
           Icon: SlidersHorizontal,
+          newUntil: "2026-11-08",
+        },
+      ],
+    },
+    {
+      key: "community",
+      items: [
+        {
+          key: "rankings",
+          href: RANKINGS,
+          Icon: ChartColumn,
+          newUntil: "2026-11-08",
+        },
+        { key: "players", href: PLAYERS, Icon: Users, newUntil: "2026-11-08" },
+        {
+          key: "contributions",
+          href: CONTRIBUTIONS,
+          Icon: Activity,
           newUntil: "2026-11-08",
         },
       ],

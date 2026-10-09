@@ -251,3 +251,93 @@ export interface NewsPage {
   /** Guests read; accounts react. */
   signedIn: boolean;
 }
+
+// Community ---------------------------------------------------------------
+
+export type RankingPeriod = "week" | "month" | "ever";
+
+export interface RankingRow {
+  person: PersonRef;
+  place: number;
+  xp: number;
+  matches: number;
+  wins: number;
+  level: number;
+}
+
+/** GET /api/rankings. */
+export interface RankingPage {
+  rows: RankingRow[];
+  /** The reader's own row, wherever it falls; null for a guest or without XP. */
+  me: RankingRow | null;
+  /** Who helped the library most in the last 30 days. */
+  helpers: {
+    person: PersonRef;
+    total: number;
+    pictures: number;
+    aliases: number;
+    characters: number;
+    live: number;
+  }[];
+}
+
+export type PlayersFilter = "all" | "with" | "now";
+
+/** A player on the players page, as they let the reader see them. */
+export interface PlayerTile {
+  person: PersonRef;
+  /** Null when they keep their activity from the reader. */
+  level: number | null;
+  /** Matches played with the reader. */
+  together: number;
+  /** In a room now: its game, and its code when it is public. */
+  playing: { game: GameKey; code: string | null } | null;
+}
+
+/** GET /api/players. */
+export interface PlayersPage {
+  players: PlayerTile[];
+  next: number | null;
+}
+
+export type FeedFilter =
+  | "all"
+  | "picture"
+  | "alias"
+  | "character"
+  | "suggestion";
+
+/** One line of the contributions feed. */
+export interface ContributionItem {
+  id: string;
+  kind: "picture" | "character" | "alias" | "suggestion" | "live";
+  at: number;
+  by: PersonRef;
+  character: { id: string; name: string; imageUrl: string | null } | null;
+  alias: { name: string; before: string | null; edited: boolean } | null;
+  suggestion: {
+    id: string;
+    kind: WorkshopKind;
+    title: string;
+    status: WorkshopStatus;
+  } | null;
+}
+
+/** GET /api/contributions. */
+export interface ContributionsPage {
+  items: ContributionItem[];
+  /** Pass as `?before=` for the next page; null on the last. */
+  next: number | null;
+  /** The reader's own numbers and how far the pictures badge is; null for a guest. */
+  mine: {
+    pictures: number;
+    aliases: number;
+    suggestions: number;
+    badge: {
+      id: "pictures";
+      tier: "bronze" | "silver" | "gold" | null;
+      next: number | null;
+      value: number;
+    };
+  } | null;
+}

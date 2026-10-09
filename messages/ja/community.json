@@ -1,0 +1,82 @@
+{
+  "eyebrow": "コミュニティ",
+  "rankings": {
+    "title": "ランキング",
+    "lead": "ゲーム別・期間別のXP獲得ランキングです。プロフィールで活動を非表示にしている人は含まれません。",
+    "game": "ゲーム",
+    "all": "総合",
+    "period": "期間",
+    "week": "週間",
+    "month": "月間",
+    "ever": "通算",
+    "stats": "{matches, plural, other {#試合}} · {wins, plural, other {#勝}}",
+    "level": "Lv {n}",
+    "xp": "{n} XP",
+    "empty": "この期間にXPを獲得した人はまだいません。",
+    "emptyHint": "試合をプレイして、ここに載ろう。",
+    "helpers": "ライブラリに貢献した人",
+    "helpersHint": "過去30日間。",
+    "helpersEmpty": "まだ誰もいません。キャラクターで写真かあだ名を送ってね。",
+    "helperLine": "{pictures, plural, other {写真#枚}} · {aliases, plural, other {あだ名#件}}",
+    "seeContributions": "貢献を見る",
+    "place": "{n}位"
+  },
+  "players": {
+    "title": "プレイヤー",
+    "lead": "一緒に遊ぶ相手を探そう。それぞれのプロフィールのプライバシー設定どおりに表示されます。",
+    "search": "名前または@ユーザー名",
+    "searchLabel": "プレイヤーを検索",
+    "filter": "絞り込み",
+    "all": "すべて",
+    "with": "一緒に遊んだ人",
+    "now": "プレイ中",
+    "together": "{n}回一緒にプレイ",
+    "playing": "{game}をプレイ中",
+    "join": "参加",
+    "empty": "この条件に合う人はいません。",
+    "emptyWith": "アカウントを持つ人とはまだ遊んでいません。",
+    "emptyNow": "今プレイ中の人はいません。",
+    "signIn": "アカウントでログインすると、一緒に遊んだ人が見られます。",
+    "more": "もっと見る"
+  },
+  "contributions": {
+    "title": "貢献",
+    "lead": "コミュニティがライブラリと工房に追加したものを、新しい順に表示します。",
+    "kpi": {
+      "pictures": "あなたの写真",
+      "aliases": "あなたのあだ名",
+      "suggestions": "あなたの提案"
+    },
+    "badge": "{name}、{tier}",
+    "toNext": "次のレベルまであと{n, plural, other {写真#枚}}",
+    "maxed": "実績コンプリート!",
+    "filter": "種類",
+    "all": "すべて",
+    "picture": "写真",
+    "alias": "あだ名",
+    "character": "キャラクター",
+    "suggestion": "工房",
+    "mine": "自分のみ",
+    "today": "今日",
+    "yesterday": "昨日",
+    "lines": {
+      "picture": "{name}さんが{character}の写真を送りました",
+      "character": "{name}さんが{character}を作成しました",
+      "alias": "{name}さんが{character}にあだ名「{alias}」を付けました",
+      "aliasEdit": "{name}さんが{character}の「{before}」を「{alias}」に変更しました",
+      "suggestion": {
+        "theme": "{name}さんがテーマ「{title}」を提案しました",
+        "question": "{name}さんが質問「{title}」を提案しました",
+        "mission": "{name}さんがミッション「{title}」を提案しました"
+      },
+      "live": {
+        "theme": "{name}さんのテーマ「{title}」が承認され、公開されました",
+        "question": "{name}さんの質問「{title}」が承認され、公開されました",
+        "mission": "{name}さんのミッション「{title}」が承認され、公開されました"
+      }
+    },
+    "empty": "この種類はまだありません。",
+    "emptyHint": "写真を送ったり、あだ名を付けたり、工房で何か提案してみよう。",
+    "more": "もっと見る"
+  }
+}

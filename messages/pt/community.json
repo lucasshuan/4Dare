@@ -1,0 +1,82 @@
+{
+  "eyebrow": "Comunidade",
+  "rankings": {
+    "title": "Rankings",
+    "lead": "Quem mais somou XP, por jogo e por período. Quem esconde a atividade no perfil fica de fora.",
+    "game": "Jogo",
+    "all": "Geral",
+    "period": "Período",
+    "week": "Semana",
+    "month": "Mês",
+    "ever": "Sempre",
+    "stats": "{matches, plural, one {# partida} other {# partidas}} · {wins, plural, one {# vitória} other {# vitórias}}",
+    "level": "Nv {n}",
+    "xp": "{n} XP",
+    "empty": "Ninguém somou XP nesse período ainda.",
+    "emptyHint": "Jogue uma partida e apareça aqui.",
+    "helpers": "Quem mais ajudou a biblioteca",
+    "helpersHint": "Nos últimos 30 dias.",
+    "helpersEmpty": "Ninguém ainda. Mande uma foto ou um apelido em Personagens.",
+    "helperLine": "{pictures, plural, one {# foto} other {# fotos}} · {aliases, plural, one {# apelido} other {# apelidos}}",
+    "seeContributions": "Ver contribuições",
+    "place": "{n}º lugar"
+  },
+  "players": {
+    "title": "Jogadores",
+    "lead": "Encontre gente para jogar. Cada um aparece como deixou a privacidade do perfil.",
+    "search": "Nome ou @usuário",
+    "searchLabel": "Buscar jogador",
+    "filter": "Filtro",
+    "all": "Todos",
+    "with": "Jogaram comigo",
+    "now": "Jogando agora",
+    "together": "jogaram juntos {n}×",
+    "playing": "Jogando {game}",
+    "join": "Entrar",
+    "empty": "Ninguém com esses filtros.",
+    "emptyWith": "Você ainda não jogou com ninguém que tenha conta.",
+    "emptyNow": "Ninguém jogando agora.",
+    "signIn": "Entre com uma conta para ver com quem jogou.",
+    "more": "Mais"
+  },
+  "contributions": {
+    "title": "Contribuições",
+    "lead": "Tudo o que a comunidade pôs na biblioteca e na Oficina, do mais novo ao mais antigo.",
+    "kpi": {
+      "pictures": "suas fotos",
+      "aliases": "seus apelidos",
+      "suggestions": "suas sugestões"
+    },
+    "badge": "{name}, {tier}",
+    "toNext": "{n, plural, one {Falta # foto} other {Faltam # fotos}} para o próximo nível",
+    "maxed": "Topo da conquista!",
+    "filter": "Tipo",
+    "all": "Tudo",
+    "picture": "Fotos",
+    "alias": "Apelidos",
+    "character": "Personagens",
+    "suggestion": "Oficina",
+    "mine": "Só as minhas",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "lines": {
+      "picture": "{name} mandou uma foto de {character}",
+      "character": "{name} criou {character}",
+      "alias": "{name} deu o apelido “{alias}” a {character}",
+      "aliasEdit": "{name} trocou “{before}” por “{alias}” em {character}",
+      "suggestion": {
+        "theme": "{name} sugeriu o tema “{title}”",
+        "question": "{name} sugeriu a pergunta “{title}”",
+        "mission": "{name} sugeriu a missão “{title}”"
+      },
+      "live": {
+        "theme": "{name} teve o tema “{title}” aprovado e no ar",
+        "question": "{name} teve a pergunta “{title}” aprovada e no ar",
+        "mission": "{name} teve a missão “{title}” aprovada e no ar"
+      }
+    },
+    "empty": "Nada desse tipo ainda.",
+    "emptyHint": "Mande uma foto, dê um apelido ou sugira algo na Oficina.",
+    "more": "Mais"
+  }
+}

@@ -7,6 +7,7 @@ import { supabaseAuth } from "./supabase/auth";
 import { supabaseBadges } from "./supabase/badges";
 import { supabaseCharacters } from "./supabase/characters";
 import { supabaseChat } from "./supabase/chat";
+import { supabaseCommunityStore } from "./supabase/community-store";
 import { supabaseFiles } from "./supabase/files";
 import { supabaseImages } from "./supabase/images";
 import { supabaseImpostor } from "./supabase/impostor";
@@ -46,6 +47,7 @@ export function getBackend(): Backend {
       library: supabaseLibraryStore(),
       workshop: supabaseWorkshopStore(),
       news: supabaseNewsStore(),
+      community: supabaseCommunityStore(),
     };
     return backend;
   }

@@ -44,7 +44,7 @@ Tick = done and committed.
 
 ## Menu
 
-- [ ] Burger left of logo opens drawer: Play, You, Community, Library, Help
+- [x] Burger left of logo opens drawer: Play, You, Community, Library, Help
 - [x] Drawer top: face, level, XP bar; guest sees Discord/Google sign-in
 - [x] "Go to" filter, arrow keys, Esc closes, focus back to button
 - [x] Hidden during matches
@@ -74,9 +74,9 @@ Tick = done and committed.
 
 ## Community
 
-- [ ] Rankings: one view per game and period
-- [ ] Players page: search; all, played with me, playing now
-- [ ] Contributions feed (photos, characters, aliases, suggestions), no new table
+- [x] Rankings: per game and period (week, month, ever), podium, own place, top helpers
+- [x] Players page: search; all, played with me, playing now
+- [x] Contributions feed (photos, characters, aliases, suggestions), own numbers and the pictures badge
 
 ## Badges
 

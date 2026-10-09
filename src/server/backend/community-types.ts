@@ -245,3 +245,88 @@ export interface NewsStore {
   /** A reader's reactions, by post. */
   mine(user: PlayerId): Promise<Map<string, NewsReaction[]>>;
 }
+
+/** An account's numbers in a ranking. */
+export interface RankRow {
+  userId: PlayerId;
+  xp: number;
+  matches: number;
+  wins: number;
+}
+
+export type FeedKind =
+  | "picture"
+  | "character"
+  | "alias"
+  | "suggestion"
+  | "live";
+
+/** One thing the community put into the library or the Workshop. */
+export interface FeedRow {
+  kind: FeedKind;
+  at: number;
+  userId: PlayerId;
+  /** Language-free; null for a suggestion. */
+  characterId: string | null;
+  /** The picture's, nickname's, character's or suggestion's id. */
+  ref: string;
+  detail: Record<string, unknown>;
+}
+
+export interface ContributorRow {
+  userId: PlayerId;
+  pictures: number;
+  characters: number;
+  aliases: number;
+  live: number;
+  total: number;
+}
+
+/** An account as the players page lists it. */
+export interface PlayerRow {
+  id: PlayerId;
+  handle: string;
+  name: string | null;
+  avatar: unknown;
+  privacy: unknown;
+}
+
+/** Where someone sits now: a room not closed, with its game. */
+export interface SeatNow {
+  game: string;
+  code: string;
+  public: boolean;
+}
+
+export interface CommunityStore {
+  /** The accounts with most XP in a game (null: all) since a time (null: ever). */
+  ranking(
+    game: string | null,
+    since: number | null,
+    limit: number,
+  ): Promise<RankRow[]>;
+  /** One account's place in it; null without XP there. */
+  place(
+    user: PlayerId,
+    game: string | null,
+    since: number | null,
+  ): Promise<(RankRow & { place: number }) | null>;
+  /** Newest first; `user` for one account's own (privacy aside). */
+  feed(
+    kind: Exclude<FeedKind, "live"> | null,
+    user: PlayerId | null,
+    before: number | null,
+    limit: number,
+  ): Promise<FeedRow[]>;
+  contributors(since: number | null, limit: number): Promise<ContributorRow[]>;
+  /** Accounts by name or handle (all when `q` is empty), newest first. */
+  players(q: string, offset: number, limit: number): Promise<PlayerRow[]>;
+  /** The accounts that shared a match with `user`, and how many. */
+  coPlayers(user: PlayerId): Promise<Map<PlayerId, number>>;
+  /** Everyone sitting in a room written since `since` (ms), present (not away nor gone). */
+  seated(since: number): Promise<Map<PlayerId, SeatNow>>;
+  /** What an account added: pictures everyone sees, nicknames kept, suggestions sent. */
+  mine(
+    user: PlayerId,
+  ): Promise<{ pictures: number; aliases: number; suggestions: number }>;
+}

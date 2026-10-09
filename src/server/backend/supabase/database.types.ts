@@ -1863,6 +1863,13 @@ export type Database = {
         Args: { c: Database["public"]["Tables"]["characters"]["Row"] };
         Returns: Database["public"]["Enums"]["taste"][];
       };
+      co_players: {
+        Args: { p_user: string };
+        Returns: {
+          times: number;
+          user_id: string;
+        }[];
+      };
       contribution_feed: {
         Args: {
           p_before: string;

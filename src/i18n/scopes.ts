@@ -23,6 +23,7 @@ export const PAGE_ONLY = [
   "howTo",
   "library",
   "workshop",
+  "community",
 ] as const satisfies readonly (keyof Messages)[];
 export type PageNamespace = (typeof PAGE_ONLY)[number];
 

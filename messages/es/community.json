@@ -1,0 +1,82 @@
+{
+  "eyebrow": "Comunidad",
+  "rankings": {
+    "title": "Rankings",
+    "lead": "Quién sumó más XP, por juego y por período. Quien oculta su actividad en el perfil queda fuera.",
+    "game": "Juego",
+    "all": "General",
+    "period": "Período",
+    "week": "Semana",
+    "month": "Mes",
+    "ever": "Siempre",
+    "stats": "{matches, plural, one {# partida} other {# partidas}} · {wins, plural, one {# victoria} other {# victorias}}",
+    "level": "Nv {n}",
+    "xp": "{n} XP",
+    "empty": "Nadie ha sumado XP en este período todavía.",
+    "emptyHint": "Juega una partida y aparece aquí.",
+    "helpers": "Quién más ayudó a la biblioteca",
+    "helpersHint": "En los últimos 30 días.",
+    "helpersEmpty": "Nadie todavía. Envía una foto o un apodo en Personajes.",
+    "helperLine": "{pictures, plural, one {# foto} other {# fotos}} · {aliases, plural, one {# apodo} other {# apodos}}",
+    "seeContributions": "Ver contribuciones",
+    "place": "Puesto {n}"
+  },
+  "players": {
+    "title": "Jugadores",
+    "lead": "Encuentra gente para jugar. Cada uno aparece según la privacidad de su perfil.",
+    "search": "Nombre o @usuario",
+    "searchLabel": "Buscar jugador",
+    "filter": "Filtro",
+    "all": "Todos",
+    "with": "Jugaron conmigo",
+    "now": "Jugando ahora",
+    "together": "jugaron juntos {n}×",
+    "playing": "Jugando {game}",
+    "join": "Entrar",
+    "empty": "Nadie con estos filtros.",
+    "emptyWith": "Todavía no has jugado con nadie que tenga cuenta.",
+    "emptyNow": "Nadie está jugando ahora.",
+    "signIn": "Inicia sesión con una cuenta para ver con quién jugaste.",
+    "more": "Más"
+  },
+  "contributions": {
+    "title": "Contribuciones",
+    "lead": "Todo lo que la comunidad aportó a la biblioteca y al Taller, del más nuevo al más antiguo.",
+    "kpi": {
+      "pictures": "tus fotos",
+      "aliases": "tus apodos",
+      "suggestions": "tus sugerencias"
+    },
+    "badge": "{name}, {tier}",
+    "toNext": "{n, plural, one {Falta # foto} other {Faltan # fotos}} para el próximo nivel",
+    "maxed": "¡Logro al máximo!",
+    "filter": "Tipo",
+    "all": "Todo",
+    "picture": "Fotos",
+    "alias": "Apodos",
+    "character": "Personajes",
+    "suggestion": "Taller",
+    "mine": "Solo las mías",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "lines": {
+      "picture": "{name} envió una foto de {character}",
+      "character": "{name} creó a {character}",
+      "alias": "{name} le puso a {character} el apodo “{alias}”",
+      "aliasEdit": "{name} cambió “{before}” por “{alias}” en {character}",
+      "suggestion": {
+        "theme": "{name} sugirió el tema “{title}”",
+        "question": "{name} sugirió la pregunta “{title}”",
+        "mission": "{name} sugirió la misión “{title}”"
+      },
+      "live": {
+        "theme": "{name} consiguió que el tema “{title}” fuera aprobado y publicado",
+        "question": "{name} consiguió que la pregunta “{title}” fuera aprobada y publicada",
+        "mission": "{name} consiguió que la misión “{title}” fuera aprobada y publicada"
+      }
+    },
+    "empty": "Nada de este tipo todavía.",
+    "emptyHint": "Envía una foto, pon un apodo o sugiere algo en el Taller.",
+    "more": "Más"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "eyebrow": "Community",
+  "rankings": {
+    "title": "Rankings",
+    "lead": "Who earned the most XP, by game and by period. Anyone who hides their activity in their profile is left out.",
+    "game": "Game",
+    "all": "Overall",
+    "period": "Period",
+    "week": "Week",
+    "month": "Month",
+    "ever": "All time",
+    "stats": "{matches, plural, one {# match} other {# matches}} · {wins, plural, one {# win} other {# wins}}",
+    "level": "Lv {n}",
+    "xp": "{n} XP",
+    "empty": "Nobody has earned XP in this period yet.",
+    "emptyHint": "Play a match and show up here.",
+    "helpers": "Top library helpers",
+    "helpersHint": "In the last 30 days.",
+    "helpersEmpty": "Nobody yet. Send a picture or an alias in Characters.",
+    "helperLine": "{pictures, plural, one {# picture} other {# pictures}} · {aliases, plural, one {# alias} other {# aliases}}",
+    "seeContributions": "See contributions",
+    "place": "Place {n}"
+  },
+  "players": {
+    "title": "Players",
+    "lead": "Find people to play with. Each one shows up as their profile privacy allows.",
+    "search": "Name or @username",
+    "searchLabel": "Search players",
+    "filter": "Filter",
+    "all": "All",
+    "with": "Played with me",
+    "now": "Playing now",
+    "together": "played together {n}×",
+    "playing": "Playing {game}",
+    "join": "Join",
+    "empty": "Nobody matches these filters.",
+    "emptyWith": "You haven't played with anyone who has an account yet.",
+    "emptyNow": "Nobody is playing right now.",
+    "signIn": "Sign in to see who you've played with.",
+    "more": "More"
+  },
+  "contributions": {
+    "title": "Contributions",
+    "lead": "Everything the community added to the library and the Workshop, newest first.",
+    "kpi": {
+      "pictures": "your pictures",
+      "aliases": "your aliases",
+      "suggestions": "your suggestions"
+    },
+    "badge": "{name}, {tier}",
+    "toNext": "{n, plural, one {# more picture} other {# more pictures}} to the next level",
+    "maxed": "Achievement maxed out!",
+    "filter": "Type",
+    "all": "All",
+    "picture": "Pictures",
+    "alias": "Aliases",
+    "character": "Characters",
+    "suggestion": "Workshop",
+    "mine": "Only mine",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "lines": {
+      "picture": "{name} sent a picture of {character}",
+      "character": "{name} created {character}",
+      "alias": "{name} gave {character} the alias “{alias}”",
+      "aliasEdit": "{name} changed “{before}” to “{alias}” on {character}",
+      "suggestion": {
+        "theme": "{name} suggested the theme “{title}”",
+        "question": "{name} suggested the question “{title}”",
+        "mission": "{name} suggested the mission “{title}”"
+      },
+      "live": {
+        "theme": "{name} got the theme “{title}” approved and live",
+        "question": "{name} got the question “{title}” approved and live",
+        "mission": "{name} got the mission “{title}” approved and live"
+      }
+    },
+    "empty": "Nothing of this kind yet.",
+    "emptyHint": "Send a picture, give an alias or suggest something in the Workshop.",
+    "more": "More"
+  }
+}
