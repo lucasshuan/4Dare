@@ -31,6 +31,7 @@ import {
   useState,
 } from "react";
 import { PROVIDER_NAME, ProviderLogo } from "@/components/ui/auth-button";
+import { Avatar } from "@/components/ui/avatar";
 import { buttonClass } from "@/components/ui/button";
 import { LayoutMotion } from "@/components/ui/layout-motion";
 import { Logo } from "@/components/ui/logo";
@@ -39,7 +40,7 @@ import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { useSignIn } from "@/features/home/use-sign-in";
 import { accentStyle } from "@/features/profile/cover-paint";
-import { LevelAvatar } from "@/features/profile/level";
+import { XpBar } from "@/features/profile/level";
 import { profilePath } from "@/features/profile/profile-link";
 import { usePlayerCard } from "@/features/profile/use-profile";
 import { type GameKey, OPEN_GAMES } from "@/game/games";
@@ -574,45 +575,40 @@ function MeCard({ onPick }: { onPick: () => void }) {
       </div>
     );
   const xp = card?.numbers?.xp ?? 0;
-  const { into, need } = levelOf(xp);
   return (
     <div
       style={accentStyle(card?.accent ?? null, me.avatar.color)}
       className="mx-3 mb-2.5 flex flex-col rounded-[20px] bg-sunken"
     >
-      <Link
-        href={me.handle ? profilePath(me.handle) : "/profile"}
-        onClick={(e) => {
-          onPick();
-          if (me.handle) asPage(e);
-        }}
-        className="group flex items-center gap-3 rounded-[20px] p-3 pb-2 text-left outline-none focus-visible:outline-3 focus-visible:outline-sky"
-      >
-        <LevelAvatar
-          avatar={me.avatar}
-          xp={xp}
-          stroke={3}
-          tag="sm"
-          on="sunken"
-          avatarClass="size-[42px] text-lg"
-        />
-        <span className="grid min-w-0 flex-1 gap-0.5">
-          <b className="truncate font-bold text-[15px] leading-tight underline-offset-2 group-hover:underline">
-            {name(meNamed(me))}
-          </b>
-          {me.handle ? (
-            <small className="truncate text-[12.5px] text-ink-muted">
-              {t("me", { handle: me.handle, into, need })}
-            </small>
-          ) : null}
-        </span>
-      </Link>
-      <SignOut />
+      <div className="flex items-start">
+        <Link
+          href={me.handle ? profilePath(me.handle) : "/profile"}
+          onClick={(e) => {
+            onPick();
+            if (me.handle) asPage(e);
+          }}
+          className="group flex min-w-0 flex-1 items-center gap-3 rounded-[20px] p-3 pr-1 pb-2 text-left outline-none focus-visible:outline-3 focus-visible:outline-sky"
+        >
+          <Avatar avatar={me.avatar} size={52} />
+          <span className="grid min-w-0 flex-1 gap-0.5">
+            <b className="truncate font-bold text-[15px] leading-tight underline-offset-2 group-hover:underline">
+              {name(meNamed(me))}
+            </b>
+            {me.handle ? (
+              <small className="truncate text-[12.5px] text-ink-muted">
+                {t("me", { handle: me.handle, level: levelOf(xp).level })}
+              </small>
+            ) : null}
+          </span>
+        </Link>
+        <SignOut />
+      </div>
+      <XpBar xp={xp} numbers={false} className="px-3 pb-3" />
     </div>
   );
 }
 
-/** Sign out, at the account card's bottom right. */
+/** Sign out, at the account card's top right. */
 function SignOut() {
   const t = useTranslations("nav");
   const { refresh } = useMe();
@@ -629,7 +625,7 @@ function SignOut() {
       type="button"
       disabled={pending}
       onClick={leave}
-      className="mr-2 mb-2 inline-flex h-8 items-center gap-1.5 self-end rounded-pill px-3 font-semibold text-[13px] text-ink-muted transition-colors duration-150 ease-soft hover:bg-no-soft hover:text-no disabled:opacity-45"
+      className="mt-2 mr-2 inline-flex h-8 shrink-0 items-center gap-1.5 rounded-pill px-3 font-semibold text-[13px] text-ink-muted transition-colors duration-150 ease-soft hover:bg-no-soft hover:text-no disabled:opacity-45"
     >
       <LogOut className="size-3.5" strokeWidth={2} />
       {t("signOut")}

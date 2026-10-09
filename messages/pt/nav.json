@@ -12,7 +12,7 @@
     "title": "Jogando como convidado",
     "hint": "Entre com Discord ou Google para guardar nível e conquistas."
   },
-  "me": "@{handle} · {into} de {need} XP",
+  "me": "@{handle} · Nível {level}",
   "groups": {
     "play": "Jogar",
     "you": "Você",

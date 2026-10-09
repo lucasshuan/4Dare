@@ -12,7 +12,7 @@
     "title": "ゲストでプレイ中",
     "hint": "DiscordかGoogleでログインすると、レベルとバッジが残ります。"
   },
-  "me": "@{handle} · {into} / {need} XP",
+  "me": "@{handle} · レベル{level}",
   "groups": {
     "play": "遊ぶ",
     "you": "あなた",

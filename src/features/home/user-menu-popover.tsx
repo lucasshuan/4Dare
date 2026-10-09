@@ -21,7 +21,7 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { useMe } from "@/features/data/use-me";
 import { accentStyle } from "@/features/profile/cover-paint";
-import { LevelAvatar, XpBar } from "@/features/profile/level";
+import { XpBar } from "@/features/profile/level";
 import { profilePath } from "@/features/profile/profile-link";
 import { usePlayerCard } from "@/features/profile/use-profile";
 import { AccountDialog } from "@/features/settings/account-dialog";
@@ -82,18 +82,8 @@ export function UserMenuPopover({
   };
 
   if (!me) return null;
-  const face = numbers ? (
-    <LevelAvatar
-      avatar={me.avatar}
-      xp={numbers.xp}
-      stroke={3}
-      tag="sm"
-      on="surface"
-      avatarClass="size-11 text-lg"
-    />
-  ) : (
-    <Avatar avatar={me.avatar} />
-  );
+  // the level reads beside the name, so the face goes bare and bigger
+  const face = <Avatar avatar={me.avatar} size={52} />;
   return (
     <>
       <Popover.Root open={open} onOpenChange={onOpenChange}>

@@ -12,7 +12,7 @@
     "title": "Playing as a guest",
     "hint": "Sign in with Discord or Google to keep your level and badges."
   },
-  "me": "@{handle} · {into} of {need} XP",
+  "me": "@{handle} · Level {level}",
   "groups": {
     "play": "Play",
     "you": "You",
