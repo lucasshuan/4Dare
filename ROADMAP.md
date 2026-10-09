@@ -18,6 +18,7 @@ Tick = done and committed.
 - [ ] New game inspired by Ito
 - [ ] Who am I?: polish, fix transitions
 - [ ] Impostor: polish, fix transitions
+- [ ] Impostor: visual redo. Spy theme, Persona vibe
 - [ ] What for?: polish, fix transitions
 
 ## Sound
