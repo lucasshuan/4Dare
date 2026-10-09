@@ -33,7 +33,6 @@
     "contributions": "Contributions",
     "characters": "Characters",
     "workshop": "Workshop",
-    "howTo": "How to play",
     "news": "What's new",
     "legal": "Privacy and terms"
   },
@@ -54,7 +53,6 @@
     "contributions": "contributions feed photos pictures nicknames",
     "characters": "characters library nicknames photos pictures",
     "workshop": "workshop themes questions missions suggest vote",
-    "howTo": "how to play rules help",
     "news": "news what's new updates changelog",
     "legal": "privacy terms legal cookies data"
   }

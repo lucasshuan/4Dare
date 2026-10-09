@@ -16,11 +16,10 @@ const ROOM_ONLY: readonly (keyof Messages)[] = [
 ];
 
 /**
- * Namespaces only their own page shows (long texts: rules, legal pages).
+ * Namespaces only their own page shows (long texts: legal pages).
  * The page hands them down itself, with `PageMessages`.
  */
 export const PAGE_ONLY = [
-  "howTo",
   "library",
   "workshop",
   "community",

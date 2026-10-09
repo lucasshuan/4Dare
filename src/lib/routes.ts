@@ -26,7 +26,6 @@ export const roomsOf = (game?: GameKey) =>
 
 /** Pages of the side menu outside the games. */
 export const SETTINGS = "/settings";
-export const HOW_TO_PLAY = "/how-to-play";
 
 /** The characters page, and one character's sheet (over the list from inside the app). */
 export const CHARACTERS = "/characters";

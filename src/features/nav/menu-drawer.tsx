@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   ChartColumn,
-  CircleQuestionMark,
   Clock,
   GalleryVerticalEnd,
   House,
@@ -58,7 +57,6 @@ import {
   CHARACTERS,
   CONTRIBUTIONS,
   GAME_PATHS,
-  HOW_TO_PLAY,
   NEW_ROOM,
   NEWS,
   PLAYERS,
@@ -86,7 +84,6 @@ type ItemKey =
   | "contributions"
   | "characters"
   | "workshop"
-  | "howTo"
   | "news"
   | "legal";
 
@@ -252,12 +249,6 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
     {
       key: "help",
       items: [
-        {
-          key: "howTo",
-          href: HOW_TO_PLAY,
-          Icon: CircleQuestionMark,
-          newUntil: "2026-11-08",
-        },
         { key: "news", href: NEWS, Icon: Megaphone, dot: newsFresh },
         { key: "legal", href: PRIVACY, Icon: Shield },
       ],

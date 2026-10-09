@@ -3,7 +3,6 @@ import { routing } from "@/i18n/routing";
 import {
   CHARACTERS,
   GAMES,
-  HOW_TO_PLAY,
   IMPOSTOR,
   NEWS,
   PRIVACY,
@@ -22,7 +21,6 @@ const PAGES = [
   { path: IMPOSTOR, priority: 0.9 },
   { path: WHAT_FOR, priority: 0.9 },
   { path: ROOMS, priority: 0.6 },
-  { path: HOW_TO_PLAY, priority: 0.5 },
   { path: CHARACTERS, priority: 0.5 },
   { path: WORKSHOP, priority: 0.5 },
   { path: NEWS, priority: 0.4 },

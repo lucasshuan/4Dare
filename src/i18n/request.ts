@@ -14,7 +14,6 @@ const SHARED = [
   "chat",
   "meta",
   "nav",
-  "howTo",
   "library",
   "workshop",
   "community",

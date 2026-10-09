@@ -51,10 +51,10 @@ Tick = done and committed.
 - [x] Drawer top: face, level, XP bar; guest sees Discord/Google sign-in
 - [x] "Go to" filter, arrow keys, Esc closes, focus back to button
 - [x] Hidden during matches
-- [x] Own pages for settings (`/settings`) and the three games' rules (`/how-to-play`)
+- [x] Own page for settings (`/settings`)
 - [ ] Avatar menu keeps account, theme, sign out only
 - [ ] Blue dot: suggestion moved or new achievement
-- [ ] Drop `/how-to-play` page
+- [x] Drop `/how-to-play` page
 
 ## Characters (`/characters`)
 
