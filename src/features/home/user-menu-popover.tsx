@@ -88,6 +88,18 @@ export function UserMenuPopover({
   };
 
   if (!me) return null;
+  const face = numbers ? (
+    <LevelAvatar
+      avatar={me.avatar}
+      xp={numbers.xp}
+      stroke={3}
+      tag="sm"
+      on="surface"
+      avatarClass="size-11 text-lg"
+    />
+  ) : (
+    <Avatar avatar={me.avatar} />
+  );
   return (
     <>
       <Popover.Root open={open} onOpenChange={onOpenChange}>
@@ -111,17 +123,20 @@ export function UserMenuPopover({
                     exit={{ opacity: 0, scale: 0.6, rotate: 20 }}
                     transition={{ duration: dur.base, ease: ease.soft }}
                   >
-                    {numbers ? (
-                      <LevelAvatar
-                        avatar={me.avatar}
-                        xp={numbers.xp}
-                        stroke={3}
-                        tag="sm"
-                        on="surface"
-                        avatarClass="size-11 text-lg"
-                      />
+                    {/* an account's face opens its profile, like "My profile" */}
+                    {me.handle && !me.isGuest ? (
+                      <Link
+                        href={profilePath(me.handle)}
+                        scroll={false}
+                        aria-label={t("myProfile")}
+                        title={t("myProfile")}
+                        onClick={() => onOpenChange(false)}
+                        className="flex rounded-pill transition-[scale] duration-200 ease-soft hover:scale-105"
+                      >
+                        {face}
+                      </Link>
                     ) : (
-                      <Avatar avatar={me.avatar} />
+                      face
                     )}
                   </m.span>
                 </AnimatePresence>
