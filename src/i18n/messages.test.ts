@@ -76,7 +76,7 @@ describe("messages", () => {
       const files = readdirSync(`${DIR}${lang}`, { recursive: true })
         .map(String)
         .filter((f) => f.endsWith(".json"))
-        .map((f) => f.slice(0, -".json".length))
+        .map((f) => f.slice(0, -".json".length).replaceAll("\\", "/"))
         .sort();
       expect(files, lang).toEqual(NAMESPACES.map(file).sort());
     }
