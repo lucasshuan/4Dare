@@ -152,7 +152,7 @@ const RISE = {
 /** The games with a take of their own; the rest keep the stage. */
 const GAME_MUSIC: Partial<Record<RoomView["settings"]["game"], Track>> = {
   impostor: "impostor",
-  lineup: "lineup",
+  lineup: "bidding",
 };
 
 function Areas() {
@@ -162,17 +162,25 @@ function Areas() {
   useStepSound();
   usePresenceSound(view);
   useMusicMuffle(area === "lobby");
-  // Impostor and What for? rooms play their own take instead of the stage, lobby
-  // (muffled) to results; picking the game in the lobby crossfades at the same point
-  // in the song, and the takes are fetched on entering the room so the swap starts at once
+  // Impostor and Build the Team rooms play their own take instead of the stage,
+  // lobby (muffled) to results; picking the game in the lobby crossfades at the
+  // same point in the song, and the takes are fetched on entering the room so the
+  // swap starts at once. Build the Team's match moves from the bidding take to the
+  // matchday one after the auction (lineup-screen.tsx), and its results keep that.
+  const lineup = view.settings.game === "lineup";
   useEffect(() => {
     preloadMusic("impostor");
-    preloadMusic("lineup");
+    preloadMusic("bidding");
   }, []);
-  useMusic(GAME_MUSIC[view.settings.game], 1);
+  useEffect(() => {
+    if (lineup) preloadMusic("matchday");
+  }, [lineup]);
+  useMusic(
+    lineup && area === "result" ? "matchday" : GAME_MUSIC[view.settings.game],
+    1,
+  );
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
-  const lineup = view.settings.game === "lineup";
   useEffect(() => {
     if (lineup) void loadLineup();
   }, [lineup]);

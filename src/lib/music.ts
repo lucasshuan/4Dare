@@ -7,17 +7,22 @@ import { getSettings, type Settings, subscribeSettings } from "./settings";
  * The background music: one tune in several takes that share a timeline (same
  * tempo, same bars, same loop), so one can take over from another at the
  * same point in the song. Played through WebAudio, so the loop has no gap and
- * every take starts sample-exact.
+ * every take starts sample-exact. The Suno prompts behind each take are in
+ * `assets/music/suno-prompts.md`.
  */
 const TRACKS = {
   /** The show's lounge vamp: the room, the lobby and every match. */
   stage: { src: "/music/stage-loop.mp3", intro: 0 },
-  /** The same vamp on an old radio in the booth: What for?'s presenter. Mixed 6 dB under the stage. */
+  /** The same vamp on an old radio in the booth: Build the Team's presenter. Mixed 6 dB under the stage. */
   booth: { src: "/music/booth-loop.mp3", intro: 0 },
   /** The same vamp as hushed spy suspense: Impostor's rooms. As loud as the stage. */
   impostor: { src: "/music/impostor-loop.mp3", intro: 20.7542 },
-  /** The same vamp as a cheeky school auction: What for?'s rooms. As loud as the stage. */
-  lineup: { src: "/music/lineup-loop.mp3", intro: 1.9381 },
+  /** The same vamp as 1970s game-show bidding: Build the Team's lobby and auction. As loud as the stage. */
+  bidding: { src: "/music/bidding-loop.mp3", intro: 19.8832 },
+  /** The same vamp as a retro sports groove: Build the Team from the wrap-up to the results. As loud as the stage. */
+  matchday: { src: "/music/matchday-loop.mp3", intro: 9.7972 },
+  /** The same vamp as a cheeky school bounce, kept for later: nothing plays it yet. As loud as the stage. */
+  recess: { src: "/music/recess-loop.mp3", intro: 1.9381 },
 } as const satisfies Record<string, { src: string; intro: number }>;
 export type Track = keyof typeof TRACKS;
 
