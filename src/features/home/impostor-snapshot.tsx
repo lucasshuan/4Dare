@@ -89,13 +89,12 @@ export function ImpostorSnapshot({
       aria-hidden="true"
       data-art-theme="dark"
       className={cn(
-        "relative isolate overflow-hidden art-impostor [container-type:size]",
+        "impostor-card-art relative isolate overflow-hidden art-impostor [container-type:size]",
         !wide && "aspect-square",
         className,
       )}
     >
-      {/* soft light spots and a couple of masks */}
-      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/10 blur-2xl" />
+      {/* a soft light below and a couple of masks */}
       <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/6 blur-2xl" />
       <VenetianMask
         className={cn(

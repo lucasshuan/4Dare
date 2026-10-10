@@ -570,7 +570,7 @@ body {
 
 /*
  * The lobby's backdrop (LobbyBackdrop): always one full colour turning every 4
- * bars, soft lights roaming and "?" marks wandering; while the music plays,
+ * bars, soft lights roaming and game symbols wandering; while the music plays,
  * the whole page flares on each beat and each mark lights on its own. Beat
  * lengths come from the tune (95.08 BPM: 0.63107 s a beat, 2.5243 s a bar).
  */
@@ -704,12 +704,25 @@ body {
   );
   animation: aurora-roam 30s ease-in-out infinite;
 }
+.aurora-slot {
+  position: absolute;
+  transition:
+    left 650ms var(--ease-soft),
+    top 650ms var(--ease-soft),
+    width 650ms var(--ease-soft),
+    height 650ms var(--ease-soft),
+    font-size 650ms var(--ease-soft),
+    rotate 650ms var(--ease-soft);
+}
 .aurora-wander {
   position: absolute;
+  inset: 0;
   animation: aurora-wander 21s ease-in-out infinite alternate;
 }
 .aurora-mark {
   display: block;
+  width: 100%;
+  height: 100%;
   font-family: var(--font-display);
   font-weight: 800;
   line-height: 1;
@@ -717,8 +730,30 @@ body {
   animation: aurora-bob 6s ease-in-out infinite;
 }
 .aurora-mark > span {
+  position: relative;
   display: block;
+  width: 100%;
+  height: 100%;
   opacity: var(--aurora-mark);
+}
+.aurora-icon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: scale(0.65) rotate(-20deg);
+  transition:
+    opacity 350ms var(--ease-soft),
+    transform 500ms var(--ease-soft);
+}
+.aurora-icon[data-active] {
+  opacity: 1;
+  transform: none;
+}
+.aurora-icon svg {
+  width: 100%;
+  height: 100%;
 }
 [data-beating] .aurora-mark > span {
   animation: aurora-mark 20.1944s ease-out infinite;
@@ -859,6 +894,14 @@ body {
 /* biome-ignore-end lint/complexity/noImportantStyles: see above */
 
 /* Each game's art ground: its colour sliding into a second one. */
+.impostor-card-art {
+  background-color: oklch(from var(--art-impostor) calc(l * 1.2) c h);
+  background-image: linear-gradient(
+    120deg,
+    oklch(from var(--art-impostor) calc(l * 1.2) c h),
+    oklch(from var(--art-impostor-2) calc(l * 1.2) c h)
+  );
+}
 @utility art-whoami {
   background-color: var(--art-whoami);
   background-image: linear-gradient(
