@@ -117,14 +117,31 @@ function useScene(): { key: string; node: React.ReactNode } | null {
   return null;
 }
 
+/** The steps after the auction: the teams are made and the boards built, shown and judged. */
+const BOARD_PHASES = new Set<string>([
+  "trading",
+  "defending",
+  "presenting",
+  "judging",
+  "tiebreak",
+  "verdict",
+  "scoring",
+]);
+
 /**
- * The presenter hears the booth's radio take of the music from the moment
- * their picture glitches into the booth's TV (the chair scene) to the end of
- * the match; everyone else, the room's What for? take.
+ * The room plays the bidding take through the opening and the auction; once
+ * the last hammer's scene is over and the teams are being made, the matchday
+ * take takes over to the round's score, and the next round's opening brings
+ * the bidding back. The presenter hears the booth's radio take instead from
+ * the moment their picture glitches into the booth's TV (the chair scene) to
+ * the end of the match.
  */
-function useBoothMusic() {
-  const { lu, me } = useLineup();
+function useLineupMusic() {
+  const { view, lu, me } = useLineup();
   const { show, beat } = useStage();
+  const kind = beat?.kind ?? show?.beats[0]?.kind;
+  const board = BOARD_PHASES.has(view.phase) && kind !== "sold";
+  useMusic(board ? "matchday" : undefined, 1.5);
   const chair = show?.beats.find((b) => b.kind === "chair");
   const now = beat?.startsAt ?? show?.startsAt ?? 0;
   const inBooth =
@@ -137,7 +154,7 @@ export function LineupScreen() {
   const ja = useLocale() === "ja";
   const scene = useScene();
   const { lu } = useLineup();
-  useBoothMusic();
+  useLineupMusic();
   return (
     <div className="relative flex w-full flex-col items-center">
       <CoinDefs />
