@@ -11,17 +11,23 @@ import { getSettings, type Settings, subscribeSettings } from "./settings";
  */
 const TRACKS = {
   /** The show's lounge vamp: the room, the lobby and every match. */
-  stage: "/music/stage-loop.mp3",
+  stage: { src: "/music/stage-loop.mp3", intro: 0 },
   /** The same vamp on an old radio in the booth: What for?'s presenter. Mixed 6 dB under the stage. */
-  booth: "/music/booth-loop.mp3",
+  booth: { src: "/music/booth-loop.mp3", intro: 0 },
   /** The same vamp as hushed spy suspense: Impostor's rooms. As loud as the stage. */
-  impostor: "/music/impostor-loop.mp3",
+  impostor: { src: "/music/impostor-loop.mp3", intro: 20.7542 },
   /** The same vamp as a cheeky school auction: What for?'s rooms. As loud as the stage. */
-  lineup: "/music/lineup-loop.mp3",
-} as const;
+  lineup: { src: "/music/lineup-loop.mp3", intro: 1.9381 },
+} as const satisfies Record<string, { src: string; intro: number }>;
 export type Track = keyof typeof TRACKS;
 
-/** Every file loops over the same 48 bars (seconds); what comes before plays once. */
+/**
+ * Song positions (seconds) on the shared timeline. Every file loops over the
+ * same 48 bars; what comes before plays once. A take may open with an intro of
+ * its own (`intro` seconds at the head of its file, before the shared song's
+ * position 0): it plays when the music starts on that take, as negative
+ * positions, and is skipped when another take hands over past it.
+ */
 const LOOP_START = 8.1062;
 const LOOP_END = 129.2721;
 const LOOP = LOOP_END - LOOP_START;
@@ -42,24 +48,31 @@ export function musicVolume(settings: Settings): number {
 
 /**
  * The tune's beat, for anything that moves with it: 95.08 BPM, the first beat
- * 0.5333 s into the file. The loop starts on a beat and holds 192 of them, so
- * the beat keeps its place across every wrap.
+ * 0.5333 s into the shared song. The loop starts on a beat and holds 192 of
+ * them, so the beat keeps its place across every wrap; the takes' intros keep
+ * the same beat before it.
  */
 export const MUSIC_BEAT = 60 / 95.076;
 export const MUSIC_FIRST_BEAT = 0.5333;
+/** 32 beats: every beat-synced animation repeats within this (beat, bar, the marks' cycle). */
+const PHRASE = 32 * MUSIC_BEAT;
 
 /**
  * The CSS animation-delay (seconds) that lines a beat-long animation started
- * at `nowMs` up with the music whose position 0 played at `originMs` (both
- * performance.now() milliseconds): negative once the song is under way.
+ * at `nowMs` up with the music whose position 0 played (or will play) at
+ * `originMs` (both performance.now() milliseconds): negative once the song is
+ * under way. During a take's intro position 0 is still ahead, and the delay
+ * steps back by whole 32-beat phrases so the animations run with the intro.
  */
 export function beatDelay(originMs: number, nowMs: number): number {
-  return (originMs - nowMs) / 1000 + MUSIC_FIRST_BEAT;
+  const delay = (originMs - nowMs) / 1000 + MUSIC_FIRST_BEAT;
+  if (delay <= MUSIC_FIRST_BEAT) return delay;
+  return delay - Math.ceil((delay - MUSIC_FIRST_BEAT) / PHRASE) * PHRASE;
 }
 
-/** Where a timeline position lands in the file once the loop has wrapped. */
+/** Where a timeline position lands once the loop has wrapped; negative positions are a take's intro. */
 export function loopPosition(seconds: number): number {
-  if (seconds < LOOP_END) return Math.max(0, seconds);
+  if (seconds < LOOP_END) return seconds;
   return LOOP_START + ((seconds - LOOP_START) % LOOP);
 }
 
@@ -139,7 +152,7 @@ function load(src: string): Promise<AudioBuffer | null> {
 
 /** Fetches and decodes a take ahead of time, so asking for it later swaps at once. */
 export function preloadMusic(track: Track) {
-  void load(TRACKS[track]);
+  void load(TRACKS[track].src);
 }
 
 /** The song position (seconds on the shared timeline) at a context time. */
@@ -155,6 +168,7 @@ function start(
   fadeIn: number,
 ) {
   const c = context();
+  const { intro } = TRACKS[track];
   const gain = c.createGain();
   gain.gain.setValueAtTime(0, at);
   gain.gain.linearRampToValueAtTime(1, at + fadeIn);
@@ -162,12 +176,13 @@ function start(
   const source = c.createBufferSource();
   source.buffer = buffer;
   source.loop = true;
-  source.loopStart = LOOP_START;
-  source.loopEnd = LOOP_END;
+  source.loopStart = LOOP_START + intro;
+  source.loopEnd = LOOP_END + intro;
   source.connect(gain);
-  const offset = loopPosition(from);
-  source.start(at, offset);
-  return { track, source, gain, origin: at - offset } satisfies Playing;
+  // deeper into an intro than this take's own goes: it starts from its top
+  const pos = Math.max(-intro, loopPosition(from));
+  source.start(at, pos + intro);
+  return { track, source, gain, origin: at - pos } satisfies Playing;
 }
 
 /**
@@ -231,7 +246,7 @@ async function apply() {
     return;
   }
   const [buffer, sfx] = await Promise.all([
-    load(TRACKS[want]),
+    load(TRACKS[want].src),
     want === "booth" && playing && playing.track !== "booth"
       ? load(SWITCH_SFX)
       : null,
@@ -241,7 +256,8 @@ async function apply() {
   const now = c.currentTime;
   const was = playing;
   if (!was) {
-    playing = start(want, buffer, now, 0, 1);
+    // a fresh start plays the take from the top, its own intro first
+    playing = start(want, buffer, now, Number.NEGATIVE_INFINITY, 0.05);
     publishPulse();
     return;
   }
