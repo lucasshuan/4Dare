@@ -87,6 +87,7 @@ export function ImpostorSnapshot({
   return (
     <div
       aria-hidden="true"
+      data-art-theme="dark"
       className={cn(
         "relative isolate overflow-hidden art-impostor [container-type:size]",
         !wide && "aspect-square",
@@ -95,7 +96,7 @@ export function ImpostorSnapshot({
     >
       {/* soft light spots and a couple of masks */}
       <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/10 blur-2xl" />
-      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/20 blur-2xl dark:bg-butter/6" />
+      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/6 blur-2xl" />
       <VenetianMask
         className={cn(
           "absolute top-[6%] right-[8%] rotate-12 text-no opacity-20",

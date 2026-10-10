@@ -86,13 +86,14 @@ export function LineupSnapshot({
   return (
     <div
       aria-hidden="true"
+      data-art-theme="light"
       className={cn(
         "relative isolate overflow-hidden art-lineup [container-type:size]",
         !wide && "aspect-square",
         className,
       )}
     >
-      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/15 blur-2xl dark:hidden" />
+      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-white/15 blur-2xl" />
 
       {/* the board, in its frame */}
       <div

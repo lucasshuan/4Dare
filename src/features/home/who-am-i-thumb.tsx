@@ -38,6 +38,7 @@ export function WhoAmIThumb() {
   return (
     <svg
       aria-hidden="true"
+      data-art-theme="light"
       viewBox="0 0 160 100"
       preserveAspectRatio="xMidYMid slice"
       className="absolute inset-0 size-full"

@@ -66,6 +66,7 @@ export function WhoAmISnapshot({
   return (
     <div
       aria-hidden="true"
+      data-art-theme="light"
       className={cn(
         "relative overflow-hidden art-whoami",
         !wide && "aspect-square",
@@ -73,8 +74,8 @@ export function WhoAmISnapshot({
       )}
     >
       {/* soft light spots */}
-      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-surface/40 blur-2xl dark:bg-white/5" />
-      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/50 blur-2xl dark:bg-butter/10" />
+      <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-surface/40 blur-2xl" />
+      <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/50 blur-2xl" />
 
       <m.div
         className={

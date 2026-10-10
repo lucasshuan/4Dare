@@ -67,7 +67,7 @@ export function HomeScreen() {
 
 /**
  * Each caption fades up from a deep, saturated shade of its game's hue (oklch
- * chroma and hue; the lightness comes from the theme), not from black or a
+ * chroma and hue; the lightness comes from the game's art), not from black or a
  * darkened pastel, which turns grey.
  */
 const TILE_GROUND: Record<GameKey, string> = {
@@ -79,6 +79,7 @@ const TILE_GROUND: Record<GameKey, string> = {
 function GameCard({ game, delay }: { game: GameKey; delay: number }) {
   const { messages, Art } = GAME_INFO[game];
   const t = useTranslations(`home.games.${messages}`);
+  const darkArt = game === "impostor";
   return (
     <m.div
       initial={{ opacity: 0, y: 20 }}
@@ -89,26 +90,34 @@ function GameCard({ game, delay }: { game: GameKey; delay: number }) {
       }}
       className={CARD}
     >
-      {/* the tiles rest dimmed in the dark theme and veiled in the page's own
-          colour in the light one; hovering (or focusing) one lights it and
+      {/* the Impostor rests dimmed; the light artworks rest veiled in their
+          palette's canvas colour. Hovering (or focusing) one lights it and
           raises its name. Phones have no hover: their tiles stay lit, with a
           small caption on */}
       <Link
         href={GAME_PATHS[game]}
-        className="group/tile relative block aspect-square overflow-hidden bg-surface-sunken outline-offset-[-3px]! transition-[filter] duration-500 ease-soft [container-type:inline-size] sm:saturate-45 sm:dark:brightness-42 sm:dark:saturate-35 sm:focus-visible:saturate-100 sm:hover:saturate-100 sm:dark:focus-visible:brightness-100 sm:dark:focus-visible:saturate-100 sm:dark:hover:brightness-100 sm:dark:hover:saturate-100"
+        data-art-theme={darkArt ? "dark" : "light"}
+        className={cn(
+          "group/tile relative block aspect-square overflow-hidden bg-surface-sunken outline-offset-[-3px]! transition-[filter] duration-500 ease-soft [container-type:inline-size] sm:focus-visible:saturate-100 sm:hover:saturate-100",
+          darkArt
+            ? "sm:brightness-42 sm:saturate-35 sm:focus-visible:brightness-100 sm:hover:brightness-100"
+            : "sm:saturate-45",
+        )}
       >
         <Art />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-[5] bg-canvas/60 transition-opacity duration-500 ease-soft max-sm:hidden dark:hidden group-hover/tile:opacity-0 group-focus-visible/tile:opacity-0"
-        />
+        {!darkArt && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-[5] bg-canvas/60 transition-opacity duration-500 ease-soft max-sm:hidden group-hover/tile:opacity-0 group-focus-visible/tile:opacity-0"
+          />
+        )}
         <div
           style={
             {
-              "--shade": `oklch(var(--l) ${TILE_GROUND[game]})`,
+              "--shade": `oklch(${darkArt ? 0.3 : 0.42} ${TILE_GROUND[game]})`,
             } as CSSProperties
           }
-          className="absolute inset-x-0 bottom-0 z-[6] flex flex-col gap-0.5 bg-[linear-gradient(to_top,color-mix(in_oklch,var(--shade)_70%,transparent),transparent)] px-3 pt-[30px] pb-[11px] text-white [--l:0.42] dark:[--l:0.3] sm:top-0 sm:justify-end sm:gap-2 sm:bg-[linear-gradient(to_top,color-mix(in_oklch,var(--shade)_76%,transparent),color-mix(in_oklch,var(--shade)_46%,transparent)_34%,transparent_62%)] sm:p-6 sm:opacity-0 sm:transition-opacity sm:duration-350 sm:ease-soft sm:group-hover/tile:opacity-100 sm:group-focus-visible/tile:opacity-100 [&>*]:transition-transform [&>*]:duration-450 [&>*]:ease-soft sm:[&>*]:translate-y-3 sm:group-hover/tile:[&>*]:translate-y-0 sm:group-focus-visible/tile:[&>*]:translate-y-0"
+          className="absolute inset-x-0 bottom-0 z-[6] flex flex-col gap-0.5 bg-[linear-gradient(to_top,color-mix(in_oklch,var(--shade)_70%,transparent),transparent)] px-3 pt-[30px] pb-[11px] text-white sm:top-0 sm:justify-end sm:gap-2 sm:bg-[linear-gradient(to_top,color-mix(in_oklch,var(--shade)_76%,transparent),color-mix(in_oklch,var(--shade)_46%,transparent)_34%,transparent_62%)] sm:p-6 sm:opacity-0 sm:transition-opacity sm:duration-350 sm:ease-soft sm:group-hover/tile:opacity-100 sm:group-focus-visible/tile:opacity-100 [&>*]:transition-transform [&>*]:duration-450 [&>*]:ease-soft sm:[&>*]:translate-y-3 sm:group-hover/tile:[&>*]:translate-y-0 sm:group-focus-visible/tile:[&>*]:translate-y-0"
         >
           <h3 className="truncate font-display font-extrabold text-lg leading-[1.05] tracking-[-0.01em] sm:text-[min(38px,11cqw)] sm:leading-none">
             {t("name")}

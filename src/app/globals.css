@@ -1,12 +1,13 @@
 @import "tailwindcss";
 
-/* Tokens from the 4Dare design system. Light on :root, dark under [data-theme="dark"] (next-themes). */
+/* Tokens from the 4Dare design system. Game card art pins its own palette; page banners follow next-themes. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 /* Short windows (laptops, small browser windows): tighter spacing so a screen fits without scrolling. */
 @custom-variant short (@media (max-height: 820px));
 @custom-variant tiny (@media (max-height: 700px));
 
-:root {
+:root,
+[data-art-theme="light"] {
   --canvas: #f3f5f9;
   --surface: #ffffff;
   --surface-sunken: #e8ecf3;
@@ -210,7 +211,8 @@
   color-scheme: light;
 }
 
-[data-theme="dark"] {
+[data-theme="dark"],
+[data-art-theme="dark"] {
   --canvas: #12161f;
   --surface: #1b212d;
   --surface-sunken: #0c1017;
@@ -572,12 +574,102 @@ body {
  * the whole page flares on each beat and each mark lights on its own. Beat
  * lengths come from the tune (95.08 BPM: 0.63107 s a beat, 2.5243 s a bar).
  */
+/* Typed colours can ease between games while the running cycle keeps its phase. */
+@property --lobby-fill-1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2b69c8;
+}
+@property --lobby-fill-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #7356c4;
+}
+@property --lobby-fill-3 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1a8599;
+}
+@property --lobby-vivid-1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1662ff;
+}
+@property --lobby-vivid-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #8640ff;
+}
+@property --lobby-vivid-3 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #00b2d1;
+}
+@property --lobby-glow-1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffffff;
+}
+@property --lobby-glow-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #c9b5f5;
+}
+@property --lobby-glow-3 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #8ee0ec;
+}
+/* Hue changes keep the original OKLCH lightness/chroma, canvas mix and pulse strength. */
+.lobby-backdrop {
+  --lobby-fill-1: oklch(from var(--aurora-1) l c var(--lobby-hue-1, h));
+  --lobby-fill-2: oklch(from var(--aurora-2) l c var(--lobby-hue-2, h));
+  --lobby-fill-3: oklch(from var(--aurora-3) l c var(--lobby-hue-3, h));
+  --lobby-vivid-1: oklch(from var(--aurora-vivid-1) l c var(--lobby-hue-1, h));
+  --lobby-vivid-2: oklch(from var(--aurora-vivid-2) l c var(--lobby-hue-2, h));
+  --lobby-vivid-3: oklch(from var(--aurora-vivid-3) l c var(--lobby-hue-3, h));
+  --lobby-glow-1: oklch(from var(--aurora-glow-1) l c var(--lobby-hue-1, h));
+  --lobby-glow-2: oklch(from var(--aurora-glow-2) l c var(--lobby-hue-2, h));
+  --lobby-glow-3: oklch(from var(--aurora-glow-3) l c var(--lobby-hue-3, h));
+  transition-property:
+    --lobby-fill-1, --lobby-fill-2, --lobby-fill-3, --lobby-vivid-1,
+    --lobby-vivid-2, --lobby-vivid-3, --lobby-glow-1, --lobby-glow-2,
+    --lobby-glow-3;
+  transition-duration: 500ms;
+  transition-timing-function: var(--ease-soft);
+}
+/* Who am I? keeps the original blue/violet/teal cycle; the team's is amber/coral/jade. */
+.lobby-backdrop[data-game="lineup"] {
+  --lobby-hue-1: 75;
+  --lobby-hue-2: 35;
+  --lobby-hue-3: 155;
+}
+/* The exception: a dim plum/wine/night-blue room, even in the light theme. */
+.lobby-backdrop[data-game="impostor"] {
+  --aurora-1: oklch(0.32 0.09 310);
+  --aurora-2: oklch(0.3 0.095 355);
+  --aurora-3: oklch(0.33 0.075 240);
+  --aurora-vivid-1: oklch(0.42 0.14 310);
+  --aurora-vivid-2: oklch(0.4 0.15 355);
+  --aurora-vivid-3: oklch(0.43 0.12 240);
+  --aurora-glow-1: #8472b5;
+  --aurora-glow-2: #b16789;
+  --aurora-glow-3: #507c9b;
+}
+[data-theme="dark"] .lobby-backdrop[data-game="impostor"] {
+  --aurora-1: oklch(0.25 0.075 310);
+  --aurora-2: oklch(0.23 0.08 355);
+  --aurora-3: oklch(0.26 0.06 240);
+  --aurora-vivid-1: oklch(0.34 0.12 310);
+  --aurora-vivid-2: oklch(0.32 0.13 355);
+  --aurora-vivid-3: oklch(0.35 0.1 240);
+}
 .aurora-fill {
   position: absolute;
   inset: 0;
   background-color: color-mix(
     in oklab,
-    var(--aurora-1),
+    var(--lobby-fill-1),
     var(--canvas) var(--aurora-lean)
   );
   animation: aurora-turn 30.2916s linear infinite;
@@ -588,7 +680,7 @@ body {
   opacity: 0;
   background-color: color-mix(
     in oklab,
-    var(--aurora-vivid-1),
+    var(--lobby-vivid-1),
     var(--canvas) var(--aurora-lean)
   );
 }
@@ -637,7 +729,7 @@ body {
   100% {
     background-color: color-mix(
       in oklab,
-      var(--aurora-1),
+      var(--lobby-fill-1),
       var(--canvas) var(--aurora-lean)
     );
   }
@@ -645,7 +737,7 @@ body {
   58.333% {
     background-color: color-mix(
       in oklab,
-      var(--aurora-2),
+      var(--lobby-fill-2),
       var(--canvas) var(--aurora-lean)
     );
   }
@@ -653,7 +745,7 @@ body {
   91.667% {
     background-color: color-mix(
       in oklab,
-      var(--aurora-3),
+      var(--lobby-fill-3),
       var(--canvas) var(--aurora-lean)
     );
   }
@@ -664,7 +756,7 @@ body {
   100% {
     background-color: color-mix(
       in oklab,
-      var(--aurora-vivid-1),
+      var(--lobby-vivid-1),
       var(--canvas) var(--aurora-lean)
     );
   }
@@ -672,7 +764,7 @@ body {
   58.333% {
     background-color: color-mix(
       in oklab,
-      var(--aurora-vivid-2),
+      var(--lobby-vivid-2),
       var(--canvas) var(--aurora-lean)
     );
   }
@@ -680,7 +772,7 @@ body {
   91.667% {
     background-color: color-mix(
       in oklab,
-      var(--aurora-vivid-3),
+      var(--lobby-vivid-3),
       var(--canvas) var(--aurora-lean)
     );
   }

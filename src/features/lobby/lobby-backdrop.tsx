@@ -2,6 +2,7 @@
 
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import type { GameKey } from "@/game/games";
 import { beatDelay, MUSIC_BEAT, useMusicPulse } from "@/lib/music";
 
 /** The soft lights: [their colour (1–3), left %, top %, size px, roam x, roam y, head start s]. */
@@ -37,7 +38,7 @@ const MARKS: [number, number, number, number, number, number, number][] = [
  * in time with what plays: the delays come from the music's own clock. The
  * ring of keyboard focus turns ink here, where sky would vanish.
  */
-export function LobbyBackdrop() {
+export function LobbyBackdrop({ game }: { game: GameKey }) {
   const [body, setBody] = useState<HTMLElement | null>(null);
   // the colours start turning when the lobby shows; the flares join them where they are
   const [born] = useState(() =>
@@ -62,7 +63,8 @@ export function LobbyBackdrop() {
   return createPortal(
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10 select-none overflow-hidden"
+      data-game={game}
+      className="lobby-backdrop pointer-events-none fixed inset-0 -z-10 select-none overflow-hidden"
     >
       <div className="aurora-fill" />
       {GLOWS.map(([c, left, top, size, dx, dy, ahead]) => (
@@ -71,7 +73,7 @@ export function LobbyBackdrop() {
           className="aurora-glow"
           style={
             {
-              "--glow": `var(--aurora-glow-${c})`,
+              "--glow": `var(--lobby-glow-${c})`,
               "--dx": dx,
               "--dy": dy,
               left: `${left}%`,

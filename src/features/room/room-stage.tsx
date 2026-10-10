@@ -179,7 +179,7 @@ function Areas() {
   return (
     <>
       {/* the lobby's coloured backdrop, its flares in time with the music */}
-      {area === "lobby" ? <LobbyBackdrop /> : null}
+      {area === "lobby" ? <LobbyBackdrop game={view.settings.game} /> : null}
       <AnimatePresence mode="wait">
         {area === "lobby" ? (
           <m.div
