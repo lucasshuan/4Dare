@@ -34,14 +34,31 @@ export async function rankingPage(
   period: RankingPeriod,
   lang: Lang,
 ): Promise<RankingPage> {
-  const { auth, community } = getBackend();
-  const me = await auth.identity(lang);
+  const me = await getBackend().auth.identity(lang);
+  return buildRanking(game, period, lang, 20, me.isGuest ? null : me.id);
+}
+
+/**
+ * A game's top three this week and the month's helpers: the same for
+ * everyone (no reader's place), so a game page can cache it.
+ */
+export const podium = (game: GameKey, lang: Lang) =>
+  buildRanking(game, "week", lang, 3, null);
+
+async function buildRanking(
+  game: GameKey | null,
+  period: RankingPeriod,
+  lang: Lang,
+  top: number,
+  meId: string | null,
+): Promise<RankingPage> {
+  const { community } = getBackend();
   const since = sinceOf(period);
   const [rows, overall, mine, helpers] = await Promise.all([
-    community.ranking(game, since, 20),
+    community.ranking(game, since, top),
     // everyone's level comes from all their XP
     community.ranking(null, null, 500),
-    me.isGuest ? Promise.resolve(null) : community.place(me.id, game, since),
+    meId ? community.place(meId, game, since) : Promise.resolve(null),
     community.contributors(Date.now() - 30 * DAY, 3),
   ]);
   const totals = new Map(overall.map((r) => [r.userId, r.xp]));
@@ -49,7 +66,7 @@ export async function rankingPage(
     [
       ...rows.map((r) => r.userId),
       ...helpers.map((h) => h.userId),
-      mine ? me.id : null,
+      mine ? meId : null,
     ],
     lang,
   );
@@ -71,16 +88,16 @@ export async function rankingPage(
         : [];
     }),
     me:
-      mine && people.get(me.id)
+      mine && meId && people.get(meId)
         ? {
-            person: people.get(me.id) as NonNullable<
+            person: people.get(meId) as NonNullable<
               ReturnType<typeof people.get>
             >,
             place: mine.place,
             xp: mine.xp,
             matches: mine.matches,
             wins: mine.wins,
-            level: level(me.id),
+            level: level(meId),
           }
         : null,
     helpers: helpers.flatMap((h) => {

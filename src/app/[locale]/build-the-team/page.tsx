@@ -4,6 +4,7 @@ import { APP_NAME } from "@/config";
 import { LineupHub } from "@/features/lineup/lineup-hub";
 import type { Lang } from "@/game/types";
 import { BUILD_THE_TEAM } from "@/lib/routes";
+import { gameFacts } from "@/server/game-facts";
 import {
   HREFLANG,
   jsonLd,
@@ -11,6 +12,9 @@ import {
   pageMetadata,
   SITE_URL,
 } from "@/server/seo";
+
+// the game facts are cached for as long (src/server/game-facts.ts)
+export const revalidate = 600;
 
 export async function generateMetadata({
   params,
@@ -30,9 +34,10 @@ export default async function WhatFor({
 }: PageProps<"/[locale]/build-the-team">) {
   const locale = (await params).locale as Lang;
   setRequestLocale(locale);
-  const [meta, home] = await Promise.all([
+  const [meta, home, facts] = await Promise.all([
     getTranslations({ locale, namespace: "meta.whatFor" }),
     getTranslations({ locale, namespace: "home.games.whatFor" }),
+    gameFacts("lineup", locale),
   ]);
   const game = {
     "@context": "https://schema.org",
@@ -62,7 +67,7 @@ export default async function WhatFor({
         // biome-ignore lint/security/noDangerouslySetInnerHtml: escaped JSON-LD
         dangerouslySetInnerHTML={{ __html: jsonLd(game) }}
       />
-      <LineupHub />
+      <LineupHub facts={facts} />
     </>
   );
 }

@@ -19,6 +19,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { GAMES, newRoom } from "@/lib/routes";
+import type { GameFactsData } from "@/server/community-contract";
 import { JoinByCode } from "./join-by-code";
 
 /**
@@ -29,12 +30,15 @@ export function GameHub({
   game,
   banner: Banner,
   extra,
+  facts,
 }: {
   game: GameKey;
   /** The game's banner; wide screens set creating and joining in it, as `aside`. */
   banner: ComponentType<{ aside: ReactNode }>;
   /** The game's own, under the pitch. */
   extra?: ReactNode;
+  /** What the page counts and shows, cached on the server; null when it could not be read. */
+  facts: GameFactsData | null;
 }) {
   const t = useTranslations("home");
   const gameName = useGameName();
@@ -81,8 +85,8 @@ export function GameHub({
             {extra}
           </m.section>
           <div className="grid items-start gap-x-8 gap-y-8 md:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
-            <GameRanking game={game} />
-            <GameFacts game={game} />
+            <GameRanking game={game} facts={facts} />
+            <GameFacts game={game} facts={facts} />
           </div>
         </div>
 

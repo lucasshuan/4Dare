@@ -264,6 +264,15 @@ export interface RankingRow {
   level: number;
 }
 
+/** What a game's page shows, cached on the server (game-facts.ts): the banks' sizes, the library's, the podium and the month's helpers. */
+export interface GameFactsData {
+  themes: number;
+  questions: number;
+  missions: number;
+  characters: number;
+  podium: Pick<RankingPage, "rows" | "helpers">;
+}
+
 /** GET /api/rankings. */
 export interface RankingPage {
   rows: RankingRow[];

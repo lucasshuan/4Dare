@@ -4,6 +4,7 @@ import { APP_NAME } from "@/config";
 import { WhoAmIHub } from "@/features/who-am-i/who-am-i-hub";
 import type { Lang } from "@/game/types";
 import { WHO_AM_I } from "@/lib/routes";
+import { gameFacts } from "@/server/game-facts";
 import {
   HREFLANG,
   jsonLd,
@@ -11,6 +12,9 @@ import {
   pageMetadata,
   SITE_URL,
 } from "@/server/seo";
+
+// the game facts are cached for as long (src/server/game-facts.ts)
+export const revalidate = 600;
 
 export async function generateMetadata({
   params,
@@ -30,9 +34,10 @@ export default async function WhoAmI({
 }: PageProps<"/[locale]/who-am-i">) {
   const locale = (await params).locale as Lang;
   setRequestLocale(locale);
-  const [meta, home] = await Promise.all([
+  const [meta, home, facts] = await Promise.all([
     getTranslations({ locale, namespace: "meta.whoAmI" }),
     getTranslations({ locale, namespace: "home.games.whoAmI" }),
+    gameFacts("who-am-i", locale),
   ]);
   const game = {
     "@context": "https://schema.org",
@@ -59,7 +64,7 @@ export default async function WhoAmI({
         // biome-ignore lint/security/noDangerouslySetInnerHtml: escaped JSON-LD
         dangerouslySetInnerHTML={{ __html: jsonLd(game) }}
       />
-      <WhoAmIHub />
+      <WhoAmIHub facts={facts} />
     </>
   );
 }

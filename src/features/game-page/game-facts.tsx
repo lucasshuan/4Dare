@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   Library,
@@ -11,19 +10,15 @@ import {
   Tags,
 } from "lucide-react";
 import { animate, m, useReducedMotion } from "motion/react";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
-import { useLineupCatalog } from "@/features/create/lineup-catalog";
-import { useThemeCatalog } from "@/features/create/theme-catalog";
-import { useQuestionBank } from "@/features/impostor/use-questions";
 import type { GameKey } from "@/game/games";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { CHARACTERS, CONTRIBUTIONS, WORKSHOP } from "@/lib/routes";
-import type { LibraryPage, RankingPage } from "@/server/community-contract";
-import { useWeekRanking } from "./game-ranking";
+import type { GameFactsData, RankingPage } from "@/server/community-contract";
 
 type Fact = "themes" | "questions" | "missions" | "characters";
 
@@ -68,55 +63,24 @@ const LOOK: Record<
 /** When the tiles start coming in: with the podium, after the pitch. */
 const START = 0.18;
 
-/** How many characters the library has, as the characters page counts them. */
-function useLibraryTotal(enabled: boolean) {
-  const lang = useLocale();
-  const { data } = useQuery({
-    enabled,
-    queryKey: ["library-total", lang],
-    queryFn: async () => {
-      const res = await fetch(`/api/characters/browse?lang=${lang}`);
-      if (!res.ok) throw new Error(`library: ${res.status}`);
-      return ((await res.json()) as LibraryPage).counts.all;
-    },
-    staleTime: 10 * 60_000,
-  });
-  return data;
-}
-
-/** Each fact's number for `game`; undefined while it loads. */
-function useFacts(game: GameKey): Record<Fact, number | undefined> {
-  const lineup = game === "lineup";
-  const themes = useThemeCatalog(!lineup);
-  const questions = useQuestionBank(game === "impostor");
-  const catalog = useLineupCatalog(lineup);
-  const library = useLibraryTotal(!lineup);
-  return {
-    themes: themes?.filter((t) => t.games.includes(game)).length,
-    questions: questions?.size,
-    missions: catalog?.missions.length,
-    // the auction deals from its own deck; the other games from the whole library
-    characters: lineup ? catalog?.deck.length : library,
-  };
-}
-
 /**
  * A game's facts beside its ranking: what it is made of (themes, questions,
- * missions, characters), each counting up and opening where it grows, and
- * who helped most this month, opening the contributions. One slim row each,
- * so the list stands about as tall as the podium; the rows slide in one by
- * one with it.
+ * missions, and the library's characters, all read on the server), each
+ * counting up and opening where it grows, and who helped most this month,
+ * opening the contributions. One slim row each, so the list stands about as
+ * tall as the podium; the rows slide in one by one with it.
  */
 export function GameFacts({
   game,
+  facts,
   className,
 }: {
   game: GameKey;
+  facts: GameFactsData | null;
   className?: string;
 }) {
   const t = useTranslations("home.gamePage.facts");
-  const facts = useFacts(game);
-  const helpers = useWeekRanking(game).data?.helpers;
+  const helpers = facts?.podium.helpers;
   const tiles = [...FACTS[game], "contributors" as const];
 
   return (
@@ -165,7 +129,7 @@ export function GameFacts({
                   tone={LOOK[key].tone}
                   label={t(key)}
                   go={t(LOOK[key].go)}
-                  head={<Count n={facts[key]} delay={delay} />}
+                  head={<Count n={facts?.[key]} delay={delay} />}
                 />
               )}
             </m.li>

@@ -1,9 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Crown } from "lucide-react";
 import { m } from "motion/react";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { ProfileLink } from "@/features/profile/profile-link";
 import type { GameKey } from "@/game/games";
@@ -11,7 +10,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { RANKINGS } from "@/lib/routes";
-import type { RankingPage } from "@/server/community-contract";
+import type { GameFactsData } from "@/server/community-contract";
 
 /**
  * The podium's places, left to right: second, first, third. `rise` is when
@@ -27,36 +26,24 @@ const PODIUM = [
   { i: 2, step: "h-8", rise: 0.2 },
 ];
 
-/** The game's weekly ranking (shared with the game's panel, which shows its helpers). */
-export function useWeekRanking(game: GameKey) {
-  const lang = useLocale();
-  return useQuery({
-    queryKey: ["rankings", lang, game, "week"],
-    queryFn: async (): Promise<RankingPage> => {
-      const p = new URLSearchParams({ lang, period: "week", game });
-      const res = await fetch(`/api/rankings?${p}`);
-      if (!res.ok) throw new Error(`rankings: ${res.status}`);
-      return (await res.json()) as RankingPage;
-    },
-  });
-}
-
 /**
  * The game's weekly ranking, as the rankings page has it: its top three on
- * a podium. Empty places wait as skeletons. On arrival the steps grow one
- * by one, then the faces pop onto them and the crown drops on the first.
+ * a podium (read on the server). Empty places wait as skeletons. On arrival
+ * the steps grow one by one, then the faces pop onto them and the crown
+ * drops on the first.
  */
 export function GameRanking({
   game,
+  facts,
   className,
 }: {
   game: GameKey;
+  facts: GameFactsData | null;
   className?: string;
 }) {
   const t = useTranslations("home.gamePage.ranking");
   const format = useFormatter();
-  const { data, isPending } = useWeekRanking(game);
-  const rows = data?.rows ?? [];
+  const rows = facts?.podium.rows ?? [];
   // sunken is darker than the canvas on dark: ink tints show on both
   const bar = "rounded-pill bg-ink/10";
   return (
@@ -84,7 +71,7 @@ export function GameRanking({
           <ArrowRight className="size-3.5" strokeWidth={2} />
         </Link>
       </m.div>
-      <ol aria-busy={isPending} className="grid grid-cols-3 items-end gap-2">
+      <ol className="grid grid-cols-3 items-end gap-2">
         {PODIUM.map(({ i, step, rise }) => {
           const r = rows[i];
           return (
@@ -134,23 +121,9 @@ export function GameRanking({
                 </m.span>
               ) : (
                 <>
-                  <span
-                    className={cn(
-                      bar,
-                      i === 0 ? "size-11" : "size-9",
-                      isPending && "animate-pulse",
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      bar,
-                      "h-2.5 w-14",
-                      isPending && "animate-pulse",
-                    )}
-                  />
-                  <span
-                    className={cn(bar, "h-2 w-9", isPending && "animate-pulse")}
-                  />
+                  <span className={cn(bar, i === 0 ? "size-11" : "size-9")} />
+                  <span className={cn(bar, "h-2.5 w-14")} />
+                  <span className={cn(bar, "h-2 w-9")} />
                 </>
               )}
               <m.span
