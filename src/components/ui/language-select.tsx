@@ -38,11 +38,11 @@ export function LanguageSelect({
         autoFocus={autoFocus}
         className={LANGUAGE_TRIGGER}
       >
-        <Flag lang={locale} />
+        <Flag lang={locale} className="max-sm:size-10 max-sm:shadow-none" />
         <Select.Value className="max-sm:sr-only">
           {(l: Lang) => t(`languages.${l}`)}
         </Select.Value>
-        <Select.Icon className="text-ink-muted">
+        <Select.Icon className="text-ink-muted max-sm:hidden">
           <ChevronDown className="size-4" strokeWidth={2} />
         </Select.Icon>
       </Select.Trigger>

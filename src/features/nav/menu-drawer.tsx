@@ -133,6 +133,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
   const tab = useSearchParams().get("tab");
   const [q, setQ] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -315,7 +316,8 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-300 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
         <Dialog.Popup
-          initialFocus={searchRef}
+          ref={popupRef}
+          initialFocus={popupRef}
           className="fixed inset-y-0 left-0 z-50 flex w-[min(372px,88vw)] flex-col bg-surface text-ink shadow-pop outline-none transition-transform duration-[420ms] ease-soft data-ending-style:-translate-x-[104%] data-starting-style:-translate-x-[104%] data-ending-style:duration-[260ms] data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]"
         >
           <Dialog.Title className="sr-only">{t("menu")}</Dialog.Title>
