@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 /**
  * Plays `steps` on a loop, each for its `ms`, and gives the step showing and
- * how many loops have gone by. Holds on `still` while `paused`.
+ * how many loops have gone by. Holds on `still` while `paused`. `initial`
+ * chooses the server-rendered frame before the clock starts.
  *
  * A hidden tab holds the loop where it is and picks it up when it shows
  * again: there the browser stops animations but only slows timers, so steps
@@ -14,8 +15,9 @@ export function useStepLoop(
   steps: readonly { ms: number }[],
   still: number,
   paused = false,
+  initial = still,
 ) {
-  const [at, setAt] = useState({ step: still, loop: 0 });
+  const [at, setAt] = useState({ step: initial, loop: 0 });
 
   useEffect(() => {
     if (paused) return setAt({ step: still, loop: 0 });

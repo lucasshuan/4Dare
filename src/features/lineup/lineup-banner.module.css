@@ -1,0 +1,34 @@
+.mark {
+  animation: mark-drift ease-in-out infinite;
+}
+
+.board {
+  animation: board-drift 6.5s ease-in-out infinite;
+}
+
+@keyframes mark-drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(8deg);
+  }
+}
+
+@keyframes board-drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.6deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(0.6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark,
+  .board {
+    animation: none;
+  }
+}
