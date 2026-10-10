@@ -16,21 +16,21 @@ import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { AuthButton } from "@/components/ui/auth-button";
 import { Button } from "@/components/ui/button";
+import { FORM_MODAL_LAYOUT } from "@/components/ui/dialog";
 import { Flag } from "@/components/ui/language-switch";
 import { Portrait } from "@/components/ui/portrait";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Segmented } from "@/components/ui/segmented";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/toast";
-import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useThemeCatalog } from "@/features/create/theme-catalog";
 import { useMe } from "@/features/data/use-me";
 import { useSignIn } from "@/features/home/use-sign-in";
-import { tasteEmoji, useTasteName } from "@/features/library/taste";
-import { useLookAlikes } from "@/features/library/use-library";
+import { TasteChip } from "@/features/library/taste";
+import { useStarterMatches } from "@/features/library/use-library";
 import { QUESTION_KINDS, type QuestionKind } from "@/game/impostor/types";
 import { TONES, type Tone } from "@/game/lineup/bank";
-import type { Taste } from "@/game/tastes";
+import { TASTE_KEYS, type Taste } from "@/game/tastes";
 import { THEME_SETS, type ThemeSet } from "@/game/theme-sets";
 import { LANGS, type Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -46,6 +46,8 @@ import type {
   WorkshopKind,
 } from "@/server/community-contract";
 import { sendSuggestion } from "@/server/workshop-actions";
+import { SuggestionDestinations } from "./destinations";
+import { WorkshopKindIcon } from "./kind-icon";
 import {
   KIND_ICON,
   MissionObject,
@@ -53,6 +55,7 @@ import {
   setEmoji,
   ThemeObject,
 } from "./objects";
+import { setsForTastes } from "./theme-filters";
 import { useRefreshWorkshop } from "./use-workshop";
 
 type Scope = "general" | "set" | "theme";
@@ -128,7 +131,7 @@ export function Suggest({
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-300 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
-        <Dialog.Popup className="fixed inset-x-0 bottom-0 z-50 flex h-[calc(100dvh-28px)] flex-col overflow-hidden rounded-t-[28px] bg-surface text-ink shadow-pop outline-none transition-[translate,opacity,scale] duration-[440ms] ease-soft data-ending-style:translate-y-full data-starting-style:translate-y-full sm:inset-0 sm:m-auto sm:grid sm:h-[min(720px,calc(100dvh-32px))] sm:w-[min(980px,calc(100vw-32px))] sm:grid-cols-[minmax(0,330px)_minmax(0,1fr)] sm:rounded-[28px] sm:data-ending-style:translate-y-0 sm:data-starting-style:translate-y-0 sm:data-ending-style:scale-[0.98] sm:data-starting-style:scale-[0.98] sm:data-ending-style:opacity-0 sm:data-starting-style:opacity-0">
+        <Dialog.Popup className={FORM_MODAL_LAYOUT}>
           {me && !me.isGuest && open ? (
             <Composer
               kind={kind}
@@ -138,7 +141,7 @@ export function Suggest({
             />
           ) : (
             <>
-              <div className="hidden bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--line-strong)_35%,transparent)_1px,transparent_1.5px)] bg-[length:18px_18px] bg-sunken sm:block" />
+              <div className="hidden bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--line-strong)_35%,transparent)_1px,transparent_1.5px)] bg-[length:18px_18px] bg-sunken lg:block" />
               <div className="flex flex-col gap-4 p-6 sm:p-8">
                 <div className="flex items-start gap-3">
                   <Dialog.Title className="font-display font-extrabold text-[26px] leading-[1.1] tracking-[-0.015em]">
@@ -190,8 +193,6 @@ function Composer({
   const tCommon = useTranslations("common");
   const tErrors = useTranslations("common.errors");
   const tSets = useTranslations("common.themeSets");
-  const tasteName = useTasteName();
-  const gameName = useGameName();
   const locale = useLocale() as Lang;
   const toast = useToast();
   const refresh = useRefreshWorkshop();
@@ -205,6 +206,7 @@ function Composer({
   // theme
   const [games, setGames] = useState<ThemeGame[]>(["who-am-i", "impostor"]);
   const [name, setName] = useState("");
+  const [selectedTastes, setSelectedTastes] = useState<Taste[]>([]);
   const [themeSet, setThemeSet] = useState<ThemeSet>("looks" as ThemeSet);
   const [starters, setStarters] = useState<StarterCard[]>([]);
   const [search, setSearch] = useState("");
@@ -409,9 +411,27 @@ function Composer({
     </AnimatePresence>
   );
 
-  const tastes = [
-    ...new Set(starters.map((s) => s.taste).filter((x): x is Taste => !!x)),
-  ];
+  const availableSets = useMemo(
+    () => setsForTastes(selectedTastes, themes),
+    [selectedTastes, themes],
+  );
+  // A filtered-out selection must not survive invisibly in the draft.
+  useEffect(() => {
+    if (!availableSets.some((set) => set.key === themeSet))
+      setThemeSet(availableSets[0]?.key ?? "looks");
+  }, [availableSets, themeSet]);
+  const toggleTaste = (taste: Taste) => {
+    const next = selectedTastes.includes(taste)
+      ? selectedTastes.filter((value) => value !== taste)
+      : [...selectedTastes, taste];
+    setSelectedTastes(next);
+    setStarters((all) =>
+      all.filter(
+        (starter) =>
+          !next.length || (starter.taste && next.includes(starter.taste)),
+      ),
+    );
+  };
   const setThemes = (themes ?? []).filter((th) => th.set === themeSet);
 
   // -- preview ---------------------------------------------------------------
@@ -476,7 +496,7 @@ function Composer({
 
   return (
     <>
-      <div className="relative flex h-[240px] shrink-0 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--line-strong)_35%,transparent)_1px,transparent_1.5px)] bg-[length:18px_18px] bg-sunken px-5 sm:h-auto sm:py-8">
+      <div className="relative hidden min-h-0 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--line-strong)_35%,transparent)_1px,transparent_1.5px)] bg-[length:18px_18px] bg-sunken px-5 lg:flex lg:py-8">
         <span className="absolute top-4 left-[18px] font-semibold text-[12px] text-ink-muted uppercase tracking-[0.08em]">
           {tc("preview")}
         </span>
@@ -506,7 +526,6 @@ function Composer({
             animate={{ opacity: 1, y: 0, rotate: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.36, ease: ease.soft }}
-            className="max-sm:mt-6 max-sm:scale-[0.72]"
           >
             {preview}
           </m.div>
@@ -518,9 +537,9 @@ function Composer({
           e.preventDefault();
           void submit();
         }}
-        className="flex min-h-0 flex-1 flex-col"
+        className="@container flex min-h-0 min-w-0 flex-1 flex-col"
       >
-        <div className="flex shrink-0 items-start gap-3 py-5 pr-5 pl-5 sm:pl-7">
+        <div className="flex shrink-0 items-start gap-3 p-4 sm:p-6 lg:p-7">
           <div>
             <Dialog.Title className="font-display font-extrabold text-[26px] leading-[1.1] tracking-[-0.015em]">
               {tc("title")}
@@ -538,19 +557,52 @@ function Composer({
         </div>
         <ScrollArea
           className="flex-1"
-          contentClassName="grid auto-rows-max content-start gap-[18px] px-5 pt-1 pb-5 sm:px-7"
+          contentClassName="grid auto-rows-max content-start gap-[18px] px-4 pt-1 pb-5 sm:px-6 lg:px-7"
         >
-          <Segmented
-            label={tc("type")}
-            options={["theme", "question", "mission"] as const}
-            value={kind}
-            onChange={(k: WorkshopKind) => {
-              setKind(k);
-              setError("");
-              setChecks([]);
-            }}
-            render={(k) => tc(`types.${k}`)}
-          />
+          <div className="grid min-w-0 gap-3 @min-[640px]:grid-cols-[minmax(0,1fr)_auto] @min-[640px]:items-center">
+            <Segmented
+              label={tc("type")}
+              options={["theme", "question", "mission"] as const}
+              value={kind}
+              onChange={(k: WorkshopKind) => {
+                setKind(k);
+                setError("");
+                setChecks([]);
+              }}
+              render={(k) => (
+                <>
+                  <WorkshopKindIcon kind={k} />
+                  {tc(`types.${k}`)}
+                </>
+              )}
+              className="min-w-0 [&_[role=radio]]:flex-1 [&_[role=radio]]:px-2.5 [&_[role=radio]]:text-[13px]"
+            />
+            <SuggestionDestinations
+              kind={kind}
+              games={games}
+              onToggle={(game) =>
+                setGames((all) =>
+                  all.includes(game)
+                    ? all.filter((value) => value !== game)
+                    : [...all, game],
+                )
+              }
+            />
+          </div>
+          <div className="grid gap-2">
+            <Hint>
+              {tc(
+                kind === "theme"
+                  ? "themeGamesHint"
+                  : kind === "question"
+                    ? "questionGamesHint"
+                    : "missionGamesHint",
+              )}
+            </Hint>
+            {kind === "theme" && !games.length ? (
+              <Bad>{tc("needGame")}</Bad>
+            ) : null}
+          </div>
           <AnimatePresence mode="wait" initial={false}>
             <m.div
               key={kind}
@@ -558,36 +610,23 @@ function Composer({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.24, ease: ease.soft }}
-              className="grid gap-[18px]"
+              className="grid items-start gap-[18px] @min-[640px]:grid-cols-2"
             >
               {kind === "theme" ? (
                 <>
-                  <Field label={tc("goesTo")}>
-                    <div className="flex flex-wrap gap-2">
-                      {(["who-am-i", "impostor"] as const).map((g) => (
-                        <button
-                          key={g}
-                          type="button"
-                          aria-pressed={games.includes(g)}
-                          onClick={() =>
-                            setGames((all) =>
-                              all.includes(g)
-                                ? all.filter((x) => x !== g)
-                                : [...all, g],
-                            )
-                          }
-                          className={cn(
-                            chip(games.includes(g)),
-                            "h-9 pl-1.5 text-[14px]",
-                          )}
-                        >
-                          <GameThumb game={g} size="tiny" />
-                          {gameName(g)}
-                        </button>
+                  <Field label={tc("tastes")}>
+                    <fieldset className="m-0 flex min-w-0 flex-wrap gap-2 border-0 p-0">
+                      <legend className="sr-only">{tc("tastes")}</legend>
+                      {TASTE_KEYS.map((taste) => (
+                        <TasteChip
+                          key={taste}
+                          taste={taste}
+                          on={selectedTastes.includes(taste)}
+                          onClick={() => toggleTaste(taste)}
+                        />
                       ))}
-                    </div>
-                    {!games.length ? <Bad>{tc("needGame")}</Bad> : null}
-                    <Hint>{tc("themeGamesHint")}</Hint>
+                    </fieldset>
+                    <Hint>{tc("tastesHint")}</Hint>
                   </Field>
                   <Field label={tc("themeName")}>
                     <input
@@ -602,7 +641,7 @@ function Composer({
                   </Field>
                   <Field label={tc("set")}>
                     <div className="flex flex-wrap gap-1.5">
-                      {THEME_SETS.map((s) => (
+                      {availableSets.map((s) => (
                         <button
                           key={s.key}
                           type="button"
@@ -678,6 +717,7 @@ function Composer({
                       q={search}
                       onQ={setSearch}
                       taken={starters.map((s) => s.id)}
+                      tastes={selectedTastes}
                       onPick={(s) => {
                         if (starters.length >= 5)
                           return setError(tc("fiveEnough"));
@@ -687,26 +727,6 @@ function Composer({
                       }}
                     />
                     <Hint>{tc("startersHint")}</Hint>
-                  </Field>
-                  <Field label={tc("tastes")}>
-                    <div className="flex flex-wrap gap-1.5">
-                      {tastes.length ? (
-                        tastes.map((x) => (
-                          <span
-                            key={x}
-                            className={cn(
-                              chip(false),
-                              "cursor-default bg-sunken",
-                            )}
-                          >
-                            {tasteEmoji(x)} {tasteName(x)}
-                          </span>
-                        ))
-                      ) : (
-                        <Hint>{tc("tastesEmpty")}</Hint>
-                      )}
-                    </div>
-                    <Hint>{tc("tastesHint")}</Hint>
                   </Field>
                   <Field label={tc("startersLang")}>
                     <Segmented
@@ -736,15 +756,6 @@ function Composer({
                 </>
               ) : kind === "question" ? (
                 <>
-                  <Field label={tc("goesTo")}>
-                    <span
-                      className={cn(chip(true), "h-9 w-fit pl-1.5 text-[14px]")}
-                    >
-                      <GameThumb game="impostor" size="tiny" />
-                      {gameName("impostor")}
-                    </span>
-                    <Hint>{tc("questionGamesHint")}</Hint>
-                  </Field>
                   <Field label={tc("answerKind")}>
                     <Segmented
                       label={tc("answerKind")}
@@ -782,7 +793,7 @@ function Composer({
                         </span>
                       }
                     >
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid gap-2 @min-[480px]:grid-cols-2">
                         <LabelInput
                           value={low}
                           onChange={setLow}
@@ -809,7 +820,7 @@ function Composer({
                         </span>
                       }
                     >
-                      <div className="grid gap-2 sm:grid-cols-2">
+                      <div className="grid gap-2 @min-[480px]:grid-cols-2">
                         {choices.map((c, i) => (
                           <div
                             // biome-ignore lint/suspicious/noArrayIndexKey: options in order
@@ -904,7 +915,10 @@ function Composer({
                       </select>
                     ) : null}
                   </Field>
-                  <Field label={tc("audience")}>
+                  <Field
+                    label={tc("audience")}
+                    className="@min-[640px]:col-span-1"
+                  >
                     <Segmented
                       label={tc("audience")}
                       options={["all", "fiction", "real"] as const}
@@ -927,7 +941,10 @@ function Composer({
                           })}
                     </Hint>
                   </Field>
-                  <Field label={tc("spice")}>
+                  <Field
+                    label={tc("spice")}
+                    className="@min-[640px]:col-span-1"
+                  >
                     <Segmented
                       label={tc("spice")}
                       options={["1", "2", "3"] as const}
@@ -954,15 +971,6 @@ function Composer({
                 </>
               ) : (
                 <>
-                  <Field label={tc("goesTo")}>
-                    <span
-                      className={cn(chip(true), "h-9 w-fit pl-1.5 text-[14px]")}
-                    >
-                      <GameThumb game="lineup" size="tiny" />
-                      {gameName("lineup")}
-                    </span>
-                    <Hint>{tc("missionGamesHint")}</Hint>
-                  </Field>
                   <Field label={tc("mission")}>
                     <span className="flex items-end rounded-[16px] border border-line-strong bg-surface pr-3 focus-within:border-sky focus-within:shadow-[0_0_0_3px_color-mix(in_oklch,var(--sky)_22%,transparent)]">
                       <textarea
@@ -979,7 +987,7 @@ function Composer({
                     </span>
                     {slot("text")}
                   </Field>
-                  <Field label={tc("tone")}>
+                  <Field label={tc("tone")} className="@min-[640px]:col-span-1">
                     <div className="flex flex-wrap gap-2">
                       {TONES.map((x) => (
                         <button
@@ -996,7 +1004,10 @@ function Composer({
                     </div>
                     <Hint>{t(`toneHints.${tone}`)}</Hint>
                   </Field>
-                  <Field label={tc("heavy")}>
+                  <Field
+                    label={tc("heavy")}
+                    className="@min-[640px]:col-span-1"
+                  >
                     <span className="flex items-center gap-3">
                       <Switch
                         checked={heavy}
@@ -1043,7 +1054,7 @@ function Composer({
             ) : null}
           </AnimatePresence>
         </ScrollArea>
-        <div className="flex shrink-0 items-center gap-2.5 border-line border-t px-5 py-3.5 sm:pl-7">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-line border-t px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 lg:px-7">
           <span className="mr-auto text-[13px] text-ink-muted max-sm:hidden">
             {left === null ? null : tc("left", { n: left })}
           </span>
@@ -1062,14 +1073,21 @@ function Composer({
 function Field({
   label,
   extra,
+  className,
   children,
 }: {
   label: string;
   extra?: ReactNode;
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <div className="grid gap-2">
+    <div
+      className={cn(
+        "col-span-full grid min-w-0 content-start gap-2",
+        className,
+      )}
+    >
       <span className="flex items-center gap-2 font-semibold text-[14px]">
         {label}
         {extra}
@@ -1132,15 +1150,17 @@ function StarterSearch({
   q,
   onQ,
   taken,
+  tastes,
   onPick,
 }: {
   q: string;
   onQ: (q: string) => void;
   taken: string[];
+  tastes: readonly Taste[];
   onPick: (s: StarterCard) => void;
 }) {
   const tc = useTranslations("workshop.compose");
-  const { data } = useLookAlikes(q);
+  const { data } = useStarterMatches(q, tastes);
   const results = (data ?? [])
     .map((c) => ({ ...c, base: baseId(c.id) }))
     .filter((c) => !taken.includes(c.base));

@@ -116,7 +116,7 @@
     "removeStarter": "Remove {name}",
     "addStarter": "Add {name}",
     "tastes": "Tastes",
-    "tastesHint": "They come from the example characters. A room that turns these tastes off won't draw the theme.",
+    "tastesHint": "Pick tastes to filter sets and characters. With none selected, all appear. Examples outside the filter are removed; the theme's tastes come from the chosen examples.",
     "tastesEmpty": "Pick the examples to see the tastes.",
     "startersLang": "Examples apply to",
     "allLangs": "All languages",

@@ -116,7 +116,7 @@
     "removeStarter": "Quitar a {name}",
     "addStarter": "Poner a {name}",
     "tastes": "Gustos",
-    "tastesHint": "Vienen de los personajes de ejemplo. Una sala que desactive estos gustos no sortea el tema.",
+    "tastesHint": "Elige gustos para filtrar conjuntos y personajes. Sin selección, aparecen todos. Se eliminan los ejemplos fuera del filtro; los gustos del tema vienen de los ejemplos elegidos.",
     "tastesEmpty": "Elige los ejemplos para ver los gustos.",
     "startersLang": "Los ejemplos valen para",
     "allLangs": "Todos los idiomas",

@@ -27,6 +27,7 @@ import {
   type WorkshopItem,
   type WorkshopKind,
 } from "@/server/community-contract";
+import { WorkshopKindIcon } from "./kind-icon";
 import { Sema } from "./objects";
 import { Suggest } from "./suggest";
 import {
@@ -260,6 +261,7 @@ export function WorkshopScreen({ focus = null }: { focus?: string | null }) {
           onChange={(k: Tab) => set({ kind: k === "all" ? null : k })}
           render={(k) => (
             <>
+              <WorkshopKindIcon kind={k} />
               {t(`tabs.${k}`)}
               {first ? (
                 <span className="font-medium font-mono text-[12px] text-ink-muted max-sm:hidden">

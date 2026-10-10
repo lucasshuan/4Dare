@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
-import type { Taste } from "@/game/tastes";
+import { TASTE_KEYS, type Taste } from "@/game/tastes";
 import type {
   AliasHistoryEntry,
   CharacterSheet,
@@ -61,6 +61,33 @@ export function useLookAlikes(q: string) {
         `/api/characters/browse?${new URLSearchParams({ lang, q: term })}`,
       ),
     select: (page) => page.items.slice(0, 3),
+    staleTime: 30_000,
+  });
+}
+
+/** Example searches filter before the library limits the results. */
+export function useStarterMatches(q: string, tastes: readonly Taste[]) {
+  const lang = useLocale();
+  const term = q.trim();
+  const selected = TASTE_KEYS.filter((taste) => tastes.includes(taste));
+  return useQuery({
+    queryKey: ["library-starters", lang, term, selected],
+    enabled: term.length >= 2,
+    queryFn: async () => {
+      const filters = selected.length ? selected : [null];
+      const pages = await Promise.all(
+        filters.map((taste) => {
+          const params = new URLSearchParams({ lang, q: term });
+          if (taste) params.set("taste", taste);
+          return json<LibraryPage>(`/api/characters/browse?${params}`);
+        }),
+      );
+      return [
+        ...new Map(
+          pages.flatMap((page) => page.items).map((c) => [c.id, c]),
+        ).values(),
+      ];
+    },
     staleTime: 30_000,
   });
 }

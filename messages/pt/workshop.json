@@ -116,7 +116,7 @@
     "removeStarter": "Tirar {name}",
     "addStarter": "Pôr {name}",
     "tastes": "Gostos",
-    "tastesHint": "Vêm dos personagens de exemplo. Uma sala que desliga esses gostos não sorteia o tema.",
+    "tastesHint": "Escolha gostos para filtrar conjuntos e personagens. Sem seleção, todos aparecem. Exemplos fora do filtro são removidos; os gostos do tema vêm dos exemplos escolhidos.",
     "tastesEmpty": "Escolha os exemplos para ver os gostos.",
     "startersLang": "Exemplos valem para",
     "allLangs": "Todos os idiomas",
