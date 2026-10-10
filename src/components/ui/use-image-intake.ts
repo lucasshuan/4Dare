@@ -11,9 +11,8 @@ import {
 } from "react";
 import type { Area } from "react-easy-crop";
 import { insideChat } from "@/lib/focus";
+import { IMAGE_ACCEPT, imageMime } from "@/lib/image-file";
 
-/** Any picture the browser can open (JFIF, AVIF, BMP...): it is re-encoded as WebP anyway. */
-export const IMAGE_ACCEPT = "image/*,.jfif,.pjpeg,.pjp";
 const MAX_BYTES = 8 * 1024 * 1024;
 
 /** The part of the picture shown when nobody has moved the crop yet: centered, covering the frame. */
@@ -64,9 +63,7 @@ export async function cropToWebp(
   );
 }
 
-const isImage = (f: File) =>
-  f.type.startsWith("image/") ||
-  (!f.type && /\.(jfif|pjpeg|pjp)$/i.test(f.name));
+const isImage = (file: File) => imageMime(file) !== null;
 
 /** A picture's address in what was pasted or dropped from a web page: an <img> in the HTML, or a link. */
 function imageAddress(data: DataTransfer): string | null {
@@ -142,9 +139,12 @@ export function useImageIntake({
       if (!input) return;
       const file = typeof input === "string" ? await download(input) : input;
       if (!file) return setError(t("notDownloadable"));
-      if (!isImage(file)) return setError(t("wrongType"));
+      const type = imageMime(file);
+      if (!type) return setError(t("wrongType"));
       if (file.size > MAX_BYTES) return setError(t("tooBig"));
-      const url = URL.createObjectURL(file);
+      const url = URL.createObjectURL(
+        file.type === type ? file : new Blob([file], { type }),
+      );
       // A file can say "image" and still not be one (or be broken): try it first.
       try {
         const img = new Image();

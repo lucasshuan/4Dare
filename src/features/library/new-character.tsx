@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { AuthButton } from "@/components/ui/auth-button";
 import { Button } from "@/components/ui/button";
+import { FORM_MODAL_LAYOUT } from "@/components/ui/dialog";
 import { ImageDrop, type ImageDropHandle } from "@/components/ui/image-drop";
 import { Portrait } from "@/components/ui/portrait";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -57,12 +58,12 @@ export function NewCharacter({
     >
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-300 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
-        <Dialog.Popup className="fixed inset-x-0 bottom-0 z-50 flex h-[calc(100dvh-28px)] flex-col overflow-hidden rounded-t-[28px] bg-surface text-ink shadow-pop outline-none transition-[translate,opacity,scale] duration-[440ms] ease-soft data-ending-style:translate-y-full data-starting-style:translate-y-full sm:inset-0 sm:m-auto sm:grid sm:h-[min(640px,calc(100dvh-32px))] sm:w-[min(900px,calc(100vw-32px))] sm:grid-cols-[minmax(0,320px)_minmax(0,1fr)] sm:rounded-[28px] sm:data-ending-style:translate-y-0 sm:data-starting-style:translate-y-0 sm:data-ending-style:scale-[0.98] sm:data-starting-style:scale-[0.98] sm:data-ending-style:opacity-0 sm:data-starting-style:opacity-0">
+        <Dialog.Popup className={FORM_MODAL_LAYOUT}>
           {me && !me.isGuest && open ? (
             <Form prefill={prefill ?? ""} onClose={onClose} onMade={onMade} />
           ) : (
             <>
-              <div className="relative hidden place-items-center bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--line-strong)_35%,transparent)_1px,transparent_1.5px)] bg-[length:18px_18px] bg-sunken sm:grid">
+              <div className="relative hidden place-items-center bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--line-strong)_35%,transparent)_1px,transparent_1.5px)] bg-[length:18px_18px] bg-sunken lg:grid">
                 <PreviewCard name="" origin="" taste={null} picture={null} />
               </div>
               <div className="flex flex-col gap-4 p-6 sm:p-8">
@@ -236,11 +237,11 @@ function Form({
 
   return (
     <>
-      <div className="relative flex h-[200px] shrink-0 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--line-strong)_35%,transparent)_1px,transparent_1.5px)] bg-[length:18px_18px] bg-sunken sm:h-auto sm:p-7">
+      <div className="relative hidden min-h-0 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_1px_1px,color-mix(in_oklch,var(--line-strong)_35%,transparent)_1px,transparent_1.5px)] bg-[length:18px_18px] bg-sunken lg:flex lg:p-7">
         <span className="absolute top-4 left-[18px] font-semibold text-[12px] text-ink-muted uppercase tracking-[0.08em]">
           {t("preview")}
         </span>
-        <m.div animate={nudge} className="max-sm:scale-[0.52]">
+        <m.div animate={nudge} className="w-full max-w-[320px]">
           <PreviewCard
             name={name.trim()}
             origin={origin.trim()}
@@ -255,9 +256,9 @@ function Form({
           e.preventDefault();
           void submit();
         }}
-        className="flex min-h-0 flex-1 flex-col"
+        className="@container flex min-h-0 min-w-0 flex-1 flex-col"
       >
-        <div className="flex shrink-0 items-start gap-3 py-5 pr-5 pl-5 sm:pl-7">
+        <div className="flex shrink-0 items-start gap-3 p-4 sm:p-6 lg:p-7">
           <div>
             <Dialog.Title className="font-display font-extrabold text-[26px] leading-[1.1] tracking-[-0.015em]">
               {t("title")}
@@ -275,162 +276,173 @@ function Form({
         </div>
         <ScrollArea
           className="flex-1"
-          contentClassName="grid auto-rows-max content-start gap-[18px] px-5 pt-1 pb-5 sm:px-7"
+          contentClassName="grid auto-rows-max content-start gap-[18px] px-4 pt-1 pb-5 sm:px-6 lg:px-7"
         >
-          <Field label={t("name")}>
-            <input
-              value={name}
-              maxLength={NAME_MAX}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t("namePh")}
-              autoComplete="off"
-              // biome-ignore lint/a11y/noAutofocus: the form opens to be typed in
-              autoFocus
-              className={INPUT}
-            />
-          </Field>
-          <AnimatePresence initial={false}>
-            {alikes.data?.length && name.trim().length >= 2 ? (
-              <m.div
-                key="alikes"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: ease.soft }}
-                className="overflow-hidden"
-                aria-live="polite"
-              >
-                <div
-                  className={cn(
-                    "grid gap-1.5 rounded-[18px] p-3",
-                    exact ? "bg-no-soft" : "bg-sunken",
-                  )}
-                >
-                  <b className="text-[13px]">
-                    {exact ? t("exists", { name: exact.name }) : t("similar")}
-                  </b>
-                  {alikes.data.map((c) => (
-                    <div
-                      key={c.id}
-                      className="flex items-center gap-2.5 text-[14px]"
-                    >
-                      <span className="w-[30px] shrink-0 overflow-hidden rounded-[8px]">
-                        <Portrait src={c.imageUrl} className="rounded-none" />
-                      </span>
-                      <span className="min-w-0 flex-1 truncate">
-                        {c.name}
-                        {c.origin ? (
-                          <small className="text-ink-muted">
-                            {" "}
-                            · {c.origin}
-                          </small>
-                        ) : null}
-                      </span>
-                      <Link
-                        href={characterPath(c.id)}
-                        scroll={false}
-                        onClick={onClose}
-                        className="inline-flex h-9 items-center rounded-pill border border-line-strong bg-surface px-3.5 font-semibold text-[14px] transition-colors hover:bg-sunken"
-                      >
-                        {t("open")}
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              </m.div>
-            ) : null}
-          </AnimatePresence>
-          <Field label={t("origin")}>
-            <input
-              value={origin}
-              maxLength={NAME_MAX}
-              onChange={(e) => setOrigin(e.target.value)}
-              placeholder={t("originPh")}
-              autoComplete="off"
-              className={INPUT}
-            />
-          </Field>
-          <div className="grid gap-2">
-            <span className="font-semibold text-[14px]">{t("taste")}</span>
-            <fieldset className="m-0 flex min-w-0 flex-wrap gap-2 border-0 p-0">
-              <legend className="sr-only">{t("taste")}</legend>
-              {TASTE_KEYS.map((k) => (
-                <TasteChip
-                  key={k}
-                  taste={k}
-                  on={taste === k}
-                  onClick={() => {
-                    setTaste(k);
-                    wiggle();
-                  }}
+          <div className="grid min-w-0 items-start gap-6 @min-[640px]:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+            <div className="grid min-w-0 content-start gap-[18px]">
+              <Field label={t("name")}>
+                <input
+                  value={name}
+                  maxLength={NAME_MAX}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t("namePh")}
+                  autoComplete="off"
+                  // biome-ignore lint/a11y/noAutofocus: the form opens to be typed in
+                  autoFocus
+                  className={INPUT}
                 />
-              ))}
-            </fieldset>
-          </div>
-          <div className="grid gap-2">
-            <span className="font-semibold text-[14px]">{t("aliases")}</span>
-            {/* biome-ignore lint/a11y/noStaticElementInteractions: a click anywhere goes to the input */}
-            {/* biome-ignore lint/a11y/useKeyWithClickEvents: the input itself takes the keys */}
-            <div
-              onClick={(e) =>
-                (
-                  e.currentTarget.querySelector("input") as HTMLInputElement
-                )?.focus()
-              }
-              className="flex min-h-[46px] flex-wrap items-center gap-1.5 rounded-[16px] border border-line-strong bg-surface px-2.5 py-1.5 focus-within:border-sky focus-within:shadow-[0_0_0_3px_color-mix(in_oklch,var(--sky)_22%,transparent)]"
-            >
+              </Field>
               <AnimatePresence initial={false}>
-                {tags.map((x, i) => (
-                  <m.span
-                    key={x}
-                    layout
-                    initial={{ opacity: 0, scale: 0.86, y: 6 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.32, ease: ease.soft }}
-                    className="inline-flex h-[30px] items-center gap-0.5 rounded-pill bg-sky-soft pl-2.5 font-semibold text-[13px]"
+                {alikes.data?.length && name.trim().length >= 2 ? (
+                  <m.div
+                    key="alikes"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: ease.soft }}
+                    className="overflow-hidden"
+                    aria-live="polite"
                   >
-                    {x}
-                    <button
-                      type="button"
-                      aria-label={t("removeAlias", { name: x })}
-                      onClick={() =>
-                        setTags((all) => all.filter((_, j) => j !== i))
-                      }
-                      className="flex size-7 items-center justify-center rounded-pill text-ink-muted hover:text-ink"
+                    <div
+                      className={cn(
+                        "grid gap-1.5 rounded-[18px] p-3",
+                        exact ? "bg-no-soft" : "bg-sunken",
+                      )}
                     >
-                      <X className="size-3.5" strokeWidth={2} />
-                    </button>
-                  </m.span>
-                ))}
+                      <b className="text-[13px]">
+                        {exact
+                          ? t("exists", { name: exact.name })
+                          : t("similar")}
+                      </b>
+                      {alikes.data.map((c) => (
+                        <div
+                          key={c.id}
+                          className="flex items-center gap-2.5 text-[14px]"
+                        >
+                          <span className="w-[30px] shrink-0 overflow-hidden rounded-[8px]">
+                            <Portrait
+                              src={c.imageUrl}
+                              className="rounded-none"
+                            />
+                          </span>
+                          <span className="min-w-0 flex-1 truncate">
+                            {c.name}
+                            {c.origin ? (
+                              <small className="text-ink-muted">
+                                {" "}
+                                · {c.origin}
+                              </small>
+                            ) : null}
+                          </span>
+                          <Link
+                            href={characterPath(c.id)}
+                            scroll={false}
+                            onClick={onClose}
+                            className="inline-flex h-9 items-center rounded-pill border border-line-strong bg-surface px-3.5 font-semibold text-[14px] transition-colors hover:bg-sunken"
+                          >
+                            {t("open")}
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </m.div>
+                ) : null}
               </AnimatePresence>
-              <input
-                value={tag}
-                maxLength={40}
-                onChange={(e) => setTag(e.target.value)}
-                onKeyDown={onTagKey}
-                onBlur={addTag}
-                placeholder={t("aliasesPh")}
-                aria-label={t("aliases")}
-                className="h-8 min-w-[120px] flex-1 bg-transparent outline-none focus-visible:outline-none"
-              />
+              <Field label={t("origin")}>
+                <input
+                  value={origin}
+                  maxLength={NAME_MAX}
+                  onChange={(e) => setOrigin(e.target.value)}
+                  placeholder={t("originPh")}
+                  autoComplete="off"
+                  className={INPUT}
+                />
+              </Field>
+              <div className="grid min-w-0 content-start gap-2">
+                <span className="font-semibold text-[14px]">
+                  {t("aliases")}
+                </span>
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: a click anywhere goes to the input */}
+                {/* biome-ignore lint/a11y/useKeyWithClickEvents: the input itself takes the keys */}
+                <div
+                  onClick={(e) =>
+                    (
+                      e.currentTarget.querySelector("input") as HTMLInputElement
+                    )?.focus()
+                  }
+                  className="flex min-h-[46px] flex-wrap items-center gap-1.5 rounded-[16px] border border-line-strong bg-surface px-2.5 py-1.5 focus-within:border-sky focus-within:shadow-[0_0_0_3px_color-mix(in_oklch,var(--sky)_22%,transparent)]"
+                >
+                  <AnimatePresence initial={false}>
+                    {tags.map((x, i) => (
+                      <m.span
+                        key={x}
+                        layout
+                        initial={{ opacity: 0, scale: 0.86, y: 6 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.32, ease: ease.soft }}
+                        className="inline-flex h-[30px] items-center gap-0.5 rounded-pill bg-sky-soft pl-2.5 font-semibold text-[13px]"
+                      >
+                        {x}
+                        <button
+                          type="button"
+                          aria-label={t("removeAlias", { name: x })}
+                          onClick={() =>
+                            setTags((all) => all.filter((_, j) => j !== i))
+                          }
+                          className="flex size-7 items-center justify-center rounded-pill text-ink-muted hover:text-ink"
+                        >
+                          <X className="size-3.5" strokeWidth={2} />
+                        </button>
+                      </m.span>
+                    ))}
+                  </AnimatePresence>
+                  <input
+                    value={tag}
+                    maxLength={40}
+                    onChange={(e) => setTag(e.target.value)}
+                    onKeyDown={onTagKey}
+                    onBlur={addTag}
+                    placeholder={t("aliasesPh")}
+                    aria-label={t("aliases")}
+                    className="h-8 min-w-[120px] flex-1 bg-transparent outline-none focus-visible:outline-none"
+                  />
+                </div>
+                <span className="text-[13px] text-ink-muted">
+                  {t("aliasesHint")}
+                </span>
+              </div>
+              <div className="grid min-w-0 gap-2">
+                <span className="font-semibold text-[14px]">{t("taste")}</span>
+                <fieldset className="m-0 flex min-w-0 flex-wrap gap-2 border-0 p-0">
+                  <legend className="sr-only">{t("taste")}</legend>
+                  {TASTE_KEYS.map((k) => (
+                    <TasteChip
+                      key={k}
+                      taste={k}
+                      on={taste === k}
+                      onClick={() => {
+                        setTaste(k);
+                        wiggle();
+                      }}
+                    />
+                  ))}
+                </fieldset>
+              </div>
             </div>
-            <span className="text-[13px] text-ink-muted">
-              {t("aliasesHint")}
-            </span>
-          </div>
-          <div className="grid gap-2">
-            <span className="font-semibold text-[14px]">{t("picture")}</span>
-            <ImageDrop
-              ref={drop}
-              onChange={(blob) => {
-                setPicture(blob ? URL.createObjectURL(blob) : null);
-                if (blob) wiggle();
-              }}
-            />
-            <span className="text-[13px] text-ink-muted">
-              {t("pictureHint")}
-            </span>
+            <div className="grid min-w-0 content-start gap-2">
+              <span className="font-semibold text-[14px]">{t("picture")}</span>
+              <ImageDrop
+                ref={drop}
+                onChange={(blob) => {
+                  setPicture(blob ? URL.createObjectURL(blob) : null);
+                  if (blob) wiggle();
+                }}
+              />
+              <span className="text-[13px] text-ink-muted">
+                {t("pictureHint")}
+              </span>
+            </div>
           </div>
           <AnimatePresence>
             {error ? (
@@ -439,14 +451,14 @@ function Form({
                 role="alert"
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="font-semibold text-[13px] text-no"
+                className="col-span-full font-semibold text-[13px] text-no"
               >
                 {error}
               </m.p>
             ) : null}
           </AnimatePresence>
         </ScrollArea>
-        <div className="flex shrink-0 items-center gap-2.5 border-line border-t px-5 py-3.5 sm:pl-7">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-line border-t px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 lg:px-7">
           <span className="mr-auto text-[13px] text-ink-muted max-sm:hidden">
             {t("author")}
           </span>
@@ -463,7 +475,7 @@ function Form({
 }
 
 const INPUT =
-  "h-[46px] w-full rounded-[16px] border border-line-strong bg-surface px-3.5 text-[15px] outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-sky focus-visible:shadow-[0_0_0_3px_color-mix(in_oklch,var(--sky)_22%,transparent)] focus-visible:outline-none";
+  "h-[46px] w-full min-w-0 rounded-[16px] border border-line-strong bg-surface px-3.5 text-[15px] outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-sky focus-visible:shadow-[0_0_0_3px_color-mix(in_oklch,var(--sky)_22%,transparent)] focus-visible:outline-none";
 
 function Field({
   label,
@@ -474,7 +486,7 @@ function Field({
 }) {
   return (
     // biome-ignore lint/a11y/noLabelWithoutControl: the control is the child
-    <label className="grid gap-2">
+    <label className="grid min-w-0 content-start gap-2">
       <span className="font-semibold text-[14px]">{label}</span>
       {children}
     </label>
@@ -496,7 +508,7 @@ function PreviewCard({
   const t = useTranslations("library.create");
   const tasteName = useTasteName();
   return (
-    <div className="grid w-[232px] max-w-full -rotate-2 gap-2.5 rounded-[32px] bg-surface p-3 shadow-card">
+    <div className="grid w-[min(320px,calc((100dvh_-_160px)_*_0.64))] max-w-full -rotate-2 gap-2.5 rounded-[32px] bg-surface p-3 shadow-card">
       <span
         style={tasteStyle(taste)}
         className="block overflow-hidden rounded-[24px] bg-(--taste)"
