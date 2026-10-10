@@ -10,7 +10,6 @@ import { RoomChat } from "@/features/chat/room-chat";
 import { useRoomContext } from "@/features/data/room-context";
 import { ImpostorScenes } from "@/features/impostor/impostor-scenes";
 import { ImpostorScreen } from "@/features/impostor/impostor-screen";
-import { LobbyBackdrop } from "@/features/lobby/lobby-backdrop";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
 import { ResultScreen } from "@/features/result/result-screen";
 import { isGuessScene, isShow, type StageScreen } from "@/features/stage/stage";
@@ -42,6 +41,7 @@ import {
   useReached,
   useStepStarted,
 } from "./match-frame";
+import { EntranceLobbyBackdrop } from "./room-entrance";
 import { stepCall } from "./step-call";
 
 /** What for?'s screens come with its match: no other room loads them. */
@@ -187,7 +187,9 @@ function Areas() {
   return (
     <>
       {/* the lobby's coloured backdrop, its flares in time with the music */}
-      {area === "lobby" ? <LobbyBackdrop game={view.settings.game} /> : null}
+      <EntranceLobbyBackdrop
+        game={area === "lobby" ? view.settings.game : null}
+      />
       <AnimatePresence mode="wait">
         {area === "lobby" ? (
           <m.div

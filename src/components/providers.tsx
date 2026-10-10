@@ -5,6 +5,7 @@ import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import { ThemeProvider } from "next-themes";
 import { type ReactNode, useState } from "react";
 import { ProfileModalHost } from "@/features/profile/profile-modal-host";
+import { RoomEntranceProvider } from "@/features/room/room-entrance";
 import { SettingsSync } from "@/features/settings/settings-sync";
 import { PageScrollbar } from "./ui/scroll-area";
 import { ToastProvider } from "./ui/toast";
@@ -25,7 +26,7 @@ export function Providers({ children }: { children: ReactNode }) {
           {/* `m` everywhere; the layout features load only where used (LayoutMotion) */}
           <LazyMotion features={domAnimation} strict>
             <ToastProvider>
-              {children}
+              <RoomEntranceProvider>{children}</RoomEntranceProvider>
               <SettingsSync />
               <ProfileModalHost />
               <PageScrollbar />

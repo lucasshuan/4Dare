@@ -13,6 +13,7 @@ import {
   UsersRound,
   VenetianMask,
 } from "lucide-react";
+import { m, useReducedMotion } from "motion/react";
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { GAME_KEYS, type GameKey } from "@/game/games";
@@ -112,6 +113,7 @@ const ARRANGEMENTS: Record<GameKey, readonly [number, number, number][]> = {
  * ring of keyboard focus turns ink here, where sky would vanish.
  */
 export function LobbyBackdrop({ game }: { game: GameKey }) {
+  const reduced = useReducedMotion();
   const [body, setBody] = useState<HTMLElement | null>(null);
   // the colours start turning when the lobby shows; the flares join them where they are
   const [born] = useState(() =>
@@ -143,10 +145,13 @@ export function LobbyBackdrop({ game }: { game: GameKey }) {
   }, [pulse, born, markClock.started]);
   if (!body) return null;
   return createPortal(
-    <div
+    <m.div
       aria-hidden="true"
       data-game={game}
       className="lobby-backdrop pointer-events-none fixed inset-0 -z-10 select-none overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: reduced ? 0.15 : 0.9, ease: [0.65, 0, 0.35, 1] }}
     >
       <div className="aurora-fill" />
       {GLOWS.map(([c, left, top, size, dx, dy, ahead]) => (
@@ -253,7 +258,7 @@ export function LobbyBackdrop({ game }: { game: GameKey }) {
           />
         </div>
       ) : null}
-    </div>,
+    </m.div>,
     body,
   );
 }

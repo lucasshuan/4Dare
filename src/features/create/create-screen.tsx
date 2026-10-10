@@ -5,12 +5,12 @@ import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
-import { PageLoader } from "@/components/ui/loader";
 import { Screen } from "@/components/ui/screen";
 import { MatchLockPage } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
+import { useRoomEntrance } from "@/features/room/room-entrance";
 import {
   DEFAULT_GAME,
   GAME_SEATS,
@@ -52,12 +52,15 @@ export function CreateScreen() {
   // Each try once, even when the effect runs twice; "Try again" starts the next.
   const [attempt, setAttempt] = useState(0);
   const started = useRef(-1);
+  const [entryGame, setEntryGame] = useState<GameKey>(DEFAULT_GAME);
+  useRoomEntrance(!match && !failed, t("createRoom.creating"), entryGame);
 
   useEffect(() => {
     if (started.current === attempt || isLoading || match || !me) return;
     started.current = attempt;
     const asked = new URLSearchParams(window.location.search).get("game");
     const game = isGameKey(asked) ? asked : DEFAULT_GAME;
+    setEntryGame(game);
     const name = roomName(displayName(meNamed(me)), (n) =>
       t("rooms.roomOf", { name: n }),
     );
@@ -112,10 +115,7 @@ export function CreateScreen() {
             {t("createRoom.retry")}
           </button>
         </m.div>
-      ) : (
-        // also while it checks for a match going on: one loader, start to end
-        <PageLoader label={t("createRoom.creating")} />
-      )}
+      ) : null}
     </Screen>
   );
 }

@@ -90,10 +90,15 @@ function Shuffle() {
 export function Loader({
   label,
   className,
+  roomCode,
 }: {
   label: string;
   className?: string;
+  /** The hand stays mounted as creation becomes the room's entrance. */
+  roomCode?: string;
 }) {
+  const reduced = useReducedMotion();
+  const room = !!roomCode;
   return (
     <m.div
       role="status"
@@ -106,8 +111,93 @@ export function Loader({
       }}
       className={cn("flex flex-col items-center gap-5", className)}
     >
-      <Shuffle />
-      <span className="font-semibold text-ink-muted text-lg">{label}</span>
+      <m.div
+        className="relative"
+        initial={{ scale: 1 }}
+        animate={{ scale: room && !reduced ? 1.08 : 1 }}
+        transition={{ duration: 0.9, ease: ease.soft }}
+      >
+        <m.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-[-28px] inset-y-[-45px] rounded-[50%] border border-white/25"
+          initial={{ opacity: 0, scale: 1, rotate: 0 }}
+          animate={{
+            opacity: room ? 1 : 0,
+            scale: room ? 1 : 0.8,
+            rotate: room && !reduced ? -18 : 0,
+          }}
+          transition={{ duration: 1.1, ease: ease.soft }}
+        />
+        <m.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-[-48px] inset-y-[-25px] rounded-[50%] border border-dashed border-white/15"
+          initial={{ opacity: 0, scale: 1, rotate: 0 }}
+          animate={{
+            opacity: room ? 1 : 0,
+            scale: room ? 1 : 0.85,
+            rotate: room && !reduced ? 18 : 0,
+          }}
+          transition={{ duration: 1.25, ease: ease.soft }}
+        />
+        <m.div
+          aria-hidden="true"
+          initial={false}
+          animate={{ opacity: room ? 1 : 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          {[-1, 1].map((side) => (
+            <m.span
+              key={side}
+              initial={{ y: 0, opacity: 0.4 }}
+              className="absolute top-14 size-2 rounded-pill bg-white/60 shadow-[0_0_16px_4px_#ffffff30]"
+              style={{ left: side < 0 ? -24 : 256 }}
+              animate={
+                room && !reduced
+                  ? { y: [0, side * 12, 0], opacity: [0.4, 1, 0.4] }
+                  : undefined
+              }
+              transition={{
+                duration: 2.8,
+                delay: side < 0 ? 0 : 0.5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </m.div>
+        <Shuffle />
+      </m.div>
+      <m.span
+        className="relative rounded-pill px-5 py-2 font-semibold text-ink-muted text-lg"
+        initial={false}
+        animate={{
+          backgroundColor: room ? "var(--surface)" : "#ffffff00",
+          boxShadow: room ? "0 6px 24px #00000012" : "0 0px 0px #00000000",
+        }}
+        transition={{ duration: 0.65, ease: ease.soft }}
+      >
+        {label}
+      </m.span>
+      {roomCode ? (
+        <div aria-hidden="true" className="absolute top-full mt-4 flex gap-1.5">
+          {[...roomCode].map((letter, index) => (
+            <m.span
+              // biome-ignore lint/suspicious/noArrayIndexKey: five fixed room-code slots, including repeated letters
+              key={`${index}-${letter}`}
+              className="flex size-7 items-center justify-center rounded-sm border border-white/25 bg-white/10 font-bold font-mono text-sm text-white"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                delay: reduced ? 0 : 0.2 + index * 0.07,
+                duration: 0.45,
+                ease: ease.soft,
+              }}
+            >
+              {letter}
+            </m.span>
+          ))}
+        </div>
+      ) : null}
     </m.div>
   );
 }

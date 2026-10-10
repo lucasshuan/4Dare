@@ -21,6 +21,7 @@ import { WHO_AM_I } from "@/lib/routes";
 import { joinRoom, leaveRoom } from "@/server/actions";
 import type { ElsewhereRoom } from "@/server/contract";
 import { PasswordDialog } from "./password-dialog";
+import { useRoomEntrance } from "./room-entrance";
 import { RoomProblem, RoomStage } from "./room-stage";
 
 /**
@@ -105,6 +106,12 @@ export function RoomScreen({ code }: { code: string }) {
   }, [member, code, refresh]);
 
   const problem = joinError ?? (error === "not_found" ? "not_found" : null);
+  const t = useTranslations("room");
+  useRoomEntrance(
+    !problem && !moved && (!data || askPassword),
+    t("loading"),
+    !problem && !moved ? data?.view.settings.game : undefined,
+  );
   if (problem === "in_match") return <InMatchElsewhere />;
   if (problem) return <RoomProblem code={problem} />;
   if (moved) return <MovedElsewhere room={moved} onStay={join} />;
@@ -145,13 +152,9 @@ export function RoomScreen({ code }: { code: string }) {
   );
 }
 
+/** The persistent entrance owns the animation; this shell holds the viewport. */
 function RoomLoading() {
-  const t = useTranslations("room");
-  return (
-    <Screen left={null}>
-      <PageLoader label={t("loading")} />
-    </Screen>
-  );
+  return <Screen left={null}>{null}</Screen>;
 }
 
 /**

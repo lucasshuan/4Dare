@@ -10,6 +10,7 @@ test("a private room is listed with a lock and asks for its password", async ({
   const code = await createRoom(host);
   // a new room is named after its host
   await expect(host.getByRole("heading", { level: 1 })).toHaveText(/'s room$/);
+  await host.getByRole("tab", { name: "Settings", exact: true }).click();
   await host.getByRole("button", { name: /edit advanced settings/i }).click();
   const save = host.getByRole("button", { name: /^save$/i });
   const name = host.getByRole("textbox", { name: "Room name" });
@@ -25,12 +26,12 @@ test("a private room is listed with a lock and asks for its password", async ({
   await expect(
     host.getByRole("heading", { name: "Pizza night" }),
   ).toBeVisible();
-  // the host sees the password to share it
-  await expect(host.getByText("pizza", { exact: true })).toBeVisible();
+  // Passwords stay out of the lobby, including the host's settings summary.
+  await expect(host.getByText("pizza", { exact: true })).toHaveCount(0);
 
   // the game page links to every room of the game
   await guest.goto("/en/who-am-i");
-  await guest.getByRole("link", { name: /see all/i }).click();
+  await guest.locator('a[href="/en/rooms?game=who-am-i"]').click();
   await guest.waitForURL(/\/rooms\?game=who-am-i$/);
   await guest.getByRole("searchbox").fill("pizza");
   await expect(guest).toHaveURL(/q=pizza/);
@@ -48,7 +49,7 @@ test("a private room is listed with a lock and asks for its password", async ({
   await expect(
     guest.getByRole("button", { name: /^ready$/i, pressed: false }),
   ).toBeVisible();
-  // the password stays with the host
+  // Joining never exposes the password in the guest's lobby.
   await expect(guest.getByText("pizza", { exact: true })).toHaveCount(0);
 });
 
