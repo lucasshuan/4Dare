@@ -16,6 +16,9 @@
   },
   "moreInfo": "Más información",
   "language": "Idioma",
+  "languageReload": "La página se recargará en {language}.",
+  "languageReloadYes": "Recargar",
+  "languageReloadNo": "Cancelar",
   "theme": {
     "light": "Tema claro",
     "dark": "Tema oscuro"

@@ -22,7 +22,7 @@ const PANES: Record<Part, () => ReactNode> = {
   sound: SoundPane,
   look: LookPane,
   game: GamePane,
-  language: LanguagePane,
+  language: () => <LanguagePane />,
 };
 
 /**

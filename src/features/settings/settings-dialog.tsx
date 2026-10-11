@@ -13,6 +13,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { type ReactNode, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
 import { Flag } from "@/components/ui/language-switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -101,7 +102,7 @@ export function SettingsTabs({ className }: { className?: string }) {
         <GamePane />
       </Pane>
       <Pane value="language">
-        <LanguagePane />
+        <LanguagePane confirm />
       </Pane>
     </Tabs.Root>
   );
@@ -329,41 +330,77 @@ export function GamePane() {
   );
 }
 
-export function LanguagePane() {
+/**
+ * The languages; picking one reloads the page in it. With `confirm` (the
+ * settings box, over whatever page is open) it first says so and waits for
+ * a yes.
+ */
+export function LanguagePane({ confirm = false }: { confirm?: boolean }) {
   const t = useTranslations("common");
   const locale = useLocale() as Lang;
   const switchLanguage = useSwitchLanguage();
+  const [asked, setAsked] = useState<Lang | null>(null);
   // Alphabetical by each language's own name, as in the language select.
   const langs = [...LANGS].sort((a, b) =>
     t(`languages.${a}`).localeCompare(t(`languages.${b}`), "en"),
   );
   return (
-    <fieldset className="m-0 grid min-w-0 grid-cols-1 gap-2 border-0 p-0 sm:grid-cols-2">
-      <legend className="sr-only">{t("language")}</legend>
-      {langs.map((l) => (
-        <button
-          key={l}
-          type="button"
-          lang={l}
-          aria-pressed={l === locale}
-          onClick={() => l !== locale && switchLanguage(l)}
-          className={cn(
-            "flex h-14 items-center gap-3 rounded-lg border-[1.5px] bg-surface px-4 font-semibold transition-colors duration-200 ease-soft",
-            l === locale
-              ? "border-ink"
-              : "border-line hover:border-line-strong",
-          )}
+    <div className="grid gap-3">
+      <fieldset className="m-0 grid min-w-0 grid-cols-1 gap-2 border-0 p-0 sm:grid-cols-2">
+        <legend className="sr-only">{t("language")}</legend>
+        {langs.map((l) => (
+          <button
+            key={l}
+            type="button"
+            lang={l}
+            aria-pressed={l === locale}
+            onClick={() => {
+              if (l === locale) setAsked(null);
+              else if (confirm) setAsked(l);
+              else switchLanguage(l);
+            }}
+            className={cn(
+              "flex h-14 items-center gap-3 rounded-lg border-[1.5px] bg-surface px-4 font-semibold transition-colors duration-200 ease-soft",
+              l === locale
+                ? "border-ink"
+                : l === asked
+                  ? "border-sky"
+                  : "border-line hover:border-line-strong",
+            )}
+          >
+            <Flag lang={l} />
+            {t(`languages.${l}`)}
+            {l === locale ? (
+              <Check
+                className="ml-auto size-[18px] text-sky"
+                strokeWidth={2.25}
+              />
+            ) : null}
+          </button>
+        ))}
+      </fieldset>
+      {asked ? (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center gap-3 rounded-lg bg-sunken px-4 py-3"
         >
-          <Flag lang={l} />
-          {t(`languages.${l}`)}
-          {l === locale ? (
-            <Check
-              className="ml-auto size-[18px] text-sky"
-              strokeWidth={2.25}
-            />
-          ) : null}
-        </button>
-      ))}
-    </fieldset>
+          <span className="min-w-0 flex-1 text-[14px]">
+            {t("languageReload", { language: t(`languages.${asked}`) })}
+          </span>
+          <div className="flex gap-2">
+            <Button size="sm" variant="ghost" onClick={() => setAsked(null)}>
+              {t("languageReloadNo")}
+            </Button>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => switchLanguage(asked)}
+            >
+              {t("languageReloadYes")}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }

@@ -16,6 +16,9 @@
   },
   "moreInfo": "詳しく",
   "language": "言語",
+  "languageReload": "ページを{language}で再読み込みします。",
+  "languageReloadYes": "再読み込み",
+  "languageReloadNo": "キャンセル",
   "theme": {
     "light": "ライトテーマ",
     "dark": "ダークテーマ"
