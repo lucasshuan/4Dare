@@ -46,8 +46,14 @@ const authorOf = (who: Identity): ImageAuthor => ({
 export interface TrayPicture {
   id: string;
   url: string;
-  /** Who sent it, named in the viewer's language; null for the library's own picture. */
-  author: (Pick<ImageAuthor, "avatar"> & { name: string }) | null;
+  /**
+   * Who sent it, named in the viewer's language, with the @handle of their
+   * profile (null for a guest, or when not looked up); null for the library's
+   * own picture.
+   */
+  author:
+    | (Pick<ImageAuthor, "avatar"> & { name: string; handle: string | null })
+    | null;
   /** The viewer sent it. */
   mine: boolean;
   /** Waiting on the detector: only its author sees it. */
@@ -159,8 +165,11 @@ export async function countPick(
 }
 
 /** Who sent a picture, as a reader in `lang` sees them. */
-export const showAuthor = (a: ImageAuthor | null, lang: Lang) =>
-  a && { name: displayName(a, lang), avatar: a.avatar };
+export const showAuthor = (
+  a: ImageAuthor | null,
+  lang: Lang,
+  handle: string | null = null,
+) => a && { name: displayName(a, lang), avatar: a.avatar, handle };
 
 /** A character's tray for a viewer (names in `lang`): its active pictures and their own waiting ones, best first. */
 export async function trayOf(
@@ -168,15 +177,26 @@ export async function trayOf(
   viewer: PlayerId,
   lang: Lang,
 ): Promise<TrayPicture[]> {
-  const list = await getBackend().images.list(
-    baseId(characterId),
-    viewer,
-    TRAY_SIZE,
+  const { images, profiles } = getBackend();
+  const list = await images.list(baseId(characterId), viewer, TRAY_SIZE);
+  // the senders with an account, so the tray can link to their profiles
+  const senders = [
+    ...new Set(list.flatMap((i) => (i.createdBy ? [i.createdBy] : []))),
+  ];
+  const handles = new Map(
+    (senders.length ? await profiles.byIds(senders) : []).map((p) => [
+      p.id,
+      p.handle,
+    ]),
   );
   return list.map((i) => ({
     id: i.id,
     url: i.url,
-    author: showAuthor(i.author, lang),
+    author: showAuthor(
+      i.author,
+      lang,
+      i.createdBy ? (handles.get(i.createdBy) ?? null) : null,
+    ),
     mine: i.createdBy === viewer,
     pending: i.status === "pending",
   }));

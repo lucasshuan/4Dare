@@ -1,5 +1,6 @@
 "use client";
 
+import { Tooltip } from "@base-ui/react/tooltip";
 import {
   ArrowLeft,
   Check,
@@ -20,6 +21,7 @@ import { Portrait } from "@/components/ui/portrait";
 import { Segmented } from "@/components/ui/segmented";
 import { useToast } from "@/components/ui/toast";
 import { useMe } from "@/features/data/use-me";
+import { ProfileLink } from "@/features/profile/profile-link";
 import type { ErrorCode, Lang } from "@/game/types";
 import { LANGS } from "@/game/types";
 import { Link } from "@/i18n/navigation";
@@ -404,42 +406,43 @@ function Pictures({
       </SectionHead>
       <div className="-mx-0.5 flex gap-2.5 overflow-x-auto px-0.5 pt-1 pb-1.5">
         {pictures.map((p, i) => (
-          <button
-            key={p.id}
-            type="button"
-            aria-label={t("picture", { n: i + 1, total: pictures.length })}
-            aria-pressed={shown?.id === p.id}
-            onClick={() => onPick(p.id)}
-            className="group/thumb relative grid w-[76px] shrink-0 gap-[5px] text-left text-[11.5px] text-ink-muted"
-          >
-            <span
-              className={cn(
-                "block overflow-hidden rounded-[14px] outline-2 outline-offset-2 transition-[outline-color,translate] duration-150 group-hover/thumb:-translate-y-0.5",
-                shown?.id === p.id ? "outline-sky" : "outline-transparent",
-              )}
+          <Tooltip.Root key={p.id}>
+            <Tooltip.Trigger
+              type="button"
+              aria-label={t("picture", { n: i + 1, total: pictures.length })}
+              aria-pressed={shown?.id === p.id}
+              onClick={() => onPick(p.id)}
+              className="group/thumb relative block w-[76px] shrink-0 self-start"
             >
-              <Portrait src={p.url} className="rounded-none" />
-            </span>
-            {p.pending ? (
-              <em className="absolute inset-x-1 top-1 rounded-pill bg-ink px-1 py-0.5 text-center font-bold text-[10px] text-on-ink not-italic">
-                {t("checking")}
-              </em>
-            ) : null}
-            <span className="truncate">
-              {p.author ? (
-                <PlayerName player={p.author} />
-              ) : (
-                t("libraryPicture")
-              )}
-            </span>
-          </button>
+              <span
+                className={cn(
+                  "block overflow-hidden rounded-[14px] outline-2 outline-offset-2 transition-[outline-color,translate] duration-150 group-hover/thumb:-translate-y-0.5",
+                  shown?.id === p.id ? "outline-sky" : "outline-transparent",
+                )}
+              >
+                <Portrait src={p.url} className="rounded-none" />
+              </span>
+              {p.pending ? (
+                <em className="absolute inset-x-1 top-1 rounded-pill bg-ink px-1 py-0.5 text-center font-bold text-[10px] text-on-ink not-italic">
+                  {t("checking")}
+                </em>
+              ) : null}
+            </Tooltip.Trigger>
+            <Tooltip.Portal>
+              <Tooltip.Positioner side="bottom" sideOffset={8} className="z-50">
+                <Tooltip.Popup className="origin-[var(--transform-origin)] rounded-pill bg-ink px-3 py-1.5 font-semibold text-[12.5px] text-on-ink shadow-pop transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+                  <PictureSender author={p.author} />
+                </Tooltip.Popup>
+              </Tooltip.Positioner>
+            </Tooltip.Portal>
+          </Tooltip.Root>
         ))}
         <button
           type="button"
           aria-expanded={sending}
           onClick={() => setSending((v) => !v)}
           className={cn(
-            "grid aspect-[4/5] w-[76px] shrink-0 place-content-center justify-items-center gap-1 rounded-[14px] border-[1.5px] border-dashed font-semibold text-[11.5px] transition-colors duration-150",
+            "grid aspect-[4/5] w-[76px] shrink-0 self-start place-content-center justify-items-center gap-1 rounded-[14px] border-[1.5px] border-dashed font-semibold text-[11.5px] transition-colors duration-150",
             sending
               ? "border-sky bg-sky-soft text-ink"
               : "border-line-strong text-ink-muted hover:bg-sunken",
@@ -470,6 +473,31 @@ function Pictures({
         {pictures.length ? t("picturesHint") : t("noPictureHint")}
       </p>
     </section>
+  );
+}
+
+/**
+ * Who sent a picture, shown when the pointer rests on it: the sender with
+ * their avatar, a link to their profile when they have an account; or the
+ * library, for its own.
+ */
+function PictureSender({ author }: { author: TrayPicture["author"] }) {
+  const t = useTranslations("library.sheet");
+  if (!author)
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <Lock className="size-3.5" strokeWidth={2} />
+        {t("libraryPicture")}
+      </span>
+    );
+  if (!author.handle) return <PlayerName player={author} />;
+  return (
+    <ProfileLink
+      handle={author.handle}
+      className="underline-offset-[3px] hover:underline"
+    >
+      <PlayerName player={author} />
+    </ProfileLink>
   );
 }
 
