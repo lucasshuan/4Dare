@@ -414,7 +414,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           <Link
             href="/"
             onClick={() => pick("home")}
-            className="flex rounded-sm"
+            className="group flex rounded-sm"
           >
             <Logo className="h-8 w-auto max-sm:h-7" />
           </Link>
