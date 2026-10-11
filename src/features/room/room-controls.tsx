@@ -42,9 +42,10 @@ function LeaveRoomButton() {
       disabled={pending}
       onClick={() => void leave(code, view.settings.game)}
       className={leaveButtonClass}
+      title={t("leaveShort")}
     >
       <LeaveIcon />
-      <span className="max-sm:sr-only">{t("leaveShort")}</span>
+      <span className="sr-only">{t("leaveShort")}</span>
     </button>
   );
 }

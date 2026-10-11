@@ -11,15 +11,17 @@ import { useRouter } from "@/i18n/navigation";
 import { GAME_PATHS } from "@/lib/routes";
 
 /**
- * The "Leave" button's look, in the match header and the lobby alike, so it
- * reads as the way out at a glance: the "no" colour, soft at rest; solid when
- * pointed at (its door swings open); a deeper red that sinks when pressed. The
- * focus ring is ink, which shows on the coloured backdrops where sky would not.
+ * The "Leave" button's look, in the match header and the lobby alike: a round
+ * key with the door alone, like the sound and theme keys beside it, and the
+ * word for screen readers. It reads as the way out at a glance: the "no"
+ * colour, soft at rest; solid when pointed at (its door swings open); a
+ * deeper red that sinks when pressed. The focus ring is ink, which shows on
+ * the coloured backdrops where sky would not.
  */
 export const leaveButtonClass = buttonClass(
   "secondary",
   "sm",
-  "group h-10 border-no bg-no-soft text-no transition-[translate,scale,background-color,border-color,color] hover:bg-no hover:text-on-no focus-visible:bg-no focus-visible:text-on-no focus-visible:outline-ink! active:translate-y-px active:scale-95 active:border-[var(--no-deep)] active:bg-[var(--no-deep)] active:text-on-no max-sm:w-10 max-sm:px-0",
+  "group h-10 border-no bg-no-soft text-no transition-[translate,scale,background-color,border-color,color] hover:bg-no hover:text-on-no focus-visible:bg-no focus-visible:text-on-no focus-visible:outline-ink! active:translate-y-px active:scale-95 active:border-[var(--no-deep)] active:bg-[var(--no-deep)] active:text-on-no w-10 px-0",
 );
 
 /** The door on "Leave": shut at rest, open while pointed at or focused. */
@@ -48,9 +50,9 @@ export function LeaveMatchButton() {
   if (me.away) return null;
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger className={leaveButtonClass}>
+      <Popover.Trigger className={leaveButtonClass} title={t("leaveShort")}>
         <LeaveIcon />
-        <span className="max-sm:sr-only">{t("leaveShort")}</span>
+        <span className="sr-only">{t("leaveShort")}</span>
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end" className="z-50">
