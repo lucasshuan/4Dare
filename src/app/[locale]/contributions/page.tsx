@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContributionsScreen } from "@/features/community/contributions-screen";
+import { SheetDrawerProvider } from "@/features/library/sheet-drawer";
 import type { Lang } from "@/game/types";
 import { PageMessages } from "@/i18n/page-messages";
 import { CONTRIBUTIONS } from "@/lib/routes";
@@ -26,8 +27,10 @@ export default async function Contributions({
   const { locale } = await params;
   setRequestLocale(locale);
   return (
-    <PageMessages only={["community"]}>
-      <ContributionsScreen />
+    <PageMessages only={["community", "library"]}>
+      <SheetDrawerProvider>
+        <ContributionsScreen />
+      </SheetDrawerProvider>
     </PageMessages>
   );
 }

@@ -62,7 +62,6 @@ export function generateStaticParams() {
 
 export default async function LocaleLayout({
   children,
-  modal,
   params,
 }: LayoutProps<"/[locale]">) {
   const { locale } = await params;
@@ -79,11 +78,7 @@ export default async function LocaleLayout({
         {locale === "ja" ? <JaFontLoader /> : null}
         {/* the hub's namespaces; r/ and dev/ layouts hand theirs every one */}
         <NextIntlClientProvider messages={hubMessages(await getMessages())}>
-          <Providers>
-            {children}
-            {/* a character opened from inside the app, over the page (@modal/(.)characters) */}
-            {modal}
-          </Providers>
+          <Providers>{children}</Providers>
         </NextIntlClientProvider>
         {/* Vercel Web Analytics and Speed Insights (half the visits: enough data, half the cost); they only send data on Vercel. */}
         <Analytics />

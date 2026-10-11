@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CharactersScreen } from "@/features/library/characters-screen";
+import { SheetDrawerProvider } from "@/features/library/sheet-drawer";
 import type { Lang } from "@/game/types";
 import { PageMessages } from "@/i18n/page-messages";
 import { CHARACTERS } from "@/lib/routes";
@@ -27,7 +28,9 @@ export default async function Characters({
   setRequestLocale(locale);
   return (
     <PageMessages only={["library"]}>
-      <CharactersScreen />
+      <SheetDrawerProvider>
+        <CharactersScreen />
+      </SheetDrawerProvider>
     </PageMessages>
   );
 }

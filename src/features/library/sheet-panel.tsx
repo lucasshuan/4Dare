@@ -4,28 +4,37 @@ import { Dialog } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useRouter } from "@/i18n/navigation";
 import { CharacterSheetBody } from "./character-sheet";
 
 /**
  * A sheet opened from inside the app: a full-height panel sliding in from the
- * right over the list, like the side menu does from the left. Closing goes
- * back, so the list is where it was.
+ * right over the page, like the side menu does from the left.
  */
-export function SheetPanel({ id }: { id: string }) {
+export function SheetPanel({
+  id,
+  open,
+  onClose,
+  onClosed,
+}: {
+  id: string;
+  open: boolean;
+  /** Asked to close: the close key, Escape or a press outside. */
+  onClose: () => void;
+  /** Done sliding out. */
+  onClosed: () => void;
+}) {
   const t = useTranslations("library.sheet");
-  const router = useRouter();
   // shut on the first paint, then open: a dialog mounted open skips its slide in
-  const [open, setOpen] = useState(false);
-  useEffect(() => setOpen(true), []);
+  const [shown, setShown] = useState(false);
+  useEffect(() => setShown(open), [open]);
   return (
     <Dialog.Root
-      open={open}
+      open={shown}
       onOpenChange={(next) => {
-        if (!next) setOpen(false);
+        if (!next) onClose();
       }}
       onOpenChangeComplete={(next) => {
-        if (!next) router.back();
+        if (!next) onClosed();
       }}
     >
       <Dialog.Portal>

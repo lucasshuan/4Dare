@@ -5,11 +5,10 @@ import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
-import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
-import { characterPath } from "@/lib/routes";
 import type { LibraryCard } from "@/server/community-contract";
+import { SheetLink } from "./sheet-drawer";
 import { TasteTag } from "./taste";
 
 /**
@@ -45,8 +44,9 @@ export function CharacterCard({
       }}
       className="[contain-intrinsic-block-size:auto_280px] [content-visibility:auto]"
     >
-      <Link
-        href={characterPath(card.id, card.name)}
+      <SheetLink
+        id={card.id}
+        name={card.name}
         scroll={false}
         className="group/card grid gap-2.5 rounded-[22px] text-left outline-offset-4"
       >
@@ -112,7 +112,7 @@ export function CharacterCard({
             </span>
           ) : null}
         </span>
-      </Link>
+      </SheetLink>
     </m.div>
   );
 }

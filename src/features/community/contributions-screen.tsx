@@ -13,11 +13,12 @@ import { Segmented } from "@/components/ui/segmented";
 import { Switch } from "@/components/ui/switch";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
+import { SheetLink } from "@/features/library/sheet-drawer";
 import { Sema } from "@/features/workshop/objects";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
-import { characterPath, workshopPath } from "@/lib/routes";
+import { workshopPath } from "@/lib/routes";
 import type {
   ContributionItem,
   ContributionsPage,
@@ -274,7 +275,7 @@ function Line({
   ) : s ? (
     <Sema status={item.kind === "live" ? "live" : s.status} large />
   ) : null;
-  const href = c ? characterPath(c.id, c.name) : s ? workshopPath(s.id) : null;
+  const link = "flex rounded-[10px] transition-transform hover:scale-105";
   return (
     <m.div
       initial={{ opacity: 0, y: 10 }}
@@ -288,12 +289,12 @@ function Line({
           {format.relativeTime(item.at, now)}
         </small>
       </p>
-      {href ? (
-        <Link
-          href={href}
-          scroll={false}
-          className="flex rounded-[10px] transition-transform hover:scale-105"
-        >
+      {c ? (
+        <SheetLink id={c.id} name={c.name} scroll={false} className={link}>
+          {thumb}
+        </SheetLink>
+      ) : s ? (
+        <Link href={workshopPath(s.id)} scroll={false} className={link}>
           {thumb}
         </Link>
       ) : (

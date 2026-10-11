@@ -16,13 +16,14 @@ import { useMe } from "@/features/data/use-me";
 import { useSignIn } from "@/features/home/use-sign-in";
 import { normalizeName } from "@/game/match";
 import { TASTE_KEYS, type Taste } from "@/game/tastes";
-import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
 import { ease } from "@/lib/motion";
-import { CHARACTERS, characterPath } from "@/lib/routes";
+import { characterPath } from "@/lib/routes";
 import type { LibraryCard } from "@/server/community-contract";
 import { newCharacter } from "@/server/library-actions";
+import { SheetLink, useSheetDrawer } from "./sheet-drawer";
 import { TasteChip, tasteEmoji, tasteStyle, useTasteName } from "./taste";
 import { useLookAlikes, useRefreshCharacter } from "./use-library";
 
@@ -51,7 +52,7 @@ export function NewCharacter({
   const open = prefill !== null;
   // a look-alike opened from the form slides its sheet over it: Escape and
   // presses there are the sheet's, and the form waits under it
-  const sheetOver = usePathname() !== CHARACTERS;
+  const sheetOver = useSheetDrawer()?.isOpen ?? false;
   return (
     <Dialog.Root
       open={open}
@@ -128,6 +129,7 @@ function Form({
   const lang = useLocale();
   const toast = useToast();
   const router = useRouter();
+  const drawer = useSheetDrawer();
   const refresh = useRefreshCharacter();
   const { me } = useMe();
   const { run, pending } = useAction();
@@ -230,7 +232,10 @@ function Form({
       toast(t("made", { name: clean }), {
         action: {
           label: t("openSheet"),
-          run: () => router.push(characterPath(id, clean), { scroll: false }),
+          run: () =>
+            drawer
+              ? drawer.open(id)
+              : router.push(characterPath(id, clean), { scroll: false }),
         },
       });
     } finally {
@@ -337,13 +342,14 @@ function Form({
                               </small>
                             ) : null}
                           </span>
-                          <Link
-                            href={characterPath(c.id, c.name)}
+                          <SheetLink
+                            id={c.id}
+                            name={c.name}
                             scroll={false}
                             className="inline-flex h-9 items-center rounded-pill border border-line-strong bg-surface px-3.5 font-semibold text-[14px] transition-colors hover:bg-sunken"
                           >
                             {t("open")}
-                          </Link>
+                          </SheetLink>
                         </div>
                       ))}
                     </div>
