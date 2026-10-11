@@ -7,6 +7,7 @@ import s from "./impostor-title.module.css";
 import { CASTS, type SuitSize, suitGeo } from "./suits";
 import {
   avatarSrc,
+  type Bleed,
   litOf,
   mix,
   rnd,
@@ -22,9 +23,11 @@ export const IMPOSTOR_SOUNDS = [
   "/opening/impostor-first.mp3",
   "/opening/impostor-again.mp3",
 ];
-export const IMPOSTOR_IMAGES = [
-  "/opening/impostor-room.webp",
-  "/opening/impostor-room-tall.webp",
+/** The pictures the scene paints with: the room (a window's way up), its sides, and the rest. */
+export const impostorImages = (portrait: boolean) => [
+  ...["", "-l", "-r"].map(
+    (side) => `/opening/impostor-room${portrait ? "-tall" : ""}${side}.webp`,
+  ),
   "/opening/smoke.webp",
   "/opening/case-wood.webp",
   "/opening/grain.webp",
@@ -51,41 +54,117 @@ export function impostorCues(first: boolean): TitleCue[] {
   ];
 }
 
-/** Each canvas's room: where its four ceiling lights hang (one per column they put out), the blinds' slats. */
+/**
+ * Each canvas's room: where its four ceiling lights hang (one per column they
+ * put out), the blinds (their slats, ladders and cord, laid out over the
+ * whole window) and the height chart's lines, which the ruler on the right
+ * marks.
+ */
 const ROOM = {
   landscape: {
+    w: 1280,
+    h: 720,
     lights: [160, 480, 800, 1120],
     colW: 320,
     mid: 640,
-    ladders: [318, 960],
+    // across the window, from its left
+    ladders: [318 / 1280, 960 / 1280],
+    ladder: { cut: 20, end: 16 },
+    cord: 28,
     slats: {
       n: 16,
       pitch: 44,
       top: 18,
       h: 43,
       stack: 2.6,
-      from: 722,
+      pad: 1,
       to: 64,
-      center: 360,
+      bunch: 89,
+    },
+    ruler: {
+      lines: [
+        274, 302.5, 333.5, 363.5, 393.5, 422.5, 452.5, 484, 512.5, 542.5, 572.5,
+      ],
+      font: 16,
+      text: 58,
+      major: 46,
+      minor: 22,
+      thick: 2.4,
     },
   },
   portrait: {
+    w: 780,
+    h: 1688,
     lights: [97, 292, 487, 682],
     colW: 195,
     mid: 390,
-    ladders: [190, 590],
+    ladders: [190 / 780, 590 / 780],
+    ladder: { cut: 18, end: 18 },
+    cord: 36,
     slats: {
       n: 26,
       pitch: 66,
       top: 18,
       h: 64,
       stack: 3.6,
-      from: 1734,
+      pad: 2,
       to: 118,
-      center: 844,
+      bunch: 171,
+    },
+    ruler: {
+      lines: [
+        850, 888.5, 933.5, 970.5, 1009.5, 1049.5, 1094, 1129.5, 1169.5, 1209.5,
+        1249.5,
+      ],
+      font: 21,
+      text: 78,
+      major: 61,
+      minor: 29,
+      thick: 3.3,
     },
   },
 } as const;
+
+/** The ruler's marks, 2,20 down to 0,20, dimmer as the light falls off down the wall. */
+const MARKS = [
+  "2,20",
+  "2,00",
+  "1,80",
+  "1,60",
+  "1,40",
+  "1,20",
+  "1,00",
+  "0,80",
+  "0,60",
+  "0,40",
+  "0,20",
+];
+const MARK_LIGHT = [
+  0.95, 1, 0.95, 0.93, 0.91, 0.88, 0.87, 0.78, 0.71, 0.63, 0.53,
+];
+const markColor = (f: number) =>
+  `rgb(${Math.round(240 * f)} ${Math.round(230 * f)} ${Math.round(218 * f)})`;
+
+/** The blinds laid over a window `w`×`h` (canvas pixels): enough slats to reach its foot. */
+function blindsFor(portrait: boolean, w: number, h: number) {
+  const room = ROOM[portrait ? "portrait" : "landscape"];
+  const sl = room.slats;
+  const n = Math.max(sl.n, Math.ceil((h - sl.top - sl.h) / sl.pitch) + 1);
+  const more = (n - sl.n) * sl.stack;
+  const from = sl.top + (n - 1) * sl.pitch + sl.h + sl.pad;
+  const to = sl.to + more;
+  return {
+    n,
+    from,
+    to,
+    center: h / 2,
+    bunch: sl.bunch + more,
+    ladders: room.ladders.map((f) => Math.round(w * f)),
+    ladderH: from - room.ladder.cut,
+    ladderEnd: to - room.ladder.end,
+    cord: w - room.cord,
+  };
+}
 
 /** The dust in each light's beam: nine motes each, the same everywhere. */
 function motes(portrait: boolean) {
@@ -131,10 +210,17 @@ function ImpostorTitleScene({
   n,
   first,
   portrait,
+  bleed,
   labels,
-}: TitleProps & { labels: { case: string; title: string } }) {
+}: TitleProps & {
+  bleed: Bleed;
+  labels: { case: string; title: string };
+}) {
   const t = impostorTimes(first);
   const room = ROOM[portrait ? "portrait" : "landscape"];
+  // the window, in canvas pixels: the room, the blinds and the glass run to its edges
+  const win = { w: room.w + 2 * bleed.x, h: room.h + 2 * bleed.y };
+  const bl = blindsFor(portrait, win.w, win.h);
   const tiltStep = portrait ? 0.011 : t.tiltStep;
   const clackAt = (c: number) => t.dim + c * t.clack;
   const count = players.length;
@@ -172,18 +258,18 @@ function ImpostorTitleScene({
     };
   });
   const sl = room.slats;
-  const v = (sl.from - sl.to) / t.raiseDur;
-  const slats = Array.from({ length: sl.n }, (_, i) => {
+  const v = (bl.from - bl.to) / t.raiseDur;
+  const slats = Array.from({ length: bl.n }, (_, i) => {
     const y = sl.top + i * sl.pitch;
     const home = sl.top + i * sl.stack;
     const off = y - home;
-    const pick = Math.max(0, (sl.from - (y + sl.h)) / v);
+    const pick = Math.max(0, (bl.from - (y + sl.h)) / v);
     return {
       y,
       // where it rests bunched up, from where it hangs (a whole pixel, as the layout put it)
       to: Math.round(home) - y,
       off,
-      po: Math.round(sl.center - (y + sl.h / 2)),
+      po: Math.round(bl.center - (y + sl.h / 2)),
       rd: t.raise + pick,
       rdur: Math.max(0.01, off / v),
       td: t.tilt + i * tiltStep,
@@ -196,10 +282,12 @@ function ImpostorTitleScene({
     <div className={cn(s.root, portrait && s.portrait)}>
       <div className={s.screen}>
         <div className={s.plate} />
+        <Ruler portrait={portrait} />
+        <div className={cn(s.win, s.dark)} />
         {room.lights.map((x, c) => (
           <div
             key={x}
-            className={cn(s.shade, s[`sh${c}`])}
+            className={cn(s.win, s.shade, s[`sh${c}`])}
             style={{
               animationDelay:
                 c < 3
@@ -208,7 +296,10 @@ function ImpostorTitleScene({
             }}
           />
         ))}
-        <div className={s.flick} style={{ animationDelay: sec(t.flick) }} />
+        <div
+          className={cn(s.win, s.flick)}
+          style={{ animationDelay: sec(t.flick) }}
+        />
         {room.lights.map((x, b) => (
           <div
             key={x}
@@ -270,7 +361,15 @@ function ImpostorTitleScene({
         })}
         <div
           className={s.blinds}
-          style={{ "--dim": sec(clackAt(3)) } as CSSProperties}
+          style={
+            {
+              left: -bleed.x,
+              top: -bleed.y,
+              width: win.w,
+              height: win.h,
+              "--dim": sec(clackAt(3)),
+            } as CSSProperties
+          }
         >
           {slats.map((x) => (
             <div key={x.y} className={s.slHome} style={{ top: x.y }}>
@@ -303,37 +402,46 @@ function ImpostorTitleScene({
               </div>
             </div>
           ))}
-          {room.ladders.map((left) => (
+          {bl.ladders.map((left) => (
             <span
               key={left}
               className={s.ladder}
-              style={{
-                left,
-                animationDelay: sec(t.raise),
-                animationDuration: sec(t.raiseDur),
-              }}
+              style={
+                {
+                  left,
+                  height: bl.ladderH,
+                  "--lh": `${bl.ladderEnd}px`,
+                  animationDelay: sec(t.raise),
+                  animationDuration: sec(t.raiseDur),
+                } as CSSProperties
+              }
             />
           ))}
-          <div className={s.railHome}>
+          <div className={s.railHome} style={{ top: bl.to }}>
             <div
               className={s.rail}
-              style={{
-                animationDelay: sec(t.raise),
-                animationDuration: sec(t.raiseDur),
-              }}
+              style={
+                {
+                  top: bl.from - bl.to,
+                  "--to": `${bl.to - bl.from}px`,
+                  animationDelay: sec(t.raise),
+                  animationDuration: sec(t.raiseDur),
+                } as CSSProperties
+              }
             />
           </div>
           <span className={s.headrail} />
           <span
             className={s.cord}
             style={{
+              left: bl.cord,
               animationDelay: `${sec(t.raise)}, 0s`,
               animationDuration: `${sec(t.raiseDur)}, 3.6s`,
             }}
           >
             <span className={s.tassel} />
           </span>
-          <span className={s.bunchDim} />
+          <span className={s.bunchDim} style={{ height: bl.bunch }} />
         </div>
         <div className={cn(s.layer, s.center)}>
           <div
@@ -385,16 +493,16 @@ function ImpostorTitleScene({
             />
           </div>
         </div>
-        <div className={cn(s.layer, s.frame)} />
+        <div className={cn(s.win, s.frame)} />
         <div
-          className={cn(s.layer, s.glasswrap)}
+          className={cn(s.win, s.glasswrap)}
           style={{ animationDelay: sec(clackAt(3)) }}
         >
           <div className={cn(s.layer, s.sheen)} />
           <div className={cn(s.layer, s.smudge)} />
           <div className={cn(s.layer, s.refl)} />
         </div>
-        <div className={cn(s.layer, s.vig)} />
+        <div className={cn(s.win, s.vig)} />
         <div className={s.stamps}>
           <span className={s.stamp} style={{ animationDelay: sec(t.stamp) }}>
             {labels.title}
@@ -407,6 +515,55 @@ function ImpostorTitleScene({
       ))}
       <span className={s.powercut} />
     </div>
+  );
+}
+
+/** The height chart's ruler, on the right edge of the window: each mark's number and ticks. */
+function Ruler({ portrait }: { portrait: boolean }) {
+  const r = ROOM[portrait ? "portrait" : "landscape"].ruler;
+  const q =
+    (r.lines[r.lines.length - 1] - r.lines[0]) / (r.lines.length - 1) / 4;
+  const w = r.text + 3 * r.font;
+  const h = ROOM[portrait ? "portrait" : "landscape"].h;
+  return (
+    <svg
+      className={s.ruler}
+      width={w}
+      height={h}
+      viewBox={`0 0 ${w} ${h}`}
+      aria-hidden="true"
+    >
+      {r.lines.map((line, i) => {
+        const at = line - 2 * q;
+        const fill = markColor(MARK_LIGHT[i]);
+        const tick = (y: number, len: number) => (
+          <rect
+            x={w - len}
+            y={y - r.thick / 2}
+            width={len}
+            height={r.thick}
+            fill={fill}
+          />
+        );
+        return (
+          <g key={MARKS[i]}>
+            {/* on its baseline, half a cap height under the tick, so the digits centre on it */}
+            <text
+              x={w - r.text}
+              y={at + r.font * 0.35}
+              fill={fill}
+              fontSize={r.font}
+              textAnchor="end"
+            >
+              {MARKS[i]}
+            </text>
+            {tick(at, r.major)}
+            {tick(at + q, r.minor)}
+            {tick(line + q, r.minor)}
+          </g>
+        );
+      })}
+    </svg>
   );
 }
 

@@ -4,7 +4,10 @@ import { AnimatePresence, m } from "motion/react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  type CSSProperties,
   type ReactNode,
+  useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -16,13 +19,14 @@ import { useStage } from "@/features/stage/stage-context";
 import type { GameKey } from "@/game/games";
 import type { Beat, ShowView } from "@/game/types";
 import { useClock } from "@/lib/hooks/use-server-clock";
-import { type Track, useMusic } from "@/lib/music";
+import { preloadMusic, type Track, useMusic } from "@/lib/music";
 import { useGameOption } from "@/lib/settings";
+import { markLoaded } from "@/server/actions";
 import {
-  IMPOSTOR_IMAGES,
   IMPOSTOR_SOUNDS,
   ImpostorTitle,
   impostorCues,
+  impostorImages,
 } from "./impostor-title";
 import {
   LINEUP_IMAGES,
@@ -30,7 +34,7 @@ import {
   LineupTitle,
   lineupCues,
 } from "./lineup-title";
-import type { TitlePlayer } from "./title-kit";
+import type { Bleed, TitlePlayer } from "./title-kit";
 import {
   preloadTitleSounds,
   type TitleCue,
@@ -48,7 +52,7 @@ const CANVAS = {
 
 /** What shows past the canvas before a scene paints it: its set's darkest colour. */
 const BACKDROP: Record<GameKey, string> = {
-  "who-am-i": "#2b69c8",
+  "who-am-i": "var(--brand-stage)",
   impostor: "#07050b",
   lineup: "#1c0e05",
 };
@@ -71,42 +75,104 @@ export function TitleFonts({ game }: { game: GameKey }) {
   return ja ? <ChalkFontJa /> : <ChalkFont />;
 }
 
+const preloads = new Map<string, Promise<void>>();
+
 /**
- * Fetches a game's title scene (sounds, pictures, What for?'s chalk unless
- * `chalk` is off) ahead of its match, so it starts on the dot.
+ * Fetches a game's title scene (its take, sounds, pictures, What for?'s chalk
+ * unless `chalk` is off) ahead of its match, so it starts on the dot. Resolves
+ * once all of it is in; a part that fails counts as in (the scene does
+ * without it), and asking again waits on the same fetches.
  */
 export function preloadTitle(
   game: GameKey,
   o: { ja: boolean; chalk: boolean },
-) {
+): Promise<void> {
+  // the upright room or the wide one, as the window is now
+  const portrait = window.innerWidth < window.innerHeight;
+  const key = `${game} ${o.ja} ${o.chalk} ${portrait}`;
+  const known = preloads.get(key);
+  if (known) return known;
+  const parts: Promise<unknown>[] = [
+    preloadMusic(TITLE_TRACK[game]),
+    preloadTitleSounds(
+      game === "impostor"
+        ? IMPOSTOR_SOUNDS
+        : game === "lineup"
+          ? LINEUP_SOUNDS
+          : WHO_SOUNDS,
+    ),
+    ...(game === "impostor"
+      ? impostorImages(portrait)
+      : game === "lineup"
+        ? LINEUP_IMAGES
+        : ["/opening/crown.svg"]
+    ).map((src) => {
+      const img = new Image();
+      img.decoding = "async";
+      img.src = src;
+      return img.decode();
+    }),
+  ];
   if (game === "lineup" && o.chalk)
-    void (
-      o.ja
+    parts.push(
+      (o.ja
         ? import("@/features/lineup/chalk-font-ja")
         : import("@/features/lineup/chalk-font")
-    ).then((m) => m.loadChalkFonts());
-  preloadTitleSounds(
-    game === "impostor"
-      ? IMPOSTOR_SOUNDS
-      : game === "lineup"
-        ? LINEUP_SOUNDS
-        : WHO_SOUNDS,
+      ).then((m) => m.loadChalkFonts()),
+    );
+  const all = Promise.allSettled(parts).then(() => undefined);
+  preloads.set(key, all);
+  return all;
+}
+
+/** The longest a page waits on its own opening before saying it is ready anyway (ms), within the start's wait. */
+const READY_CAP = 3000;
+
+/**
+ * Resolves once this page has `game`'s opening loaded (or after READY_CAP):
+ * what the host's start and the room's handshake wait on.
+ */
+export function useOpeningLoaded(game: GameKey): () => Promise<void> {
+  const ja = useLocale() === "ja";
+  const chalk = !useGameOption("lineup", "plainLetters");
+  return useCallback(
+    () =>
+      Promise.race([
+        preloadTitle(game, { ja, chalk }),
+        new Promise<void>((done) => window.setTimeout(done, READY_CAP)),
+      ]),
+    [game, ja, chalk],
   );
-  for (const src of game === "impostor"
-    ? IMPOSTOR_IMAGES
-    : game === "lineup"
-      ? LINEUP_IMAGES
-      : ["/opening/crown.svg"]) {
-    const img = new Image();
-    img.decoding = "async";
-    img.src = src;
-  }
+}
+
+/**
+ * The room's handshake: while the host's start waits for every page, this
+ * one says so once its opening is loaded, and the match begins for everyone
+ * together (no word on screen: it takes a moment).
+ */
+export function useStartHandshake() {
+  const { view, code, apply } = useRoomContext();
+  const loaded = useOpeningLoaded(view.settings.game);
+  const w = view.phase === "lobby" ? view.starting : null;
+  const waiting = w && !w.loaded.includes(view.youId) ? w.until : null;
+  useEffect(() => {
+    if (waiting === null) return;
+    let live = true;
+    void loaded().then(async () => {
+      if (!live) return;
+      const r = await markLoaded(code);
+      if (r.ok) apply(r.data);
+    });
+    return () => {
+      live = false;
+    };
+  }, [waiting, loaded, code, apply]);
 }
 
 /**
  * Fits a canvas whole in the window, centred: the landscape one on a wide
  * window, the upright one on a tall one. What is around it is the scene's own
- * set, carried past the canvas by each scene.
+ * set, carried past the canvas by each scene (`bleed` says how far).
  */
 function useFit() {
   const ref = useRef<HTMLDivElement>(null);
@@ -123,7 +189,11 @@ function useFit() {
   const portrait = size ? size.w < size.h : false;
   const canvas = portrait ? CANVAS.portrait : CANVAS.landscape;
   const scale = size ? Math.min(size.w / canvas.w, size.h / canvas.h) : 0;
-  return { ref, portrait, canvas, scale, ready: size !== null };
+  // a pixel more than the window, so no edge shows a hairline of the backdrop
+  const bx = size ? Math.ceil((size.w / scale - canvas.w) / 2) + 1 : 0;
+  const by = size ? Math.ceil((size.h / scale - canvas.h) / 2) + 1 : 0;
+  const bleed = useMemo<Bleed>(() => ({ x: bx, y: by }), [bx, by]);
+  return { ref, portrait, canvas, scale, bleed, ready: size !== null };
 }
 
 /**
@@ -153,7 +223,7 @@ export function TitleStage({
    * painted, unseen, so it starts on the dot even on a slow phone.
    */
   live?: boolean;
-  children: (portrait: boolean) => ReactNode;
+  children: (portrait: boolean, bleed: Bleed) => ReactNode;
 }) {
   const fit = useFit();
   const scene = useRef<HTMLDivElement>(null);
@@ -184,14 +254,18 @@ export function TitleStage({
         ref={scene}
         aria-hidden
         className="absolute top-1/2 left-1/2 select-none"
-        style={{
-          width: fit.canvas.w,
-          height: fit.canvas.h,
-          transform: `translate(-50%, -50%) scale(${fit.scale})`,
-          visibility: fit.ready ? undefined : "hidden",
-        }}
+        style={
+          {
+            width: fit.canvas.w,
+            height: fit.canvas.h,
+            transform: `translate(-50%, -50%) scale(${fit.scale})`,
+            visibility: fit.ready ? undefined : "hidden",
+            "--bx": `${fit.bleed.x}px`,
+            "--by": `${fit.bleed.y}px`,
+          } as CSSProperties
+        }
       >
-        {fit.ready ? children(fit.portrait) : null}
+        {fit.ready ? children(fit.portrait, fit.bleed) : null}
       </div>
       {live ? (
         <p className="sr-only" role="status">
@@ -204,16 +278,17 @@ export function TitleStage({
 }
 
 /**
- * The opening's title beat, from the curtain before it on: the scene is built
- * then, unseen, and is `live` once its beat plays.
+ * The opening's title beat, from the start on (a moment ahead, then the
+ * curtain): the scene is built then, unseen, and is `live` once its beat plays.
  */
 function useTitleShow(): { show: ShowView; beat: Beat; live: boolean } | null {
   const { show, beat } = useStage();
   const title =
     show?.kind === "opening" && show.title ? beatOf(show, "title") : null;
-  if (!show || !title || (beat?.kind !== "title" && beat?.kind !== "curtain"))
-    return null;
-  return { show, beat: title, live: beat.kind === "title" };
+  // before the curtain too: a start a moment ahead (START_LEAD_MS)
+  const ahead = beat === null || beat.kind === "curtain";
+  if (!show || !title || (!ahead && beat.kind !== "title")) return null;
+  return { show, beat: title, live: beat?.kind === "title" };
 }
 
 /** The players a title scene draws: the match's, in seat order. */
@@ -316,11 +391,12 @@ function Title({
       label={`${t("match", { n })} · ${name}`}
       live={live}
     >
-      {(portrait) =>
+      {(portrait, bleed) =>
         game === "impostor" ? (
           <ImpostorTitle
             {...props}
             portrait={portrait}
+            bleed={bleed}
             labels={labels.impostor}
           />
         ) : game === "lineup" ? (

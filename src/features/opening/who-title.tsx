@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, memo } from "react";
+import { SEAT_COLORS } from "@/game/seat-colors";
 import { cn } from "@/lib/cn";
 import { avatarSrc, inkOf, seatOf, type TitleProps } from "./title-kit";
 import type { TitleCue } from "./title-sound";
@@ -170,6 +171,9 @@ function sizes(n: number, portrait: boolean) {
             };
   return { ...sz, rowGap: 0, cols: n, castW: null as number | null };
 }
+
+/** A seat's number in the app's colours (--seat-1..10). */
+const seatNo = (slot: number) => (slot % SEAT_COLORS) + 1;
 
 /** The sounds, mixed on the timeline: the number thumps in (rolls on a rematch) and whooshes off, a soft thud per player landing, the card fan as the roulette spins. */
 export function whoCues(first: boolean, n: number): TitleCue[] {
@@ -361,12 +365,17 @@ function WhoTitleScene({
                   <div className={s.avw}>
                     <span
                       className={s.av}
-                      style={{
-                        width: sz.av,
-                        height: sz.av,
-                        background: p.avatar.color,
-                        boxShadow: `0 0 0 ${sz.gapRing}px #FFFFFF, 0 0 0 ${sz.ring}px ${seatOf(p.slot)}`,
-                      }}
+                      style={
+                        {
+                          width: sz.av,
+                          height: sz.av,
+                          background: p.avatar.color,
+                          "--gap-w": `${sz.gapRing}px`,
+                          "--ring-w": `${sz.ring}px`,
+                          "--ring": seatOf(p.slot),
+                          "--ring-dark": `var(--seat-${seatNo(p.slot)})`,
+                        } as CSSProperties
+                      }
                     >
                       {/* biome-ignore lint/performance/noImgElement: generated svg or a remote picture */}
                       <img src={avatarSrc(p.avatar)} alt="" />
@@ -400,11 +409,14 @@ function WhoTitleScene({
                   </div>
                   <span
                     className={s.pname}
-                    style={{
-                      color: inkOf(p.slot),
-                      fontSize:
-                        p.name.length > 10 ? Math.round(sz.fs * 0.74) : sz.fs,
-                    }}
+                    style={
+                      {
+                        "--name": inkOf(p.slot),
+                        "--name-dark": `var(--seat-${seatNo(p.slot)}-ink)`,
+                        fontSize:
+                          p.name.length > 10 ? Math.round(sz.fs * 0.74) : sz.fs,
+                      } as CSSProperties
+                    }
                   >
                     {p.name}
                   </span>

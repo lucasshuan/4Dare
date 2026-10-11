@@ -93,6 +93,22 @@ type Actions = typeof import("./actions");
 let A: Actions;
 let roomRoute: typeof import("@/app/api/rooms/[code]/route");
 
+/**
+ * The caller (the host) starts, and every other page that has been open
+ * says its opening is loaded (one not in the room just gets an error): the
+ * match begins. Returns the room as the host now sees it.
+ */
+async function startMatch(code: string): Promise<RoomView> {
+  const host = caller;
+  must(await A.startGame(code));
+  for (const name of [...jars.keys()].filter((n) => n !== host)) {
+    as(name);
+    await A.markLoaded(code);
+  }
+  as(host);
+  return (await view(code)).body;
+}
+
 /** Moves the clock to where the step's clock starts: past the show on screen. */
 const skipTo = (v: RoomView) =>
   vi.setSystemTime(Math.max(Date.now(), v.stepStartsAt ?? 0));
@@ -175,7 +191,7 @@ describe("server, local mode", () => {
     as("p2");
     expect(await A.startGame(code)).toEqual({ ok: false, error: "not_host" });
     as("p1");
-    must(await A.startGame(code));
+    await startMatch(code);
     expect(await A.voteTheme(code, 4)).toEqual({
       ok: false,
       error: "invalid_input",
@@ -275,7 +291,7 @@ describe("server, local mode", () => {
     as("m2");
     must(await A.joinRoom(code, "pw"));
     as("m1");
-    must(await A.startGame(code));
+    await startMatch(code);
     await voteAll(code, ["m1", "m2"]);
     for (const p of ["m1", "m2"]) {
       as(p);
@@ -757,7 +773,7 @@ describe("server, local mode", () => {
     as("b3");
     must(await A.joinRoom(code));
     as("b1");
-    must(await A.startGame(code));
+    await startMatch(code);
     expect(await current()).toEqual({ code, game: ROOM.game, phase: "voting" });
     expect(await A.createRoom(settings)).toEqual({
       ok: false,
@@ -806,7 +822,7 @@ describe("server, local mode", () => {
 
     // a match going on is never left for a lobby: joining waits until it ends
     as("o1");
-    must(await A.startGame(first));
+    await startMatch(first);
     expect(await A.joinRoom(own)).toEqual({ ok: false, error: "in_match" });
     expect((await view(first)).body.phase).toBe("voting");
   });
@@ -829,7 +845,7 @@ describe("server, local mode", () => {
     as("s2");
     must(await A.joinRoom(match));
     as("s1");
-    must(await A.startGame(match));
+    await startMatch(match);
 
     await handOverSeats(uidOf(jarFor("s1")), account, null);
     as("s3");
@@ -938,7 +954,7 @@ async function pickingRoom(a: string, b: string) {
   as(b);
   must(await A.joinRoom(code, "pw"));
   as(a);
-  must(await A.startGame(code));
+  await startMatch(code);
   const voted = await voteAll(code, [a, b]);
   return { code, voted };
 }
@@ -1436,7 +1452,7 @@ describe("rule examples and the hand", () => {
       as("h2");
       must(await A.joinRoom(code, "pw"));
       as("h1");
-      const theming = must(await A.startGame(code));
+      const theming = await startMatch(code);
       expect(theming.phase).toBe("theming");
       vi.setSystemTime((theming.deadline ?? 0) + 1);
       const v = (await view(code)).body;
@@ -1660,7 +1676,7 @@ describe("room chat", () => {
   it("posts the match's lines once, each waiting for its scene", async () => {
     const code = await lobby(["v1", "v2"], 2);
     as("v1");
-    must(await A.startGame(code));
+    await startMatch(code);
     skipTo((await view(code)).body);
     as("v2");
     expect((await read(code)).messages?.map((m) => m.system?.type)).toEqual([
@@ -2105,7 +2121,7 @@ describe("impostor, local mode", () => {
       must(await A.joinRoom(code));
     }
     as("imp1");
-    must(await A.startGame(code));
+    await startMatch(code);
     for (const p of players) {
       as(p);
       expect((await view(code)).body.phase).toBe("voting");

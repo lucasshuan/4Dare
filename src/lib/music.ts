@@ -216,9 +216,9 @@ function load(src: string): Promise<AudioBuffer | null> {
 /** The audio context the music plays in, for sounds that must keep time with it (the title scenes). */
 export const audioContext = () => context();
 
-/** Fetches and decodes a take ahead of time, so asking for it later swaps at once. */
-export function preloadMusic(track: Track) {
-  void load(TRACKS[track].src);
+/** Fetches and decodes a take ahead of time, so asking for it later swaps at once. Resolves when it is in (null if it failed). */
+export function preloadMusic(track: Track): Promise<AudioBuffer | null> {
+  return load(TRACKS[track].src);
 }
 
 /** The song position (seconds on the shared timeline) at a context time. */

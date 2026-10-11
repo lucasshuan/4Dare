@@ -4,12 +4,27 @@
    seconds from the title beat's start. */
 
 .screen {
+  /* the stage, the cards and the ink in the app's colours, so the dark theme has its own; and the
+     opened stage, pastel in the light theme, a night show in the dark one */
+  --who-stage: var(--brand-stage);
+  --who-card: var(--surface);
+  --who-ink: var(--ink);
+  --who-open-a: #b4cff7;
+  --who-open-b: #cdbff6;
+  --who-open-out: #c0c7f6;
+  --who-bulb-off: rgba(30, 36, 51, 0.2);
   position: relative;
   width: 1280px;
   height: 720px;
-  background: #2b69c8;
+  background: var(--who-stage);
   font-family: var(--font-sans);
-  color: #1e2433;
+  color: var(--who-ink);
+}
+:global([data-theme="dark"]) .screen {
+  --who-open-a: #23416f;
+  --who-open-b: #382d68;
+  --who-open-out: #2d3567;
+  --who-bulb-off: rgba(255, 255, 255, 0.14);
 }
 .portrait.screen {
   width: 780px;
@@ -19,7 +34,7 @@
 .bleed {
   position: absolute;
   inset: -2000px;
-  background: #2b69c8;
+  background: var(--who-stage);
 }
 .layer {
   position: absolute;
@@ -230,8 +245,8 @@
 .reveal {
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, #b4cff7, #cdbff6);
-  box-shadow: 0 0 0 2000px #c0c7f6;
+  background: linear-gradient(120deg, var(--who-open-a), var(--who-open-b));
+  box-shadow: 0 0 0 2000px var(--who-open-out);
   animation: reveal 0.9s cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 .portrait .reveal {
@@ -323,7 +338,7 @@
   font-size: 112px;
   line-height: 1.05;
   letter-spacing: -0.025em;
-  color: #1e2433;
+  color: var(--who-ink);
   white-space: nowrap;
   text-shadow:
     4px 4px 0 #f6e3a1,
@@ -381,7 +396,7 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: rgba(30, 36, 51, 0.2);
+  background: var(--who-bulb-off);
   animation: chase 0.947s steps(1, end) infinite;
 }
 .portrait .bulb {
@@ -397,7 +412,7 @@
   }
   33.3%,
   100% {
-    background: rgba(30, 36, 51, 0.2);
+    background: var(--who-bulb-off);
     box-shadow: none;
   }
 }
@@ -485,7 +500,7 @@
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  background: #ffffff;
+  background: var(--who-card);
   border-radius: 32px;
   box-shadow:
     0 2px 6px rgba(18, 22, 31, 0.12),
@@ -495,11 +510,20 @@
   position: relative;
   flex: none;
 }
+/* the face in its seat's ring: the scene's own colours in the light theme, the app's seat colours in the dark one */
 .av {
   position: relative;
   display: block;
   border-radius: 50%;
   overflow: hidden;
+  box-shadow:
+    0 0 0 var(--gap-w) var(--who-card),
+    0 0 0 var(--ring-w) var(--ring);
+}
+:global([data-theme="dark"]) .av {
+  box-shadow:
+    0 0 0 var(--gap-w) var(--who-card),
+    0 0 0 var(--ring-w) var(--ring-dark);
 }
 .av img {
   display: block;
@@ -508,6 +532,7 @@
   object-fit: cover;
 }
 .pname {
+  color: var(--name);
   max-width: 100%;
   font-family: var(--font-display);
   font-weight: 700;
@@ -516,6 +541,9 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+:global([data-theme="dark"]) .pname {
+  color: var(--name-dark);
 }
 .kcrown {
   position: absolute;
@@ -612,7 +640,7 @@
   border-radius: 9px;
   overflow: hidden;
   box-shadow:
-    0 0 0 3px #ffffff,
+    0 0 0 3px var(--who-card),
     0 6px 12px rgba(18, 22, 31, 0.28);
   backface-visibility: hidden;
 }
@@ -620,7 +648,7 @@
   background: #f6e3a1;
 }
 .back {
-  background: #2b69c8;
+  background: var(--who-stage);
   transform: rotateY(180deg);
   display: flex;
   align-items: center;

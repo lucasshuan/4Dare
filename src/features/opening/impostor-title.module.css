@@ -1,7 +1,8 @@
 /* The Impostor's title scene: a noir police lineup seen through the
    observation room's mirror. Drawn on 1280×720, or 780×1688 on a phone held
    upright (.portrait); every animation-delay comes inline, in seconds from
-   the title beat's start. */
+   the title beat's start. The room, the blinds and the glass run past the
+   canvas to the window's edges: --bx and --by (from the stage) say how far. */
 
 .root {
   position: relative;
@@ -13,11 +14,9 @@
   width: 780px;
   height: 1688px;
 }
-/* the room, clipped to the canvas; past it the backdrop stays dark */
 .screen {
   position: absolute;
   inset: 0;
-  overflow: hidden;
   background: #07050b;
   isolation: isolate;
 }
@@ -25,24 +24,95 @@
   position: absolute;
   inset: 0;
 }
+/* the whole window, past the canvas on every side */
+.win {
+  position: absolute;
+  inset: calc(var(--by) * -1) calc(var(--bx) * -1);
+}
 
-/* the room: a mounted photo (painted block wall, height chart, floor) */
+/* the room: a mounted photo (painted block wall, height chart, floor), lit evenly, with 160px
+   (80px upright) more of it above and below the canvas; past its sides the wall and floor
+   carry on in tiles, under it. No background colour: its edge, half a pixel on a scaled
+   canvas, would draw a dark hairline over the tiles */
 .plate {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: calc(var(--by) * -1);
+  bottom: calc(var(--by) * -1);
   background:
-    #07050b url(/opening/impostor-room.webp) 0 0 / 1280px 720px no-repeat;
+    url(/opening/impostor-room.webp) 0 calc(var(--by) - 160px) / 1280px 1040px
+    no-repeat;
+}
+.plate::before,
+.plate::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: -1;
+  width: calc(var(--bx) + 4px);
+  background:
+    url(/opening/impostor-room-l.webp) right 4px top calc(var(--by) - 160px) /
+    320px 1040px repeat-x;
+}
+.plate::before {
+  right: calc(100% - 4px);
+}
+.plate::after {
+  left: calc(100% - 4px);
+  background-image: url(/opening/impostor-room-r.webp);
+  background-position: left 4px top calc(var(--by) - 160px);
 }
 .portrait .plate {
   background-image: url(/opening/impostor-room-tall.webp);
-  background-size: 780px 1688px;
+  background-position: 0 calc(var(--by) - 80px);
+  background-size: 780px 1848px;
+}
+.portrait .plate::before,
+.portrait .plate::after {
+  background-size: 196px 1848px;
+}
+.portrait .plate::before {
+  background-image: url(/opening/impostor-room-tall-l.webp);
+  background-position: right 4px top calc(var(--by) - 80px);
+}
+.portrait .plate::after {
+  background-image: url(/opening/impostor-room-tall-r.webp);
+  background-position: left 4px top calc(var(--by) - 80px);
+}
+/* the height chart's ruler, on the window's right edge */
+.ruler {
+  position: absolute;
+  top: 0;
+  right: calc(var(--bx) * -1);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  pointer-events: none;
+}
+/* the room's light falling off toward the window's edges */
+.dark {
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(3, 1, 7, 0) 70%, rgba(3, 1, 7, 0.35) 100%),
+    linear-gradient(
+      90deg,
+      rgba(3, 1, 7, 0.55) 0%,
+      rgba(3, 1, 7, 0.36) 8%,
+      rgba(3, 1, 7, 0.2) 18%,
+      rgba(3, 1, 7, 0.07) 30%,
+      rgba(3, 1, 7, 0) 42%,
+      rgba(3, 1, 7, 0) 58%,
+      rgba(3, 1, 7, 0.07) 70%,
+      rgba(3, 1, 7, 0.2) 82%,
+      rgba(3, 1, 7, 0.36) 92%,
+      rgba(3, 1, 7, 0.55) 100%
+    );
 }
 /* the lights going off one column at a time: a veil leaving the room at 5% from the left up to
    that column's soft edge, in two clacks; the one before is put away once it is down, so they
    never stack */
 .shade {
-  position: absolute;
-  inset: 0;
   opacity: 0;
   animation:
     shadeOn 0.2s steps(2, start) both,
@@ -51,43 +121,43 @@
 .sh0 {
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.95) 262px,
-    rgba(0, 0, 0, 0) 378px
+    rgba(0, 0, 0, 0.95) calc(var(--bx) + 262px),
+    rgba(0, 0, 0, 0) calc(var(--bx) + 378px)
   );
 }
 .sh1 {
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.95) 582px,
-    rgba(0, 0, 0, 0) 698px
+    rgba(0, 0, 0, 0.95) calc(var(--bx) + 582px),
+    rgba(0, 0, 0, 0) calc(var(--bx) + 698px)
   );
 }
 .sh2 {
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.95) 902px,
-    rgba(0, 0, 0, 0) 1018px
+    rgba(0, 0, 0, 0.95) calc(var(--bx) + 902px),
+    rgba(0, 0, 0, 0) calc(var(--bx) + 1018px)
   );
 }
 .portrait .sh0 {
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.95) 160px,
-    rgba(0, 0, 0, 0) 230px
+    rgba(0, 0, 0, 0.95) calc(var(--bx) + 160px),
+    rgba(0, 0, 0, 0) calc(var(--bx) + 230px)
   );
 }
 .portrait .sh1 {
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.95) 355px,
-    rgba(0, 0, 0, 0) 425px
+    rgba(0, 0, 0, 0.95) calc(var(--bx) + 355px),
+    rgba(0, 0, 0, 0) calc(var(--bx) + 425px)
   );
 }
 .portrait .sh2 {
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.95) 550px,
-    rgba(0, 0, 0, 0) 620px
+    rgba(0, 0, 0, 0.95) calc(var(--bx) + 550px),
+    rgba(0, 0, 0, 0) calc(var(--bx) + 620px)
   );
 }
 .sh3 {
@@ -108,14 +178,20 @@
   }
 }
 .flick {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(5, 3, 10, 0) 902px, #05030a 1018px);
+  background: linear-gradient(
+    90deg,
+    rgba(5, 3, 10, 0) calc(var(--bx) + 902px),
+    #05030a calc(var(--bx) + 1018px)
+  );
   opacity: 0;
   animation: flick 4.6s linear infinite;
 }
 .portrait .flick {
-  background: linear-gradient(90deg, rgba(5, 3, 10, 0) 550px, #05030a 620px);
+  background: linear-gradient(
+    90deg,
+    rgba(5, 3, 10, 0) calc(var(--bx) + 550px),
+    #05030a calc(var(--bx) + 620px)
+  );
 }
 @keyframes flick {
   0%,
@@ -627,10 +703,10 @@
     inset -1px -2px 0 rgba(10, 6, 20, 0.15);
 }
 
-/* the blinds: closed, the slats turn, then they rise and bunch up at the top */
+/* the blinds, over the whole window (its size and the slats' come inline): closed, the slats
+   turn, then they rise and bunch up at the top */
 .blinds {
   position: absolute;
-  inset: 0;
   z-index: 0;
   pointer-events: none;
 }
@@ -651,11 +727,7 @@
   left: 0;
   right: 0;
   top: 0;
-  height: 89px;
   z-index: 4;
-}
-.portrait .bunchDim {
-  height: 171px;
 }
 .cord::after,
 .tassel::after {
@@ -787,40 +859,26 @@
   position: absolute;
   top: 18px;
   width: 2px;
-  height: 702px;
   background: rgba(214, 204, 192, 0.22);
   animation-name: ladderUp;
   animation-timing-function: linear;
   animation-fill-mode: both;
 }
-.portrait .ladder {
-  height: 1716px;
-  animation-name: ladderUpTall;
-}
+/* down to --lh, as the blinds bunch up */
 @keyframes ladderUp {
   to {
-    height: 48px;
+    height: var(--lh);
   }
 }
-@keyframes ladderUpTall {
-  to {
-    height: 100px;
-  }
-}
+/* where the bottom rail rests (its top comes inline), and the rail, starting from the window's foot */
 .railHome {
   position: absolute;
   left: -30px;
   right: -30px;
-  top: 64px;
   height: 11px;
 }
-.portrait .railHome {
-  top: 118px;
-}
 .rail {
-  --to: -658px;
   position: relative;
-  top: 658px;
   height: 11px;
   border-radius: 2px;
   background: linear-gradient(180deg, #3d3546 0%, #231d2a 60%, #16121b 100%);
@@ -831,13 +889,8 @@
   animation-timing-function: linear;
   animation-fill-mode: both;
 }
-.portrait .rail {
-  --to: -1616px;
-  top: 1616px;
-}
 .cord {
   position: absolute;
-  left: 1252px;
   top: 12px;
   width: 3px;
   height: 300px;
@@ -851,7 +904,6 @@
   animation-direction: normal, alternate;
 }
 .portrait .cord {
-  left: 744px;
   height: 620px;
   animation-name: cordPullTall, cordSway;
 }
@@ -938,7 +990,8 @@
     transform: none;
   }
   to {
-    transform: translate(-460px, -236px) scale(0.34);
+    transform: translate(calc(-460px - var(--bx)), calc(-236px - var(--by)))
+      scale(0.34);
   }
 }
 @keyframes flyTall {
@@ -946,7 +999,8 @@
     transform: none;
   }
   to {
-    transform: translate(-248px, -744px) scale(0.4);
+    transform: translate(calc(-248px - var(--bx)), calc(-744px - var(--by)))
+      scale(0.4);
   }
 }
 .felt {
@@ -1116,17 +1170,13 @@
   );
 }
 .smudge {
-  background: url(/opening/glass-smudge.webp) 0 0 / 1280px 720px no-repeat;
+  background: url(/opening/glass-smudge.webp) 50% 50% / cover no-repeat;
   opacity: 0.16;
-}
-.portrait .smudge {
-  background-position: 50% 50%;
-  background-size: auto 1688px;
 }
 .refl {
   background:
     radial-gradient(
-      150px 110px at 1120px 640px,
+      150px 110px at calc(100% - 160px) calc(100% - 80px),
       rgba(255, 186, 120, 0.14),
       rgba(255, 186, 120, 0)
     ),
@@ -1139,7 +1189,7 @@
 .portrait .refl {
   background:
     radial-gradient(
-      150px 110px at 660px 1560px,
+      150px 110px at calc(100% - 120px) calc(100% - 128px),
       rgba(255, 186, 120, 0.14),
       rgba(255, 186, 120, 0)
     ),
@@ -1157,7 +1207,7 @@
     rgba(4, 2, 8, 0.5) 100%
   );
 }
-/* the camera's flash lights the whole window, past the canvas too */
+/* the camera's flash lights the whole window */
 .flash {
   position: absolute;
   inset: 0;
@@ -1188,7 +1238,7 @@
 }
 .grain {
   position: absolute;
-  inset: -128px;
+  inset: calc(var(--by) * -1 - 128px) calc(var(--bx) * -1 - 128px);
   pointer-events: none;
   background: url(/opening/grain.webp) 0 0 / 256px 256px repeat;
   opacity: 0.12;
