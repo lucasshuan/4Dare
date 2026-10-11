@@ -531,11 +531,11 @@ function Tile({
       data-nav-row
       aria-current={marked ? "page" : undefined}
       onClick={onPick}
-      className="group/tile flex flex-col gap-1.5 rounded-[12px] font-bold font-display text-[12.5px] leading-[1.15] outline-none focus-visible:outline-3 focus-visible:outline-sky"
+      className="group/tile flex flex-col gap-1.5 rounded-md font-bold font-display text-[12.5px] leading-[1.15] outline-none focus-visible:outline-3 focus-visible:outline-sky"
     >
       <span
         className={cn(
-          "block overflow-hidden rounded-[12px] transition-[translate,box-shadow] duration-150 ease-soft group-hover/tile:-translate-y-0.5",
+          "block overflow-hidden rounded-md transition-[translate,box-shadow] duration-150 ease-soft group-hover/tile:-translate-y-0.5",
           marked && "shadow-[0_0_0_3px_var(--sky)]",
         )}
       >
