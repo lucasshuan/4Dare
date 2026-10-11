@@ -10,12 +10,21 @@ import type { OgText } from "./og/art";
 // Search and share metadata shared by the pages: canonical and hreflang links,
 // Open Graph and Twitter cards, and the texts drawn on the share images.
 
-/** Where the site lives. SITE_URL wins; on Vercel the production domain comes in on its own. */
+/** The site's own address: 4dare.com, which serves from www. */
+const PRODUCTION_URL = "https://www.4dare.com";
+
+/**
+ * Where the site lives. Production always says 4dare.com, so a stale
+ * SITE_URL there can't point search engines at another host; elsewhere
+ * SITE_URL wins, then the Vercel host, then localhost.
+ */
 const vercelHost =
   process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
 export const SITE_URL = (
-  process.env.SITE_URL ||
-  (vercelHost ? `https://${vercelHost}` : "http://localhost:3000")
+  process.env.VERCEL_ENV === "production"
+    ? PRODUCTION_URL
+    : process.env.SITE_URL ||
+      (vercelHost ? `https://${vercelHost}` : "http://localhost:3000")
 ).replace(/\/$/, "");
 
 const OG_LOCALE: Record<Lang, string> = {
