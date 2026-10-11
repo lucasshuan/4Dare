@@ -19,6 +19,7 @@ import {
   ProviderLogo,
 } from "@/components/ui/auth-button";
 import { Avatar } from "@/components/ui/avatar";
+import { Tip } from "@/components/ui/tip";
 import { useMe } from "@/features/data/use-me";
 import { accentStyle } from "@/features/profile/cover-paint";
 import { XpBar } from "@/features/profile/level";
@@ -35,7 +36,7 @@ import { dur, ease } from "@/lib/motion";
 import { meNamed, useDisplayName } from "@/lib/names";
 import { rerollGuest, signOut } from "@/server/actions";
 import { useSignIn } from "./use-sign-in";
-import { UserMenuFace, userMenuTrigger } from "./user-menu";
+import { UserMenuFace, userMenuTrigger, useUserMenuLabel } from "./user-menu";
 
 /** The user menu itself, loaded after the page (user-menu.tsx shows a stand-in until then). */
 export function UserMenuPopover({
@@ -47,6 +48,7 @@ export function UserMenuPopover({
   const name = useDisplayName();
   const router = useRouter();
   const { me, refresh, setMe } = useMe();
+  const label = useUserMenuLabel(me);
   const { signIn, pending } = useSignIn();
   const { run, pending: leaving } = useAction();
   const { run: runReroll, pending: rerolling } = useAction();
@@ -88,9 +90,14 @@ export function UserMenuPopover({
   return (
     <>
       <Popover.Root open={open} onOpenChange={onOpenChange}>
-        <Popover.Trigger autoFocus={autoFocus} className={userMenuTrigger(me)}>
-          <UserMenuFace me={me} />
-        </Popover.Trigger>
+        <Tip label={label}>
+          <Popover.Trigger
+            autoFocus={autoFocus}
+            className={userMenuTrigger(me)}
+          >
+            <UserMenuFace me={me} />
+          </Popover.Trigger>
+        </Tip>
         <Popover.Portal>
           <Popover.Positioner sideOffset={8} align="end" className="z-50">
             <Popover.Popup

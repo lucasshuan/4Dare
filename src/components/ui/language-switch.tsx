@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { deferred, useDeferred } from "@/lib/hooks/use-deferred";
+import { Tip } from "./tip";
 
 /** A round flag for a language; `size-5` unless `className` says otherwise. */
 export function Flag({ lang, className }: { lang: Lang; className?: string }) {
@@ -41,17 +42,19 @@ export function LanguageSwitch() {
   const { loaded: Select, props, reach } = useDeferred(loadSelect);
   if (Select) return <Select {...props} />;
   return (
-    <button
-      type="button"
-      role="combobox"
-      aria-haspopup="listbox"
-      aria-expanded={false}
-      aria-label={t("language")}
-      className={LANGUAGE_TRIGGER}
-      {...reach}
-    >
-      <Flag lang={locale} className="size-10 shadow-none" />
-      <span className="sr-only">{t(`languages.${locale}`)}</span>
-    </button>
+    <Tip label={t("language")}>
+      <button
+        type="button"
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={false}
+        aria-label={t("language")}
+        className={LANGUAGE_TRIGGER}
+        {...reach}
+      >
+        <Flag lang={locale} className="size-10 shadow-none" />
+        <span className="sr-only">{t(`languages.${locale}`)}</span>
+      </button>
+    </Tip>
   );
 }

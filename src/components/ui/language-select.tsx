@@ -7,6 +7,7 @@ import { LANGS, type Lang } from "@/game/types";
 import type { DeferredProps } from "@/lib/hooks/use-deferred";
 import { useSwitchLanguage } from "@/lib/hooks/use-switch-language";
 import { Flag, LANGUAGE_TRIGGER } from "./language-switch";
+import { Tip } from "./tip";
 
 /** The language select itself, loaded after the page (language-switch.tsx shows a stand-in until then). */
 export function LanguageSelect({
@@ -33,16 +34,18 @@ export function LanguageSelect({
         if (l && l !== locale) switchLanguage(l as Lang);
       }}
     >
-      <Select.Trigger
-        aria-label={t("language")}
-        autoFocus={autoFocus}
-        className={LANGUAGE_TRIGGER}
-      >
-        <Flag lang={locale} className="size-10 shadow-none" />
-        <Select.Value className="sr-only">
-          {(l: Lang) => t(`languages.${l}`)}
-        </Select.Value>
-      </Select.Trigger>
+      <Tip label={t("language")}>
+        <Select.Trigger
+          aria-label={t("language")}
+          autoFocus={autoFocus}
+          className={LANGUAGE_TRIGGER}
+        >
+          <Flag lang={locale} className="size-10 shadow-none" />
+          <Select.Value className="sr-only">
+            {(l: Lang) => t(`languages.${l}`)}
+          </Select.Value>
+        </Select.Trigger>
+      </Tip>
       <Select.Portal>
         <Select.Positioner
           sideOffset={6}

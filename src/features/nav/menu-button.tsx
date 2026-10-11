@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Tip } from "@/components/ui/tip";
 import { cn } from "@/lib/cn";
 import { deferred, useDeferred } from "@/lib/hooks/use-deferred";
 
@@ -18,15 +19,17 @@ export function MenuButton() {
   const { loaded: Drawer, props, reach } = useDeferred(loadDrawer);
   if (Drawer) return <Drawer {...props} />;
   return (
-    <button
-      type="button"
-      aria-label={t("open")}
-      aria-expanded={false}
-      className={burgerClass}
-      {...reach}
-    >
-      <Bars />
-    </button>
+    <Tip label={t("open")}>
+      <button
+        type="button"
+        aria-label={t("open")}
+        aria-expanded={false}
+        className={burgerClass}
+        {...reach}
+      >
+        <Bars />
+      </button>
+    </Tip>
   );
 }
 

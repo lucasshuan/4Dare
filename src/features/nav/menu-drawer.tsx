@@ -37,6 +37,7 @@ import { buttonClass } from "@/components/ui/button";
 import { LayoutMotion } from "@/components/ui/layout-motion";
 import { Logo } from "@/components/ui/logo";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tip } from "@/components/ui/tip";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
@@ -306,13 +307,15 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
         }
       }}
     >
-      <Dialog.Trigger
-        autoFocus={autoFocus}
-        aria-label={t("open")}
-        className={burgerClass}
-      >
-        <Bars open={open} />
-      </Dialog.Trigger>
+      <Tip label={t("open")}>
+        <Dialog.Trigger
+          autoFocus={autoFocus}
+          aria-label={t("open")}
+          className={burgerClass}
+        >
+          <Bars open={open} />
+        </Dialog.Trigger>
+      </Tip>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-300 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
         <Dialog.Popup
@@ -408,9 +411,11 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           over the menu as it slides in: the bars fold into an X
         */}
         <div className="pointer-events-none fixed top-0 left-0 z-50 flex items-center gap-2 px-4 pt-4 sm:gap-4 sm:px-8 sm:pt-6 sm:short:pt-4 [&>*]:pointer-events-auto">
-          <Dialog.Close aria-label={t("close")} className={burgerClass}>
-            <Bars open={open} unfoldsIn />
-          </Dialog.Close>
+          <Tip label={t("close")}>
+            <Dialog.Close aria-label={t("close")} className={burgerClass}>
+              <Bars open={open} unfoldsIn />
+            </Dialog.Close>
+          </Tip>
           <Link
             href="/"
             onClick={() => pick("home")}

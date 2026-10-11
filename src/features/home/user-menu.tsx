@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
+import { Tip } from "@/components/ui/tip";
 import { useMe } from "@/features/data/use-me";
 import { cn } from "@/lib/cn";
 import { deferred, useDeferred } from "@/lib/hooks/use-deferred";
@@ -18,6 +19,15 @@ export const userMenuTrigger = (me: Me) =>
     "inline-flex size-10 shrink-0 items-center justify-center rounded-pill transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line",
     me.isGuest && "text-ink-muted",
   );
+
+/** The trigger's tip: who you are, and "Guest" for a guest. */
+export function useUserMenuLabel(me: Me | null | undefined) {
+  const t = useTranslations("home.user");
+  const name = useDisplayName();
+  if (!me) return "";
+  const who = name(meNamed(me));
+  return me.isGuest ? `${who} · ${t("guestBadge")}` : who;
+}
 
 /** What the trigger shows: the avatar, then the name and "Guest" tag for screen readers. */
 export function UserMenuFace({ me }: { me: Me }) {
@@ -47,20 +57,23 @@ const loadPopover = deferred(() =>
 export function UserMenu() {
   const { me } = useMe();
   const { loaded: Popover, props, reach } = useDeferred(loadPopover);
+  const label = useUserMenuLabel(me);
   if (!me)
     return (
       <span className="size-10 shrink-0 animate-pulse rounded-pill bg-sunken" />
     );
   if (Popover) return <Popover {...props} />;
   return (
-    <button
-      type="button"
-      aria-haspopup="dialog"
-      aria-expanded={false}
-      className={userMenuTrigger(me)}
-      {...reach}
-    >
-      <UserMenuFace me={me} />
-    </button>
+    <Tip label={label}>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={false}
+        className={userMenuTrigger(me)}
+        {...reach}
+      >
+        <UserMenuFace me={me} />
+      </button>
+    </Tip>
   );
 }

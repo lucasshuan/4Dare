@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { SoundToggle } from "@/components/ui/sound-toggle";
 import { ThemeSwitch } from "@/components/ui/theme-toggle";
+import { Tip } from "@/components/ui/tip";
 import { useRoomContext } from "@/features/data/room-context";
 import { useLeaveRoom } from "@/features/data/use-current-match";
 import { cn } from "@/lib/cn";
@@ -37,15 +38,16 @@ function LeaveRoomButton() {
   const { view, code } = useRoomContext();
   const { leave, pending } = useLeaveRoom();
   return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={() => void leave(code, view.settings.game)}
-      className={leaveButtonClass}
-      title={t("leaveShort")}
-    >
-      <LeaveIcon />
-      <span className="sr-only">{t("leaveShort")}</span>
-    </button>
+    <Tip label={t("leaveShort")}>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => void leave(code, view.settings.game)}
+        className={leaveButtonClass}
+      >
+        <LeaveIcon />
+        <span className="sr-only">{t("leaveShort")}</span>
+      </button>
+    </Tip>
   );
 }

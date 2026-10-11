@@ -5,6 +5,7 @@ import { DoorClosed, DoorOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button, buttonClass } from "@/components/ui/button";
+import { Tip } from "@/components/ui/tip";
 import { useRoomContext } from "@/features/data/room-context";
 import { useLeaveMatch } from "@/features/data/use-current-match";
 import { useRouter } from "@/i18n/navigation";
@@ -50,10 +51,12 @@ export function LeaveMatchButton() {
   if (me.away) return null;
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger className={leaveButtonClass} title={t("leaveShort")}>
-        <LeaveIcon />
-        <span className="sr-only">{t("leaveShort")}</span>
-      </Popover.Trigger>
+      <Tip label={t("leaveShort")}>
+        <Popover.Trigger className={leaveButtonClass}>
+          <LeaveIcon />
+          <span className="sr-only">{t("leaveShort")}</span>
+        </Popover.Trigger>
+      </Tip>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end" className="z-50">
           <Popover.Popup className="flex w-[min(300px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-3 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
