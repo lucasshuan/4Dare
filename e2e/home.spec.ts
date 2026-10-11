@@ -6,7 +6,7 @@ test("the hub leads to the game, and the language select keeps the page", {
 }, async ({ page }) => {
   await page.goto("/pt");
   await page.getByRole("link", { name: /quem sou eu\?/i }).click();
-  await page.waitForURL(/\/pt\/who-am-i$/);
+  await page.waitForURL(/\/pt\/quem-sou-eu$/);
   await expect(page.getByRole("link", { name: "Criar sala" })).toBeVisible();
   // A click that lands before the page hydrates opens nothing: try again. Only
   // press a select that is not open (a press on an open one closes it), and

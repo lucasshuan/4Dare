@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { appName } from "@/config";
 import type { Lang } from "@/game/types";
+import { localizePath } from "@/i18n/paths";
 import { routing } from "@/i18n/routing";
 import type { OgText } from "./og/art";
 
@@ -30,9 +31,9 @@ export const HREFLANG: Record<Lang, string> = {
   ja: "ja",
 };
 
-/** "/" in Portuguese is "/pt"; "/who-am-i" is "/pt/who-am-i". */
+/** "/" in Portuguese is "/pt"; "/who-am-i" is "/pt/quem-sou-eu". */
 export const localePath = (lang: Lang, path: string) =>
-  `/${lang}${path === "/" ? "" : path}`;
+  `/${lang}${path === "/" ? "" : localizePath(lang, path)}`;
 
 /** A page's path, the same in every language or one per language (a slug from a name). */
 type PagePath = string | Record<Lang, string>;
