@@ -25,6 +25,24 @@ interface NewsEntry {
  */
 export const NEWS_POSTS: readonly NewsEntry[] = [
   {
+    id: "volume-key",
+    at: "2026-10-11",
+    kind: "better",
+    game: "site",
+    title: {
+      pt: "Volume na mão",
+      en: "Volume at hand",
+      es: "Volumen a mano",
+      ja: "音量をすぐ調整",
+    },
+    body: {
+      pt: "Numa sala, pare o mouse no botão de som: aparece o volume geral, que começa na metade. Um clique muta e outro volta para onde estava. Os botões do topo agora mostram o que fazem.",
+      en: "In a room, rest the pointer on the sound key: the overall volume shows up, starting at half. One click mutes, another brings it back where it was. The top bar keys now say what they do.",
+      es: "En una sala, deja el ratón sobre el botón de sonido: aparece el volumen general, que empieza a la mitad. Un clic silencia y otro lo devuelve a donde estaba. Los botones de arriba ahora dicen qué hacen.",
+      ja: "ルームでサウンドボタンにマウスを乗せると全体の音量が出ます（最初は半分）。クリックでミュート、もう一度で元の音量に。上のボタンは何をするか表示するようになりました。",
+    },
+  },
+  {
     id: "side-menu-community",
     at: "2026-10-09",
     kind: "new",
