@@ -69,7 +69,9 @@ export function useRoom(code: string) {
         ? current
         : next;
     },
-    refetchInterval: pollMs(connected),
+    // while a start waits for every page, quicker: each page sees it begin at once
+    refetchInterval: (q) =>
+      q.state.data?.view.starting ? 250 : pollMs(connected),
     refetchOnWindowFocus: true,
     // a hidden tab is still a page open on the room: its polls keep the room listed
     refetchIntervalInBackground: true,

@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import {
   type ReactNode,
+  useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -16,8 +18,9 @@ import { useStage } from "@/features/stage/stage-context";
 import type { GameKey } from "@/game/games";
 import type { Beat, ShowView } from "@/game/types";
 import { useClock } from "@/lib/hooks/use-server-clock";
-import { type Track, useMusic } from "@/lib/music";
+import { preloadMusic, type Track, useMusic } from "@/lib/music";
 import { useGameOption } from "@/lib/settings";
+import { markLoaded } from "@/server/actions";
 import {
   IMPOSTOR_IMAGES,
   IMPOSTOR_SOUNDS,
@@ -71,36 +74,96 @@ export function TitleFonts({ game }: { game: GameKey }) {
   return ja ? <ChalkFontJa /> : <ChalkFont />;
 }
 
+const preloads = new Map<string, Promise<void>>();
+
 /**
- * Fetches a game's title scene (sounds, pictures, What for?'s chalk unless
- * `chalk` is off) ahead of its match, so it starts on the dot.
+ * Fetches a game's title scene (its take, sounds, pictures, What for?'s chalk
+ * unless `chalk` is off) ahead of its match, so it starts on the dot. Resolves
+ * once all of it is in; a part that fails counts as in (the scene does
+ * without it), and asking again waits on the same fetches.
  */
 export function preloadTitle(
   game: GameKey,
   o: { ja: boolean; chalk: boolean },
-) {
+): Promise<void> {
+  const key = `${game} ${o.ja} ${o.chalk}`;
+  const known = preloads.get(key);
+  if (known) return known;
+  const parts: Promise<unknown>[] = [
+    preloadMusic(TITLE_TRACK[game]),
+    preloadTitleSounds(
+      game === "impostor"
+        ? IMPOSTOR_SOUNDS
+        : game === "lineup"
+          ? LINEUP_SOUNDS
+          : WHO_SOUNDS,
+    ),
+    ...(game === "impostor"
+      ? IMPOSTOR_IMAGES
+      : game === "lineup"
+        ? LINEUP_IMAGES
+        : ["/opening/crown.svg"]
+    ).map((src) => {
+      const img = new Image();
+      img.decoding = "async";
+      img.src = src;
+      return img.decode();
+    }),
+  ];
   if (game === "lineup" && o.chalk)
-    void (
-      o.ja
+    parts.push(
+      (o.ja
         ? import("@/features/lineup/chalk-font-ja")
         : import("@/features/lineup/chalk-font")
-    ).then((m) => m.loadChalkFonts());
-  preloadTitleSounds(
-    game === "impostor"
-      ? IMPOSTOR_SOUNDS
-      : game === "lineup"
-        ? LINEUP_SOUNDS
-        : WHO_SOUNDS,
+      ).then((m) => m.loadChalkFonts()),
+    );
+  const all = Promise.allSettled(parts).then(() => undefined);
+  preloads.set(key, all);
+  return all;
+}
+
+/** The longest a page waits on its own opening before saying it is ready anyway (ms), within the start's wait. */
+const READY_CAP = 3000;
+
+/**
+ * Resolves once this page has `game`'s opening loaded (or after READY_CAP):
+ * what the host's start and the room's handshake wait on.
+ */
+export function useOpeningLoaded(game: GameKey): () => Promise<void> {
+  const ja = useLocale() === "ja";
+  const chalk = !useGameOption("lineup", "plainLetters");
+  return useCallback(
+    () =>
+      Promise.race([
+        preloadTitle(game, { ja, chalk }),
+        new Promise<void>((done) => window.setTimeout(done, READY_CAP)),
+      ]),
+    [game, ja, chalk],
   );
-  for (const src of game === "impostor"
-    ? IMPOSTOR_IMAGES
-    : game === "lineup"
-      ? LINEUP_IMAGES
-      : ["/opening/crown.svg"]) {
-    const img = new Image();
-    img.decoding = "async";
-    img.src = src;
-  }
+}
+
+/**
+ * The room's handshake: while the host's start waits for every page, this
+ * one says so once its opening is loaded, and the match begins for everyone
+ * together (no word on screen: it takes a moment).
+ */
+export function useStartHandshake() {
+  const { view, code, apply } = useRoomContext();
+  const loaded = useOpeningLoaded(view.settings.game);
+  const w = view.phase === "lobby" ? view.starting : null;
+  const waiting = w && !w.loaded.includes(view.youId) ? w.until : null;
+  useEffect(() => {
+    if (waiting === null) return;
+    let live = true;
+    void loaded().then(async () => {
+      if (!live) return;
+      const r = await markLoaded(code);
+      if (r.ok) apply(r.data);
+    });
+    return () => {
+      live = false;
+    };
+  }, [waiting, loaded, code, apply]);
 }
 
 /**
@@ -204,16 +267,17 @@ export function TitleStage({
 }
 
 /**
- * The opening's title beat, from the curtain before it on: the scene is built
- * then, unseen, and is `live` once its beat plays.
+ * The opening's title beat, from the start on (a moment ahead, then the
+ * curtain): the scene is built then, unseen, and is `live` once its beat plays.
  */
 function useTitleShow(): { show: ShowView; beat: Beat; live: boolean } | null {
   const { show, beat } = useStage();
   const title =
     show?.kind === "opening" && show.title ? beatOf(show, "title") : null;
-  if (!show || !title || (beat?.kind !== "title" && beat?.kind !== "curtain"))
-    return null;
-  return { show, beat: title, live: beat.kind === "title" };
+  // before the curtain too: a start a moment ahead (START_LEAD_MS)
+  const ahead = beat === null || beat.kind === "curtain";
+  if (!show || !title || (!ahead && beat.kind !== "title")) return null;
+  return { show, beat: title, live: beat?.kind === "title" };
 }
 
 /** The players a title scene draws: the match's, in seat order. */

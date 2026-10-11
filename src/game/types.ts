@@ -220,6 +220,17 @@ export const HEARTBEAT_MS = 60_000;
  */
 export const GONE_GRACE_MS = 5000;
 
+/**
+ * The longest a start waits for every page in the room to load its opening;
+ * a page that has not said so by then sees it as it comes.
+ */
+export const START_WAIT_MS = 4000;
+/**
+ * Once everyone has loaded it, the match starts this far ahead, so every page
+ * has the new state before its first beat and they all play it together.
+ */
+export const START_LEAD_MS = 500;
+
 /** How long a player the host removed from the lobby stays out (ms). */
 export const KICK_MS = 2 * 60_000;
 /** The podium stays this long; then the room goes back to the lobby on its own (the host can go sooner). */
@@ -603,8 +614,38 @@ export interface RoomState {
   chair?: PlayerId | null;
   /** The host drew who sits in the chair; the next opening says so. */
   chairDrawn?: boolean;
+  /** The lobby while a start waits for every page to load its opening. */
+  starting?: StartingState | null;
   createdAt: number;
   updatedAt: number;
+}
+
+/**
+ * What a match starts with. `themes`: the THEME_OPTIONS themes put to the
+ * vote, or ideas for a host who types the theme. `examples`: the rule scene's
+ * cards for each theme (a room's first match), aligned with `themes`.
+ */
+export interface StartFields {
+  playerId: PlayerId;
+  /** Who am I? and the Impostor: the themes put to the vote. */
+  themes?: Theme[];
+  examples?: (RuleExamples | null)[];
+  /** Someone seated has never finished a match (the server checks). */
+  newcomer?: boolean;
+  /** Impostor: each theme's cards and questions, aligned with `themes`. */
+  deals?: ImpDeal[];
+  /** What for?: each round's cards and mission. */
+  decks?: LuDeck[];
+}
+
+/** A start waiting for every page in the room to load its opening (PREPARE_START). */
+export interface StartingState {
+  /** When it starts regardless. */
+  until: number;
+  /** Whose pages have it loaded. */
+  loaded: PlayerId[];
+  /** What it starts with, kept on the server only. */
+  start: StartFields;
 }
 
 export type GameEvent =
@@ -632,23 +673,16 @@ export type GameEvent =
   | { type: "UPDATE_IDENTITY"; player: Identity }
   /** A guest signed in: the account takes the guest's seat, history and all. */
   | { type: "SWAP_PLAYER"; from: PlayerId; player: Identity }
+  /** The match begins at once (see StartFields). */
+  | ({ type: "START" } & StartFields)
   /**
-   * `themes`: the THEME_OPTIONS themes put to the vote, or ideas for a host who types the theme.
-   * `examples`: the rule scene's cards for each theme (a room's first match), aligned with `themes`.
+   * The host's start: the match begins once every page open on the room has
+   * its opening loaded (LOADED), or at the wait's end regardless. The host's
+   * page asks only once its own has loaded.
    */
-  | {
-      type: "START";
-      playerId: PlayerId;
-      /** Who am I? and the Impostor: the themes put to the vote. */
-      themes?: Theme[];
-      examples?: (RuleExamples | null)[];
-      /** Someone seated has never finished a match (the server checks). */
-      newcomer?: boolean;
-      /** Impostor: each theme's cards and questions, aligned with `themes`. */
-      deals?: ImpDeal[];
-      /** What for?: each round's cards and mission. */
-      decks?: LuDeck[];
-    }
+  | ({ type: "PREPARE_START" } & StartFields)
+  /** A page in the room has its opening loaded, while a start waits for them. */
+  | { type: "LOADED"; playerId: PlayerId }
   | { type: "VOTE"; playerId: PlayerId; option: number }
   | { type: "UNVOTE"; playerId: PlayerId }
   /** The host typed the theme. */
@@ -1039,6 +1073,8 @@ export interface RoomView {
   stepMs: number | null;
   /** When a closed page's grace runs out and the room has a seat to free (or closes): refetch then. */
   sweepAt?: number | null;
+  /** A start waiting for every page to load its opening: until when, and whose pages have. */
+  starting?: { until: number; loaded: PlayerId[] } | null;
   /** Shown to everyone until `reveal.until`; null when nothing is being revealed. */
   reveal: RevealView | null;
   /** Server clock when this view was built; use it to correct the countdown. */

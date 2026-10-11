@@ -81,9 +81,12 @@ import {
   type RoomState,
   type RuleExamples,
   SHOW_TIMING,
+  START_LEAD_MS,
+  START_WAIT_MS,
   STEP_SECONDS_MAX,
   STEP_SECONDS_MIN,
   STEP_TIMES,
+  type StartFields,
   THEME_IDEAS,
   THEME_OPTIONS,
   type Theme,
@@ -497,8 +500,59 @@ export function reduce(
 ): RoomState {
   const s = structuredClone(state);
   apply(s, event, ctx);
+  // someone leaving (or closing their page) may be all a waiting start still waited for
+  if (s.starting && SETTLES_START.has(event.type)) settleStart(s, ctx);
   s.updatedAt = ctx.now;
   return s;
+}
+
+const SETTLES_START = new Set<GameEvent["type"]>([
+  "LEAVE",
+  "KICK",
+  "GONE",
+  "SWEEP",
+]);
+
+/** The host may start: in the lobby, with enough players. */
+function checkStart(s: RoomState, playerId: PlayerId) {
+  requireSeated(s, playerId);
+  if (playerId !== s.hostId) fail("not_host");
+  if (s.phase !== "lobby") fail("wrong_phase");
+  if (s.players.length < GAME_SEATS[s.settings.game].min)
+    fail(
+      s.settings.game === "impostor"
+        ? "need_three_players"
+        : "need_two_players",
+    );
+}
+
+/** The match begins with what the start brought. */
+function begin(s: RoomState, e: StartFields, ctx: Ctx) {
+  s.starting = null;
+  stopClock(s);
+  s.newcomer = e.newcomer === true;
+  countMatch(s);
+  // What for? has no theme: the cards and missions come with the start
+  if (s.settings.game === "lineup")
+    return beginLineup(s, e.decks ?? fail("invalid_input"), ctx);
+  return beginTheme(s, e.themes, e.examples, e.deals, ctx);
+}
+
+/**
+ * A waiting start begins once every page still open on the room has loaded
+ * its opening, START_LEAD_MS ahead, so they all have it before the curtain;
+ * with too few players left it is called off.
+ */
+function settleStart(s: RoomState, ctx: Ctx) {
+  const w = s.starting;
+  if (!w) return;
+  if (s.players.length < GAME_SEATS[s.settings.game].min) {
+    s.starting = null;
+    return stopClock(s);
+  }
+  const open = s.players.filter((p) => p.goneAt == null && !p.away);
+  if (open.every((p) => w.loaded.includes(p.id)))
+    begin(s, w.start, { ...ctx, now: ctx.now + START_LEAD_MS });
 }
 
 function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
@@ -540,7 +594,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     case "UPDATE_SETTINGS": {
       requireSeated(s, e.playerId);
       if (e.playerId !== s.hostId) fail("not_host");
-      if (s.phase !== "lobby") fail("wrong_phase");
+      // a start already waiting was made for these settings
+      if (s.phase !== "lobby" || s.starting) fail("wrong_phase");
       const game = s.settings.game;
       s.settings = mergeSettings(s.settings, e.settings, s.players.length);
       if (s.settings.game !== game) recolor(s);
@@ -554,21 +609,32 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     case "SWAP_PLAYER":
       return swapPlayer(s, e.from, e.player);
     case "START": {
-      requireSeated(s, e.playerId);
-      if (e.playerId !== s.hostId) fail("not_host");
-      if (s.phase !== "lobby") fail("wrong_phase");
-      if (s.players.length < GAME_SEATS[s.settings.game].min)
-        fail(
-          s.settings.game === "impostor"
-            ? "need_three_players"
-            : "need_two_players",
-        );
-      s.newcomer = e.newcomer === true;
-      countMatch(s);
-      // What for? has no theme: the cards and missions come with the start
-      if (s.settings.game === "lineup")
-        return beginLineup(s, e.decks ?? fail("invalid_input"), ctx);
-      return beginTheme(s, e.themes, e.examples, e.deals, ctx);
+      checkStart(s, e.playerId);
+      const { type: _, ...start } = e;
+      return begin(s, start, ctx);
+    }
+    case "PREPARE_START": {
+      checkStart(s, e.playerId);
+      if (s.starting) fail("already_done");
+      if (s.settings.game === "lineup" && !e.decks) fail("invalid_input");
+      const { type: _, ...start } = e;
+      // the host's page asks once it has the opening loaded
+      s.starting = {
+        until: ctx.now + START_WAIT_MS,
+        loaded: [e.playerId],
+        start,
+      };
+      // its clock: the read after it starts the match regardless
+      s.deadline = s.starting.until;
+      return settleStart(s, ctx);
+    }
+    case "LOADED": {
+      const p = requireSeated(s, e.playerId);
+      const w = s.phase === "lobby" ? s.starting : null;
+      if (!w) return fail("wrong_phase");
+      if (w.loaded.includes(p.id)) fail("already_done");
+      w.loaded.push(p.id);
+      return settleStart(s, ctx);
     }
     case "VOTE":
       return vote(s, e.playerId, e.option, ctx);
@@ -962,9 +1028,15 @@ function timeout(
 ) {
   if (!isExpired(s, ctx.now)) fail("wrong_phase");
   switch (s.phase) {
-    // only a room saved while lobbies still had a clock gets here
-    case "lobby":
+    case "lobby": {
+      // a start that waited long enough begins, whoever has not loaded the opening yet
+      const w = s.starting;
+      if (w && s.players.length >= GAME_SEATS[s.settings.game].min)
+        return begin(s, w.start, { ...ctx, now: ctx.now + START_LEAD_MS });
+      // too few left, or a room saved while lobbies still had a clock
+      s.starting = null;
       return stopClock(s);
+    }
     case "theming":
       // the host's opening already played: just the vote coming in
       return beginVote(

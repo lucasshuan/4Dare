@@ -39,9 +39,9 @@ function load(src: string): Promise<AudioBuffer | null> {
   return p;
 }
 
-/** Fetches and decodes a scene's sounds ahead of time, so they play on the dot. */
-export function preloadTitleSounds(srcs: readonly string[]) {
-  for (const src of srcs) void load(src);
+/** Fetches and decodes a scene's sounds ahead of time, so they play on the dot. Resolves when they are in (a failed one counts). */
+export function preloadTitleSounds(srcs: readonly string[]): Promise<unknown> {
+  return Promise.all(srcs.map(load));
 }
 
 /** One gain for every scene sound, following the settings while they play. */

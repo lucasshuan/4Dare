@@ -291,10 +291,13 @@ export async function transferHost(
 }
 
 /**
- * Host only, 2+ players. Draws the themes everyone votes on (or the host's
- * ideas, when they type the theme), avoiding the last vote's. The game's first
- * match in the room, or one where someone seated plays their first ever, gets
- * the long shows; its vote brings the rule scene's cards for each theme along.
+ * Host only, 2+ players, from a page with the opening loaded. Draws the themes
+ * everyone votes on (or the host's ideas, when they type the theme), avoiding
+ * the last vote's. The game's first match in the room, or one where someone
+ * seated plays their first ever, gets the long shows; its vote brings the rule
+ * scene's cards for each theme along. The match begins once every page open
+ * on the room has its opening loaded too (markLoaded), so they all play it
+ * together from the first beat.
  */
 export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {
@@ -306,7 +309,7 @@ export async function startGame(code: string): Promise<Result<RoomView>> {
         hasNewcomer(stored.state),
       ]);
       return act(code, (id) => ({
-        type: "START",
+        type: "PREPARE_START",
         playerId: id,
         decks,
         ...(newcomer ? { newcomer } : {}),
@@ -319,7 +322,7 @@ export async function startGame(code: string): Promise<Result<RoomView>> {
         hasNewcomer(stored.state),
       ]);
       return act(code, (id) => ({
-        type: "START",
+        type: "PREPARE_START",
         playerId: id,
         themes: round.themes,
         deals: round.deals,
@@ -337,13 +340,18 @@ export async function startGame(code: string): Promise<Result<RoomView>> {
         ? await roundExamples(stored.state, themes, newcomer)
         : undefined;
     return act(code, (id) => ({
-      type: "START",
+      type: "PREPARE_START",
       playerId: id,
       themes,
       ...(examples ? { examples } : {}),
       ...(newcomer ? { newcomer } : {}),
     }));
   });
+}
+
+/** The player's page has its opening loaded, while a start waits for the room's. */
+export async function markLoaded(code: string): Promise<Result<RoomView>> {
+  return run(() => act(code, (id) => ({ type: "LOADED", playerId: id })));
 }
 
 /** Host only, while the room waits for them to type the theme. */

@@ -15,6 +15,7 @@ import {
   OpeningMusic,
   OpeningScene,
   preloadTitle,
+  useStartHandshake,
 } from "@/features/opening/title-scene";
 import { ResultScreen } from "@/features/result/result-screen";
 import { isGuessScene, isShow, type StageScreen } from "@/features/stage/stage";
@@ -189,8 +190,10 @@ function Areas() {
   const ja = useLocale() === "ja";
   const chalk = !useGameOption("lineup", "plainLetters");
   useEffect(() => {
-    if (area === "lobby") preloadTitle(game, { ja, chalk });
+    if (area === "lobby") void preloadTitle(game, { ja, chalk });
   }, [area, game, ja, chalk]);
+  // a start waits for every page to have it loaded
+  useStartHandshake();
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
   useEffect(() => {

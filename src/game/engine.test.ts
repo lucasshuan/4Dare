@@ -23,6 +23,8 @@ import {
   type RoomState,
   type RuleExamples,
   SHOW_TIMING,
+  START_LEAD_MS,
+  START_WAIT_MS,
 } from "./types";
 import { toView } from "./view";
 
@@ -355,6 +357,79 @@ describe("the host's lobby", () => {
     expect(code(() => g.do({ type: "JOIN", player: ident("p4") }))).toBe(
       "room_full",
     );
+  });
+});
+
+describe("the start handshake", () => {
+  const prepare = (g: Game) =>
+    g.do({ type: "PREPARE_START", playerId: "p1", themes: THEMES });
+  const loaded = (g: Game, id: string) =>
+    code(() => g.do({ type: "LOADED", playerId: id }));
+
+  it("waits for every page to load the opening, then starts a moment ahead for all", () => {
+    const g = new Game(3);
+    prepare(g);
+    expect(g.state.phase).toBe("lobby");
+    expect(g.state.starting).toMatchObject({
+      until: g.now + START_WAIT_MS,
+      loaded: ["p1"],
+    });
+    expect(g.state.deadline).toBe(g.now + START_WAIT_MS);
+    // the view says who is in, never what the match starts with
+    const view = toView(g.state, 1, "p2", g.now, "en");
+    expect(view.starting).toEqual({
+      until: g.now + START_WAIT_MS,
+      loaded: ["p1"],
+    });
+    expect(view.canStart).toBe(false);
+    expect(JSON.stringify(view)).not.toContain(THEMES[1].en);
+    g.now += 400;
+    expect(loaded(g, "p2")).toBe("no error");
+    expect(loaded(g, "p2")).toBe("already_done");
+    expect(g.state.phase).toBe("lobby");
+    g.now += 300;
+    expect(loaded(g, "p3")).toBe("no error");
+    expect(g.state.phase).not.toBe("lobby");
+    expect(g.state.starting).toBeNull();
+    expect(g.state.reveal?.startsAt).toBe(g.now + START_LEAD_MS);
+    expect(g.state.played).toEqual({ "who-am-i": 1 });
+  });
+
+  it("starts at the wait's end regardless, and doesn't wait for a closed page", () => {
+    const g = new Game(3);
+    prepare(g);
+    loaded(g, "p2");
+    g.now += START_WAIT_MS;
+    expect(isExpired(g.state, g.now)).toBe(true);
+    g.do({ type: "TIMEOUT" });
+    expect(g.state.phase).not.toBe("lobby");
+    expect(g.state.reveal?.startsAt).toBe(g.now + START_LEAD_MS);
+
+    const h = new Game(3);
+    prepare(h);
+    loaded(h, "p2");
+    h.do({ type: "GONE", playerId: "p3" });
+    expect(h.state.phase).not.toBe("lobby");
+  });
+
+  it("holds the settings while it waits, and calls itself off with too few left", () => {
+    const g = new Game(2);
+    prepare(g);
+    expect(
+      code(() =>
+        g.do({
+          type: "UPDATE_SETTINGS",
+          playerId: "p1",
+          settings: { seats: 3 },
+        }),
+      ),
+    ).toBe("wrong_phase");
+    expect(code(() => prepare(g))).toBe("already_done");
+    g.do({ type: "LEAVE", playerId: "p2" });
+    expect(g.state.phase).toBe("lobby");
+    expect(g.state.starting).toBeNull();
+    expect(g.state.deadline).toBeNull();
+    expect(loaded(g, "p1")).toBe("wrong_phase");
   });
 });
 

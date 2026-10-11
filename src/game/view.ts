@@ -411,6 +411,10 @@ export function toView(
     stepStartsAt: s.stepStartsAt,
     stepMs: s.stepMs,
     sweepAt: sweepAt(s),
+    // what it starts with stays on the server: the themes and the cards are secrets until then
+    starting: s.starting
+      ? { until: s.starting.until, loaded: [...s.starting.loaded] }
+      : null,
     reveal: reveal(s, viewerId, now),
     serverNow: now,
     vote: voteView(s, viewerId, now),
@@ -426,6 +430,7 @@ export function toView(
     canStart:
       viewerId === s.hostId &&
       s.phase === "lobby" &&
+      !s.starting &&
       s.players.length >= GAME_SEATS[s.settings.game].min,
   };
 }

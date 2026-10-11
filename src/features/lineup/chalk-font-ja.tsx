@@ -7,9 +7,11 @@ import { Yomogi } from "next/font/google";
 const yomogi = Yomogi({ weight: "400", preload: false });
 
 /** Fetches the font ahead of a screen that writes with it (the title scene). */
-export function loadChalkFonts() {
+export function loadChalkFonts(): Promise<unknown> {
   // a face missing (the fallback's local font) only means it isn't loaded early
-  document.fonts.load(`400 1em ${yomogi.style.fontFamily}`).catch(() => {});
+  return document.fonts
+    .load(`400 1em ${yomogi.style.fontFamily}`)
+    .catch(() => {});
 }
 
 export default function ChalkFontJa() {
