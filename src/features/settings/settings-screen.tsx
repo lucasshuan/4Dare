@@ -50,7 +50,7 @@ export function SettingsScreen() {
         title={t("title")}
         lead={t("lead")}
       />
-      <div className="grid gap-x-10 gap-y-5 lg:grid-cols-[200px_minmax(0,760px)]">
+      <div className="grid gap-x-10 gap-y-5 lg:grid-cols-[200px_minmax(0,1fr)]">
         <nav
           aria-label={t("jump")}
           className="-mx-1 flex gap-1.5 overflow-x-auto px-1 py-0.5 [scrollbar-width:none] lg:sticky lg:top-24 lg:mx-0 lg:flex-col lg:self-start lg:overflow-visible lg:p-0"
