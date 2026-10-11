@@ -5,13 +5,13 @@
   "tagline": "Jogos de adivinhação para jogar com amigos",
   "chips": {
     "free": "Grátis",
-    "players": "2 a 4 jogadores",
+    "players": "2 a 10 jogadores",
     "browser": "No navegador"
   },
   "imageAlt": "4Dare: jogos de adivinhação para jogar com amigos",
   "whoAmI": {
     "title": "Quem sou eu? Jogue online com os amigos",
-    "description": "Cada um escolhe um personagem para outro jogador. Você vê as cartas dos outros, nunca a sua. Descubra quem você é com perguntas de sim ou não. Grátis, 2 a 4 jogadores, sem cadastro.",
+    "description": "Cada um escolhe um personagem para outro jogador. Você vê as cartas dos outros, nunca a sua. Descubra quem você é com perguntas de sim ou não. Grátis, 2 a 6 jogadores, sem cadastro.",
     "pitch": "Cada um escolhe um personagem para outro. Descubra o seu com perguntas de sim ou não.",
     "imageAlt": "Quem sou eu? no 4Dare: cartas na mesa e uma pergunta de sim ou não"
   },

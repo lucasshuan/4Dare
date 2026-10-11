@@ -21,7 +21,7 @@ const isShow = (r: Reveal | null | undefined): r is Reveal =>
 
 /** Each show's beats, in the order they may come. */
 const SHOW_BEATS: Record<string, BeatKind[]> = {
-  opening: ["curtain", "intro", "round", "entrance"],
+  opening: ["curtain", "title", "intro", "entrance"],
   theme: ["tie_spin", "settle", "theme", "rule", "draw", "target", "entrance"],
   cast: ["picked", "received", "order", "entrance"],
   deal: ["tie_spin", "settle", "theme", "card", "entrance"],
@@ -34,6 +34,8 @@ function beatLengths(show: string, kind: BeatKind, first: boolean): number[] {
   switch (kind) {
     case "curtain":
       return [T.curtain];
+    case "title":
+      return [T.title[v]];
     case "intro":
       return [T.intro];
     case "round":
@@ -316,7 +318,7 @@ describe("random play", () => {
     const queued = new Set<string>();
     for (let seed = 1; seed <= 300; seed++) {
       const r = rng(seed * 7919);
-      const g = new Game(2 + (seed % 3), seed);
+      const g = new Game(2 + (seed % 5), seed);
       // events sent right away, at the same time (everyone votes during the opening)
       const burst: GameEvent[] = [];
       for (let step = 0; step < 250; step++) {

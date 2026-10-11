@@ -175,10 +175,12 @@ describe("what for?: the start", () => {
     expect(s.reveal?.kind).toBe("opening");
     expect(s.reveal?.beats?.map((b) => b.kind)).toEqual([
       "curtain",
+      "title",
       "rules",
       "secret",
       "entrance",
     ]);
+    expect(s.reveal?.title).toEqual({ n: 1, crowned: [] });
     // the lot's clock waits for the opening
     expect(s.stepStartsAt).toBe(s.reveal?.until);
     expect(s.deadline).toBe((s.reveal?.until ?? 0) + 60_000);

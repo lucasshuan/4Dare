@@ -30,12 +30,14 @@ const IDEAS_SHOWN = 4;
 const spring = { type: "spring", stiffness: 320, damping: 30 } as const;
 
 type Stage = "typing" | "waiting";
-const OPENING_BEATS = ["curtain", "intro", "round"] as const;
+/** The opening: nothing here under the curtain and the title scene, then the cold open (a long match). */
+const OPENING_BEATS = ["curtain", "title", "intro"] as const;
 const THEME_BEATS = ["theme", "rule"] as const;
 
 /**
  * The host types the theme while the others wait, inside the opening and
- * theme shows: the cold open (or "Round N") first, then the form lands; once
+ * theme shows: the title scene (over everything, title-scene.tsx) and on a
+ * long match the cold open first, then the form lands; once
  * the theme is typed, the theme hero ("Chosen by {host}") and, on the room's
  * first match, the rule as a sentence.
  */

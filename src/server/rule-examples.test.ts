@@ -283,7 +283,13 @@ describe("ruleExamples", () => {
 });
 
 describe("voteExamples", () => {
-  const room = (round: number) => ({ round }) as RoomState;
+  /** A Who am I? room that has played it `played` times (and maybe other games). */
+  const room = (played: number, other = 0) =>
+    ({
+      round: played + other,
+      settings: { game: "who-am-i" },
+      played: { "who-am-i": played, impostor: other },
+    }) as unknown as RoomState;
   const themes = [
     theme("Superheroes", "heroes"),
     theme("Presidents", "history"),
@@ -291,11 +297,13 @@ describe("voteExamples", () => {
     theme("Pirates", "warriors"),
   ];
 
-  it("sends cards only on a room's first match", async () => {
+  it("sends cards only on the game's first match in the room", async () => {
     const first = await voteExamples(room(0), themes, sources());
     expect(first).toHaveLength(4);
     expect(first?.[2]).toBeNull();
     expect(await voteExamples(room(1), themes, sources())).toBeUndefined();
+    // the room played other games first: still Who am I?'s first
+    expect(await voteExamples(room(0, 2), themes, sources())).toHaveLength(4);
   });
 
   it("sends cards on a later match when a newcomer is seated", async () => {

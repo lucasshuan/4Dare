@@ -86,17 +86,26 @@ export function exampleCard(id: string, name: string, i: number): ExampleCard {
 }
 
 /** Short account names, as in the prototype. */
-const SHORT = ["Bia", "Rafa", "Leo", "Nina"];
+const SHORT = ["Bia", "Rafa", "Leo", "Nina", "Duda", "Gabi"];
 /** Guests whose Portuguese names are 16 characters (the longest a name gets). */
-const LONG_GUESTS = [532, 956, 843, 99]; // RaposaMisteriosa, PandaAventureiro, PandaTrabalhador, GatoAconchegante
+const LONG_GUESTS = [532, 956, 843, 99, 249, 278]; // RaposaMisteriosa, PandaAventureiro, PandaTrabalhador, GatoAconchegante, CachorroCorajoso, CachorroElétrico
 /** The players' creatures, by seat. */
 const CREATURES = [
   "Cat..Happy..0",
   "Frog..Sleepy..0",
   "Potato.Ninja...0",
   "Owl..Curious..0",
+  "Cat..Sleepy..0",
+  "Frog..Happy..0",
 ];
-const COLORS = ["#F4C7D9", "#BFE3EA", "#F2E3A8", "#D9C7F4"];
+const COLORS = [
+  "#F4C7D9",
+  "#BFE3EA",
+  "#F2E3A8",
+  "#D9C7F4",
+  "#F3D3B8",
+  "#BFE6C8",
+];
 
 /** The players by seat; the host sits first. */
 export function labPlayers(params: LabParams): Identity[] {
@@ -214,6 +223,8 @@ export const LAB_CHARACTERS: Character[] = [
   labCharacter("lab-c2", "Wonder Woman", "DC", 1),
   labCharacter("lab-c3", "Black Panther", "Marvel", 2),
   labCharacter("lab-c4", "Batgirl", "DC", 3),
+  labCharacter("lab-c5", "Thor", "Marvel", 4),
+  labCharacter("lab-c6", "Supergirl", "DC", 5),
 ];
 
 /** ✓✓ and ✗, the same for every theme. */

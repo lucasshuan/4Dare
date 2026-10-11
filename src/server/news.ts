@@ -10,7 +10,6 @@ import {
 } from "./backend/community-types";
 import { peopleOf } from "./catalog";
 import type { NewsItem, NewsPage, ThemeDraft } from "./community-contract";
-import { NEWS_POSTS } from "./news-posts";
 
 type Texts = Record<Lang, string>;
 
@@ -129,34 +128,18 @@ export async function publishWorkshopNews(live: {
   newsCache = null;
 }
 
-const rowed = new Set<string>();
 let newsCache: { at: number; posts: Promise<StoredNews[]> } | null = null;
 
-/** The hand-written posts (news-posts.ts); the first of a day is the newest. */
-const written = NEWS_POSTS.map(
-  (e, i): StoredNews => ({
-    id: e.id,
-    publishedAt: Date.parse(`${e.at}T12:00:00Z`) - i * 1000,
-    kind: e.kind,
-    game: e.game,
-    title: e.title ?? {},
-    body: e.body,
-    action: e.action ?? null,
-    suggestionId: null,
-  }),
-);
-
-/** Written posts and the Workshop's, newest first (a written post wins an id). */
+/** The posts in the database (news_posts), newest first. */
 function posts(): Promise<StoredNews[]> {
   if (newsCache && Date.now() - newsCache.at < 60_000) return newsCache.posts;
   const p = getBackend()
     .news.list()
-    .then((rows) => {
-      const ids = new Set(written.map((w) => w.id));
-      return [...written, ...rows.filter((r) => !ids.has(r.id))]
+    .then((rows) =>
+      rows
         .filter((s) => s.publishedAt <= Date.now())
-        .sort((a, b) => b.publishedAt - a.publishedAt);
-    });
+        .sort((a, b) => b.publishedAt - a.publishedAt),
+    );
   newsCache = { at: Date.now(), posts: p };
   p.catch(() => {
     newsCache = null;
@@ -226,10 +209,5 @@ export async function react(
     throw new GameError("invalid_input");
   const post = (await posts()).find((p) => p.id === postId);
   if (!post) throw new GameError("not_found");
-  // reactions hang on a news_posts row: a written post gets its row on the first one
-  if (!rowed.has(postId) && written.some((w) => w.id === postId)) {
-    await getBackend().news.insert(post);
-    rowed.add(postId);
-  }
   return getBackend().news.toggle(postId, viewer, reaction as NewsReaction);
 }

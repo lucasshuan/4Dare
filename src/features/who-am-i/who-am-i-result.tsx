@@ -53,6 +53,9 @@ export function WhoAmIResult() {
   const winners = ranked.filter((p) => p.place === 1);
   const winner = winners[0];
   const columns = podiumOrder(ranked);
+  // five or six: below the widest layout only the top three stand on the podium, the rest are listed
+  const crowded = columns.length >= 5;
+  const rest = crowded ? columns.slice(3) : [];
   const you = view.players.find((p) => p.isYou);
   const youLine = !you
     ? null
@@ -64,8 +67,10 @@ export function WhoAmIResult() {
           ? t("youGaveUp")
           : t("youMissed");
   // plinths rise from the lowest place to the highest, then the cards land on them
+  // (with five or six, closer together: the winner's rises when four players' would)
+  const riseStep = 0.22 * Math.min(1, 3 / Math.max(1, ranked.length - 1));
   const riseDelay = (p: PlayerView) =>
-    0.25 + (ranked.length - 1 - ranked.indexOf(p)) * 0.22;
+    0.25 + (ranked.length - 1 - ranked.indexOf(p)) * riseStep;
 
   useEffect(() => {
     if (!winner) return;
@@ -150,128 +155,233 @@ export function WhoAmIResult() {
           </div>
         </div>
 
-        <ol className="flex w-full items-end justify-center gap-3 self-end sm:gap-6">
-          {columns.map((p) => {
-            const picker = playerById(p.pickedById);
-            const plinth = p.place ? (PLINTH[p.place] ?? 40) : 20;
-            const delay = riseDelay(p);
-            return (
-              <li
-                key={p.id}
-                className="flex w-full max-w-[min(250px,30vh)] min-w-0 flex-col gap-3"
-              >
-                <m.article
-                  initial={{ opacity: 0, y: 40, rotateX: 25 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    rotateX: 0,
-                    transition: {
-                      delay: delay + 0.45,
-                      duration: 0.6,
-                      ease: ease.soft,
-                    },
-                  }}
-                  style={
-                    p.place === 1
-                      ? {
-                          outlineColor: seatColor(p.colorSlot),
-                          boxShadow: `0 0 48px -8px ${seatColor(p.colorSlot)}`,
-                        }
-                      : undefined
-                  }
+        <div className="flex w-full flex-col gap-6 self-end">
+          {rest.length ? (
+            <ul className="grid gap-2 sm:grid-cols-2 xl:hidden">
+              {rest.map((p, k) => (
+                <RestRow
+                  key={p.id}
+                  player={p}
+                  picker={playerById(p.pickedById)}
+                  delay={0.4 + k * 0.12}
+                />
+              ))}
+            </ul>
+          ) : null}
+          <ol
+            className={cn(
+              "flex w-full items-end justify-center gap-3",
+              crowded ? "sm:gap-4" : "sm:gap-6",
+            )}
+          >
+            {columns.map((p, k) => {
+              const picker = playerById(p.pickedById);
+              const plinth = p.place ? (PLINTH[p.place] ?? 40) : 20;
+              const delay = riseDelay(p);
+              return (
+                <li
+                  key={p.id}
                   className={cn(
-                    "flex flex-col gap-2 rounded-xl bg-surface p-2.5 shadow-card",
-                    p.place === 1 && "outline-[3px] outline-solid",
+                    "flex w-full max-w-[min(250px,30vh)] min-w-0 flex-col gap-3",
+                    crowded && k >= 3 && "max-xl:hidden",
                   )}
                 >
-                  <Portrait
-                    src={p.card?.imageUrl ?? null}
-                    tone={p.isYou ? "you" : p.place === 1 ? "other" : "neutral"}
-                  />
-                  <h2 className="truncate px-1.5 font-bold font-display text-[clamp(16px,2vw,24px)] leading-tight">
-                    {p.card?.name ?? "?"}
-                  </h2>
-                  <p className="line-clamp-2 px-1.5 font-medium text-[13px] text-ink-muted leading-[18px]">
-                    {p.card?.origin}
-                    {p.card?.origin && picker ? " · " : null}
-                    {picker
-                      ? withNames((n) =>
-                          t("pickedBy", { name: n(picker, picker.isYou) }),
-                        )
-                      : null}
-                  </p>
-                </m.article>
-                <m.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    transition: {
-                      delay: delay + 0.7,
-                      duration: 0.5,
-                      ease: ease.soft,
-                    },
-                  }}
-                  className="flex px-1"
-                >
-                  <PersonCard
-                    person={{ ...p, name: name(p, p.isYou) }}
-                    className="-m-1 flex min-w-0 items-center gap-3 p-1"
+                  <m.article
+                    initial={{ opacity: 0, y: 40, rotateX: 25 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      rotateX: 0,
+                      transition: {
+                        delay: delay + 0.45,
+                        duration: 0.6,
+                        ease: ease.soft,
+                      },
+                    }}
+                    style={
+                      p.place === 1
+                        ? {
+                            outlineColor: seatColor(p.colorSlot),
+                            boxShadow: `0 0 48px -8px ${seatColor(p.colorSlot)}`,
+                          }
+                        : undefined
+                    }
+                    className={cn(
+                      "flex flex-col gap-2 rounded-xl bg-surface p-2.5 shadow-card",
+                      p.place === 1 && "outline-[3px] outline-solid",
+                    )}
                   >
-                    <Avatar
-                      avatar={p.avatar}
-                      size={48}
-                      seat={p.colorSlot}
-                      className="max-sm:size-8 [--ring-gap:var(--canvas)]"
+                    <Portrait
+                      src={p.card?.imageUrl ?? null}
+                      tone={
+                        p.isYou ? "you" : p.place === 1 ? "other" : "neutral"
+                      }
                     />
-                    <span className="flex min-w-0 flex-col">
-                      <span className="truncate font-bold text-[clamp(14px,1.6vw,18px)]">
-                        {name(p, p.isYou)}
+                    <h2
+                      className={cn(
+                        "truncate px-1.5 font-bold font-display text-[clamp(16px,2vw,24px)] leading-tight",
+                        crowded && "xl:text-lg",
+                      )}
+                    >
+                      {p.card?.name ?? "?"}
+                    </h2>
+                    <p className="line-clamp-2 px-1.5 font-medium text-[13px] text-ink-muted leading-[18px]">
+                      {p.card?.origin}
+                      {p.card?.origin && picker ? " · " : null}
+                      {picker
+                        ? withNames((n) =>
+                            t("pickedBy", { name: n(picker, picker.isYou) }),
+                          )
+                        : null}
+                    </p>
+                  </m.article>
+                  <m.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: {
+                        delay: delay + 0.7,
+                        duration: 0.5,
+                        ease: ease.soft,
+                      },
+                    }}
+                    className="flex px-1"
+                  >
+                    <PersonCard
+                      person={{ ...p, name: name(p, p.isYou) }}
+                      className="-m-1 flex min-w-0 items-center gap-3 p-1"
+                    >
+                      <Avatar
+                        avatar={p.avatar}
+                        size={48}
+                        seat={p.colorSlot}
+                        className={cn(
+                          "max-sm:size-8 [--ring-gap:var(--canvas)]",
+                          crowded && "xl:size-9",
+                        )}
+                      />
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate font-bold text-[clamp(14px,1.6vw,18px)]">
+                          {name(p, p.isYou)}
+                        </span>
+                        <span className="font-medium text-[13px] text-ink-muted">
+                          {p.discoveredAt
+                            ? t("discoveredAt", { n: p.discoveredAt })
+                            : p.gaveUp
+                              ? t("gaveUp")
+                              : t("notFound")}
+                        </span>
                       </span>
-                      <span className="font-medium text-[13px] text-ink-muted">
-                        {p.discoveredAt
-                          ? t("discoveredAt", { n: p.discoveredAt })
-                          : p.gaveUp
-                            ? t("gaveUp")
-                            : t("notFound")}
-                      </span>
-                    </span>
-                  </PersonCard>
-                </m.div>
-                <m.div
-                  initial={{ height: 0 }}
-                  animate={{
-                    height: plinth,
-                    transition: { delay, duration: 0.7, ease: ease.soft },
-                  }}
-                  // each plinth in its player's colour: the winner's full, the rest light
-                  style={
-                    p.place === 1
-                      ? {
-                          backgroundColor: seatColor(p.colorSlot),
-                          color: onSeat(p.colorSlot),
-                        }
-                      : {
-                          backgroundColor: seatSoft(p.colorSlot),
-                          color: seatInk(p.colorSlot),
-                        }
-                  }
-                  className={cn(
-                    "flex items-center justify-center gap-2 overflow-hidden rounded-t-[20px] font-display font-extrabold",
-                    p.place === 1 ? "text-[clamp(32px,4vw,48px)]" : "text-3xl",
-                  )}
-                >
-                  {p.place === 1 ? (
-                    <Trophy className="size-8" strokeWidth={1.75} />
-                  ) : null}
-                  {p.place ? t("placeShort", { place: p.place }) : null}
-                </m.div>
-              </li>
-            );
-          })}
-        </ol>
+                    </PersonCard>
+                  </m.div>
+                  <m.div
+                    initial={{ height: 0 }}
+                    animate={{
+                      height: plinth,
+                      transition: { delay, duration: 0.7, ease: ease.soft },
+                    }}
+                    // each plinth in its player's colour: the winner's full, the rest light
+                    style={
+                      p.place === 1
+                        ? {
+                            backgroundColor: seatColor(p.colorSlot),
+                            color: onSeat(p.colorSlot),
+                          }
+                        : {
+                            backgroundColor: seatSoft(p.colorSlot),
+                            color: seatInk(p.colorSlot),
+                          }
+                    }
+                    className={cn(
+                      "flex items-center justify-center gap-2 overflow-hidden rounded-t-[20px] font-display font-extrabold",
+                      p.place === 1
+                        ? "text-[clamp(32px,4vw,48px)]"
+                        : "text-3xl",
+                    )}
+                  >
+                    {p.place === 1 ? (
+                      <Trophy className="size-8" strokeWidth={1.75} />
+                    ) : null}
+                    {p.place ? t("placeShort", { place: p.place }) : null}
+                  </m.div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * A player off the podium, when five or six played and the screen is not
+ * wide: their place, their card and who picked it, and how they did.
+ */
+function RestRow({
+  player: p,
+  picker,
+  delay,
+}: {
+  player: PlayerView;
+  picker: PlayerView | undefined;
+  delay: number;
+}) {
+  const t = useTranslations("whoAmI.result");
+  const name = useDisplayName();
+  const withNames = useWithNames();
+  return (
+    <m.li
+      initial={{ opacity: 0, y: 10 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        transition: { delay, duration: 0.5, ease: ease.soft },
+      }}
+      className="flex min-w-0 items-center gap-3 rounded-xl bg-surface p-2 pr-3 shadow-card"
+    >
+      <span
+        style={{
+          backgroundColor: seatSoft(p.colorSlot),
+          color: seatInk(p.colorSlot),
+        }}
+        className="flex h-full min-h-14 w-10 shrink-0 items-center justify-center rounded-[10px] font-display font-extrabold text-lg"
+      >
+        {p.place ? t("placeShort", { place: p.place }) : "–"}
+      </span>
+      <Portrait
+        src={p.card?.imageUrl ?? null}
+        tone={p.isYou ? "you" : "neutral"}
+        className="w-11 shrink-0 rounded-[8px]"
+      />
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="truncate font-bold font-display text-base leading-tight">
+          {p.card?.name ?? "?"}
+        </span>
+        <span className="truncate font-medium text-[13px] text-ink-muted">
+          {picker
+            ? withNames((n) => t("pickedBy", { name: n(picker, picker.isYou) }))
+            : p.card?.origin}
+        </span>
+        <PersonCard
+          person={{ ...p, name: name(p, p.isYou) }}
+          className="-m-0.5 flex min-w-0 items-center gap-1.5 p-0.5"
+        >
+          <Avatar avatar={p.avatar} size={20} seat={p.colorSlot} />
+          <span className="truncate font-semibold text-[13px]">
+            {name(p, p.isYou)}
+            <span className="font-medium text-ink-muted">
+              {" · "}
+              {p.discoveredAt
+                ? t("discoveredAt", { n: p.discoveredAt })
+                : p.gaveUp
+                  ? t("gaveUp")
+                  : t("notFound")}
+            </span>
+          </span>
+        </PersonCard>
+      </span>
+    </m.li>
   );
 }

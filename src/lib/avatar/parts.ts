@@ -796,7 +796,38 @@ export const DEFAULT_EX: [string, number][] = [
   ["smug", 0.8],
 ];
 
+/** While true, every eye drawn is wrapped in a `.e` group (avatarEyesSvg). */
+let markingEyes = false;
+
+/** Draws with the eyes marked, so a render can keep only them. */
+export function withEyesMarked<T>(draw: () => T): T {
+  markingEyes = true;
+  try {
+    return draw();
+  } finally {
+    markingEyes = false;
+  }
+}
+
+/** Whether a draw is marking its eyes: it then draws them even behind shades. */
+export const eyesMarked = () => markingEyes;
+
+/** An eye drawn outside eye() (a spider's, a cyclops's pupil), marked like the rest. */
+export const markEye = (svg: string) =>
+  markingEyes ? `<g class="e">${svg}</g>` : svg;
+
 export function eye(
+  kind: string,
+  x: number,
+  y: number,
+  side: number,
+  lod: number,
+  onDark: boolean,
+): string {
+  return markEye(eyeShape(kind, x, y, side, lod, onDark));
+}
+
+function eyeShape(
   kind: string,
   x: number,
   y: number,
@@ -1456,8 +1487,10 @@ export function face(
       s +=
         `<circle cx="50" cy="${n(f.ey - 1)}" r="9" fill="${WH}" stroke="${INK}" stroke-width="2.2"/>` +
         (["dot", "big", "mono"].includes(e1) || !e1
-          ? F(Ci(50, f.ey - 0.4, 4.6), INK) +
-            (lod > 0 ? F(Ci(48.4, f.ey - 2.6, 1.7), WH) : "")
+          ? markEye(
+              F(Ci(50, f.ey - 0.4, 4.6), INK) +
+                (lod > 0 ? F(Ci(48.4, f.ey - 2.6, 1.7), WH) : ""),
+            )
           : G(
               `translate(50 ${n(f.ey - 1)}) scale(1.3) translate(-50 ${n(-(f.ey - 1))})`,
               eye(e1 === "odd" ? "wide" : e1, 50, f.ey - 1, 1, lod, false),
@@ -1470,9 +1503,10 @@ export function face(
       [-f.ex * 1.35, -4, 1.8],
       [f.ex * 1.35, -4, 1.8],
     ])
-      s +=
+      s += markEye(
         F(Ci(50 + dx, f.ey + dy, rr + 1.6), WH) +
-        F(Ci(50 + dx, f.ey + dy, rr), INK);
+          F(Ci(50 + dx, f.ey + dy, rr), INK),
+      );
   }
   if (ek === "mono") {
   } else if (ek === "spider") {
@@ -1484,9 +1518,10 @@ export function face(
       [-f.ex * 1.35, -4, 1.8],
       [f.ex * 1.35, -4, 1.8],
     ]) {
-      s +=
+      s += markEye(
         F(Ci(50 + dx, f.ey + dy, rr + 1.6), WH) +
-        F(Ci(50 + dx, f.ey + dy, rr), INK);
+          F(Ci(50 + dx, f.ey + dy, rr), INK),
+      );
     }
   } else if (ek === "wink") {
     s +=

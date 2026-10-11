@@ -9,7 +9,7 @@ import {
 import { labRoom, labTime } from "./scenarios";
 
 const variants: Partial<LabParams>[] = [];
-for (const players of [2, 3, 4] as const)
+for (const players of [2, 3, 4, 5, 6] as const)
   for (const match of ["first", "later"] as const)
     for (const typed of [false, true])
       for (const timeout of [false, true])

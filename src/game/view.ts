@@ -281,6 +281,7 @@ function showView(r: Reveal, kind: ShowKind, now: number): ShowView {
     beats: (r.beats ?? []).map((b) => ({ ...b })),
     first: r.first ?? false,
     rule: r.rule ?? null,
+    title: r.title ?? null,
     prev:
       prev && isShowKind(prev.kind) && now < prev.until
         ? showView({ ...prev, prev: null }, prev.kind, now)

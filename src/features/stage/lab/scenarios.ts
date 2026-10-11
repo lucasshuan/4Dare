@@ -110,7 +110,7 @@ class Run {
     this.state = createRoom(
       CODE,
       host,
-      { ...DEFAULT_SETTINGS, seats: 4, themeMode: typed ? "host" : "vote" },
+      { ...DEFAULT_SETTINGS, seats: 6, themeMode: typed ? "host" : "vote" },
       { now, random: this.random },
     );
     this.snaps.push({ at: now, state: this.state });
@@ -173,10 +173,11 @@ export function labRoom(params: LabParams): LabRoom {
   } else {
     people.forEach((p, i) => {
       run.to(marks.vote + 900 * (i + 1));
+      // a tie: two themes level (2, 4 or 6 voters), or the last one apart (3 or 5)
       const option = params.tie
-        ? people.length === 4
+        ? people.length % 2 === 0 || i < people.length - 1
           ? i % 2
-          : i
+          : 2
         : i === 1 && people.length > 2
           ? 1
           : 0;

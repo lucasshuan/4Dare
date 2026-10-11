@@ -9,6 +9,8 @@ const LONG_CHARACTERS = [
   labCharacter("lab-c2", "Diana Prince (Wonder Woman)", "DC", 1),
   labCharacter("lab-c3", "T'Challa, the Black Panther", "Marvel", 2),
   labCharacter("lab-c4", "Barbara Gordon (Batgirl)", "DC", 3),
+  labCharacter("lab-c5", "Thor, the God of Thunder", "Marvel", 4),
+  labCharacter("lab-c6", "Kara Zor-El (Supergirl)", "DC", 5),
 ];
 
 export function scenario(params: LabParams): SceneFixtures {

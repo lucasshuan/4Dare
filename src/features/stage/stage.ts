@@ -332,7 +332,12 @@ export function stageLook(
     const beat = on.beat ?? show.beats[0];
     const t = on.beat ? now : beat.startsAt;
     const until = on.beat ? beat.until : show.startsAt;
-    if (view.lu && beat.kind !== "curtain" && beat.kind !== "round")
+    if (
+      view.lu &&
+      beat.kind !== "curtain" &&
+      beat.kind !== "title" &&
+      beat.kind !== "round"
+    )
       return {
         look:
           beat.kind === "sold" || beat.kind === "entrance" ? AUCTION : SLATE,
@@ -347,8 +352,10 @@ export function stageLook(
     };
     const first = show.first;
     switch (beat.kind) {
+      // the lobby leaves to the bare canvas, where the title scene opens its own set
       case "curtain":
-        return split(SHOW_MARKS.curtainWash, NO_LOOK, BRAND);
+      case "title":
+        return { look: NO_LOOK, next: until };
       case "intro":
       case "round":
         return { look: BRAND, next: until };

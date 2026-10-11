@@ -1,0 +1,804 @@
+/* What for?'s title scene: a tactics board in a 1970s/80s coach's room, in
+   Nutmeg's mood (warm, saturated, dark corners, film grain). Drawn on
+   1280×720, or 780×1688 on a phone held upright (.portrait); every
+   animation-delay comes inline, in seconds from the title beat's start. */
+
+.screen {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  background: #c99a5f;
+  filter: saturate(1.16) contrast(1.07) sepia(0.1);
+}
+.portrait.screen {
+  width: 780px;
+  height: 1688px;
+}
+.grain {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 21;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  will-change: transform;
+  animation: grainJit 0.5s steps(1, end) infinite;
+}
+/* live film grain: the same noise jumps 8 times a second (a little enlarged so its edge never shows) */
+@keyframes grainJit {
+  0% {
+    transform: scale(1.08) translate(0, 0);
+  }
+  25% {
+    transform: scale(1.08) translate(-23px, 14px);
+  }
+  50% {
+    transform: scale(1.08) translate(17px, -19px);
+  }
+  75% {
+    transform: scale(1.08) translate(-9px, -27px);
+  }
+}
+/* lamp light: a warm middle, very dark edges and corners; past the canvas (its shadow), the darkest of it */
+.vignette {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 720px;
+  z-index: 20;
+  pointer-events: none;
+  background: radial-gradient(
+    75% 85% at 50% 42%,
+    rgba(255, 200, 120, 0.12) 0%,
+    rgba(255, 200, 120, 0) 40%,
+    rgba(46, 20, 4, 0.42) 64%,
+    rgba(24, 9, 2, 0.86) 100%
+  );
+  box-shadow: 0 0 0 2000px rgba(24, 9, 2, 0.86);
+}
+.portrait .vignette {
+  width: 780px;
+  height: 1688px;
+  background: radial-gradient(
+    95% 70% at 50% 46%,
+    rgba(255, 200, 120, 0.12) 0%,
+    rgba(255, 200, 120, 0) 40%,
+    rgba(46, 20, 4, 0.42) 64%,
+    rgba(24, 9, 2, 0.86) 100%
+  );
+}
+
+/* the coach's room: faded diamond wallpaper with stains and warm light; the wall and what hangs on it a little out of focus, the board in front sharp */
+.wall {
+  position: absolute;
+  left: -2000px;
+  top: -2000px;
+  filter: blur(1.3px);
+}
+.aging {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 720px;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      60% 55% at 50% 38%,
+      rgba(255, 244, 214, 0.34),
+      rgba(255, 244, 214, 0) 70%
+    ),
+    radial-gradient(
+      22% 30% at 8% 78%,
+      rgba(120, 78, 30, 0.16),
+      rgba(120, 78, 30, 0) 70%
+    ),
+    radial-gradient(
+      18% 22% at 93% 22%,
+      rgba(120, 78, 30, 0.12),
+      rgba(120, 78, 30, 0) 70%
+    ),
+    radial-gradient(
+      14% 18% at 97% 70%,
+      rgba(255, 250, 235, 0.16),
+      rgba(255, 250, 235, 0) 70%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(90, 55, 20, 0.18) 0%,
+      rgba(90, 55, 20, 0) 22%,
+      rgba(90, 55, 20, 0) 78%,
+      rgba(90, 55, 20, 0.22) 100%
+    ),
+    radial-gradient(
+      130% 110% at 50% 45%,
+      rgba(40, 22, 8, 0) 55%,
+      rgba(40, 22, 8, 0.32) 100%
+    );
+}
+.portrait .aging {
+  width: 780px;
+  height: 1688px;
+}
+/* a team pennant on the wall */
+.pennant {
+  position: absolute;
+  left: 2px;
+  top: 4px;
+  width: 89px;
+  height: 220px;
+  transform: rotate(-3deg);
+  transform-origin: 45px 54px;
+  filter: blur(0.8px) drop-shadow(0 6px 6px rgba(42, 29, 12, 0.3));
+}
+.portrait .pennant {
+  left: 30px;
+  top: -20px;
+  width: 76px;
+  height: 188px;
+  transform-origin: 38px 46px;
+}
+/* the coach's note and the whistle */
+.note {
+  position: absolute;
+  left: 6px;
+  top: 262px;
+  width: 78px;
+  height: 108px;
+  transform: rotate(-6deg);
+  filter: blur(0.7px) drop-shadow(0 6px 7px rgba(42, 29, 12, 0.28));
+}
+.portrait .note {
+  z-index: 7;
+  left: 22px;
+  top: 30px;
+}
+.noteTape {
+  position: absolute;
+  z-index: 2;
+  left: 26px;
+  top: -9px;
+  width: 40px;
+  height: 18px;
+  background: rgba(246, 227, 161, 0.85);
+  transform: rotate(5deg);
+  box-shadow: 0 1px 2px rgba(42, 29, 12, 0.15);
+}
+.paper {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  padding: 17px 4px 0 19px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  color: #3a4458;
+  white-space: nowrap;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0 12px,
+      #a9d3e6 12px 13px
+    )
+    16px 15px / calc(100% - 20px) calc(100% - 15px) no-repeat,
+    #fcfcf9;
+  mask:
+    radial-gradient(circle at 7px 50%, transparent 2.8px, #000 3.4px) 0 3px /
+    100% 17px repeat-y;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 94%,
+    93% 96.5%,
+    86% 93.8%,
+    79% 97%,
+    71% 94.4%,
+    63% 97.4%,
+    55% 94.6%,
+    47% 97.8%,
+    38% 95%,
+    30% 97.4%,
+    21% 94.2%,
+    12% 96.8%,
+    0 94.6%
+  );
+}
+.paper b {
+  font-size: 18px;
+  line-height: 1;
+}
+.paper span {
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.8;
+}
+.whistle {
+  position: absolute;
+  z-index: 6;
+  left: 1164px;
+  top: -30px;
+  width: 60px;
+  height: 210px;
+  transform-origin: 30px 0;
+  overflow: visible;
+  animation: swing 3.4s ease-in-out infinite alternate;
+}
+.portrait .whistle {
+  left: 684px;
+  top: -70px;
+}
+@keyframes swing {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
+}
+
+/* the standing tactics board: a raw orange-brown wooden frame with a vertical grain, on two legs */
+.wood {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(60, 24, 4, 0.16) 0%,
+      rgba(255, 214, 160, 0.07) 45%,
+      rgba(60, 24, 4, 0.18) 100%
+    ),
+    url(/opening/pine.webp) 0 0 / 360px 360px;
+}
+.frame {
+  position: absolute;
+  left: 94px;
+  top: 42px;
+  width: 1092px;
+  height: 592px;
+  border-radius: 16px;
+  box-shadow:
+    0 34px 60px -8px rgba(38, 16, 2, 0.6),
+    26px 30px 54px rgba(38, 16, 2, 0.28),
+    inset 0 4px 0 rgba(255, 214, 160, 0.38),
+    inset 4px 0 0 rgba(255, 214, 160, 0.16),
+    inset 0 -6px 0 rgba(60, 24, 4, 0.5),
+    inset -4px 0 0 rgba(60, 24, 4, 0.32);
+}
+.portrait .frame {
+  left: 10px;
+  top: 90px;
+  width: 760px;
+  height: 1462px;
+}
+.leg {
+  position: absolute;
+  top: 640px;
+  width: 48px;
+  height: 130px;
+  border-radius: 3px 3px 0 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(60, 24, 4, 0.3) 0%,
+      rgba(255, 214, 160, 0.08) 40%,
+      rgba(60, 24, 4, 0.4) 100%
+    ),
+    url(/opening/pine.webp) 0 0 / 360px 360px;
+  box-shadow:
+    inset 3px 0 0 rgba(255, 214, 160, 0.2),
+    inset -5px 0 0 rgba(60, 24, 4, 0.35),
+    10px 0 18px rgba(38, 16, 2, 0.3);
+}
+.portrait .leg {
+  top: 1568px;
+  height: 140px;
+}
+.screw {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e3d3bd, #8f6a45);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+.erased {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+.slate {
+  position: absolute;
+  left: 134px;
+  top: 82px;
+  width: 1012px;
+  height: 512px;
+  border-radius: 4px;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      0deg,
+      rgba(232, 238, 226, 0.07) 0%,
+      rgba(232, 238, 226, 0) 16%
+    ),
+    radial-gradient(
+      70% 60% at 50% 40%,
+      rgba(52, 82, 66, 0.5),
+      rgba(52, 82, 66, 0) 75%
+    ),
+    #17261f;
+  box-shadow:
+    inset 0 0 0 3px #101b16,
+    inset 0 10px 18px rgba(0, 0, 0, 0.45),
+    inset 0 0 60px rgba(0, 0, 0, 0.45),
+    0 0 0 3px rgba(60, 24, 4, 0.55);
+}
+.portrait .slate {
+  left: 50px;
+  top: 130px;
+  width: 620px;
+  height: 1260px;
+  transform: scale(1.097);
+  transform-origin: 0 0;
+}
+.tray {
+  position: absolute;
+  left: 80px;
+  top: 626px;
+  width: 1120px;
+  height: 24px;
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(255, 214, 160, 0.12), rgba(60, 24, 4, 0.32)),
+    url(/opening/pine.webp) 0 0 / 360px 360px;
+  box-shadow:
+    0 14px 22px rgba(38, 16, 2, 0.45),
+    inset 0 3px 0 rgba(255, 214, 160, 0.35),
+    inset 0 -4px 0 rgba(60, 24, 4, 0.45);
+}
+.portrait .tray {
+  left: -4px;
+  top: 1544px;
+  width: 788px;
+}
+.chalkStick {
+  position: absolute;
+  top: 617px;
+  height: 9px;
+  border-radius: 4px;
+  background: #eef2e6;
+}
+.portrait .chalkStick {
+  top: 1535px;
+}
+.eraser {
+  position: absolute;
+  left: 900px;
+  top: 606px;
+  width: 86px;
+  height: 22px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #b07a48 0 55%, #566075 55% 100%);
+  transform: rotate(-3deg);
+}
+.portrait .eraser {
+  left: 590px;
+  top: 1524px;
+}
+
+/* chalk */
+/* chalk being drawn: each on its own layer, so redrawing it every frame leaves the rest of the
+   room (the blurred wall, the old erased marks) painted once */
+.chalk {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: opacity;
+}
+.draw {
+  fill: none;
+  stroke: #eef2e6;
+  stroke-opacity: 0.84;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.9s ease-in-out both;
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.ghostChalk {
+  fill: none;
+  stroke: #eef2e6;
+  stroke-opacity: 0.16;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  filter: blur(1.4px);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.25s ease-out both;
+}
+.smear {
+  fill: none;
+  stroke: #eef2e6;
+  stroke-opacity: 0.06;
+  stroke-width: 46;
+  stroke-linecap: round;
+  filter: blur(6px);
+  opacity: 0;
+  animation: smearIn 0.3s ease both;
+}
+@keyframes smearIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.write {
+  clip-path: inset(-40% 100% -40% 0);
+  animation: write 0.9s steps(14) both;
+}
+@keyframes write {
+  from {
+    clip-path: inset(-40% 100% -40% 0);
+  }
+  to {
+    clip-path: inset(-40% -25% -40% -25%);
+  }
+}
+.title {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  margin: 0;
+  font-family: var(--font-chalk);
+  font-weight: 700;
+  font-size: 66px;
+  line-height: 1;
+  color: #eef2e6;
+}
+.portrait .title {
+  top: 80px;
+  font-size: 70px;
+}
+.mystery {
+  position: absolute;
+  font-family: var(--font-chalk);
+  font-weight: 700;
+  font-size: 74px;
+  line-height: 1;
+  color: #eef2e6;
+}
+
+/* the match number: "1st half" in chalk in the middle, then off to the corner */
+.halfwrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 120px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  animation: fly 0.62s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+.portrait .halfwrap {
+  top: 480px;
+  animation-name: flyTall;
+}
+@keyframes fly {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate(387px, -161px) scale(0.36);
+  }
+}
+@keyframes flyTall {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate(218px, -523px) scale(0.36);
+  }
+}
+.halfbox {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.htext {
+  display: flex;
+  align-items: baseline;
+  /* keeps the space of " half" at the start of its part */
+  white-space: pre;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 136px;
+  line-height: 1;
+  color: #eef2e6;
+  text-shadow: 0 0 1px rgba(238, 242, 230, 0.6);
+}
+.hnum {
+  position: relative;
+  display: inline-block;
+}
+.old {
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: smudge 0.3s ease forwards;
+}
+@keyframes smudge {
+  from {
+    opacity: 1;
+    filter: blur(0);
+  }
+  to {
+    opacity: 0.13;
+    filter: blur(5px);
+  }
+}
+.rub {
+  position: absolute;
+  left: -36px;
+  top: 46%;
+  width: 96px;
+  height: 34px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #b07a48 0 50%, #566075 50% 100%);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  animation: rub 0.5s ease-in-out both;
+}
+@keyframes rub {
+  0% {
+    opacity: 0;
+    transform: translate(-20px, -10px) rotate(-10deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  35% {
+    transform: translate(18px, 8px) rotate(-4deg);
+  }
+  55% {
+    transform: translate(-6px, -4px) rotate(-12deg);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(40px, 6px) rotate(-6deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(80px, -20px) rotate(-6deg);
+  }
+}
+.uline {
+  display: block;
+  width: 440px;
+  height: 34px;
+  margin-top: -8px;
+}
+.dust {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #eef2e6;
+  opacity: 0;
+  animation: dustFall 1s ease-in both;
+}
+@keyframes dustFall {
+  0% {
+    opacity: 0;
+    transform: none;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(6px, 90px);
+  }
+}
+
+/* the magnets */
+.kcrown {
+  position: absolute;
+  z-index: 3;
+  display: block;
+  height: auto;
+  pointer-events: none;
+  transform-origin: 50% 90%;
+  filter: drop-shadow(0 4px 5px rgba(18, 22, 31, 0.32));
+  animation: crownIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes crownIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-70px) rotate(14deg) scale(1.15);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(6px) rotate(-28deg) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-20deg);
+  }
+}
+.mg {
+  position: absolute;
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+/* a rematch: the magnets slide from last match's places to this one's */
+.move {
+  animation: magMove 0.85s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@keyframes magMove {
+  from {
+    transform: translate(var(--from-x), var(--from-y));
+  }
+  to {
+    transform: none;
+  }
+}
+.mag {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 5px 0 rgba(0, 0, 0, 0.28),
+    0 12px 18px rgba(0, 0, 0, 0.35);
+  animation: clack 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes clack {
+  0% {
+    opacity: 0;
+    transform: translateY(-46px) scale(1.45);
+    box-shadow: 0 40px 40px rgba(0, 0, 0, 0.25);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.magHi {
+  position: absolute;
+  left: 10px;
+  top: 7px;
+  width: 30px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: rotate(-24deg);
+}
+.mdust {
+  position: absolute;
+  left: -14px;
+  top: 10px;
+  width: 108px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(
+    50% 50% at 50% 60%,
+    rgba(238, 242, 230, 0) 40%,
+    rgba(238, 242, 230, 0.35) 55%,
+    rgba(238, 242, 230, 0) 72%
+  );
+  opacity: 0;
+  animation: puff 0.55s ease-out both;
+}
+@keyframes puff {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+.av {
+  position: relative;
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85);
+}
+.av img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mname {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  line-height: 1;
+  color: #eef2e6;
+  white-space: nowrap;
+}
+
+/* the way in: from the lobby's bare canvas, the room goes dark and the lamp comes on, from the board's middle to the edges */
+.fromwhite,
+.lampdark,
+.lampedge {
+  position: absolute;
+  inset: -2000px;
+  pointer-events: none;
+  animation-name: lampOut;
+  animation-fill-mode: both;
+}
+.fromwhite {
+  z-index: 24;
+  background: var(--canvas);
+  animation-duration: 0.16s;
+  animation-timing-function: ease-in;
+}
+.lampdark {
+  z-index: 23;
+  background: #1c0e05;
+  animation-duration: 0.34s;
+  animation-timing-function: ease-out;
+}
+/* the canvas lit from its middle; past it (its shadow) the room's dark */
+.lampedge {
+  inset: 0;
+  z-index: 23;
+  background: radial-gradient(
+    55% 50% at 50% 40%,
+    rgba(28, 14, 5, 0) 0%,
+    rgba(28, 14, 5, 0.8) 70%,
+    #1c0e05 100%
+  );
+  box-shadow: 0 0 0 2000px #1c0e05;
+  animation-duration: 0.6s;
+  animation-timing-function: ease-in-out;
+}
+@keyframes lampOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whistle,
+  .grain {
+    animation: none;
+  }
+}

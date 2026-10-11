@@ -32,6 +32,8 @@ export interface CastSceneProps {
 /** Table sizes (spec C 2.1): card width and the gap between columns. */
 const CARD = { desktop: 150, phone: 80 } as const;
 const GAP = { desktop: 26, phone: 8 } as const;
+/** Between the two rows a table too wide for the screen takes (room for the number badges). */
+const ROW_GAP = { desktop: 34, phone: 24 } as const;
 /** Opacity of the columns out of the spotlight, and of away players all along. */
 const DIM = 0.55;
 /** A name longer than this steps the phone headings down a size, so it fits on 390 px. */
@@ -83,6 +85,10 @@ export function CastScene({ show }: CastSceneProps) {
   const v = show.first ? "first" : "later";
   const w = phone ? CARD.phone : CARD.desktop;
   const gap = phone ? GAP.phone : GAP.desktop;
+  // one row while it fits the screen (four on a phone); five or six past that take two
+  const n = ordered.length;
+  const fits = useMedia(`(min-width: ${n * w + (n - 1) * gap + 32}px)`);
+  const perRow = fits || n < 5 ? n : Math.ceil(n / 2);
   const longName = (p: PlayerView | undefined) =>
     !!p && name(p, p.isYou).length > LONG_NAME;
 
@@ -97,6 +103,7 @@ export function CastScene({ show }: CastSceneProps) {
       ordered.map((p) => `${p.id}:${p.seat}:${p.away}`).join(),
       first?.id,
       picker?.id,
+      perRow,
     ],
     build: (scope, { reduced, phone }) => {
       if (!received || !order) return [];
@@ -124,9 +131,14 @@ export function CastScene({ show }: CastSceneProps) {
       const part = (col: HTMLElement, name: string) =>
         col.querySelector<HTMLElement>(`[data-cast-${name}]`);
 
-      // each column starts in its seat slot: the k-th slot, k = its seat rank
-      const slots = cols.map((c) => layoutRect(c, scope).x);
-      const shift = ordered.map((p, i) => slots[seated.indexOf(p)] - slots[i]);
+      // each column starts in its seat slot: the k-th slot, k = its seat rank (in two rows, across both)
+      const slots = cols.map((c) => layoutRect(c, scope));
+      const shift = ordered.map(
+        (p, i) => slots[seated.indexOf(p)].x - slots[i].x,
+      );
+      const lift = ordered.map(
+        (p, i) => slots[seated.indexOf(p)].y - slots[i].y,
+      );
       const rest = (p: PlayerView) => (p.away ? DIM : 1);
       const firstIx = ordered.findIndex((p) => p.id === first?.id);
       const spot = CAST_MARKS.orderSpot[v] / 1000;
@@ -137,7 +149,7 @@ export function CastScene({ show }: CastSceneProps) {
       ordered.forEach((_, i) => {
         seq.push([
           cols[i],
-          { x: [shift[i], shift[i]] },
+          { x: [shift[i], shift[i]], y: [lift[i], lift[i]] },
           { at: 0, duration: 0.01 },
         ]);
       });
@@ -180,7 +192,7 @@ export function CastScene({ show }: CastSceneProps) {
         ordered.forEach((_, i) => {
           seq.push([
             cols[i],
-            { x: [shift[i], 0] },
+            { x: [shift[i], 0], y: [lift[i], 0] },
             { at: o(0.2), duration: 0.01 },
           ]);
           const badge = part(cols[i], "badge");
@@ -241,7 +253,8 @@ export function CastScene({ show }: CastSceneProps) {
         const k = phone ? 1.65 : 1.45;
         const dx = scope.offsetWidth / 2 - (c.x + c.width / 2 + shift[myIx]);
         const dy =
-          scope.offsetHeight * (phone ? 0.6 : 0.64) - (c.y + c.height / 2);
+          scope.offsetHeight * (phone ? 0.6 : 0.64) -
+          (c.y + c.height / 2 + lift[myIx]);
         seq.push([myCard, { opacity: [0, 1] }, { at: 0, duration: 0.01 }]);
         seq.push([
           myCard,
@@ -297,9 +310,10 @@ export function CastScene({ show }: CastSceneProps) {
             { at: r(0.5), duration: r(0.3), ease: gs.p1Out },
           ]);
       }
-      // the others turn face up, in seat order
+      // the others turn face up, in seat order (with five or six, closer together: done as four players' are)
       const flipAt = show.first ? 2.9 : 0.5;
-      const flipStep = show.first ? 0.18 : 0.12;
+      const flipStep =
+        (show.first ? 0.18 : 0.12) * Math.min(1, 2 / Math.max(1, n - 2));
       const flipDur = show.first ? 0.6 : 0.5;
       seated
         .filter((p) => !p.isYou)
@@ -333,7 +347,7 @@ export function CastScene({ show }: CastSceneProps) {
             shuffle: 0.5,
             shuffleDur: 0.9,
             badge: 1.6,
-            badgeStep: 0.16,
+            badgeStep: 0.16 * Math.min(1, 3 / Math.max(1, n - 1)),
             badgeDur: 0.45,
             kickOut: 2.4,
             leaveDur: 0.7,
@@ -344,7 +358,7 @@ export function CastScene({ show }: CastSceneProps) {
             shuffle: 0.2,
             shuffleDur: 0.7,
             badge: 0.9,
-            badgeStep: 0.12,
+            badgeStep: 0.12 * Math.min(1, 3 / Math.max(1, n - 1)),
             badgeDur: 0.35,
             kickOut: spot - 0.2,
             leaveDur: 0.6,
@@ -368,10 +382,13 @@ export function CastScene({ show }: CastSceneProps) {
       ]);
       ordered.forEach((_, i) => {
         const at = o(L.shuffle + i * 0.05);
-        // along an arc: even columns over the top, odd ones under
+        // along an arc: even columns over the top, odd ones under (from their row, to their row)
         seq.push([
           cols[i],
-          { x: [shift[i], 0], y: [0, i % 2 ? 46 : -46, 0] },
+          {
+            x: [shift[i], 0],
+            y: [lift[i], lift[i] / 2 + (i % 2 ? 46 : -46), 0],
+          },
           {
             at,
             duration: L.shuffleDur * fO,
@@ -519,7 +536,15 @@ export function CastScene({ show }: CastSceneProps) {
             </h2>
           ) : null}
         </div>
-        <div data-cast-row className="flex items-start" style={{ gap }}>
+        <div
+          data-cast-row
+          className="flex flex-wrap items-start justify-center"
+          style={{
+            columnGap: gap,
+            rowGap: phone ? ROW_GAP.phone : ROW_GAP.desktop,
+            maxWidth: perRow * w + (perRow - 1) * gap,
+          }}
+        >
           {ordered.map((p) => (
             <Column
               key={p.id}

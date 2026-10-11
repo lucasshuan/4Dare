@@ -52,7 +52,7 @@ export default async function WhoAmI({
     applicationCategory: "Game",
     operatingSystem: "Any",
     playMode: "MultiPlayer",
-    numberOfPlayers: { "@type": "QuantitativeValue", minValue: 2, maxValue: 4 },
+    numberOfPlayers: { "@type": "QuantitativeValue", minValue: 2, maxValue: 6 },
     isAccessibleForFree: true,
     offers: { "@type": "Offer", price: 0, priceCurrency: "USD" },
     publisher: { "@type": "Organization", name: APP_NAME, url: SITE_URL },

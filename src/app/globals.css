@@ -87,7 +87,7 @@
   --seat-2: #cf7024;
   --seat-3: #0b7a75;
   --seat-4: #8a4fc4;
-  /* seats 5..10: Impostor rooms only (up to ten people) */
+  /* seats 5..10: the bigger rooms (Who am I? up to six, Lineup eight, Impostor ten) */
   --seat-5: #c03d8a;
   --seat-6: #3d8b47;
   --seat-7: #b38600;

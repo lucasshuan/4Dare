@@ -2,7 +2,7 @@
 
 import { AnimatePresence, m, type Variants } from "motion/react";
 import dynamic from "next/dynamic";
-import { type Messages, useTranslations } from "next-intl";
+import { type Messages, useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
@@ -11,6 +11,11 @@ import { useRoomContext } from "@/features/data/room-context";
 import { ImpostorScenes } from "@/features/impostor/impostor-scenes";
 import { ImpostorScreen } from "@/features/impostor/impostor-screen";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
+import {
+  OpeningMusic,
+  OpeningScene,
+  preloadTitle,
+} from "@/features/opening/title-scene";
 import { ResultScreen } from "@/features/result/result-screen";
 import { isGuessScene, isShow, type StageScreen } from "@/features/stage/stage";
 import { StageBackdrop } from "@/features/stage/stage-backdrop";
@@ -34,6 +39,7 @@ import {
 } from "@/lib/music";
 import { useRoomTitle } from "@/lib/names";
 import { GAMES } from "@/lib/routes";
+import { useGameOption } from "@/lib/settings";
 import { playSound } from "@/lib/sound";
 import {
   isAwaited,
@@ -60,6 +66,8 @@ export function RoomStage() {
     <StageProvider>
       <RoomBackdrop />
       <Areas />
+      <OpeningScene />
+      <OpeningMusic />
       <RevealOverlay />
       <GuessScene />
       <ImpostorScenes />
@@ -152,7 +160,7 @@ const RISE = {
 /** The games with a take of their own; the rest keep the stage. */
 const GAME_MUSIC: Partial<Record<RoomView["settings"]["game"], Track>> = {
   impostor: "impostor",
-  lineup: "bidding",
+  lineup: "matchday",
 };
 
 function Areas() {
@@ -165,23 +173,24 @@ function Areas() {
   // Impostor and Lineup rooms play their own take instead of the stage,
   // lobby (muffled) to results; picking the game in the lobby crossfades at the
   // same point in the song, and the takes are fetched on entering the room so the
-  // swap starts at once. Lineup's lobby plays the matchday take; its match
-  // plays the bidding one, back to matchday after the auction
-  // (lineup-screen.tsx), and its results keep that.
+  // swap starts at once. A match's start cuts the lobby's music and its title
+  // scene plays the take again from the top (OpeningMusic). Lineup's
+  // presenter hears the booth's radio take (lineup-screen.tsx).
   const lineup = view.settings.game === "lineup";
   useEffect(() => {
     preloadMusic("impostor");
-    preloadMusic("bidding");
   }, []);
   useEffect(() => {
     if (lineup) preloadMusic("matchday");
   }, [lineup]);
-  useMusic(
-    lineup && (area === "lobby" || area === "result")
-      ? "matchday"
-      : GAME_MUSIC[view.settings.game],
-    1,
-  );
+  useMusic(GAME_MUSIC[view.settings.game], 1);
+  // the game's title scene, fetched while the lobby fills so the match starts on the dot
+  const game = view.settings.game;
+  const ja = useLocale() === "ja";
+  const chalk = !useGameOption("lineup", "plainLetters");
+  useEffect(() => {
+    if (area === "lobby") preloadTitle(game, { ja, chalk });
+  }, [area, game, ja, chalk]);
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
   useEffect(() => {

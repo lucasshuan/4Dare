@@ -1,0 +1,1322 @@
+/* The Impostor's title scene: a noir police lineup seen through the
+   observation room's mirror. Drawn on 1280×720, or 780×1688 on a phone held
+   upright (.portrait); every animation-delay comes inline, in seconds from
+   the title beat's start. */
+
+.root {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  font-family: var(--font-sans);
+}
+.portrait.root {
+  width: 780px;
+  height: 1688px;
+}
+/* the room, clipped to the canvas; past it the backdrop stays dark */
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #07050b;
+  isolation: isolate;
+}
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* the room: a mounted photo (painted block wall, height chart, floor) */
+.plate {
+  position: absolute;
+  inset: 0;
+  background:
+    #07050b url(/opening/impostor-room.webp) 0 0 / 1280px 720px no-repeat;
+}
+.portrait .plate {
+  background-image: url(/opening/impostor-room-tall.webp);
+  background-size: 780px 1688px;
+}
+/* the lights going off one column at a time: a veil leaving the room at 5% from the left up to
+   that column's soft edge, in two clacks; the one before is put away once it is down, so they
+   never stack */
+.shade {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation:
+    shadeOn 0.2s steps(2, start) both,
+    shadeOff 0.01s steps(1, start) forwards;
+}
+.sh0 {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.95) 262px,
+    rgba(0, 0, 0, 0) 378px
+  );
+}
+.sh1 {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.95) 582px,
+    rgba(0, 0, 0, 0) 698px
+  );
+}
+.sh2 {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.95) 902px,
+    rgba(0, 0, 0, 0) 1018px
+  );
+}
+.portrait .sh0 {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.95) 160px,
+    rgba(0, 0, 0, 0) 230px
+  );
+}
+.portrait .sh1 {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.95) 355px,
+    rgba(0, 0, 0, 0) 425px
+  );
+}
+.portrait .sh2 {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.95) 550px,
+    rgba(0, 0, 0, 0) 620px
+  );
+}
+.sh3 {
+  background: rgba(0, 0, 0, 0.95);
+  animation: shadeOn 0.2s steps(2, start) both;
+}
+@keyframes shadeOn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes shadeOff {
+  to {
+    opacity: 0;
+  }
+}
+.flick {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(5, 3, 10, 0) 902px, #05030a 1018px);
+  opacity: 0;
+  animation: flick 4.6s linear infinite;
+}
+.portrait .flick {
+  background: linear-gradient(90deg, rgba(5, 3, 10, 0) 550px, #05030a 620px);
+}
+@keyframes flick {
+  0%,
+  10% {
+    opacity: 0;
+  }
+  10.5% {
+    opacity: 0.42;
+  }
+  11.1% {
+    opacity: 0.06;
+  }
+  11.6% {
+    opacity: 0.34;
+  }
+  12.4%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* cones of light with smoke and dust */
+.beamwrap {
+  position: absolute;
+  top: 16px;
+  width: 520px;
+  height: 620px;
+  margin-left: -260px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation: beamOff 0.2s steps(1, start) both;
+}
+.portrait .beamwrap {
+  top: 500px;
+  width: 400px;
+  height: 860px;
+  margin-left: -200px;
+}
+/* upright, the beam fades in over its first 140px: black over it, which in a beam added to the
+   room by screen is the same as masking it */
+.beamVeil {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 140px;
+  background: linear-gradient(180deg, #000, rgba(0, 0, 0, 0) 140px);
+}
+@keyframes beamOff {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.cone {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(
+    from 150deg at 50% 0%,
+    rgba(255, 234, 210, 0) 0deg,
+    rgba(255, 234, 210, 0.09) 13deg,
+    rgba(255, 234, 210, 0.2) 30deg,
+    rgba(255, 234, 210, 0.09) 47deg,
+    rgba(255, 234, 210, 0) 60deg
+  );
+  mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    rgba(0, 0, 0, 0.55) 50%,
+    transparent 94%
+  );
+}
+.portrait .cone {
+  background: conic-gradient(
+    from 162deg at 50% 0%,
+    rgba(255, 234, 210, 0) 0deg,
+    rgba(255, 234, 210, 0.09) 8deg,
+    rgba(255, 234, 210, 0.2) 18deg,
+    rgba(255, 234, 210, 0.09) 28deg,
+    rgba(255, 234, 210, 0) 36deg
+  );
+}
+.fl .cone {
+  animation: flickB 4.6s linear infinite;
+}
+@keyframes flickB {
+  0%,
+  10% {
+    opacity: 1;
+  }
+  10.5% {
+    opacity: 0.2;
+  }
+  11.1% {
+    opacity: 0.9;
+  }
+  11.6% {
+    opacity: 0.3;
+  }
+  12.4%,
+  100% {
+    opacity: 1;
+  }
+}
+.smoke {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.32;
+  mask-image: radial-gradient(
+    42% 88% at 50% 0%,
+    #000 0%,
+    rgba(0, 0, 0, 0.45) 55%,
+    transparent 100%
+  );
+}
+/* the smoke drifting one tile over 30 s: the texture moves under the beam's still mask (a tile
+   larger than the beam, so it always covers it), on the compositor, never repainted */
+.smokeTex {
+  position: absolute;
+  left: -512px;
+  top: 0;
+  width: calc(100% + 512px);
+  height: calc(100% + 256px);
+  background: url(/opening/smoke.webp) 0 0 / 512px 256px repeat;
+  animation: smokeDrift 30s linear infinite;
+}
+@keyframes smokeDrift {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(512px, -256px);
+  }
+}
+.mote {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  background: #fff3e2;
+  box-shadow: 0 0 4px rgba(255, 240, 220, 0.7);
+  opacity: 0;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.moteB {
+  filter: blur(1.6px);
+  background: rgba(255, 240, 220, 0.6);
+}
+.m1 {
+  animation-name: m1;
+}
+.m2 {
+  animation-name: m2;
+}
+.m3 {
+  animation-name: m3;
+}
+@keyframes m1 {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  18% {
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(14px, -20px);
+  }
+  82% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-6px, -44px);
+  }
+}
+@keyframes m2 {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  22% {
+    opacity: 0.6;
+  }
+  60% {
+    transform: translate(-16px, 12px);
+  }
+  80% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-28px, 30px);
+  }
+}
+@keyframes m3 {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  25% {
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(22px, 16px);
+  }
+}
+
+/* the lineup */
+.lineup {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+.portrait .lineup {
+  transform-origin: 50% 100%;
+}
+.portrait .back {
+  bottom: 376px;
+  transform: scale(0.94);
+}
+.portrait .front {
+  bottom: 92px;
+  transform: scale(1.03);
+}
+.slot {
+  position: relative;
+  flex: none;
+  display: flex;
+  justify-content: center;
+}
+.walk {
+  position: relative;
+  animation: walkIn 1s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+@keyframes walkIn {
+  from {
+    opacity: 0;
+    transform: translateX(1100px);
+  }
+  12% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes walkInTall {
+  from {
+    opacity: 0;
+    transform: translateX(900px);
+  }
+  12% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.portrait .walk {
+  animation-name: walkInTall;
+}
+.foot {
+  position: absolute;
+  left: 50%;
+  bottom: -11px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(3, 1, 6, 0.78),
+    rgba(3, 1, 6, 0.35) 60%,
+    rgba(3, 1, 6, 0)
+  );
+}
+.bob {
+  position: relative;
+  filter: drop-shadow(var(--dx) 14px 16px rgba(4, 2, 9, 0.55));
+  animation:
+    bob 0.25s ease-in-out 4 alternate,
+    bobDim 0.2s steps(2, start) both;
+}
+/* its column's light going off: the costume, face and placard at 5% (their shadow stays as it is) */
+@keyframes bobDim {
+  from {
+    filter: brightness(1) saturate(1)
+      drop-shadow(var(--dx) 14px 16px rgba(4, 2, 9, 0.55));
+  }
+  to {
+    filter: brightness(0.05) saturate(0.5)
+      drop-shadow(var(--dx) 14px 16px rgba(4, 2, 9, 0.55));
+  }
+}
+@keyframes bob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-7px);
+  }
+}
+.suit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.suit svg {
+  display: block;
+  overflow: visible;
+}
+/* walking in 4 drawn frames (a sprite): each frame a drawing of the body, swapped dry, never tweened.
+   They play while the suspects walk in and stop on frame 1. Face and placard follow the frame. */
+.frm {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  overflow: visible;
+  animation-duration: 0.5s;
+  animation-timing-function: steps(1, end);
+  animation-fill-mode: both;
+}
+.f0 {
+  animation-name: fr0;
+}
+.f1 {
+  animation-name: fr1;
+  opacity: 0;
+}
+.f2 {
+  animation-name: fr2;
+  opacity: 0;
+}
+.f3 {
+  animation-name: fr3;
+  opacity: 0;
+}
+@keyframes fr0 {
+  0% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes fr1 {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fr2 {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fr3 {
+  0% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.frh {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  animation: frh 0.5s steps(1, end) both;
+}
+@keyframes frh {
+  0% {
+    transform: var(--t0);
+  }
+  25% {
+    transform: var(--t1);
+  }
+  50% {
+    transform: var(--t2);
+  }
+  75% {
+    transform: var(--t3);
+  }
+  100% {
+    transform: var(--t0);
+  }
+}
+.av {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  border-radius: 50%;
+}
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 2.6px #1e2433,
+    inset 0 -12px 18px rgba(8, 4, 16, 0.5),
+    inset 0 5px 8px rgba(255, 236, 214, 0.2);
+}
+.held {
+  position: absolute;
+  z-index: 2;
+  transform-origin: 50% 30%;
+}
+.placard {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(
+    180deg,
+    #1b1c23 0 2px,
+    #111218 2px 10px
+  );
+  box-shadow:
+    inset 0 0 0 2px #33353f,
+    inset 0 0 0 3px rgba(0, 0, 0, 0.55),
+    0 0 0 2.6px #1e2433,
+    0 7px 10px rgba(0, 0, 0, 0.42);
+}
+.pnum {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  line-height: 1;
+  color: #f2eee6;
+  font-variant-numeric: tabular-nums;
+  text-shadow:
+    0 1px 0 #ffffff,
+    0 2px 0 #aaa395,
+    0 3px 4px rgba(0, 0, 0, 0.7);
+}
+.pname {
+  max-width: 90%;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #d9d3c7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.paw {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2.4px solid #1e2433;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+    inset -1px -2px 0 rgba(10, 6, 20, 0.15);
+}
+
+/* the blinds: closed, the slats turn, then they rise and bunch up at the top */
+.blinds {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+/* the last light going off: the blinds, bunched up at the top, at 5%. A veil over the band they
+   fill (what shows between them is already dark by then) and over the cord, a pixel past their
+   edges so none stays lit */
+.bunchDim,
+.cord::after,
+.tassel::after {
+  content: "";
+  position: absolute;
+  background: rgba(0, 0, 0, 0.95);
+  border-radius: inherit;
+  opacity: 0;
+  animation: shadeOn 0.2s steps(2, start) var(--dim) both;
+}
+.bunchDim {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 89px;
+  z-index: 4;
+}
+.portrait .bunchDim {
+  height: 171px;
+}
+.cord::after,
+.tassel::after {
+  inset: -1px;
+}
+.headrail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 18px;
+  z-index: 3;
+  background: linear-gradient(180deg, #332c3b 0%, #1f1a26 55%, #141018 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 236, 214, 0.08) inset,
+    0 3px 8px rgba(0, 0, 0, 0.7);
+}
+.slHome {
+  position: absolute;
+  left: -30px;
+  right: -30px;
+  height: 43px;
+}
+.portrait .slHome {
+  height: 64px;
+}
+.slMv {
+  position: relative;
+  height: 43px;
+  perspective: 1100px;
+  animation-name: raise;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+.portrait .slMv {
+  height: 64px;
+}
+/* rising from where it hangs to where it rests (--to above), moved by the compositor */
+@keyframes raise {
+  to {
+    transform: translateY(var(--to));
+  }
+}
+.slat {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 43px;
+  background: linear-gradient(
+    180deg,
+    #17121c 0%,
+    #272030 22%,
+    #3a3244 46%,
+    #2a2333 62%,
+    #16121b 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 236, 214, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.75);
+  animation-name: tilt, flat;
+  animation-timing-function: cubic-bezier(0.3, 0.7, 0.3, 1), ease-in;
+  animation-fill-mode: both, forwards;
+}
+.portrait .slat {
+  height: 64px;
+}
+@keyframes tilt {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(74deg);
+  }
+}
+@keyframes flat {
+  from {
+    transform: rotateX(74deg);
+  }
+  to {
+    transform: rotateX(81deg);
+  }
+}
+.leak {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1.5px;
+  background: #ffecd6;
+  box-shadow:
+    0 0 5px 1px rgba(255, 232, 206, 0.5),
+    0 0 16px 3px rgba(255, 232, 206, 0.16);
+  opacity: 0;
+  animation-name: leakOn, leakOff;
+  animation-timing-function: steps(1, end), ease;
+  animation-fill-mode: both, forwards;
+}
+@keyframes leakOn {
+  0% {
+    opacity: 0;
+  }
+  16% {
+    opacity: 0.85;
+  }
+  24% {
+    opacity: 0.1;
+  }
+  38% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+  62%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes leakOff {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.ladder {
+  position: absolute;
+  top: 18px;
+  width: 2px;
+  height: 702px;
+  background: rgba(214, 204, 192, 0.22);
+  animation-name: ladderUp;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+.portrait .ladder {
+  height: 1716px;
+  animation-name: ladderUpTall;
+}
+@keyframes ladderUp {
+  to {
+    height: 48px;
+  }
+}
+@keyframes ladderUpTall {
+  to {
+    height: 100px;
+  }
+}
+.railHome {
+  position: absolute;
+  left: -30px;
+  right: -30px;
+  top: 64px;
+  height: 11px;
+}
+.portrait .railHome {
+  top: 118px;
+}
+.rail {
+  --to: -658px;
+  position: relative;
+  top: 658px;
+  height: 11px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #3d3546 0%, #231d2a 60%, #16121b 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 236, 214, 0.12) inset,
+    0 4px 8px rgba(0, 0, 0, 0.6);
+  animation-name: raise;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+.portrait .rail {
+  --to: -1616px;
+  top: 1616px;
+}
+.cord {
+  position: absolute;
+  left: 1252px;
+  top: 12px;
+  width: 3px;
+  height: 300px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #4a4252, #1c1822);
+  transform-origin: 50% 0;
+  animation-name: cordPull, cordSway;
+  animation-timing-function: linear, ease-in-out;
+  animation-fill-mode: both, none;
+  animation-iteration-count: 1, infinite;
+  animation-direction: normal, alternate;
+}
+.portrait .cord {
+  left: 744px;
+  height: 620px;
+  animation-name: cordPullTall, cordSway;
+}
+@keyframes cordPull {
+  to {
+    height: 540px;
+  }
+}
+@keyframes cordPullTall {
+  to {
+    height: 980px;
+  }
+}
+@keyframes cordSway {
+  from {
+    transform: rotate(-0.7deg);
+  }
+  to {
+    transform: rotate(0.7deg);
+  }
+}
+.tassel {
+  position: absolute;
+  left: 50%;
+  bottom: -24px;
+  width: 13px;
+  height: 26px;
+  margin-left: -6.5px;
+  border-radius: 7px 7px 4px 4px;
+  background: linear-gradient(90deg, #57505e, #2a2430 55%, #17131b);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* the letter board: the case number */
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.caseboard {
+  position: relative;
+  width: 560px;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 12px;
+  background: #4a2f1d url(/opening/case-wood.webp) 0 0 / 380px 380px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 222, 186, 0.28),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 34px 70px rgba(0, 0, 0, 0.65),
+    0 8px 18px rgba(0, 0, 0, 0.5);
+  animation:
+    boardIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both,
+    fly 0.62s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+/* the first light going off: the board in its corner at 5% (a veil a screen pixel past its edge,
+   so none stays lit once it is shrunk) */
+.boardDim {
+  position: absolute;
+  inset: -3px;
+  z-index: 2;
+  border-radius: 15px;
+  background: rgba(0, 0, 0, 0.95);
+  opacity: 0;
+  animation: shadeOn 0.2s steps(2, start) both;
+}
+.portrait .caseboard {
+  animation-name: boardIn, flyTall;
+}
+@keyframes boardIn {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fly {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate(-460px, -236px) scale(0.34);
+  }
+}
+@keyframes flyTall {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate(-248px, -744px) scale(0.4);
+  }
+}
+.felt {
+  position: relative;
+  padding: 22px 30px 26px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: repeating-linear-gradient(
+    180deg,
+    #16171d 0 3px,
+    #0d0e12 3px 22px
+  );
+  box-shadow:
+    inset 0 4px 10px rgba(0, 0, 0, 0.85),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.felt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url(/opening/grain.webp) 0 0 / 128px 128px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.screw {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f3dcb2, #b08a5c 55%, #6d5232);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+.row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.lt {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: #f2eee6;
+  white-space: pre;
+  text-shadow:
+    0 1px 0 #ffffff,
+    0 2px 0 #c9c2b4,
+    0 3px 0 #9a9284,
+    0 6px 9px rgba(0, 0, 0, 0.75);
+  animation: press 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes press {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(1.18);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.small {
+  font-size: 44px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+.big {
+  font-size: 164px;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+}
+.dslot {
+  position: relative;
+  display: inline-block;
+}
+.out {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  animation:
+    press 0.01s both,
+    popOut 0.34s cubic-bezier(0.55, 0, 0.8, 0.3) forwards;
+}
+@keyframes popOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate(26px, -48px) rotate(32deg);
+  }
+}
+
+/* the eyes */
+.eyes {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: eyesOn 0.35s ease both;
+}
+@keyframes eyesOn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.eyes img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: blinkO 5.2s infinite;
+}
+@keyframes blinkO {
+  0%,
+  91%,
+  100% {
+    opacity: 1;
+  }
+  93%,
+  95% {
+    opacity: 0.06;
+  }
+}
+
+/* the observation room's one-way glass */
+.frame {
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 10px #0a0710,
+    inset 0 0 0 11px rgba(255, 236, 214, 0.06),
+    inset 0 0 120px rgba(0, 0, 0, 0.5);
+}
+.glasswrap {
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation: glassDim 0.3s ease both;
+}
+@keyframes glassDim {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.22;
+  }
+}
+.sheen {
+  background: linear-gradient(
+    112deg,
+    rgba(255, 255, 255, 0) 0 20%,
+    rgba(190, 200, 255, 0.05) 20% 23%,
+    rgba(255, 255, 255, 0) 23% 57%,
+    rgba(190, 200, 255, 0.032) 57% 66%,
+    rgba(255, 255, 255, 0) 66%
+  );
+}
+.smudge {
+  background: url(/opening/glass-smudge.webp) 0 0 / 1280px 720px no-repeat;
+  opacity: 0.16;
+}
+.portrait .smudge {
+  background-position: 50% 50%;
+  background-size: auto 1688px;
+}
+.refl {
+  background:
+    radial-gradient(
+      150px 110px at 1120px 640px,
+      rgba(255, 186, 120, 0.14),
+      rgba(255, 186, 120, 0)
+    ),
+    radial-gradient(
+      240px 170px at 90px 70px,
+      rgba(120, 150, 255, 0.08),
+      rgba(120, 150, 255, 0)
+    );
+}
+.portrait .refl {
+  background:
+    radial-gradient(
+      150px 110px at 660px 1560px,
+      rgba(255, 186, 120, 0.14),
+      rgba(255, 186, 120, 0)
+    ),
+    radial-gradient(
+      240px 170px at 90px 90px,
+      rgba(120, 150, 255, 0.08),
+      rgba(120, 150, 255, 0)
+    );
+}
+.vig {
+  pointer-events: none;
+  background: radial-gradient(
+    125% 100% at 50% 44%,
+    rgba(0, 0, 0, 0) 56%,
+    rgba(4, 2, 8, 0.5) 100%
+  );
+}
+/* the camera's flash lights the whole window, past the canvas too */
+.flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 42%,
+    #ffffff 0,
+    #f6f7ff 55%,
+    #e2e8ff 100%
+  );
+  box-shadow: 0 0 0 2000px #e2e8ff;
+  opacity: 0;
+  animation: flash 0.45s ease-out both;
+}
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  30% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.grain {
+  position: absolute;
+  inset: -128px;
+  pointer-events: none;
+  background: url(/opening/grain.webp) 0 0 / 256px 256px repeat;
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  animation: grain 0.55s steps(1, end) infinite;
+}
+@keyframes grain {
+  0% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-37px, 23px);
+  }
+  40% {
+    transform: translate(51px, -14px);
+  }
+  60% {
+    transform: translate(-18px, -61px);
+  }
+  80% {
+    transform: translate(29px, 44px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* the stamp */
+.stamps {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 150px;
+  display: flex;
+  justify-content: center;
+}
+.portrait .stamps {
+  top: 640px;
+}
+.stamp {
+  display: inline-block;
+  padding: 14px 30px 10px;
+  border: 7px solid #f28b76;
+  border-radius: 16px;
+  color: #f28b76;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 104px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(-7deg);
+  mask-image: url(/opening/stamp-mask.webp);
+  mask-size: 100% 100%;
+  text-shadow: 0 0 18px rgba(242, 139, 118, 0.25);
+  animation: stamp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.portrait .stamp {
+  font-size: 96px;
+}
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-7deg) scale(2.4);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-7deg) scale(0.93);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-7deg) scale(1);
+  }
+}
+
+/* the way in: from the lobby's bare canvas the white light flickers and burns out, leaving the dark room with light leaking through the blinds */
+.powercut {
+  position: absolute;
+  inset: -2000px;
+  z-index: 40;
+  background: var(--canvas);
+  pointer-events: none;
+  opacity: 0;
+  animation: powerCut 0.46s linear both;
+}
+@keyframes powerCut {
+  0%,
+  26% {
+    opacity: 1;
+  }
+  27%,
+  40% {
+    opacity: 0.12;
+  }
+  41%,
+  50% {
+    opacity: 0.75;
+  }
+  51%,
+  64% {
+    opacity: 0;
+  }
+  65%,
+  70% {
+    opacity: 0.3;
+  }
+  71%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bob {
+    animation-name: none, bobDim;
+  }
+  .frm,
+  .frh,
+  .eyes img,
+  .mote,
+  .smokeTex,
+  .grain,
+  .flick,
+  .fl .cone {
+    animation: none;
+  }
+  .cord {
+    animation-name: cordPull;
+  }
+}

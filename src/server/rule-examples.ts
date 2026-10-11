@@ -263,10 +263,10 @@ export async function ruleExamples(
 }
 
 /**
- * The cards to send with the themes of a vote: only on a room's first match,
- * or when a `newcomer` (someone's first match ever) is seated, since the rule
- * scene plays only then; and never in the way of the match: if the data can't
- * be read, the scene shows the sentence alone.
+ * The cards to send with the themes of a vote: only on the game's first match
+ * in the room, or when a `newcomer` (someone's first match ever) is seated,
+ * since the rule scene plays only then; and never in the way of the match: if
+ * the data can't be read, the scene shows the sentence alone.
  */
 export async function voteExamples(
   state: RoomState,
@@ -274,7 +274,8 @@ export async function voteExamples(
   src: ExampleSources,
   newcomer = state.newcomer === true,
 ): Promise<(RuleExamples | null)[] | undefined> {
-  if ((state.round !== 0 && !newcomer) || themes.length !== THEME_OPTIONS)
+  const playedBefore = (state.played?.[state.settings.game] ?? 0) !== 0;
+  if ((playedBefore && !newcomer) || themes.length !== THEME_OPTIONS)
     return undefined;
   try {
     const examples = await ruleExamplesFor(themes, src);

@@ -1,5 +1,6 @@
-// The seat colours (--seat-1..10 in globals.css): a "Who am I?" room uses the
-// first four, an Impostor room all ten. A player gets one on joining and keeps
+// The seat colours (--seat-1..10 in globals.css): a room uses as many as its
+// game seats at most (GAME_SEATS), from the first: six for "Who am I?", ten for
+// Impostor. A player gets one on joining and keeps
 // it until they leave the room: the free one closest to their avatar's
 // colour, so the room's colour is theirs as much as it can be.
 
@@ -45,7 +46,7 @@ const hueGap = (a: number, b: number) => {
 export function pickColorSlot(
   taken: Iterable<number>,
   avatarColor: string,
-  slots = 4,
+  slots: number,
 ): number {
   const held = new Set(taken);
   const free = SEAT_HUES.slice(0, slots)

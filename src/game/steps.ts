@@ -14,8 +14,10 @@ import {
   type RoomState,
   type RuleExamples,
   SHOW_KINDS,
+  SHOW_TIMING,
   type ShowKind,
   type StepTime,
+  type TitleCard,
 } from "./types";
 
 export const fail = (code: ErrorCode): never => {
@@ -93,6 +95,8 @@ export function stage(
     first,
     prev: running,
     ...(rule !== undefined ? { rule } : {}),
+    // a match's opening carries what its title scene shows
+    ...(beats.some((b) => b.kind === "title") ? { title: titleCard(s) } : {}),
   };
   return t;
 }
@@ -157,9 +161,33 @@ export function shuffle<T>(items: T[], random: () => number): T[] {
   return a;
 }
 
-/** Match `round` plays the long shows: the room's first, or someone's first ever. */
-export const longShows = (s: RoomState, round: number) =>
-  round === 1 || s.newcomer;
+/** Which of this game's matches in the room the current one is (1 = its first); counted at START. */
+export const gameRound = (s: RoomState) => s.played?.[s.settings.game] ?? 1;
+
+/** A match of the room's game starts: one more of them. */
+export function countMatch(s: RoomState) {
+  const game = s.settings.game;
+  s.played = { ...s.played, [game]: (s.played?.[game] ?? 0) + 1 };
+}
+
+/**
+ * The match plays the long shows: the game's first in the room, or someone's
+ * first ever. A later one is the same group playing the game again.
+ */
+export const longShows = (s: RoomState) => gameRound(s) === 1 || s.newcomer;
+
+/** The title scene's beat: long with the rules after it, short when the group plays again. */
+export const titlePart = (s: RoomState): Part => [
+  "title",
+  longShows(s) ? SHOW_TIMING.title.first : SHOW_TIMING.title.later,
+];
+
+/** What the title scene shows: this game's match number, and on a rematch who won the last one and is still seated. */
+export function titleCard(s: RoomState): TitleCard {
+  const seated = new Set(s.players.map((p) => p.id));
+  const last = longShows(s) ? [] : (s.champions?.[s.settings.game] ?? []);
+  return { n: gameRound(s), crowned: last.filter((id) => seated.has(id)) };
+}
 
 /** The podium; its clock (after the last reveal) takes everyone back to the lobby. */
 export function finish(s: RoomState, ctx: Ctx) {
@@ -223,6 +251,11 @@ function keepMatch(s: RoomState, ctx: Ctx) {
     players,
   };
   s.matches = [match, ...(s.matches ?? [])].slice(0, PAST_MATCHES);
+  // the next match of this game crowns them on its title scene
+  s.champions = {
+    ...s.champions,
+    [s.settings.game]: players.filter((p) => p.place === 1).map((p) => p.id),
+  };
 }
 
 /** When the host is gone (or away mid-match), the room goes to whoever joined first. */

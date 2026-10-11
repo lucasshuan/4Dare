@@ -2,6 +2,15 @@
   "loading": "Opening the room…",
   "theme": "Theme:",
   "round": "Match {n}",
+  "title": {
+    "matchLabel": "Match",
+    "match": "Match {n}",
+    "case": "CASE NO.",
+    "halfNumber": "{n, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+    "halfRest": " half",
+    "formation": "4-3-3?",
+    "formationOr": "or 4-4-2"
+  },
   "lobbyIn": "Everyone goes back to the lobby in {seconds} s",
   "goHome": "Back to start",
   "problem": {

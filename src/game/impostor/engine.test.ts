@@ -109,12 +109,12 @@ describe("impostor", () => {
     ).toBe("invalid_input");
   });
 
-  it('opens its first match with the round card, not the cold open of "Who am I?"', () => {
+  it('opens its first match with its title scene, not the cold open of "Who am I?"', () => {
     const g = new Game(4, 1, { game: "impostor", seats: 10 });
     g.do({ type: "START", playerId: "p1", themes: THEMES, deals: DEALS });
     const kinds = (g.state.reveal?.beats ?? []).map((b) => b.kind);
-    expect(kinds).toContain("round");
-    expect(kinds).not.toContain("intro");
+    expect(kinds).toEqual(["curtain", "title", "entrance"]);
+    expect(g.state.reveal?.title).toEqual({ n: 1, crowned: [] });
   });
 
   it("deals one impostor, two from seven players, and the host's number up to a third", () => {
@@ -403,8 +403,8 @@ describe("impostor", () => {
   });
 
   it("switching games keeps the seats in range and colours within the game's", () => {
-    const g = new Game(5, 1, { game: "impostor", seats: 10 });
-    expect(g.state.players.map((p) => p.colorSlot)).toHaveLength(5);
+    const g = new Game(7, 1, { game: "impostor", seats: 10 });
+    expect(g.state.players.map((p) => p.colorSlot)).toHaveLength(7);
     expect(
       code(() =>
         g.do({
@@ -420,7 +420,7 @@ describe("impostor", () => {
       playerId: "p1",
       settings: { game: "impostor" },
     });
-    expect(h.state.settings.seats).toBe(4);
+    expect(h.state.settings.seats).toBe(6);
     h.do({
       type: "UPDATE_SETTINGS",
       playerId: "p1",
@@ -440,7 +440,7 @@ describe("impostor", () => {
       playerId: "p1",
       settings: { game: "who-am-i" },
     });
-    expect(h.state.settings.seats).toBe(4);
-    expect(h.state.players.every((p) => p.colorSlot < 4)).toBe(true);
+    expect(h.state.settings.seats).toBe(6);
+    expect(h.state.players.every((p) => p.colorSlot < 6)).toBe(true);
   });
 });

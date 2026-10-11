@@ -20,6 +20,7 @@ import { StageProvider, useStage } from "../stage-context";
 import {
   LAB_SHOWS,
   type LabParams,
+  type LabPlayers,
   type LabShow,
   labSearch,
   parseLabParams,
@@ -407,9 +408,9 @@ function LabPanel({
         <Select
           label="Players"
           value={String(params.players)}
-          options={["2", "3", "4"]}
+          options={["2", "3", "4", "5", "6"]}
           onChange={(v) => {
-            const players = Number(v) as 2 | 3 | 4;
+            const players = Number(v) as LabPlayers;
             onChange({
               ...params,
               players,

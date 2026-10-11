@@ -292,9 +292,9 @@ export async function transferHost(
 
 /**
  * Host only, 2+ players. Draws the themes everyone votes on (or the host's
- * ideas, when they type the theme), avoiding the last vote's. A room's first
- * match, or one where someone seated plays their first ever, gets the long
- * shows; its vote brings the rule scene's cards for each theme along.
+ * ideas, when they type the theme), avoiding the last vote's. The game's first
+ * match in the room, or one where someone seated plays their first ever, gets
+ * the long shows; its vote brings the rule scene's cards for each theme along.
  */
 export async function startGame(code: string): Promise<Result<RoomView>> {
   return run(async () => {

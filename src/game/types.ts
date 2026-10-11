@@ -132,7 +132,8 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   name: "",
   visibility: "public",
   password: "",
-  seats: 4,
+  // every seat of the default game open, as a new room has them (GAME_SEATS)
+  seats: 6,
   voteSeconds: 40,
   askSeconds: 80,
   guessSeconds: 60,
@@ -238,7 +239,7 @@ export const MAX_NAME = 16;
 /**
  * How long everyone looks at a reveal (ms). Turn steps start under it.
  * Answers: a base for the entrance and the question, plus time to read each answer and its note,
- * kept between 6 and 10 seconds. Guesses: a quick "not yet", a longer moment for a hit (card flip, confetti).
+ * kept between 6 and 12 seconds. Guesses: a quick "not yet", a longer moment for a hit (card flip, confetti).
  * The shows that present a match (opening, theme, cast) are timed by SHOW_TIMING.
  */
 export const REVEAL_TIMING = {
@@ -246,7 +247,7 @@ export const REVEAL_TIMING = {
   perAnswer: 1000,
   perNoteChar: 60,
   answersMin: 6000,
-  answersMax: 10000,
+  answersMax: 12000,
   guessMiss: 4000,
   guessHit: 5000,
   /** The turn player passed instead of guessing. */
@@ -259,6 +260,7 @@ export { SHOW_MARKS, SHOW_TIMING } from "./show-timing";
 /** The scenes a show is made of, back to back. */
 export const BEAT_KINDS = [
   "curtain",
+  "title",
   "intro",
   "round",
   "entrance",
@@ -507,8 +509,18 @@ export interface Reveal {
   first?: boolean;
   /** Theme show with a rule beat: its cards; null = the sentence alone. */
   rule?: RuleExamples | null;
+  /** A match's opening: what its title scene shows. */
+  title?: TitleCard;
   /** Shows only: the show still running when this one was staged; it plays out until its own `until`. */
   prev?: Reveal | null;
+}
+
+/** The title scene of a match's opening: which of this game's matches in the room it is, and who won the one before. */
+export interface TitleCard {
+  /** This game's matches in the room so far, this one included (1 = its first). */
+  n: number;
+  /** Who won this game's last match in the room and is seated again; empty on the long shows. */
+  crowned: PlayerId[];
 }
 
 /** A finished match, as the lobby lists it. */
@@ -554,6 +566,10 @@ export interface RoomState {
   reveal: Reveal | null;
   /** Counts matches played in this room. */
   round: number;
+  /** Matches of each game started in this room. Missing in older rooms (read as none). */
+  played?: Partial<Record<GameKey, number>>;
+  /** Who won each game's last finished match in this room. Missing in older rooms. */
+  champions?: Partial<Record<GameKey, PlayerId[]>>;
   /**
    * Someone seated when the match started had never finished one: the match
    * plays the long shows, as on the room's first.
@@ -923,10 +939,12 @@ export interface ShowView {
   startsAt: number;
   until: number;
   beats: Beat[];
-  /** The room's first match: the long versions. */
+  /** The game's first match in the room, or someone's first ever: the long versions. */
   first: boolean;
   /** The rule scene's cards; null = the sentence alone (or no rule beat). */
   rule: RuleExamples | null;
+  /** A match's opening: its title scene's number and crowns; null on every other show. */
+  title: TitleCard | null;
   /** The show still playing when this one was staged, while it lasts; this one starts at its end. */
   prev: ShowView | null;
 }

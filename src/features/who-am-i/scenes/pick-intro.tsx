@@ -15,6 +15,7 @@ import {
 } from "@/features/stage/use-stage-timeline";
 import { DRAW } from "@/game/show-timing/draw";
 import type { ShowView } from "@/game/types";
+import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { gs } from "@/lib/motion";
@@ -226,7 +227,15 @@ export function PickIntro({ show }: PickIntroProps) {
             <DrawUrn />
             <div
               data-draw-row
-              className="flex gap-[26px] sm:gap-[60px]"
+              // five or six still fit a phone's width in one row
+              className={cn(
+                "flex sm:gap-[60px]",
+                order.length >= 6
+                  ? "gap-2.5"
+                  : order.length === 5
+                    ? "gap-4"
+                    : "gap-[26px]",
+              )}
               aria-hidden="true"
             >
               {order.map((p) => (

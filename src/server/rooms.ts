@@ -287,7 +287,8 @@ function saveMatch(state: RoomState) {
   }
 }
 
-// Used when the library cannot supply enough characters for a clock-filled pick.
+// Used when the library cannot supply enough characters for a clock-filled pick:
+// more than a full room's cards, so every empty one still gets a name.
 const EMERGENCY: Record<Lang, string[]> = {
   en: [
     "Mickey Mouse",
@@ -296,6 +297,10 @@ const EMERGENCY: Record<Lang, string[]> = {
     "Batman",
     "Harry Potter",
     "Darth Vader",
+    "Homer Simpson",
+    "SpongeBob",
+    "Shrek",
+    "Sherlock Holmes",
   ],
   es: [
     "Mickey Mouse",
@@ -304,6 +309,10 @@ const EMERGENCY: Record<Lang, string[]> = {
     "Batman",
     "Harry Potter",
     "Darth Vader",
+    "Homer Simpson",
+    "Bob Esponja",
+    "Shrek",
+    "Sherlock Holmes",
   ],
   pt: [
     "Mickey Mouse",
@@ -312,6 +321,10 @@ const EMERGENCY: Record<Lang, string[]> = {
     "Batman",
     "Harry Potter",
     "Darth Vader",
+    "Homer Simpson",
+    "Bob Esponja",
+    "Shrek",
+    "Sherlock Holmes",
   ],
   ja: [
     "ミッキーマウス",
@@ -320,6 +333,10 @@ const EMERGENCY: Record<Lang, string[]> = {
     "バットマン",
     "ハリー・ポッター",
     "ダース・ベイダー",
+    "ホーマー・シンプソン",
+    "スポンジ・ボブ",
+    "シュレック",
+    "シャーロック・ホームズ",
   ],
 };
 

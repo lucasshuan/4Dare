@@ -265,7 +265,7 @@ describe("profiles", () => {
         code: "ABCDE",
         name: "Noite de anime",
         taken: 3,
-        seats: 4,
+        seats: 6,
         open: true,
       },
     });

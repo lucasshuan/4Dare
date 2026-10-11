@@ -48,7 +48,8 @@ import { voteTheme } from "@/server/actions";
 /** Cards are dealt like a hand: each starts tilted its own way (on desktop, the left column one way and the right the other). */
 const TILT = [-7, 5, -5, 7];
 const spring = { type: "spring", stiffness: 320, damping: 32 } as const;
-const OPENING_BEATS = ["curtain", "intro", "round"] as const;
+/** The opening: nothing here under the curtain and the title scene, then the cold open (a long match). */
+const OPENING_BEATS = ["curtain", "title", "intro"] as const;
 const RESULT_BEATS = ["tie_spin", "settle"] as const;
 const THEME_BEATS = ["theme", "rule"] as const;
 
@@ -68,8 +69,9 @@ const from = (a: Look, b: Look) => ({
 });
 
 /**
- * The theme vote, inside the opening and theme shows: the cold open (or
- * "Round N") first; then the line comes in alone, rises into the heading and
+ * The theme vote, inside the opening and theme shows: the title scene (over
+ * everything, title-scene.tsx) and on a long match the cold open first; then
+ * the line comes in alone, rises into the heading and
  * the cards are dealt (they take votes from the clock's start); when the vote
  * closes, the tie roulette, the losers dim and leave, and the winner flies to
  * the middle as the theme hero.
