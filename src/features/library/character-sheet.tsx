@@ -103,7 +103,7 @@ export function CharacterSheetBody({
     );
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <Head id={id} mode={mode} close={close} />
+      <Head id={id} sheet={sheet} mode={mode} close={close} />
       <div
         className={cn(
           "grid flex-1 content-start gap-[26px] pb-7",
@@ -121,21 +121,26 @@ export function CharacterSheetBody({
 
 function Head({
   id,
+  sheet,
   mode,
   close,
 }: {
   id: string;
+  /** Once loaded: the language-free id and the name for the links. */
+  sheet?: CharacterSheet;
   mode: "panel" | "page";
   close?: ReactNode;
 }) {
   const t = useTranslations("library.sheet");
   const toast = useToast();
   const locale = useLocale();
+  const path = sheet
+    ? characterPath(sheet.baseId, sheet.card.name)
+    : characterPath(id);
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/${locale}${characterPath(id)}`,
-      );
+      // no language in the link: whoever opens it reads the sheet in their own
+      await navigator.clipboard.writeText(`${window.location.origin}${path}`);
       toast(t("copied"));
     } catch {
       // the browser refused the clipboard
@@ -158,7 +163,7 @@ function Head({
         </Link>
       )}
       <span className="min-w-0 flex-1 truncate font-mono text-[12.5px] text-ink-muted">
-        {characterPath(id)}
+        {path}
       </span>
       <button
         type="button"
@@ -171,7 +176,7 @@ function Head({
       </button>
       {mode === "panel" ? (
         <a
-          href={`/${locale}${characterPath(id)}`}
+          href={`/${locale}${path}`}
           aria-label={t("openPage")}
           title={t("openPage")}
           className={icon}

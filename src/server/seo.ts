@@ -34,13 +34,18 @@ export const HREFLANG: Record<Lang, string> = {
 export const localePath = (lang: Lang, path: string) =>
   `/${lang}${path === "/" ? "" : path}`;
 
+/** A page's path, the same in every language or one per language (a slug from a name). */
+type PagePath = string | Record<Lang, string>;
+const pathIn = (path: PagePath, lang: Lang) =>
+  typeof path === "string" ? path : path[lang];
+
 /** The same page in every language; x-default is the unprefixed path, which picks the visitor's language. */
-export function languageLinks(path: string): Record<string, string> {
+export function languageLinks(path: PagePath): Record<string, string> {
   return {
     ...Object.fromEntries(
-      routing.locales.map((l) => [HREFLANG[l], localePath(l, path)]),
+      routing.locales.map((l) => [HREFLANG[l], localePath(l, pathIn(path, l))]),
     ),
-    "x-default": path,
+    "x-default": pathIn(path, routing.defaultLocale),
   };
 }
 
@@ -55,7 +60,7 @@ export function pageMetadata({
   index = true,
 }: {
   lang: Lang;
-  path: string;
+  path: PagePath;
   /** The tab title; the layout adds " · 4Dare" (" · 4だれ" in Japanese). */
   title: Metadata["title"];
   description: string;
@@ -68,7 +73,7 @@ export function pageMetadata({
     title,
     description,
     alternates: {
-      canonical: localePath(lang, path),
+      canonical: localePath(lang, pathIn(path, lang)),
       languages: index ? languageLinks(path) : undefined,
     },
     openGraph: {
@@ -78,7 +83,7 @@ export function pageMetadata({
       alternateLocale: routing.locales
         .filter((l) => l !== lang)
         .map((l) => OG_LOCALE[l]),
-      url: localePath(lang, path),
+      url: localePath(lang, pathIn(path, lang)),
       title: shareTitle ?? undefined,
       description,
     },

@@ -274,7 +274,7 @@ function Line({
   ) : s ? (
     <Sema status={item.kind === "live" ? "live" : s.status} large />
   ) : null;
-  const href = c ? characterPath(c.id) : s ? workshopPath(s.id) : null;
+  const href = c ? characterPath(c.id, c.name) : s ? workshopPath(s.id) : null;
   return (
     <m.div
       initial={{ opacity: 0, y: 10 }}

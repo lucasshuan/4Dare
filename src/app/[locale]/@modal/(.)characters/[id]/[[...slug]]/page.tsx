@@ -5,7 +5,7 @@ import { PageMessages } from "@/i18n/page-messages";
 /** A sheet opened from inside the app: over the list it came from. */
 export default async function SheetOverPage({
   params,
-}: PageProps<"/[locale]/characters/[id]">) {
+}: PageProps<"/[locale]/characters/[id]/[[...slug]]">) {
   const { locale, id } = await params;
   setRequestLocale(locale);
   return (

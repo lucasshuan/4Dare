@@ -29,6 +29,30 @@ export const ALIAS_MAX = 40;
 export const cleanAlias = (raw: unknown) =>
   typeof raw === "string" ? raw.replace(/\s+/g, " ").trim() : "";
 
+/**
+ * What a character's page tells search engines: its language-free id, its
+ * name in every language (English, else any, where it has none) and whether
+ * it is the library's own. Null for an unknown id.
+ */
+export async function characterPage(rawId: string): Promise<{
+  id: string;
+  names: Record<Lang, string>;
+  library: boolean;
+} | null> {
+  const id = characterIdOf(rawId);
+  if (!id) return null;
+  const row = (await catalog("en")).byId.get(id);
+  if (!row) return null;
+  const given = await getBackend().library.names(id);
+  const names = Object.fromEntries(
+    LANGS.map((lang) => [
+      lang,
+      given.find((n) => n.lang === lang)?.name ?? row.name,
+    ]),
+  ) as Record<Lang, string>;
+  return { id, names, library: row.createdBy === null };
+}
+
 /** A character's sheet as `viewer` reads it, in `lang`; null for an unknown id. */
 export async function characterSheet(
   rawId: string,

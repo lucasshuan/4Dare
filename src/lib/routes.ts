@@ -29,7 +29,27 @@ export const SETTINGS = "/settings";
 
 /** The characters page, and one character's sheet (over the list from inside the app). */
 export const CHARACTERS = "/characters";
-export const characterPath = (id: string) => `${CHARACTERS}/${id}`;
+/**
+ * A character's page; its name, when given, goes after the id as a slug
+ * ("/characters/wd-Q302/jesus-christ") for search engines and people reading
+ * the link. Only the id picks the character.
+ */
+export const characterPath = (id: string, name?: string) => {
+  const slug = name ? nameSlug(name) : "";
+  return `${CHARACTERS}/${id}${slug ? `/${slug}` : ""}`;
+};
+
+/** A name as one URL segment: Latin accents off, lowercase, runs of anything but letters (any script) and digits as "-". */
+export const nameSlug = (name: string) =>
+  name
+    .normalize("NFD")
+    // only Latin accents: kana keep their voicing marks once recomposed
+    .replace(/[̀-ͯ]/g, "")
+    .normalize("NFC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .slice(0, 60)
+    .replace(/^-+|-+$/g, "");
 
 /** The Workshop, one suggestion in it (a shared link), and the curators' queue. */
 export const WORKSHOP = "/workshop";

@@ -227,7 +227,7 @@ function Form({
       toast(t("made", { name: clean }), {
         action: {
           label: t("openSheet"),
-          run: () => router.push(characterPath(id), { scroll: false }),
+          run: () => router.push(characterPath(id, clean), { scroll: false }),
         },
       });
     } finally {
@@ -335,7 +335,7 @@ function Form({
                             ) : null}
                           </span>
                           <Link
-                            href={characterPath(c.id)}
+                            href={characterPath(c.id, c.name)}
                             scroll={false}
                             onClick={onClose}
                             className="inline-flex h-9 items-center rounded-pill border border-line-strong bg-surface px-3.5 font-semibold text-[14px] transition-colors hover:bg-sunken"

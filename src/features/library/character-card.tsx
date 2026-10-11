@@ -46,7 +46,7 @@ export function CharacterCard({
       className="[contain-intrinsic-block-size:auto_280px] [content-visibility:auto]"
     >
       <Link
-        href={characterPath(card.id)}
+        href={characterPath(card.id, card.name)}
         scroll={false}
         className="group/card grid gap-2.5 rounded-[22px] text-left outline-offset-4"
       >
