@@ -25,6 +25,33 @@ interface NewsEntry {
  */
 export const NEWS_POSTS: readonly NewsEntry[] = [
   {
+    id: "helpers-board",
+    at: "2026-10-11",
+    kind: "better",
+    game: "site",
+    title: {
+      pt: "Ranking de quem ajuda a biblioteca",
+      en: "A ranking of who helps the library",
+      es: "Un ranking de quién ayuda a la biblioteca",
+      ja: "ライブラリ貢献ランキング",
+    },
+    body: {
+      pt: "Em Contribuições, quem mais ajudou agora tem pódio, por semana, mês ou desde sempre. Toque no título para ver quem mais mandou fotos, deu apelidos, criou personagens ou emplacou ideias na Oficina. Os filtros de tipo ganharam ícones.",
+      en: "In Contributions, the top helpers now get a podium, by week, month or all time. Tap the title to see who sent the most pictures, gave the most aliases, created the most characters or got the most Workshop ideas live. The kind filters got icons.",
+      es: "En Contribuciones, quien más ayudó ahora tiene podio, por semana, mes o desde siempre. Toca el título para ver quién envió más fotos, dio más apodos, creó más personajes o publicó más ideas en el Taller. Los filtros de tipo tienen iconos.",
+      ja: "「貢献」で、貢献した人に表彰台ができました（週・月・全期間）。タイトルをタップすると、写真・あだ名・キャラ作成・工房で採用されたアイデアの多い順にも切り替えられます。種類の絞り込みにアイコンが付きました。",
+    },
+    action: {
+      href: "/contributions",
+      label: {
+        pt: "Ver ranking",
+        en: "See the ranking",
+        es: "Ver ranking",
+        ja: "ランキングを見る",
+      },
+    },
+  },
+  {
     id: "lineup-name",
     at: "2026-10-11",
     kind: "notice",

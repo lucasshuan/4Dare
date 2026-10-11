@@ -5,7 +5,7 @@ import { SheetDrawerProvider } from "@/features/library/sheet-drawer";
 import type { Lang } from "@/game/types";
 import { PageMessages } from "@/i18n/page-messages";
 import { CONTRIBUTIONS } from "@/lib/routes";
-import { topHelpers } from "@/server/community";
+import { helperBoard } from "@/server/community";
 import { pageMetadata } from "@/server/seo";
 
 // the top helpers are rendered with the page and kept five minutes
@@ -34,7 +34,7 @@ export default async function Contributions({
 }: PageProps<"/[locale]/contributions">) {
   const locale = (await params).locale as Lang;
   setRequestLocale(locale);
-  const helpers = await topHelpers(locale).catch(() => null);
+  const helpers = await helperBoard("month", locale).catch(() => null);
   return (
     <PageMessages only={["community", "library"]}>
       <SheetDrawerProvider>

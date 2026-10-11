@@ -92,13 +92,14 @@ export async function myRankingRow(
 export const podium = (game: GameKey, lang: Lang) =>
   buildRanking(game, "week", lang, 3);
 
-/** The `top` who helped the library most in the last 30 days. */
+/** The `top` who helped the library most in a period (by their weighted total). */
 export async function libraryHelpers(
+  period: RankingPeriod,
   lang: Lang,
   top: number,
 ): Promise<LibraryHelper[]> {
   const { community } = getBackend();
-  const helpers = await community.contributors(Date.now() - 30 * DAY, top);
+  const helpers = await community.contributors(sinceOf(period), top);
   const people = await peopleOf(
     helpers.map((h) => h.userId),
     lang,
@@ -120,12 +121,22 @@ export async function libraryHelpers(
   });
 }
 
-/** The contributions page's top helpers, kept five minutes like a ranking board. */
-export const topHelpers = unstable_cache(
-  (lang: Lang) => libraryHelpers(lang, 5),
-  ["top-helpers"],
+/**
+ * The contributions page's helpers board for a period, kept five minutes like
+ * a ranking board. Wide enough that the page can rank by any one count
+ * (pictures, aliases...) on its own.
+ */
+export const helperBoard = unstable_cache(
+  (period: RankingPeriod, lang: Lang) => libraryHelpers(period, lang, 100),
+  ["helper-board"],
   { revalidate: BOARD_TTL },
 );
+
+/** `?period=` of the helpers board: unknown ones are this month. */
+export const helperPeriod = (p: URLSearchParams): RankingPeriod => {
+  const period = p.get("period");
+  return period === "week" || period === "ever" ? period : "month";
+};
 
 async function buildRanking(
   game: GameKey | null,

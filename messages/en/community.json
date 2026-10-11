@@ -73,8 +73,22 @@
     "empty": "Nothing of this kind yet.",
     "emptyHint": "Send a picture, give an alias or suggest something in the Workshop.",
     "more": "More",
-    "helpers": "Top library helpers",
-    "helpersHint": "In the last 30 days.",
+    "helpersBy": {
+      "total": "Top library helpers",
+      "pictures": "Most pictures sent",
+      "aliases": "Most aliases given",
+      "characters": "Most characters created",
+      "live": "Most Workshop ideas live"
+    },
+    "rankBy": "Rank by",
+    "helperCount": {
+      "total": "{n, plural, one {# point} other {# points}}",
+      "pictures": "{n, plural, one {# picture} other {# pictures}}",
+      "aliases": "{n, plural, one {# alias} other {# aliases}}",
+      "characters": "{n, plural, one {# character} other {# characters}}",
+      "live": "{n} live"
+    },
+    "helperPoints": "A picture, an alias or a character is 1 point; a Workshop idea that goes live is 5.",
     "helpersEmpty": "Nobody yet. Send a picture or an alias in Characters.",
     "helperLine": "{pictures, plural, one {# picture} other {# pictures}} · {aliases, plural, one {# alias} other {# aliases}}"
   }

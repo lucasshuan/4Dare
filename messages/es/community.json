@@ -73,8 +73,22 @@
     "empty": "Nada de este tipo todavía.",
     "emptyHint": "Envía una foto, pon un apodo o sugiere algo en el Taller.",
     "more": "Más",
-    "helpers": "Quién más ayudó a la biblioteca",
-    "helpersHint": "En los últimos 30 días.",
+    "helpersBy": {
+      "total": "Quién más ayudó a la biblioteca",
+      "pictures": "Quién más envió fotos",
+      "aliases": "Quién más dio apodos",
+      "characters": "Quién más creó personajes",
+      "live": "Quién más publicó en el Taller"
+    },
+    "rankBy": "Ordenar por",
+    "helperCount": {
+      "total": "{n, plural, one {# punto} other {# puntos}}",
+      "pictures": "{n, plural, one {# foto} other {# fotos}}",
+      "aliases": "{n, plural, one {# apodo} other {# apodos}}",
+      "characters": "{n, plural, one {# personaje} other {# personajes}}",
+      "live": "{n} publicadas"
+    },
+    "helperPoints": "Una foto, un apodo o un personaje vale 1 punto; una idea del Taller publicada vale 5.",
     "helpersEmpty": "Nadie todavía. Envía una foto o un apodo en Personajes.",
     "helperLine": "{pictures, plural, one {# foto} other {# fotos}} · {aliases, plural, one {# apodo} other {# apodos}}"
   }

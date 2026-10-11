@@ -73,8 +73,22 @@
     "empty": "Nada desse tipo ainda.",
     "emptyHint": "Mande uma foto, dê um apelido ou sugira algo na Oficina.",
     "more": "Mais",
-    "helpers": "Quem mais ajudou a biblioteca",
-    "helpersHint": "Nos últimos 30 dias.",
+    "helpersBy": {
+      "total": "Quem mais ajudou a biblioteca",
+      "pictures": "Quem mais mandou fotos",
+      "aliases": "Quem mais deu apelidos",
+      "characters": "Quem mais criou personagens",
+      "live": "Quem mais emplacou na Oficina"
+    },
+    "rankBy": "Ordenar por",
+    "helperCount": {
+      "total": "{n, plural, one {# ponto} other {# pontos}}",
+      "pictures": "{n, plural, one {# foto} other {# fotos}}",
+      "aliases": "{n, plural, one {# apelido} other {# apelidos}}",
+      "characters": "{n, plural, one {# personagem} other {# personagens}}",
+      "live": "{n} no ar"
+    },
+    "helperPoints": "Foto, apelido ou personagem vale 1 ponto; ideia da Oficina que vai ao ar vale 5.",
     "helpersEmpty": "Ninguém ainda. Mande uma foto ou um apelido em Personagens.",
     "helperLine": "{pictures, plural, one {# foto} other {# fotos}} · {aliases, plural, one {# apelido} other {# apelidos}}"
   }

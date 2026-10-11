@@ -20,7 +20,7 @@ const read = unstable_cache(
         lineup.missions(),
         catalog(lang),
         podium(game, lang),
-        libraryHelpers(lang, 3),
+        libraryHelpers("month", lang, 3),
       ]);
     return {
       themes: list.filter((t) => t.games.includes(game)).length,

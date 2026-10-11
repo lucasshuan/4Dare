@@ -12,7 +12,6 @@ import {
 import { m } from "motion/react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PageHead } from "@/components/ui/page-head";
 import { useWithNames } from "@/components/ui/player-name";
@@ -22,7 +21,6 @@ import { Segmented } from "@/components/ui/segmented";
 import { Switch } from "@/components/ui/switch";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { SheetLink } from "@/features/library/sheet-drawer";
-import { ProfileLink } from "@/features/profile/profile-link";
 import { Sema } from "@/features/workshop/objects";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -34,6 +32,7 @@ import type {
   FeedFilter,
   LibraryHelper,
 } from "@/server/community-contract";
+import { HelpersBoard, MEDAL } from "./helpers-board";
 
 const FILTERS: readonly FeedFilter[] = [
   "all",
@@ -49,13 +48,6 @@ const FILTER_ICON: Record<FeedFilter, LucideIcon> = {
   alias: Tag,
   character: UserRoundPlus,
   suggestion: Lightbulb,
-};
-
-const MEDAL: Record<string, string> = {
-  none: "radial-gradient(circle at 35% 30%, #f2f4f8, #c3cad6)",
-  bronze: "radial-gradient(circle at 35% 30%, #f3c9a2, #b8743f)",
-  silver: "radial-gradient(circle at 35% 30%, #f2f4f8, #a9b2c2)",
-  gold: "radial-gradient(circle at 35% 30%, #fbe7a1, #d6a72c)",
 };
 
 /**
@@ -268,59 +260,9 @@ export function ContributionsScreen({
             </div>
           ) : null}
         </div>
-        <Helpers helpers={helpers} />
+        <HelpersBoard initial={helpers} />
       </div>
     </Screen>
-  );
-}
-
-/** Who helped the library most in the last 30 days, in a side panel (above the feed on a phone, which never ends). */
-function Helpers({ helpers }: { helpers: LibraryHelper[] | null }) {
-  const t = useTranslations("community.contributions");
-  return (
-    <aside className="grid gap-3 rounded-[24px] bg-surface p-[18px] max-lg:row-start-1">
-      <div>
-        <h2 className="font-bold font-display text-[17px] leading-tight">
-          {t("helpers")}
-        </h2>
-        <span className="text-[12.5px] text-ink-muted">{t("helpersHint")}</span>
-      </div>
-      <div className="grid gap-2.5">
-        {helpers?.length ? (
-          helpers.map((h, i) => (
-            <m.div
-              key={h.person.id}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, ease: ease.soft, delay: i * 0.06 }}
-            >
-              <ProfileLink
-                handle={h.person.handle}
-                className="flex items-center gap-2.5 rounded-[14px] text-[14px] transition-colors hover:bg-sunken"
-              >
-                <Avatar avatar={h.person.avatar} size={32} />
-                <span className="min-w-0 flex-1">
-                  <b className="block truncate">{h.person.name}</b>
-                  <small className="block text-[12px] text-ink-muted">
-                    {t("helperLine", {
-                      pictures: h.pictures,
-                      aliases: h.aliases,
-                    })}
-                  </small>
-                </span>
-                <span className="font-medium font-mono text-[13px] tabular-nums">
-                  {h.total}
-                </span>
-              </ProfileLink>
-            </m.div>
-          ))
-        ) : (
-          <span className="text-[13px] text-ink-muted">
-            {t("helpersEmpty")}
-          </span>
-        )}
-      </div>
-    </aside>
   );
 }
 

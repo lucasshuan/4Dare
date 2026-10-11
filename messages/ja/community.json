@@ -73,8 +73,22 @@
     "empty": "この種類はまだありません。",
     "emptyHint": "写真を送ったり、あだ名を付けたり、工房で何か提案してみよう。",
     "more": "もっと見る",
-    "helpers": "ライブラリに貢献した人",
-    "helpersHint": "過去30日間。",
+    "helpersBy": {
+      "total": "ライブラリに貢献した人",
+      "pictures": "写真を一番送った人",
+      "aliases": "あだ名を一番つけた人",
+      "characters": "キャラを一番作った人",
+      "live": "工房で一番採用された人"
+    },
+    "rankBy": "並べ替え",
+    "helperCount": {
+      "total": "{n}pt",
+      "pictures": "写真{n}枚",
+      "aliases": "あだ名{n}件",
+      "characters": "キャラ{n}人",
+      "live": "採用{n}件"
+    },
+    "helperPoints": "写真・あだ名・キャラは1pt、工房で採用されたアイデアは5pt。",
     "helpersEmpty": "まだ誰もいません。キャラクターで写真かあだ名を送ってね。",
     "helperLine": "{pictures, plural, other {写真#枚}} · {aliases, plural, other {あだ名#件}}"
   }
