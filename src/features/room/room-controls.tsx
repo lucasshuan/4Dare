@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { SoundToggle } from "@/components/ui/sound-toggle";
-import { ThemeSwitch, ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemeSwitch } from "@/components/ui/theme-toggle";
 import { useRoomContext } from "@/features/data/room-context";
 import { useLeaveRoom } from "@/features/data/use-current-match";
 import { cn } from "@/lib/cn";
@@ -25,11 +25,7 @@ export function RoomControls({
   return (
     <div className={cn("flex shrink-0 items-center gap-2", className)}>
       <SoundToggle />
-      {/* on a phone the theme is one key, so the row fits beside the clock */}
-      <div className="flex max-sm:hidden">
-        <ThemeToggle />
-      </div>
-      <ThemeSwitch className="sm:hidden" />
+      <ThemeSwitch />
       {leave === undefined ? <LeaveRoomButton /> : leave}
     </div>
   );

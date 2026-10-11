@@ -17,7 +17,6 @@
   "moreInfo": "More info",
   "language": "Language",
   "theme": {
-    "label": "Theme",
     "light": "Light theme",
     "dark": "Dark theme"
   },

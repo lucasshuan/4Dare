@@ -17,7 +17,6 @@
   "moreInfo": "詳しく",
   "language": "言語",
   "theme": {
-    "label": "テーマ",
     "light": "ライトテーマ",
     "dark": "ダークテーマ"
   },

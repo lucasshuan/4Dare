@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl";
 import { updateSettings, useSettings } from "@/lib/settings";
 
 /**
- * Sound on or off, music included, in one tap: a round key the size of the
- * theme toggle's track, beside it. The speaker wiggles as the sound comes back.
+ * Sound on or off, music included, in one tap: a round key like the theme
+ * key beside it. The speaker wiggles as the sound comes back.
  */
 export function SoundToggle() {
   const t = useTranslations("home.user");

@@ -1,7 +1,7 @@
 "use client";
 
 import { Select } from "@base-ui/react/select";
-import { Check, ChevronDown } from "lucide-react";
+import { Check } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { LANGS, type Lang } from "@/game/types";
 import type { DeferredProps } from "@/lib/hooks/use-deferred";
@@ -38,13 +38,10 @@ export function LanguageSelect({
         autoFocus={autoFocus}
         className={LANGUAGE_TRIGGER}
       >
-        <Flag lang={locale} className="max-sm:size-10 max-sm:shadow-none" />
-        <Select.Value className="max-sm:sr-only">
+        <Flag lang={locale} className="size-10 shadow-none" />
+        <Select.Value className="sr-only">
           {(l: Lang) => t(`languages.${l}`)}
         </Select.Value>
-        <Select.Icon className="text-ink-muted max-sm:hidden">
-          <ChevronDown className="size-4" strokeWidth={2} />
-        </Select.Icon>
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner

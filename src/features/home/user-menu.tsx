@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { useMe } from "@/features/data/use-me";
@@ -10,18 +9,17 @@ import { meNamed, useDisplayName } from "@/lib/names";
 import type { Me } from "@/server/contract";
 
 /**
- * On the same ground as the language button, so it reads over any banner. A
- * guest's trigger looks unfinished on purpose: dashed outline, faded avatar,
- * muted name and a "Guest" tag.
+ * The round avatar alone, like the language flag beside it; the name and the
+ * "Guest" tag stay for screen readers. A guest's avatar looks unfinished on
+ * purpose: faded and grey.
  */
 export const userMenuTrigger = (me: Me) =>
   cn(
-    "group inline-flex h-10 min-w-0 max-w-60 items-center gap-2.5 rounded-pill py-1 pr-3 pl-1 font-semibold transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken max-sm:size-10 max-sm:shrink-0 max-sm:justify-center max-sm:gap-0 max-sm:p-0 sm:bg-surface dark:data-popup-open:bg-line dark:hover:bg-line sm:dark:bg-sunken",
-    me.isGuest &&
-      "max-w-72 border-line-strong border-dashed text-ink-muted sm:border-[1.5px]",
+    "inline-flex size-10 shrink-0 items-center justify-center rounded-pill transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line",
+    me.isGuest && "text-ink-muted",
   );
 
-/** What the trigger shows: avatar, name, the "Guest" tag and the chevron. */
+/** What the trigger shows: the avatar, then the name and "Guest" tag for screen readers. */
 export function UserMenuFace({ me }: { me: Me }) {
   const t = useTranslations("home.user");
   const name = useDisplayName();
@@ -30,21 +28,10 @@ export function UserMenuFace({ me }: { me: Me }) {
       <Avatar
         avatar={me.avatar}
         size={32}
-        className={cn("max-sm:size-10", me.isGuest && "opacity-60 grayscale")}
+        className={cn("size-10", me.isGuest && "opacity-60 grayscale")}
       />
-      {/* phones keep only the avatar, so the bar fits next to the language and theme */}
-      <span className="min-w-0 truncate max-sm:sr-only">
-        {name(meNamed(me))}
-      </span>
-      {me.isGuest ? (
-        <span className="shrink-0 rounded-pill bg-line px-2 py-0.5 font-bold text-[11px] text-ink-muted uppercase tracking-wide max-sm:sr-only">
-          {t("guestBadge")}
-        </span>
-      ) : null}
-      <ChevronDown
-        className="size-4 shrink-0 text-ink-muted transition-transform duration-200 group-data-popup-open:rotate-180 max-sm:hidden"
-        strokeWidth={2}
-      />
+      <span className="sr-only">{name(meNamed(me))}</span>
+      {me.isGuest ? <span className="sr-only">{t("guestBadge")}</span> : null}
     </>
   );
 }
@@ -62,7 +49,7 @@ export function UserMenu() {
   const { loaded: Popover, props, reach } = useDeferred(loadPopover);
   if (!me)
     return (
-      <span className="size-10 shrink-0 animate-pulse rounded-pill bg-sunken sm:w-40" />
+      <span className="size-10 shrink-0 animate-pulse rounded-pill bg-sunken" />
     );
   if (Popover) return <Popover {...props} />;
   return (
