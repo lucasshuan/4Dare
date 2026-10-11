@@ -9,6 +9,7 @@ import {
   type ShowView,
 } from "@/game/types";
 import { toView } from "@/game/view";
+import { beatSeconds } from "./scene-kit";
 import {
   beatOf,
   type Look,
@@ -82,18 +83,21 @@ function screensByBeat(g: Game, show: ShowView, viewer = "p1") {
 }
 
 describe("stageFrame: the opening", () => {
-  it("first match, vote: curtain, cold open, the vote coming in", () => {
+  it("first match, vote: curtain, title scene, cold open, the vote coming in", () => {
     for (const players of [2, 3, 4]) {
       const g = new Game(players);
       g.do({ type: "START", playerId: "p1", themes: THEMES });
       const show = showOf(g);
       expect(show.beats.map((b) => b.kind)).toEqual([
         "curtain",
+        "title",
         "intro",
         "entrance",
       ]);
+      expect(show.title).toEqual({ n: 1, crowned: [] });
       expect(screensByBeat(g, show)).toEqual([
         ["curtain", "vote"],
+        ["title", "vote"],
         ["intro", "vote"],
         ["entrance", "vote"],
       ]);
@@ -109,21 +113,21 @@ describe("stageFrame: the opening", () => {
     }
   });
 
-  it("the backdrop: canvas, brand from the curtain's wash, butter for the vote", () => {
+  it("the backdrop: canvas under the curtain and the title scene, brand for the cold open, butter for the vote", () => {
     const g = new Game(3);
     g.do({ type: "START", playerId: "p1", themes: THEMES });
     const show = showOf(g);
     const curtain = beat(show, "curtain");
-    const wash = markAt(curtain, SHOW_MARKS.curtainWash);
+    const title = beat(show, "title");
     expect(look(g, curtain.startsAt)).toEqual(NO_LOOK);
-    expect(frame(g, curtain.startsAt).next).toBe(wash);
-    expect(look(g, wash)).toMatchObject({
+    expect(frame(g, curtain.startsAt).next).toBe(title.startsAt);
+    expect(look(g, title.startsAt)).toEqual(NO_LOOK);
+    expect(look(g, beat(show, "intro").startsAt)).toMatchObject({
       tone: "brand",
       glyphs: "q",
       glyphColor: "var(--brand-butter)",
       fade: 0.7,
     });
-    expect(look(g, beat(show, "intro").startsAt).tone).toBe("brand");
     const butter = {
       tone: "butter",
       glyphs: "q",
@@ -158,7 +162,7 @@ describe("stageFrame: the opening", () => {
     });
   });
 
-  it("later matches: curtain, Round N, entrance", () => {
+  it("later matches: curtain, the short title scene, entrance", () => {
     const g = new Game(2);
     g.start();
     pickAll(g);
@@ -172,12 +176,15 @@ describe("stageFrame: the opening", () => {
     g.do({ type: "START", playerId: "p1", themes: THEMES });
     const show = showOf(g);
     expect(show.first).toBe(false);
+    expect(show.title?.n).toBe(2);
     expect(screensByBeat(g, show)).toEqual([
       ["curtain", "vote"],
-      ["round", "vote"],
+      ["title", "vote"],
       ["entrance", "vote"],
     ]);
-    expect(look(g, beat(show, "round").startsAt).tone).toBe("brand");
+    expect(beatSeconds(beat(show, "title"))).toBe(
+      SHOW_TIMING.title.later / 1000,
+    );
   });
 
   it("host typing: the opening plays on the theme screen", () => {
@@ -186,6 +193,7 @@ describe("stageFrame: the opening", () => {
     const show = showOf(g);
     expect(screensByBeat(g, show)).toEqual([
       ["curtain", "theming"],
+      ["title", "theming"],
       ["intro", "theming"],
       ["entrance", "theming"],
     ]);
@@ -200,7 +208,8 @@ describe("stageFrame: the opening", () => {
     const g = new Game(3);
     g.do({ type: "START", playerId: "p1", themes: THEMES, examples: EXAMPLES });
     const opening = showOf(g);
-    g.now += 2000;
+    // into the cold open
+    g.now = beat(opening, "intro").startsAt + 2000;
     g.voteAll(1);
     expect(g.state.phase).toBe("picking");
     const fetched = g.now;
@@ -665,7 +674,7 @@ describe("stageFrame: following `next`", () => {
     const seen = walk(g, opening.startsAt, opening.until + 1);
     expect(seen.map((f) => f.beat?.kind ?? null)).toEqual([
       "curtain",
-      "curtain", // the wash comes in
+      "title",
       "intro",
       "entrance",
       null, // the vote's clock starts

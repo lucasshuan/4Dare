@@ -2,6 +2,15 @@
   "loading": "Abriendo la sala…",
   "theme": "Tema:",
   "round": "Partida {n}",
+  "title": {
+    "matchLabel": "Partida",
+    "match": "Partida {n}",
+    "case": "CASO N.º",
+    "halfNumber": "{n, select, 1 {1.er} 3 {3.er} other {{n}.º}}",
+    "halfRest": " tiempo",
+    "formation": "4-3-3?",
+    "formationOr": "o 4-4-2"
+  },
   "lobbyIn": "Todos vuelven a la sala de espera en {seconds} s",
   "goHome": "Volver al inicio",
   "problem": {

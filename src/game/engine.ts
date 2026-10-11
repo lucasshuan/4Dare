@@ -50,6 +50,7 @@ import { LU_PHASES } from "./lineup/types";
 import { pickColorSlot } from "./seat-colors";
 import {
   cleanText,
+  countMatch,
   cutClock,
   fail,
   handOverHost,
@@ -60,6 +61,7 @@ import {
   startStep,
   stepMs,
   stopClock,
+  titlePart,
 } from "./steps";
 import { isTaste, TASTE_KEYS } from "./tastes";
 import {
@@ -212,8 +214,9 @@ function mergeSettings(
 
 /**
  * A new round needs a theme: the host types it, or everyone votes on `themes`.
- * The opening plays first: the lobby leaves, then the cold open ("Who am I?"'s
- * long match, see longShows) or "Round N", then the vote or the host's form comes in.
+ * The opening plays first: the lobby leaves, the title scene, then the cold
+ * open on "Who am I?"'s long matches (see longShows), then the vote or the
+ * host's form comes in.
  */
 function beginTheme(
   s: RoomState,
@@ -224,10 +227,11 @@ function beginTheme(
 ) {
   const T = SHOW_TIMING;
   // the cold open tells "Who am I?"'s rules; the Impostor's deal show tells its own
-  const coldOpen = s.settings.game === "who-am-i" && longShows(s, s.round + 1);
+  const coldOpen = s.settings.game === "who-am-i" && longShows(s);
   const open: Part[] = [
     ["curtain", T.curtain],
-    coldOpen ? ["intro", T.intro] : ["round", T.round],
+    titlePart(s),
+    ["intro", coldOpen ? T.intro : 0],
   ];
   // the Impostor always votes: its cards come with the themes
   if (s.settings.game === "impostor")
@@ -262,7 +266,7 @@ function beginTheming(
   s.reveal = null;
   s.turnPlayerId = null;
   s.phase = "theming";
-  stage(s, "opening", s.round + 1, longShows(s, s.round + 1), opening, ctx);
+  stage(s, "opening", s.round + 1, longShows(s), opening, ctx);
   startStep(s, ctx, HOST_THEME_SECONDS * 1000);
 }
 
@@ -292,7 +296,7 @@ function beginVote(
   s.reveal = null;
   s.turnPlayerId = null;
   s.phase = "voting";
-  stage(s, "opening", s.round + 1, longShows(s, s.round + 1), opening, ctx);
+  stage(s, "opening", s.round + 1, longShows(s), opening, ctx);
   startStep(s, ctx, stepMs(s, "voteSeconds"));
 }
 
@@ -336,7 +340,7 @@ function showTheme(
   o: { tie: boolean; typed: boolean; rule: RuleExamples | null },
   ctx: Ctx,
 ) {
-  const first = longShows(s, s.round);
+  const first = longShows(s);
   const v = first ? "first" : "later";
   const T = SHOW_TIMING;
   const rule = first
@@ -560,6 +564,7 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
             : "need_two_players",
         );
       s.newcomer = e.newcomer === true;
+      countMatch(s);
       // What for? has no theme: the cards and missions come with the start
       if (s.settings.game === "lineup")
         return beginLineup(s, e.decks ?? fail("invalid_input"), ctx);

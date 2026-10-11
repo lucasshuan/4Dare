@@ -259,6 +259,7 @@ export { SHOW_MARKS, SHOW_TIMING } from "./show-timing";
 /** The scenes a show is made of, back to back. */
 export const BEAT_KINDS = [
   "curtain",
+  "title",
   "intro",
   "round",
   "entrance",
@@ -507,8 +508,18 @@ export interface Reveal {
   first?: boolean;
   /** Theme show with a rule beat: its cards; null = the sentence alone. */
   rule?: RuleExamples | null;
+  /** A match's opening: what its title scene shows. */
+  title?: TitleCard;
   /** Shows only: the show still running when this one was staged; it plays out until its own `until`. */
   prev?: Reveal | null;
+}
+
+/** The title scene of a match's opening: which of this game's matches in the room it is, and who won the one before. */
+export interface TitleCard {
+  /** This game's matches in the room so far, this one included (1 = its first). */
+  n: number;
+  /** Who won this game's last match in the room and is seated again; empty on the long shows. */
+  crowned: PlayerId[];
 }
 
 /** A finished match, as the lobby lists it. */
@@ -554,6 +565,10 @@ export interface RoomState {
   reveal: Reveal | null;
   /** Counts matches played in this room. */
   round: number;
+  /** Matches of each game started in this room. Missing in older rooms (read as none). */
+  played?: Partial<Record<GameKey, number>>;
+  /** Who won each game's last finished match in this room. Missing in older rooms. */
+  champions?: Partial<Record<GameKey, PlayerId[]>>;
   /**
    * Someone seated when the match started had never finished one: the match
    * plays the long shows, as on the room's first.
@@ -923,10 +938,12 @@ export interface ShowView {
   startsAt: number;
   until: number;
   beats: Beat[];
-  /** The room's first match: the long versions. */
+  /** The game's first match in the room, or someone's first ever: the long versions. */
   first: boolean;
   /** The rule scene's cards; null = the sentence alone (or no rule beat). */
   rule: RuleExamples | null;
+  /** A match's opening: its title scene's number and crowns; null on every other show. */
+  title: TitleCard | null;
   /** The show still playing when this one was staged, while it lasts; this one starts at its end. */
   prev: ShowView | null;
 }

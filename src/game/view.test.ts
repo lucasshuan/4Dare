@@ -373,6 +373,7 @@ describe("shows in the view", () => {
       beats: opening?.beats,
       first: true,
       rule: null,
+      title: { n: 1, crowned: [] },
       prev: null,
     });
     // everyone votes during the opening: the theme show waits behind it

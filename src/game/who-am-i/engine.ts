@@ -228,7 +228,7 @@ function abandonTurn(s: RoomState, ctx: Ctx) {
  * character you got, the turn order), then the first turn's clock.
  */
 function startTurns(s: RoomState, ctx: Ctx, how: "confirmed" | "timeout") {
-  const first = longShows(s, s.round);
+  const first = longShows(s);
   const v = first ? "first" : "later";
   const T = SHOW_TIMING;
   // The first question can come once the cast is over.

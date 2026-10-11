@@ -1,0 +1,714 @@
+/* Who am I?'s title scene: the match card on a 1970s game-show stage with a
+   touch of a 16-bit menu (the stage take). Drawn on 1280×720, or 780×1688 on
+   a phone held upright (.portrait); every animation-delay comes inline, in
+   seconds from the title beat's start. */
+
+.screen {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  background: #2b69c8;
+  font-family: var(--font-sans);
+  color: #1e2433;
+}
+.portrait.screen {
+  width: 780px;
+  height: 1688px;
+}
+/* the blue carried past the canvas, to the edges of any screen */
+.bleed {
+  position: absolute;
+  inset: -2000px;
+  background: #2b69c8;
+}
+.layer {
+  position: absolute;
+  inset: 0;
+}
+.glow {
+  background:
+    radial-gradient(
+      60% 60% at 86% 8%,
+      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0) 70%
+    ),
+    radial-gradient(
+      55% 55% at 10% 96%,
+      rgba(0, 0, 0, 0.16),
+      rgba(0, 0, 0, 0) 70%
+    );
+}
+.glyph {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+  color: #f6e3a1;
+  opacity: 0.16;
+  animation: drift 9s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  from {
+    transform: translateY(8px) rotate(-8deg);
+  }
+  to {
+    transform: translateY(-8px) rotate(8deg);
+  }
+}
+
+/* the number */
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.num {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation:
+    numIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
+    numFly 0.62s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes numIn {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes numFly {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  75% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(-530px, -304px) scale(0.16);
+  }
+}
+@keyframes numFlyTall {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  75% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(-236px, -760px) scale(0.2);
+  }
+}
+.portrait .num {
+  animation-name: numIn, numFlyTall;
+}
+.numLabel {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: 0.32em;
+  padding-left: 0.32em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+.portrait .numLabel {
+  font-size: 34px;
+}
+.digitWin {
+  display: block;
+  height: 250px;
+  overflow: hidden;
+}
+.portrait .digitWin {
+  height: 320px;
+}
+.digitCol {
+  display: flex;
+  flex-direction: column;
+}
+.roll {
+  animation: roll 0.6s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@keyframes roll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-250px);
+  }
+}
+@keyframes rollTall {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-320px);
+  }
+}
+.portrait .roll {
+  animation-name: rollTall;
+}
+.digit {
+  display: block;
+  height: 250px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 260px;
+  line-height: 250px;
+  letter-spacing: -0.04em;
+  color: #f6e3a1;
+  text-align: center;
+  white-space: nowrap;
+}
+.portrait .digit {
+  height: 320px;
+  font-size: 340px;
+  line-height: 320px;
+}
+
+/* the chip the number lands in, top left */
+.chip {
+  position: absolute;
+  left: 40px;
+  top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #f6e3a1;
+  color: #3a2e05;
+  animation: chipIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.portrait .chip {
+  top: 40px;
+  gap: 14px;
+  height: 72px;
+  padding: 0 32px;
+}
+.chipLabel {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.portrait .chipLabel {
+  font-size: 20px;
+}
+.chipNum {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1;
+}
+.portrait .chipNum {
+  font-size: 40px;
+}
+@keyframes chipIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the game takes the stage: the 1970s stage opens in a circle, sun rays turning slowly and flashing on the beat.
+   The circle is in the canvas's px and keeps opening past it, over the stage's colour carried out as a shadow. */
+.reveal {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, #b4cff7, #cdbff6);
+  box-shadow: 0 0 0 2000px #c0c7f6;
+  animation: reveal 0.9s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+.portrait .reveal {
+  animation-name: revealTall;
+}
+/* circle(0% → 140% at 50% 22%) of the canvas */
+@keyframes reveal {
+  from {
+    clip-path: circle(0px at 640px 158.4px);
+  }
+  to {
+    clip-path: circle(1453.9px at 640px 158.4px);
+  }
+}
+/* circle(0% → 140% at 50% 16%) of the upright canvas */
+@keyframes revealTall {
+  from {
+    clip-path: circle(0px at 390px 270.1px);
+  }
+  to {
+    clip-path: circle(1840.8px at 390px 270.1px);
+  }
+}
+.rays {
+  position: absolute;
+  left: -560px;
+  top: -1042px;
+  width: 2400px;
+  height: 2400px;
+  border-radius: 50%;
+  opacity: 0.5;
+  background: repeating-conic-gradient(
+    rgba(255, 255, 255, 0.34) 0deg 7.5deg,
+    rgba(255, 255, 255, 0) 7.5deg 15deg
+  );
+  mask-image: radial-gradient(
+    closest-side,
+    #000 8%,
+    rgba(0, 0, 0, 0.7) 32%,
+    transparent 62%
+  );
+  animation:
+    spin 48s linear infinite,
+    rayPulse 0.631s ease-out infinite;
+}
+.portrait .rays {
+  left: -810px;
+  top: -930px;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes rayPulse {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+.rq {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+  opacity: 0.32;
+}
+.titleWrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.portrait .titleWrap {
+  top: 168px;
+}
+/* the title, with a 1970s sign's striped shadow: it hits the downbeat, then pulses with the music */
+.gtitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 112px;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: #1e2433;
+  white-space: nowrap;
+  text-shadow:
+    4px 4px 0 #f6e3a1,
+    8px 8px 0 #2b69c8;
+  transform-origin: 50% 60%;
+  animation:
+    slam 0.6s cubic-bezier(0.3, 0.7, 0.35, 1) both,
+    titleBeat 0.631s ease-out infinite;
+}
+.portrait .gtitle {
+  font-size: 100px;
+}
+@keyframes slam {
+  0% {
+    opacity: 0;
+    transform: scale(2.6) rotate(-9deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.93) rotate(2deg);
+  }
+  76% {
+    transform: scale(1.04) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes titleBeat {
+  0% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* a row of marquee bulbs: three groups taking turns every half beat */
+.bulbs {
+  display: flex;
+  gap: 16px;
+  opacity: 0;
+  animation: fadeIn 0.2s ease both;
+}
+.portrait .bulbs {
+  gap: 14px;
+}
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+.bulb {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(30, 36, 51, 0.2);
+  animation: chase 0.947s steps(1, end) infinite;
+}
+.portrait .bulb {
+  width: 16px;
+  height: 16px;
+}
+@keyframes chase {
+  0% {
+    background: #fff6d6;
+    box-shadow:
+      0 0 0 3px rgba(246, 227, 161, 0.45),
+      0 0 14px 4px rgba(246, 227, 161, 0.8);
+  }
+  33.3%,
+  100% {
+    background: rgba(30, 36, 51, 0.2);
+    box-shadow: none;
+  }
+}
+
+/* the cast */
+.castWrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 300px;
+  display: flex;
+  justify-content: center;
+}
+.portrait .castWrap {
+  top: 390px;
+  bottom: 70px;
+  align-items: center;
+}
+.cast {
+  display: flex;
+  align-items: flex-start;
+}
+.portrait .cast {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+/* each player jumps on stage with squash and stretch and lands on the beat (62% into the animation) */
+.pcard {
+  position: relative;
+  flex: none;
+  transform-origin: 50% 100%;
+  animation: pop 0.5s linear both;
+}
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: translateY(150px) scale(0.84, 1.22);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1);
+  }
+  12% {
+    opacity: 1;
+  }
+  44% {
+    transform: translateY(-22px) scale(0.95, 1.06);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5);
+  }
+  62% {
+    transform: translateY(0) scale(1.1, 0.88);
+    animation-timing-function: ease-out;
+  }
+  80% {
+    transform: scale(0.97, 1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* pixel sparks (the music's 16-bit side) as the card lands */
+.spark {
+  position: absolute;
+  bottom: -6px;
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  pointer-events: none;
+  animation: spark 0.42s steps(6, end) both;
+}
+@keyframes spark {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+.pcardIn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 32px;
+  box-shadow:
+    0 2px 6px rgba(18, 22, 31, 0.12),
+    0 24px 48px rgba(18, 22, 31, 0.22);
+}
+.avw {
+  position: relative;
+  flex: none;
+}
+.av {
+  position: relative;
+  display: block;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.av img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pname {
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kcrown {
+  position: absolute;
+  z-index: 3;
+  display: block;
+  height: auto;
+  pointer-events: none;
+  transform-origin: 50% 90%;
+  filter: drop-shadow(0 4px 5px rgba(18, 22, 31, 0.32));
+  animation: crownIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes crownIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-70px) rotate(14deg) scale(1.15);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(6px) rotate(-28deg) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-20deg);
+  }
+}
+@keyframes qBob {
+  0% {
+    transform: translateY(-5px) rotate(-6deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+/* the forehead card: it drops and sticks, spins like a roulette through the characters until it stops on one, then turns to "?" (whoever wears it doesn't know who they are) */
+.idcPos {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+}
+.idc {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation:
+    idDrop 0.4s linear both,
+    qBob 0.631s ease-out infinite;
+}
+@keyframes idDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-90px) rotate(-25deg);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.5);
+  }
+  12% {
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(3px) scale(1.1, 0.9);
+    animation-timing-function: ease-out;
+  }
+  80% {
+    transform: scale(0.97, 1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.idcIn {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: idFlip 0.5s cubic-bezier(0.3, 0.7, 0.35, 1) both;
+}
+@keyframes idFlip {
+  0% {
+    transform: perspective(320px) rotateY(0deg);
+  }
+  60% {
+    transform: perspective(320px) rotateY(200deg) scale(1.1);
+  }
+  100% {
+    transform: perspective(320px) rotateY(180deg);
+  }
+}
+.idf {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 9px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 6px 12px rgba(18, 22, 31, 0.28);
+  backface-visibility: hidden;
+}
+.front {
+  background: #f6e3a1;
+}
+.back {
+  background: #2b69c8;
+  transform: rotateY(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+  color: #f6e3a1;
+}
+/* the roulette: a strip of characters moving one frame at a time (dry steps, 16-bit style) */
+.reel {
+  display: flex;
+  flex-direction: column;
+  animation: reel 0.631s steps(8, end) both;
+}
+.reel svg {
+  display: block;
+  flex: none;
+}
+@keyframes reel {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(var(--reel-y));
+  }
+}
+
+/* the way in: from the lobby's bare canvas, the stage opens in a circle with a marquee border while the number rises */
+.iris {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 30;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 0 solid #f6e3a1;
+  box-shadow: 0 0 0 4000px var(--canvas);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: irisOpen 0.5s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@keyframes irisOpen {
+  0% {
+    width: 0;
+    height: 0;
+    border-width: 0;
+  }
+  12% {
+    border-width: 14px;
+  }
+  100% {
+    width: 1700px;
+    height: 1700px;
+    border-width: 14px;
+  }
+}
+@keyframes irisOpenTall {
+  0% {
+    width: 0;
+    height: 0;
+    border-width: 0;
+  }
+  12% {
+    border-width: 18px;
+  }
+  100% {
+    width: 2100px;
+    height: 2100px;
+    border-width: 18px;
+  }
+}
+.portrait .iris {
+  animation-name: irisOpenTall;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glyph,
+  .rays,
+  .bulb {
+    animation: none;
+  }
+  .gtitle {
+    animation: slam 0.6s both;
+  }
+  .idc {
+    animation: idDrop 0.4s both;
+  }
+}

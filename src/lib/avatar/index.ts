@@ -41,6 +41,7 @@ import {
   brows,
   DEFAULT_EX,
   EX,
+  eyesMarked,
   type FaceKit,
   face,
   fx as fxOf,
@@ -48,6 +49,7 @@ import {
   stalkEyes,
   WEAR,
   type Wear,
+  withEyesMarked,
 } from "./parts";
 
 /** The words of an avatar; a legend stands alone. */
@@ -612,7 +614,8 @@ function draw(k: Kit, seed: string, size: number): string {
     blush: !!k.flags.blush || neutral,
     eyeBase: !!k.flags.eyeBase || k.marks.includes("patches"),
     cheekpuffs: !!k.flags.cheekpuffs,
-    noEyes: !!k.flags.noEyes || eyesHidden,
+    // shades hide the eyes, except from a render of the eyes alone
+    noEyes: !!k.flags.noEyes || (eyesHidden && !eyesMarked()),
     stalks: !!stalkPts,
     faceAt: f,
   };
@@ -686,6 +689,57 @@ export const avatarSvg = (dna: string, size = 64) =>
 export function avatarColor(dna: string): string {
   const r = rng(dna);
   return background(r, bodyColour(kitFor(dna), r).col);
+}
+
+/** Only the eyes, in one colour, the rest transparent: the same canvas as the avatar, so it lays exactly over it. */
+function eyesSvg(dna: string, glow: string): string | null {
+  const svg = withEyesMarked(() => draw(kitFor(dna), dna, 64));
+  if (!svg.includes('class="e"')) return null;
+  const css =
+    "*{visibility:hidden}.e,.e *{visibility:visible}" +
+    `.e [fill]:not([fill="none"]){fill:${glow}}` +
+    `.e [stroke]:not([stroke="none"]){stroke:${glow}}`;
+  return svg.replace(
+    'viewBox="0 0 100 100">',
+    `viewBox="0 0 100 100"><style>${css}</style>`,
+  );
+}
+
+/** A creature drawn for `seed`, always the same one. */
+const seededDna = (seed: string) => {
+  let x = rng(seed).sh || 1;
+  return randomDna(() => {
+    // xorshift32 off the seed's hash
+    x ^= x << 13;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    return (x >>> 0) / 4294967296;
+  });
+};
+
+const eyesCache = new Map<string, string>();
+
+/**
+ * Just the eyes of an avatar, glowing in `glow`, as a data URI to lay over
+ * it in a dark room. A picture has no eyes of its own: it gets the eyes of a
+ * creature drawn for it, the same every time; so does a creature without eyes.
+ */
+export function avatarEyesUri(
+  avatar: { kind: "creature"; dna: string } | { kind: "image"; url: string },
+  glow: string,
+): string {
+  const seed = avatar.kind === "creature" ? avatar.dna : avatar.url;
+  const key = `${glow}${seed}`;
+  let uri = eyesCache.get(key);
+  if (uri === undefined) {
+    let svg = avatar.kind === "creature" ? eyesSvg(avatar.dna, glow) : null;
+    for (let i = 0; !svg && i < 8; i++)
+      svg = eyesSvg(seededDna(`${seed}:${i}`), glow);
+    uri = svgUri(svg ?? "<svg xmlns='http://www.w3.org/2000/svg'/>");
+    if (eyesCache.size > 200) eyesCache.clear();
+    eyesCache.set(key, uri);
+  }
+  return uri;
 }
 
 const cache = new Map<string, string>();

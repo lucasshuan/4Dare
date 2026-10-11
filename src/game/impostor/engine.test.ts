@@ -109,12 +109,12 @@ describe("impostor", () => {
     ).toBe("invalid_input");
   });
 
-  it('opens its first match with the round card, not the cold open of "Who am I?"', () => {
+  it('opens its first match with its title scene, not the cold open of "Who am I?"', () => {
     const g = new Game(4, 1, { game: "impostor", seats: 10 });
     g.do({ type: "START", playerId: "p1", themes: THEMES, deals: DEALS });
     const kinds = (g.state.reveal?.beats ?? []).map((b) => b.kind);
-    expect(kinds).toContain("round");
-    expect(kinds).not.toContain("intro");
+    expect(kinds).toEqual(["curtain", "title", "entrance"]);
+    expect(g.state.reveal?.title).toEqual({ n: 1, crowned: [] });
   });
 
   it("deals one impostor, two from seven players, and the host's number up to a third", () => {

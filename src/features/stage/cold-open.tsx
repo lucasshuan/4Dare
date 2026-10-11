@@ -22,7 +22,7 @@ import { beatOf } from "./stage";
 import { useStageTimeline } from "./use-stage-timeline";
 
 export interface ColdOpenProps {
-  /** The opening show (its curtain, intro or round beat is running). */
+  /** The opening show (its curtain, title or intro beat is running). */
   show: ShowView;
 }
 
@@ -32,17 +32,14 @@ const LINE2_AT = 3.65;
 const LINE1_AT = 0.15;
 
 /**
- * The cold open of the room's first match (the game in two lines, the room's
- * players with their cards up and yours a "?"), or the "Round N" card of a
- * later one. Both play on the solid brand stage; during the curtain beat
- * before them nothing is drawn yet.
+ * Who am I?'s cold open on a long match, after the title scene: the game in
+ * two lines, the room's players with their cards up and yours a "?". It plays
+ * on the solid brand stage; mounted from the curtain on, it waits, hidden,
+ * for its beat. A short match has none.
  */
 export function ColdOpen({ show }: ColdOpenProps) {
   const intro = beatOf(show, "intro");
-  if (intro) return <ColdOpenScene beat={intro} />;
-  const round = beatOf(show, "round");
-  if (round) return <RoundCard beat={round} n={show.n} />;
-  return null;
+  return intro ? <ColdOpenScene beat={intro} /> : null;
 }
 
 function ColdOpenScene({ beat }: { beat: Beat }) {
@@ -271,46 +268,6 @@ function Person({
       <span className="-mx-[15px] max-w-[92px] truncate text-center font-bold text-[13px] sm:-mx-9 sm:max-w-[176px] sm:text-base">
         {label}
       </span>
-    </div>
-  );
-}
-
-/** Later matches: "Round N", in and out (1.5 s). */
-function RoundCard({ beat, n }: { beat: Beat; n: number }) {
-  const t = useTranslations("room");
-  const len = beatSeconds(beat);
-  const outAt = Math.max(len - 0.45, 0.9);
-  const shown = useAfter(beat.startsAt + 150);
-  const ref = useStageTimeline<HTMLDivElement>({
-    startsAt: beat.startsAt,
-    deps: [len, n],
-    build: (scope, { reduced }) => {
-      const tl = new Timeline(reduced);
-      const line = marked(scope, "round");
-      tl.to(line, { y: [30, 0], opacity: [0, 1] }, 0.15, 0.6, gs.p3Out);
-      tl.to(line, { y: -24, opacity: 0 }, outAt, 0.35, gs.p2In);
-      return tl.seq;
-    },
-  });
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        SCENE_MIN_H,
-        "flex items-center justify-center px-1.5 pb-10 text-center text-on-brand",
-      )}
-    >
-      <p
-        data-round
-        aria-hidden
-        style={{ opacity: 0 }}
-        className={cn("text-[34px] sm:text-[58px]", BIG)}
-      >
-        {t("round", { n })}
-      </p>
-      <output aria-live="polite" className="sr-only">
-        {shown ? t("round", { n }) : ""}
-      </output>
     </div>
   );
 }

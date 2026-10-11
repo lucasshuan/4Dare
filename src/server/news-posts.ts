@@ -25,6 +25,24 @@ interface NewsEntry {
  */
 export const NEWS_POSTS: readonly NewsEntry[] = [
   {
+    id: "match-openings",
+    at: "2026-10-11",
+    kind: "new",
+    game: "site",
+    title: {
+      pt: "Cada partida abre com uma cena",
+      en: "Every match opens with a scene",
+      es: "Cada partida abre con una escena",
+      ja: "試合ごとにオープニング",
+    },
+    body: {
+      pt: "Quem sou eu?, Impostor e Escalação ganharam aberturas próprias, no ritmo da música: a ficha da partida, a fila de suspeitos e o quadro tático. O número da partida conta por jogo, e quem venceu a última entra de coroa. A música do lobby para e a do jogo começa do início junto com a cena. A primeira partida tem a cena completa; as seguintes, uma mais curta.",
+      en: "Who am I?, Impostor and Lineup each open with their own scene, on the music's beat: the match card, the suspects' lineup and the tactics board. The match number counts per game, and whoever won the last one comes in wearing a crown. The lobby's music stops and the game's starts over with the scene. The first match gets the full scene; the next ones a shorter one.",
+      es: "¿Quién soy?, Impostor y Alineación abren con su propia escena, al ritmo de la música: la ficha de la partida, la rueda de sospechosos y la pizarra táctica. El número de partida cuenta por juego, y quien ganó la última entra con corona. La música del lobby se detiene y la del juego empieza de nuevo con la escena. La primera partida tiene la escena completa; las siguientes, una más corta.",
+      ja: "だれ？、インポスター、スタメンに、音楽に合わせたオープニングが付きました。試合のカード、容疑者の面通し、作戦ボード。試合の番号はゲームごとに数え、前の試合の勝者は王冠で登場します。ロビーの音楽は止まり、ゲームの音楽がシーンと一緒に最初から流れます。最初の試合はフル、次からは短いバージョンです。",
+    },
+  },
+  {
     id: "lineup-name",
     at: "2026-10-11",
     kind: "notice",

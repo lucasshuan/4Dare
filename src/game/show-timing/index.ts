@@ -12,6 +12,7 @@ import { THEME, THEME_MARKS } from "./theme";
 /** Beat lengths in ms; "first" is the room's first match (the long versions), "later" the ones after. */
 export const SHOW_TIMING = {
   curtain: OPENING.curtain,
+  title: OPENING.title,
   intro: OPENING.intro,
   round: OPENING.round,
   tieSpin: OPENING.tieSpin,

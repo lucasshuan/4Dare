@@ -390,7 +390,7 @@ describe("the theme vote", () => {
     expect(g.state.phase).toBe("voting");
     expect(g.state.theme).toBeNull();
     expect(g.state.vote?.options).toEqual(THEMES);
-    // the room's first match: the cold open
+    // the room's first match: the long title scene, then the cold open
     const r = g.state.reveal;
     expect(r).toMatchObject({
       kind: "opening",
@@ -398,9 +398,11 @@ describe("the theme vote", () => {
       first: true,
       startsAt: g.now,
       prev: null,
+      title: { n: 1, crowned: [] },
     });
     expect(beats(r)).toEqual([
       ["curtain", T.curtain],
+      ["title", T.title.first],
       ["intro", T.intro],
       ["entrance", T.entrance.vote],
     ]);
@@ -637,6 +639,7 @@ describe("the host types the theme", () => {
     expect(r).toMatchObject({ kind: "opening", n: 1, first: true });
     expect(beats(r)).toEqual([
       ["curtain", T.curtain],
+      ["title", T.title.first],
       ["intro", T.intro],
       ["entrance", T.entrance.theming],
     ]);
@@ -856,7 +859,7 @@ describe("picking", () => {
     expect(opening).toMatchObject({ kind: "opening", n: 2, first: false });
     expect(beats(opening)).toEqual([
       ["curtain", T.curtain],
-      ["round", T.round],
+      ["title", T.title.later],
       ["entrance", T.entrance.vote],
     ]);
     g.skipShow();
@@ -882,6 +885,51 @@ describe("picking", () => {
     ]);
   });
 
+  it("a rematch's title scene counts this game's matches and crowns the last winner", () => {
+    const g = started(3);
+    const winner = g.askAndAnswer();
+    g.do({ type: "GUESS", playerId: winner, text: "Someone close" });
+    const picker = g.state.assignments[winner].pickerId;
+    if (g.state.phase === "validating")
+      g.do({ type: "VALIDATE", playerId: picker, correct: true });
+    expect(g.state.outcomes[winner].place).toBe(1);
+    for (const p of g.state.players)
+      if (g.state.phase !== "finished" && p.id !== winner)
+        g.do({ type: "GIVE_UP", playerId: p.id });
+    g.skipReveal();
+    expect(g.state.phase).toBe("finished");
+    expect(g.state.champions).toEqual({ "who-am-i": [winner] });
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p1" });
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    expect(g.state.played).toEqual({ "who-am-i": 2 });
+    expect(g.state.reveal).toMatchObject({
+      first: false,
+      title: { n: 2, crowned: [winner] },
+    });
+  });
+
+  it("each game counts its own matches: switching games opens with the long title scene", () => {
+    const g = new Game(3);
+    g.state.played = { impostor: 4 };
+    g.state.champions = { impostor: ["p2"], "who-am-i": ["p3"] };
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    // Who am I?'s first match here, whatever else the room played
+    expect(g.state.played).toEqual({ impostor: 4, "who-am-i": 1 });
+    expect(g.state.reveal).toMatchObject({
+      first: true,
+      title: { n: 1, crowned: [] },
+    });
+    expect(beats(g.state.reveal).map(([k]) => k)).toContain("intro");
+  });
+
+  it("a crowned winner who left the room is not crowned", () => {
+    const g = new Game(3);
+    g.state.played = { "who-am-i": 1 };
+    g.state.champions = { "who-am-i": ["p2", "p9"] };
+    g.do({ type: "START", playerId: "p1", themes: THEMES });
+    expect(g.state.reveal?.title).toEqual({ n: 2, crowned: ["p2"] });
+  });
+
   it("a later match with a newcomer gets the long show versions again", () => {
     const g = new Game(2);
     g.start();
@@ -898,6 +946,7 @@ describe("picking", () => {
     });
     const opening = g.state.reveal;
     expect(opening).toMatchObject({ kind: "opening", n: 2, first: true });
+    expect(beats(opening)).toContainEqual(["title", T.title.first]);
     expect(beats(opening)).toContainEqual(["intro", T.intro]);
     g.skipShow();
     g.voteAll(0);
@@ -932,7 +981,7 @@ describe("picking", () => {
     g.do({ type: "START", playerId: "p1", themes: [] });
     expect(beats(g.state.reveal)).toEqual([
       ["curtain", T.curtain],
-      ["round", T.round],
+      ["title", T.title.later],
       ["entrance", T.entrance.theming],
     ]);
     g.skipShow();
@@ -951,6 +1000,7 @@ describe("picking", () => {
     const r = g.state.reveal;
     expect(beats(r)).toEqual([
       ["curtain", Math.round(T.curtain * 0.25)],
+      ["title", Math.round(T.title.first * 0.25)],
       ["intro", Math.round(T.intro * 0.25)],
       ["entrance", Math.round(T.entrance.vote * 0.25)],
     ]);
@@ -1677,7 +1727,7 @@ describe("whole matches", () => {
     expect(g.state.plays).toEqual([]);
     g.do({ type: "START", playerId: s.hostId, themes: THEMES });
     expect(g.state.phase).toBe("voting");
-    // "Match 2" instead of the cold open
+    // the short title scene ("Match 2"), no cold open
     expect(g.state.reveal).toMatchObject({
       kind: "opening",
       n: 2,
@@ -1685,7 +1735,7 @@ describe("whole matches", () => {
     });
     expect(beats(g.state.reveal).map(([k]) => k)).toEqual([
       "curtain",
-      "round",
+      "title",
       "entrance",
     ]);
     g.voteAll(2);

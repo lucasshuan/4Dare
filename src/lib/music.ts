@@ -59,14 +59,14 @@ const TRACKS = {
     start: cut(0),
     end: cut(49),
   },
-  /** The same vamp as 1970s game-show bidding: Lineup's auction. As loud as the stage. */
+  /** The same vamp as 1970s game-show bidding, kept for later: nothing plays it since Lineup's auction moved to the matchday take. As loud as the stage. */
   bidding: {
     src: "/music/bidding-loop.mp3",
     intro: 0,
     start: cut(0),
     end: cut(49),
   },
-  /** The same vamp as a retro sports groove: Lineup's lobby, and its match from the wrap-up to the results. As loud as the stage. */
+  /** The same vamp as a retro sports groove: Lineup's lobby, its whole match (the presenter's booth aside) and its results. As loud as the stage. */
   matchday: {
     src: "/music/matchday-loop.mp3",
     intro: 9.7972,
@@ -133,6 +133,8 @@ type Playing = {
   gain: GainNode;
   /** The context time the song's position 0 would have played at. */
   origin: number;
+  /** Started from the top for a claim's `restartAt` (that moment), not handed over. */
+  restart?: number;
 };
 
 let ctx: AudioContext | null = null;
@@ -144,6 +146,8 @@ let muffleGain: GainNode | null = null;
 let muffled = false;
 let playing: Playing | null = null;
 let current: Track | null = null;
+/** The winning claim's `restartAt`, if it has one. */
+let currentRestart: number | null = null;
 const buffers = new Map<string, Promise<AudioBuffer | null>>();
 
 function context() {
@@ -208,6 +212,9 @@ function load(src: string): Promise<AudioBuffer | null> {
   }
   return p;
 }
+
+/** The audio context the music plays in, for sounds that must keep time with it (the title scenes). */
+export const audioContext = () => context();
 
 /** Fetches and decodes a take ahead of time, so asking for it later swaps at once. */
 export function preloadMusic(track: Track) {
@@ -297,10 +304,47 @@ function stop(p: Playing, at: number, fadeOut: number) {
 
 let applying = 0;
 
-/** Moves the music to `current`: a fade in, a crossfade, the TV switch into the booth or a fade out. */
+/** How fast the music already playing gets out of the way of a restart: gone at once, without a click. */
+const CUT = 0.12;
+
+/**
+ * A claim that restarts its track from the top at `at` (performance.now()
+ * ms): whatever plays stops at once, then silence until that moment. A
+ * moment already past (a reload mid-way) starts that far into the song.
+ */
+async function restart(turn: number, want: Track, at: number) {
+  const c = context();
+  if (playing && playing.restart !== at) {
+    stop(playing, c.currentTime, CUT);
+    playing = null;
+    publishPulse();
+  }
+  const buffer = await load(TRACKS[want].src);
+  if (turn !== applying || !buffer || playing) return;
+  const now = c.currentTime;
+  const when = now + (at - performance.now()) / 1000;
+  const top = -TRACKS[want].intro;
+  playing = {
+    ...start(
+      want,
+      buffer,
+      Math.max(now, when),
+      top + Math.max(0, now - when),
+      0.02,
+    ),
+    restart: at,
+  };
+  publishPulse();
+}
+
+/** Moves the music to `current`: a fade in, a crossfade, the TV switch into the booth, a restart or a fade out. */
 async function apply() {
   const turn = ++applying;
   const want = musicVolume(getSettings()) > 0 ? current : null;
+  if (want && currentRestart !== null) {
+    if (playing?.track === want && playing.restart === currentRestart) return;
+    return restart(turn, want, currentRestart);
+  }
   if (playing?.track === want) return;
   if (!ctx && !want) return;
   const c = context();
@@ -401,27 +445,36 @@ export function useMusicMuffle(on: boolean) {
   }, [on]);
 }
 
-const claims = new Map<string, { track: Track | null; rank: number }>();
+type Claim = { track: Track | null; rank: number; restartAt: number | null };
+const claims = new Map<string, Claim>();
 
 function resolve() {
   listen();
-  let best: { track: Track | null; rank: number } | null = null;
+  let best: Claim | null = null;
   for (const c of claims.values()) if (!best || c.rank > best.rank) best = c;
   current = best?.track ?? null;
+  currentRestart = best?.restartAt ?? null;
   apply();
 }
 
 /**
  * Asks for a track while mounted. The highest `rank` asking wins (null asks
  * for silence, undefined asks nothing); with nobody asking, the music fades out.
+ * With `restartAt` (performance.now() ms) the track plays from its top at that
+ * moment instead of taking over at the same point in the song: what plays
+ * before stops at once, and it is quiet until then.
  */
-export function useMusic(track: Track | null | undefined, rank = 0) {
+export function useMusic(
+  track: Track | null | undefined,
+  rank = 0,
+  restartAt: number | null = null,
+) {
   const id = useId();
   useEffect(() => {
     if (track === undefined) claims.delete(id);
-    else claims.set(id, { track, rank });
+    else claims.set(id, { track, rank, restartAt });
     resolve();
-  }, [id, track, rank]);
+  }, [id, track, rank, restartAt]);
   useEffect(
     () => () => {
       claims.delete(id);

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -6 136 104" width="272" height="208">
+  <path d="M15 87L9 31L33 57L43 22L57 55L66 9L75 55L89 22L99 57L123 31L117 87Z" fill="#FFC21A" stroke="#FFC21A" stroke-width="9" stroke-linejoin="round"></path>
+  <circle cx="9" cy="27" r="7.5" fill="#FFC21A"></circle>
+  <circle cx="43" cy="17.5" r="7" fill="#FFC21A"></circle>
+  <circle cx="66" cy="5.5" r="8" fill="#FFC21A"></circle>
+  <circle cx="89" cy="17.5" r="7" fill="#FFC21A"></circle>
+  <circle cx="123" cy="27" r="7.5" fill="#FFC21A"></circle>
+  <rect x="10" y="70" width="112" height="24" rx="8" fill="#F5A300"></rect>
+  <path d="M66 72.5L73.5 82L66 91.5L58.5 82Z" fill="#E8344E"></path>
+  <circle cx="38" cy="82" r="6" fill="#18A999"></circle>
+  <circle cx="94" cy="82" r="6" fill="#18A999"></circle>
+  <path d="M66 39L71 46L66 53L61 46Z" fill="#3E7BEA"></path>
+  <circle cx="64" cy="79.5" r="1.8" fill="#FFFFFF" opacity=".7"></circle>
+  <circle cx="36.2" cy="80" r="1.6" fill="#FFFFFF" opacity=".7"></circle>
+  <circle cx="92.2" cy="80" r="1.6" fill="#FFFFFF" opacity=".7"></circle>
+  <path d="M20 40L23 64" stroke="#FFE27A" stroke-width="3.2" stroke-linecap="round" fill="none"></path>
+</svg>

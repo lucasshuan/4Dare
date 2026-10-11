@@ -2,6 +2,15 @@
   "loading": "ルームを開いています…",
   "theme": "テーマ：",
   "round": "第{n}戦",
+  "title": {
+    "matchLabel": "試合",
+    "match": "第{n}戦",
+    "case": "事件 No.",
+    "halfNumber": "第{n}",
+    "halfRest": "試合",
+    "formation": "4-3-3?",
+    "formationOr": "4-4-2?"
+  },
   "lobbyIn": "{seconds}秒後に全員が待合室に戻ります",
   "goHome": "トップに戻る",
   "problem": {

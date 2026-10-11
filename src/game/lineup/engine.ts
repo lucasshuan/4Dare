@@ -18,6 +18,7 @@ import {
   stage,
   startStep,
   stepMs,
+  titlePart,
 } from "../steps";
 import { type Ctx, type PlayerId, type RoomState, SHOW_TIMING } from "../types";
 import { RECENT_MISSIONS } from "./bank";
@@ -183,11 +184,13 @@ export function beginLineup(s: RoomState, decks: LuDeck[], ctx: Ctx) {
     cuts: {},
     showing: 0,
   };
-  const first = longShows(s, s.round);
+  const first = longShows(s);
   const L = SHOW_TIMING.lineup;
+  // the title scene; the rules only when the group hasn't played it here yet
   startRound(s, ctx, [
     ["curtain", SHOW_TIMING.curtain],
-    first ? ["rules", L.rules] : ["round", SHOW_TIMING.round],
+    titlePart(s),
+    ["rules", first ? L.rules : 0],
     ["secret", first ? L.secret.first : L.secret.later],
     ...(presenter ? [["chair", L.chair] satisfies Part] : []),
     ["entrance", L.entrance],
@@ -221,7 +224,7 @@ function startRound(s: RoomState, ctx: Ctx, parts: Part[]) {
   lu.coins = Object.fromEntries(lu.dealt.map((id) => [id, s.settings.coins]));
   lu.breaks = breaksFor(deck.lots, s.settings.interval);
   lu.offers = [];
-  const first = lu.round === 1 && longShows(s, s.round);
+  const first = lu.round === 1 && longShows(s);
   stage(s, "opening", lu.round, first, parts, ctx);
   if (hosted(s) && deck.options?.length) return beginChoosing(s, ctx);
   openLot(s, ctx, 0);

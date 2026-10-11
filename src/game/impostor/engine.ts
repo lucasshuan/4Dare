@@ -137,7 +137,7 @@ export function beginImpostor(
     winner: null,
     reason: null,
   };
-  const first = longShows(s, s.round);
+  const first = longShows(s);
   const v = first ? "first" : "later";
   const T = SHOW_TIMING;
   const parts: Part[] = [
