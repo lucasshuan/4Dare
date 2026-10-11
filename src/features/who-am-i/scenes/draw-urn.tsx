@@ -109,12 +109,14 @@ const SHAKE = 1.15;
 
 /**
  * The draw's schedule (spec B §2.3). First match: the prototype's times, hops
- * at 1.40 + 0.22·i. The anticipation waits for the last swallow squash
+ * at 1.40 + 0.22·i (with five or six, closer together, so the last one hops
+ * when the fourth would). The anticipation waits for the last swallow squash
  * (`max(2.45, lastSquashEnd)`), so the two never touch the urn at once; the
- * shake follows it and still ends before the swell (3.85), so with 3-4
+ * shake follows it and still ends before the swell (3.85), so with 3-6
  * players it plays its keyframes a little faster. Later matches (3.4 s): the
- * avatars hop together, one 0.6 s shake, the slip out at 2.35. The slip's
- * flight (0.3 s up, 0.7 s down) is the prototype's in both.
+ * avatars hop together, one 0.6 s shake, the slip out at 2.35; the row comes
+ * in no later than four players' would. The slip's flight (0.3 s up, 0.7 s
+ * down) is the prototype's in both.
  */
 export function drawTimes(n: number, first: boolean): DrawTimes {
   if (!first) {
@@ -129,7 +131,7 @@ export function drawTimes(n: number, first: boolean): DrawTimes {
       urnDur: 0.5,
       row: 0.2,
       rowDur: 0.35,
-      rowStagger: 0.05,
+      rowStagger: Math.min(0.05, 0.15 / Math.max(1, n - 1)),
       hops: Array.from({ length: n }, () => hop),
       hopDur: 0.6,
       squashes: [squash],
@@ -151,7 +153,8 @@ export function drawTimes(n: number, first: boolean): DrawTimes {
       rowOut: 2.4,
     };
   }
-  const hops = Array.from({ length: n }, (_, i) => r3(1.4 + 0.22 * i));
+  const step = 0.22 * Math.min(1, 3 / Math.max(1, n - 1));
+  const hops = Array.from({ length: n }, (_, i) => r3(1.4 + step * i));
   const squashes = hops.map((h) => r3(h + 0.55));
   const lastSquashEnd = (squashes.at(-1) ?? 0) + SQUASH;
   const anticipation = r3(Math.max(2.45, lastSquashEnd));

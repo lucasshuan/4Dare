@@ -5,13 +5,13 @@
   "tagline": "Juegos de adivinanzas para jugar con amigos",
   "chips": {
     "free": "Gratis",
-    "players": "2 a 4 jugadores",
+    "players": "2 a 10 jugadores",
     "browser": "En el navegador"
   },
   "imageAlt": "4Dare: juegos de adivinanzas para jugar con amigos",
   "whoAmI": {
     "title": "¿Quién soy? Juega online con amigos",
-    "description": "Cada uno elige un personaje para otro jugador. Ves las cartas de los demás, nunca la tuya. Descubre quién eres con preguntas de sí o no. Gratis, de 2 a 4 jugadores, sin registro.",
+    "description": "Cada uno elige un personaje para otro jugador. Ves las cartas de los demás, nunca la tuya. Descubre quién eres con preguntas de sí o no. Gratis, de 2 a 6 jugadores, sin registro.",
     "pitch": "Cada uno elige un personaje para otro. Descubre el tuyo con preguntas de sí o no.",
     "imageAlt": "¿Quién soy? en 4Dare: cartas sobre la mesa y una pregunta de sí o no"
   },

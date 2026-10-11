@@ -25,6 +25,28 @@ interface NewsEntry {
  */
 export const NEWS_POSTS: readonly NewsEntry[] = [
   {
+    id: "who-am-i-six",
+    at: "2026-10-11",
+    kind: "new",
+    game: "who-am-i",
+    title: {
+      pt: "Quem sou eu? com até 6 jogadores",
+      en: "Who am I? for up to 6 players",
+      es: "¿Quién soy? para hasta 6 jugadores",
+      ja: "だれ？は6人まで遊べるように",
+    },
+    body: {
+      pt: "Uma sala de Quem sou eu? agora tem até seis lugares. No celular, a mesa e as cenas se arrumam em duas fileiras.",
+      en: "A Who am I? room now has up to six seats. On a phone, the table and the scenes settle into two rows.",
+      es: "Una sala de ¿Quién soy? ahora tiene hasta seis lugares. En el móvil, la mesa y las escenas se ordenan en dos filas.",
+      ja: "だれ？のルームは最大6人になりました。スマホではテーブルや演出が2列に並びます。",
+    },
+    action: {
+      href: "/who-am-i",
+      label: { pt: "Jogar", en: "Play", es: "Jugar", ja: "遊ぶ" },
+    },
+  },
+  {
     id: "match-openings",
     at: "2026-10-11",
     kind: "new",

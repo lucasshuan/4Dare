@@ -16,6 +16,9 @@ export const LAB_SHOWS = [
 ] as const;
 export type LabShow = (typeof LAB_SHOWS)[number];
 
+/** How many sit at the table: a "Who am I?" room seats 2 to 6. */
+export type LabPlayers = 2 | 3 | 4 | 5 | 6;
+
 export interface LabParams {
   /** The page's language (from its path, not the query). */
   lang: Lang;
@@ -23,7 +26,7 @@ export interface LabParams {
   show: LabShow;
   /** Seconds from that moment (negative: before it). */
   at: number;
-  players: 2 | 3 | 4;
+  players: LabPlayers;
   /** Whose screen it is: their seat, 0 (the host) to players − 1. */
   you: number;
   /** The room's first match (cold open, rule) or a later one ("Match 2"). */
@@ -97,8 +100,10 @@ export function parseLabParams(query: Query, lang: Lang): LabParams {
     const v = get(k);
     return options.includes(v as T) ? (v as T) : (LAB_DEFAULTS[k] as T);
   };
-  const players = Number(get("players"));
-  const n = (players === 2 || players === 3 ? players : 4) as 2 | 3 | 4;
+  const players = Math.trunc(Number(get("players")));
+  const n = (
+    players >= 2 && players <= 6 ? players : LAB_DEFAULTS.players
+  ) as LabPlayers;
   const you = Math.trunc(Number(get("you")) || 0);
   const at = Number(get("at"));
   const speed = Number(get("speed"));

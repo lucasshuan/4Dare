@@ -16,8 +16,18 @@ describe("draw schedule", () => {
       );
   });
 
+  it("brings five or six in closer together, the last when the fourth would", () => {
+    for (const n of [5, 6]) {
+      const hops = drawTimes(n, true).hops;
+      expect(hops).toHaveLength(n);
+      expect(hops[0]).toBe(1.4);
+      expect(hops.at(-1)).toBeCloseTo(drawTimes(4, true).hops[3], 3);
+      expect(drawTimes(n, true).shakeDur).toBe(drawTimes(4, true).shakeDur);
+    }
+  });
+
   it("never lets a swallow squash overlap the anticipation, the shake or the swell", () => {
-    for (const n of [2, 3, 4]) {
+    for (const n of [2, 3, 4, 5, 6]) {
       const tm = drawTimes(n, true);
       const lastSquashEnd = (tm.squashes.at(-1) ?? 0) + SQUASH;
       expect(tm.anticipation).toBe(
@@ -52,13 +62,17 @@ describe("draw schedule", () => {
   });
 
   it("fits the later variant in its beat: hops together, one 0.6 s shake", () => {
+    for (const n of [2, 3, 4, 5, 6]) {
+      const t = drawTimes(n, false);
+      // the whole row is in before anyone hops
+      expect(t.row + t.rowStagger * (n - 1) + t.rowDur).toBeLessThanOrEqual(
+        t.hops[0] + 1e-9,
+      );
+    }
     const tm = drawTimes(4, false);
     expect(new Set(tm.hops).size).toBe(1);
     expect(tm.squashes).toHaveLength(1);
     expect(tm.shakeDur).toBe(0.6);
-    expect(tm.row + tm.rowStagger * 3 + tm.rowDur).toBeLessThanOrEqual(
-      tm.hops[0],
-    );
     expect(tm.squashes[0] + SQUASH).toBeLessThanOrEqual(tm.anticipation + 1e-9);
     const end = DRAW.draw.later / 1000;
     expect(tm.slip + tm.slipRise + tm.slipFall).toBeLessThanOrEqual(end);
@@ -79,6 +93,22 @@ describe("ring of who picks for whom", () => {
   it("has the spec's sizes", () => {
     expect(ringGeometry(4, false)).toMatchObject({ R: 74, A: 40, size: 212 });
     expect(ringGeometry(4, true)).toMatchObject({ R: 62, A: 34, size: 182 });
+  });
+
+  it("keeps five or six readable: smaller faces, a bigger circle, no arrow under 40 / 34 px", () => {
+    for (const phone of [false, true])
+      for (const n of [5, 6]) {
+        const g = ringGeometry(n, phone);
+        const four = ringGeometry(4, phone);
+        expect(g.A).toBeLessThan(four.A);
+        expect(g.R).toBeGreaterThan(four.R);
+        for (const a of g.arcs)
+          expect(a.length).toBeGreaterThanOrEqual(
+            phone ? 34 - 0.01 : 40 - 0.01,
+          );
+        // still fits a phone's width
+        if (phone) expect(g.size).toBeLessThanOrEqual(220);
+      }
   });
 
   it("starts at the top and goes clockwise", () => {

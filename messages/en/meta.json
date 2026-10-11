@@ -5,13 +5,13 @@
   "tagline": "Guessing games to play with friends",
   "chips": {
     "free": "Free",
-    "players": "2–4 players",
+    "players": "2–10 players",
     "browser": "In the browser"
   },
   "imageAlt": "4Dare: guessing games to play with friends",
   "whoAmI": {
     "title": "Who am I? Play online with friends",
-    "description": "Everyone picks a character for someone else. You see their cards, never yours. Find out who you are with yes-or-no questions. Free, 2 to 4 players, no sign-up.",
+    "description": "Everyone picks a character for someone else. You see their cards, never yours. Find out who you are with yes-or-no questions. Free, 2 to 6 players, no sign-up.",
     "pitch": "Everyone picks a character for someone else. Find out yours with yes-or-no questions.",
     "imageAlt": "Who am I? on 4Dare: cards on the table and a yes-or-no question"
   },

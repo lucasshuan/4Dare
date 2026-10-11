@@ -5,8 +5,16 @@ import { Avatar } from "@/components/ui/avatar";
 import type { Person } from "@/components/ui/player-name";
 import { gs, mirror } from "@/lib/motion";
 
-/** Space kept clear around each face on the circle (radians, ≈25.2°). */
+/** Space kept clear around each face on the circle (radians, ≈25.2°), up to four players. */
 export const RING_GAP = 0.44;
+
+/** The ring for up to four players: circle radius and face size. */
+const BASE = { desktop: { R: 74, A: 40 }, phone: { R: 62, A: 34 } } as const;
+/**
+ * The shortest arc between two faces (px): with five or six, the faces get a
+ * little smaller and the circle grows until every arrow is still this long.
+ */
+const MIN_ARC = { desktop: 40, phone: 34 } as const;
 
 export interface RingArc {
   /** Index (in turn order) of the player the arc starts at: they pick for the next one. */
@@ -19,11 +27,14 @@ export interface RingArc {
   head: { x: number; y: number; deg: number };
 }
 
+/** The faces' sizes: the spec's, and smaller ones for five or six players. */
+type RingFace = 28 | 30 | 34 | 36 | 40;
+
 export interface RingGeometry {
   /** Circle radius. */
   R: number;
   /** Face size. */
-  A: number;
+  A: RingFace;
   /** The ring's box (square). */
   size: number;
   /** Face centres, in turn order: the first at the top, then clockwise. */
@@ -35,14 +46,29 @@ export interface RingGeometry {
 const r2 = (v: number) => Math.round(v * 100) / 100;
 
 /**
- * The circle of who picks for whom (spec B §3.2, generalised to 2-4 players):
+ * The circle of who picks for whom (spec B §3.2, generalised to 2-6 players):
  * faces on a circle in turn order, each arc running clockwise from a player
- * to the next one, who they pick for.
+ * to the next one, who they pick for. Up to four it is the spec's ring; with
+ * five or six the faces shrink a little (4 and 6 px) and the circle grows,
+ * keeping the same clearance round each face in pixels.
  */
 export function ringGeometry(n: number, phone: boolean): RingGeometry {
-  const R = phone ? 62 : 74;
-  const A = phone ? 34 : 40;
-  const size = 2 * R + A + 24;
+  const base = phone ? BASE.phone : BASE.desktop;
+  const more = Math.min(2, Math.max(0, n - 4));
+  const A = (base.A - [0, 4, 6][more]) as RingFace;
+  // the clearance round a face (px): the spec's 0.44 rad at the base radius, less what the face lost
+  const clear = RING_GAP * base.R - (base.A - A) / 2;
+  const R = more
+    ? Math.max(
+        base.R,
+        r2(
+          ((phone ? MIN_ARC.phone : MIN_ARC.desktop) + 2 * clear) /
+            ((2 * Math.PI) / n),
+        ),
+      )
+    : base.R;
+  const gap = more ? clear / R : RING_GAP;
+  const size = r2(2 * R + A + 24);
   const c = size / 2;
   const angle = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
   const at = (a: number) => ({
@@ -52,8 +78,8 @@ export function ringGeometry(n: number, phone: boolean): RingGeometry {
   const seats = Array.from({ length: n }, (_, i) => at(angle(i)));
   const arcs = Array.from({ length: n }, (_, i): RingArc => {
     // the next angle is not wrapped, so the arc always runs forwards
-    const a1 = angle(i) + RING_GAP;
-    const a2 = angle(i + 1) - RING_GAP;
+    const a1 = angle(i) + gap;
+    const a2 = angle(i + 1) - gap;
     const p1 = at(a1);
     const p2 = at(a2);
     return {
@@ -138,7 +164,7 @@ export function WhoRing({
                 transform: "scale(0)",
               }}
             >
-              <Avatar avatar={p.avatar} size={phone ? 34 : 40} />
+              <Avatar avatar={p.avatar} size={g.A} />
               {lit ? (
                 <span
                   data-ring-lit={lit}

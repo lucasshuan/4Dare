@@ -19,7 +19,7 @@ export const OPEN_GAMES: readonly GameKey[] = [
  * them in between. A match needs `min` players to start.
  */
 export const GAME_SEATS: Record<GameKey, { min: number; max: number }> = {
-  "who-am-i": { min: 2, max: 4 },
+  "who-am-i": { min: 2, max: 6 },
   impostor: { min: 3, max: 10 },
   lineup: { min: 2, max: 8 },
 };

@@ -132,7 +132,8 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   name: "",
   visibility: "public",
   password: "",
-  seats: 4,
+  // every seat of the default game open, as a new room has them (GAME_SEATS)
+  seats: 6,
   voteSeconds: 40,
   askSeconds: 80,
   guessSeconds: 60,
@@ -238,7 +239,7 @@ export const MAX_NAME = 16;
 /**
  * How long everyone looks at a reveal (ms). Turn steps start under it.
  * Answers: a base for the entrance and the question, plus time to read each answer and its note,
- * kept between 6 and 10 seconds. Guesses: a quick "not yet", a longer moment for a hit (card flip, confetti).
+ * kept between 6 and 12 seconds. Guesses: a quick "not yet", a longer moment for a hit (card flip, confetti).
  * The shows that present a match (opening, theme, cast) are timed by SHOW_TIMING.
  */
 export const REVEAL_TIMING = {
@@ -246,7 +247,7 @@ export const REVEAL_TIMING = {
   perAnswer: 1000,
   perNoteChar: 60,
   answersMin: 6000,
-  answersMax: 10000,
+  answersMax: 12000,
   guessMiss: 4000,
   guessHit: 5000,
   /** The turn player passed instead of guessing. */

@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import type { CSSProperties } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { FigureArt } from "@/components/ui/figure-art";
 import { useRoomContext } from "@/features/data/room-context";
@@ -49,6 +50,7 @@ function ColdOpenScene({ beat }: { beat: Beat }) {
   const name = useDisplayName();
   const { view } = useRoomContext();
   const { row, next } = peopleRow(view.players, view.youId);
+  const upright = tableRows(view.players, view.youId);
   const len = beatSeconds(beat);
   // everything leaves 0.5 s before the beat ends (7.1 of 7.6), never before the chips are in
   const outAt = Math.max(len - 0.5, 5.9);
@@ -153,7 +155,14 @@ function ColdOpenScene({ beat }: { beat: Beat }) {
             {t("line2")}
           </p>
         </div>
-        <div className="mt-[78px] flex items-end justify-center gap-[30px] sm:mt-[104px] sm:gap-[72px]">
+        <div
+          className={cn(
+            "mt-[78px] flex items-end justify-center gap-[30px] sm:mt-[104px] sm:gap-[72px]",
+            // a phone's width holds four: five or six sit in two rows of three
+            upright &&
+              "max-sm:max-w-[246px] max-sm:flex-wrap max-sm:gap-y-[52px]",
+          )}
+        >
           {row.map((p, i) => (
             <Person
               key={p.id}
@@ -161,6 +170,7 @@ function ColdOpenScene({ beat }: { beat: Beat }) {
               you={p.id === view.youId}
               seed={i}
               chip={next.indexOf(p)}
+              place={upright?.get(p.id)}
               label={p.id === view.youId ? tc("you") : name(p)}
               question={t("question")}
             />
@@ -172,6 +182,28 @@ function ColdOpenScene({ beat }: { beat: Beat }) {
       </output>
     </div>
   );
+}
+
+/**
+ * Upright, five or six players sit in two rows of three, as round a table:
+ * you in the middle of the top one between your neighbours, the next after
+ * you (and the answer chips) on your right going round, the rest along the
+ * bottom from right to left. Each one's place in that order; null for four
+ * or fewer, who keep the one row.
+ */
+function tableRows(
+  players: readonly PlayerView[],
+  youId: string,
+): Map<string, number> | null {
+  if (players.length < 5) return null;
+  const at = Math.max(
+    0,
+    players.findIndex((p) => p.id === youId),
+  );
+  const others = [...players.slice(at + 1), ...players.slice(0, at)];
+  const top = [others[others.length - 1], players[at], others[0]];
+  const bottom = others.slice(1, -1).reverse();
+  return new Map([...top, ...bottom].map((p, i) => [p.id, i]));
 }
 
 /** Fixed colours, the same in both themes, as on the prototype's blue stage. */
@@ -188,6 +220,7 @@ function Person({
   you,
   seed,
   chip,
+  place,
   label,
   question,
 }: {
@@ -196,6 +229,8 @@ function Person({
   seed: number;
   /** 0: "Yes", 1: "Probably yes", -1: none. */
   chip: number;
+  /** Upright with five or six: their place in the two rows (tableRows). */
+  place?: number;
   label: string;
   question: string;
 }) {
@@ -204,8 +239,17 @@ function Person({
   return (
     <div
       data-person
-      style={{ opacity: 0, transform: "translateY(60px)" }}
-      className="relative flex flex-col items-center gap-1.5 sm:gap-2.5"
+      style={
+        {
+          opacity: 0,
+          transform: "translateY(60px)",
+          "--place": place,
+        } as CSSProperties
+      }
+      className={cn(
+        "relative flex flex-col items-center gap-1.5 sm:gap-2.5",
+        place !== undefined && "max-sm:order-(--place)",
+      )}
     >
       {you ? (
         <span

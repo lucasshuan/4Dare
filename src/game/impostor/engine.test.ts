@@ -403,8 +403,8 @@ describe("impostor", () => {
   });
 
   it("switching games keeps the seats in range and colours within the game's", () => {
-    const g = new Game(5, 1, { game: "impostor", seats: 10 });
-    expect(g.state.players.map((p) => p.colorSlot)).toHaveLength(5);
+    const g = new Game(7, 1, { game: "impostor", seats: 10 });
+    expect(g.state.players.map((p) => p.colorSlot)).toHaveLength(7);
     expect(
       code(() =>
         g.do({
@@ -420,7 +420,7 @@ describe("impostor", () => {
       playerId: "p1",
       settings: { game: "impostor" },
     });
-    expect(h.state.settings.seats).toBe(4);
+    expect(h.state.settings.seats).toBe(6);
     h.do({
       type: "UPDATE_SETTINGS",
       playerId: "p1",
@@ -440,7 +440,7 @@ describe("impostor", () => {
       playerId: "p1",
       settings: { game: "who-am-i" },
     });
-    expect(h.state.settings.seats).toBe(4);
-    expect(h.state.players.every((p) => p.colorSlot < 4)).toBe(true);
+    expect(h.state.settings.seats).toBe(6);
+    expect(h.state.players.every((p) => p.colorSlot < 6)).toBe(true);
   });
 });

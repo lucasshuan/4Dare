@@ -1,6 +1,6 @@
 # 4Dare
 
-A guessing game for 2 to 4 friends. Everyone picks a character for someone else. You see everyone's card but yours, and find out who you are with yes-or-no questions.
+A guessing game for 2 to 6 friends. Everyone picks a character for someone else. You see everyone's card but yours, and find out who you are with yes-or-no questions.
 
 ## Run
 

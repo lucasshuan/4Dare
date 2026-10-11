@@ -318,7 +318,7 @@ describe("random play", () => {
     const queued = new Set<string>();
     for (let seed = 1; seed <= 300; seed++) {
       const r = rng(seed * 7919);
-      const g = new Game(2 + (seed % 3), seed);
+      const g = new Game(2 + (seed % 5), seed);
       // events sent right away, at the same time (everyone votes during the opening)
       const burst: GameEvent[] = [];
       for (let step = 0; step < 250; step++) {

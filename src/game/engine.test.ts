@@ -112,26 +112,26 @@ describe("lobby", () => {
       });
     const slots = () =>
       Object.fromEntries(g.state.players.map((p) => [p.id, p.colorSlot]));
-    // p1's pale blue took the blue; peach goes apricot, mint goes teal
+    // p1's pale blue took the blue; peach goes apricot, mint goes green
     join("p2", "#F3D3B8");
     join("p3", "#BFE6C8");
-    // another blue avatar gets what is left
+    // another blue avatar gets the closest one left, the teal
     join("p4", "#DCE8FA");
-    expect(slots()).toEqual({ p1: 0, p2: 1, p3: 2, p4: 3 });
-    // someone leaving changes nobody else's colour; the next one gets theirs
+    expect(slots()).toEqual({ p1: 0, p2: 1, p3: 5, p4: 2 });
+    // someone leaving changes nobody else's colour; the next peach one gets theirs
     g.do({ type: "LEAVE", playerId: "p2" });
-    expect(slots()).toEqual({ p1: 0, p3: 2, p4: 3 });
-    join("p5", "#D9C7F4");
+    expect(slots()).toEqual({ p1: 0, p3: 5, p4: 2 });
+    join("p5", "#F7C9A8");
     expect(slots()).toMatchObject({ p5: 1 });
     expect(
       toView(g.state, 0, "p3", g.now, "en").players.map((p) => p.colorSlot),
-    ).toEqual([0, 2, 3, 1]);
+    ).toEqual([0, 5, 2, 1]);
   });
 
   it("rejects invalid settings", () => {
     const ctx = { now: 0, random: Math.random };
     const bad = [
-      { seats: 5 },
+      { seats: 7 },
       { askSeconds: 10 },
       { guessSeconds: 301 },
       { answerSeconds: 60.5 },
@@ -344,14 +344,14 @@ describe("the host's lobby", () => {
         g.do({
           type: "UPDATE_SETTINGS",
           playerId: "p1",
-          settings: { seats: n as 2 | 3 | 4 },
+          settings: { seats: n },
         }),
       );
-    expect(seats(4)).toBe("no error");
+    expect(seats(6)).toBe("no error");
     expect(seats(3)).toBe("no error");
     expect(g.state.settings.seats).toBe(3);
     expect(seats(2)).toBe("invalid_input");
-    expect(seats(5)).toBe("invalid_input");
+    expect(seats(7)).toBe("invalid_input");
     expect(code(() => g.do({ type: "JOIN", player: ident("p4") }))).toBe(
       "room_full",
     );

@@ -1,6 +1,6 @@
 # Product
 
-4Dare is a collection of games to play with friends. For now there is one: **Who am I?**, online, for 2 to 4 people.
+4Dare is a collection of games to play with friends. For now there is one: **Who am I?**, online, for 2 to 6 people.
 
 ## How to play
 

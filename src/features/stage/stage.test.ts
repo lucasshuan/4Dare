@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { SEAT_COLORS } from "@/game/seat-colors";
 import { char, Game, THEMES } from "@/game/test-utils";
 import {
   type Beat,
@@ -51,7 +52,7 @@ const seatOf = (g: Game, id: string) => {
   const p = g.state.players.find((x) => x.id === id);
   return p ? p.colorSlot : -1;
 };
-const seatTone = (slot: number) => `seat-${(slot % 4) + 1}`;
+const seatTone = (slot: number) => `seat-${(slot % SEAT_COLORS) + 1}`;
 /** Everyone picks for their target (the theme show may still be on). */
 const pickAll = (g: Game) => g.pickAll();
 
