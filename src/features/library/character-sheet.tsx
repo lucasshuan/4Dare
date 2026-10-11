@@ -109,7 +109,8 @@ export function CharacterSheetBody({
           "grid flex-1 content-start gap-[26px] pb-7",
           mode === "panel"
             ? "overflow-y-auto overscroll-contain px-4 pt-1 sm:px-6"
-            : "pt-2",
+            : // a page has the room for two columns: the character and its pictures, then the names and themes
+              "pt-2 lg:grid-cols-2 lg:gap-x-12",
         )}
       >
         {sheet ? <Loaded sheet={sheet} /> : <Placeholder />}
@@ -209,21 +210,25 @@ function Loaded({ sheet }: { sheet: CharacterSheet }) {
   const shown = list.find((p) => p.id === picked) ?? list[0] ?? null;
   return (
     <>
-      <Hero sheet={sheet} picture={shown?.url ?? sheet.card.imageUrl} />
-      <m.div {...rise(1)}>
-        <Pictures
-          sheet={sheet}
-          pictures={list}
-          shown={shown}
-          onPick={setPicked}
-        />
-      </m.div>
-      <m.div {...rise(2)}>
-        <Nicknames sheet={sheet} />
-      </m.div>
-      <m.div {...rise(3)}>
-        <Themes sheet={sheet} />
-      </m.div>
+      <div className="grid min-w-0 content-start gap-[26px]">
+        <Hero sheet={sheet} picture={shown?.url ?? sheet.card.imageUrl} />
+        <m.div {...rise(1)}>
+          <Pictures
+            sheet={sheet}
+            pictures={list}
+            shown={shown}
+            onPick={setPicked}
+          />
+        </m.div>
+      </div>
+      <div className="grid min-w-0 content-start gap-[26px]">
+        <m.div {...rise(2)}>
+          <Nicknames sheet={sheet} />
+        </m.div>
+        <m.div {...rise(3)}>
+          <Themes sheet={sheet} />
+        </m.div>
+      </div>
     </>
   );
 }

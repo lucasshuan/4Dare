@@ -8,9 +8,7 @@ import { CharacterSheetBody } from "./character-sheet";
 export function SheetScreen({ id }: { id: string }) {
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
-      <div className="mx-auto max-w-[720px]">
-        <CharacterSheetBody id={id} mode="page" />
-      </div>
+      <CharacterSheetBody id={id} mode="page" />
     </Screen>
   );
 }
