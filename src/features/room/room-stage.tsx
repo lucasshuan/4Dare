@@ -165,8 +165,9 @@ function Areas() {
   // Impostor and Lineup rooms play their own take instead of the stage,
   // lobby (muffled) to results; picking the game in the lobby crossfades at the
   // same point in the song, and the takes are fetched on entering the room so the
-  // swap starts at once. Lineup's match moves from the bidding take to the
-  // matchday one after the auction (lineup-screen.tsx), and its results keep that.
+  // swap starts at once. Lineup's lobby plays the matchday take; its match
+  // plays the bidding one, back to matchday after the auction
+  // (lineup-screen.tsx), and its results keep that.
   const lineup = view.settings.game === "lineup";
   useEffect(() => {
     preloadMusic("impostor");
@@ -176,7 +177,9 @@ function Areas() {
     if (lineup) preloadMusic("matchday");
   }, [lineup]);
   useMusic(
-    lineup && area === "result" ? "matchday" : GAME_MUSIC[view.settings.game],
+    lineup && (area === "lobby" || area === "result")
+      ? "matchday"
+      : GAME_MUSIC[view.settings.game],
     1,
   );
   usePreloadCards(view);

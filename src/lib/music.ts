@@ -59,14 +59,14 @@ const TRACKS = {
     start: cut(0),
     end: cut(49),
   },
-  /** The same vamp as 1970s game-show bidding: Lineup's lobby and auction. As loud as the stage. */
+  /** The same vamp as 1970s game-show bidding: Lineup's auction. As loud as the stage. */
   bidding: {
     src: "/music/bidding-loop.mp3",
     intro: 0,
     start: cut(0),
     end: cut(49),
   },
-  /** The same vamp as a retro sports groove: Lineup from the wrap-up to the results. As loud as the stage. */
+  /** The same vamp as a retro sports groove: Lineup's lobby, and its match from the wrap-up to the results. As loud as the stage. */
   matchday: {
     src: "/music/matchday-loop.mp3",
     intro: 9.7972,
