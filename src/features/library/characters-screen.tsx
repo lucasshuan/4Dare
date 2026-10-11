@@ -27,6 +27,7 @@ import {
   type LibraryCard,
   type LibraryCounts,
   type LibraryNeed,
+  type LibraryPage,
   type LibrarySort,
 } from "@/server/community-contract";
 import { CharacterCard } from "./character-card";
@@ -72,7 +73,12 @@ function writeFilters(f: LibraryFilters) {
  * time as the list scrolls. A card opens its sheet over the list; "New
  * character" opens the form over it too.
  */
-export function CharactersScreen() {
+export function CharactersScreen({
+  firstPage,
+}: {
+  /** The unfiltered first page, read on the server with the page; null when that failed. */
+  firstPage: LibraryPage | null;
+}) {
   const t = useTranslations("library");
   const format = useFormatter();
   const [filters, setFilters] = useState<LibraryFilters>({
@@ -83,7 +89,7 @@ export function CharactersScreen() {
   });
   useEffect(() => setFilters(readFilters()), []);
   const deferredQ = useDeferredValue(filters.q);
-  const query = useLibrary({ ...filters, q: deferredQ });
+  const query = useLibrary({ ...filters, q: deferredQ }, firstPage);
   const [creating, setCreating] = useState<string | null>(null);
   // made here a moment ago: first in the list, with a ring
   const [fresh, setFresh] = useState<LibraryCard[]>([]);

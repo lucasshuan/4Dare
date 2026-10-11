@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SheetScreen } from "@/features/library/sheet-screen";
 import { LANGS, type Lang } from "@/game/types";
 import { PageMessages } from "@/i18n/page-messages";
 import { characterPath } from "@/lib/routes";
-import { characterPage } from "@/server/library-sheet";
+import { characterPage, characterSheet } from "@/server/library-sheet";
 import { pageMetadata } from "@/server/seo";
+
+// each sheet is rendered on its first visit and kept ten minutes
+export const revalidate = 600;
+
+export function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({
   params,
@@ -36,15 +44,26 @@ export async function generateMetadata({
   });
 }
 
-/** A character's sheet as a page: a shared link or a reload. The slug after the id is only for reading. */
+/**
+ * A character's sheet as a page: a shared link or a reload. The slug after
+ * the id is only for reading. The sheet comes with the page as a signed-out
+ * reader sees it; the reader's own (hidden nicknames, theirs) follows from
+ * the browser.
+ */
 export default async function CharacterPage({
   params,
 }: PageProps<"/[locale]/characters/[id]/[[...slug]]">) {
-  const { locale, id } = await params;
+  const { locale, id: rawId } = await params;
   setRequestLocale(locale);
+  const id = decodeURIComponent(rawId);
+  // nobody as the viewer: no hidden nicknames, none marked as theirs
+  const sheet = await characterSheet(id, locale as Lang, "").catch(
+    () => undefined,
+  );
+  if (sheet === null) notFound();
   return (
     <PageMessages only={["library"]}>
-      <SheetScreen id={decodeURIComponent(id)} />
+      <SheetScreen id={id} sheet={sheet ?? null} />
     </PageMessages>
   );
 }

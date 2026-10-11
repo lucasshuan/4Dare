@@ -82,14 +82,17 @@ export function CharacterSheetBody({
   id,
   mode,
   close,
+  initial,
 }: {
   id: string;
   mode: "panel" | "page";
   /** The panel's close button. */
   close?: ReactNode;
+  /** The sheet read with the page, as a signed-out reader sees it. */
+  initial?: CharacterSheet | null;
 }) {
   const t = useTranslations("library.sheet");
-  const { data: sheet, isError } = useSheet(id);
+  const { data: sheet, isError } = useSheet(id, initial);
   if (isError)
     return (
       <div className="grid justify-items-start gap-3 p-6">
@@ -115,7 +118,11 @@ export function CharacterSheetBody({
               "pt-2 lg:grid-cols-2 lg:gap-x-12",
         )}
       >
-        {sheet ? <Loaded sheet={sheet} /> : <Placeholder />}
+        {sheet ? (
+          <Loaded sheet={sheet} page={mode === "page"} />
+        ) : (
+          <Placeholder />
+        )}
       </div>
     </div>
   );
@@ -209,7 +216,7 @@ const rise = (i: number) => ({
   transition: { duration: 0.4, ease: ease.soft, delay: 0.04 + i * 0.05 },
 });
 
-function Loaded({ sheet }: { sheet: CharacterSheet }) {
+function Loaded({ sheet, page }: { sheet: CharacterSheet; page: boolean }) {
   const id = sheet.card.id;
   const pictures = usePictures(id);
   const [picked, setPicked] = useState<string | null>(null);
@@ -218,7 +225,11 @@ function Loaded({ sheet }: { sheet: CharacterSheet }) {
   return (
     <>
       <div className="grid min-w-0 content-start gap-[26px]">
-        <Hero sheet={sheet} picture={shown?.url ?? sheet.card.imageUrl} />
+        <Hero
+          sheet={sheet}
+          picture={shown?.url ?? sheet.card.imageUrl}
+          page={page}
+        />
         <m.div {...rise(1)}>
           <Pictures
             sheet={sheet}
@@ -243,9 +254,12 @@ function Loaded({ sheet }: { sheet: CharacterSheet }) {
 function Hero({
   sheet,
   picture,
+  page,
 }: {
   sheet: CharacterSheet;
   picture: string | null;
+  /** On its own page the name is the page's heading. */
+  page: boolean;
 }) {
   const t = useTranslations("library.sheet");
   const format = useFormatter();
@@ -253,6 +267,7 @@ function Hero({
   const tasteName = useTasteName();
   const { card } = sheet;
   const by = card.by;
+  const Name = page ? "h1" : "h2";
   return (
     <section className="grid grid-cols-[120px_minmax(0,1fr)] items-start gap-4 sm:grid-cols-[168px_minmax(0,1fr)] sm:gap-5">
       <m.span
@@ -279,9 +294,9 @@ function Hero({
             {tasteEmoji(card.taste)} {tasteName(card.taste)}
           </span>
         ) : null}
-        <h2 className="font-display font-extrabold text-[24px] leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere] sm:text-[30px]">
+        <Name className="font-display font-extrabold text-[24px] leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere] sm:text-[30px]">
           {card.name}
-        </h2>
+        </Name>
         {card.origin ? <p className="text-ink-muted">{card.origin}</p> : null}
         <dl className="mt-2 grid grid-cols-[repeat(3,auto)] justify-start gap-x-[18px] gap-y-1">
           {(

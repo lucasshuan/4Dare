@@ -167,16 +167,23 @@ function posts(): Promise<StoredNews[]> {
 const pick = (texts: Partial<Record<Lang, string>>, lang: Lang) =>
   texts[lang] ?? texts.en ?? Object.values(texts)[0] ?? "";
 
-/** The news as `viewer` reads them in `lang`: every post, its reactions, theirs. */
+/** The news as the reader reads them in `lang`: every post, its reactions, theirs. */
 export async function newsPage(lang: Lang): Promise<NewsPage> {
-  const { auth, news, workshop } = getBackend();
-  const me = await auth.identity(lang);
+  const me = await getBackend().auth.identity(lang);
+  return newsFor(lang, me.isGuest ? null : me.id);
+}
+
+/** The news as someone signed out reads them: what the page renders before the reader's own reactions arrive. */
+export const publicNews = (lang: Lang) => newsFor(lang, null);
+
+async function newsFor(lang: Lang, viewer: PlayerId | null): Promise<NewsPage> {
+  const { news, workshop } = getBackend();
   const [list, counts, mine] = await Promise.all([
     posts(),
     news.counts(),
-    me.isGuest
-      ? Promise.resolve(new Map<string, NewsReaction[]>())
-      : news.mine(me.id),
+    viewer
+      ? news.mine(viewer)
+      : Promise.resolve(new Map<string, NewsReaction[]>()),
   ]);
   const credits = new Map<string, string | null>();
   for (const p of list)
@@ -201,7 +208,7 @@ export async function newsPage(lang: Lang): Promise<NewsPage> {
       mine: mine.get(p.id) ?? [],
     }),
   );
-  return { items, signedIn: !me.isGuest };
+  return { items, signedIn: viewer !== null };
 }
 
 /** The newest post's time: the menu's dot compares it with the last one seen. */

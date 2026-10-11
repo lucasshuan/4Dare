@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, LayoutGrid, Link2 } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { PageHead } from "@/components/ui/page-head";
 import { useWithNames } from "@/components/ui/player-name";
 import { Screen } from "@/components/ui/screen";
@@ -55,7 +55,22 @@ const fits = (n: NewsItem, kind: KindFilter) =>
  * reactions for accounts, and what the Workshop put live credits who
  * suggested it.
  */
-export function NewsScreen() {
+const noSubscribe = () => () => {};
+
+/** False on the server and while hydrating, true after: the reader's own day only then. */
+const useHydrated = () =>
+  useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
+
+export function NewsScreen({
+  initial,
+}: {
+  /** The news read with the page, as a signed-out reader sees them; null when that failed. */
+  initial: NewsPage | null;
+}) {
   const t = useTranslations("news");
   const lang = useLocale();
   const gameName = useGameName();
@@ -71,7 +86,12 @@ export function NewsScreen() {
       if (!res.ok) throw new Error(`news: ${res.status}`);
       return (await res.json()) as NewsPage;
     },
+    initialData: initial ?? undefined,
+    // stale at once: the reader's own reactions are fetched on mount
+    initialDataUpdatedAt: 0,
   });
+  // the server knows no time zone: until hydrated, days are UTC ones and none is "today"
+  const hydrated = useHydrated();
 
   // the filters live in the link; a #post link opens on that post
   useEffect(() => {
@@ -110,12 +130,15 @@ export function NewsScreen() {
   const days: { day: string; at: number; items: NewsItem[] }[] = [];
   for (const n of list) {
     const d = new Date(n.at);
-    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const key = hydrated
+      ? `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+      : d.toISOString().slice(0, 10);
     const last = days.at(-1);
     if (last?.day === key) last.items.push(n);
     else days.push({ day: key, at: n.at, items: [n] });
   }
   const dayLabel = (at: number) => {
+    if (!hydrated) return null;
     const start = (x: Date) =>
       new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
     const diff = Math.round((start(now) - start(new Date(at))) / 86_400_000);
@@ -193,6 +216,7 @@ export function NewsScreen() {
             const date = format.dateTime(d.at, {
               day: "numeric",
               month: "long",
+              timeZone: hydrated ? undefined : "UTC",
             });
             return (
               <section

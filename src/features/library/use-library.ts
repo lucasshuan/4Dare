@@ -29,9 +29,17 @@ async function json<T>(url: string): Promise<T> {
   return (await res.json()) as T;
 }
 
-/** The characters page's list, a page at a time. */
-export function useLibrary(filters: LibraryFilters) {
+/** The characters page's list, a page at a time; `first` is the unfiltered first page, read with the page. */
+export function useLibrary(
+  filters: LibraryFilters,
+  first: LibraryPage | null = null,
+) {
   const lang = useLocale();
+  const unfiltered =
+    !filters.q.trim() &&
+    !filters.taste &&
+    filters.sort === "top" &&
+    !filters.need;
   return useInfiniteQuery({
     queryKey: ["library", lang, filters],
     initialPageParam: 0,
@@ -44,6 +52,8 @@ export function useLibrary(filters: LibraryFilters) {
       return json<LibraryPage>(`/api/characters/browse?${p}`);
     },
     getNextPageParam: (last) => last.next ?? undefined,
+    initialData:
+      first && unfiltered ? { pages: [first], pageParams: [0] } : undefined,
     placeholderData: (prev) => prev,
     staleTime: 30_000,
   });
@@ -95,10 +105,14 @@ export function useStarterMatches(q: string, tastes: readonly Taste[]) {
 export const sheetKey = (id: string, lang: string) =>
   ["character-sheet", id, lang] as const;
 
-export function useSheet(id: string) {
+/** A character's sheet; `initial`, read with the page for nobody in particular, shows until the reader's own arrives. */
+export function useSheet(id: string, initial?: CharacterSheet | null) {
   const lang = useLocale();
   return useQuery({
     queryKey: sheetKey(id, lang),
+    initialData: initial ?? undefined,
+    // stale at once: the reader's own sheet is fetched on mount
+    initialDataUpdatedAt: 0,
     queryFn: () =>
       json<CharacterSheet>(
         `/api/characters/${encodeURIComponent(id)}/sheet?lang=${lang}`,

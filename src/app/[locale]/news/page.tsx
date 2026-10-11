@@ -4,7 +4,11 @@ import { NewsScreen } from "@/features/news/news-screen";
 import type { Lang } from "@/game/types";
 import { PageMessages } from "@/i18n/page-messages";
 import { NEWS } from "@/lib/routes";
+import { publicNews } from "@/server/news";
 import { pageMetadata } from "@/server/seo";
+
+// the posts are rendered with the page and kept ten minutes
+export const revalidate = 600;
 
 export async function generateMetadata({
   params,
@@ -21,11 +25,12 @@ export async function generateMetadata({
 
 /** /news?game=&kind=: what changed in 4Dare, by day; #post opens on one. */
 export default async function News({ params }: PageProps<"/[locale]/news">) {
-  const { locale } = await params;
+  const locale = (await params).locale as Lang;
   setRequestLocale(locale);
+  const initial = await publicNews(locale).catch(() => null);
   return (
     <PageMessages only={["news"]}>
-      <NewsScreen />
+      <NewsScreen initial={initial} />
     </PageMessages>
   );
 }
