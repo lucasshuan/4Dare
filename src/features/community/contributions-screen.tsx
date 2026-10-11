@@ -1,6 +1,14 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  Activity,
+  ImageIcon,
+  Lightbulb,
+  type LucideIcon,
+  Tag,
+  UserRoundPlus,
+} from "lucide-react";
 import { m } from "motion/react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
@@ -12,7 +20,6 @@ import { Portrait } from "@/components/ui/portrait";
 import { Screen } from "@/components/ui/screen";
 import { Segmented } from "@/components/ui/segmented";
 import { Switch } from "@/components/ui/switch";
-import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { SheetLink } from "@/features/library/sheet-drawer";
 import { ProfileLink } from "@/features/profile/profile-link";
@@ -35,6 +42,14 @@ const FILTERS: readonly FeedFilter[] = [
   "character",
   "suggestion",
 ];
+
+const FILTER_ICON: Record<FeedFilter, LucideIcon> = {
+  all: Activity,
+  picture: ImageIcon,
+  alias: Tag,
+  character: UserRoundPlus,
+  suggestion: Lightbulb,
+};
 
 const MEDAL: Record<string, string> = {
   none: "radial-gradient(circle at 35% 30%, #f2f4f8, #c3cad6)",
@@ -61,7 +76,6 @@ export function ContributionsScreen({
   const format = useFormatter();
   const lang = useLocale();
   const now = useNow({ updateInterval: 60_000 });
-  const { me } = useMe();
   const [kind, setKind] = useState<FeedFilter>("all");
   const [mine, setMine] = useState(false);
   const query = useInfiniteQuery({
@@ -184,19 +198,25 @@ export function ContributionsScreen({
               options={FILTERS}
               value={kind}
               onChange={setKind}
-              render={(k) => t(k)}
+              render={(k) => {
+                const Icon = FILTER_ICON[k];
+                return (
+                  <>
+                    <Icon className="size-4" strokeWidth={2} />
+                    {t(k)}
+                  </>
+                );
+              }}
             />
-            {me && !me.isGuest ? (
-              // biome-ignore lint/a11y/noLabelWithoutControl: the switch is inside
-              <label className="inline-flex cursor-pointer items-center gap-2.5 font-semibold text-[14px]">
-                <Switch
-                  checked={mine}
-                  onCheckedChange={setMine}
-                  aria-label={t("mine")}
-                />
-                {t("mine")}
-              </label>
-            ) : null}
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: the switch is inside */}
+            <label className="inline-flex shrink-0 cursor-pointer items-center gap-2.5 font-semibold text-[14px]">
+              <Switch
+                checked={mine}
+                onCheckedChange={setMine}
+                aria-label={t("mine")}
+              />
+              {t("mine")}
+            </label>
           </div>
           <div
             className={cn(

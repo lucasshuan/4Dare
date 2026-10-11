@@ -264,9 +264,11 @@ export async function contributionsPage(
   const { auth, community } = getBackend();
   const me = await auth.identity(lang);
   const account = !me.isGuest;
+  // a guest has nothing of their own
+  if (mineOnly && !account) return { items: [], next: null, mine: null };
   const rows = await community.feed(
     kind === "all" ? null : kind,
-    mineOnly && account ? me.id : null,
+    mineOnly ? me.id : null,
     before,
     FEED_PAGE,
   );
