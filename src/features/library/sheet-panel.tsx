@@ -30,7 +30,7 @@ export function SheetPanel({ id }: { id: string }) {
     >
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-300 ease-soft data-ending-style:opacity-0 data-starting-style:opacity-0" />
-        <Dialog.Popup className="fixed inset-y-0 right-0 z-50 flex w-[min(760px,100vw)] flex-col overflow-hidden bg-surface text-ink shadow-pop outline-none transition-transform duration-[420ms] ease-soft data-ending-style:translate-x-[104%] data-starting-style:translate-x-[104%] data-ending-style:duration-[260ms] data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]">
+        <Dialog.Popup className="fixed inset-y-0 right-0 z-50 flex w-[min(960px,100vw)] flex-col overflow-hidden bg-surface text-ink shadow-pop outline-none transition-transform duration-[420ms] ease-soft data-ending-style:translate-x-[104%] data-starting-style:translate-x-[104%] data-ending-style:duration-[260ms] data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]">
           <Dialog.Title className="sr-only">{id}</Dialog.Title>
           <CharacterSheetBody
             id={id}
