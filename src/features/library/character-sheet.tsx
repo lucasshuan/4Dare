@@ -404,7 +404,8 @@ function Pictures({
           </button>
         ) : null}
       </SectionHead>
-      <div className="-mx-0.5 flex gap-2.5 overflow-x-auto px-0.5 pt-1 pb-1.5">
+      {/* the padding leaves room for the chosen picture's ring and its lift on hover: the scroller clips both ways */}
+      <div className="-mx-1.5 -my-1 flex gap-3 overflow-x-auto px-1.5 py-2">
         {pictures.map((p, i) => (
           <Tooltip.Root key={p.id}>
             <Tooltip.Trigger
