@@ -270,14 +270,15 @@ export interface GameFactsData {
   questions: number;
   missions: number;
   characters: number;
-  podium: Pick<RankingPage, "rows" | "helpers">;
+  podium: RankingBoard;
 }
 
-/** GET /api/rankings. */
-export interface RankingPage {
+/** The rankings page shows a board only from this many players up; fewer is no ranking yet. */
+export const MIN_RANKED = 3;
+
+/** GET /api/rankings: the same for everyone, so the server and the CDN keep it. */
+export interface RankingBoard {
   rows: RankingRow[];
-  /** The reader's own row, wherever it falls; null for a guest or without XP. */
-  me: RankingRow | null;
   /** Who helped the library most in the last 30 days. */
   helpers: {
     person: PersonRef;
@@ -287,6 +288,11 @@ export interface RankingPage {
     characters: number;
     live: number;
   }[];
+}
+
+/** GET /api/rankings/me: the reader's own row, wherever it falls; null for a guest or without XP. */
+export interface MyRankingRow {
+  me: RankingRow | null;
 }
 
 export type PlayersFilter = "all" | "with" | "now";

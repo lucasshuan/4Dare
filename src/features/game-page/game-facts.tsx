@@ -18,7 +18,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { CHARACTERS, CONTRIBUTIONS, WORKSHOP } from "@/lib/routes";
-import type { GameFactsData, RankingPage } from "@/server/community-contract";
+import type { GameFactsData, RankingBoard } from "@/server/community-contract";
 
 type Fact = "themes" | "questions" | "missions" | "characters";
 
@@ -228,7 +228,7 @@ function Faces({
   helpers,
   delay,
 }: {
-  helpers: RankingPage["helpers"] | undefined;
+  helpers: RankingBoard["helpers"] | undefined;
   delay: number;
 }) {
   if (!helpers) return <Pending className="w-16" />;

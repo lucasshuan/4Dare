@@ -1,5 +1,6 @@
 import "server-only";
-import type { GameKey } from "@/game/games";
+import { unstable_cache } from "next/cache";
+import { GAME_KEYS, type GameKey } from "@/game/games";
 import { BADGES, TIERS } from "@/game/profile/badges";
 import { sees } from "@/game/profile/profile";
 import { levelOf } from "@/game/profile/xp";
@@ -14,8 +15,9 @@ import type {
   PlayersFilter,
   PlayersPage,
   PlayerTile,
-  RankingPage,
+  RankingBoard,
   RankingPeriod,
+  RankingRow,
 } from "./community-contract";
 import { person } from "./profiles";
 import { piecesOf } from "./workshop";
@@ -28,46 +30,85 @@ const sinceOf = (period: RankingPeriod, now = Date.now()) =>
       ? now - 30 * DAY
       : null;
 
-/** The ranking of a game (null: all) in a period, the reader's place, and who helped the library most. */
-export async function rankingPage(
+/** `?game=` and `?period=` of the rankings page and its route: unknown ones are all games, this week. */
+export function rankingQuery(p: URLSearchParams): {
+  game: GameKey | null;
+  period: RankingPeriod;
+} {
+  const game = p.get("game");
+  const period = p.get("period");
+  return {
+    game: (GAME_KEYS as readonly string[]).includes(game ?? "")
+      ? (game as GameKey)
+      : null,
+    period: period === "month" || period === "ever" ? period : "week",
+  };
+}
+
+/** How long the server keeps a ranking board, in seconds. */
+const BOARD_TTL = 300;
+
+/**
+ * The ranking of a game (null: all) in a period and who helped the library
+ * most: the same for everyone, so the server keeps it five minutes instead
+ * of every visit asking the database.
+ */
+export const rankingBoard = unstable_cache(
+  (game: GameKey | null, period: RankingPeriod, lang: Lang) =>
+    buildRanking(game, period, lang, 20),
+  ["ranking-board"],
+  { revalidate: BOARD_TTL },
+);
+
+/** The reader's own row in a ranking, wherever it falls; null for a guest or without XP there. */
+export async function myRankingRow(
   game: GameKey | null,
   period: RankingPeriod,
   lang: Lang,
-): Promise<RankingPage> {
-  const me = await getBackend().auth.identity(lang);
-  return buildRanking(game, period, lang, 20, me.isGuest ? null : me.id);
+): Promise<RankingRow | null> {
+  const { auth, community } = getBackend();
+  const me = await auth.identity(lang);
+  if (me.isGuest) return null;
+  const [mine, total] = await Promise.all([
+    community.place(me.id, game, sinceOf(period)),
+    // the level comes from all their XP
+    community.place(me.id, null, null),
+  ]);
+  if (!mine) return null;
+  const person = (await peopleOf([me.id], lang)).get(me.id);
+  return person
+    ? {
+        person,
+        place: mine.place,
+        xp: mine.xp,
+        matches: mine.matches,
+        wins: mine.wins,
+        level: levelOf(total?.xp ?? mine.xp).level,
+      }
+    : null;
 }
 
-/**
- * A game's top three this week and the month's helpers: the same for
- * everyone (no reader's place), so a game page can cache it.
- */
+/** A game's top three this week and the month's helpers, for its page (cached there). */
 export const podium = (game: GameKey, lang: Lang) =>
-  buildRanking(game, "week", lang, 3, null);
+  buildRanking(game, "week", lang, 3);
 
 async function buildRanking(
   game: GameKey | null,
   period: RankingPeriod,
   lang: Lang,
   top: number,
-  meId: string | null,
-): Promise<RankingPage> {
+): Promise<RankingBoard> {
   const { community } = getBackend();
   const since = sinceOf(period);
-  const [rows, overall, mine, helpers] = await Promise.all([
+  const [rows, overall, helpers] = await Promise.all([
     community.ranking(game, since, top),
     // everyone's level comes from all their XP
     community.ranking(null, null, 500),
-    meId ? community.place(meId, game, since) : Promise.resolve(null),
     community.contributors(Date.now() - 30 * DAY, 3),
   ]);
   const totals = new Map(overall.map((r) => [r.userId, r.xp]));
   const people = await peopleOf(
-    [
-      ...rows.map((r) => r.userId),
-      ...helpers.map((h) => h.userId),
-      mine ? meId : null,
-    ],
+    [...rows.map((r) => r.userId), ...helpers.map((h) => h.userId)],
     lang,
   );
   const level = (id: string) => levelOf(totals.get(id) ?? 0).level;
@@ -87,19 +128,6 @@ async function buildRanking(
           ]
         : [];
     }),
-    me:
-      mine && meId && people.get(meId)
-        ? {
-            person: people.get(meId) as NonNullable<
-              ReturnType<typeof people.get>
-            >,
-            place: mine.place,
-            xp: mine.xp,
-            matches: mine.matches,
-            wins: mine.wins,
-            level: level(meId),
-          }
-        : null,
     helpers: helpers.flatMap((h) => {
       const p = people.get(h.userId);
       return p
