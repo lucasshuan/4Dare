@@ -48,7 +48,7 @@ const CANVAS = {
 
 /** What shows past the canvas before a scene paints it: its set's darkest colour. */
 const BACKDROP: Record<GameKey, string> = {
-  "who-am-i": "#2b69c8",
+  "who-am-i": "var(--brand-stage)",
   impostor: "#07050b",
   lineup: "#1c0e05",
 };
