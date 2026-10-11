@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { APP_NAME } from "@/config";
 import { LineupHub } from "@/features/lineup/lineup-hub";
 import type { Lang } from "@/game/types";
-import { BUILD_THE_TEAM } from "@/lib/routes";
+import { LINEUP } from "@/lib/routes";
 import { gameFacts } from "@/server/game-facts";
 import {
   HREFLANG,
@@ -18,12 +18,12 @@ export const revalidate = 600;
 
 export async function generateMetadata({
   params,
-}: PageProps<"/[locale]/build-the-team">): Promise<Metadata> {
+}: PageProps<"/[locale]/lineup">): Promise<Metadata> {
   const locale = (await params).locale as Lang;
   const t = await getTranslations({ locale, namespace: "meta.whatFor" });
   return pageMetadata({
     lang: locale,
-    path: BUILD_THE_TEAM,
+    path: LINEUP,
     title: t("title"),
     description: t("description"),
   });
@@ -31,7 +31,7 @@ export async function generateMetadata({
 
 export default async function WhatFor({
   params,
-}: PageProps<"/[locale]/build-the-team">) {
+}: PageProps<"/[locale]/lineup">) {
   const locale = (await params).locale as Lang;
   setRequestLocale(locale);
   const [meta, home, facts] = await Promise.all([
@@ -44,7 +44,7 @@ export default async function WhatFor({
     "@type": "VideoGame",
     name: home("name"),
     description: meta("description"),
-    url: `${SITE_URL}${localePath(locale, BUILD_THE_TEAM)}`,
+    url: `${SITE_URL}${localePath(locale, LINEUP)}`,
     inLanguage: HREFLANG[locale],
     genre: ["Party game", "Auction game"],
     gamePlatform: "Web browser",

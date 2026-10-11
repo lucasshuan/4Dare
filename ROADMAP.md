@@ -19,7 +19,7 @@ Tick = done and committed.
 - [ ] Who am I?: polish, fix transitions
 - [ ] Impostor: polish, fix transitions
 - [ ] Impostor: visual redo. Spy theme, Persona vibe
-- [ ] Build the Team: polish, fix transitions
+- [ ] Lineup: polish, fix transitions
 
 ## Sound
 
@@ -34,7 +34,7 @@ Tick = done and committed.
 - [ ] Max one line per 45 s, no repeat in a match, never same line twice in a row
 - [ ] Collisions: only top one plays (ending > discovery/vote > give up > check > wrong guess > pass > stall)
 - [ ] Two-player Who am I? skips `whoami.lastOne`
-- [ ] Build the Team presenter mode: presenter and room hear own `whatfor.host.*` lines
+- [ ] Lineup presenter mode: presenter and room hear own `whatfor.host.*` lines
 - [ ] Auctioneer countdown (`goingOnce/Twice/Sold`): optional, off by default
 - [ ] Cold open ~11000 ms when narration on (`OPENING.intro`)
 - [ ] Impostor stops showing Who am I?'s cold-open text

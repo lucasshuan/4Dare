@@ -204,7 +204,7 @@
       }
     },
     "whatFor": {
-      "name": "Monte a equipe",
+      "name": "Escalação",
       "players": "2 a 8 jogadores",
       "play": "Jogar",
       "demoLines": [

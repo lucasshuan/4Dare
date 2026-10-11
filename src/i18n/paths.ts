@@ -8,7 +8,7 @@ import type { Lang } from "@/game/types";
 
 const TRANSLATED: Record<string, Partial<Record<Lang, string>>> = {
   "who-am-i": { pt: "quem-sou-eu", es: "quien-soy" },
-  "build-the-team": { pt: "monte-a-equipe", es: "arma-el-equipo" },
+  lineup: { pt: "escalacao", es: "alineacion" },
   rooms: { pt: "salas", es: "salas" },
   characters: { pt: "personagens", es: "personajes" },
   workshop: { pt: "oficina", es: "taller" },

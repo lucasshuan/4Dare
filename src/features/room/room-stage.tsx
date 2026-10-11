@@ -162,10 +162,10 @@ function Areas() {
   useStepSound();
   usePresenceSound(view);
   useMusicMuffle(area === "lobby");
-  // Impostor and Build the Team rooms play their own take instead of the stage,
+  // Impostor and Lineup rooms play their own take instead of the stage,
   // lobby (muffled) to results; picking the game in the lobby crossfades at the
   // same point in the song, and the takes are fetched on entering the room so the
-  // swap starts at once. Build the Team's match moves from the bidding take to the
+  // swap starts at once. Lineup's match moves from the bidding take to the
   // matchday one after the auction (lineup-screen.tsx), and its results keep that.
   const lineup = view.settings.game === "lineup";
   useEffect(() => {

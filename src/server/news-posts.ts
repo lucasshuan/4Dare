@@ -25,6 +25,28 @@ interface NewsEntry {
  */
 export const NEWS_POSTS: readonly NewsEntry[] = [
   {
+    id: "lineup-name",
+    at: "2026-10-11",
+    kind: "notice",
+    game: "lineup",
+    title: {
+      pt: "Monte a equipe agora é Escalação",
+      en: "Build the Team is now Lineup",
+      es: "Arma el equipo ahora es Alineación",
+      ja: "「チームを組もう」は「スタメン」に",
+    },
+    body: {
+      pt: "Mesmo jogo, nome novo. Os links antigos continuam funcionando.",
+      en: "Same game, new name. Old links still work.",
+      es: "Mismo juego, nombre nuevo. Los enlaces viejos siguen funcionando.",
+      ja: "ゲームはそのまま、名前が変わりました。前のリンクもそのまま使えます。",
+    },
+    action: {
+      href: "/lineup",
+      label: { pt: "Jogar", en: "Play", es: "Jugar", ja: "遊ぶ" },
+    },
+  },
+  {
     id: "volume-key",
     at: "2026-10-11",
     kind: "better",
