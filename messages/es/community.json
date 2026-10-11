@@ -14,11 +14,6 @@
     "xp": "{n} XP",
     "few": "Aún hay pocos jugadores para un ranking.",
     "fewHint": "Aparece cuando 3 jugadores sumen XP aquí. Juega una partida y sé uno de ellos.",
-    "helpers": "Quién más ayudó a la biblioteca",
-    "helpersHint": "En los últimos 30 días.",
-    "helpersEmpty": "Nadie todavía. Envía una foto o un apodo en Personajes.",
-    "helperLine": "{pictures, plural, one {# foto} other {# fotos}} · {aliases, plural, one {# apodo} other {# apodos}}",
-    "seeContributions": "Ver contribuciones",
     "place": "Puesto {n}"
   },
   "players": {
@@ -77,6 +72,10 @@
     },
     "empty": "Nada de este tipo todavía.",
     "emptyHint": "Envía una foto, pon un apodo o sugiere algo en el Taller.",
-    "more": "Más"
+    "more": "Más",
+    "helpers": "Quién más ayudó a la biblioteca",
+    "helpersHint": "En los últimos 30 días.",
+    "helpersEmpty": "Nadie todavía. Envía una foto o un apodo en Personajes.",
+    "helperLine": "{pictures, plural, one {# foto} other {# fotos}} · {aliases, plural, one {# apodo} other {# apodos}}"
   }
 }

@@ -6,19 +6,16 @@ import { m } from "motion/react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { type ComponentProps, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
-import { buttonClass } from "@/components/ui/button";
 import { PageHead } from "@/components/ui/page-head";
 import { Screen } from "@/components/ui/screen";
 import { Segmented } from "@/components/ui/segmented";
-import { useGameName } from "@/features/create/game-info";
+import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { ProfileLink } from "@/features/profile/profile-link";
 import { type GameKey, OPEN_GAMES } from "@/game/games";
-import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
-import { CONTRIBUTIONS } from "@/lib/routes";
 import {
   MIN_RANKED,
   type MyRankingRow,
@@ -56,8 +53,7 @@ export function LevelFace({
 /**
  * /rankings: who earned the most XP, overall or per game, this week, this
  * month or ever. The top three on a podium (the first crowned), the rest in
- * rows, the reader's own row pinned at the bottom; beside it, who helped the
- * library most.
+ * rows, the reader's own row pinned at the bottom.
  */
 export function RankingsScreen(initial: {
   game: GameChoice;
@@ -120,7 +116,16 @@ export function RankingsScreen(initial: {
           options={["all", ...OPEN_GAMES] as GameChoice[]}
           value={game}
           onChange={(g) => choose(g, period)}
-          render={(g) => (g === "all" ? t("rankings.all") : gameName(g))}
+          render={(g) =>
+            g === "all" ? (
+              t("rankings.all")
+            ) : (
+              <>
+                <GameThumb game={g} size="tiny" />
+                {gameName(g)}
+              </>
+            )
+          }
         />
         <Segmented
           label={t("rankings.period")}
@@ -130,101 +135,44 @@ export function RankingsScreen(initial: {
           render={(p) => t(`rankings.${p}`)}
         />
       </div>
-      <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div
-          className={cn(
-            "transition-opacity duration-200",
-            isPlaceholderData && "opacity-60",
-          )}
-        >
-          {few ? (
-            <m.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: ease.soft }}
-              className="grid justify-items-start gap-2 rounded-[24px] border border-line-strong border-dashed p-7"
-            >
-              <b className="font-bold font-display text-[19px]">
-                {t("rankings.few")}
-              </b>
-              <span className="text-ink-muted">{t("rankings.fewHint")}</span>
-            </m.div>
-          ) : (
-            <>
-              {/* a new top three replays the podium's arrival */}
-              <Podium
-                rows={rows.slice(0, 3)}
-                key={rows
-                  .slice(0, 3)
-                  .map((r) => r.person.id)
-                  .join()}
-              />
-              <div className="grid gap-1.5">
-                {rows.slice(3).map((r, i) => (
-                  <Row key={r.person.id} row={r} index={i} />
-                ))}
-                {me && !rows.some((r) => r.person.id === me.person.id) ? (
-                  <Row row={me} index={rows.length - 3} me />
-                ) : null}
-              </div>
-            </>
-          )}
-        </div>
-        <aside className="grid gap-3 rounded-[24px] bg-surface p-[18px]">
-          <div>
-            <h2 className="font-bold font-display text-[17px] leading-tight">
-              {t("rankings.helpers")}
-            </h2>
-            <span className="text-[12.5px] text-ink-muted">
-              {t("rankings.helpersHint")}
-            </span>
-          </div>
-          <div className="grid gap-2.5">
-            {data?.helpers.length ? (
-              data.helpers.map((h, i) => (
-                <m.div
-                  key={h.person.id}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{
-                    duration: 0.4,
-                    ease: ease.soft,
-                    delay: i * 0.06,
-                  }}
-                >
-                  <ProfileLink
-                    handle={h.person.handle}
-                    className="flex items-center gap-2.5 rounded-[14px] text-[14px] transition-colors hover:bg-sunken"
-                  >
-                    <Avatar avatar={h.person.avatar} size={32} />
-                    <span className="min-w-0 flex-1">
-                      <b className="block truncate">{h.person.name}</b>
-                      <small className="block text-[12px] text-ink-muted">
-                        {t("rankings.helperLine", {
-                          pictures: h.pictures,
-                          aliases: h.aliases,
-                        })}
-                      </small>
-                    </span>
-                    <span className="font-medium font-mono text-[13px] tabular-nums">
-                      {h.total}
-                    </span>
-                  </ProfileLink>
-                </m.div>
-              ))
-            ) : (
-              <span className="text-[13px] text-ink-muted">
-                {t("rankings.helpersEmpty")}
-              </span>
-            )}
-          </div>
-          <Link
-            href={CONTRIBUTIONS}
-            className={buttonClass("secondary", "sm", "justify-self-start")}
+      <div
+        className={cn(
+          "transition-opacity duration-200",
+          isPlaceholderData && "opacity-60",
+        )}
+      >
+        {few ? (
+          <m.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: ease.soft }}
+            className="grid justify-items-start gap-2 rounded-[24px] border border-line-strong border-dashed p-7"
           >
-            {t("rankings.seeContributions")}
-          </Link>
-        </aside>
+            <b className="font-bold font-display text-[19px]">
+              {t("rankings.few")}
+            </b>
+            <span className="text-ink-muted">{t("rankings.fewHint")}</span>
+          </m.div>
+        ) : (
+          <>
+            {/* a new top three replays the podium's arrival */}
+            <Podium
+              rows={rows.slice(0, 3)}
+              key={rows
+                .slice(0, 3)
+                .map((r) => r.person.id)
+                .join()}
+            />
+            <div className="grid gap-1.5">
+              {rows.slice(3).map((r, i) => (
+                <Row key={r.person.id} row={r} index={i} />
+              ))}
+              {me && !rows.some((r) => r.person.id === me.person.id) ? (
+                <Row row={me} index={rows.length - 3} me />
+              ) : null}
+            </div>
+          </>
+        )}
       </div>
     </Screen>
   );

@@ -12,6 +12,7 @@ import type {
   ContributionItem,
   ContributionsPage,
   FeedFilter,
+  LibraryHelper,
   PlayersFilter,
   PlayersPage,
   PlayerTile,
@@ -49,9 +50,8 @@ export function rankingQuery(p: URLSearchParams): {
 const BOARD_TTL = 300;
 
 /**
- * The ranking of a game (null: all) in a period and who helped the library
- * most: the same for everyone, so the server keeps it five minutes instead
- * of every visit asking the database.
+ * The ranking of a game (null: all) in a period: the same for everyone, so
+ * the server keeps it five minutes instead of every visit asking the database.
  */
 export const rankingBoard = unstable_cache(
   (game: GameKey | null, period: RankingPeriod, lang: Lang) =>
@@ -88,9 +88,44 @@ export async function myRankingRow(
     : null;
 }
 
-/** A game's top three this week and the month's helpers, for its page (cached there). */
+/** A game's top three this week, for its page (cached there). */
 export const podium = (game: GameKey, lang: Lang) =>
   buildRanking(game, "week", lang, 3);
+
+/** The `top` who helped the library most in the last 30 days. */
+export async function libraryHelpers(
+  lang: Lang,
+  top: number,
+): Promise<LibraryHelper[]> {
+  const { community } = getBackend();
+  const helpers = await community.contributors(Date.now() - 30 * DAY, top);
+  const people = await peopleOf(
+    helpers.map((h) => h.userId),
+    lang,
+  );
+  return helpers.flatMap((h) => {
+    const p = people.get(h.userId);
+    return p
+      ? [
+          {
+            person: p,
+            total: h.total,
+            pictures: h.pictures,
+            aliases: h.aliases,
+            characters: h.characters,
+            live: h.live,
+          },
+        ]
+      : [];
+  });
+}
+
+/** The contributions page's top helpers, kept five minutes like a ranking board. */
+export const topHelpers = unstable_cache(
+  (lang: Lang) => libraryHelpers(lang, 5),
+  ["top-helpers"],
+  { revalidate: BOARD_TTL },
+);
 
 async function buildRanking(
   game: GameKey | null,
@@ -100,15 +135,14 @@ async function buildRanking(
 ): Promise<RankingBoard> {
   const { community } = getBackend();
   const since = sinceOf(period);
-  const [rows, overall, helpers] = await Promise.all([
+  const [rows, overall] = await Promise.all([
     community.ranking(game, since, top),
     // everyone's level comes from all their XP
     community.ranking(null, null, 500),
-    community.contributors(Date.now() - 30 * DAY, 3),
   ]);
   const totals = new Map(overall.map((r) => [r.userId, r.xp]));
   const people = await peopleOf(
-    [...rows.map((r) => r.userId), ...helpers.map((h) => h.userId)],
+    rows.map((r) => r.userId),
     lang,
   );
   const level = (id: string) => levelOf(totals.get(id) ?? 0).level;
@@ -124,21 +158,6 @@ async function buildRanking(
               matches: r.matches,
               wins: r.wins,
               level: level(r.userId),
-            },
-          ]
-        : [];
-    }),
-    helpers: helpers.flatMap((h) => {
-      const p = people.get(h.userId);
-      return p
-        ? [
-            {
-              person: p,
-              total: h.total,
-              pictures: h.pictures,
-              aliases: h.aliases,
-              characters: h.characters,
-              live: h.live,
             },
           ]
         : [];

@@ -14,11 +14,6 @@
     "xp": "{n} XP",
     "few": "ランキングにはまだ人数が足りません。",
     "fewHint": "ここで3人がXPを獲得すると表示されます。1試合遊んで、その1人になろう。",
-    "helpers": "ライブラリに貢献した人",
-    "helpersHint": "過去30日間。",
-    "helpersEmpty": "まだ誰もいません。キャラクターで写真かあだ名を送ってね。",
-    "helperLine": "{pictures, plural, other {写真#枚}} · {aliases, plural, other {あだ名#件}}",
-    "seeContributions": "貢献を見る",
     "place": "{n}位"
   },
   "players": {
@@ -77,6 +72,10 @@
     },
     "empty": "この種類はまだありません。",
     "emptyHint": "写真を送ったり、あだ名を付けたり、工房で何か提案してみよう。",
-    "more": "もっと見る"
+    "more": "もっと見る",
+    "helpers": "ライブラリに貢献した人",
+    "helpersHint": "過去30日間。",
+    "helpersEmpty": "まだ誰もいません。キャラクターで写真かあだ名を送ってね。",
+    "helperLine": "{pictures, plural, other {写真#枚}} · {aliases, plural, other {あだ名#件}}"
   }
 }

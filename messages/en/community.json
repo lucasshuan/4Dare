@@ -14,11 +14,6 @@
     "xp": "{n} XP",
     "few": "Too few players for a ranking yet.",
     "fewHint": "It shows up once 3 players earn XP here. Play a match and be one of them.",
-    "helpers": "Top library helpers",
-    "helpersHint": "In the last 30 days.",
-    "helpersEmpty": "Nobody yet. Send a picture or an alias in Characters.",
-    "helperLine": "{pictures, plural, one {# picture} other {# pictures}} · {aliases, plural, one {# alias} other {# aliases}}",
-    "seeContributions": "See contributions",
     "place": "Place {n}"
   },
   "players": {
@@ -77,6 +72,10 @@
     },
     "empty": "Nothing of this kind yet.",
     "emptyHint": "Send a picture, give an alias or suggest something in the Workshop.",
-    "more": "More"
+    "more": "More",
+    "helpers": "Top library helpers",
+    "helpersHint": "In the last 30 days.",
+    "helpersEmpty": "Nobody yet. Send a picture or an alias in Characters.",
+    "helperLine": "{pictures, plural, one {# picture} other {# pictures}} · {aliases, plural, one {# alias} other {# aliases}}"
   }
 }

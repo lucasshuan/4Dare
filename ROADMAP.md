@@ -79,9 +79,9 @@ Tick = done and committed.
 
 ## Community
 
-- [x] Rankings: per game and period (week, month, ever), podium, own place, top helpers
+- [x] Rankings: per game and period (week, month, ever), podium, own place, game thumbnails on the game buttons
 - [x] Players page: search; all, played with me, playing now
-- [x] Contributions feed (photos, characters, aliases, suggestions), own numbers and the pictures badge
+- [x] Contributions feed (photos, characters, aliases, suggestions), own numbers, the pictures badge and the top helpers
 - [ ] Empty ranking (under 3 players): better skeleton
 
 ## Social

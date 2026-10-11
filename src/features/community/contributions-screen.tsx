@@ -4,6 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { m } from "motion/react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PageHead } from "@/components/ui/page-head";
 import { useWithNames } from "@/components/ui/player-name";
@@ -14,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { SheetLink } from "@/features/library/sheet-drawer";
+import { ProfileLink } from "@/features/profile/profile-link";
 import { Sema } from "@/features/workshop/objects";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -23,6 +25,7 @@ import type {
   ContributionItem,
   ContributionsPage,
   FeedFilter,
+  LibraryHelper,
 } from "@/server/community-contract";
 
 const FILTERS: readonly FeedFilter[] = [
@@ -43,9 +46,15 @@ const MEDAL: Record<string, string> = {
 /**
  * /contributions: what the community put into the library and the Workshop,
  * newest first, by day. On top, the reader's own numbers and how far their
- * pictures badge is; a filter by kind and "only mine".
+ * pictures badge is; a filter by kind and "only mine". Beside it, who helped
+ * the library most.
  */
-export function ContributionsScreen() {
+export function ContributionsScreen({
+  helpers,
+}: {
+  /** Read on the server; null when that failed. */
+  helpers: LibraryHelper[] | null;
+}) {
   const t = useTranslations("community.contributions");
   const tc = useTranslations("community");
   const tBadges = useTranslations("profile.badges");
@@ -94,141 +103,204 @@ export function ContributionsScreen() {
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
       <PageHead eyebrow={tc("eyebrow")} title={t("title")} lead={t("lead")} />
-      {mineNums ? (
-        <div className="mb-2 grid max-w-[760px] gap-3">
-          <div className="grid grid-cols-3 gap-3">
-            {(["pictures", "aliases", "suggestions"] as const).map((k, i) => (
-              <m.div
-                key={k}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: ease.soft, delay: i * 0.05 }}
-                className="grid gap-0.5 rounded-[20px] bg-surface px-4 py-3.5"
-              >
-                <b className="font-display font-extrabold text-[28px] leading-none tracking-[-0.02em] tabular-nums">
-                  {format.number(mineNums[k])}
-                </b>
-                <small className="text-[13px] text-ink-muted">
-                  {t(`kpi.${k}`)}
-                </small>
-              </m.div>
-            ))}
-          </div>
-          <div className="flex items-center gap-3 rounded-[20px] bg-sunken px-4 py-3 text-[13.5px]">
-            <m.span
-              aria-hidden="true"
-              initial={{ rotate: -30, scale: 0.6 }}
-              animate={{ rotate: 0, scale: 1 }}
-              transition={{ duration: 0.6, ease: ease.soft }}
-              style={{ background: MEDAL[mineNums.badge.tier ?? "none"] }}
-              className="size-[34px] shrink-0 rounded-pill shadow-[inset_0_-3px_0_rgb(0_0_0/0.15)]"
+      <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,760px)_300px]">
+        <div className="min-w-0">
+          {mineNums ? (
+            <div className="mb-2 grid max-w-[760px] gap-3">
+              <div className="grid grid-cols-3 gap-3">
+                {(["pictures", "aliases", "suggestions"] as const).map(
+                  (k, i) => (
+                    <m.div
+                      key={k}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.4,
+                        ease: ease.soft,
+                        delay: i * 0.05,
+                      }}
+                      className="grid gap-0.5 rounded-[20px] bg-surface px-4 py-3.5"
+                    >
+                      <b className="font-display font-extrabold text-[28px] leading-none tracking-[-0.02em] tabular-nums">
+                        {format.number(mineNums[k])}
+                      </b>
+                      <small className="text-[13px] text-ink-muted">
+                        {t(`kpi.${k}`)}
+                      </small>
+                    </m.div>
+                  ),
+                )}
+              </div>
+              <div className="flex items-center gap-3 rounded-[20px] bg-sunken px-4 py-3 text-[13.5px]">
+                <m.span
+                  aria-hidden="true"
+                  initial={{ rotate: -30, scale: 0.6 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ duration: 0.6, ease: ease.soft }}
+                  style={{ background: MEDAL[mineNums.badge.tier ?? "none"] }}
+                  className="size-[34px] shrink-0 rounded-pill shadow-[inset_0_-3px_0_rgb(0_0_0/0.15)]"
+                />
+                <span className="min-w-0">
+                  <b>
+                    {mineNums.badge.tier
+                      ? t("badge", {
+                          name: tBadges("names.pictures"),
+                          tier: tBadges(`tiers.${mineNums.badge.tier}`),
+                        })
+                      : tBadges("names.pictures")}
+                  </b>
+                  <br />
+                  <span className="text-ink-muted">
+                    {mineNums.badge.next === null
+                      ? t("maxed")
+                      : t("toNext", {
+                          n: mineNums.badge.next - mineNums.badge.value,
+                        })}
+                  </span>
+                </span>
+                {mineNums.badge.next !== null ? (
+                  <>
+                    <span className="h-1.5 flex-1 overflow-hidden rounded-pill bg-line">
+                      <m.i
+                        className="block h-full rounded-pill bg-sky"
+                        initial={{ width: 0 }}
+                        animate={{
+                          width: `${Math.min(100, (mineNums.badge.value / mineNums.badge.next) * 100)}%`,
+                        }}
+                        transition={{ duration: 0.8, ease: ease.soft }}
+                      />
+                    </span>
+                    <span className="font-medium font-mono text-[13px] tabular-nums">
+                      {mineNums.badge.value}/{mineNums.badge.next}
+                    </span>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+          <div className="mt-3.5 mb-[18px] flex flex-wrap items-center gap-3">
+            <Segmented
+              label={t("filter")}
+              options={FILTERS}
+              value={kind}
+              onChange={setKind}
+              render={(k) => t(k)}
             />
-            <span className="min-w-0">
-              <b>
-                {mineNums.badge.tier
-                  ? t("badge", {
-                      name: tBadges("names.pictures"),
-                      tier: tBadges(`tiers.${mineNums.badge.tier}`),
-                    })
-                  : tBadges("names.pictures")}
-              </b>
-              <br />
-              <span className="text-ink-muted">
-                {mineNums.badge.next === null
-                  ? t("maxed")
-                  : t("toNext", {
-                      n: mineNums.badge.next - mineNums.badge.value,
-                    })}
-              </span>
-            </span>
-            {mineNums.badge.next !== null ? (
-              <>
-                <span className="h-1.5 flex-1 overflow-hidden rounded-pill bg-line">
-                  <m.i
-                    className="block h-full rounded-pill bg-sky"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${Math.min(100, (mineNums.badge.value / mineNums.badge.next) * 100)}%`,
-                    }}
-                    transition={{ duration: 0.8, ease: ease.soft }}
-                  />
-                </span>
-                <span className="font-medium font-mono text-[13px] tabular-nums">
-                  {mineNums.badge.value}/{mineNums.badge.next}
-                </span>
-              </>
+            {me && !me.isGuest ? (
+              // biome-ignore lint/a11y/noLabelWithoutControl: the switch is inside
+              <label className="inline-flex cursor-pointer items-center gap-2.5 font-semibold text-[14px]">
+                <Switch
+                  checked={mine}
+                  onCheckedChange={setMine}
+                  aria-label={t("mine")}
+                />
+                {t("mine")}
+              </label>
             ) : null}
           </div>
-        </div>
-      ) : null}
-      <div className="mt-3.5 mb-[18px] flex flex-wrap items-center gap-3">
-        <Segmented
-          label={t("filter")}
-          options={FILTERS}
-          value={kind}
-          onChange={setKind}
-          render={(k) => t(k)}
-        />
-        {me && !me.isGuest ? (
-          // biome-ignore lint/a11y/noLabelWithoutControl: the switch is inside
-          <label className="inline-flex cursor-pointer items-center gap-2.5 font-semibold text-[14px]">
-            <Switch
-              checked={mine}
-              onCheckedChange={setMine}
-              aria-label={t("mine")}
-            />
-            {t("mine")}
-          </label>
-        ) : null}
-      </div>
-      <div
-        className={cn(
-          "grid max-w-[760px] gap-1",
-          query.isPlaceholderData && "opacity-60 transition-opacity",
-        )}
-      >
-        {query.data && items.length === 0 ? (
-          <div className="grid justify-items-start gap-2 rounded-[24px] border border-line-strong border-dashed p-7">
-            <b className="font-bold font-display text-[19px]">{t("empty")}</b>
-            <span className="text-ink-muted">{t("emptyHint")}</span>
-          </div>
-        ) : null}
-        {!query.data
-          ? ["a", "b", "c", "d"].map((k) => (
-              <span
-                key={k}
-                className="h-[60px] animate-pulse rounded-[18px] bg-sunken"
-              />
-            ))
-          : null}
-        {items.map((item, i) => {
-          const day = dayOf(item.at);
-          const head = day !== lastDay;
-          lastDay = day;
-          return (
-            <div key={item.id} className="grid gap-1">
-              {head ? (
-                <div className="px-1 pt-4 pb-1.5 font-semibold text-[12px] text-ink-muted uppercase tracking-[0.08em]">
-                  {day}
-                </div>
-              ) : null}
-              <Line item={item} index={i % 30} now={now} />
-            </div>
-          );
-        })}
-      </div>
-      {query.hasNextPage ? (
-        <div className="flex justify-center py-8">
-          <Button
-            variant="secondary"
-            disabled={query.isFetchingNextPage}
-            onClick={() => void query.fetchNextPage()}
+          <div
+            className={cn(
+              "grid max-w-[760px] gap-1",
+              query.isPlaceholderData && "opacity-60 transition-opacity",
+            )}
           >
-            {t("more")}
-          </Button>
+            {query.data && items.length === 0 ? (
+              <div className="grid justify-items-start gap-2 rounded-[24px] border border-line-strong border-dashed p-7">
+                <b className="font-bold font-display text-[19px]">
+                  {t("empty")}
+                </b>
+                <span className="text-ink-muted">{t("emptyHint")}</span>
+              </div>
+            ) : null}
+            {!query.data
+              ? ["a", "b", "c", "d"].map((k) => (
+                  <span
+                    key={k}
+                    className="h-[60px] animate-pulse rounded-[18px] bg-sunken"
+                  />
+                ))
+              : null}
+            {items.map((item, i) => {
+              const day = dayOf(item.at);
+              const head = day !== lastDay;
+              lastDay = day;
+              return (
+                <div key={item.id} className="grid gap-1">
+                  {head ? (
+                    <div className="px-1 pt-4 pb-1.5 font-semibold text-[12px] text-ink-muted uppercase tracking-[0.08em]">
+                      {day}
+                    </div>
+                  ) : null}
+                  <Line item={item} index={i % 30} now={now} />
+                </div>
+              );
+            })}
+          </div>
+          {query.hasNextPage ? (
+            <div className="flex justify-center py-8">
+              <Button
+                variant="secondary"
+                disabled={query.isFetchingNextPage}
+                onClick={() => void query.fetchNextPage()}
+              >
+                {t("more")}
+              </Button>
+            </div>
+          ) : null}
         </div>
-      ) : null}
+        <Helpers helpers={helpers} />
+      </div>
     </Screen>
+  );
+}
+
+/** Who helped the library most in the last 30 days, in a side panel (above the feed on a phone, which never ends). */
+function Helpers({ helpers }: { helpers: LibraryHelper[] | null }) {
+  const t = useTranslations("community.contributions");
+  return (
+    <aside className="grid gap-3 rounded-[24px] bg-surface p-[18px] max-lg:row-start-1">
+      <div>
+        <h2 className="font-bold font-display text-[17px] leading-tight">
+          {t("helpers")}
+        </h2>
+        <span className="text-[12.5px] text-ink-muted">{t("helpersHint")}</span>
+      </div>
+      <div className="grid gap-2.5">
+        {helpers?.length ? (
+          helpers.map((h, i) => (
+            <m.div
+              key={h.person.id}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, ease: ease.soft, delay: i * 0.06 }}
+            >
+              <ProfileLink
+                handle={h.person.handle}
+                className="flex items-center gap-2.5 rounded-[14px] text-[14px] transition-colors hover:bg-sunken"
+              >
+                <Avatar avatar={h.person.avatar} size={32} />
+                <span className="min-w-0 flex-1">
+                  <b className="block truncate">{h.person.name}</b>
+                  <small className="block text-[12px] text-ink-muted">
+                    {t("helperLine", {
+                      pictures: h.pictures,
+                      aliases: h.aliases,
+                    })}
+                  </small>
+                </span>
+                <span className="font-medium font-mono text-[13px] tabular-nums">
+                  {h.total}
+                </span>
+              </ProfileLink>
+            </m.div>
+          ))
+        ) : (
+          <span className="text-[13px] text-ink-muted">
+            {t("helpersEmpty")}
+          </span>
+        )}
+      </div>
+    </aside>
   );
 }
 

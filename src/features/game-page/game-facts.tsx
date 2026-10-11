@@ -18,7 +18,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { CHARACTERS, CONTRIBUTIONS, WORKSHOP } from "@/lib/routes";
-import type { GameFactsData, RankingBoard } from "@/server/community-contract";
+import type { GameFactsData, LibraryHelper } from "@/server/community-contract";
 
 type Fact = "themes" | "questions" | "missions" | "characters";
 
@@ -80,7 +80,7 @@ export function GameFacts({
   className?: string;
 }) {
   const t = useTranslations("home.gamePage.facts");
-  const helpers = facts?.podium.helpers;
+  const helpers = facts?.helpers;
   const tiles = [...FACTS[game], "contributors" as const];
 
   return (
@@ -228,7 +228,7 @@ function Faces({
   helpers,
   delay,
 }: {
-  helpers: RankingBoard["helpers"] | undefined;
+  helpers: LibraryHelper[] | undefined;
   delay: number;
 }) {
   if (!helpers) return <Pending className="w-16" />;

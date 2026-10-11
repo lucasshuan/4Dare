@@ -4,7 +4,7 @@ import type { GameKey } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { getBackend } from "./backend";
 import { catalog } from "./catalog";
-import { podium } from "./community";
+import { libraryHelpers, podium } from "./community";
 import type { GameFactsData } from "./community-contract";
 
 /** How long a game page keeps its facts, in seconds (the pages' `revalidate` says the same). */
@@ -13,19 +13,22 @@ const FACTS_TTL = 600;
 const read = unstable_cache(
   async (game: GameKey, lang: Lang): Promise<GameFactsData> => {
     const { themes, impostor, lineup } = getBackend();
-    const [list, questions, missions, library, board] = await Promise.all([
-      themes.catalog(),
-      impostor.list(),
-      lineup.missions(),
-      catalog(lang),
-      podium(game, lang),
-    ]);
+    const [list, questions, missions, library, board, helpers] =
+      await Promise.all([
+        themes.catalog(),
+        impostor.list(),
+        lineup.missions(),
+        catalog(lang),
+        podium(game, lang),
+        libraryHelpers(lang, 3),
+      ]);
     return {
       themes: list.filter((t) => t.games.includes(game)).length,
       questions: questions.length,
       missions: missions.length,
       characters: library.rows.length,
       podium: board,
+      helpers,
     };
   },
   ["game-facts"],

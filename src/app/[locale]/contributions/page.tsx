@@ -5,7 +5,11 @@ import { SheetDrawerProvider } from "@/features/library/sheet-drawer";
 import type { Lang } from "@/game/types";
 import { PageMessages } from "@/i18n/page-messages";
 import { CONTRIBUTIONS } from "@/lib/routes";
+import { topHelpers } from "@/server/community";
 import { pageMetadata } from "@/server/seo";
+
+// the top helpers are rendered with the page and kept five minutes
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
@@ -20,16 +24,21 @@ export async function generateMetadata({
   });
 }
 
-/** /contributions: what the community added to the library and the Workshop. */
+/**
+ * /contributions: what the community added to the library and the Workshop.
+ * The top helpers come from the server's cache (five minutes), so they paint
+ * with the page.
+ */
 export default async function Contributions({
   params,
 }: PageProps<"/[locale]/contributions">) {
-  const { locale } = await params;
+  const locale = (await params).locale as Lang;
   setRequestLocale(locale);
+  const helpers = await topHelpers(locale).catch(() => null);
   return (
     <PageMessages only={["community", "library"]}>
       <SheetDrawerProvider>
-        <ContributionsScreen />
+        <ContributionsScreen helpers={helpers} />
       </SheetDrawerProvider>
     </PageMessages>
   );

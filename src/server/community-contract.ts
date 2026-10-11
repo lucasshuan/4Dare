@@ -271,6 +271,7 @@ export interface GameFactsData {
   missions: number;
   characters: number;
   podium: RankingBoard;
+  helpers: LibraryHelper[];
 }
 
 /** The rankings page shows a board only from this many players up; fewer is no ranking yet. */
@@ -279,15 +280,16 @@ export const MIN_RANKED = 3;
 /** GET /api/rankings: the same for everyone, so the server and the CDN keep it. */
 export interface RankingBoard {
   rows: RankingRow[];
-  /** Who helped the library most in the last 30 days. */
-  helpers: {
-    person: PersonRef;
-    total: number;
-    pictures: number;
-    aliases: number;
-    characters: number;
-    live: number;
-  }[];
+}
+
+/** One of who helped the library most in the last 30 days (the contributions page, a game's page). */
+export interface LibraryHelper {
+  person: PersonRef;
+  total: number;
+  pictures: number;
+  aliases: number;
+  characters: number;
+  live: number;
 }
 
 /** GET /api/rankings/me: the reader's own row, wherever it falls; null for a guest or without XP. */
