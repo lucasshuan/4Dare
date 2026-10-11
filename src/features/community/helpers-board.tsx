@@ -34,17 +34,17 @@ export const MEDAL: Record<string, string> = {
 };
 
 /**
- * The places, left to right: second, first, third, each on a medal-coloured
- * step. A smaller cousin of the rankings page's podium.
+ * The places, left to right: second, first, third, each step with its
+ * medal: a cousin of the rankings page's podium.
  */
 const PODIUM = [
-  { i: 1, height: 52, medal: "silver", rise: 0.18 },
-  { i: 0, height: 70, medal: "gold", rise: 0.28 },
-  { i: 2, height: 38, medal: "bronze", rise: 0.08 },
+  { i: 1, height: 104, medal: "silver", rise: 0.32 },
+  { i: 0, height: 140, medal: "gold", rise: 0.46 },
+  { i: 2, height: 78, medal: "bronze", rise: 0.2 },
 ];
 
 /**
- * Who helped the library most, as a small ranking: by period, and by what
+ * Who helped the library most, as a ranking beside the feed: by period, and by what
  * they did (the title is a select). The server sends everyone's counts for
  * the period; the board ranks them by the chosen one.
  */
@@ -81,8 +81,8 @@ export function HelpersBoard({
   const top = ranked.slice(0, 3);
 
   return (
-    <aside className="grid gap-3.5 rounded-[24px] bg-surface p-[18px] max-lg:row-start-1">
-      <div className="grid gap-2.5">
+    <section className="grid gap-4 max-lg:row-start-1 lg:sticky lg:top-6">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5">
         <Select.Root
           items={METRICS.map((v) => ({ value: v, label: t(`helpersBy.${v}`) }))}
           value={metric}
@@ -90,11 +90,11 @@ export function HelpersBoard({
         >
           <Select.Trigger
             aria-label={t("rankBy")}
-            className="group -mx-1.5 flex items-center gap-1 justify-self-start rounded-md px-1.5 py-0.5 text-left font-bold font-display text-[17px] leading-tight transition-colors hover:bg-sunken focus-visible:outline-3 focus-visible:outline-sky"
+            className="group -mx-2 flex min-w-0 items-center gap-1.5 rounded-[12px] px-2 py-1 text-left font-display font-extrabold text-[22px] leading-tight tracking-[-0.01em] transition-colors hover:bg-sunken focus-visible:outline-3 focus-visible:outline-sky"
           >
             <Select.Value>{(v: Metric) => t(`helpersBy.${v}`)}</Select.Value>
             <ChevronDown
-              className="size-4 shrink-0 text-ink-muted transition-transform group-data-popup-open:rotate-180"
+              className="size-5 shrink-0 text-ink-muted transition-transform group-data-popup-open:rotate-180"
               strokeWidth={2.5}
             />
           </Select.Trigger>
@@ -105,7 +105,7 @@ export function HelpersBoard({
               alignItemWithTrigger={false}
               className="z-50 outline-none"
             >
-              <Select.Popup className="min-w-56 origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
+              <Select.Popup className="min-w-64 origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
                 <Select.List>
                   {METRICS.map((v) => (
                     <Select.Item
@@ -127,22 +127,21 @@ export function HelpersBoard({
           </Select.Portal>
         </Select.Root>
         <Segmented
-          size="sm"
           label={tc("rankings.period")}
           options={["week", "month", "ever"] as const}
           value={period}
           onChange={setPeriod}
           render={(p) => tc(`rankings.${p}`)}
         />
-        {metric === "total" ? (
-          <span className="text-[12px] text-ink-muted leading-snug">
-            {t("helperPoints")}
-          </span>
-        ) : null}
       </div>
+      {metric === "total" ? (
+        <span className="-mt-2 text-[13px] text-ink-muted">
+          {t("helperPoints")}
+        </span>
+      ) : null}
       <div
         className={cn(
-          "grid gap-1 transition-opacity duration-200",
+          "transition-opacity duration-200",
           isPlaceholderData && "opacity-60",
         )}
       >
@@ -151,7 +150,7 @@ export function HelpersBoard({
             {/* a new top three (or a new ranking) replays the podium */}
             <div
               key={`${metric}-${top.map((h) => h.person.id).join()}`}
-              className="mt-1 mb-2 grid grid-cols-3 items-end gap-2"
+              className="mx-auto mt-2 mb-6 grid max-w-[480px] grid-cols-3 items-end gap-3"
             >
               {PODIUM.map(({ i, height, medal, rise }) => {
                 const h = top[i];
@@ -161,27 +160,27 @@ export function HelpersBoard({
                     key={h.person.id}
                     handle={h.person.handle}
                     style={{ gridColumn: i === 0 ? 2 : i === 1 ? 1 : 3 }}
-                    className="grid min-w-0 justify-items-center gap-1.5 text-center"
+                    className="grid min-w-0 justify-items-center gap-2 text-center"
                   >
                     <m.span
-                      initial={{ opacity: 0, scale: 0.4, y: 10 }}
+                      initial={{ opacity: 0, scale: 0.4, y: 14 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       transition={{
                         type: "spring",
                         stiffness: 420,
                         damping: 16,
-                        delay: rise + 0.18,
+                        delay: rise + 0.22,
                       }}
-                      className="grid min-w-0 max-w-full justify-items-center gap-1"
+                      className="grid min-w-0 max-w-full justify-items-center gap-1.5"
                     >
                       <Avatar
                         avatar={h.person.avatar}
-                        size={i === 0 ? 44 : 36}
+                        size={i === 0 ? 52 : 44}
                       />
-                      <b className="max-w-full truncate font-bold text-[12.5px] leading-tight">
+                      <b className="max-w-full truncate font-bold font-display text-[15px] leading-tight">
                         {h.person.name}
                       </b>
-                      <small className="font-medium font-mono text-[11px] text-ink-muted">
+                      <small className="font-medium font-mono text-[12px] text-ink-muted">
                         {count(h)}
                       </small>
                     </m.span>
@@ -195,11 +194,11 @@ export function HelpersBoard({
                         delay: rise,
                       }}
                       style={{ height }}
-                      className="grid w-full origin-bottom place-items-start justify-center rounded-[14px_14px_6px_6px] bg-sunken pt-2"
+                      className="grid w-full origin-bottom place-items-start justify-center rounded-[18px_18px_8px_8px] border border-line bg-surface pt-3"
                     >
                       <span
                         style={{ background: MEDAL[medal] }}
-                        className="grid size-6 place-items-center rounded-pill font-bold font-display text-[12px] text-ink shadow-[inset_0_-2px_0_rgb(0_0_0/0.15)]"
+                        className="grid size-9 place-items-center rounded-pill font-display font-extrabold text-[17px] text-ink shadow-[inset_0_-3px_0_rgb(0_0_0/0.15)]"
                       >
                         {i + 1}
                       </span>
@@ -208,49 +207,53 @@ export function HelpersBoard({
                 );
               })}
             </div>
-            {ranked.slice(3).map((h, i) => (
-              <m.div
-                key={h.person.id}
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{
-                  duration: 0.4,
-                  ease: ease.soft,
-                  delay: 0.45 + i * 0.05,
-                }}
-              >
-                <ProfileLink
-                  handle={h.person.handle}
-                  className="grid grid-cols-[22px_30px_minmax(0,1fr)_auto] items-center gap-2 rounded-[12px] py-1.5 pr-2 pl-1 text-[13.5px] transition-colors hover:bg-sunken"
+            <div className="grid gap-1.5">
+              {ranked.slice(3).map((h, i) => (
+                <m.div
+                  key={h.person.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    ease: ease.soft,
+                    delay: 0.55 + i * 0.04,
+                  }}
                 >
-                  <span className="text-center font-medium font-mono text-[12.5px] text-ink-muted">
-                    {i + 4}
-                  </span>
-                  <Avatar avatar={h.person.avatar} size={30} />
-                  <span className="min-w-0">
-                    <b className="block truncate">{h.person.name}</b>
-                    {metric === "total" ? (
-                      <small className="block truncate text-[11.5px] text-ink-muted">
-                        {t("helperLine", {
-                          pictures: h.pictures,
-                          aliases: h.aliases,
-                        })}
+                  <ProfileLink
+                    handle={h.person.handle}
+                    className="grid grid-cols-[36px_34px_minmax(0,1fr)_auto] items-center gap-3 rounded-[16px] bg-surface py-2 pr-3.5 pl-2.5 transition-colors hover:bg-sunken"
+                  >
+                    <span className="text-center font-medium font-mono text-[14px] text-ink-muted">
+                      {i + 4}
+                    </span>
+                    <Avatar avatar={h.person.avatar} size={34} />
+                    <span className="min-w-0">
+                      <b className="block truncate font-bold text-[14.5px]">
+                        {h.person.name}
+                      </b>
+                      <small className="block truncate font-medium text-[12px] text-ink-muted">
+                        {metric === "total"
+                          ? t("helperLine", {
+                              pictures: h.pictures,
+                              aliases: h.aliases,
+                            })
+                          : `@${h.person.handle}`}
                       </small>
-                    ) : null}
-                  </span>
-                  <span className="font-medium font-mono text-[12.5px] tabular-nums">
-                    {h[metric]}
-                  </span>
-                </ProfileLink>
-              </m.div>
-            ))}
+                    </span>
+                    <span className="text-right font-medium font-mono text-[14px] tabular-nums">
+                      {count(h)}
+                    </span>
+                  </ProfileLink>
+                </m.div>
+              ))}
+            </div>
           </>
         ) : (
-          <span className="text-[13px] text-ink-muted">
-            {t("helpersEmpty")}
-          </span>
+          <div className="grid justify-items-start gap-2 rounded-[24px] border border-line-strong border-dashed p-7">
+            <span className="text-ink-muted">{t("helpersEmpty")}</span>
+          </div>
         )}
       </div>
-    </aside>
+    </section>
   );
 }

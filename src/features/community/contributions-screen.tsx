@@ -109,10 +109,10 @@ export function ContributionsScreen({
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
       <PageHead eyebrow={tc("eyebrow")} title={t("title")} lead={t("lead")} />
-      <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,760px)_300px]">
+      <div className="grid items-start gap-7 lg:grid-cols-2 lg:gap-x-10">
         <div className="min-w-0">
           {mineNums ? (
-            <div className="mb-2 grid max-w-[760px] gap-3">
+            <div className="mb-2 grid gap-3">
               <div className="grid grid-cols-3 gap-3">
                 {(["pictures", "aliases", "suggestions"] as const).map(
                   (k, i) => (
@@ -212,7 +212,7 @@ export function ContributionsScreen({
           </div>
           <div
             className={cn(
-              "grid max-w-[760px] gap-1",
+              "grid gap-1",
               query.isPlaceholderData && "opacity-60 transition-opacity",
             )}
           >
