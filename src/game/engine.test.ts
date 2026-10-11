@@ -26,7 +26,7 @@ import {
   START_LEAD_MS,
   START_WAIT_MS,
 } from "./types";
-import { toView } from "./view";
+import { toPublicRoom, toView } from "./view";
 
 const code = (fn: () => unknown) => {
   try {
@@ -430,6 +430,32 @@ describe("the start handshake", () => {
     expect(g.state.starting).toBeNull();
     expect(g.state.deadline).toBeNull();
     expect(loaded(g, "p1")).toBe("wrong_phase");
+  });
+
+  it("closes the seats while it waits: whoever sat when it was asked plays", () => {
+    const g = new Game(2, 1, { seats: 4 });
+    prepare(g);
+    expect(toPublicRoom(g.state, g.now)?.status).toBe("playing");
+    const join = (id: string) =>
+      code(() => g.do({ type: "JOIN", player: ident(id) }));
+    expect(join("p3")).toBe("already_started");
+    // a seated page coming back is not a newcomer
+    expect(join("p2")).toBe("no error");
+    // a seat that changes hands keeps its load
+    g.do({ type: "SWAP_PLAYER", from: "p2", player: ident("p2b") });
+    expect(g.state.starting?.loaded).toEqual(["p1"]);
+    expect(loaded(g, "p2b")).toBe("no error");
+    expect(g.state.players.map((p) => p.id)).toEqual(["p1", "p2b"]);
+    expect(g.state.phase).not.toBe("lobby");
+
+    // called off, the lobby opens again
+    const h = new Game(2, 1, { seats: 4 });
+    prepare(h);
+    h.do({ type: "LEAVE", playerId: "p2" });
+    expect(h.state.starting).toBeNull();
+    expect(code(() => h.do({ type: "JOIN", player: ident("p3") }))).toBe(
+      "no error",
+    );
   });
 });
 

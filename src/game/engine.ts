@@ -541,7 +541,8 @@ function begin(s: RoomState, e: StartFields, ctx: Ctx) {
 /**
  * A waiting start begins once every page still open on the room has loaded
  * its opening, START_LEAD_MS ahead, so they all have it before the curtain;
- * with too few players left it is called off.
+ * with too few players left it is called off. The seats are closed while it
+ * waits: whoever sat when it was asked plays, newcomers get the next match.
  */
 function settleStart(s: RoomState, ctx: Ctx) {
   const w = s.starting;
@@ -773,6 +774,10 @@ function swapPlayer(s: RoomState, from: PlayerId, player: Identity) {
     s.vote.votes[to] = s.vote.votes[from];
     delete s.vote.votes[from];
   }
+  if (s.starting) {
+    s.starting.loaded = s.starting.loaded.map(swap);
+    s.starting.start.playerId = swap(s.starting.start.playerId);
+  }
   for (const m of s.matches ?? [])
     for (const p of m.players) if (p.id === from) p.id = to;
   if (s.imp) swapImpostor(s.imp, swap);
@@ -866,7 +871,8 @@ function join(
     return;
   }
   if ((s.kicked?.[player.id] ?? 0) > ctx.now) fail("kicked");
-  if (s.phase !== "lobby") fail("already_started");
+  // a waiting start already fixed who plays: newcomers wait for the next match
+  if (s.phase !== "lobby" || s.starting) fail("already_started");
   if (s.players.length >= s.settings.seats) fail("room_full");
   // Only newcomers are asked: whoever already has a seat comes back freely.
   const lock = s.settings.visibility === "private" ? s.settings.password : "";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Game } from "@/game/test-utils";
+import { Game, THEMES } from "@/game/test-utils";
 import type { RoomState } from "@/game/types";
 import { toPublicRoom } from "@/game/view";
 import { LISTED, LISTED_COLUMNS } from "./listing";
@@ -25,7 +25,10 @@ describe("room listing", () => {
     playing.start();
     playing.skipShow();
     playing.voteAll(0);
-    const states = [lobby, locked, playing].map(
+    // a lobby whose start is waiting lists as playing
+    const starting = new Game(2, 4);
+    starting.do({ type: "PREPARE_START", playerId: "p1", themes: THEMES });
+    const states = [lobby, locked, playing, starting].map(
       (g) => [g.state, g.now] as const,
     );
     for (const [state, now] of states)

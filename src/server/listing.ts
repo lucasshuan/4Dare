@@ -11,8 +11,9 @@ export const LISTED = [
   "updatedAt",
   "settings",
   "players",
+  "starting",
 ] as const;
 
 /** The same fields as a PostgREST select (`code` and `phase` are columns too). */
 export const LISTED_COLUMNS =
-  "code, phase, hostId:state->hostId, createdAt:state->createdAt, updatedAt:state->updatedAt, settings:state->settings, players:state->players";
+  "code, phase, hostId:state->hostId, createdAt:state->createdAt, updatedAt:state->updatedAt, settings:state->settings, players:state->players, starting:state->starting";

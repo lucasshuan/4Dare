@@ -518,14 +518,15 @@ export function toPublicRoom(state: RoomState, now: number): ListedRoom | null {
   // every page closed: as good as closed, even before anyone sweeps it
   if (abandoned(s, now)) return null;
   let status: PublicRoom["status"];
-  if (s.phase === "lobby") {
+  // a lobby whose start is waiting has closed its seats: it shows as playing
+  if (s.phase === "lobby" && !s.starting) {
     // Every page in the lobby closed: off the list at once. The seats wait out
     // GONE_GRACE_MS for a reload, but nobody should find the room meanwhile.
     if (s.players.every((p) => p.goneAt != null)) return null;
     if (now - s.updatedAt >= LOBBY_LISTED_MS) return null;
     status = s.players.length < s.settings.seats ? "open" : "full";
   } else if (
-    PLAYING_PHASES.has(s.phase) &&
+    (s.starting || PLAYING_PHASES.has(s.phase)) &&
     now - s.updatedAt < PLAYING_FRESH_MS
   ) {
     status = "playing";
