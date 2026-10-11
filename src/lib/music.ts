@@ -158,7 +158,7 @@ function context() {
   muffleFilter.type = "lowpass";
   muffleFilter.Q.value = 0.5;
   muffleGain = ctx.createGain();
-  setMuffle(true);
+  setMuffle();
   master
     .connect(muffleLow)
     .connect(muffleFilter)
@@ -368,41 +368,37 @@ const MUFFLE_LOW_HZ = 160;
 const OPEN_HZ = 20000;
 const OPEN_LOW_HZ = 20;
 
-function setMuffle(now = false) {
+function setMuffle() {
   if (!ctx || !muffleLow || !muffleFilter || !muffleGain) return;
   const hz = muffled ? MUFFLE_HZ : OPEN_HZ;
   const low = muffled ? MUFFLE_LOW_HZ : OPEN_LOW_HZ;
   const gain = muffled ? MUFFLE_GAIN : OPEN_GAIN;
-  if (now) {
-    muffleLow.frequency.value = low;
-    muffleFilter.frequency.value = hz;
-    muffleGain.gain.value = gain;
-    return;
-  }
-  // opening takes about 1.5 s, like walking into the room; closing about 1 s
-  const tau = muffled ? 0.35 : 0.5;
   const t = ctx.currentTime;
-  muffleLow.frequency.cancelScheduledValues(t);
-  muffleLow.frequency.setTargetAtTime(low, t, tau);
-  muffleFilter.frequency.cancelScheduledValues(t);
-  muffleFilter.frequency.setTargetAtTime(hz, t, tau);
-  muffleGain.gain.cancelScheduledValues(t);
-  muffleGain.gain.setTargetAtTime(gain, t, tau);
+  // opening takes about 1.5 s, like walking into the room; closing about 1 s.
+  // With nothing playing yet it is set at once: a room opening on its lobby
+  // starts behind the wall, not in the open for the first second.
+  const tau = muffled ? 0.35 : 0.5;
+  for (const [param, value] of [
+    [muffleLow.frequency, low],
+    [muffleFilter.frequency, hz],
+    [muffleGain.gain, gain],
+  ] as const) {
+    param.cancelScheduledValues(t);
+    if (playing) param.setTargetAtTime(value, t, tau);
+    else param.setValueAtTime(value, t);
+  }
 }
 
-/** Muffles the music while `on` (the lobby); it opens up when `on` goes false. */
+/**
+ * Muffles the music while `on` (the lobby); it opens up when `on` goes
+ * false. Leaving the room keeps it as it was: the music fades out through
+ * the same wall.
+ */
 export function useMusicMuffle(on: boolean) {
   useEffect(() => {
     muffled = on;
     setMuffle();
   }, [on]);
-  useEffect(
-    () => () => {
-      muffled = false;
-      setMuffle();
-    },
-    [],
-  );
 }
 
 const claims = new Map<string, { track: Track | null; rank: number }>();
