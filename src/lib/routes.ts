@@ -36,7 +36,9 @@ export const CHARACTERS = "/characters";
  */
 export const characterPath = (id: string, name?: string) => {
   const slug = name ? nameSlug(name) : "";
-  return `${CHARACTERS}/${id}${slug ? `/${slug}` : ""}`;
+  // the language-free id ("pt-wd-Q302" -> "wd-Q302"): one address per character
+  const base = id.replace(/^(?:en|es|ja|pt)-(?=wd-|al-|hand-)/, "");
+  return `${CHARACTERS}/${base}${slug ? `/${slug}` : ""}`;
 };
 
 /** A name as one URL segment: Latin accents off, lowercase, runs of anything but letters (any script) and digits as "-". */

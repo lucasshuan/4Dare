@@ -25,6 +25,13 @@ describe("characterPath", () => {
     );
   });
 
+  it("drops the language from an app id", () => {
+    expect(characterPath("pt-wd-Q302", "Jesus Cristo")).toBe(
+      "/characters/wd-Q302/jesus-cristo",
+    );
+    expect(characterPath("hand-pt-x")).toBe("/characters/hand-pt-x");
+  });
+
   it("is the bare id without a usable name", () => {
     expect(characterPath("wd-Q302")).toBe("/characters/wd-Q302");
     expect(characterPath("wd-Q302", "!!")).toBe("/characters/wd-Q302");
