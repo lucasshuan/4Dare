@@ -15,6 +15,7 @@ import { AnimatePresence, m } from "motion/react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { type FormEvent, type ReactNode, useState } from "react";
 import { ImageDrop } from "@/components/ui/image-drop";
+import { Flag } from "@/components/ui/language-switch";
 import { LayoutMotion } from "@/components/ui/layout-motion";
 import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
@@ -604,7 +605,7 @@ function Nicknames({ sheet }: { sheet: CharacterSheet }) {
               key={`${n.lang}-${n.name}`}
               className="inline-flex min-h-[38px] max-w-full items-center gap-2 rounded-pill bg-sunken px-1.5 py-1"
             >
-              <LangCode lang={n.lang} on="surface" />
+              <LangFlag lang={n.lang} />
               <span className="font-semibold text-[14px] [overflow-wrap:anywhere]">
                 {n.name}
               </span>
@@ -725,15 +726,14 @@ function Nicknames({ sheet }: { sheet: CharacterSheet }) {
   );
 }
 
-function LangCode({ lang, on }: { lang: Lang; on: "surface" | "sunken" }) {
+/** The language a name is in: its round flag, named on hover. */
+function LangFlag({ lang }: { lang: Lang }) {
+  const locale = useLocale();
+  const name =
+    new Intl.DisplayNames([locale], { type: "language" }).of(lang) ?? lang;
   return (
-    <span
-      className={cn(
-        "shrink-0 rounded-pill px-1.5 py-[3px] font-medium font-mono text-[10.5px] text-ink-muted uppercase",
-        on === "surface" ? "bg-surface" : "bg-sunken",
-      )}
-    >
-      {lang}
+    <span role="img" aria-label={name} title={name} className="flex shrink-0">
+      <Flag lang={lang} className="size-6" />
     </span>
   );
 }
@@ -783,7 +783,7 @@ function AliasChip({
         alias.hidden && "opacity-60",
       )}
     >
-      <LangCode lang={alias.lang} on="sunken" />
+      <LangFlag lang={alias.lang} />
       <span className="font-semibold text-[14px] [overflow-wrap:anywhere]">
         {alias.name}
       </span>
@@ -877,7 +877,7 @@ function EditAlias({
         }}
         className="flex items-center gap-1"
       >
-        <LangCode lang={alias.lang} on="sunken" />
+        <LangFlag lang={alias.lang} />
         <input
           value={value}
           maxLength={40}
