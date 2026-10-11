@@ -4,6 +4,7 @@ import { AnimatePresence, m } from "motion/react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  type CSSProperties,
   type ReactNode,
   useCallback,
   useEffect,
@@ -22,10 +23,10 @@ import { preloadMusic, type Track, useMusic } from "@/lib/music";
 import { useGameOption } from "@/lib/settings";
 import { markLoaded } from "@/server/actions";
 import {
-  IMPOSTOR_IMAGES,
   IMPOSTOR_SOUNDS,
   ImpostorTitle,
   impostorCues,
+  impostorImages,
 } from "./impostor-title";
 import {
   LINEUP_IMAGES,
@@ -33,7 +34,7 @@ import {
   LineupTitle,
   lineupCues,
 } from "./lineup-title";
-import type { TitlePlayer } from "./title-kit";
+import type { Bleed, TitlePlayer } from "./title-kit";
 import {
   preloadTitleSounds,
   type TitleCue,
@@ -86,7 +87,9 @@ export function preloadTitle(
   game: GameKey,
   o: { ja: boolean; chalk: boolean },
 ): Promise<void> {
-  const key = `${game} ${o.ja} ${o.chalk}`;
+  // the upright room or the wide one, as the window is now
+  const portrait = window.innerWidth < window.innerHeight;
+  const key = `${game} ${o.ja} ${o.chalk} ${portrait}`;
   const known = preloads.get(key);
   if (known) return known;
   const parts: Promise<unknown>[] = [
@@ -99,7 +102,7 @@ export function preloadTitle(
           : WHO_SOUNDS,
     ),
     ...(game === "impostor"
-      ? IMPOSTOR_IMAGES
+      ? impostorImages(portrait)
       : game === "lineup"
         ? LINEUP_IMAGES
         : ["/opening/crown.svg"]
@@ -169,7 +172,7 @@ export function useStartHandshake() {
 /**
  * Fits a canvas whole in the window, centred: the landscape one on a wide
  * window, the upright one on a tall one. What is around it is the scene's own
- * set, carried past the canvas by each scene.
+ * set, carried past the canvas by each scene (`bleed` says how far).
  */
 function useFit() {
   const ref = useRef<HTMLDivElement>(null);
@@ -186,7 +189,11 @@ function useFit() {
   const portrait = size ? size.w < size.h : false;
   const canvas = portrait ? CANVAS.portrait : CANVAS.landscape;
   const scale = size ? Math.min(size.w / canvas.w, size.h / canvas.h) : 0;
-  return { ref, portrait, canvas, scale, ready: size !== null };
+  // a pixel more than the window, so no edge shows a hairline of the backdrop
+  const bx = size ? Math.ceil((size.w / scale - canvas.w) / 2) + 1 : 0;
+  const by = size ? Math.ceil((size.h / scale - canvas.h) / 2) + 1 : 0;
+  const bleed = useMemo<Bleed>(() => ({ x: bx, y: by }), [bx, by]);
+  return { ref, portrait, canvas, scale, bleed, ready: size !== null };
 }
 
 /**
@@ -216,7 +223,7 @@ export function TitleStage({
    * painted, unseen, so it starts on the dot even on a slow phone.
    */
   live?: boolean;
-  children: (portrait: boolean) => ReactNode;
+  children: (portrait: boolean, bleed: Bleed) => ReactNode;
 }) {
   const fit = useFit();
   const scene = useRef<HTMLDivElement>(null);
@@ -247,14 +254,18 @@ export function TitleStage({
         ref={scene}
         aria-hidden
         className="absolute top-1/2 left-1/2 select-none"
-        style={{
-          width: fit.canvas.w,
-          height: fit.canvas.h,
-          transform: `translate(-50%, -50%) scale(${fit.scale})`,
-          visibility: fit.ready ? undefined : "hidden",
-        }}
+        style={
+          {
+            width: fit.canvas.w,
+            height: fit.canvas.h,
+            transform: `translate(-50%, -50%) scale(${fit.scale})`,
+            visibility: fit.ready ? undefined : "hidden",
+            "--bx": `${fit.bleed.x}px`,
+            "--by": `${fit.bleed.y}px`,
+          } as CSSProperties
+        }
       >
-        {fit.ready ? children(fit.portrait) : null}
+        {fit.ready ? children(fit.portrait, fit.bleed) : null}
       </div>
       {live ? (
         <p className="sr-only" role="status">
@@ -380,11 +391,12 @@ function Title({
       label={`${t("match", { n })} · ${name}`}
       live={live}
     >
-      {(portrait) =>
+      {(portrait, bleed) =>
         game === "impostor" ? (
           <ImpostorTitle
             {...props}
             portrait={portrait}
+            bleed={bleed}
             labels={labels.impostor}
           />
         ) : game === "lineup" ? (

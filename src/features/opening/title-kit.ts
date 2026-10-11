@@ -27,6 +27,12 @@ export interface TitleProps {
   portrait: boolean;
 }
 
+/** The window past the canvas on each side, in canvas pixels: where a scene carries its set on. */
+export interface Bleed {
+  x: number;
+  y: number;
+}
+
 /** --seat-1..10 of the light theme: the seat colours on the sets. */
 const SEAT = [
   "#2b69c8",

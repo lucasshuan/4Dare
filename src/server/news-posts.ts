@@ -25,6 +25,24 @@ interface NewsEntry {
  */
 export const NEWS_POSTS: readonly NewsEntry[] = [
   {
+    id: "impostor-full-room",
+    at: "2026-10-11",
+    kind: "better",
+    game: "impostor",
+    title: {
+      pt: "A abertura do Impostor ocupa a tela toda",
+      en: "Impostor's opening fills the screen",
+      es: "La apertura de Impostor ocupa toda la pantalla",
+      ja: "インポスターのオープニングが全画面に",
+    },
+    body: {
+      pt: "A sala de reconhecimento agora vai de ponta a ponta em qualquer tela: a parede, o chão, a persiana e o vidro chegam até as bordas, sem faixas escuras dos lados. A régua de alturas fica só à direita.",
+      en: "The lineup room now runs edge to edge on any screen: the wall, the floor, the blinds and the glass reach the borders, with no dark bars at the sides. The height ruler sits on the right only.",
+      es: "La sala de reconocimiento ahora va de borde a borde en cualquier pantalla: la pared, el suelo, la persiana y el vidrio llegan hasta los bordes, sin franjas oscuras a los lados. La regla de alturas queda solo a la derecha.",
+      ja: "面通しの部屋がどの画面でも端から端まで広がるようになりました。壁、床、ブラインド、ガラスが画面の縁まで届き、両側の黒い帯はなくなりました。身長の目盛りは右側だけです。",
+    },
+  },
+  {
     id: "who-am-i-six",
     at: "2026-10-11",
     kind: "new",

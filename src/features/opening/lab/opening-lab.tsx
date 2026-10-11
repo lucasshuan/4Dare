@@ -128,11 +128,12 @@ export function OpeningLab({ query }: { lang: Lang; query: Query }) {
         cues={cues}
         label={`${t("match", { n })} · ${name}`}
       >
-        {(portrait) =>
+        {(portrait, bleed) =>
           game === "impostor" ? (
             <ImpostorTitle
               {...props}
               portrait={portrait}
+              bleed={bleed}
               labels={{ case: t("case"), title: name }}
             />
           ) : game === "lineup" ? (
