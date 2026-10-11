@@ -19,6 +19,7 @@ import { useShuffle } from "@/lib/hooks/use-shuffle";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 import { BannerPaper } from "./banner-paper";
 import styles from "./lineup-banner.module.css";
+import { PitchLines } from "./pitch-lines";
 
 type Seat = "a" | "b" | "c" | "d";
 
@@ -121,30 +122,6 @@ const MARKS: [number, number, number, string, number, string][] = [
  */
 const SLATE =
   "radial-gradient(60% 40% at 25% 15%, rgba(255,255,255,0.07), transparent), radial-gradient(40% 30% at 80% 90%, rgba(255,255,255,0.05), transparent), linear-gradient(170deg, color-mix(in oklch, var(--art-lineup-slate), white 10%), var(--art-lineup-slate) 45%, color-mix(in oklch, var(--art-lineup-slate), black 32%))";
-
-/** The chalk lines of a pitch seen side on, faint on the slate. */
-function PitchLines() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 572 372"
-      preserveAspectRatio="none"
-      className="pointer-events-none absolute inset-0 size-full"
-    >
-      <g
-        fill="none"
-        stroke="rgba(238,242,230,0.16)"
-        strokeWidth="2"
-        strokeLinecap="round"
-      >
-        <rect x="14" y="14" width="544" height="344" rx="6" />
-        <path d="M286 14v344" />
-        <circle cx="286" cy="186" r="40" />
-        <path d="M14 120h44v132H14M558 120h-44v132h44" />
-      </g>
-    </svg>
-  );
-}
 
 /** A strip of tape pressed on from one end, a beat after the paper lands. */
 function Tape({

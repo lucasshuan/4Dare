@@ -3,6 +3,7 @@
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { FigureArt } from "@/components/ui/figure-art";
+import { PitchLines } from "@/features/lineup/pitch-lines";
 import { cn } from "@/lib/cn";
 import type { Figure } from "@/lib/figures";
 import { useShuffle } from "@/lib/hooks/use-shuffle";
@@ -55,7 +56,7 @@ function Coin({ className }: { className?: string }) {
 }
 
 /**
- * What for?'s card art: a board in its wood frame; the photos land one by one
+ * Lineup's card art: the pitch board in its wood frame; the photos land one by one
  * with their price tags while the purse empties, then the sealed envelope
  * drops and opens on the mission. Still (envelope open) for reduced motion,
  * or with `still`.
@@ -110,8 +111,7 @@ export function LineupSnapshot({
             wide ? "rounded-[3cqh]" : "rounded-[2cqh]",
           )}
         >
-          <span className="absolute top-[9%] left-[5%] h-[1.6cqh] w-[34%] rounded-pill bg-chalk/80" />
-          <span className="absolute inset-[5%] rounded-[1.4cqh] border border-chalk/20" />
+          <PitchLines />
           {SLOTS.map((c, i) => (
             <AnimatePresence key={c.x}>
               {i < s.team ? (
