@@ -1,6 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
+import { Slider } from "@base-ui/react/slider";
 import { Volume1, Volume2, VolumeX } from "lucide-react";
 import { m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
@@ -11,7 +12,7 @@ import {
   updateSettings,
   useSettings,
 } from "@/lib/settings";
-import { Slider } from "./slider";
+import { Tip } from "./tip";
 
 /** A click on the key: silent goes back to the level it had (half, if it had none); sound goes silent. */
 const flip = (s: Settings): Settings =>
@@ -22,7 +23,8 @@ const flip = (s: Settings): Settings =>
 /**
  * The site's volume, made easy: a round key like the theme key beside it.
  * A click mutes, or brings the sound back to where it was; resting the
- * pointer on it drops a slider below for the overall volume (half to start).
+ * pointer on it drops a bare upright slider below for the overall volume
+ * (half to start), with its tip at the side, out of the slider's way.
  * Sliding to 0 mutes and keeps the level the key brings back. The speaker
  * wiggles as the sound comes back.
  */
@@ -44,51 +46,66 @@ export function SoundToggle() {
         if (details.reason !== "trigger-press") setOpen(next);
       }}
     >
-      <Popover.Trigger
-        openOnHover
-        delay={120}
-        closeDelay={200}
-        aria-pressed={!silent}
-        aria-label={label}
-        onClick={() => updateSettings(flip)}
-        className="inline-flex size-10 items-center justify-center rounded-pill bg-surface text-ink transition-colors duration-200 ease-soft hover:text-ink aria-[pressed=false]:text-ink-muted dark:bg-sunken"
-      >
-        <m.span
-          // a new key on each change replays the wiggle
-          key={silent ? "off" : "on"}
-          className="flex"
-          initial={false}
-          animate={
-            !silent && !still
-              ? { rotate: [0, -14, 10, 0], scale: [0.8, 1] }
-              : undefined
-          }
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      <Tip label={tSound("master")} side="left" open={open}>
+        <Popover.Trigger
+          openOnHover
+          delay={120}
+          closeDelay={200}
+          aria-pressed={!silent}
+          aria-label={label}
+          onClick={() => updateSettings(flip)}
+          className="inline-flex size-10 items-center justify-center rounded-pill bg-surface text-ink transition-colors duration-200 ease-soft hover:text-ink aria-[pressed=false]:text-ink-muted dark:bg-sunken"
         >
-          <Icon className="size-5" strokeWidth={1.75} />
-        </m.span>
-      </Popover.Trigger>
+          <m.span
+            // a new key on each change replays the wiggle
+            key={silent ? "off" : "on"}
+            className="flex"
+            initial={false}
+            animate={
+              !silent && !still
+                ? { rotate: [0, -14, 10, 0], scale: [0.8, 1] }
+                : undefined
+            }
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Icon className="size-5" strokeWidth={1.75} />
+          </m.span>
+        </Popover.Trigger>
+      </Tip>
       <Popover.Portal>
         <Popover.Positioner side="bottom" sideOffset={8} className="z-50">
           <Popover.Popup
             initialFocus={false}
-            className="flex w-52 origin-[var(--transform-origin)] items-center gap-3 rounded-pill bg-surface py-0.5 pr-3.5 pl-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0"
+            aria-label={tSound("master")}
+            className="origin-top px-2 py-1 outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-y-90 data-starting-style:scale-y-90 data-ending-style:opacity-0 data-starting-style:opacity-0"
           >
-            <Slider
-              label={tSound("master")}
+            <Slider.Root
+              orientation="vertical"
               value={level}
-              onValueChange={(v) =>
+              min={0}
+              max={100}
+              step={5}
+              onValueChange={(v) => {
+                const next = Array.isArray(v) ? v[0] : v;
                 updateSettings((s) =>
-                  v === 0
+                  next === 0
                     ? { ...s, muted: true }
-                    : { ...s, muted: false, volume: v / 100 },
-                )
-              }
-              className="flex-1"
-            />
-            <span className="w-9 text-right font-medium font-mono text-[12px] text-ink-muted tabular-nums">
-              {level}%
-            </span>
+                    : { ...s, muted: false, volume: next / 100 },
+                );
+              }}
+              className="cursor-pointer"
+            >
+              <Slider.Control className="flex h-28 touch-none select-none justify-center px-2.5">
+                {/* a see-through ink track and a solid ink fill: they read on any room colour behind them */}
+                <Slider.Track className="h-full w-1.5 select-none rounded-pill bg-ink/20">
+                  <Slider.Indicator className="select-none rounded-pill bg-ink" />
+                  <Slider.Thumb
+                    aria-label={tSound("master")}
+                    className="size-4 select-none rounded-pill border-2 border-ink bg-surface shadow-card has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-solid has-[:focus-visible]:outline-sky has-[:focus-visible]:outline-offset-2"
+                  />
+                </Slider.Track>
+              </Slider.Control>
+            </Slider.Root>
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
