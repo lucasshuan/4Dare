@@ -20,8 +20,8 @@
   font-family: var(--font-sans);
   color: var(--who-ink);
   /* the way in: the stage opens in a circle over the screen before it (the
-     start's loading screen); past it, nothing is cut */
-  animation: irisClip 0.5s cubic-bezier(0.65, 0, 0.35, 1) backwards;
+     start's loading screen); once open, the circle takes in any window */
+  animation: irisClip 0.5s cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 :global([data-theme="dark"]) .screen {
   --who-open-a: #23416f;
@@ -733,19 +733,25 @@
 }
 /* the stage cut to the marquee's circle as it opens */
 @keyframes irisClip {
-  from {
+  0% {
     clip-path: circle(0 at 50% 50%);
   }
-  to {
+  99.9% {
     clip-path: circle(850px at 50% 50%);
+  }
+  100% {
+    clip-path: circle(6000px at 50% 50%);
   }
 }
 @keyframes irisClipTall {
-  from {
+  0% {
     clip-path: circle(0 at 50% 50%);
   }
-  to {
+  99.9% {
     clip-path: circle(1050px at 50% 50%);
+  }
+  100% {
+    clip-path: circle(6000px at 50% 50%);
   }
 }
 

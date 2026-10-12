@@ -79,9 +79,13 @@ export function useStartBackdrop(): boolean {
   return covered || (iris !== null && opened !== iris);
 }
 
-/** The start's loading screen: the room entrance's shuffling hand, over the lobby's backdrop. */
+/**
+ * The start's loading screen: the room entrance's shuffling hand, over the
+ * lobby's backdrop and under the title scene, which covers it as it comes in
+ * (Who am I?'s stage opens over it in a circle).
+ */
 export function StartCover() {
-  const covered = useStartCovered();
+  const covered = useStartBackdrop();
   const t = useTranslations("room");
   return (
     <AnimatePresence>
@@ -89,7 +93,7 @@ export function StartCover() {
         <m.div
           key="start-cover"
           data-start-cover
-          className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center overflow-hidden pb-6"
+          className="pointer-events-none fixed inset-0 z-25 flex items-center justify-center overflow-hidden pb-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { duration: 0.25 } }}
           exit={{ opacity: 0, transition: { duration: 0.3, ease: ease.soft } }}
