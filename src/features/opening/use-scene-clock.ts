@@ -1,6 +1,12 @@
 "use client";
 
-import { type RefObject, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  type RefObject,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { type ServerClock, useClock } from "@/lib/hooks/use-server-clock";
 
 /** How far a CSS animation may drift from the clock before it is put back (ms). */
@@ -22,8 +28,10 @@ export function useSceneClock(
   hold: number | null = null,
 ) {
   const clock = useClock();
-  const live = useRef({ clock, startsAt, hold });
-  live.current = { clock, startsAt, hold };
+  // the animations the rehearsal held, so letting go of the hold reaches them all
+  const [held] = useState(() => new Set<Animation>());
+  const live = useRef({ clock, startsAt, hold, held });
+  live.current = { clock, startsAt, hold, held };
   // after every render: a render may bring elements, and their animations, in
   useLayoutEffect(() => {
     sync(ref.current, live.current);
@@ -48,12 +56,25 @@ function sync(
     clock,
     startsAt,
     hold,
-  }: { clock: ServerClock; startsAt: number; hold: number | null },
+    held,
+  }: {
+    clock: ServerClock;
+    startsAt: number;
+    hold: number | null;
+    held: Set<Animation>;
+  },
 ) {
   if (!el) return;
   const t = hold === null ? clock.now() - startsAt : hold * 1000;
-  for (const a of el.getAnimations({ subtree: true })) {
+  const all = new Set(el.getAnimations({ subtree: true }));
+  // one held at no speed before its delay (and filling only forwards) is out of
+  // getAnimations: left there, it would stay put for good, a number never flying off
+  for (const a of held)
+    if (a.playState !== "idle" && isConnected(a)) all.add(a);
+  if (hold === null) held.clear();
+  for (const a of all) {
     if (hold !== null) {
+      held.add(a);
       // held but still running, at no speed: what plays on the compositor once the
       // scene is on gets its layer now, not on its first visible frame
       if (a.playbackRate !== 0) a.playbackRate = 0;
@@ -74,3 +95,6 @@ function sync(
     if (Math.abs(Number(a.currentTime ?? 0) - t) > DRIFT) a.currentTime = t;
   }
 }
+
+const isConnected = (a: Animation) =>
+  a.effect instanceof KeyframeEffect && !!a.effect.target?.isConnected;
