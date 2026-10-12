@@ -49,7 +49,7 @@ import {
   useStepStarted,
 } from "./match-frame";
 import { EntranceLobbyBackdrop } from "./room-entrance";
-import { StartCover, useStartCovered } from "./start-cover";
+import { StartCover, useStartBackdrop, useStartCovered } from "./start-cover";
 import { stepCall } from "./step-call";
 
 /** What for?'s screens come with its match: no other room loads them. */
@@ -197,6 +197,7 @@ function Areas() {
   // a start's ready check: every page loads and rehearses it behind the loading screen
   useReadyCheck();
   const covered = useStartCovered();
+  const backdrop = useStartBackdrop();
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
   useEffect(() => {
@@ -206,7 +207,7 @@ function Areas() {
     <>
       {/* the lobby's coloured backdrop, its flares in time with the music */}
       <EntranceLobbyBackdrop
-        game={area === "lobby" || covered ? view.settings.game : null}
+        game={area === "lobby" || backdrop ? view.settings.game : null}
       />
       <AnimatePresence mode="wait">
         {area === "lobby" ? (

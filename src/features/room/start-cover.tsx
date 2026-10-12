@@ -2,10 +2,11 @@
 
 import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Loader } from "@/components/ui/loader";
 import { useRoomContext } from "@/features/data/room-context";
 import { useStage } from "@/features/stage/stage-context";
+import { useClock } from "@/lib/hooks/use-server-clock";
 import { ease } from "@/lib/motion";
 
 // The loading screen of a match's start: from the host's press (on their page
@@ -46,6 +47,36 @@ export function useStartCovered(): boolean {
     !!show.title &&
     (beat === null || beat.kind === "curtain");
   return pressed || checking || ahead;
+}
+
+/** How long Who am I?'s stage takes to open over the loading screen (its iris, with a margin; ms). */
+const IRIS_MS = 650;
+
+/**
+ * Whether the lobby's backdrop stays behind the start: under the loading
+ * screen, and under Who am I?'s title while its stage opens in a circle over it.
+ */
+export function useStartBackdrop(): boolean {
+  const covered = useStartCovered();
+  const { view } = useRoomContext();
+  const { show, beat } = useStage();
+  const clock = useClock();
+  const iris =
+    view.settings.game === "who-am-i" &&
+    show?.kind === "opening" &&
+    beat?.kind === "title"
+      ? beat.startsAt + IRIS_MS
+      : null;
+  const [opened, setOpened] = useState<number | null>(null);
+  useEffect(() => {
+    if (iris === null) return;
+    const id = window.setTimeout(
+      () => setOpened(iris),
+      Math.max(0, iris - clock.now()),
+    );
+    return () => window.clearTimeout(id);
+  }, [iris, clock]);
+  return covered || (iris !== null && opened !== iris);
 }
 
 /** The start's loading screen: the room entrance's shuffling hand, over the lobby's backdrop. */

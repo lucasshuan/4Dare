@@ -52,9 +52,13 @@ const CANVAS = {
   portrait: { w: 780, h: 1688 },
 } as const;
 
-/** What shows past the canvas before a scene paints it: its set's darkest colour. */
+/**
+ * What shows past the canvas before a scene paints it: its set's darkest
+ * colour. Who am I?'s stage opens in a circle over the screen before it, so
+ * nothing covers that.
+ */
 const BACKDROP: Record<GameKey, string> = {
-  "who-am-i": "var(--brand-stage)",
+  "who-am-i": "transparent",
   impostor: "#07050b",
   lineup: "#1c0e05",
 };

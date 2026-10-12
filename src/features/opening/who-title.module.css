@@ -19,6 +19,9 @@
   background: var(--who-stage);
   font-family: var(--font-sans);
   color: var(--who-ink);
+  /* the way in: the stage opens in a circle over the screen before it (the
+     start's loading screen); past it, nothing is cut */
+  animation: irisClip 0.5s cubic-bezier(0.65, 0, 0.35, 1) backwards;
 }
 :global([data-theme="dark"]) .screen {
   --who-open-a: #23416f;
@@ -29,6 +32,7 @@
 .portrait.screen {
   width: 780px;
   height: 1688px;
+  animation-name: irisClipTall;
 }
 /* the blue carried past the canvas, to the edges of any screen */
 .bleed {
@@ -41,6 +45,8 @@
   inset: 0;
 }
 .glow {
+  /* the light and the shadow over the whole window, not the canvas alone */
+  inset: calc(var(--by) * -1) calc(var(--bx) * -1);
   background:
     radial-gradient(
       60% 60% at 86% 8%,
@@ -677,7 +683,7 @@
   }
 }
 
-/* the way in: from the lobby's bare canvas, the stage opens in a circle with a marquee border while the number rises */
+/* the way in: the stage opens in a circle (the screen's clip) with a marquee border while the number rises */
 .iris {
   position: absolute;
   left: 50%;
@@ -688,7 +694,6 @@
   border-radius: 50%;
   box-sizing: border-box;
   border: 0 solid #f6e3a1;
-  box-shadow: 0 0 0 4000px var(--canvas);
   transform: translate(-50%, -50%);
   pointer-events: none;
   animation: irisOpen 0.5s cubic-bezier(0.65, 0, 0.35, 1) both;
@@ -725,6 +730,23 @@
 }
 .portrait .iris {
   animation-name: irisOpenTall;
+}
+/* the stage cut to the marquee's circle as it opens */
+@keyframes irisClip {
+  from {
+    clip-path: circle(0 at 50% 50%);
+  }
+  to {
+    clip-path: circle(850px at 50% 50%);
+  }
+}
+@keyframes irisClipTall {
+  from {
+    clip-path: circle(0 at 50% 50%);
+  }
+  to {
+    clip-path: circle(1050px at 50% 50%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
