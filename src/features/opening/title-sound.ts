@@ -65,18 +65,20 @@ const LATE = 0.15;
  * Plays a title scene's sounds on the server clock, t = 0 at `startsAt`.
  * Each starts what the speakers lag ahead of its moment, so it is heard with
  * the frame it belongs to. Leaving before `endsAt` (the scene cut short)
- * silences them; at the natural end their tails ring out.
+ * silences them; at the natural end their tails ring out. A `silent` scene
+ * (the rehearsal) plays none.
  */
 export function useTitleSounds(
   cues: readonly TitleCue[],
   startsAt: number,
   endsAt: number,
+  silent = false,
 ) {
   const clock = useClock();
   // read when the scene starts: a clock re-estimated mid-scene doesn't replay anything
   const serverNow = useRef(clock.now);
   serverNow.current = clock.now;
-  const still = clock.frozen || clock.rate !== 1;
+  const still = silent || clock.frozen || clock.rate !== 1;
   const key = cues.map((c) => `${c.src}@${c.at}`).join(" ");
   // biome-ignore lint/correctness/useExhaustiveDependencies: the cues are keyed by their content
   useEffect(() => {

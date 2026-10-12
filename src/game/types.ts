@@ -221,12 +221,13 @@ export const HEARTBEAT_MS = 60_000;
 export const GONE_GRACE_MS = 5000;
 
 /**
- * The longest a start waits for every page in the room to load its opening;
- * a page that has not said so by then sees it as it comes.
+ * The longest a start's ready check waits for every page in the room to have
+ * its opening loaded and rehearsed; a page that has not said so by then sees
+ * it as it comes.
  */
-export const START_WAIT_MS = 4000;
+export const START_WAIT_MS = 5500;
 /**
- * Once everyone has loaded it, the match starts this far ahead, so every page
+ * Once everyone is ready, the match starts this far ahead, so every page
  * has the new state before its first beat and they all play it together.
  */
 export const START_LEAD_MS = 500;
@@ -638,12 +639,15 @@ export interface StartFields {
   decks?: LuDeck[];
 }
 
-/** A start waiting for every page in the room to load its opening (PREPARE_START). */
+/**
+ * A start's ready check (PREPARE_START): it waits for every page in the room
+ * to have its opening loaded and rehearsed behind the loading screen.
+ */
 export interface StartingState {
   /** When it starts regardless. */
   until: number;
-  /** Whose pages have it loaded. */
-  loaded: PlayerId[];
+  /** Whose pages are ready. */
+  ready: PlayerId[];
   /** What it starts with, kept on the server only. */
   start: StartFields;
 }
@@ -676,13 +680,13 @@ export type GameEvent =
   /** The match begins at once (see StartFields). */
   | ({ type: "START" } & StartFields)
   /**
-   * The host's start: the match begins once every page open on the room has
-   * its opening loaded (LOADED), or at the wait's end regardless. The host's
-   * page asks only once its own has loaded.
+   * The host's start, a ready check: the match begins once every page open on
+   * the room is ready for its opening (OPENING_READY), or at the wait's end
+   * regardless. Every page shows the loading screen meanwhile.
    */
   | ({ type: "PREPARE_START" } & StartFields)
-  /** A page in the room has its opening loaded, while a start waits for them. */
-  | { type: "LOADED"; playerId: PlayerId }
+  /** A page in the room has its opening loaded and rehearsed, while a start waits for them. */
+  | { type: "OPENING_READY"; playerId: PlayerId }
   | { type: "VOTE"; playerId: PlayerId; option: number }
   | { type: "UNVOTE"; playerId: PlayerId }
   /** The host typed the theme. */
@@ -1074,7 +1078,13 @@ export interface RoomView {
   /** When a closed page's grace runs out and the room has a seat to free (or closes): refetch then. */
   sweepAt?: number | null;
   /** A start waiting for every page to load its opening: until when, and whose pages have. */
-  starting?: { until: number; loaded: PlayerId[] } | null;
+  /** A start's ready check, with the title card and length the match will open with. */
+  starting?: {
+    until: number;
+    ready: PlayerId[];
+    title: TitleCard;
+    first: boolean;
+  } | null;
   /** Shown to everyone until `reveal.until`; null when nothing is being revealed. */
   reveal: RevealView | null;
   /** Server clock when this view was built; use it to correct the countdown. */

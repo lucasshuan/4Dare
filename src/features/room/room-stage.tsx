@@ -15,7 +15,7 @@ import {
   OpeningMusic,
   OpeningScene,
   preloadTitle,
-  useStartHandshake,
+  useReadyCheck,
 } from "@/features/opening/title-scene";
 import { ResultScreen } from "@/features/result/result-screen";
 import { isGuessScene, isShow, type StageScreen } from "@/features/stage/stage";
@@ -49,6 +49,7 @@ import {
   useStepStarted,
 } from "./match-frame";
 import { EntranceLobbyBackdrop } from "./room-entrance";
+import { StartCover, useStartCovered } from "./start-cover";
 import { stepCall } from "./step-call";
 
 /** What for?'s screens come with its match: no other room loads them. */
@@ -68,6 +69,7 @@ export function RoomStage() {
       <RoomBackdrop />
       <Areas />
       <OpeningScene />
+      <StartCover />
       <OpeningMusic />
       <RevealOverlay />
       <GuessScene />
@@ -192,8 +194,9 @@ function Areas() {
   useEffect(() => {
     if (area === "lobby") void preloadTitle(game, { ja, chalk });
   }, [area, game, ja, chalk]);
-  // a start waits for every page to have it loaded
-  useStartHandshake();
+  // a start's ready check: every page loads and rehearses it behind the loading screen
+  useReadyCheck();
+  const covered = useStartCovered();
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
   useEffect(() => {
@@ -203,7 +206,7 @@ function Areas() {
     <>
       {/* the lobby's coloured backdrop, its flares in time with the music */}
       <EntranceLobbyBackdrop
-        game={area === "lobby" ? view.settings.game : null}
+        game={area === "lobby" || covered ? view.settings.game : null}
       />
       <AnimatePresence mode="wait">
         {area === "lobby" ? (
@@ -214,7 +217,15 @@ function Areas() {
             animate="shown"
             exit="leave"
           >
-            <LobbyScreen />
+            {/* the start's loading screen takes its place, over the same backdrop */}
+            <m.div
+              inert={covered}
+              initial={false}
+              animate={{ opacity: covered ? 0 : 1 }}
+              transition={{ duration: 0.25, ease: ease.soft }}
+            >
+              <LobbyScreen />
+            </m.div>
           </m.div>
         ) : area === "match" ? (
           <MatchFrame key="match">

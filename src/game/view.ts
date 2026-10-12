@@ -16,6 +16,7 @@ import {
 import { impReveal, impStatus, impView } from "./impostor/view";
 import { LU_PHASES } from "./lineup/types";
 import { luStatus, luView } from "./lineup/view";
+import { upcomingTitle } from "./steps";
 import {
   type ActiveRoom,
   type AnswerEntry,
@@ -413,7 +414,11 @@ export function toView(
     sweepAt: sweepAt(s),
     // what it starts with stays on the server: the themes and the cards are secrets until then
     starting: s.starting
-      ? { until: s.starting.until, loaded: [...s.starting.loaded] }
+      ? {
+          until: s.starting.until,
+          ready: [...s.starting.ready],
+          ...upcomingTitle(s, s.starting.start.newcomer === true),
+        }
       : null,
     reveal: reveal(s, viewerId, now),
     serverNow: now,

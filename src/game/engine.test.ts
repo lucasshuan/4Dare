@@ -360,35 +360,38 @@ describe("the host's lobby", () => {
   });
 });
 
-describe("the start handshake", () => {
+describe("the start's ready check", () => {
   const prepare = (g: Game) =>
     g.do({ type: "PREPARE_START", playerId: "p1", themes: THEMES });
-  const loaded = (g: Game, id: string) =>
-    code(() => g.do({ type: "LOADED", playerId: id }));
+  const ready = (g: Game, id: string) =>
+    code(() => g.do({ type: "OPENING_READY", playerId: id }));
 
-  it("waits for every page to load the opening, then starts a moment ahead for all", () => {
+  it("waits for every page, the host's too, to be ready, then starts a moment ahead for all", () => {
     const g = new Game(3);
     prepare(g);
     expect(g.state.phase).toBe("lobby");
     expect(g.state.starting).toMatchObject({
       until: g.now + START_WAIT_MS,
-      loaded: ["p1"],
+      ready: [],
     });
     expect(g.state.deadline).toBe(g.now + START_WAIT_MS);
-    // the view says who is in, never what the match starts with
+    // the view says who is ready and the title the match opens with, never what it starts with
     const view = toView(g.state, 1, "p2", g.now, "en");
     expect(view.starting).toEqual({
       until: g.now + START_WAIT_MS,
-      loaded: ["p1"],
+      ready: [],
+      title: { n: 1, crowned: [] },
+      first: true,
     });
     expect(view.canStart).toBe(false);
     expect(JSON.stringify(view)).not.toContain(THEMES[1].en);
     g.now += 400;
-    expect(loaded(g, "p2")).toBe("no error");
-    expect(loaded(g, "p2")).toBe("already_done");
+    expect(ready(g, "p2")).toBe("no error");
+    expect(ready(g, "p2")).toBe("already_done");
+    expect(ready(g, "p1")).toBe("no error");
     expect(g.state.phase).toBe("lobby");
     g.now += 300;
-    expect(loaded(g, "p3")).toBe("no error");
+    expect(ready(g, "p3")).toBe("no error");
     expect(g.state.phase).not.toBe("lobby");
     expect(g.state.starting).toBeNull();
     expect(g.state.reveal?.startsAt).toBe(g.now + START_LEAD_MS);
@@ -398,7 +401,7 @@ describe("the start handshake", () => {
   it("starts at the wait's end regardless, and doesn't wait for a closed page", () => {
     const g = new Game(3);
     prepare(g);
-    loaded(g, "p2");
+    ready(g, "p2");
     g.now += START_WAIT_MS;
     expect(isExpired(g.state, g.now)).toBe(true);
     g.do({ type: "TIMEOUT" });
@@ -407,7 +410,8 @@ describe("the start handshake", () => {
 
     const h = new Game(3);
     prepare(h);
-    loaded(h, "p2");
+    ready(h, "p1");
+    ready(h, "p2");
     h.do({ type: "GONE", playerId: "p3" });
     expect(h.state.phase).not.toBe("lobby");
   });
@@ -429,7 +433,7 @@ describe("the start handshake", () => {
     expect(g.state.phase).toBe("lobby");
     expect(g.state.starting).toBeNull();
     expect(g.state.deadline).toBeNull();
-    expect(loaded(g, "p1")).toBe("wrong_phase");
+    expect(ready(g, "p1")).toBe("wrong_phase");
   });
 
   it("closes the seats while it waits: whoever sat when it was asked plays", () => {
@@ -441,10 +445,11 @@ describe("the start handshake", () => {
     expect(join("p3")).toBe("already_started");
     // a seated page coming back is not a newcomer
     expect(join("p2")).toBe("no error");
-    // a seat that changes hands keeps its load
+    // a seat that changes hands keeps its readiness
+    ready(g, "p2");
     g.do({ type: "SWAP_PLAYER", from: "p2", player: ident("p2b") });
-    expect(g.state.starting?.loaded).toEqual(["p1"]);
-    expect(loaded(g, "p2b")).toBe("no error");
+    expect(g.state.starting?.ready).toEqual(["p2b"]);
+    expect(ready(g, "p1")).toBe("no error");
     expect(g.state.players.map((p) => p.id)).toEqual(["p1", "p2b"]);
     expect(g.state.phase).not.toBe("lobby");
 

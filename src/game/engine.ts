@@ -539,7 +539,7 @@ function begin(s: RoomState, e: StartFields, ctx: Ctx) {
 }
 
 /**
- * A waiting start begins once every page still open on the room has loaded
+ * A waiting start begins once every page still open on the room is ready for
  * its opening, START_LEAD_MS ahead, so they all have it before the curtain;
  * with too few players left it is called off. The seats are closed while it
  * waits: whoever sat when it was asked plays, newcomers get the next match.
@@ -552,7 +552,7 @@ function settleStart(s: RoomState, ctx: Ctx) {
     return stopClock(s);
   }
   const open = s.players.filter((p) => p.goneAt == null && !p.away);
-  if (open.every((p) => w.loaded.includes(p.id)))
+  if (open.every((p) => w.ready.includes(p.id)))
     begin(s, w.start, { ...ctx, now: ctx.now + START_LEAD_MS });
 }
 
@@ -619,22 +619,18 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       if (s.starting) fail("already_done");
       if (s.settings.game === "lineup" && !e.decks) fail("invalid_input");
       const { type: _, ...start } = e;
-      // the host's page asks once it has the opening loaded
-      s.starting = {
-        until: ctx.now + START_WAIT_MS,
-        loaded: [e.playerId],
-        start,
-      };
+      // every page, the host's too, says when it is ready
+      s.starting = { until: ctx.now + START_WAIT_MS, ready: [], start };
       // its clock: the read after it starts the match regardless
       s.deadline = s.starting.until;
       return settleStart(s, ctx);
     }
-    case "LOADED": {
+    case "OPENING_READY": {
       const p = requireSeated(s, e.playerId);
       const w = s.phase === "lobby" ? s.starting : null;
       if (!w) return fail("wrong_phase");
-      if (w.loaded.includes(p.id)) fail("already_done");
-      w.loaded.push(p.id);
+      if (w.ready.includes(p.id)) fail("already_done");
+      w.ready.push(p.id);
       return settleStart(s, ctx);
     }
     case "VOTE":
@@ -775,7 +771,7 @@ function swapPlayer(s: RoomState, from: PlayerId, player: Identity) {
     delete s.vote.votes[from];
   }
   if (s.starting) {
-    s.starting.loaded = s.starting.loaded.map(swap);
+    s.starting.ready = s.starting.ready.map(swap);
     s.starting.start.playerId = swap(s.starting.start.playerId);
   }
   for (const m of s.matches ?? [])
@@ -1035,7 +1031,7 @@ function timeout(
   if (!isExpired(s, ctx.now)) fail("wrong_phase");
   switch (s.phase) {
     case "lobby": {
-      // a start that waited long enough begins, whoever has not loaded the opening yet
+      // a start that waited long enough begins, whoever is not ready yet
       const w = s.starting;
       if (w && s.players.length >= GAME_SEATS[s.settings.game].min)
         return begin(s, w.start, { ...ctx, now: ctx.now + START_LEAD_MS });

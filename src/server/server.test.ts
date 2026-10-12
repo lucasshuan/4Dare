@@ -94,18 +94,19 @@ let A: Actions;
 let roomRoute: typeof import("@/app/api/rooms/[code]/route");
 
 /**
- * The caller (the host) starts, and every other page that has been open
- * says its opening is loaded (one not in the room just gets an error): the
- * match begins. Returns the room as the host now sees it.
+ * The caller (the host) starts, and every page that has been open, the
+ * host's last, says it is ready for the opening (one not in the room just
+ * gets an error): the match begins. Returns the room as the host now sees it.
  */
 async function startMatch(code: string): Promise<RoomView> {
   const host = caller;
   must(await A.startGame(code));
   for (const name of [...jars.keys()].filter((n) => n !== host)) {
     as(name);
-    await A.markLoaded(code);
+    await A.markOpeningReady(code);
   }
   as(host);
+  await A.markOpeningReady(code);
   return (await view(code)).body;
 }
 

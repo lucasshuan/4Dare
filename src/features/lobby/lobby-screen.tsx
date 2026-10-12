@@ -29,8 +29,8 @@ import { useLineupCount } from "@/features/create/lineup-catalog";
 import { RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { useOpeningLoaded } from "@/features/opening/title-scene";
 import { RoomControls } from "@/features/room/room-controls";
+import { setStartAsked } from "@/features/room/start-cover";
 import { GAME_SEATS } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -157,13 +157,15 @@ export function LobbyScreen() {
   const waiting = others.filter((p) => !p.ready);
   // asks first only when someone has not confirmed yet
   const [confirming, setConfirming] = useState(false);
-  // the host's page asks once it has the opening loaded (it always has, by then)
-  const openingLoaded = useOpeningLoaded(view.settings.game);
-  const start = () =>
-    act(async () => {
-      await openingLoaded();
-      return startGame(code);
-    });
+  // the loading screen covers the host's page at once; the ready check then runs on every page
+  const start = async () => {
+    setStartAsked(true);
+    try {
+      return await act(() => startGame(code));
+    } finally {
+      setStartAsked(false);
+    }
+  };
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<CreateRoomInput>(() =>
     editable(view.settings),

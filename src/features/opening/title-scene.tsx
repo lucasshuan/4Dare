@@ -17,11 +17,12 @@ import { useRoomContext } from "@/features/data/room-context";
 import { beatOf } from "@/features/stage/stage";
 import { useStage } from "@/features/stage/stage-context";
 import type { GameKey } from "@/game/games";
-import type { Beat, ShowView } from "@/game/types";
+import { SHOW_TIMING } from "@/game/show-timing";
+import type { TitleCard } from "@/game/types";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { preloadMusic, type Track, useMusic } from "@/lib/music";
 import { useGameOption } from "@/lib/settings";
-import { markLoaded } from "@/server/actions";
+import { markOpeningReady } from "@/server/actions";
 import {
   IMPOSTOR_SOUNDS,
   ImpostorTitle,
@@ -34,6 +35,7 @@ import {
   LineupTitle,
   lineupCues,
 } from "./lineup-title";
+import { rehearsed, useRehearsal } from "./rehearsal";
 import type { Bleed, TitlePlayer } from "./title-kit";
 import {
   preloadTitleSounds,
@@ -125,48 +127,44 @@ export function preloadTitle(
   return all;
 }
 
-/** The longest a page waits on its own opening before saying it is ready anyway (ms), within the start's wait. */
-const READY_CAP = 3000;
+/** The longest a page takes to say it is ready for a start, loaded and rehearsed or not, within the ready check's wait (ms). */
+const READY_CAP = 4500;
 
-/**
- * Resolves once this page has `game`'s opening loaded (or after READY_CAP):
- * what the host's start and the room's handshake wait on.
- */
-export function useOpeningLoaded(game: GameKey): () => Promise<void> {
+/** Fetches `game`'s title scene as this page will play it (preloadTitle). */
+function useOpeningFiles(game: GameKey): () => Promise<void> {
   const ja = useLocale() === "ja";
   const chalk = !useGameOption("lineup", "plainLetters");
   return useCallback(
-    () =>
-      Promise.race([
-        preloadTitle(game, { ja, chalk }),
-        new Promise<void>((done) => window.setTimeout(done, READY_CAP)),
-      ]),
+    () => preloadTitle(game, { ja, chalk }),
     [game, ja, chalk],
   );
 }
 
 /**
- * The room's handshake: while the host's start waits for every page, this
- * one says so once its opening is loaded, and the match begins for everyone
- * together (no word on screen: it takes a moment).
+ * A start's ready check, on this page: every page shows the loading screen
+ * while the opening the match starts with is loaded and rehearsed behind it
+ * (rehearsal.ts); then the page says it is ready (or after READY_CAP), and the
+ * match begins for everyone together once they all have.
  */
-export function useStartHandshake() {
+export function useReadyCheck() {
   const { view, code, apply } = useRoomContext();
-  const loaded = useOpeningLoaded(view.settings.game);
   const w = view.phase === "lobby" ? view.starting : null;
-  const waiting = w && !w.loaded.includes(view.youId) ? w.until : null;
+  const waiting = w && !w.ready.includes(view.youId) ? w.until : null;
   useEffect(() => {
     if (waiting === null) return;
     let live = true;
-    void loaded().then(async () => {
+    void Promise.race([
+      rehearsed(waiting),
+      new Promise<void>((done) => window.setTimeout(done, READY_CAP)),
+    ]).then(async () => {
       if (!live) return;
-      const r = await markLoaded(code);
+      const r = await markOpeningReady(code);
       if (r.ok) apply(r.data);
     });
     return () => {
       live = false;
     };
-  }, [waiting, loaded, code, apply]);
+  }, [waiting, code, apply]);
 }
 
 /**
@@ -208,6 +206,8 @@ export function TitleStage({
   label,
   fonts,
   live = true,
+  rehearse = null,
+  files,
   children,
 }: {
   game: GameKey;
@@ -223,15 +223,32 @@ export function TitleStage({
    * painted, unseen, so it starts on the dot even on a slow phone.
    */
   live?: boolean;
+  /**
+   * The start whose ready check this scene is rehearsed for (its `until`):
+   * silent, off the clock, held at a few moments of its `length` (ms) once
+   * its `files` are in. Null once the match is on.
+   */
+  rehearse?: number | null;
+  length?: number;
+  files?: () => Promise<void>;
   children: (portrait: boolean, bleed: Bleed) => ReactNode;
 }) {
   const fit = useFit();
   const scene = useRef<HTMLDivElement>(null);
-  useSceneClock(scene, startsAt);
+  const [held, setHeld] = useState(0);
+  useSceneClock(scene, startsAt, rehearse === null ? null : held);
   useTitleSounds(
     useMemo(() => cues(fit.portrait), [cues, fit.portrait]),
     startsAt,
     endsAt,
+    rehearse !== null,
+  );
+  useRehearsal(
+    rehearse,
+    fit.ready,
+    (length ?? endsAt - startsAt) / 1000,
+    files ?? noFiles,
+    setHeld,
   );
   return (
     <div
@@ -239,13 +256,14 @@ export function TitleStage({
       className="fixed inset-0 z-30 overflow-hidden"
       style={{
         background: BACKDROP[game],
+        // its own layer all along: the one painted unseen is the one that shows, not drawn again then
+        willChange: "opacity",
         ...(live
-          ? {}
+          ? { transition: "opacity 0.2s ease-out" }
           : {
               // painted, rasterized and playing unseen: under one 8-bit step, where a plain 0 skips the
               // painting and leaves it all for the first visible frame
               opacity: 0.001,
-              willChange: "opacity",
               pointerEvents: "none",
             }),
       }}
@@ -277,18 +295,55 @@ export function TitleStage({
   );
 }
 
+const noFiles = () => Promise.resolve();
+
 /**
  * The opening's title beat, from the start on (a moment ahead, then the
  * curtain): the scene is built then, unseen, and is `live` once its beat plays.
  */
-function useTitleShow(): { show: ShowView; beat: Beat; live: boolean } | null {
+function useTitleShow(): SceneProps | null {
   const { show, beat } = useStage();
   const title =
     show?.kind === "opening" && show.title ? beatOf(show, "title") : null;
   // before the curtain too: a start a moment ahead (START_LEAD_MS)
   const ahead = beat === null || beat.kind === "curtain";
-  if (!show || !title || (!ahead && beat.kind !== "title")) return null;
-  return { show, beat: title, live: beat?.kind === "title" };
+  if (!show?.title || !title || (!ahead && beat.kind !== "title")) return null;
+  return {
+    card: show.title,
+    first: show.first,
+    startsAt: title.startsAt,
+    until: title.until,
+    live: beat?.kind === "title",
+    rehearse: null,
+  };
+}
+
+/**
+ * The scene a start's ready check rehearses, unseen behind the loading
+ * screen: the one the match opens with, which then plays on as it is.
+ */
+function useRehearsedTitle(): SceneProps | null {
+  const { view } = useRoomContext();
+  const w = view.phase === "lobby" ? view.starting : null;
+  if (!w) return null;
+  return {
+    card: w.title,
+    first: w.first,
+    startsAt: 0,
+    until: 0,
+    live: false,
+    rehearse: w.until,
+  };
+}
+
+/** What a title scene plays: its card, its length and where it stands. */
+interface SceneProps {
+  card: TitleCard;
+  first: boolean;
+  startsAt: number;
+  until: number;
+  live: boolean;
+  rehearse: number | null;
 }
 
 /** The players a title scene draws: the match's, in seat order. */
@@ -316,38 +371,32 @@ function useTitlePlayers(crowned: readonly string[]): TitlePlayer[] {
  * the opening's title beat plays; it fades out into the next beat.
  */
 export function OpeningScene() {
-  const on = useTitleShow();
+  const show = useTitleShow();
+  const rehearsal = useRehearsedTitle();
+  const on = show ?? rehearsal;
   return (
     <AnimatePresence>
       {on ? (
+        // one scene from the rehearsal to the show: built and painted once
         <m.div
-          key={on.show.startsAt}
+          key="title"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.25 } }}
         >
-          <Title show={on.show} beat={on.beat} live={on.live} />
+          <Title {...on} />
         </m.div>
       ) : null}
     </AnimatePresence>
   );
 }
 
-function Title({
-  show,
-  beat,
-  live,
-}: {
-  show: ShowView;
-  beat: Beat;
-  live: boolean;
-}) {
+function Title({ card, first, startsAt, until, live, rehearse }: SceneProps) {
   const { view } = useRoomContext();
   const t = useTranslations("room.title");
   const tg = useTranslations("home.games");
   const game = view.settings.game;
-  const card = show.title ?? { n: 1, crowned: [] };
+  const files = useOpeningFiles(game);
   const players = useTitlePlayers(card.crowned);
-  const first = show.first;
   const props = { players, n: card.n, first };
   const count = players.length;
   const cues = useMemo(
@@ -385,11 +434,14 @@ function Title({
     <TitleStage
       game={game}
       fonts={<TitleFonts game={game} />}
-      startsAt={beat.startsAt}
-      endsAt={beat.until}
+      startsAt={startsAt}
+      endsAt={until}
       cues={cues}
       label={`${t("match", { n })} · ${name}`}
       live={live}
+      rehearse={rehearse}
+      length={first ? SHOW_TIMING.title.first : SHOW_TIMING.title.later}
+      files={files}
     >
       {(portrait, bleed) =>
         game === "impostor" ? (

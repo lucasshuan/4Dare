@@ -13,15 +13,17 @@ const RESYNC_MS = 1000;
  * the beat's start, and an animation's current time counts from its creation,
  * delay included, so setting it to the time since the beat started lands each
  * one on the frame every other screen shows: after a reload, a late join or a
- * tab switch too. A stopped clock (the lab) holds them all at its moment.
+ * tab switch too. A stopped clock (the lab) holds them all at its moment,
+ * and so does `hold` (s into the scene), off the clock: the rehearsal.
  */
 export function useSceneClock(
   ref: RefObject<HTMLElement | null>,
   startsAt: number,
+  hold: number | null = null,
 ) {
   const clock = useClock();
-  const live = useRef({ clock, startsAt });
-  live.current = { clock, startsAt };
+  const live = useRef({ clock, startsAt, hold });
+  live.current = { clock, startsAt, hold };
   // after every render: a render may bring elements, and their animations, in
   useLayoutEffect(() => {
     sync(ref.current, live.current);
@@ -42,11 +44,23 @@ export function useSceneClock(
 
 function sync(
   el: HTMLElement | null,
-  { clock, startsAt }: { clock: ServerClock; startsAt: number },
+  {
+    clock,
+    startsAt,
+    hold,
+  }: { clock: ServerClock; startsAt: number; hold: number | null },
 ) {
   if (!el) return;
-  const t = clock.now() - startsAt;
+  const t = hold === null ? clock.now() - startsAt : hold * 1000;
   for (const a of el.getAnimations({ subtree: true })) {
+    if (hold !== null) {
+      // held but still running, at no speed: what plays on the compositor once the
+      // scene is on gets its layer now, not on its first visible frame
+      if (a.playbackRate !== 0) a.playbackRate = 0;
+      if (a.playState !== "running") a.play();
+      a.currentTime = t;
+      continue;
+    }
     if (clock.frozen) {
       a.pause();
       a.currentTime = t;

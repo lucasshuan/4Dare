@@ -189,6 +189,20 @@ export function titleCard(s: RoomState): TitleCard {
   return { n: gameRound(s), crowned: last.filter((id) => seated.has(id)) };
 }
 
+/**
+ * What a start's ready check opens with: the title card and whether its shows
+ * run long, as `begin` will count them, so every page can rehearse the very
+ * scene it is about to play.
+ */
+export function upcomingTitle(
+  s: RoomState,
+  newcomer: boolean,
+): { title: TitleCard; first: boolean } {
+  const next = { ...s, newcomer };
+  countMatch(next);
+  return { title: titleCard(next), first: longShows(next) };
+}
+
 /** The podium; its clock (after the last reveal) takes everyone back to the lobby. */
 export function finish(s: RoomState, ctx: Ctx) {
   // A match that ends mid-show goes to the podium at once; a guess reveal still holds it.
