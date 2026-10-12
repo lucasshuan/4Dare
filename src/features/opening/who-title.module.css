@@ -683,55 +683,7 @@
   }
 }
 
-/* the way in: the stage opens in a circle (the screen's clip) with a marquee border while the number rises */
-.iris {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 30;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  box-sizing: border-box;
-  border: 0 solid #f6e3a1;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  animation: irisOpen 0.5s cubic-bezier(0.65, 0, 0.35, 1) both;
-}
-@keyframes irisOpen {
-  0% {
-    width: 0;
-    height: 0;
-    border-width: 0;
-  }
-  12% {
-    border-width: 14px;
-  }
-  100% {
-    width: 1700px;
-    height: 1700px;
-    border-width: 14px;
-  }
-}
-@keyframes irisOpenTall {
-  0% {
-    width: 0;
-    height: 0;
-    border-width: 0;
-  }
-  12% {
-    border-width: 18px;
-  }
-  100% {
-    width: 2100px;
-    height: 2100px;
-    border-width: 18px;
-  }
-}
-.portrait .iris {
-  animation-name: irisOpenTall;
-}
-/* the stage cut to the marquee's circle as it opens */
+/* the way in: the stage cut to a circle opening from the middle */
 @keyframes irisClip {
   0% {
     clip-path: circle(0 at 50% 50%);

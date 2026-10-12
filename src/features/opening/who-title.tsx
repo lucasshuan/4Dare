@@ -262,7 +262,6 @@ function WhoTitleScene({
           </span>
         ))}
       </div>
-      <span className={s.iris} />
       <div className={cn(s.layer, s.center)}>
         <div
           className={s.num}
