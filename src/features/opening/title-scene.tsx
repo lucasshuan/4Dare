@@ -207,6 +207,7 @@ export function TitleStage({
   fonts,
   live = true,
   rehearse = null,
+  length,
   files,
   children,
 }: {
