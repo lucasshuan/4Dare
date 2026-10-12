@@ -66,7 +66,8 @@ const BOARD = {
       { x: 200, y: 291 },
       { x: 330, y: 176 },
       { x: 330, y: 406 },
-      { x: 470, y: 291 },
+      // short of the centre circle, so its chalk doesn't cross the name
+      { x: 420, y: 291 },
       { x: 620, y: 190 },
       { x: 620, y: 392 },
       { x: 750, y: 291 },
@@ -124,7 +125,7 @@ const BOARD = {
       { x: 310, y: 1058 },
       { x: 151, y: 906 },
       { x: 469, y: 906 },
-      { x: 310, y: 742 },
+      { x: 310, y: 801 },
       { x: 170, y: 567 },
       { x: 450, y: 567 },
       { x: 310, y: 414 },
@@ -152,14 +153,97 @@ const BOARD = {
   },
 } as const;
 
-/** The passes drawn between magnets: [from, to (or the goal), bend]. */
-const LINKS: [number, number | "Q", number][] = [
-  [0, 3, -46],
-  [1, 4, 40],
-  [2, 5, -40],
-  [4, "Q", 34],
-  [3, 6, 30],
-];
+/** A pass drawn between magnets: [from, to (or the goal), bend]. */
+type Link = [number, number | "Q", number];
+/**
+ * The passes drawn for each number of players (seats as in `next`), at
+ * least two, one of them always at the goal. Eight players put a magnet on
+ * the path from the left wing to the right one, so that pass starts from it
+ * instead of crossing its name.
+ */
+const LINKS: Record<number, Link[]> = {
+  2: [
+    [0, 1, -30],
+    [1, "Q", 30],
+  ],
+  3: [
+    [0, 1, -30],
+    [0, 2, 30],
+    [2, "Q", -24],
+  ],
+  4: [
+    [0, 1, -30],
+    [0, 2, 30],
+    [1, 3, 30],
+    [3, "Q", 24],
+  ],
+  5: [
+    [0, 1, -30],
+    [1, 3, 30],
+    [2, 4, -30],
+    [3, "Q", 34],
+  ],
+  6: [
+    [0, 3, -46],
+    [1, 4, 40],
+    [2, 5, -40],
+    [4, "Q", 34],
+  ],
+  7: [
+    [0, 3, -46],
+    [1, 4, 40],
+    [2, 5, -40],
+    [4, "Q", 34],
+    [3, 6, 30],
+  ],
+  8: [
+    [0, 3, -46],
+    [7, 4, 20],
+    [2, 5, -40],
+    [4, "Q", 34],
+    [3, 6, 30],
+  ],
+};
+/**
+ * Where fewer than six players stand on the wide board, spread over the
+ * pitch rather than packed at the back of the eight-a-side places (`next`).
+ */
+const FEW: Record<number, Pt[]> = {
+  2: [
+    { x: 250, y: 330 },
+    { x: 640, y: 210 },
+  ],
+  3: [
+    { x: 220, y: 291 },
+    { x: 430, y: 170 },
+    { x: 660, y: 380 },
+  ],
+  4: [
+    { x: 200, y: 291 },
+    { x: 370, y: 176 },
+    { x: 370, y: 406 },
+    { x: 690, y: 291 },
+  ],
+  5: [
+    { x: 200, y: 291 },
+    { x: 350, y: 176 },
+    { x: 350, y: 406 },
+    { x: 650, y: 190 },
+    { x: 650, y: 392 },
+  ],
+};
+/** A place on the wide board on the upright one: the same pitch turned 90°, attacking upwards. */
+const upright = (p: Pt): Pt => ({
+  x: Math.round(310 + (p.y - 291) * 1.383),
+  y: Math.round(1058 - (p.x - 200) * 1.17),
+});
+/** Where the match's players stand this time, by how many there are. */
+function placesFor(portrait: boolean, n: number): readonly Pt[] {
+  const few = FEW[n];
+  if (!few) return BOARD[portrait ? "portrait" : "landscape"].next;
+  return portrait ? few.map(upright) : few;
+}
+
 /** The chalk dust falling off the underline: [left %, top %]. */
 const DUST = [
   [8, 62],
@@ -204,11 +288,19 @@ function arrow(a: Pt, b: Pt, bend: number, endGap: number) {
   return `M${r(st.x)} ${r(st.y)}Q${r(m.x)} ${r(m.y)} ${r(e.x)} ${r(e.y)}M${r(h1.x)} ${r(h1.y)}L${r(e.x)} ${r(e.y)}L${r(h2.x)} ${r(h2.y)}`;
 }
 
+/** How far short of a magnet a pass from below stops: past the name under it. */
+const NAME_GAP = 96;
+
 function links(pos: readonly Pt[], goal: Pt, n: number) {
-  return LINKS.filter(([a, b]) => a < n && (b === "Q" || b < n)).map(
-    ([a, b, bend]) =>
-      arrow(pos[a], b === "Q" ? goal : pos[b], bend, b === "Q" ? 62 : 54),
-  );
+  const set = LINKS[Math.min(8, Math.max(2, n))];
+  return set.map(([a, b, bend]) => {
+    const to = b === "Q" ? goal : pos[b];
+    // a pass coming up at a magnet (the upright board) stops under its name, not on it
+    const dx = to.x - pos[a].x;
+    const dy = to.y - pos[a].y;
+    const fromBelow = b !== "Q" && dy < 0 && -dy > Math.abs(dx);
+    return arrow(pos[a], to, bend, b === "Q" ? 62 : fromBelow ? NAME_GAP : 54);
+  });
 }
 
 /** The wallpaper: faded diamonds in cream and caramel with a brown outline and a dot in each. */
@@ -310,7 +402,8 @@ function LineupTitleScene({
   const board = BOARD[portrait ? "portrait" : "landscape"];
   const count = Math.min(players.length, board.next.length);
   const shown = players.slice(0, count);
-  const arrows = links(board.next, board.goal, count);
+  const places = placesFor(portrait, count);
+  const arrows = links(places, board.goal, count);
   const ghost = first ? [] : links(board.last, board.goal, count);
   const { w, h } = portrait ? { w: 780, h: 1688 } : { w: 1280, h: 720 };
   const vb = `0 0 ${board.w} ${board.h}`;
@@ -609,7 +702,7 @@ function LineupTitleScene({
           ?
         </span>
         {shown.map((p, i) => {
-          const to = board.next[i];
+          const to = places[i];
           const from = board.last[i];
           const drop = t.drop + i * t.step;
           return (
