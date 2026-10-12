@@ -1,0 +1,68 @@
+/*
+ * The loader's shuffle in CSS, so it runs on the compositor and keeps moving
+ * while the page is busy behind it (a match's opening rehearsed under the
+ * start's loading screen). One cycle is three steps of 720 ms: each card
+ * moves for 520 ms and rests. It starts on the card going round the back:
+ * from the right, lifted and smaller, to the left (behind the others), then to
+ * the middle (on top), then to the right. Each card starts a step apart (its
+ * delay comes inline).
+ */
+.card {
+  animation:
+    shuffle 2160ms infinite,
+    shuffleDepth 2160ms infinite step-end;
+}
+@keyframes shuffle {
+  0% {
+    transform: translate(60px, 10px) scale(0.94) rotate(14deg);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  12.037% {
+    transform: translate(0, -26px) scale(0.84) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  24.074%,
+  33.333% {
+    transform: translate(-60px, 10px) scale(0.94) rotate(-14deg);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  57.407%,
+  66.667% {
+    transform: translate(0, -4px) scale(1.06) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  90.741%,
+  100% {
+    transform: translate(60px, 10px) scale(0.94) rotate(14deg);
+  }
+}
+
+/* the card going round the back stays behind for its step; then the middle on top, the right under it */
+@keyframes shuffleDepth {
+  0% {
+    z-index: 0;
+  }
+  33.333% {
+    z-index: 3;
+  }
+  66.667% {
+    z-index: 2;
+  }
+}
+
+/* the table's shadow, breathing with each step */
+.shadow {
+  animation: breathe 720ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes breathe {
+  50% {
+    transform: scaleX(0.86);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .shadow {
+    animation: none;
+  }
+}

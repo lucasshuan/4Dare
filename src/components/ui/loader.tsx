@@ -1,20 +1,20 @@
 "use client";
 
 import { m, useReducedMotion } from "motion/react";
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
+import s from "./loader.module.css";
 
-/** One step of the shuffle, in ms: a card moves, the hand rests a moment. */
-const STEP = 720;
-const MOVE = 0.52;
-
-/** Where a card sits in the hand: left, middle (on top), right. */
+/** Where a card sits in the hand: left, middle (on top), right. Still for reduced motion. */
 const SLOTS = [
-  { x: -60, y: 10, rotate: -14, scale: 0.94, z: 1 },
-  { x: 0, y: -4, rotate: 0, scale: 1.06, z: 3 },
-  { x: 60, y: 10, rotate: 14, scale: 0.94, z: 2 },
+  "translate(-60px, 10px) scale(0.94) rotate(-14deg)",
+  "translate(0, -4px) scale(1.06)",
+  "translate(60px, 10px) scale(0.94) rotate(14deg)",
 ] as const;
+/** Each card's place in the shuffle's cycle (loader.module.css): the left one moves to the middle, the middle one to the right, the right one round the back. */
+const DELAYS = ["-720ms", "-1440ms", "0ms"] as const;
+/** Which card is on top while still: the middle one, then the right one. */
+const DEPTHS = [1, 3, 2] as const;
 
 /** The three cards: a pastel face and its "?", in the theme's colours. */
 const CARDS = [
@@ -25,60 +25,44 @@ const CARDS = [
 
 /**
  * Three "?" cards shuffled in a hand: every step the right one travels behind
- * the others to the left, and the next one takes the middle. Still for reduced motion.
+ * the others to the left, and the next one takes the middle. Pure CSS, so it
+ * keeps going while the page works under it. Still for reduced motion.
  */
 function Shuffle() {
-  const reduced = useReducedMotion() ?? false;
-  const [step, setStep] = useState(0);
-  useEffect(() => {
-    if (reduced) return;
-    const id = window.setInterval(() => setStep((n) => n + 1), STEP);
-    return () => window.clearInterval(id);
-  }, [reduced]);
   return (
     <div aria-hidden="true" className="relative h-44 w-60">
       {/* the table's shadow, breathing with the hand */}
-      <m.span
-        className="absolute bottom-2 left-1/2 h-4 w-40 -translate-x-1/2 rounded-[50%] bg-ink/10 blur-[6px]"
-        animate={reduced ? undefined : { scaleX: [1, 0.86, 1] }}
-        transition={{
-          duration: STEP / 1000,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: ease.swap,
-        }}
+      <span
+        className={cn(
+          "absolute bottom-2 left-1/2 h-4 w-40 -translate-x-1/2 rounded-[50%] bg-ink/10 blur-[6px]",
+          s.shadow,
+        )}
       />
-      {CARDS.map((card, i) => {
-        const slot = (i + step) % 3;
-        const at = SLOTS[slot];
-        // the card that just left the right goes round the back, lifted
-        const wrapping = step > 0 && slot === 0;
-        return (
-          <m.div
-            key={card.face}
-            className="absolute top-9 left-1/2 -ml-9 flex h-25 w-18 flex-col rounded-[15px] bg-surface p-1.5 shadow-card ring-1 ring-line"
-            style={{ zIndex: wrapping ? 0 : at.z }}
-            initial={false}
-            animate={{
-              x: wrapping ? [SLOTS[2].x, 0, at.x] : at.x,
-              y: wrapping ? [SLOTS[2].y, -26, at.y] : at.y,
-              rotate: wrapping ? [SLOTS[2].rotate, 0, at.rotate] : at.rotate,
-              scale: wrapping ? [SLOTS[2].scale, 0.84, at.scale] : at.scale,
-            }}
-            transition={{ duration: MOVE, ease: ease.swap }}
+      {CARDS.map((card, i) => (
+        <div
+          key={card.face}
+          className={cn(
+            "absolute top-9 left-1/2 -ml-9 flex h-25 w-18 flex-col rounded-[15px] bg-surface p-1.5 shadow-card ring-1 ring-line",
+            s.card,
+          )}
+          style={{
+            transform: SLOTS[i],
+            zIndex: DEPTHS[i],
+            animationDelay: DELAYS[i],
+          }}
+        >
+          <span
+            className={cn(
+              "flex flex-1 items-center justify-center rounded-[10px] font-display font-extrabold text-[40px] leading-none",
+              card.face,
+              card.mark,
+            )}
           >
-            <span
-              className={cn(
-                "flex flex-1 items-center justify-center rounded-[10px] font-display font-extrabold text-[40px] leading-none",
-                card.face,
-                card.mark,
-              )}
-            >
-              ?
-            </span>
-            <span className="mx-1 mt-1.5 mb-0.5 h-1.5 w-2/3 rounded-pill bg-line" />
-          </m.div>
-        );
-      })}
+            ?
+          </span>
+          <span className="mx-1 mt-1.5 mb-0.5 h-1.5 w-2/3 rounded-pill bg-line" />
+        </div>
+      ))}
     </div>
   );
 }
@@ -91,9 +75,12 @@ export function Loader({
   label,
   className,
   roomCode,
+  pill = false,
 }: {
   label: string;
   className?: string;
+  /** Its words on a pill, readable over a coloured backdrop (the room's code brings one too). */
+  pill?: boolean;
   /** The hand stays mounted as creation becomes the room's entrance. */
   roomCode?: string;
 }) {
@@ -171,8 +158,9 @@ export function Loader({
         className="relative rounded-pill px-5 py-2 font-semibold text-ink-muted text-lg"
         initial={false}
         animate={{
-          backgroundColor: room ? "var(--surface)" : "#ffffff00",
-          boxShadow: room ? "0 6px 24px #00000012" : "0 0px 0px #00000000",
+          backgroundColor: room || pill ? "var(--surface)" : "#ffffff00",
+          boxShadow:
+            room || pill ? "0 6px 24px #00000012" : "0 0px 0px #00000000",
         }}
         transition={{ duration: 0.65, ease: ease.soft }}
       >
