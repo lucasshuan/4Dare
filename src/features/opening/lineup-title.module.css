@@ -3,12 +3,26 @@
    1280×720, or 780×1688 on a phone held upright (.portrait); every
    animation-delay comes inline, in seconds from the title beat's start. */
 
+/* the room's colour, over the window: the canvas plus what shows past it */
+.tone {
+  position: absolute;
+  left: calc(var(--bx) * -1);
+  top: calc(var(--by) * -1);
+  width: calc(1280px + 2 * var(--bx));
+  height: calc(720px + 2 * var(--by));
+  filter: saturate(1.16) contrast(1.07) sepia(0.1);
+}
+.portrait.tone {
+  width: calc(780px + 2 * var(--bx));
+  height: calc(1688px + 2 * var(--by));
+}
 .screen {
-  position: relative;
+  position: absolute;
+  left: var(--bx);
+  top: var(--by);
   width: 1280px;
   height: 720px;
   background: #c99a5f;
-  filter: saturate(1.16) contrast(1.07) sepia(0.1);
 }
 .portrait.screen {
   width: 780px;
@@ -40,13 +54,14 @@
     transform: scale(1.08) translate(-9px, -27px);
   }
 }
-/* lamp light: a warm middle, very dark edges and corners; past the canvas (its shadow), the darkest of it */
+/* lamp light: a warm middle, very dark edges and corners, over the whole window (the canvas and what
+   shows past it, so its sides carry on with no step); past that (its shadow), the darkest of it */
 .vignette {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 1280px;
-  height: 720px;
+  left: calc(var(--bx) * -1);
+  top: calc(var(--by) * -1);
+  width: calc(1280px + 2 * var(--bx));
+  height: calc(720px + 2 * var(--by));
   z-index: 20;
   pointer-events: none;
   background: radial-gradient(
@@ -59,8 +74,8 @@
   box-shadow: 0 0 0 2000px rgba(24, 9, 2, 0.86);
 }
 .portrait .vignette {
-  width: 780px;
-  height: 1688px;
+  width: calc(780px + 2 * var(--bx));
+  height: calc(1688px + 2 * var(--by));
   background: radial-gradient(
     95% 70% at 50% 46%,
     rgba(255, 200, 120, 0.12) 0%,
@@ -73,16 +88,15 @@
 /* the coach's room: faded diamond wallpaper with stains and warm light; the wall and what hangs on it a little out of focus, the board in front sharp */
 .wall {
   position: absolute;
-  left: -2000px;
-  top: -2000px;
   filter: blur(1.3px);
 }
+/* the light and stains of age, over the whole window like the lamp */
 .aging {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 1280px;
-  height: 720px;
+  left: calc(var(--bx) * -1);
+  top: calc(var(--by) * -1);
+  width: calc(1280px + 2 * var(--bx));
+  height: calc(720px + 2 * var(--by));
   pointer-events: none;
   background:
     radial-gradient(
@@ -119,8 +133,8 @@
     );
 }
 .portrait .aging {
-  width: 780px;
-  height: 1688px;
+  width: calc(780px + 2 * var(--bx));
+  height: calc(1688px + 2 * var(--by));
 }
 /* a team pennant on the wall */
 .pennant {

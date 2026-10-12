@@ -3,7 +3,17 @@
 import { type CSSProperties, memo } from "react";
 import { cn } from "@/lib/cn";
 import s from "./lineup-title.module.css";
-import { avatarSrc, litOf, seatOf, type TitleProps } from "./title-kit";
+import {
+  avatarSrc,
+  type Bleed,
+  litOf,
+  seatOf,
+  type TitleProps,
+} from "./title-kit";
+
+/** No window past the canvas: what a scene drawn on its own assumes. */
+const NO_BLEED: Bleed = { x: 0, y: 0 };
+
 import type { TitleCue } from "./title-sound";
 import { lineupTimes, sec } from "./title-timing";
 
@@ -304,16 +314,20 @@ function links(pos: readonly Pt[], goal: Pt, n: number) {
 }
 
 /** The wallpaper: faded diamonds in cream and caramel with a brown outline and a dot in each. */
-function Wall({ w, h }: { w: number; h: number }) {
-  // past the canvas on every side, the same pattern carried on
-  const W = w + 4000;
-  const H = h + 4000;
+function Wall({ w, h, bleed }: { w: number; h: number; bleed: Bleed }) {
+  // past the canvas as far as the window goes (and the blur's edge), the same
+  // pattern carried on: no further, a blurred layer too big for the browser is cut short
+  const ex = bleed.x + 24;
+  const ey = bleed.y + 24;
+  const W = w + 2 * ex;
+  const H = h + 2 * ey;
   return (
     <svg
       className={s.wall}
       width={W}
       height={H}
-      viewBox={`-2000 -2000 ${W} ${H}`}
+      viewBox={`${-ex} ${-ey} ${W} ${H}`}
+      style={{ left: -ex, top: -ey }}
       aria-hidden="true"
     >
       <defs>
@@ -353,16 +367,10 @@ function Wall({ w, h }: { w: number; h: number }) {
           <circle cx="64" cy="96" r="3.4" fill="#5e3518" fillOpacity=".7" />
         </pattern>
       </defs>
+      <rect x={-ex} y={-ey} width={W} height={H} fill="url(#lu-title-wall)" />
       <rect
-        x="-2000"
-        y="-2000"
-        width={W}
-        height={H}
-        fill="url(#lu-title-wall)"
-      />
-      <rect
-        x="-2000"
-        y="-2000"
+        x={-ex}
+        y={-ey}
         width={W}
         height={H}
         fill="#f2dfb8"
@@ -385,8 +393,11 @@ function LineupTitleScene({
   players,
   first,
   portrait,
+  bleed = NO_BLEED,
   labels,
 }: TitleProps & {
+  /** How far the window goes past the canvas, for the wall to cover it. */
+  bleed?: Bleed;
   labels: {
     /** The match number as written ("1", "1st"), and the one before (a rematch). */
     half: string;
@@ -408,474 +419,498 @@ function LineupTitleScene({
   const { w, h } = portrait ? { w: 780, h: 1688 } : { w: 1280, h: 720 };
   const vb = `0 0 ${board.w} ${board.h}`;
   return (
-    <div className={cn(s.screen, portrait && s.portrait)}>
-      <Wall w={w} h={h} />
-      <span className={s.aging} />
-      <svg className={s.pennant} viewBox="-10 -56 104 256" aria-hidden="true">
-        <path
-          d="M-2 7L42 -48L86 7"
-          fill="none"
-          stroke="#3f2614"
-          strokeWidth="1.6"
-          strokeLinejoin="round"
-        />
-        <circle cx="42" cy="-49" r="3.2" fill="#6b6f78" />
-        <path d="M4 10H80L42 196Z" fill="#1E2433" />
-        <path d="M4 10H80L74.5 37H9.5Z" fill="#cf7024" />
-        <path d="M14.6 62H69.4L64.5 86H19.5Z" fill="#cf7024" />
-        <path d="M24.4 110H59.6L54.7 134H29.3Z" fill="#cf7024" />
-        <path
-          d="M4 10H80L42 196Z"
-          fill="none"
-          stroke="#F6E3A1"
-          strokeWidth="2.4"
-          strokeLinejoin="round"
-        />
-        <rect x="-6" y="3" width="96" height="8" rx="4" fill="#a8622b" />
-        <rect
-          x="-6"
-          y="3"
-          width="96"
-          height="3"
-          rx="1.5"
-          fill="#d08a4e"
-          fillOpacity=".7"
-        />
-        <circle cx="-6" cy="7" r="5" fill="#7a4220" />
-        <circle cx="90" cy="7" r="5" fill="#7a4220" />
-      </svg>
-      {board.legs.map((left) => (
-        <span key={left} className={s.leg} style={{ left }} />
-      ))}
-      <div className={s.note}>
-        <span className={s.noteTape} />
-        <div className={s.paper}>
-          <b>{labels.formation}</b>
-          <span>{labels.or}</span>
-        </div>
-      </div>
-      <Whistle />
-      <span className={cn(s.frame, s.wood)} />
-      {board.screws.map(([left, top]) => (
-        <span
-          key={`${left}-${top}`}
-          className={s.screw}
-          style={{ left, top }}
-        />
-      ))}
-      <span className={s.tray} />
-      <span
-        className={s.chalkStick}
-        style={{ left: board.sticks[0], width: 54, transform: "rotate(-4deg)" }}
-      />
-      <span
-        className={s.chalkStick}
-        style={{
-          left: board.sticks[1],
-          width: 38,
-          transform: "rotate(3deg)",
-          background: "#f6e3a1",
-        }}
-      />
-      <span className={s.eraser} />
-      <span className={s.lampedge} style={{ animationDelay: "0.28s" }} />
-      <span className={s.lampdark} style={{ animationDelay: "0.12s" }} />
-      <span className={s.fromwhite} style={{ animationDelay: "0s" }} />
-      <div className={s.slate}>
-        <svg
-          className={s.erased}
-          width={board.w}
-          height={board.h}
-          viewBox={vb}
-          aria-hidden="true"
-        >
-          <defs>
-            <filter
-              id="lu-title-erased"
-              x="-10%"
-              y="-20%"
-              width="120%"
-              height="140%"
-            >
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.006 0.22"
-                numOctaves="3"
-                seed="7"
-                result="streak"
-              />
-              <feColorMatrix
-                in="streak"
-                type="matrix"
-                values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.6 -0.45"
-                result="grain"
-              />
-              <feGaussianBlur
-                in="SourceGraphic"
-                stdDeviation="26"
-                result="soft"
-              />
-              <feComposite in="grain" in2="soft" operator="in" result="marks" />
-              <feGaussianBlur in="marks" stdDeviation="5.2 2.6" />
-            </filter>
-          </defs>
-          <g
-            filter="url(#lu-title-erased)"
-            fill="none"
-            stroke="#e8eee2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            {board.erased.map(([d, width, opacity]) => (
-              <path key={d} d={d} strokeWidth={width} strokeOpacity={opacity} />
-            ))}
-          </g>
-        </svg>
-        {first ? null : (
-          <>
-            <svg
-              className={s.chalk}
-              width={board.w}
-              height={board.h}
-              viewBox={vb}
-              aria-hidden="true"
-            >
-              {board.smears.map((d) => (
-                <path
-                  key={d}
-                  className={s.smear}
-                  d={d}
-                  style={{ animationDelay: sec(t.smear) }}
-                />
-              ))}
-            </svg>
-            <svg
-              className={s.chalk}
-              width={board.w}
-              height={board.h}
-              viewBox={vb}
-              aria-hidden="true"
-            >
-              {ghost.map((d) => (
-                <path
-                  key={d}
-                  className={s.ghostChalk}
-                  pathLength={1}
-                  d={d}
-                  style={{ animationDelay: sec(t.ghost) }}
-                />
-              ))}
-            </svg>
-          </>
-        )}
-        <svg
-          className={s.chalk}
-          width={board.w}
-          height={board.h}
-          viewBox={vb}
-          aria-hidden="true"
-        >
-          <defs>
-            <filter
-              id="lu-title-chalk"
-              x="-5%"
-              y="-5%"
-              width="110%"
-              height="110%"
-            >
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="1.1"
-                numOctaves="2"
-                result="n"
-              />
-              <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" />
-            </filter>
-          </defs>
-          <g filter="url(#lu-title-chalk)">
-            <path
-              className={s.draw}
-              pathLength={1}
-              d={board.pitch[0]}
-              style={{
-                animationDelay: sec(t.pitch),
-                animationDuration: sec(t.pitchDur),
-              }}
-            />
-            <path
-              className={s.draw}
-              pathLength={1}
-              d={board.pitch[1]}
-              style={{
-                animationDelay: sec(t.pitch2),
-                animationDuration: sec(t.lineDur),
-              }}
-            />
-            <path
-              className={s.draw}
-              pathLength={1}
-              d={board.pitch[2]}
-              style={{
-                animationDelay: sec(t.pitch2),
-                animationDuration: sec(t.lineDur),
-              }}
-            />
-            <path
-              className={s.draw}
-              pathLength={1}
-              d={board.pitch[3]}
-              style={{
-                animationDelay: sec(t.pitch3),
-                animationDuration: sec(t.lineDur),
-              }}
-            />
-            <path
-              className={s.draw}
-              pathLength={1}
-              d={board.pitch[4]}
-              style={{
-                animationDelay: sec(t.pitch3),
-                animationDuration: sec(t.lineDur),
-              }}
-            />
-            <path
-              className={s.draw}
-              pathLength={1}
-              d={board.pitch[5]}
-              style={{
-                animationDelay: sec(t.pitch3),
-                animationDuration: sec(t.lineDur),
-              }}
-            />
-          </g>
-        </svg>
-        {/* the circle and the arrows each on their own, so drawing them doesn't redraw the pitch's chalk (the same noise, the same marks) */}
-        <svg
-          className={s.chalk}
-          width={board.w}
-          height={board.h}
-          viewBox={vb}
-          aria-hidden="true"
-        >
+    // the colour of the room over the whole window: a filter on the canvas alone
+    // stops short of the window's edges, where the wall shows through untinted
+    <div className={cn(s.tone, portrait && s.portrait)}>
+      <div className={cn(s.screen, portrait && s.portrait)}>
+        <Wall w={w} h={h} bleed={bleed} />
+        <span className={s.aging} />
+        <svg className={s.pennant} viewBox="-10 -56 104 256" aria-hidden="true">
           <path
-            className={s.draw}
-            pathLength={1}
-            d={board.circle}
-            filter="url(#lu-title-chalk)"
-            style={{
-              animationDelay: sec(t.circle),
-              animationDuration: sec(t.circleDur),
-            }}
+            d="M-2 7L42 -48L86 7"
+            fill="none"
+            stroke="#3f2614"
+            strokeWidth="1.6"
+            strokeLinejoin="round"
           />
+          <circle cx="42" cy="-49" r="3.2" fill="#6b6f78" />
+          <path d="M4 10H80L42 196Z" fill="#1E2433" />
+          <path d="M4 10H80L74.5 37H9.5Z" fill="#cf7024" />
+          <path d="M14.6 62H69.4L64.5 86H19.5Z" fill="#cf7024" />
+          <path d="M24.4 110H59.6L54.7 134H29.3Z" fill="#cf7024" />
+          <path
+            d="M4 10H80L42 196Z"
+            fill="none"
+            stroke="#F6E3A1"
+            strokeWidth="2.4"
+            strokeLinejoin="round"
+          />
+          <rect x="-6" y="3" width="96" height="8" rx="4" fill="#a8622b" />
+          <rect
+            x="-6"
+            y="3"
+            width="96"
+            height="3"
+            rx="1.5"
+            fill="#d08a4e"
+            fillOpacity=".7"
+          />
+          <circle cx="-6" cy="7" r="5" fill="#7a4220" />
+          <circle cx="90" cy="7" r="5" fill="#7a4220" />
         </svg>
-        <svg
-          className={s.chalk}
-          width={board.w}
-          height={board.h}
-          viewBox={vb}
-          aria-hidden="true"
-        >
-          <g filter="url(#lu-title-chalk)">
-            {arrows.map((d, i) => (
+        {board.legs.map((left) => (
+          <span key={left} className={s.leg} style={{ left }} />
+        ))}
+        <div className={s.note}>
+          <span className={s.noteTape} />
+          <div className={s.paper}>
+            <b>{labels.formation}</b>
+            <span>{labels.or}</span>
+          </div>
+        </div>
+        <Whistle />
+        <span className={cn(s.frame, s.wood)} />
+        {board.screws.map(([left, top]) => (
+          <span
+            key={`${left}-${top}`}
+            className={s.screw}
+            style={{ left, top }}
+          />
+        ))}
+        <span className={s.tray} />
+        <span
+          className={s.chalkStick}
+          style={{
+            left: board.sticks[0],
+            width: 54,
+            transform: "rotate(-4deg)",
+          }}
+        />
+        <span
+          className={s.chalkStick}
+          style={{
+            left: board.sticks[1],
+            width: 38,
+            transform: "rotate(3deg)",
+            background: "#f6e3a1",
+          }}
+        />
+        <span className={s.eraser} />
+        <span className={s.lampedge} style={{ animationDelay: "0.28s" }} />
+        <span className={s.lampdark} style={{ animationDelay: "0.12s" }} />
+        <span className={s.fromwhite} style={{ animationDelay: "0s" }} />
+        <div className={s.slate}>
+          <svg
+            className={s.erased}
+            width={board.w}
+            height={board.h}
+            viewBox={vb}
+            aria-hidden="true"
+          >
+            <defs>
+              <filter
+                id="lu-title-erased"
+                x="-10%"
+                y="-20%"
+                width="120%"
+                height="140%"
+              >
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.006 0.22"
+                  numOctaves="3"
+                  seed="7"
+                  result="streak"
+                />
+                <feColorMatrix
+                  in="streak"
+                  type="matrix"
+                  values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.6 -0.45"
+                  result="grain"
+                />
+                <feGaussianBlur
+                  in="SourceGraphic"
+                  stdDeviation="26"
+                  result="soft"
+                />
+                <feComposite
+                  in="grain"
+                  in2="soft"
+                  operator="in"
+                  result="marks"
+                />
+                <feGaussianBlur in="marks" stdDeviation="5.2 2.6" />
+              </filter>
+            </defs>
+            <g
+              filter="url(#lu-title-erased)"
+              fill="none"
+              stroke="#e8eee2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {board.erased.map(([d, width, opacity]) => (
+                <path
+                  key={d}
+                  d={d}
+                  strokeWidth={width}
+                  strokeOpacity={opacity}
+                />
+              ))}
+            </g>
+          </svg>
+          {first ? null : (
+            <>
+              <svg
+                className={s.chalk}
+                width={board.w}
+                height={board.h}
+                viewBox={vb}
+                aria-hidden="true"
+              >
+                {board.smears.map((d) => (
+                  <path
+                    key={d}
+                    className={s.smear}
+                    d={d}
+                    style={{ animationDelay: sec(t.smear) }}
+                  />
+                ))}
+              </svg>
+              <svg
+                className={s.chalk}
+                width={board.w}
+                height={board.h}
+                viewBox={vb}
+                aria-hidden="true"
+              >
+                {ghost.map((d) => (
+                  <path
+                    key={d}
+                    className={s.ghostChalk}
+                    pathLength={1}
+                    d={d}
+                    style={{ animationDelay: sec(t.ghost) }}
+                  />
+                ))}
+              </svg>
+            </>
+          )}
+          <svg
+            className={s.chalk}
+            width={board.w}
+            height={board.h}
+            viewBox={vb}
+            aria-hidden="true"
+          >
+            <defs>
+              <filter
+                id="lu-title-chalk"
+                x="-5%"
+                y="-5%"
+                width="110%"
+                height="110%"
+              >
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="1.1"
+                  numOctaves="2"
+                  result="n"
+                />
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" />
+              </filter>
+            </defs>
+            <g filter="url(#lu-title-chalk)">
               <path
-                key={d}
                 className={s.draw}
                 pathLength={1}
-                d={d}
+                d={board.pitch[0]}
                 style={{
-                  animationDelay: sec(t.arrows + i * t.arrowStep),
-                  animationDuration: sec(t.arrowDur),
+                  animationDelay: sec(t.pitch),
+                  animationDuration: sec(t.pitchDur),
                 }}
               />
-            ))}
-          </g>
-        </svg>
-        <span
-          className={cn(s.mystery, s.write)}
-          style={{
-            left: board.mystery.x,
-            top: board.mystery.y,
-            animationDelay: sec(t.mystery),
-            animationDuration: sec(t.writeDur),
-          }}
-        >
-          ?
-        </span>
-        {shown.map((p, i) => {
-          const to = places[i];
-          const from = board.last[i];
-          const drop = t.drop + i * t.step;
-          return (
-            <div
-              key={p.id}
-              className={cn(s.mg, !first && s.move)}
-              style={
-                {
-                  left: to.x - 40,
-                  top: to.y - 40,
-                  "--from-x": `${from.x - to.x}px`,
-                  "--from-y": `${from.y - to.y}px`,
-                  animationDelay: first ? undefined : sec(t.move + i * 0.05),
-                } as CSSProperties
-              }
-            >
-              <div
-                className={s.mag}
+              <path
+                className={s.draw}
+                pathLength={1}
+                d={board.pitch[1]}
                 style={{
-                  background: `radial-gradient(circle at 35% 30%, ${litOf(p.slot)}, ${seatOf(p.slot)} 62%)`,
-                  animationDelay: sec(drop),
-                  animationDuration: sec(t.dropDur),
+                  animationDelay: sec(t.pitch2),
+                  animationDuration: sec(t.lineDur),
                 }}
-              >
-                {first ? (
-                  <span
-                    className={s.mdust}
-                    style={{ animationDelay: sec(drop + 0.3) }}
-                  />
-                ) : null}
-                <span className={s.magHi} />
-                <span className={s.av} style={{ background: p.avatar.color }}>
-                  {/* biome-ignore lint/performance/noImgElement: generated svg or a remote picture */}
-                  <img src={avatarSrc(p.avatar)} alt="" />
-                </span>
-              </div>
-              {p.crowned && !first ? (
-                // biome-ignore lint/performance/noImgElement: a small svg
-                <img
-                  className={s.kcrown}
-                  src="/opening/crown.svg"
-                  alt=""
+              />
+              <path
+                className={s.draw}
+                pathLength={1}
+                d={board.pitch[2]}
+                style={{
+                  animationDelay: sec(t.pitch2),
+                  animationDuration: sec(t.lineDur),
+                }}
+              />
+              <path
+                className={s.draw}
+                pathLength={1}
+                d={board.pitch[3]}
+                style={{
+                  animationDelay: sec(t.pitch3),
+                  animationDuration: sec(t.lineDur),
+                }}
+              />
+              <path
+                className={s.draw}
+                pathLength={1}
+                d={board.pitch[4]}
+                style={{
+                  animationDelay: sec(t.pitch3),
+                  animationDuration: sec(t.lineDur),
+                }}
+              />
+              <path
+                className={s.draw}
+                pathLength={1}
+                d={board.pitch[5]}
+                style={{
+                  animationDelay: sec(t.pitch3),
+                  animationDuration: sec(t.lineDur),
+                }}
+              />
+            </g>
+          </svg>
+          {/* the circle and the arrows each on their own, so drawing them doesn't redraw the pitch's chalk (the same noise, the same marks) */}
+          <svg
+            className={s.chalk}
+            width={board.w}
+            height={board.h}
+            viewBox={vb}
+            aria-hidden="true"
+          >
+            <path
+              className={s.draw}
+              pathLength={1}
+              d={board.circle}
+              filter="url(#lu-title-chalk)"
+              style={{
+                animationDelay: sec(t.circle),
+                animationDuration: sec(t.circleDur),
+              }}
+            />
+          </svg>
+          <svg
+            className={s.chalk}
+            width={board.w}
+            height={board.h}
+            viewBox={vb}
+            aria-hidden="true"
+          >
+            <g filter="url(#lu-title-chalk)">
+              {arrows.map((d, i) => (
+                <path
+                  key={d}
+                  className={s.draw}
+                  pathLength={1}
+                  d={d}
                   style={{
-                    width: 76,
-                    left: -16,
-                    top: -52,
-                    animationDelay: sec(t.crown),
+                    animationDelay: sec(t.arrows + i * t.arrowStep),
+                    animationDuration: sec(t.arrowDur),
                   }}
                 />
-              ) : null}
-              <span
-                className={cn(s.mname, s.write)}
-                style={{
-                  fontSize: p.name.length > 10 ? 22 : 28,
-                  animationDelay: sec(drop + t.nameLag),
-                  animationDuration: sec(t.nameDur),
-                }}
+              ))}
+            </g>
+          </svg>
+          <span
+            className={cn(s.mystery, s.write)}
+            style={{
+              left: board.mystery.x,
+              top: board.mystery.y,
+              animationDelay: sec(t.mystery),
+              animationDuration: sec(t.writeDur),
+            }}
+          >
+            ?
+          </span>
+          {shown.map((p, i) => {
+            const to = places[i];
+            const from = board.last[i];
+            const drop = t.drop + i * t.step;
+            return (
+              <div
+                key={p.id}
+                className={cn(s.mg, !first && s.move)}
+                style={
+                  {
+                    left: to.x - 40,
+                    top: to.y - 40,
+                    "--from-x": `${from.x - to.x}px`,
+                    "--from-y": `${from.y - to.y}px`,
+                    animationDelay: first ? undefined : sec(t.move + i * 0.05),
+                  } as CSSProperties
+                }
               >
-                {p.name}
-              </span>
-            </div>
-          );
-        })}
-        <h2
-          className={cn(s.title, s.write)}
-          style={{
-            animationDelay: sec(t.title),
-            animationDuration: sec(t.titleDur),
-          }}
-        >
-          {labels.title}
-        </h2>
-        <div className={s.halfwrap} style={{ animationDelay: sec(t.fly) }}>
-          <div className={s.halfbox}>
-            <div className={s.htext}>
-              <span className={s.hnum}>
-                {first ? null : (
-                  <>
+                <div
+                  className={s.mag}
+                  style={{
+                    background: `radial-gradient(circle at 35% 30%, ${litOf(p.slot)}, ${seatOf(p.slot)} 62%)`,
+                    animationDelay: sec(drop),
+                    animationDuration: sec(t.dropDur),
+                  }}
+                >
+                  {first ? (
                     <span
-                      className={s.old}
-                      style={{ animationDelay: sec(t.smudge) }}
-                    >
-                      {labels.prevHalf}
-                    </span>
-                    <span
-                      className={s.rub}
-                      style={{ animationDelay: sec(t.erase) }}
+                      className={s.mdust}
+                      style={{ animationDelay: sec(drop + 0.3) }}
                     />
-                  </>
-                )}
+                  ) : null}
+                  <span className={s.magHi} />
+                  <span className={s.av} style={{ background: p.avatar.color }}>
+                    {/* biome-ignore lint/performance/noImgElement: generated svg or a remote picture */}
+                    <img src={avatarSrc(p.avatar)} alt="" />
+                  </span>
+                </div>
+                {p.crowned && !first ? (
+                  // biome-ignore lint/performance/noImgElement: a small svg
+                  <img
+                    className={s.kcrown}
+                    src="/opening/crown.svg"
+                    alt=""
+                    style={{
+                      width: 76,
+                      left: -16,
+                      top: -52,
+                      animationDelay: sec(t.crown),
+                    }}
+                  />
+                ) : null}
+                <span
+                  className={cn(s.mname, s.write)}
+                  style={{
+                    fontSize: p.name.length > 10 ? 22 : 28,
+                    animationDelay: sec(drop + t.nameLag),
+                    animationDuration: sec(t.nameDur),
+                  }}
+                >
+                  {p.name}
+                </span>
+              </div>
+            );
+          })}
+          <h2
+            className={cn(s.title, s.write)}
+            style={{
+              animationDelay: sec(t.title),
+              animationDuration: sec(t.titleDur),
+            }}
+          >
+            {labels.title}
+          </h2>
+          <div className={s.halfwrap} style={{ animationDelay: sec(t.fly) }}>
+            <div className={s.halfbox}>
+              <div className={s.htext}>
+                <span className={s.hnum}>
+                  {first ? null : (
+                    <>
+                      <span
+                        className={s.old}
+                        style={{ animationDelay: sec(t.smudge) }}
+                      >
+                        {labels.prevHalf}
+                      </span>
+                      <span
+                        className={s.rub}
+                        style={{ animationDelay: sec(t.erase) }}
+                      />
+                    </>
+                  )}
+                  <span
+                    className={s.write}
+                    style={{
+                      display: "inline-block",
+                      animationDelay: sec(t.numW),
+                      animationDuration: "0.3s",
+                      animationTimingFunction: "steps(5)",
+                    }}
+                  >
+                    {labels.half}
+                  </span>
+                </span>
                 <span
                   className={s.write}
                   style={{
-                    display: "inline-block",
-                    animationDelay: sec(t.numW),
-                    animationDuration: "0.3s",
-                    animationTimingFunction: "steps(5)",
+                    animationDelay: sec(t.restW),
+                    animationDuration: sec(t.restDur),
                   }}
                 >
-                  {labels.half}
+                  {labels.rest}
                 </span>
-              </span>
-              <span
-                className={s.write}
-                style={{
-                  animationDelay: sec(t.restW),
-                  animationDuration: sec(t.restDur),
-                }}
-              >
-                {labels.rest}
-              </span>
+              </div>
+              <svg className={s.uline} viewBox="0 0 440 34" aria-hidden="true">
+                <path
+                  className={s.draw}
+                  pathLength={1}
+                  d="M18 12C120 4 300 6 424 14"
+                  style={{
+                    animationDelay: sec(t.ul1),
+                    animationDuration: sec(t.ulDur),
+                  }}
+                />
+                <path
+                  className={s.draw}
+                  pathLength={1}
+                  d="M40 27C150 20 290 22 400 28"
+                  style={{
+                    animationDelay: sec(t.ul2),
+                    animationDuration: sec(t.ulDur),
+                  }}
+                />
+              </svg>
+              {first
+                ? DUST.map(([x, y], i) => (
+                    <span
+                      key={`${x}-${y}`}
+                      className={s.dust}
+                      style={{
+                        left: `${x}%`,
+                        top: `${y}%`,
+                        animationDelay: sec(0.2 + i * 0.12),
+                      }}
+                    />
+                  ))
+                : null}
             </div>
-            <svg className={s.uline} viewBox="0 0 440 34" aria-hidden="true">
-              <path
-                className={s.draw}
-                pathLength={1}
-                d="M18 12C120 4 300 6 424 14"
-                style={{
-                  animationDelay: sec(t.ul1),
-                  animationDuration: sec(t.ulDur),
-                }}
-              />
-              <path
-                className={s.draw}
-                pathLength={1}
-                d="M40 27C150 20 290 22 400 28"
-                style={{
-                  animationDelay: sec(t.ul2),
-                  animationDuration: sec(t.ulDur),
-                }}
-              />
-            </svg>
-            {first
-              ? DUST.map(([x, y], i) => (
-                  <span
-                    key={`${x}-${y}`}
-                    className={s.dust}
-                    style={{
-                      left: `${x}%`,
-                      top: `${y}%`,
-                      animationDelay: sec(0.2 + i * 0.12),
-                    }}
-                  />
-                ))
-              : null}
           </div>
         </div>
-      </div>
-      <span className={s.vignette} />
-      <svg
-        className={s.grain}
-        width={w}
-        height={h}
-        viewBox={`0 0 ${w} ${h}`}
-        aria-hidden="true"
-      >
-        <filter id="lu-title-grain">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.78"
-            numOctaves="2"
-            stitchTiles="stitch"
+        <span className={s.vignette} />
+        {/* as far as the window goes, with room for its jumps */}
+        <svg
+          className={s.grain}
+          width={w + 2 * (bleed.x + 40)}
+          height={h + 2 * (bleed.y + 40)}
+          viewBox={`0 0 ${w + 2 * (bleed.x + 40)} ${h + 2 * (bleed.y + 40)}`}
+          style={{ left: -(bleed.x + 40), top: -(bleed.y + 40) }}
+          aria-hidden="true"
+        >
+          <filter id="lu-title-grain">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.78"
+              numOctaves="2"
+              stitchTiles="stitch"
+            />
+            <feColorMatrix type="saturate" values="0" />
+            <feComponentTransfer>
+              <feFuncR type="linear" slope="3.2" intercept="-1.1" />
+              <feFuncG type="linear" slope="3.2" intercept="-1.1" />
+              <feFuncB type="linear" slope="3.2" intercept="-1.1" />
+              <feFuncA type="linear" slope="0" intercept="1" />
+            </feComponentTransfer>
+          </filter>
+          <rect
+            width={w + 2 * (bleed.x + 40)}
+            height={h + 2 * (bleed.y + 40)}
+            filter="url(#lu-title-grain)"
           />
-          <feColorMatrix type="saturate" values="0" />
-          <feComponentTransfer>
-            <feFuncR type="linear" slope="3.2" intercept="-1.1" />
-            <feFuncG type="linear" slope="3.2" intercept="-1.1" />
-            <feFuncB type="linear" slope="3.2" intercept="-1.1" />
-            <feFuncA type="linear" slope="0" intercept="1" />
-          </feComponentTransfer>
-        </filter>
-        <rect width={w} height={h} filter="url(#lu-title-grain)" />
-      </svg>
+        </svg>
+      </div>
     </div>
   );
 }

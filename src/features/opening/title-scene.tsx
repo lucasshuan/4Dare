@@ -457,7 +457,12 @@ function Title({ card, first, startsAt, until, live, rehearse }: SceneProps) {
             labels={labels.impostor}
           />
         ) : game === "lineup" ? (
-          <LineupTitle {...props} portrait={portrait} labels={labels.lineup} />
+          <LineupTitle
+            {...props}
+            portrait={portrait}
+            bleed={bleed}
+            labels={labels.lineup}
+          />
         ) : (
           <WhoTitle {...props} portrait={portrait} labels={labels.who} />
         )

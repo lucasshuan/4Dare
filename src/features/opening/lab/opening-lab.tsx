@@ -140,6 +140,7 @@ export function OpeningLab({ query }: { lang: Lang; query: Query }) {
             <LineupTitle
               {...props}
               portrait={portrait}
+              bleed={bleed}
               labels={{
                 half: t("halfNumber", { n }),
                 prevHalf: t("halfNumber", { n: Math.max(1, n - 1) }),
