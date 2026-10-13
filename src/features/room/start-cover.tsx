@@ -101,8 +101,8 @@ export function StartCover() {
           data-start-cover
           className="pointer-events-none fixed inset-0 z-25 flex items-center justify-center overflow-hidden pb-6"
           initial={{ opacity: 0 }}
-          // once the lobby's panels are mostly gone
-          animate={{ opacity: 1, transition: { duration: 0.25, delay: 0.3 } }}
+          // as the lobby's last panel goes (three panels 70 ms apart, 0.3 s each: globals.css, .lobby-leave)
+          animate={{ opacity: 1, transition: { duration: 0.25, delay: 0.42 } }}
           exit={{ opacity: 0, transition: { duration: 0.3, ease: ease.soft } }}
         >
           <Loader label={t("starting")} className="relative" pill />
