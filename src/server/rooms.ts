@@ -67,11 +67,15 @@ const ctx = () => ({
 
 /** A chat older than this belongs to a room that died without closing. */
 const CHAT_TTL_MS = 24 * 3600_000;
+/** A watcher unseen this long is pruned (the lists leave them out long before). */
+const WATCH_TTL_MS = 3600_000;
 
 export async function openRoom(host: Identity, settings: RoomSettings) {
-  const { rooms, notify, chat } = getBackend();
-  // one indexed delete, no cron: the chats of rooms that never closed
+  const { rooms, notify, chat, watchers } = getBackend();
+  // one indexed delete, no cron: the chats of rooms that never closed, and
+  // watchers whose page died without a word
   background(() => chat.prune(Date.now() - CHAT_TTL_MS));
+  background(() => watchers.prune(Date.now() - WATCH_TTL_MS));
   for (let attempt = 0; attempt < 10; attempt++) {
     const state = newRoomState(randomCode(), host, settings, ctx());
     if (await rooms.create(state)) {
@@ -587,11 +591,20 @@ const LEFT_BEHIND: readonly Phase[] = ["lobby", "finished"];
 
 /**
  * One room at a time: once the player is in `code`, their seats in other
- * lobbies and podiums are given up. A match going on is never left here;
- * joining refuses it first (see currentMatch).
+ * lobbies and podiums are given up, and they stop watching anywhere else. A
+ * match going on is never left here; joining refuses it first (see
+ * currentMatch).
  */
 export async function leaveOtherRooms(id: PlayerId, code: string) {
-  const codes = await getBackend().rooms.withPlayer(id, LEFT_BEHIND);
+  const { rooms, watchers, notify } = getBackend();
+  const [codes, watching] = await Promise.all([
+    rooms.withPlayer(id, LEFT_BEHIND),
+    watchers.get(id),
+  ]);
+  if (watching && watching.room !== code) {
+    await watchers.remove(id, watching.room);
+    background(() => notify.watchersChanged(watching.room));
+  }
   await Promise.all(
     codes
       .filter((c) => c !== code)
@@ -620,12 +633,18 @@ export async function handOverSeats(
   player: Identity,
   prefer: string | null,
 ) {
-  const { rooms, chat } = getBackend();
+  const { rooms, chat, watchers, reports } = getBackend();
   const codes = await rooms.withPlayer(from, SEATED);
   await Promise.all([
     chat
       .reassign(from, player.id)
       .catch((e: unknown) => console.error("[chat] reassign failed:", e)),
+    watchers
+      .reassign(from, player)
+      .catch((e: unknown) => console.error("[watchers] reassign failed:", e)),
+    reports
+      .reassign(from, player.id)
+      .catch((e: unknown) => console.error("[reports] reassign failed:", e)),
     ...codes.map((code) =>
       dispatch(code, () => ({ type: "SWAP_PLAYER", from, player })).catch(
         (e: unknown) => {
@@ -667,7 +686,9 @@ export async function seatedElsewhere(
  * named after its host.
  */
 export async function syncIdentity(player: Identity) {
-  const codes = await getBackend().rooms.withPlayer(player.id, SEATED);
+  const { rooms, watchers } = getBackend();
+  const codes = await rooms.withPlayer(player.id, SEATED);
+  await watchers.rename(player);
   await Promise.all(
     codes.map((code) =>
       dispatch(code, () => ({ type: "UPDATE_IDENTITY", player })).catch(

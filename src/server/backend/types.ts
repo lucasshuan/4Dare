@@ -32,6 +32,7 @@ import type {
   Localized,
   Phase,
   PlayerId,
+  ReportReason,
   RoomState,
   Theme,
 } from "@/game/types";
@@ -66,6 +67,69 @@ export interface RoomStore {
   listActive(since: number): Promise<ActiveRoom[]>;
   /** Codes of the recent rooms in one of `phases` where `playerId` has a seat. */
   withPlayer(playerId: PlayerId, phases: readonly Phase[]): Promise<string[]>;
+}
+
+/** Someone watching a room (no seat), as kept (0050_watchers_and_reports.sql). */
+export interface StoredWatcher {
+  room: string;
+  person: Identity;
+  /** The host's order, lowest first. */
+  position: number;
+  /** When their page last asked for the room (ms). */
+  seenAt: number;
+  /** When their page closed, until it shows up again (ms). */
+  goneAt: number | null;
+}
+
+/**
+ * Watchers live outside RoomState, so thousands can watch without every room
+ * write carrying them. One room at a time: watching one stops watching any
+ * other.
+ */
+export interface WatcherStore {
+  /** Where `playerId` watches, if anywhere (stale or not). */
+  get(playerId: PlayerId): Promise<StoredWatcher | null>;
+  /** `person` watches `code`: in the place they had there, else last. Seen now. */
+  add(code: string, person: Identity): Promise<StoredWatcher>;
+  /** Stops watching `code`; true when they did. */
+  remove(playerId: PlayerId, code: string): Promise<boolean>;
+  /** Their page is open (seen now) or closed (gone now). */
+  touch(playerId: PlayerId, code: string, gone: boolean): Promise<void>;
+  /**
+   * The first `limit` watching `code` in order, and how many in all, leaving
+   * out pages closed past GONE_GRACE_MS or unseen for WATCH_STALE_MS.
+   */
+  list(
+    code: string,
+    limit: number,
+    now: number,
+  ): Promise<{ total: number; watchers: StoredWatcher[] }>;
+  /** Puts `playerId` at `position` in the order. */
+  move(playerId: PlayerId, code: string, position: number): Promise<void>;
+  /** New name or face: wherever they watch shows it. */
+  rename(person: Identity): Promise<void>;
+  /** A guest signed in: their watching row becomes the account's. */
+  reassign(from: PlayerId, to: Identity): Promise<void>;
+  /** Rows unseen since `before` (ms). */
+  prune(before: number): Promise<void>;
+}
+
+export interface NewReport {
+  reporterId: PlayerId;
+  target: Identity;
+  room: string;
+  reason: ReportReason;
+  note: string | null;
+  /** What the target wrote in the room's chat, oldest first: kept for good. */
+  lines: ChatMessage[];
+}
+
+/** What players say about someone in a room. Nothing reads them yet. */
+export interface ReportStore {
+  /** False when the reporter already reported the target in that room. */
+  add(report: NewReport): Promise<boolean>;
+  /** A guest signed in: their reports, both ways, become the account's. */
+  reassign(from: PlayerId, to: PlayerId): Promise<void>;
 }
 
 export interface NewCharacter {
@@ -395,6 +459,8 @@ export interface Notifier {
   roomChanged(code: string, version: number): Promise<void>;
   /** Tell home screens that the public room list changed. Best effort. */
   lobbyChanged(): Promise<void>;
+  /** Someone started or stopped watching the room, or moved in its order. Best effort. */
+  watchersChanged(code: string): Promise<void>;
   /** New chat lines in the room; `id` is the newest. A ping only, never the text (topics are public). Best effort. */
   chatChanged(code: string, id: number): Promise<void>;
   /** What for?: reactions to the board on stage, for every screen to float them. Best effort. */
@@ -422,6 +488,12 @@ export interface ChatStore {
   prune(before: number): Promise<void>;
   /** A guest signed in: their lines, and the system lines naming them, become the account's. */
   reassign(from: PlayerId, to: PlayerId): Promise<void>;
+  /** The newest `limit` lines `authorId` wrote in the room, oldest first. */
+  byAuthor(
+    code: string,
+    authorId: PlayerId,
+    limit: number,
+  ): Promise<ChatMessage[]>;
 }
 
 /** Finished matches, kept per player: profiles read them. */
@@ -526,6 +598,8 @@ export interface Backend {
   badges: BadgeStore;
   notify: Notifier;
   chat: ChatStore;
+  watchers: WatcherStore;
+  reports: ReportStore;
   library: LibraryStore;
   workshop: WorkshopStore;
   news: NewsStore;

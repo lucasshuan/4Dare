@@ -13,19 +13,33 @@ import {
 } from "@/server/http";
 import { allow } from "@/server/rate-limit";
 import { normalizeCode } from "@/server/rooms";
+import { watcherIn } from "@/server/watchers";
 
 /** Most lines one refetch brings (it asks from the newest line's time minus a small overlap). */
 const SINCE_LIMIT = 200;
 
-/** The caller's seat in an open room: 404 for a missing or closed room, 403 off it. No timeouts fire here: kept cheap. */
+/**
+ * The caller in an open room: their seat, or their watcher row. 404 for a
+ * missing or closed room, 403 off it. No timeouts fire here: kept cheap.
+ */
 async function seatOf(code: string, id: Promise<PlayerId>) {
   const [stored, me] = await Promise.all([getBackend().rooms.get(code), id]);
   if (!stored || stored.state.phase === "closed")
     throw new GameError("not_found");
   const seat = stored.state.players.find((p) => p.id === me);
-  if (!seat) throw new GameError("not_member");
-  return seat;
+  if (seat) return { state: stored.state, seat, watching: false };
+  const row = await watcherIn(code, me);
+  if (!row) throw new GameError("not_member");
+  return {
+    state: stored.state,
+    seat: { ...row.person, away: false },
+    watching: true,
+  };
 }
+
+/** Whoever watches can't post links: what spam bots come for. */
+const LINK =
+  /(https?:\/\/|www\.|\b[a-z0-9-]{2,}\.(com|net|org|io|gg|me|ly|tv|xyz|link|site|online|shop|app|br|ru|cn)\b)/i;
 
 const callerId = async () => (await getBackend().auth.identity("en")).id;
 
@@ -88,8 +102,15 @@ export async function POST(
         : null,
     );
     if (text === null) return failure("invalid_input");
-    const seat = await seatOf(code, id);
+    const { state, seat, watching } = await seatOf(code, id);
     if (seat.away) return failure("not_member");
+    if (state.muted?.includes(me)) return failure("muted");
+    if (watching) {
+      if (!state.settings.watchChat) return failure("watch_chat_off");
+      if (LINK.test(text)) return failure("no_links");
+      // a crowd watching: slower than the players
+      if (!allow(`chat-watch:${me}`, 3, 15_000)) return failure("rate_limited");
+    }
     const { chat, notify } = getBackend();
     const [message] = await chat.add(code, [
       { by: me, author: chatPerson(seat), text },

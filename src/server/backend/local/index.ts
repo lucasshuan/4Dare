@@ -15,8 +15,10 @@ import { localMatches } from "./matches";
 import { localMural } from "./mural";
 import { localNewsStore } from "./news-store";
 import { localProfiles } from "./profiles";
+import { localReports } from "./reports";
 import { localRooms } from "./rooms";
 import { localThemes } from "./themes";
+import { localWatchers } from "./watchers";
 import { localWorkshopStore } from "./workshop-store";
 
 // Local mode (no Supabase keys) in one module: a build made with the keys
@@ -44,9 +46,12 @@ export function localBackend(): Backend {
       roomChanged: async () => {},
       lobbyChanged: async () => {},
       chatChanged: async () => {},
+      watchersChanged: async () => {},
       reacted: async () => {},
     },
     chat: localChat(),
+    watchers: localWatchers(),
+    reports: localReports(),
     library: localLibraryStore(characters),
     workshop: localWorkshopStore(),
     news: localNewsStore(),

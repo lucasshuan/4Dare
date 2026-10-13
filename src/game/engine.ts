@@ -65,6 +65,7 @@ import {
 } from "./steps";
 import { isTaste, TASTE_KEYS } from "./tastes";
 import {
+  BAN_MS,
   type Ctx,
   DEFAULT_SETTINGS,
   type GameEvent,
@@ -134,6 +135,7 @@ function mergeSettings(
     "trades",
     "heavy",
     "offMissions",
+    "watchChat",
   ]);
   if (Object.keys(patch).some((k) => !allowed.has(k))) fail("invalid_input");
   const next = { ...DEFAULT_SETTINGS, ...base, ...patch };
@@ -191,6 +193,7 @@ function mergeSettings(
     typeof next.interval === "boolean" &&
     typeof next.trades === "boolean" &&
     typeof next.heavy === "boolean" &&
+    typeof next.watchChat === "boolean" &&
     Array.isArray(offMissions) &&
     offMissions.length <= OFF_MISSIONS_MAX &&
     offMissions.every((id) => typeof id === "string" && THEME_ID.test(id));
@@ -589,7 +592,17 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       return;
     }
     case "KICK":
-      return kick(s, e.playerId, e.targetId, ctx);
+      return kick(s, e, ctx);
+    case "SIT":
+      return sit(s, e.playerId, e.player, e.at, ctx);
+    case "STAND":
+      return stand(s, e.playerId, e.targetId);
+    case "SWAP_SEAT":
+      return swapSeat(s, e.playerId, e.targetId, e.player, ctx);
+    case "SWAP_SEATS":
+      return swapSeats(s, e.playerId, e.a, e.b);
+    case "MUTE":
+      return mute(s, e.playerId, e.targetId, e.muted);
     case "TRANSFER_HOST":
       return transferHost(s, e.playerId, e.targetId);
     case "UPDATE_SETTINGS": {
@@ -751,6 +764,7 @@ function swapPlayer(s: RoomState, from: PlayerId, player: Identity) {
   Object.assign(seat, identityFields(player), { id: to });
   const swap = (id: PlayerId) => (id === from ? to : id);
   s.hostId = swap(s.hostId);
+  if (s.muted) s.muted = s.muted.map(swap);
   s.order = s.order.map(swap);
   if (s.turnPlayerId) s.turnPlayerId = swap(s.turnPlayerId);
   const assignments: RoomState["assignments"] = {};
@@ -866,17 +880,51 @@ function join(
     Object.assign(seated, identityFields(player));
     return;
   }
-  if ((s.kicked?.[player.id] ?? 0) > ctx.now) fail("kicked");
+  checkKicked(s, player.id, ctx.now);
   // a waiting start already fixed who plays: newcomers wait for the next match
   if (s.phase !== "lobby" || s.starting) fail("already_started");
   if (s.players.length >= s.settings.seats) fail("room_full");
   // Only newcomers are asked: whoever already has a seat comes back freely.
+  checkLock(s, password);
+  s.players.push(seatFor(s, player, ctx));
+}
+
+function checkKicked(s: RoomState, id: PlayerId, now: number) {
+  const until = s.kicked?.[id] ?? 0;
+  if (until > now) fail(until - now > KICK_MS ? "banned" : "kicked");
+}
+
+function checkLock(s: RoomState, password: string | undefined) {
   const lock = s.settings.visibility === "private" ? s.settings.password : "";
-  if (lock) {
-    if (!password?.trim()) fail("password_required");
-    if (password?.trim() !== lock) fail("wrong_password");
-  }
-  s.players.push({
+  if (!lock) return;
+  if (!password?.trim()) fail("password_required");
+  if (password?.trim() !== lock) fail("wrong_password");
+}
+
+/**
+ * May `player` come in to watch (no seat)? The same door as a seat, without
+ * the seats: an open room, not kicked out, the password of a private one.
+ * Throws GameError otherwise. The server keeps watchers outside RoomState.
+ */
+export function admitWatcher(
+  s: RoomState,
+  player: PlayerId,
+  password: string | undefined,
+  now: number,
+) {
+  if (s.phase === "closed") fail("not_found");
+  checkKicked(s, player, now);
+  checkLock(s, password);
+}
+
+/** A new seat for `player`, with a colour nobody here holds. */
+function seatFor(
+  s: RoomState,
+  player: Identity,
+  ctx: Ctx,
+  taken = s.players.map((p) => p.colorSlot),
+) {
+  return {
     ...player,
     ready: false,
     joinedAt: ctx.now,
@@ -884,26 +932,136 @@ function join(
     away: false,
     goneAt: null,
     colorSlot: pickColorSlot(
-      s.players.map((p) => p.colorSlot),
+      taken,
       player.avatar.color,
       GAME_SEATS[s.settings.game].max,
     ),
-  });
+  };
 }
 
-/** The host takes someone out of the lobby; they can't come back for KICK_MS. */
-function kick(s: RoomState, hostId: PlayerId, targetId: PlayerId, ctx: Ctx) {
+/** The host may move people around: in the lobby, before a start waits. */
+function checkSeating(s: RoomState, playerId: PlayerId) {
+  requireSeated(s, playerId);
+  if (playerId !== s.hostId) fail("not_host");
+  if (s.phase !== "lobby" || s.starting) fail("wrong_phase");
+}
+
+/**
+ * The host takes someone out: a player out of the lobby, or someone watching
+ * at any point of the match. They can't come back for KICK_MS, or BAN_MS
+ * when banned.
+ */
+function kick(s: RoomState, e: Extract<GameEvent, { type: "KICK" }>, ctx: Ctx) {
+  const { playerId: hostId, targetId } = e;
   requireSeated(s, hostId);
   if (hostId !== s.hostId) fail("not_host");
-  if (s.phase !== "lobby") fail("wrong_phase");
   if (targetId === hostId) fail("invalid_input");
-  requireSeated(s, targetId);
-  s.players = s.players.filter((p) => p.id !== targetId);
+  const seat = findPlayer(s, targetId);
+  if (seat) {
+    if (s.phase !== "lobby") fail("wrong_phase");
+    s.players = s.players.filter((p) => p.id !== targetId);
+    if (s.chair === targetId) {
+      s.chair = null;
+      delete s.chairDrawn;
+    }
+  } else if (!e.watcher) fail("not_member");
+  else if (s.phase === "closed") fail("wrong_phase");
   const kicked = Object.entries(s.kicked ?? {}).filter(
     ([, until]) => until > ctx.now,
   );
-  s.kicked = Object.fromEntries([...kicked, [targetId, ctx.now + KICK_MS]]);
+  s.kicked = Object.fromEntries([
+    ...kicked,
+    [targetId, ctx.now + (e.ban ? BAN_MS : KICK_MS)],
+  ]);
   if (s.players.length < 2) stopClock(s);
+}
+
+/** Someone watching takes a free seat (`at`: where, else the last one). */
+function sit(
+  s: RoomState,
+  playerId: PlayerId,
+  player: Identity,
+  at: number | undefined,
+  ctx: Ctx,
+) {
+  if (playerId === player.id) {
+    if (s.phase !== "lobby" || s.starting) fail("wrong_phase");
+  } else checkSeating(s, playerId);
+  if (findPlayer(s, player.id)) fail("already_done");
+  checkKicked(s, player.id, ctx.now);
+  if (s.players.length >= s.settings.seats) fail("room_full");
+  const i =
+    at === undefined
+      ? s.players.length
+      : Math.max(0, Math.min(Math.trunc(at), s.players.length));
+  s.players.splice(i, 0, seatFor(s, player, ctx));
+}
+
+/** A player gets up to watch: never the host, who hands the room over first. */
+function stand(s: RoomState, playerId: PlayerId, targetId: PlayerId) {
+  if (playerId === targetId) {
+    requireSeated(s, playerId);
+    if (s.phase !== "lobby" || s.starting) fail("wrong_phase");
+  } else checkSeating(s, playerId);
+  requireSeated(s, targetId);
+  if (targetId === s.hostId) fail("invalid_input");
+  s.players = s.players.filter((p) => p.id !== targetId);
+  if (s.chair === targetId) {
+    s.chair = null;
+    delete s.chairDrawn;
+  }
+}
+
+/** The host seats someone watching in `targetId`'s place; `targetId` watches. */
+function swapSeat(
+  s: RoomState,
+  hostId: PlayerId,
+  targetId: PlayerId,
+  player: Identity,
+  ctx: Ctx,
+) {
+  checkSeating(s, hostId);
+  const i = s.players.findIndex((p) => p.id === targetId);
+  if (i < 0) fail("not_member");
+  if (targetId === s.hostId) fail("invalid_input");
+  if (findPlayer(s, player.id)) fail("already_done");
+  checkKicked(s, player.id, ctx.now);
+  const taken = s.players.filter((p) => p.id !== targetId);
+  s.players[i] = seatFor(
+    s,
+    player,
+    ctx,
+    taken.map((p) => p.colorSlot),
+  );
+  if (s.chair === targetId) {
+    s.chair = null;
+    delete s.chairDrawn;
+  }
+}
+
+/** The host has two players trade places. */
+function swapSeats(s: RoomState, hostId: PlayerId, a: PlayerId, b: PlayerId) {
+  checkSeating(s, hostId);
+  const i = s.players.findIndex((p) => p.id === a);
+  const j = s.players.findIndex((p) => p.id === b);
+  if (i < 0 || j < 0) fail("not_member");
+  if (i === j) fail("invalid_input");
+  [s.players[i], s.players[j]] = [s.players[j], s.players[i]];
+}
+
+/** The host silences someone in the chat, or lets them talk again. */
+function mute(
+  s: RoomState,
+  hostId: PlayerId,
+  targetId: PlayerId,
+  muted: boolean,
+) {
+  requireSeated(s, hostId);
+  if (hostId !== s.hostId) fail("not_host");
+  if (s.phase === "closed") fail("wrong_phase");
+  if (targetId === hostId) fail("invalid_input");
+  const rest = (s.muted ?? []).filter((id) => id !== targetId);
+  s.muted = muted ? [...rest, targetId] : rest;
 }
 
 /** The host hands the room to someone else here: they take over, ready like any host. */
@@ -917,6 +1075,8 @@ function transferHost(s: RoomState, hostId: PlayerId, targetId: PlayerId) {
   s.hostId = targetId;
   target.ready = true;
   old.ready = false;
+  // the host is never silenced
+  if (s.muted) s.muted = s.muted.filter((id) => id !== targetId);
 }
 
 /**

@@ -33,6 +33,9 @@ import {
   MAX_QUESTION,
   MAX_THEME,
   OFF_THEMES_MAX,
+  REPORT_NOTE_MAX,
+  REPORT_REASONS,
+  type ReportReason,
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
   type RoomSettings,
@@ -71,6 +74,7 @@ import {
   dispatch,
   hasNewcomer,
   leaveOtherRooms,
+  loadRoom,
   normalizeCode,
   openRoom,
   roundExamples,
@@ -81,6 +85,17 @@ import {
 } from "./rooms";
 import { showMe } from "./shown";
 import { drawFit, pickKey } from "./theme-picks";
+import {
+  kickWatcher,
+  mute as muteIn,
+  sitDown,
+  standUp,
+  stopWatching,
+  swapSeat,
+  swapWatchers,
+  watch,
+  watcherIn,
+} from "./watchers";
 
 async function lang(): Promise<Lang> {
   try {
@@ -178,6 +193,7 @@ const createSchema = z.object({
   offMissions: z
     .array(z.string().regex(/^[a-z0-9-]{1,80}$/))
     .max(OFF_MISSIONS_MAX),
+  watchChat: z.boolean().optional(),
 });
 
 export async function createRoom(
@@ -205,7 +221,8 @@ export async function createRoom(
 export async function joinRoom(
   rawCode: string,
   password?: string,
-): Promise<Result<{ code: string }>> {
+  how: "play" | "watch" = "play",
+): Promise<Result<{ code: string; watching: boolean }>> {
   return run(async () => {
     const code = roomCode(rawCode);
     const who = await me();
@@ -216,22 +233,210 @@ export async function joinRoom(
     if (playing && playing.code !== code) throw new GameError("in_match");
     const typed =
       typeof password === "string" ? password.slice(0, 100) : undefined;
-    await dispatch(code, () => ({
-      type: "JOIN",
-      player: who,
-      password: typed,
-    }));
-    await leaveOtherRooms(who.id, code);
-    return { code };
+    if (how !== "watch") {
+      try {
+        await dispatch(code, () => ({
+          type: "JOIN",
+          player: who,
+          password: typed,
+        }));
+        await stopWatching(code, who.id);
+        await leaveOtherRooms(who.id, code);
+        return { code, watching: false };
+      } catch (e) {
+        // no seat for them: they watch instead
+        if (
+          !(e instanceof GameError) ||
+          (e.code !== "room_full" && e.code !== "already_started")
+        )
+          throw e;
+      }
+    }
+    await watch(code, who, typed);
+    return { code, watching: true };
   });
 }
 
-/** Out of the room, or out of the match (the seat stays, marked away). Nothing to show afterwards: a player who left has no view. */
+/** Out of the room, or out of the match (the seat stays, marked away), or no longer watching. Nothing to show afterwards. */
 export async function leaveRoom(rawCode: string): Promise<Result> {
   return run(async () => {
     const code = roomCode(rawCode);
     const who = await me();
-    await dispatch(code, () => ({ type: "LEAVE", playerId: who.id }));
+    try {
+      await dispatch(code, () => ({ type: "LEAVE", playerId: who.id }));
+    } catch (e) {
+      if (!(e instanceof GameError) || e.code !== "not_member") throw e;
+      await stopWatching(code, who.id);
+    }
+  });
+}
+
+/** The room as the caller now sees it: seated, or watching. */
+async function viewNow(
+  done: { state: RoomState; version: number },
+  who: Identity,
+): Promise<RoomView> {
+  return toView(
+    done.state,
+    done.version,
+    who.id,
+    Date.now(),
+    await lang(),
+    who,
+  );
+}
+
+const personId = (raw: unknown) =>
+  typeof raw === "string" && raw.length > 0 && raw.length <= 100 ? raw : bad();
+
+/** A player in the lobby gets up to watch (never the host). */
+export async function watchInstead(rawCode: string): Promise<Result<RoomView>> {
+  return run(async () => {
+    const code = roomCode(rawCode);
+    const who = await me();
+    return viewNow(await standUp(code, who.id, who.id), who);
+  });
+}
+
+/** Someone watching takes a free seat in the lobby. */
+export async function playInstead(rawCode: string): Promise<Result<RoomView>> {
+  return run(async () => {
+    const code = roomCode(rawCode);
+    const who = await me();
+    return viewNow(await sitDown(code, who, who.id), who);
+  });
+}
+
+/**
+ * Host only, lobby only: moves people between the seats and the watchers.
+ * `from` is who is dragged, `to` where they land: another player (they trade
+ * places), someone watching (they trade too), a free seat, or the watchers.
+ */
+export async function moveSomeone(
+  rawCode: string,
+  move:
+    | { kind: "seat"; id: string; at?: number }
+    | { kind: "stand"; id: string }
+    | { kind: "swap-seat"; seated: string; watcher: string }
+    | { kind: "swap-players"; a: string; b: string }
+    | { kind: "swap-watchers"; a: string; b: string },
+): Promise<Result<RoomView>> {
+  return run(async () => {
+    const code = roomCode(rawCode);
+    const who = await me();
+    if (!move || typeof move !== "object") bad();
+    switch (move.kind) {
+      case "seat": {
+        const at =
+          move.at === undefined
+            ? undefined
+            : Number.isInteger(move.at)
+              ? move.at
+              : bad();
+        return viewNow(await sitDown(code, who, personId(move.id), at), who);
+      }
+      case "stand":
+        return viewNow(await standUp(code, who.id, personId(move.id)), who);
+      case "swap-seat":
+        return viewNow(
+          await swapSeat(
+            code,
+            who.id,
+            personId(move.seated),
+            personId(move.watcher),
+          ),
+          who,
+        );
+      case "swap-players":
+        return act(code, (id) => ({
+          type: "SWAP_SEATS",
+          playerId: id,
+          a: personId(move.a),
+          b: personId(move.b),
+        }));
+      case "swap-watchers": {
+        await swapWatchers(code, who.id, personId(move.a), personId(move.b));
+        const stored = await loadRoom(code);
+        if (!stored) throw new GameError("not_found");
+        return viewNow(stored, who);
+      }
+      default:
+        return bad();
+    }
+  });
+}
+
+/** Host only: silences `targetId` in the chat (seated or watching), or lets them talk again. */
+export async function mutePlayer(
+  rawCode: string,
+  targetId: string,
+  muted: boolean,
+): Promise<Result<RoomView>> {
+  return run(async () => {
+    const code = roomCode(rawCode);
+    const who = await me();
+    return viewNow(
+      await muteIn(code, who.id, personId(targetId), muted === true),
+      who,
+    );
+  });
+}
+
+const reportSchema = z.object({
+  targetId: z.string().min(1).max(100),
+  reason: z.enum(REPORT_REASONS),
+  note: z.string().trim().max(REPORT_NOTE_MAX),
+});
+
+/**
+ * Reports someone in the room (seated or watching) for spam, offence or
+ * cheating. What they wrote in the room's chat is kept with the report for
+ * good. Once per person and room.
+ */
+export async function reportPlayer(
+  rawCode: string,
+  input: { targetId: string; reason: ReportReason; note: string },
+): Promise<Result> {
+  return run(async () => {
+    const code = roomCode(rawCode);
+    const parsed = reportSchema.safeParse(input);
+    if (!parsed.success) bad();
+    const { targetId, reason, note } = parsed.data as z.infer<
+      typeof reportSchema
+    >;
+    const who = await me();
+    if (targetId === who.id) bad();
+    if (!allow(`report:${who.id}`, 10, 3600_000))
+      throw new GameError("rate_limited");
+    const stored = await loadRoom(code);
+    if (!stored || stored.state.phase === "closed")
+      throw new GameError("not_found");
+    const seatOf = (id: string) =>
+      stored.state.players.find((p) => p.id === id);
+    const [mine, theirs] = await Promise.all([
+      seatOf(who.id) ? null : watcherIn(code, who.id),
+      seatOf(targetId) ? null : watcherIn(code, targetId),
+    ]);
+    if (!seatOf(who.id) && !mine) throw new GameError("not_member");
+    const target = seatOf(targetId) ?? theirs?.person;
+    if (!target) throw new GameError("not_member");
+    const { chat, reports } = getBackend();
+    const saved = await reports.add({
+      reporterId: who.id,
+      target: {
+        id: target.id,
+        isGuest: target.isGuest,
+        name: target.name,
+        guestNumber: target.guestNumber,
+        avatar: target.avatar,
+        lang: target.lang,
+      },
+      room: code,
+      reason,
+      note: note || null,
+      lines: await chat.byAuthor(code, targetId, 200),
+    });
+    if (!saved) throw new GameError("already_reported");
   });
 }
 
@@ -264,14 +469,31 @@ export async function setReady(
   );
 }
 
-/** Host only, lobby only: takes `targetId` out of the room for KICK_MS. */
+/**
+ * Host only: takes `targetId` out of the room for KICK_MS, or BAN_MS when
+ * `ban`. A player only in the lobby; someone watching at any time.
+ */
 export async function kickPlayer(
-  code: string,
+  rawCode: string,
   targetId: string,
+  ban = false,
 ): Promise<Result<RoomView>> {
   return run(async () => {
-    if (typeof targetId !== "string" || !targetId) bad();
-    return act(code, (id) => ({ type: "KICK", playerId: id, targetId }));
+    const code = roomCode(rawCode);
+    const target = personId(targetId);
+    const who = await me();
+    const stored = await loadRoom(code);
+    if (stored && !stored.state.players.some((p) => p.id === target))
+      return viewNow(
+        await kickWatcher(code, who.id, target, ban === true),
+        who,
+      );
+    return act(code, (id) => ({
+      type: "KICK",
+      playerId: id,
+      targetId: target,
+      ban: ban === true,
+    }));
   });
 }
 

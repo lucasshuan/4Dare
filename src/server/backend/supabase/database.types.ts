@@ -1052,6 +1052,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      player_reports: {
+        Row: {
+          created_at: string;
+          id: number;
+          lines: Json;
+          note: string | null;
+          reason: string;
+          reporter_id: string;
+          room_code: string;
+          target: Json;
+          target_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: never;
+          lines?: Json;
+          note?: string | null;
+          reason: string;
+          reporter_id: string;
+          room_code: string;
+          target: Json;
+          target_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: never;
+          lines?: Json;
+          note?: string | null;
+          reason?: string;
+          reporter_id?: string;
+          room_code?: string;
+          target?: Json;
+          target_id?: string;
+        };
+        Relationships: [];
+      };
       profile_comment_reports: {
         Row: {
           comment_id: number;
@@ -1234,6 +1270,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "room_messages_room_code_fkey";
+            columns: ["room_code"];
+            isOneToOne: false;
+            referencedRelation: "rooms";
+            referencedColumns: ["code"];
+          },
+        ];
+      };
+      room_watchers: {
+        Row: {
+          gone_at: string | null;
+          joined_at: string;
+          person: Json;
+          player_id: string;
+          position: number;
+          room_code: string;
+          seen_at: string;
+        };
+        Insert: {
+          gone_at?: string | null;
+          joined_at?: string;
+          person: Json;
+          player_id: string;
+          position: number;
+          room_code: string;
+          seen_at?: string;
+        };
+        Update: {
+          gone_at?: string | null;
+          joined_at?: string;
+          person?: Json;
+          player_id?: string;
+          position?: number;
+          room_code?: string;
+          seen_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "room_watchers_room_code_fkey";
             columns: ["room_code"];
             isOneToOne: false;
             referencedRelation: "rooms";
@@ -1999,6 +2073,10 @@ export type Database = {
       };
       reassign_matches: {
         Args: { from_id: string; to_id: string };
+        Returns: undefined;
+      };
+      reassign_player_reports: {
+        Args: { p_from: string; p_to: string };
         Returns: undefined;
       };
       reassign_room_messages: {

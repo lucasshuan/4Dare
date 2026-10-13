@@ -18,8 +18,10 @@ import { supabaseMural } from "./supabase/mural";
 import { supabaseNewsStore } from "./supabase/news-store";
 import { supabaseNotify } from "./supabase/notify";
 import { supabaseProfiles } from "./supabase/profiles";
+import { supabaseReports } from "./supabase/reports";
 import { supabaseRooms } from "./supabase/rooms";
 import { supabaseThemes } from "./supabase/themes";
+import { supabaseWatchers } from "./supabase/watchers";
 import { supabaseWorkshopStore } from "./supabase/workshop-store";
 import type { Backend } from "./types";
 
@@ -44,6 +46,8 @@ export function getBackend(): Backend {
       badges: supabaseBadges(),
       notify: supabaseNotify(),
       chat: supabaseChat(),
+      watchers: supabaseWatchers(),
+      reports: supabaseReports(),
       library: supabaseLibraryStore(),
       workshop: supabaseWorkshopStore(),
       news: supabaseNewsStore(),

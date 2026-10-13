@@ -282,6 +282,8 @@ export function handOverHost(s: RoomState) {
   if (next) {
     s.hostId = next.id;
     next.ready = true;
+    // the host is never silenced
+    if (s.muted) s.muted = s.muted.filter((id) => id !== next.id);
   }
 }
 

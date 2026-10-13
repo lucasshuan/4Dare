@@ -184,9 +184,18 @@ describe("server, local mode", () => {
     as("p3");
     must(await A.joinRoom(code, "secret"));
     as("p4");
-    expect(await A.joinRoom(code, "secret")).toEqual({
+    // no seat left: they come in to watch, the password still asked
+    expect(await A.joinRoom(code)).toEqual({
       ok: false,
-      error: "room_full",
+      error: "password_required",
+    });
+    expect(await A.joinRoom(code, "secret")).toEqual({
+      ok: true,
+      data: { code, watching: true },
+    });
+    expect((await view(code)).body).toMatchObject({
+      watching: true,
+      settings: { password: "" },
     });
 
     as("p2");
@@ -2208,5 +2217,203 @@ describe("impostor, local mode", () => {
     expect(bank.questions.length).toBe(134);
     for (const a of v.imp?.asked ?? [])
       expect(bank.questions.some((q) => q.id === a.question.id)).toBe(true);
+  });
+});
+
+describe("watchers", () => {
+  const watchersRoute = () => import("@/app/api/rooms/[code]/watchers/route");
+  const watchers = async (code: string) => {
+    const res = await (await watchersRoute()).GET(
+      new Request(`http://x/api/rooms/${code}/watchers?lang=pt`),
+      { params: Promise.resolve({ code }) },
+    );
+    return {
+      status: res.status,
+      body: (await res.json()) as {
+        total: number;
+        watchers: { id: string; isYou: boolean }[];
+      },
+    };
+  };
+  const idOf = (name: string) => uidOf(jarFor(name));
+  const post = async (code: string, text: string) =>
+    (await import("@/app/api/rooms/[code]/messages/route")).POST(
+      new Request(`http://x/api/rooms/${code}/messages`, {
+        method: "POST",
+        headers: { origin: "http://x", "content-type": "application/json" },
+        body: JSON.stringify({ text }),
+      }),
+      { params: Promise.resolve({ code }) },
+    );
+  const room = async (seats: 2 | 3) =>
+    must(await A.createRoom({ ...ROOM, visibility: "public", seats, ...TIMES }))
+      .code;
+
+  it("comes in to a full room to watch, sits down, gets up, swaps", async () => {
+    as("wh1");
+    const code = await room(2);
+    as("wh2");
+    expect(must(await A.joinRoom(code)).watching).toBe(false);
+    as("ww1");
+    expect(must(await A.joinRoom(code)).watching).toBe(true);
+    as("ww2");
+    expect(must(await A.joinRoom(code, undefined, "watch")).watching).toBe(
+      true,
+    );
+    const list = (await watchers(code)).body;
+    expect(list.total).toBe(2);
+    expect(list.watchers.map((w) => w.id)).toEqual([idOf("ww1"), idOf("ww2")]);
+    expect(list.watchers.find((w) => w.isYou)?.id).toBe(idOf("ww2"));
+    // an outsider reads nothing
+    as("nobody");
+    expect((await watchers(code)).status).toBe(403);
+
+    // no seat for a watcher while every one is taken
+    as("ww1");
+    expect(await A.playInstead(code)).toEqual({
+      ok: false,
+      error: "room_full",
+    });
+    // a player gets up; the watcher sits down
+    as("wh2");
+    expect(must(await A.watchInstead(code)).watching).toBe(true);
+    as("ww1");
+    const seated = must(await A.playInstead(code));
+    expect(seated.watching).toBe(false);
+    expect(seated.players.map((p) => p.id)).toEqual([idOf("wh1"), idOf("ww1")]);
+    expect((await watchers(code)).body.watchers.map((w) => w.id)).toEqual([
+      idOf("ww2"),
+      idOf("wh2"),
+    ]);
+
+    // the host swaps a watcher in; the player takes their place among the watchers
+    as("wh1");
+    let v = must(
+      await A.moveSomeone(code, {
+        kind: "swap-seat",
+        seated: idOf("ww1"),
+        watcher: idOf("wh2"),
+      }),
+    );
+    expect(v.players.map((p) => p.id)).toEqual([idOf("wh1"), idOf("wh2")]);
+    expect((await watchers(code)).body.watchers.map((w) => w.id)).toEqual([
+      idOf("ww2"),
+      idOf("ww1"),
+    ]);
+    // two watchers trade places, two players too
+    must(
+      await A.moveSomeone(code, {
+        kind: "swap-watchers",
+        a: idOf("ww2"),
+        b: idOf("ww1"),
+      }),
+    );
+    expect((await watchers(code)).body.watchers.map((w) => w.id)).toEqual([
+      idOf("ww1"),
+      idOf("ww2"),
+    ]);
+    v = must(
+      await A.moveSomeone(code, {
+        kind: "swap-players",
+        a: idOf("wh1"),
+        b: idOf("wh2"),
+      }),
+    );
+    expect(v.players.map((p) => p.id)).toEqual([idOf("wh2"), idOf("wh1")]);
+    // only the host moves people
+    as("wh2");
+    expect(
+      await A.moveSomeone(code, { kind: "stand", id: idOf("wh1") }),
+    ).toEqual({ ok: false, error: "not_host" });
+    expect(
+      await A.moveSomeone(code, {
+        kind: "swap-watchers",
+        a: idOf("ww2"),
+        b: idOf("ww1"),
+      }),
+    ).toEqual({ ok: false, error: "not_host" });
+
+    // leaving stops watching
+    as("ww2");
+    must(await A.leaveRoom(code));
+    expect((await watchers(code)).status).toBe(403);
+    as("wh1");
+    expect((await watchers(code)).body.total).toBe(1);
+  });
+
+  it("watches a match under way and can't act in it", async () => {
+    as("wm1");
+    const code = await room(3);
+    as("wm2");
+    must(await A.joinRoom(code));
+    as("wm1");
+    await startMatch(code);
+    as("wmw");
+    expect(must(await A.joinRoom(code)).watching).toBe(true);
+    const v = (await view(code)).body;
+    expect(v.watching).toBe(true);
+    expect(v.watcher?.id).toBe(idOf("wmw"));
+    expect(v.players.some((p) => p.isYou)).toBe(false);
+    expect(await A.voteTheme(code, 0)).toEqual({
+      ok: false,
+      error: "not_member",
+    });
+  });
+
+  it("keeps the chat to its rules: no links from watchers, the host's mute, players only", async () => {
+    as("wc1");
+    const code = await room(2);
+    as("wcw");
+    must(await A.joinRoom(code, undefined, "watch"));
+    expect((await post(code, "oi pessoal")).status).toBe(200);
+    expect(
+      await (await post(code, "olha www.spam.com agora")).json(),
+    ).toMatchObject({ error: "no_links" });
+    as("wc1");
+    // links are fine among players
+    expect((await post(code, "https://example.org")).status).toBe(200);
+    must(await A.mutePlayer(code, idOf("wcw"), true));
+    as("wcw");
+    expect(await (await post(code, "hm")).json()).toMatchObject({
+      error: "muted",
+    });
+    as("wc1");
+    must(await A.mutePlayer(code, idOf("wcw"), false));
+    must(await A.updateSettings(code, { watchChat: false }));
+    as("wcw");
+    expect(await (await post(code, "hm")).json()).toMatchObject({
+      error: "watch_chat_off",
+    });
+  });
+
+  it("reports someone once, with what they wrote; the host bans a watcher", async () => {
+    as("wr1");
+    const code = await room(2);
+    as("wrw");
+    must(await A.joinRoom(code, undefined, "watch"));
+    expect((await post(code, "compre seguidores baratos")).status).toBe(200);
+    as("wr1");
+    const report = {
+      targetId: idOf("wrw"),
+      reason: "spam" as const,
+      note: "",
+    };
+    must(await A.reportPlayer(code, report));
+    expect(await A.reportPlayer(code, report)).toEqual({
+      ok: false,
+      error: "already_reported",
+    });
+    // nobody reports themselves, nor someone who isn't here
+    expect(
+      await A.reportPlayer(code, { ...report, targetId: idOf("wr1") }),
+    ).toEqual({ ok: false, error: "invalid_input" });
+    expect(
+      await A.reportPlayer(code, { ...report, targetId: "nobody-here" }),
+    ).toEqual({ ok: false, error: "not_member" });
+
+    must(await A.kickPlayer(code, idOf("wrw"), true));
+    expect((await watchers(code)).body.total).toBe(0);
+    as("wrw");
+    expect(await A.joinRoom(code)).toEqual({ ok: false, error: "banned" });
   });
 });

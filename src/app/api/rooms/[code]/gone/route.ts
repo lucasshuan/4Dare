@@ -20,8 +20,11 @@ export async function POST(
       return { type: "GONE", playerId: me.id };
     });
   } catch (e) {
-    if (e instanceof GameError) return new Response(null, { status: 204 });
-    throw e;
+    if (!(e instanceof GameError)) throw e;
+    // someone watching: their row waits out the grace, then the lists leave them out
+    if (e.code === "not_member")
+      await getBackend().watchers.touch(me.id, code, true);
+    return new Response(null, { status: 204 });
   }
   // The others' pages refetch when the grace ends (the view's `sweepAt`) and
   // that read settles it, so no function waits out the grace.

@@ -69,6 +69,12 @@ export function localChat(): ChatStore {
         else rooms.delete(code);
       }
     },
+    async byAuthor(code, authorId, limit) {
+      const lines = (rooms.get(code) ?? []).filter(
+        (m) => m.by === authorId && m.text !== null,
+      );
+      return structuredClone(lines.slice(-limit));
+    },
     async reassign(from, to) {
       for (const [code, lines] of rooms)
         rooms.set(

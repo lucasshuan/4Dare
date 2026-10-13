@@ -163,6 +163,8 @@ export interface CreateRoomInput extends LineupRules {
   themeMode: "vote" | "host";
   offTastes: Taste[];
   offThemes: string[];
+  /** Whoever watches writes in the chat (on when left out). */
+  watchChat?: boolean;
 }
 
 /** The eight avatar colours an account can choose (design system `avatar-*`). */

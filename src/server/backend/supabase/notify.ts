@@ -9,7 +9,7 @@ import { serviceClient } from "./clients";
  */
 async function ping(
   topic: string,
-  event: "changed" | "chat" | "react",
+  event: "changed" | "chat" | "react" | "watchers",
   payload: Record<string, unknown>,
 ) {
   const client = serviceClient();
@@ -31,6 +31,9 @@ export function supabaseNotify(): Notifier {
     lobbyChanged: () => ping("lobby", "changed", { at: Date.now() }),
     // the newest line's id only: the text is read through the room's route
     chatChanged: (code, id) => ping(`room:${code}`, "chat", { id }),
+    // a time only: who watches is read through the room's route
+    watchersChanged: (code) =>
+      ping(`room:${code}`, "watchers", { at: Date.now() }),
     // reactions hide nothing: everyone on stage sees them anyway
     reacted: (code, payload) => ping(`room:${code}`, "react", payload),
   };

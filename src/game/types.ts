@@ -125,6 +125,8 @@ export interface RoomSettings {
   offTastes: Taste[];
   /** Themes switched off, by id (theme-id.ts): a theme added later comes in switched on. */
   offThemes: string[];
+  /** Whoever watches (no seat) can write in the chat; off, only the players do. */
+  watchChat: boolean;
 }
 
 export const DEFAULT_SETTINGS: RoomSettings = {
@@ -152,6 +154,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   themeMode: "vote",
   offTastes: [],
   offThemes: [],
+  watchChat: true,
 };
 /** The most themes a room can switch off: about every theme there is. */
 export const OFF_THEMES_MAX = 1000;
@@ -234,6 +237,27 @@ export const START_LEAD_MS = 500;
 
 /** How long a player the host removed from the lobby stays out (ms). */
 export const KICK_MS = 2 * 60_000;
+/** How long a player the host banned stays out: as good as the room's whole life (ms). */
+export const BAN_MS = 24 * 3600_000;
+/**
+ * Whoever watches has no seat: they live outside RoomState (the room_watchers
+ * table), so thousands can watch without every room write carrying them. The
+ * lists show this many, in the host's order; the rest are counted.
+ */
+export const WATCHERS_SHOWN = 120;
+/** A watcher whose page has not asked for the room in this long has gone (a killed browser says no goodbye). */
+export const WATCH_STALE_MS = 3 * 60_000;
+
+/** Why someone is reported. */
+export const REPORT_REASONS = [
+  "spam",
+  "offensive",
+  "cheating",
+  "other",
+] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+/** Longest note on a report. */
+export const REPORT_NOTE_MAX = 300;
 /** The podium stays this long; then the room goes back to the lobby on its own (the host can go sooner). */
 export const RESULT_SECONDS = 15;
 /** Themes offered in the vote before each match. */
@@ -601,6 +625,8 @@ export interface RoomState {
   playStartedAt: number | null;
   /** Players the host removed: until when (epoch ms) they can't come back. Missing in older rooms. */
   kicked?: Record<PlayerId, number>;
+  /** Who the host silenced in the chat, seated or watching. Missing in older rooms. */
+  muted?: PlayerId[];
   /** The room's latest finished matches, newest first. Missing in rooms made before it was kept. */
   matches?: PastMatch[];
   /** The Impostor match under way (or just over); null otherwise. Missing in older rooms. */
@@ -665,7 +691,30 @@ export type GameEvent =
   | { type: "SWEEP" }
   | { type: "SET_READY"; playerId: PlayerId; ready: boolean }
   /** The host removes someone from the lobby; they stay out for KICK_MS. */
-  | { type: "KICK"; playerId: PlayerId; targetId: PlayerId }
+  | {
+      type: "KICK";
+      playerId: PlayerId;
+      targetId: PlayerId;
+      /** Out for BAN_MS instead of KICK_MS. */
+      ban?: boolean;
+      /** The target watches (no seat), as the server checked: any phase but closed. */
+      watcher?: boolean;
+    }
+  /** Someone watching takes a free seat in the lobby: themselves, or the host seats them (at seat `at`). */
+  | { type: "SIT"; playerId: PlayerId; player: Identity; at?: number }
+  /** A player in the lobby gets up to watch: themselves, or the host moves them. Never the host. */
+  | { type: "STAND"; playerId: PlayerId; targetId: PlayerId }
+  /** The host, in the lobby: `player` (watching) takes `targetId`'s seat, and `targetId` watches. */
+  | {
+      type: "SWAP_SEAT";
+      playerId: PlayerId;
+      targetId: PlayerId;
+      player: Identity;
+    }
+  /** The host, in the lobby: two players trade places. */
+  | { type: "SWAP_SEATS"; playerId: PlayerId; a: PlayerId; b: PlayerId }
+  /** The host silences someone in the chat (seated or watching), or lets them talk again. */
+  | { type: "MUTE"; playerId: PlayerId; targetId: PlayerId; muted: boolean }
   /** The host hands the room to someone present, in the lobby; they become the host. */
   | { type: "TRANSFER_HOST"; playerId: PlayerId; targetId: PlayerId }
   | {
@@ -835,6 +884,16 @@ export const ERROR_CODES = [
   "in_match",
   /** The host removed the player from this room a moment ago (KICK_MS). */
   "kicked",
+  /** The host banned the player from this room (BAN_MS). */
+  "banned",
+  /** The host silenced the player in this room's chat. */
+  "muted",
+  /** The room keeps its chat to the players: whoever watches only reads. */
+  "watch_chat_off",
+  /** Whoever watches can't post links (spam). */
+  "no_links",
+  /** The caller already reported this person in this room. */
+  "already_reported",
   /** Another account has that @handle. */
   "handle_taken",
   /** The @handle changed less than HANDLE_CHANGE_DAYS ago. */
@@ -934,6 +993,22 @@ export interface PlayerView {
   gaveUp: boolean;
   /** Left the room mid-match. */
   away: boolean;
+}
+
+/** Someone watching, as the lists show them: no seat, so no colour. */
+export interface WatcherView {
+  id: PlayerId;
+  isYou: boolean;
+  isGuest: boolean;
+  /** As the viewer reads it (see PlayerView.name). */
+  name: string;
+  avatar: Avatar;
+}
+
+/** Who watches a room: the first WATCHERS_SHOWN in the host's order, and how many in all. */
+export interface WatchersView {
+  total: number;
+  watchers: WatcherView[];
 }
 
 export type HistoryEntryView =
@@ -1067,6 +1142,12 @@ export interface RoomView {
   round: number;
   version: number;
   youId: PlayerId;
+  /** The viewer has no seat: they watch (WATCHERS_SHOWN). */
+  watching: boolean;
+  /** The viewer as the screens show them while watching: never among `players`. */
+  watcher: PlayerView | null;
+  /** Who the host silenced in the chat. */
+  muted: PlayerId[];
   hostId: PlayerId;
   players: PlayerView[];
   theme: Theme | null;

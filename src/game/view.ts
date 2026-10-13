@@ -25,6 +25,7 @@ import {
   GameError,
   GONE_GRACE_MS,
   type HistoryEntryView,
+  type Identity,
   type Lang,
   type ListedRoom,
   LOBBY_LISTED_MS,
@@ -348,7 +349,9 @@ function reveal(
 
 /**
  * The room as `viewerId` may see it, names in `lang` (the viewer's page).
- * Throws GameError("not_member") for outsiders.
+ * Someone watching (`watcher`, the viewer) has no seat: they see what any player sees of the
+ * others (every card but none of their own, no side in the Impostor). Throws
+ * GameError("not_member") for outsiders.
  */
 export function toView(
   state: RoomState,
@@ -356,9 +359,11 @@ export function toView(
   viewerId: PlayerId,
   now: number,
   lang: Lang,
+  watcher?: Identity,
 ): RoomView {
   const s = state;
-  if (!findPlayer(s, viewerId)) throw new GameError("not_member");
+  const seated = !!findPlayer(s, viewerId);
+  if (!seated && watcher?.id !== viewerId) throw new GameError("not_member");
   // Who picks for whom is open from picking on (the ring and the turn order give it away anyway).
   const pickedOpen = s.phase === "picking" || CARDS_OPEN.includes(s.phase);
 
@@ -405,6 +410,32 @@ export function toView(
     round: s.round,
     version,
     youId: viewerId,
+    watching: !seated,
+    watcher:
+      !seated && watcher
+        ? {
+            id: watcher.id,
+            isYou: true,
+            isHost: false,
+            isGuest: watcher.isGuest,
+            name: displayName(watcher, lang),
+            avatar: watcher.avatar,
+            ready: false,
+            status: "waiting",
+            seat: -1,
+            colorSlot: 0,
+            turnOrder: null,
+            isTurn: false,
+            card: null,
+            cardHidden: false,
+            pickedById: null,
+            discoveredAt: null,
+            place: null,
+            gaveUp: false,
+            away: false,
+          }
+        : null,
+    muted: [...(s.muted ?? [])],
     hostId: s.hostId,
     players,
     theme: s.theme,

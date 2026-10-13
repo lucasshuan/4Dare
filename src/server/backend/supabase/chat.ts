@@ -87,6 +87,17 @@ export function supabaseChat(): ChatStore {
       const { error } = await db().delete().lt("created_at", iso(before));
       if (error) throw error;
     },
+    async byAuthor(code, authorId, limit) {
+      const { data, error } = await db()
+        .select(COLUMNS)
+        .eq("room_code", code)
+        .eq("author_id", authorId)
+        .not("body", "is", null)
+        .order("id", { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return ((data ?? []) as Row[]).map(toMessage).sort((a, b) => a.id - b.id);
+    },
     async reassign(from, to) {
       const { error } = await serviceClient().rpc("reassign_room_messages", {
         p_from: from,

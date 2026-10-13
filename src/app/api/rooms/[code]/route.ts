@@ -1,6 +1,9 @@
+import { isExpired } from "@/game/engine";
+import { presenceDue } from "@/game/helpers";
 import { GameError, HEARTBEAT_MS } from "@/game/types";
 import { toView } from "@/game/view";
 import { getBackend } from "@/server/backend";
+import { background } from "@/server/background";
 import { langParam } from "@/server/http";
 import {
   applyDueTimeouts,
@@ -8,10 +11,14 @@ import {
   normalizeCode,
   seatedElsewhere,
 } from "@/server/rooms";
+import { watcherIn } from "@/server/watchers";
 
 const noStore = { "Cache-Control": "no-store" };
 
-/** The room as the caller may see it, names in `?lang=`. Fires any clock timeouts that are due first. */
+/**
+ * The room as the caller may see it (seated or watching), names in `?lang=`.
+ * A player's read fires any clock timeouts that are due first.
+ */
 export async function GET(
   request: Request,
   ctx: RouteContext<"/api/rooms/[code]">,
@@ -22,12 +29,19 @@ export async function GET(
       { error: "not_found" },
       { status: 404, headers: noStore },
     );
-  const { auth } = getBackend();
+  const { auth, rooms } = getBackend();
   // The room read and the identity check don't depend on each other.
-  const [stored, me] = await Promise.all([
-    applyDueTimeouts(code),
-    auth.me("en"),
-  ]);
+  const [first, me] = await Promise.all([rooms.get(code), auth.me("en")]);
+  const seated = !!first?.state.players.some((p) => p.id === me.id);
+  // Only players' pages fire the clock and settle closed pages: whoever
+  // watches only reads, so a crowd at a deadline doesn't race to write it.
+  const now = Date.now();
+  const stored =
+    first &&
+    seated &&
+    (isExpired(first.state, now) || presenceDue(first.state, now))
+      ? await applyDueTimeouts(code)
+      : first;
   if (!stored || stored.state.phase === "closed") {
     return Response.json(
       { error: "not_found" },
@@ -36,6 +50,24 @@ export async function GET(
   }
   const mine = stored.state.players.find((p) => p.id === me.id);
   if (!mine) {
+    // Watching: a plain read, never a room write, so thousands can watch.
+    const watching = await watcherIn(code, me.id);
+    if (watching) {
+      // their page is open: seen again, now and then (back, after a reload)
+      if (watching.goneAt !== null || now - watching.seenAt >= HEARTBEAT_MS)
+        background(() => getBackend().watchers.touch(me.id, code, false));
+      return Response.json(
+        toView(
+          stored.state,
+          stored.version,
+          me.id,
+          now,
+          langParam(request),
+          watching.person,
+        ),
+        { headers: noStore },
+      );
+    }
     // A seat given up for another room (one room at a time) says which one.
     const elsewhere = await seatedElsewhere(me.id, code, langParam(request));
     return Response.json(
