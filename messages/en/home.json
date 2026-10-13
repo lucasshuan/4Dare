@@ -256,8 +256,8 @@
   "codeNotFound": "No room with this code.",
   "joining": "Joining…",
   "roomsPage": {
-    "back": "Games",
     "title": "Rooms",
+    "lead": "Rooms waiting for players. Find one by name, game, language or who can join.",
     "count": "{count, plural, =0 {No rooms} one {# room · {open} with a free seat} other {# rooms · {open} with a free seat}}",
     "create": "Create room",
     "search": "Search",
@@ -281,7 +281,6 @@
     "clearFilters": "Clear filters"
   },
   "gamesPage": {
-    "back": "Home",
     "title": "Games",
     "lead": "Every game on 4Dare. Search by name, or filter by table size and how it plays.",
     "count": "{count, plural, =0 {No games} one {# game} other {# games}}",
@@ -294,8 +293,8 @@
     "sort": "Sort",
     "sorts": {
       "featured": "Featured",
-      "popular": "Most played now",
-      "name": "Name (A–Z)"
+      "popular": "Most played",
+      "name": "A–Z"
     },
     "style": "Style",
     "online": "People playing",

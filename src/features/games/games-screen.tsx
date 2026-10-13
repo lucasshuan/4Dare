@@ -2,7 +2,6 @@
 
 import {
   ArrowDownAZ,
-  ChevronLeft,
   Flame,
   Gavel,
   Lightbulb,
@@ -13,7 +12,6 @@ import {
   UsersRound,
   VenetianMask,
   Vote,
-  X,
 } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
@@ -26,7 +24,10 @@ import {
 } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { FilterSelect } from "@/components/ui/filter-select";
+import { PageHead } from "@/components/ui/page-head";
 import { Screen } from "@/components/ui/screen";
+import { SearchField } from "@/components/ui/search-field";
+import { Segmented } from "@/components/ui/segmented";
 import { GAME_INFO, useGameName } from "@/features/create/game-info";
 import { LiveDot } from "@/features/current-match/match-lock";
 import { useOnlineByGame } from "@/features/data/use-public-rooms";
@@ -34,10 +35,8 @@ import { GameCard } from "@/features/home/game-card";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { useAuthErrorToast } from "@/features/home/use-auth-error";
 import type { GameKey } from "@/game/games";
-import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease, riseIn } from "@/lib/motion";
-import { GAMES } from "@/lib/routes";
 import {
   fromSearch,
   GAME_SORTS,
@@ -76,6 +75,7 @@ const ANY = "any";
 /** /games: every game as the hub's tiles, with a search, table size, style and who is playing. The filters live in the link. */
 export function GamesScreen() {
   const t = useTranslations("home.gamesPage");
+  const tn = useTranslations("nav");
   const tg = useTranslations("home.games");
   const locale = useLocale();
   const gameName = useGameName();
@@ -120,94 +120,71 @@ export function GamesScreen() {
 
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
-      <div className="flex flex-col gap-6">
-        <m.div {...riseIn} className="flex flex-col gap-4">
-          <Link
-            href={GAMES}
-            className="-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink"
+      <PageHead
+        eyebrow={tn("groups.play")}
+        title={t("title")}
+        lead={t("lead")}
+      />
+      <Filters filters={filters} set={set} />
+      <div className="mt-[26px] mb-3 flex flex-wrap items-baseline justify-between gap-3">
+        <h2
+          aria-live="polite"
+          className="font-bold font-display text-[19px] leading-tight tracking-[-0.01em]"
+        >
+          {t("count", { count: shown.length })}
+        </h2>
+        {filtered ? (
+          <button
+            type="button"
+            onClick={() => set({ ...NO_FILTERS, sort: filters.sort })}
+            className="font-semibold text-[13px] text-sky underline decoration-1 underline-offset-[3px]"
           >
-            <ChevronLeft className="size-4" strokeWidth={2} />
-            {t("back")}
-          </Link>
-          <div className="flex flex-col gap-1">
-            <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em]">
-              {t("title")}
-            </h1>
-            <p className="max-w-[60ch] font-medium text-ink-muted">
-              {t("lead")}
-            </p>
-          </div>
-        </m.div>
-
-        <Filters filters={filters} set={set} />
-
-        <div className="flex min-h-8 items-center justify-between gap-4">
-          <p
-            className="font-semibold text-ink-muted text-sm"
-            aria-live="polite"
-          >
-            {t("count", { count: shown.length })}
-          </p>
-          <AnimatePresence>
-            {filtered ? (
-              <m.button
-                type="button"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => set({ ...NO_FILTERS, sort: filters.sort })}
-                className="inline-flex items-center gap-1 font-semibold text-sky text-sm hover:underline"
-              >
-                <X className="size-4" strokeWidth={2} />
-                {t("clearFilters")}
-              </m.button>
-            ) : null}
-          </AnimatePresence>
-        </div>
-
-        {shown.length ? (
-          <ul className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] sm:gap-x-5 sm:gap-y-9">
-            <AnimatePresence initial={false} mode="popLayout">
-              {shown.map((game, i) => (
-                <m.li
-                  key={game}
-                  layout
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.35, ease: ease.soft }}
-                  className="flex min-w-0 flex-col gap-3"
-                >
-                  <GameCard
-                    game={game}
-                    delay={0.1 + i * 0.07}
-                    className="w-full"
-                    tileClassName="rounded-xl shadow-card"
-                  />
-                  <GameInfo game={game} picked={filters.tags} />
-                </m.li>
-              ))}
-            </AnimatePresence>
-          </ul>
-        ) : (
-          <m.div
-            {...riseIn}
-            className="flex flex-col items-center gap-4 rounded-xl border-[1.5px] border-line-strong border-dashed px-6 py-12 text-center"
-          >
-            <span className="flex size-12 items-center justify-center rounded-pill bg-sunken text-ink-muted">
-              <Search className="size-6" strokeWidth={1.75} />
-            </span>
-            <p className="max-w-sm text-ink-muted">{t("empty")}</p>
-            <button
-              type="button"
-              onClick={() => set({ ...NO_FILTERS, sort: filters.sort })}
-              className={buttonClass("secondary", "sm")}
-            >
-              {t("clearFilters")}
-            </button>
-          </m.div>
-        )}
+            {t("clearFilters")}
+          </button>
+        ) : null}
       </div>
+      {shown.length ? (
+        <ul className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] sm:gap-x-5 sm:gap-y-9">
+          <AnimatePresence initial={false} mode="popLayout">
+            {shown.map((game, i) => (
+              <m.li
+                key={game}
+                layout
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.35, ease: ease.soft }}
+                className="flex min-w-0 flex-col gap-3"
+              >
+                <GameCard
+                  game={game}
+                  delay={0.1 + i * 0.07}
+                  className="w-full"
+                  tileClassName="rounded-xl shadow-card"
+                />
+                <GameInfo game={game} picked={filters.tags} />
+              </m.li>
+            ))}
+          </AnimatePresence>
+        </ul>
+      ) : (
+        <m.div
+          {...riseIn}
+          className="flex flex-col items-center gap-4 rounded-xl border-[1.5px] border-line-strong border-dashed px-6 py-12 text-center"
+        >
+          <span className="flex size-12 items-center justify-center rounded-pill bg-sunken text-ink-muted">
+            <Search className="size-6" strokeWidth={1.75} />
+          </span>
+          <p className="max-w-sm text-ink-muted">{t("empty")}</p>
+          <button
+            type="button"
+            onClick={() => set({ ...NO_FILTERS, sort: filters.sort })}
+            className={buttonClass("secondary", "sm")}
+          >
+            {t("clearFilters")}
+          </button>
+        </m.div>
+      )}
     </Screen>
   );
 }
@@ -268,81 +245,48 @@ function Filters({
         : GAME_TAGS.filter((x) => x === tag || filters.tags.includes(x)),
     });
   return (
-    <m.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        transition: { delay: 0.08, duration: 0.4, ease: ease.soft },
-      }}
-      className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-card sm:p-5"
-    >
-      <div className="flex flex-wrap gap-3">
-        <label className="group flex h-13 min-w-64 flex-1 basis-full items-center gap-3 rounded-pill border-[1.5px] border-line-strong bg-canvas px-4 transition-colors focus-within:border-sky md:basis-0">
-          <Search
-            className="size-5 shrink-0 text-ink-muted transition-colors group-focus-within:text-sky"
-            strokeWidth={1.75}
-          />
-          <span className="sr-only">{t("search")}</span>
-          <input
-            type="search"
-            value={filters.q}
-            placeholder={t("searchPlaceholder")}
-            onChange={(e) => set({ q: e.target.value })}
-            className="h-full min-w-0 flex-1 bg-transparent text-base placeholder:text-ink-muted focus-visible:outline-none! [&::-webkit-search-cancel-button]:hidden"
-          />
-          <AnimatePresence>
-            {filters.q ? (
-              <m.button
-                type="button"
-                initial={{ opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.6 }}
-                aria-label={t("clearSearch")}
-                onClick={() => set({ q: "" })}
-                className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-sunken text-ink-muted hover:text-ink"
-              >
-                <X className="size-4" strokeWidth={2} />
-              </m.button>
-            ) : null}
-          </AnimatePresence>
-        </label>
-        <FilterSelect
-          label={t("players")}
-          value={filters.players ? String(filters.players) : ANY}
-          onChange={(v) => set({ players: v === ANY ? null : Number(v) })}
-          options={[
-            {
-              value: ANY,
-              label: t("anyPlayers"),
-              icon: <UsersRound className="size-4" strokeWidth={1.75} />,
-            },
-            ...PLAYER_COUNTS.map((n) => ({
-              value: String(n),
-              label: t("playersN", { n }),
-              icon: <UsersRound className="size-4" strokeWidth={1.75} />,
-            })),
-          ]}
-        />
-        <FilterSelect
-          label={t("sort")}
-          value={filters.sort}
-          onChange={(v) => set({ sort: v as GameSort })}
-          options={GAME_SORTS.map((s) => {
-            const Icon = SORT_ICON[s];
-            return {
-              value: s,
-              label: t(`sorts.${s}`),
-              icon: <Icon className="size-4" strokeWidth={1.75} />,
-            };
-          })}
-        />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 font-semibold text-[11px] text-ink-muted uppercase tracking-[0.08em]">
-          {t("style")}
-        </span>
+    <div className="mb-[18px] flex flex-wrap items-center gap-3">
+      <SearchField
+        value={filters.q}
+        onChange={(q) => set({ q })}
+        label={t("search")}
+        placeholder={t("searchPlaceholder")}
+        clearLabel={t("clearSearch")}
+      />
+      <FilterSelect
+        label={t("players")}
+        value={filters.players ? String(filters.players) : ANY}
+        onChange={(v) => set({ players: v === ANY ? null : Number(v) })}
+        options={[
+          {
+            value: ANY,
+            label: t("anyPlayers"),
+            icon: <UsersRound className="size-4" strokeWidth={1.75} />,
+          },
+          ...PLAYER_COUNTS.map((n) => ({
+            value: String(n),
+            label: t("playersN", { n }),
+            icon: <UsersRound className="size-4" strokeWidth={1.75} />,
+          })),
+        ]}
+      />
+      <Segmented
+        label={t("sort")}
+        options={GAME_SORTS}
+        value={filters.sort}
+        onChange={(sort: GameSort) => set({ sort })}
+        render={(s) => {
+          const Icon = SORT_ICON[s];
+          return (
+            <>
+              <Icon className="size-4" strokeWidth={1.75} />
+              {t(`sorts.${s}`)}
+            </>
+          );
+        }}
+      />
+      <fieldset className="-my-0.5 order-3 m-0 flex min-w-0 flex-[1_1_100%] gap-2 overflow-x-auto border-0 px-0 py-0.5 [scrollbar-width:none]">
+        <legend className="sr-only">{t("style")}</legend>
         {GAME_TAGS.map((tag) => {
           const Icon = TAG_ICON[tag];
           return (
@@ -358,7 +302,7 @@ function Filters({
         })}
         <span
           aria-hidden="true"
-          className="mx-1 h-6 w-px bg-line-strong max-sm:hidden"
+          className="mx-1 h-6 w-px shrink-0 self-center bg-line-strong"
         />
         <Chip
           on={filters.online}
@@ -373,8 +317,8 @@ function Filters({
           </span>
           {t("online")}
         </Chip>
-      </div>
-    </m.div>
+      </fieldset>
+    </div>
   );
 }
 
@@ -394,10 +338,10 @@ function Chip({
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        "inline-flex h-10 items-center gap-1.5 rounded-pill border-[1.5px] px-3.5 font-semibold text-sm transition-[color,background-color,border-color,transform] duration-200 ease-soft active:scale-95",
+        "inline-flex h-9 shrink-0 items-center gap-[7px] whitespace-nowrap rounded-pill border px-3.5 font-semibold text-sm transition-[background-color,border-color,color,scale] duration-150 ease-soft active:scale-[0.96]",
         on
-          ? "border-sky bg-sky-soft text-ink"
-          : "border-line-strong bg-canvas text-ink-muted hover:border-ink-muted hover:text-ink",
+          ? "border-transparent bg-sky-soft text-ink shadow-[inset_0_0_0_1.5px_var(--sky)]"
+          : "border-line bg-surface hover:bg-sunken",
       )}
     >
       {children}

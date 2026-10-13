@@ -256,8 +256,8 @@
   "codeNotFound": "No hay ninguna sala con este código.",
   "joining": "Entrando…",
   "roomsPage": {
-    "back": "Juegos",
     "title": "Salas",
+    "lead": "Salas esperando jugadores. Encuéntralas por nombre, juego, idioma o quién puede entrar.",
     "count": "{count, plural, =0 {No hay salas} one {# sala · {open} con lugar libre} other {# salas · {open} con lugar libre}}",
     "create": "Crear sala",
     "search": "Buscar",
@@ -281,7 +281,6 @@
     "clearFilters": "Borrar filtros"
   },
   "gamesPage": {
-    "back": "Inicio",
     "title": "Juegos",
     "lead": "Todos los juegos de 4Dare. Busca por nombre o filtra por tamaño de la mesa y forma de jugar.",
     "count": "{count, plural, =0 {Ningún juego} one {# juego} other {# juegos}}",
@@ -294,8 +293,8 @@
     "sort": "Ordenar",
     "sorts": {
       "featured": "Destacados",
-      "popular": "Más jugados ahora",
-      "name": "Nombre (A–Z)"
+      "popular": "Más jugados",
+      "name": "A–Z"
     },
     "style": "Estilo",
     "online": "Con gente jugando",

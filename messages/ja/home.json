@@ -256,8 +256,8 @@
   "codeNotFound": "このコードのルームはありません。",
   "joining": "参加中…",
   "roomsPage": {
-    "back": "ゲーム一覧",
     "title": "ルーム",
+    "lead": "プレイヤーを待っているルーム。名前、ゲーム、言語、参加条件で探せます。",
     "count": "{count, plural, =0 {ルームなし} other {#件 · 空きあり{open}件}}",
     "create": "ルームを作る",
     "search": "検索",
@@ -281,7 +281,6 @@
     "clearFilters": "条件をクリア"
   },
   "gamesPage": {
-    "back": "ホーム",
     "title": "ゲーム",
     "lead": "4Dareのすべてのゲーム。名前で探すか、人数や遊び方で絞り込めます。",
     "count": "{count, plural, =0 {ゲームなし} other {#件のゲーム}}",
@@ -294,7 +293,7 @@
     "sort": "並べ替え",
     "sorts": {
       "featured": "おすすめ",
-      "popular": "いま人気",
+      "popular": "人気順",
       "name": "名前順"
     },
     "style": "スタイル",

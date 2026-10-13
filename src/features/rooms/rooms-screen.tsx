@@ -4,14 +4,13 @@ import { Select } from "@base-ui/react/select";
 import {
   Check,
   ChevronDown,
-  ChevronLeft,
   EyeOff,
   Globe,
   Languages,
   Layers,
   Lock,
+  Plus,
   Search,
-  X,
 } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
@@ -24,7 +23,9 @@ import {
   TRIGGER,
 } from "@/components/ui/filter-select";
 import { Flag } from "@/components/ui/language-switch";
+import { PageHead } from "@/components/ui/page-head";
 import { Screen } from "@/components/ui/screen";
+import { SearchField } from "@/components/ui/search-field";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { MatchGate } from "@/features/current-match/match-lock";
 import { useCurrentMatch } from "@/features/data/use-current-match";
@@ -40,9 +41,9 @@ import { TASTE_KEYS, TASTES, type Taste } from "@/game/tastes";
 import { LANGS, type Lang } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { fold } from "@/lib/fold";
-import { ease, riseIn } from "@/lib/motion";
+import { riseIn } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
-import { GAMES, newRoom } from "@/lib/routes";
+import { newRoom } from "@/lib/routes";
 import { RoomRow, sortRooms } from "./room-row";
 
 export type Access = "all" | "public" | "private";
@@ -96,6 +97,7 @@ function fromSearch(search: string, locale: Lang): RoomFilters {
 /** /rooms: every listed room, filtered by game, a search, language and who can join. The filters live in the link. */
 export function RoomsScreen() {
   const t = useTranslations("home.roomsPage");
+  const tn = useTranslations("nav");
   const locale = useLocale() as Lang;
   const tr = useTranslations("home.rooms");
   const name = useDisplayName();
@@ -143,105 +145,102 @@ export function RoomsScreen() {
     filters.hide.length
   );
 
+  const clearFilters = () =>
+    set({ game: null, q: "", access: "all", langs: null, hide: [] });
+
   return (
     <Screen left={<HubBrand />} right={<HubActions />}>
-      <div className="flex flex-col gap-6">
-        <m.div {...riseIn} className="flex flex-col gap-4">
+      <PageHead
+        eyebrow={tn("groups.play")}
+        title={t("title")}
+        lead={t("lead")}
+        actions={
           <Link
-            href={GAMES}
-            className="-ml-1.5 inline-flex items-center gap-1 self-start font-semibold text-ink-muted text-sm transition-colors hover:text-ink"
+            href={newRoom(filters.game ?? DEFAULT_GAME)}
+            inert={match ? true : undefined}
+            className={buttonClass(
+              "primary",
+              "md",
+              match ? "pointer-events-none opacity-35" : undefined,
+            )}
           >
-            <ChevronLeft className="size-4" strokeWidth={2} />
-            {t("back")}
+            <Plus className="size-5" strokeWidth={2} />
+            {t("create")}
           </Link>
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <h1 className="font-bold font-display text-[44px] leading-[48px] tracking-[-0.015em]">
-                {t("title")}
-              </h1>
-              <p className="font-medium text-ink-muted" aria-live="polite">
-                {isLoading ? " " : t("count", { count: shown.length, open })}
-              </p>
-            </div>
-            <Link
-              href={newRoom(filters.game ?? DEFAULT_GAME)}
-              inert={match ? true : undefined}
-              className={buttonClass(
-                "primary",
-                "md",
-                match ? "pointer-events-none opacity-35" : undefined,
-              )}
+        }
+      />
+      <MatchGate>
+        <Filters filters={filters} set={set} />
+        <div className="mt-[26px] mb-3 flex flex-wrap items-baseline justify-between gap-3">
+          <h2
+            aria-live="polite"
+            className="font-bold font-display text-[19px] leading-tight tracking-[-0.01em]"
+          >
+            {isLoading ? " " : t("count", { count: shown.length, open })}
+          </h2>
+          {filtered ? (
+            <button
+              type="button"
+              onClick={() => clearFilters()}
+              className="font-semibold text-[13px] text-sky underline decoration-1 underline-offset-[3px]"
             >
-              {t("create")}
-            </Link>
+              {t("clearFilters")}
+            </button>
+          ) : null}
+        </div>
+        {isLoading ? (
+          <div className="flex flex-col gap-2">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-[76px] animate-pulse rounded-lg bg-surface"
+              />
+            ))}
           </div>
-        </m.div>
-
-        <MatchGate className="flex flex-col gap-6">
-          <Filters filters={filters} set={set} />
-
-          {isLoading ? (
-            <div className="flex flex-col gap-2">
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-[76px] animate-pulse rounded-lg bg-surface"
+        ) : shown.length ? (
+          <ul className="flex flex-col gap-2">
+            <AnimatePresence initial={false} mode="popLayout">
+              {shown.map((r) => (
+                <RoomRow
+                  key={r.code}
+                  room={r}
+                  showGame
+                  className="bg-surface shadow-card"
                 />
               ))}
-            </div>
-          ) : shown.length ? (
-            <ul className="flex flex-col gap-2">
-              <AnimatePresence initial={false} mode="popLayout">
-                {shown.map((r) => (
-                  <RoomRow
-                    key={r.code}
-                    room={r}
-                    showGame
-                    className="bg-surface shadow-card"
-                  />
-                ))}
-              </AnimatePresence>
-            </ul>
-          ) : (
-            <m.div
-              {...riseIn}
-              className="flex flex-col items-center gap-4 rounded-xl border-[1.5px] border-line-strong border-dashed px-6 py-12 text-center"
-            >
-              <span className="flex size-12 items-center justify-center rounded-pill bg-sunken text-ink-muted">
-                <Search className="size-6" strokeWidth={1.75} />
-              </span>
-              <p className="max-w-sm text-ink-muted">
-                {filtered ? t("emptyFiltered") : t("empty")}
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {filtered ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      set({
-                        game: null,
-                        q: "",
-                        access: "all",
-                        langs: null,
-                        hide: [],
-                      })
-                    }
-                    className={buttonClass("secondary", "sm")}
-                  >
-                    {t("clearFilters")}
-                  </button>
-                ) : null}
-                <Link
-                  href={newRoom(filters.game ?? DEFAULT_GAME)}
-                  className={buttonClass("primary", "sm")}
+            </AnimatePresence>
+          </ul>
+        ) : (
+          <m.div
+            {...riseIn}
+            className="flex flex-col items-center gap-4 rounded-xl border-[1.5px] border-line-strong border-dashed px-6 py-12 text-center"
+          >
+            <span className="flex size-12 items-center justify-center rounded-pill bg-sunken text-ink-muted">
+              <Search className="size-6" strokeWidth={1.75} />
+            </span>
+            <p className="max-w-sm text-ink-muted">
+              {filtered ? t("emptyFiltered") : t("empty")}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {filtered ? (
+                <button
+                  type="button"
+                  onClick={() => clearFilters()}
+                  className={buttonClass("secondary", "sm")}
                 >
-                  {t("create")}
-                </Link>
-              </div>
-            </m.div>
-          )}
-        </MatchGate>
-      </div>
+                  {t("clearFilters")}
+                </button>
+              ) : null}
+              <Link
+                href={newRoom(filters.game ?? DEFAULT_GAME)}
+                className={buttonClass("primary", "sm")}
+              >
+                {t("create")}
+              </Link>
+            </div>
+          </m.div>
+        )}
+      </MatchGate>
     </Screen>
   );
 }
@@ -260,45 +259,14 @@ function Filters({
   const t = useTranslations("home.roomsPage");
   const gameName = useGameName();
   return (
-    <m.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        transition: { delay: 0.08, duration: 0.4, ease: ease.soft },
-      }}
-      className="flex flex-wrap gap-3 rounded-xl bg-surface p-4 shadow-card sm:p-5"
-    >
-      <label className="group flex h-13 min-w-64 flex-1 basis-full items-center gap-3 rounded-pill border-[1.5px] border-line-strong bg-canvas px-4 transition-colors focus-within:border-sky md:basis-0">
-        <Search
-          className="size-5 shrink-0 text-ink-muted transition-colors group-focus-within:text-sky"
-          strokeWidth={1.75}
-        />
-        <span className="sr-only">{t("search")}</span>
-        <input
-          type="search"
-          value={filters.q}
-          placeholder={t("searchPlaceholder")}
-          onChange={(e) => set({ q: e.target.value })}
-          className="h-full min-w-0 flex-1 bg-transparent text-base placeholder:text-ink-muted focus-visible:outline-none! [&::-webkit-search-cancel-button]:hidden"
-        />
-        <AnimatePresence>
-          {filters.q ? (
-            <m.button
-              type="button"
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.6 }}
-              aria-label={t("clearSearch")}
-              onClick={() => set({ q: "" })}
-              className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-sunken text-ink-muted hover:text-ink"
-            >
-              <X className="size-4" strokeWidth={2} />
-            </m.button>
-          ) : null}
-        </AnimatePresence>
-      </label>
-
+    <div className="mb-[18px] flex flex-wrap items-center gap-3">
+      <SearchField
+        value={filters.q}
+        onChange={(q) => set({ q })}
+        label={t("search")}
+        placeholder={t("searchPlaceholder")}
+        clearLabel={t("clearSearch")}
+      />
       <FilterSelect
         label={t("game")}
         value={filters.game ?? ALL_GAMES}
@@ -340,7 +308,7 @@ function Filters({
           },
         ]}
       />
-    </m.div>
+    </div>
   );
 }
 
@@ -377,7 +345,7 @@ function LangSelect({
       }}
     >
       <Select.Trigger aria-label={t("lang")} className={TRIGGER}>
-        <span className="flex shrink-0 text-ink-muted max-sm:hidden">
+        <span className="flex shrink-0 text-ink-muted">
           {value?.length === 1 ? (
             <Flag lang={value[0]} className="size-4" />
           ) : (
@@ -454,7 +422,7 @@ function HideSelect({
       }
     >
       <Select.Trigger aria-label={t("hide")} className={TRIGGER}>
-        <span className="flex shrink-0 text-ink-muted max-sm:hidden">
+        <span className="flex shrink-0 text-ink-muted">
           <EyeOff className="size-4" strokeWidth={1.75} />
         </span>
         <Select.Value className="min-w-0 flex-1 truncate">

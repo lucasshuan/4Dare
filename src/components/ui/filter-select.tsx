@@ -4,9 +4,9 @@ import { Select } from "@base-ui/react/select";
 import { Check, ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 
-/** The filter selects' parts, alike in every one (the room and game lists). */
+/** The filter selects' parts, alike in every one (the room and game lists); as tall as the search field. */
 export const TRIGGER =
-  "flex h-13 min-w-0 flex-1 items-center gap-2.5 rounded-pill border-[1.5px] border-line-strong bg-canvas px-4 text-left max-sm:px-3.5 font-semibold text-sm transition-[border-color,box-shadow] duration-200 ease-soft hover:border-ink-muted data-popup-open:border-sky md:w-52 md:flex-none";
+  "flex h-[46px] min-w-0 max-w-60 flex-[0_1_auto] items-center gap-2 rounded-[16px] border border-line-strong bg-surface px-3.5 text-left font-semibold text-sm transition-[border-color,box-shadow] duration-150 ease-soft hover:border-ink-muted data-popup-open:border-sky data-popup-open:shadow-[0_0_0_3px_color-mix(in_oklch,var(--sky)_22%,transparent)] max-sm:max-w-none max-sm:flex-[1_1_40%]";
 export const POPUP =
   "min-w-[var(--anchor-width)] origin-[var(--transform-origin)] rounded-lg bg-surface p-1.5 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0";
 export const ITEM =
@@ -18,7 +18,7 @@ export interface FilterOption {
   icon: ReactNode;
 }
 
-/** A filter as a select, as tall as the search beside it. */
+/** A filter as a select. */
 export function FilterSelect({
   label,
   value,
@@ -40,9 +40,7 @@ export function FilterSelect({
       }}
     >
       <Select.Trigger aria-label={label} className={TRIGGER}>
-        <span className="flex shrink-0 text-ink-muted max-sm:hidden">
-          {current.icon}
-        </span>
+        <span className="flex shrink-0 text-ink-muted">{current.icon}</span>
         <Select.Value className="min-w-0 flex-1 truncate">
           {() => current.label}
         </Select.Value>
