@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { knownAs } from "@/game/character-search";
-import { GAME_KEYS, OPEN_GAMES } from "@/game/games";
+import { GAME_KEYS, type GameKey, isGameKey, OPEN_GAMES } from "@/game/games";
 import type { ImpAnswer } from "@/game/impostor/types";
 import {
   COINS,
@@ -16,6 +16,11 @@ import {
 } from "@/game/lineup/rules";
 import { CUES, type LuCue } from "@/game/lineup/types";
 import { parseSynced } from "@/game/options";
+import {
+  type MatchReward,
+  matchReward as rewardOf,
+} from "@/game/profile/reward";
+import { matchRecord } from "@/game/record";
 import { TASTE_KEYS, type Taste } from "@/game/tastes";
 import { themeId } from "@/game/theme-id";
 import {
@@ -1193,11 +1198,45 @@ export async function giveUp(code: string): Promise<Result<RoomView>> {
   return run(() => act(code, (id) => ({ type: "GIVE_UP", playerId: id })));
 }
 
-/** Host only, from the podium: everyone back to the lobby now, without waiting for the clock. */
-export async function backToLobby(code: string): Promise<Result<RoomView>> {
-  return run(() =>
-    act(code, (id) => ({ type: "BACK_TO_LOBBY", playerId: id })),
-  );
+/** From a match's end, anyone seated: everyone back to the lobby; the host may bring another game (`game`). */
+export async function backToLobby(
+  code: string,
+  game?: GameKey,
+): Promise<Result<RoomView>> {
+  return run(() => {
+    if (game !== undefined && !isGameKey(game)) bad();
+    return act(code, (id) => ({
+      type: "BACK_TO_LOBBY",
+      playerId: id,
+      ...(game ? { game } : {}),
+    }));
+  });
+}
+
+/**
+ * What the match that just ended gave the caller, for the end's reward card:
+ * its lines and XP, and for an account its level before and after and a badge
+ * tier reached for the first time. Null for someone who didn't play it.
+ */
+export async function myMatchReward(
+  code: string,
+): Promise<Result<MatchReward | null>> {
+  return run(async () => {
+    const [who, stored] = await Promise.all([
+      me(),
+      getBackend().rooms.get(roomCode(code)),
+    ]);
+    const s = stored?.state;
+    if (s?.phase !== "finished") throw new GameError("wrong_phase");
+    const record = matchRecord(s, s.stepStartsAt ?? Date.now());
+    const part = record?.players.find((p) => p.userId === who.id);
+    if (!record || !part) return null;
+    if (who.isGuest) return rewardOf(record, part, null);
+    const { matches } = getBackend();
+    // saving the same match again does nothing: this makes sure the history holds it
+    await matches.record(record).catch(() => undefined);
+    return rewardOf(record, part, await matches.history(who.id));
+  });
 }
 
 // --- character library --------------------------------------------------------
