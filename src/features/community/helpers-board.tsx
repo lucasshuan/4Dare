@@ -2,7 +2,7 @@
 
 import { Select } from "@base-ui/react/select";
 import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Crown } from "lucide-react";
 import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -34,13 +34,13 @@ export const MEDAL: Record<string, string> = {
 };
 
 /**
- * The places, left to right: second, first, third, each step with its
- * medal: a cousin of the rankings page's podium.
+ * The places, left to right: second, first, third, as the rankings page's
+ * podium: the steps grow one by one, then the faces pop on and the first is crowned.
  */
 const PODIUM = [
-  { i: 1, height: 104, medal: "silver", rise: 0.32 },
-  { i: 0, height: 140, medal: "gold", rise: 0.46 },
-  { i: 2, height: 78, medal: "bronze", rise: 0.2 },
+  { i: 1, height: 112, rise: 0.32 },
+  { i: 0, height: 150, rise: 0.46 },
+  { i: 2, height: 84, rise: 0.2 },
 ];
 
 /**
@@ -150,11 +150,11 @@ export function HelpersBoard({
             {/* a new top three (or a new ranking) replays the podium */}
             <div
               key={`${metric}-${top.map((h) => h.person.id).join()}`}
-              className="mx-auto mt-2 mb-6 grid max-w-[480px] grid-cols-3 items-end gap-3"
+              className="mx-auto mt-2 mb-[26px] grid w-full max-w-[480px] grid-cols-3 items-end gap-3"
             >
-              {PODIUM.map(({ i, height, medal, rise }) => {
+              {PODIUM.map(({ i, height, rise }) => {
                 const h = top[i];
-                if (!h) return <span key={i} />;
+                if (!h) return null;
                 return (
                   <ProfileLink
                     key={h.person.id}
@@ -171,12 +171,26 @@ export function HelpersBoard({
                         damping: 16,
                         delay: rise + 0.22,
                       }}
-                      className="grid min-w-0 max-w-full justify-items-center gap-1.5"
+                      className="grid min-w-0 max-w-full justify-items-center gap-2"
                     >
-                      <Avatar
-                        avatar={h.person.avatar}
-                        size={i === 0 ? 52 : 44}
-                      />
+                      {i === 0 ? (
+                        <m.span
+                          initial={{ opacity: 0, y: -16, rotate: -40 }}
+                          animate={{ opacity: 1, y: 0, rotate: 0 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 380,
+                            damping: 11,
+                            delay: rise + 0.5,
+                          }}
+                        >
+                          <Crown
+                            className="h-[18px] text-gold"
+                            strokeWidth={2}
+                          />
+                        </m.span>
+                      ) : null}
+                      <Avatar avatar={h.person.avatar} size={48} />
                       <b className="max-w-full truncate font-bold font-display text-[15px] leading-tight">
                         {h.person.name}
                       </b>
@@ -194,14 +208,14 @@ export function HelpersBoard({
                         delay: rise,
                       }}
                       style={{ height }}
-                      className="grid w-full origin-bottom place-items-start justify-center rounded-[18px_18px_8px_8px] border border-line bg-surface pt-3"
+                      className={cn(
+                        "grid w-full origin-bottom place-items-start justify-center rounded-[18px_18px_8px_8px] border pt-2.5 font-display font-extrabold text-[34px] leading-none",
+                        i === 0
+                          ? "border-transparent bg-butter text-on-butter"
+                          : "border-line bg-surface text-ink-muted",
+                      )}
                     >
-                      <span
-                        style={{ background: MEDAL[medal] }}
-                        className="grid size-9 place-items-center rounded-pill font-display font-extrabold text-[17px] text-ink shadow-[inset_0_-3px_0_rgb(0_0_0/0.15)]"
-                      >
-                        {i + 1}
-                      </span>
+                      {i + 1}
                     </m.div>
                   </ProfileLink>
                 );
