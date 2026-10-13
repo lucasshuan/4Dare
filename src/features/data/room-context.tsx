@@ -18,7 +18,10 @@ export interface RoomContextValue {
   apply: (view: RoomView) => void;
   /** The server's current time, estimated from the local clock (or the lab's clock). */
   serverTime: () => number;
+  /** The viewer: their seat, or (watching) a stand-in that is never among the players. */
   me: PlayerView;
+  /** The viewer has no seat: they watch. */
+  watching: boolean;
   playerById: (id: string | null | undefined) => PlayerView | undefined;
 }
 
@@ -48,7 +51,7 @@ export function RoomProvider({
   );
   const value = useMemo<RoomContextValue>(() => {
     const byId = new Map(view.players.map((p) => [p.id, p]));
-    const me = byId.get(view.youId);
+    const me = byId.get(view.youId) ?? view.watcher;
     if (!me) throw new Error("viewer is not in the room view");
     return {
       code,
@@ -58,6 +61,7 @@ export function RoomProvider({
       apply,
       serverTime: roomClock.now,
       me,
+      watching: view.watching,
       playerById: (id) => (id ? byId.get(id) : undefined),
     };
   }, [code, view, offset, refresh, apply, roomClock]);

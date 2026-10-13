@@ -10,6 +10,7 @@ import { useRoomContext } from "@/features/data/room-context";
 import { useLeaveMatch } from "@/features/data/use-current-match";
 import { useRouter } from "@/i18n/navigation";
 import { GAME_PATHS } from "@/lib/routes";
+import { leaveRoom } from "@/server/actions";
 
 /**
  * The "Leave" button's look, in the match header and the lobby alike: a round
@@ -44,11 +45,28 @@ export function LeaveIcon() {
 /** "Leave" in the match header: out of the match for good, after a quick "sure?". */
 export function LeaveMatchButton() {
   const t = useTranslations("common.currentMatch");
-  const { view, me, code } = useRoomContext();
+  const { view, me, code, watching } = useRoomContext();
   const router = useRouter();
   const { leave, pending } = useLeaveMatch();
   const [open, setOpen] = useState(false);
   if (me.away) return null;
+  // someone watching just goes: nobody waits on them
+  if (watching)
+    return (
+      <Tip label={t("leaveShort")}>
+        <button
+          type="button"
+          className={leaveButtonClass}
+          onClick={() => {
+            void leaveRoom(code);
+            router.push(GAME_PATHS[view.settings.game]);
+          }}
+        >
+          <LeaveIcon />
+          <span className="sr-only">{t("leaveShort")}</span>
+        </button>
+      </Tip>
+    );
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Tip label={t("leaveShort")}>

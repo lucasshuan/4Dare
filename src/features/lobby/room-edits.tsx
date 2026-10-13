@@ -10,6 +10,8 @@ import {
   Lock,
   type LucideIcon,
   Mail,
+  MessageSquare,
+  MessageSquareOff,
   PenLine,
   Tv,
   UsersRound,
@@ -744,6 +746,45 @@ export function ModeRow({
         <p className="m-0 text-[13px] text-ink-muted">
           {few ? t("modeNeeds3") : t("modeHint")}
         </p>
+      </div>
+    </EditRow>
+  );
+}
+
+/** Whether whoever watches writes in the chat, or only reads it. */
+export function WatchChatRow({
+  value,
+  editable,
+  pending,
+  onSave,
+}: {
+  value: boolean;
+  editable: boolean;
+  pending: boolean;
+  onSave: (watchChat: boolean) => Promise<boolean>;
+}) {
+  const t = useTranslations("lobby");
+  const [draft, setDraft] = useState(value);
+  return (
+    <EditRow
+      icon={rowIcon(value ? MessageSquare : MessageSquareOff)}
+      text={t(value ? "watchChatOn" : "watchChatOff")}
+      label={t("watchChat")}
+      editable={editable}
+      pending={pending}
+      width="340px"
+      onOpen={() => setDraft(value)}
+      onSave={() => onSave(draft)}
+    >
+      <div className="flex flex-col gap-2">
+        <span className="font-semibold text-sm">{t("watchChat")}</span>
+        <Segmented
+          label={t("watchChat")}
+          options={["on", "off"] as const}
+          value={draft ? "on" : "off"}
+          onChange={(v) => setDraft(v === "on")}
+          render={(v) => t(v === "on" ? "watchChatOn" : "watchChatOff")}
+        />
       </div>
     </EditRow>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import { ChevronDown, type LucideIcon } from "lucide-react";
+import { ChevronDown, Ellipsis, type LucideIcon } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -29,16 +29,21 @@ export interface SeatAction {
 }
 
 /**
- * The host's one control on a seat: the same quiet button on every seat it
- * fits, opening a dropdown of what the host can do there. The seat itself
- * stays free for what clicking a player will do (their profile).
+ * The one control on a seat or a face in the room: the same quiet button on
+ * every one it fits, opening a dropdown of what the viewer can do there (the
+ * host far more). The face itself stays free for the person's quick card.
+ * `compact`: a small round key in the corner of a card.
  */
 export function SeatMenu({
   label,
   actions,
+  compact = false,
+  className,
 }: {
   label: string;
   actions: SeatAction[];
+  compact?: boolean;
+  className?: string;
 }) {
   const t = useTranslations("lobby");
   const [open, setOpen] = useState(false);
@@ -57,18 +62,25 @@ export function SeatMenu({
     >
       <Popover.Trigger
         aria-label={label}
+        data-no-drag=""
         className={cn(
-          "ml-auto flex size-8 shrink-0 items-center justify-center rounded-pill text-ink-muted transition-colors duration-200 ease-soft hover:bg-surface/70 hover:text-ink",
+          "flex shrink-0 items-center justify-center rounded-pill text-ink-muted transition-colors duration-200 ease-soft hover:bg-surface/70 hover:text-ink",
+          compact ? "size-7" : "ml-auto size-8",
           open && "bg-surface/70 text-ink",
+          className,
         )}
       >
-        <ChevronDown
-          className={cn(
-            "size-4.5 transition-transform duration-200 ease-soft",
-            open && "rotate-180",
-          )}
-          strokeWidth={2.25}
-        />
+        {compact ? (
+          <Ellipsis className="size-4.5" strokeWidth={2.25} />
+        ) : (
+          <ChevronDown
+            className={cn(
+              "size-4.5 transition-transform duration-200 ease-soft",
+              open && "rotate-180",
+            )}
+            strokeWidth={2.25}
+          />
+        )}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner

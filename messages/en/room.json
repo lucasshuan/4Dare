@@ -31,6 +31,10 @@
       "title": "The host removed you from the room",
       "body": "You can come back in 2 minutes. Meanwhile, join another room or make your own."
     },
+    "banned": {
+      "title": "The host banned you from this room",
+      "body": "You can't come back here. Join another room or make your own."
+    },
     "other": {
       "title": "Something went wrong",
       "body": "Try again in a moment."

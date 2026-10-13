@@ -56,7 +56,7 @@ const FINE_POINTER = "(hover: hover) and (pointer: fine)";
  */
 export function RoomChat() {
   const t = useTranslations("chat");
-  const { code, me, serverTime, playerById, view } = useRoomContext();
+  const { code, me, serverTime, playerById, view, watching } = useRoomContext();
   // What for?'s presenter knows the mission: a word against telling
   const hostHint = view.lu?.presenterId === me.id && view.phase !== "finished";
   const clock = useClock();
@@ -285,6 +285,13 @@ export function RoomChat() {
               <ChatCompose
                 ref={inputRef}
                 hint={hostHint ? t("hostHint") : null}
+                blocked={
+                  view.muted.includes(me.id)
+                    ? t("mutedNote")
+                    : watching && !view.settings.watchChat
+                      ? t("watchOnly")
+                      : null
+                }
                 text={draft}
                 onText={setDraft}
                 onSend={send}

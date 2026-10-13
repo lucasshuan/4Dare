@@ -28,5 +28,7 @@
     "verdict": "📺 {name}: “{why}”",
     "verdictMute": "📺 {name} não explicou"
   },
-  "hostHint": "Você sabe a missão. Não conte."
+  "hostHint": "Você sabe a missão. Não conte.",
+  "mutedNote": "O anfitrião silenciou você no chat",
+  "watchOnly": "Quem assiste só lê o chat nesta sala"
 }

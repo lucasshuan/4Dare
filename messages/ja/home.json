@@ -165,6 +165,8 @@
     "meta": "{players}/{seats}人 · 1ステップ{seconds}秒",
     "join": "参加",
     "joinRoom": "{name}さんのルームに参加",
+    "watch": "観戦",
+    "watchRoom": "{name}を観戦（{status}）",
     "empty": "今はルームがありません。作るとここに表示されます。",
     "full": "満員",
     "playing": "対戦中",

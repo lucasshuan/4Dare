@@ -165,6 +165,8 @@
     "meta": "{players}/{seats} players · {seconds} s per step",
     "join": "Join",
     "joinRoom": "Join {name}'s room",
+    "watch": "Watch",
+    "watchRoom": "Watch {name} ({status})",
     "empty": "No rooms right now. Create one and it shows up here.",
     "full": "Full",
     "playing": "Playing",

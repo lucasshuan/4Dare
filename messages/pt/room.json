@@ -31,6 +31,10 @@
       "title": "O anfitrião tirou você da sala",
       "body": "Dá para voltar daqui a 2 minutos. Enquanto isso, entre em outra sala ou crie a sua."
     },
+    "banned": {
+      "title": "O anfitrião baniu você desta sala",
+      "body": "Você não pode mais entrar aqui. Entre em outra sala ou crie a sua."
+    },
     "other": {
       "title": "Algo deu errado",
       "body": "Tente de novo daqui a pouco."

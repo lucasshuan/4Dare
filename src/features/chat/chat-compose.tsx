@@ -14,8 +14,11 @@ export function ChatCompose({
   onText,
   onSend,
   hint,
+  blocked = null,
   ref,
 }: {
+  /** Why the viewer can't write here (silenced, or watching a room that keeps its chat to the players): the field says so, shut. */
+  blocked?: string | null;
   /** In place of the usual placeholder: a word for whoever writes (the presenter's "don't tell"). */
   hint?: string | null;
   text: string;
@@ -25,11 +28,12 @@ export function ChatCompose({
   ref?: Ref<HTMLInputElement>;
 }) {
   const t = useTranslations("chat");
-  const empty = cleanChatText(text) === null;
+  const empty = cleanChatText(text) === null || !!blocked;
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        if (blocked) return;
         if (onSend(text)) onText("");
         // the send button took the focus: give it back to the field
         const field = e.currentTarget.elements.namedItem("message");
@@ -45,7 +49,8 @@ export function ChatCompose({
           onChange={(e) => onText(e.target.value)}
           maxLength={MAX_CHAT}
           aria-label={t("inputLabel")}
-          placeholder={hint ?? t("placeholder")}
+          placeholder={blocked ?? hint ?? t("placeholder")}
+          disabled={!!blocked}
           enterKeyHint="send"
           autoComplete="off"
           className="h-full min-w-0 flex-1 bg-transparent font-medium text-[14.5px] text-ink placeholder:text-ink-muted focus-visible:outline-none!"

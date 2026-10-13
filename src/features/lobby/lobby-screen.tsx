@@ -1,8 +1,11 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+  Armchair,
   Check,
+  Eye,
   History,
   Link as LinkIcon,
   Settings,
@@ -29,6 +32,7 @@ import { useLineupCount } from "@/features/create/lineup-catalog";
 import { RoomSetup } from "@/features/create/room-setup";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
+import { watchersKey } from "@/features/data/use-watchers";
 import { RoomControls } from "@/features/room/room-controls";
 import { setStartAsked } from "@/features/room/start-cover";
 import { GAME_SEATS } from "@/game/games";
@@ -38,6 +42,7 @@ import { useDisplayName, useRoomTitle } from "@/lib/names";
 import {
   drawChair,
   kickPlayer,
+  playInstead,
   setReady,
   sitChair,
   startGame,
@@ -47,6 +52,7 @@ import {
 import type { CreateRoomInput } from "@/server/contract";
 import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
+import { People } from "./people";
 import {
   AuctionRow,
   ImpostorsRow,
@@ -58,8 +64,8 @@ import {
   ThemeModeRow,
   TimesRow,
   VisibilityRow,
+  WatchChatRow,
 } from "./room-edits";
-import { SeatGrid } from "./seat-grid";
 import { StartDialog } from "./start-dialog";
 import { TvChair } from "./tv-chair";
 
@@ -102,6 +108,7 @@ const editable = ({
   trades,
   heavy,
   offMissions,
+  watchChat,
 }: CreateRoomInput): CreateRoomInput => ({
   game,
   name,
@@ -131,6 +138,7 @@ const editable = ({
   trades,
   heavy,
   offMissions,
+  watchChat,
 });
 
 export function LobbyScreen() {
@@ -139,8 +147,9 @@ export function LobbyScreen() {
   const roomTitle = useRoomTitle();
   const withNames = useWithNames();
   const toast = useToast();
-  const { view, me, code } = useRoomContext();
+  const { view, me, code, watching } = useRoomContext();
   const { act, pending } = useRoomAction();
+  const client = useQueryClient();
   // "Ready" flips at once; the server confirms in the background.
   const [readyGuess, setReadyGuess] = useState<boolean | null>(null);
   const myReady = readyGuess ?? me.ready;
@@ -191,9 +200,9 @@ export function LobbyScreen() {
     inFlight.current -= 1;
     if (inFlight.current === 0) setSeatsGuess(null);
   };
-  const kick = async (id: string) => {
+  const kick = async (id: string, ban: boolean) => {
     setKicking((ids) => [...ids, id]);
-    await act(() => kickPlayer(code, id));
+    await act(() => kickPlayer(code, id, ban));
     setKicking((ids) => ids.filter((x) => x !== id));
   };
 
@@ -222,10 +231,20 @@ export function LobbyScreen() {
   const greeting = me.isHost
     ? t(view.round > 0 ? "titleHostAgain" : "titleHost")
     : withNames((n) =>
-        t(view.round > 0 ? "titleGuestAgain" : "titleGuest", {
-          name: host ? n(host) : "",
-        }),
+        t(
+          watching
+            ? "titleWatcher"
+            : view.round > 0
+              ? "titleGuestAgain"
+              : "titleGuest",
+          { name: host ? n(host) : "" },
+        ),
       );
+  const free = view.players.length < shownSeats;
+  const play = async () => {
+    await act(() => playInstead(code));
+    await client.invalidateQueries({ queryKey: watchersKey(code) });
+  };
 
   return (
     <Screen bare>
@@ -308,11 +327,10 @@ export function LobbyScreen() {
                   icon: Users,
                   count: `${shownPlayers.length}/${shownSeats}`,
                   panel: (
-                    <SeatGrid
+                    <People
                       players={shownPlayers}
                       seats={shownSeats}
                       slots={me.isHost ? range.max : shownSeats}
-                      host={me.isHost}
                       canClose={canClose}
                       onSeats={setSeats}
                       onKick={kick}
@@ -353,6 +371,18 @@ export function LobbyScreen() {
                             await setSeats(n);
                             return true;
                           }}
+                        />
+                        <WatchChatRow
+                          value={view.settings.watchChat}
+                          editable={me.isHost}
+                          pending={pending}
+                          onSave={async (watchChat) =>
+                            (
+                              await act(() =>
+                                updateSettings(code, { watchChat }),
+                              )
+                            ).ok
+                          }
                         />
                       </SettingsGroup>
                       <SettingsGroup title={t("settingsGroups.rules")}>
@@ -529,6 +559,26 @@ export function LobbyScreen() {
                   onStart={start}
                 />
               </>
+            ) : watching ? (
+              // someone watching takes a free seat with the same big key
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  type="button"
+                  className={keyClass("sky", {
+                    bounce: true,
+                    className: "min-h-16 w-full px-6 text-2xl",
+                  })}
+                  disabled={pending || !free || !!view.starting}
+                  onClick={play}
+                >
+                  <Armchair className="size-5 shrink-0" strokeWidth={2.25} />
+                  {t("playInstead")}
+                </button>
+                <span className="inline-flex items-center gap-1.5 font-semibold text-ink-muted text-sm">
+                  <Eye className="size-4" strokeWidth={2} />
+                  {free ? t("watchingNote") : t("noSeat")}
+                </span>
+              </div>
             ) : (
               <button
                 type="button"

@@ -28,5 +28,7 @@
     "verdict": "📺 {name}: “{why}”",
     "verdictMute": "📺 {name} didn't explain"
   },
-  "hostHint": "You know the mission. Don't tell."
+  "hostHint": "You know the mission. Don't tell.",
+  "mutedNote": "The host muted you in the chat",
+  "watchOnly": "Spectators only read the chat in this room"
 }

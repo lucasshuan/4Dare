@@ -165,6 +165,8 @@
     "meta": "{players}/{seats} jugadores · {seconds} s por etapa",
     "join": "Entrar",
     "joinRoom": "Entrar a la sala de {name}",
+    "watch": "Mirar",
+    "watchRoom": "Mirar {name} ({status})",
     "empty": "No hay salas ahora. Crea una y aparecerá aquí.",
     "full": "Llena",
     "playing": "Jugando",

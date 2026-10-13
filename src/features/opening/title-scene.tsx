@@ -154,7 +154,7 @@ function useOpeningFiles(game: GameKey): () => Promise<void> {
  * match begins for everyone together once they all have.
  */
 export function useReadyCheck() {
-  const { view, code, apply } = useRoomContext();
+  const { view, code, apply, watching } = useRoomContext();
   const w = view.phase === "lobby" ? view.starting : null;
   const waiting = w && !w.ready.includes(view.youId) ? w.until : null;
   useEffect(() => {
@@ -164,14 +164,15 @@ export function useReadyCheck() {
       rehearsed(waiting),
       new Promise<void>((done) => window.setTimeout(done, READY_CAP)),
     ]).then(async () => {
-      if (!live) return;
+      // someone watching gets the opening ready too, but nobody waits on them
+      if (!live || watching) return;
       const r = await markOpeningReady(code);
       if (r.ok) apply(r.data);
     });
     return () => {
       live = false;
     };
-  }, [waiting, code, apply]);
+  }, [waiting, code, apply, watching]);
 }
 
 /**

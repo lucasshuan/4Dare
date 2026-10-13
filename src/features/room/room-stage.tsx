@@ -277,6 +277,7 @@ const PROBLEMS = [
   "room_full",
   "already_started",
   "kicked",
+  "banned",
 ] as const satisfies readonly ErrorCode[];
 const isKnownProblem = (code: ErrorCode): code is (typeof PROBLEMS)[number] =>
   (PROBLEMS as readonly ErrorCode[]).includes(code);

@@ -162,3 +162,7 @@ export const subscribeReactions = (
 /** The public room list changed (`at` names its version). */
 export const subscribeLobby = (onChange: (payload: { at?: number }) => void) =>
   listen("lobby", "changed", onChange);
+
+/** Someone started or stopped watching the room, or the host moved them: read who through the watchers route. */
+export const subscribeWatchers = (code: string, onChange: () => void) =>
+  listen(`room:${code}`, "watchers", onChange);

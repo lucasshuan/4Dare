@@ -165,6 +165,8 @@
     "meta": "{players}/{seats} jogadores · {seconds} s por etapa",
     "join": "Entrar",
     "joinRoom": "Entrar na sala de {name}",
+    "watch": "Assistir",
+    "watchRoom": "Assistir {name} ({status})",
     "empty": "Nenhuma sala agora. Crie uma e ela aparece aqui.",
     "full": "Cheia",
     "playing": "Em partida",

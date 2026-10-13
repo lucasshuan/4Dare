@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Lock, UsersRound } from "lucide-react";
+import { ArrowRight, Eye, Lock, UsersRound } from "lucide-react";
 import { m } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
@@ -170,14 +170,25 @@ export function RoomRow({
           />
         </Link>
       ) : (
-        <span className="inline-flex shrink-0 items-center gap-1.5 justify-self-end rounded-pill bg-surface px-3 py-1.5 font-semibold text-[13px] text-ink-muted">
+        // no seat left, or a match under way: come in to watch
+        <Link
+          href={`/r/${r.code}`}
+          aria-label={t("watchRoom", { name: title, status: t(r.status) })}
+          title={t(r.status)}
+          className={buttonClass(
+            "secondary",
+            "md",
+            "h-11 gap-2 justify-self-end px-4",
+          )}
+        >
           {r.status === "playing" ? (
             <span className="size-2 animate-pulse rounded-pill bg-yes" />
           ) : (
-            <UsersRound className="size-3.5" strokeWidth={2.25} />
+            <UsersRound className="size-4" strokeWidth={2.25} />
           )}
-          {t(r.status)}
-        </span>
+          {t("watch")}
+          <Eye className="size-4.5" strokeWidth={2} />
+        </Link>
       )}
     </m.li>
   );
