@@ -131,6 +131,9 @@ export function preloadTitle(
   return all;
 }
 
+/** How long the lobby's panels take to leave for the loading screen (globals.css, .lobby-leave), with a margin (ms). */
+const LOBBY_LEAVE_MS = 520;
+
 /** The longest a page takes to say it is ready for a start, loaded and rehearsed or not, within the ready check's wait (ms). */
 const READY_CAP = 4500;
 
@@ -330,7 +333,16 @@ function useTitleShow(): SceneProps | null {
 function useRehearsedTitle(): SceneProps | null {
   const { view } = useRoomContext();
   const w = view.phase === "lobby" ? view.starting : null;
-  if (!w) return null;
+  const key = w?.until ?? null;
+  // built once the lobby has left for the loading screen: building it is heavy
+  // work, which would stall the panels on their way out
+  const [armed, setArmed] = useState<number | null>(null);
+  useEffect(() => {
+    if (key === null) return;
+    const id = window.setTimeout(() => setArmed(key), LOBBY_LEAVE_MS);
+    return () => window.clearTimeout(id);
+  }, [key]);
+  if (!w || armed !== key) return null;
   return {
     card: w.title,
     first: w.first,

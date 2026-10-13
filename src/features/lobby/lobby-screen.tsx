@@ -160,11 +160,10 @@ export function LobbyScreen() {
   // the loading screen covers the host's page at once; the ready check then runs on every page
   const start = async () => {
     setStartAsked(true);
-    try {
-      return await act(() => startGame(code));
-    } finally {
-      setStartAsked(false);
-    }
+    const r = await act(() => startGame(code));
+    // on its way: the cover lets go once the room says the start waits (start-cover.tsx)
+    if (!r.ok) setStartAsked(false);
+    return r;
   };
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<CreateRoomInput>(() =>
@@ -241,7 +240,7 @@ export function LobbyScreen() {
           <div
             className={cn(
               panelClass,
-              "flex shrink-0 flex-col gap-4 max-lg:order-1",
+              "lobby-leave flex shrink-0 flex-col gap-4 [--leave-i:1] max-lg:order-1",
             )}
           >
             <RoomTitle
@@ -297,7 +296,7 @@ export function LobbyScreen() {
           <div
             className={cn(
               panelClass,
-              "flex flex-col max-lg:order-3 lg:min-h-0 lg:flex-1",
+              "lobby-leave flex flex-col [--leave-i:2] max-lg:order-3 lg:min-h-0 lg:flex-1",
             )}
           >
             <LobbyTabs
@@ -468,7 +467,7 @@ export function LobbyScreen() {
           <div
             className={cn(
               panelClass,
-              "flex shrink-0 flex-col gap-4 overflow-hidden max-lg:order-2",
+              "lobby-leave flex shrink-0 flex-col gap-4 overflow-hidden [--leave-i:0] max-lg:order-2",
             )}
           >
             <div
@@ -561,7 +560,7 @@ export function LobbyScreen() {
           {/* What for?'s presenter chair, under the game */}
           {game === "lineup" && view.settings.mode === "host" ? (
             <TvChair
-              className="max-lg:order-2"
+              className="lobby-leave [--leave-i:1] max-lg:order-2"
               players={shownPlayers}
               here={shownPlayers.filter((p) => !p.away).length}
               chairId={view.chairId}

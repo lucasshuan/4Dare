@@ -218,15 +218,10 @@ function Areas() {
             animate="shown"
             exit="leave"
           >
-            {/* the start's loading screen takes its place, over the same backdrop */}
-            <m.div
-              inert={covered}
-              initial={false}
-              animate={{ opacity: covered ? 0 : 1 }}
-              transition={{ duration: 0.25, ease: ease.soft }}
-            >
+            {/* the start's loading screen takes its place, over the same backdrop: the panels leave one after the other (globals.css), the controls stay */}
+            <div inert={covered} data-leaving={covered || undefined}>
               <LobbyScreen />
-            </m.div>
+            </div>
           </m.div>
         ) : area === "match" ? (
           <MatchFrame key="match">

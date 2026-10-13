@@ -41,6 +41,12 @@ export function useStartCovered(): boolean {
   const { view } = useRoomContext();
   const { show, beat } = useStage();
   const checking = view.phase === "lobby" && !!view.starting;
+  // the press holds until the room shows the start waiting (or under way):
+  // let go sooner, the lobby would come back for a moment in between
+  const reached = checking || view.phase !== "lobby";
+  useEffect(() => {
+    if (reached) setStartAsked(false);
+  }, [reached]);
   // the match is on, a moment ahead: the lobby leaves under it until the title plays
   const ahead =
     show?.kind === "opening" &&
@@ -95,7 +101,8 @@ export function StartCover() {
           data-start-cover
           className="pointer-events-none fixed inset-0 z-25 flex items-center justify-center overflow-hidden pb-6"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1, transition: { duration: 0.25 } }}
+          // once the lobby's panels are mostly gone
+          animate={{ opacity: 1, transition: { duration: 0.25, delay: 0.3 } }}
           exit={{ opacity: 0, transition: { duration: 0.3, ease: ease.soft } }}
         >
           <Loader label={t("starting")} className="relative" pill />

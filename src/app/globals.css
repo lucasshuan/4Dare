@@ -569,6 +569,33 @@ body {
 }
 
 /*
+ * The lobby leaving for a start's loading screen ([data-leaving], room-stage.tsx):
+ * its panels drop a little, shrink and fade, one after the other (--leave-i);
+ * a start called off brings them back the same way.
+ */
+.lobby-leave {
+  transition:
+    opacity 0.22s ease-out,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-leaving] .lobby-leave {
+  opacity: 0;
+  transform: translateY(28px) scale(0.94);
+  pointer-events: none;
+  /* on its own layer, so it keeps moving while the page works under it */
+  will-change: opacity, transform;
+  transition:
+    opacity 0.22s ease-in calc(var(--leave-i, 0) * 70ms),
+    transform 0.3s cubic-bezier(0.55, 0, 0.75, 0.2)
+    calc(var(--leave-i, 0) * 70ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-leaving] .lobby-leave {
+    transform: none;
+  }
+}
+
+/*
  * The lobby's backdrop (LobbyBackdrop): always one full colour turning every 4
  * bars, soft lights roaming and game symbols wandering; while the music plays,
  * the whole page flares on each beat and each mark lights on its own. Beat
