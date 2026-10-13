@@ -234,6 +234,11 @@ export const START_WAIT_MS = 5500;
  * has the new state before its first beat and they all play it together.
  */
 export const START_LEAD_MS = 500;
+/**
+ * A match's end with no reveal to wait for starts this far ahead, so every
+ * page builds and paints its scene unseen first, as a start's ready check does.
+ */
+export const END_LEAD_MS = 700;
 
 /** How long a player the host removed from the lobby stays out (ms). */
 export const KICK_MS = 2 * 60_000;

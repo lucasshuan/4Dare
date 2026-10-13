@@ -6,6 +6,7 @@ import {
   type BeatKind,
   CLOCK_CUT_FLOOR_MS,
   type Ctx,
+  END_LEAD_MS,
   type ErrorCode,
   GameError,
   type PlayerId,
@@ -218,6 +219,7 @@ export function finish(s: RoomState, ctx: Ctx) {
   s.phase = "finished";
   s.turnPlayerId = null;
   startStep(s, ctx, 0);
+  if (s.stepStartsAt === ctx.now) s.stepStartsAt = ctx.now + END_LEAD_MS;
   s.deadline = null;
   s.stepMs = null;
   for (const p of s.players) p.ready = p.id === s.hostId;

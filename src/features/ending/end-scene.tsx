@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRoomContext } from "@/features/data/room-context";
@@ -82,13 +83,16 @@ export function preloadEnd(
 export function EndScene() {
   const { view } = useRoomContext();
   const { finishedWait } = useStage();
+  // with no reveal to wait for, it starts a moment ahead (END_LEAD_MS): built and painted unseen till then
+  const started = usePassed(view.stepStartsAt ?? 0);
   if (view.phase !== "finished" || view.stepStartsAt === null) return null;
   return (
     <End
       key={view.stepStartsAt}
       game={view.settings.game}
       startsAt={view.stepStartsAt}
-      live={!finishedWait}
+      live={!finishedWait && started}
+      lead={!finishedWait && !started}
     />
   );
 }
@@ -99,10 +103,13 @@ function End({
   game,
   startsAt,
   live,
+  lead,
 }: {
   game: GameKey;
   startsAt: number;
   live: boolean;
+  /** The moment before it starts, with nothing else on screen: its set's colour covers the window. */
+  lead: boolean;
 }) {
   const tg = useTranslations("home.games");
   const ja = useLocale() === "ja";
@@ -143,6 +150,15 @@ function End({
           )
         }
       </TitleStage>
+      {lead ? (
+        <m.div
+          aria-hidden
+          className="fixed inset-0 z-30"
+          style={{ background: BACKDROP[game] }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: 0.15 } }}
+        />
+      ) : null}
       {live ? <EndRoom game={game} startsAt={startsAt} /> : null}
     </>
   );

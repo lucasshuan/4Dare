@@ -9,6 +9,7 @@ import {
   type Character,
   CLOCK_CUT_FLOOR_MS,
   DEFAULT_SETTINGS,
+  END_LEAD_MS,
   type ExampleCard,
   GameError,
   GONE_GRACE_MS,
@@ -1750,7 +1751,7 @@ describe("leaving and giving up", () => {
     expect(g.state.deadline).toBeNull();
   });
 
-  it("a match that ends mid-show drops the show: the podium comes at once", () => {
+  it("a match that ends mid-show drops the show: the end comes a moment later", () => {
     // during the theme show (picking)
     const g = new Game(2);
     g.do({ type: "START", playerId: "p1", themes: THEMES });
@@ -1760,7 +1761,8 @@ describe("leaving and giving up", () => {
     g.do({ type: "LEAVE", playerId: "p2" });
     expect(g.state.phase).toBe("finished");
     expect(g.state.reveal).toBeNull();
-    expect(g.state.stepStartsAt).toBe(g.now);
+    // a moment ahead, for every page to build its scene unseen
+    expect(g.state.stepStartsAt).toBe(g.now + END_LEAD_MS);
 
     // during the cast
     const h = new Game(2);
@@ -1770,7 +1772,7 @@ describe("leaving and giving up", () => {
     h.do({ type: "LEAVE", playerId: "p2" });
     expect(h.state.phase).toBe("finished");
     expect(h.state.reveal).toBeNull();
-    expect(h.state.stepStartsAt).toBe(h.now);
+    expect(h.state.stepStartsAt).toBe(h.now + END_LEAD_MS);
     // play never started: it does not start after the match finished
     expect(h.state.playStartedAt).toBe(h.now);
   });
