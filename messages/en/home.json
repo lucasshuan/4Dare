@@ -187,6 +187,15 @@
       "players": "2–6 players",
       "play": "Play",
       "demoQuestion": "Am I an animal?",
+      "demoQuestions": [
+        "Am I an animal?",
+        "Am I alive?",
+        "Can I do magic?",
+        "Am I royalty?",
+        "Do I have fur?",
+        "Do I live at sea?",
+        "Do I wear a crown?"
+      ],
       "banner": {
         "q1": "Am I an animal?",
         "q2": "Do I have whiskers?",

@@ -1,25 +1,90 @@
 "use client";
 
-import { m, useReducedMotion } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
+import type { AnswerValue } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { type Figure, figureUri } from "@/lib/figures";
+import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
-/** One loop of the little scene, in seconds. */
-const LOOP = 6;
+/**
+ * The rounds the scene plays: the others' cards (left, right), yours, and the
+ * answer the table gives your question (home.games.whoAmI.demoQuestions, in
+ * this order). The first is the server-rendered one.
+ */
+const ROUNDS: {
+  left: Figure;
+  right: Figure;
+  you: Figure;
+  answer: AnswerValue;
+}[] = [
+  { left: "lady", right: "king", you: "cat", answer: "yes" },
+  { left: "owl", right: "pirate", you: "robot", answer: "no" },
+  { left: "astronaut", right: "fox", you: "witch", answer: "yes" },
+  { left: "lion", right: "witch", you: "astronaut", answer: "no" },
+  { left: "robot", right: "giraffe", you: "owl", answer: "no" },
+  { left: "cat", right: "king", you: "pirate", answer: "probably_yes" },
+  { left: "fox", right: "lady", you: "king", answer: "yes" },
+];
 
-/** Pops in at `from` (share of the loop) and out at the end, every loop. */
-const popIn = (from: number) => ({
-  initial: { opacity: 0, scale: 0.8 },
-  animate: { opacity: [0, 0, 1, 1, 0], scale: [0.8, 0.8, 1, 1, 0.9] },
-  transition: {
-    duration: LOOP,
-    times: [0, from, from + 0.08, 0.9, 1],
-    repeat: Number.POSITIVE_INFINITY,
-    ease: "easeOut" as const,
-  },
-});
+/**
+ * One loop, a quick shuffle first: every card turns face down and gathers in
+ * a pile, the pile is cut (the side cards cross over yours), the cards are
+ * dealt back out and the others' turn up (the next round's). Then the
+ * question, its answer, your card turns over, and back down. `ms` is how
+ * long each step stays.
+ */
+type Shuffle = "gather" | "cut" | "deal";
+const STEPS: {
+  ms: number;
+  shuffle?: Shuffle;
+  ask?: boolean;
+  answer?: boolean;
+  up?: boolean;
+}[] = [
+  { ms: 360, shuffle: "gather" },
+  { ms: 340, shuffle: "cut" },
+  { ms: 320, shuffle: "gather" },
+  { ms: 420, shuffle: "deal" },
+  { ms: 900, ask: true },
+  { ms: 1300, ask: true, answer: true },
+  { ms: 1700, ask: true, answer: true, up: true },
+  { ms: 450 },
+];
+/** The frame shown when still: the answer in, your card up. */
+const STILL = 6;
+
+/** A card face down, as yours is: the "?" on white, sized by the card's width. */
+function CardBack({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex aspect-[4/5.6] items-center justify-center rounded-lg bg-surface font-display font-extrabold text-sky shadow-pop backface-hidden [container-type:inline-size]",
+        className,
+      )}
+    >
+      <span className="text-[52cqw] leading-none">?</span>
+    </div>
+  );
+}
+
+/** A number in 0..1 from a seed and a loop, the same both times it is asked. */
+const noise = (seed: number, n: number) => {
+  const x = Math.sin(seed * 9301 + n * 49297) * 233280;
+  return x - Math.floor(x);
+};
+
+/** The round loop `n` plays: never the same twice in a row; the first is the first. */
+function roundAt(seed: number, n: number) {
+  let r = 0;
+  for (let i = 1; i <= n; i++)
+    r =
+      (r + 1 + Math.floor(noise(seed, i) * (ROUNDS.length - 1))) %
+      ROUNDS.length;
+  return r;
+}
 
 function MiniCard({
   figure,
@@ -45,9 +110,10 @@ function MiniCard({
 }
 
 /**
- * The "Who am I?" card art: everyone else's cards on the table, yours a "?"
- * that flips over, a question and its answer popping up. Still for reduced motion,
- * or with `still` (a small thumbnail).
+ * The "Who am I?" card art: everyone else's cards on the table, yours a "?";
+ * a quick shuffle of all three deals a new round, a question and its answer pop up and your
+ * card turns over. The rounds come in a random order. Still (one round, your
+ * card up) for reduced motion, or with `still`.
  */
 export function WhoAmISnapshot({
   className,
@@ -62,6 +128,71 @@ export function WhoAmISnapshot({
   const t = useTranslations("home.games.whoAmI");
   const reduced = useReducedMotion() ?? false;
   const still = forceStill || reduced;
+  const { step, loop } = useStepLoop(STEPS, STILL, still);
+  // the order is picked in the browser: the server renders the first round
+  const [seed, setSeed] = useState(0);
+  useEffect(() => setSeed(1 + Math.floor(Math.random() * 1000)), []);
+
+  const s = STEPS[step];
+  const shuffle = still ? undefined : s.shuffle;
+  // the first gather still holds the round just played; the faces are down from the cut on
+  const round = ROUNDS[roundAt(seed, step === 0 ? loop - 1 : loop)];
+  const questions = t.raw("demoQuestions") as string[];
+  const n = ROUNDS.indexOf(round);
+  const quick = { duration: 0.3, ease: [0.4, 0, 0.2, 1] as const };
+
+  /**
+   * A side card: face down through the shuffle, gathered on yours (`pile` of
+   * its own widths away), crossing over it in the cut, then dealt back.
+   */
+  const side = (dir: -1 | 1, pile: number, delay: number) => ({
+    animate:
+      shuffle === "gather"
+        ? { x: `${-dir * pile}%`, y: "6%", rotate: dir * 4, scale: 0.92 }
+        : shuffle === "cut"
+          ? {
+              x: `${-dir * (pile + 34)}%`,
+              y: "-6%",
+              rotate: -dir * 9,
+              scale: 0.92,
+            }
+          : {
+              x: "0%",
+              y: still || shuffle ? "0%" : ["0%", "-4%", "0%"],
+              rotate: dir * 10,
+              scale: 1,
+            },
+    transition: shuffle
+      ? { ...quick, delay: shuffle === "deal" ? delay : 0 }
+      : {
+          y: still
+            ? { duration: 0 }
+            : {
+                duration: 4,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut" as const,
+              },
+        },
+  });
+  /** A side card's face, turned down from the gather until the deal lands. */
+  const face = (figure: Figure, delay: number) => (
+    <m.div
+      className="relative transform-3d"
+      initial={false}
+      animate={{ rotateY: shuffle && shuffle !== "deal" ? 180 : 0 }}
+      transition={{
+        duration: still ? 0 : 0.3,
+        delay: shuffle === "deal" ? 0.3 + delay : 0,
+      }}
+    >
+      <div className="backface-hidden">
+        <MiniCard figure={figure} />
+      </div>
+      <div className="absolute inset-0 rotate-y-180 backface-hidden">
+        <CardBack className="h-full" />
+      </div>
+    </m.div>
+  );
 
   return (
     <div
@@ -77,104 +208,108 @@ export function WhoAmISnapshot({
       <span className="absolute -top-10 -left-8 size-40 rounded-pill bg-surface/40 blur-2xl" />
       <span className="absolute -right-6 -bottom-12 size-44 rounded-pill bg-butter/50 blur-2xl" />
 
+      {/* the left card goes over yours in the cut, the right one under */}
       <m.div
-        className={
+        className={cn(
+          "absolute perspective-[800px]",
+          shuffle === "cut" && "z-[2]",
           wide
-            ? "absolute bottom-[12%] left-[33%] w-[22%]"
-            : "absolute bottom-[23%] left-[9%] w-[29%]"
-        }
-        style={{ rotate: -10 }}
-        {...(still
-          ? {}
-          : {
-              animate: { y: [0, -6, 0] },
-              transition: {
-                duration: 4,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              },
-            })}
+            ? "bottom-[12%] left-[33%] w-[22%]"
+            : "bottom-[23%] left-[9%] w-[29%]",
+        )}
+        {...side(-1, 91, 0)}
       >
-        <MiniCard figure="lady" />
+        {face(round.left, 0)}
       </m.div>
       <m.div
-        className={
+        className={cn(
+          "absolute perspective-[800px]",
           wide
-            ? "absolute right-[5%] bottom-[12%] w-[22%]"
-            : "absolute right-[9%] bottom-[23%] w-[29%]"
-        }
-        style={{ rotate: 10 }}
-        {...(still
-          ? {}
-          : {
-              animate: { y: [0, -6, 0] },
-              transition: {
-                duration: 4,
-                delay: 1.2,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              },
-            })}
+            ? "right-[5%] bottom-[12%] w-[22%]"
+            : "right-[9%] bottom-[23%] w-[29%]",
+        )}
+        {...side(1, wide ? 84 : 91, 0.06)}
       >
-        <MiniCard figure="king" />
+        {face(round.right, 0.06)}
       </m.div>
 
-      {/* your card: "?" on the front, a character on the back */}
-      <div
+      {/* your card: "?" on the front, a character on the back; part of the pile in the shuffle */}
+      <m.div
         className={cn(
-          "-translate-x-1/2 absolute perspective-[800px]",
+          "-translate-x-1/2 absolute z-[1] perspective-[800px]",
           wide
             ? "bottom-[10%] left-[64%] w-[25%]"
             : "bottom-[25%] left-1/2 w-[33%]",
         )}
+        animate={
+          shuffle === "gather"
+            ? { y: "6%", rotate: 0, scale: 0.92 }
+            : shuffle === "cut"
+              ? { y: "10%", rotate: 3, scale: 0.92 }
+              : { y: "0%", rotate: 0, scale: 1 }
+        }
+        transition={quick}
       >
         <m.div
           className="relative transform-3d"
-          {...(still
-            ? {}
-            : {
-                animate: { rotateY: [0, 0, 180, 180, 360] },
-                transition: {
-                  duration: LOOP,
-                  times: [0, 0.5, 0.62, 0.92, 1],
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "easeInOut",
-                },
-              })}
+          initial={false}
+          animate={{ rotateY: s.up ? 180 : 0 }}
+          transition={{
+            duration: still ? 0 : 0.55,
+            ease: [0.22, 1, 0.36, 1],
+          }}
         >
-          <div className="flex aspect-[4/5.6] items-center justify-center rounded-lg bg-surface font-display font-extrabold text-[clamp(40px,6vw,64px)] text-sky shadow-pop backface-hidden">
-            ?
-          </div>
+          <CardBack />
           <div className="absolute inset-0 rotate-y-180 backface-hidden">
             <MiniCard
-              figure="cat"
-              className="h-full outline-[3px] outline-yes outline-solid"
+              figure={round.you}
+              className={cn(
+                "h-full outline-[3px] outline-solid",
+                round.answer === "no" ? "outline-no" : "outline-yes",
+              )}
             />
           </div>
         </m.div>
-      </div>
+      </m.div>
 
-      {/* the question, then the answer */}
-      <m.div
+      {/* the question, then the answer under it */}
+      <div
         className={cn(
-          "absolute origin-bottom-left rounded-lg rounded-bl-sm bg-surface px-3 py-2 font-bold font-display text-[clamp(13px,1.6vw,16px)] text-ink leading-tight shadow-card",
+          "absolute flex flex-col items-start gap-1.5",
           wide
             ? "top-[10%] left-[4%] max-w-[30%]"
-            : "top-[6%] left-[7%] max-w-[52%]",
+            : "top-[6%] left-[7%] max-w-[80%]",
         )}
-        {...(still ? {} : popIn(0.06))}
       >
-        {t("demoQuestion")}
-      </m.div>
-      <m.div
-        className={cn(
-          "absolute origin-left",
-          wide ? "top-[10%] right-[4%]" : "top-[8%] right-[7%]",
-        )}
-        {...(still ? {} : popIn(0.22))}
-      >
-        <AnswerChip value="yes" small pressed />
-      </m.div>
+        <AnimatePresence>
+          {s.ask ? (
+            <m.div
+              key={`q-${loop}`}
+              initial={still ? false : { opacity: 0, scale: 0.8, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
+              transition={{ type: "spring", stiffness: 420, damping: 26 }}
+              className="origin-bottom-left rounded-lg rounded-bl-sm bg-surface px-3 py-2 font-bold font-display text-[clamp(13px,1.6vw,16px)] text-ink leading-tight shadow-card"
+            >
+              {questions[n]}
+            </m.div>
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence>
+          {s.answer ? (
+            <m.div
+              key={`a-${loop}`}
+              initial={still ? false : { opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
+              transition={{ type: "spring", stiffness: 500, damping: 22 }}
+              className="ml-2 origin-top-left"
+            >
+              <AnswerChip value={round.answer} small pressed />
+            </m.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

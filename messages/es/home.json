@@ -187,6 +187,15 @@
       "players": "2 a 6 jugadores",
       "play": "Jugar",
       "demoQuestion": "¿Soy un animal?",
+      "demoQuestions": [
+        "¿Soy un animal?",
+        "¿Estoy vivo?",
+        "¿Sé hacer magia?",
+        "¿Soy de la realeza?",
+        "¿Tengo pelo?",
+        "¿Vivo en el mar?",
+        "¿Llevo corona?"
+      ],
       "banner": {
         "q1": "¿Soy un animal?",
         "q2": "¿Tengo bigotes?",
