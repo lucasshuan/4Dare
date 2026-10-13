@@ -401,11 +401,11 @@ async function apply() {
 }
 
 /**
- * Outside the lobby the music plays at 0.75, 25% under its old level. In the
- * lobby it plays through the wall: a 160 Hz high-pass and a 350 Hz low-pass,
- * at 0.84, 20% louder than before.
+ * Outside the lobby the music plays open and at full level: every track at
+ * 100% of itself, before the master and music volumes. In the lobby it plays
+ * through the wall: a 160 Hz high-pass and a 350 Hz low-pass, at 0.84.
  */
-const OPEN_GAIN = 0.75;
+const OPEN_GAIN = 1;
 const MUFFLE_GAIN = 0.84;
 const MUFFLE_HZ = 350;
 const MUFFLE_LOW_HZ = 160;
