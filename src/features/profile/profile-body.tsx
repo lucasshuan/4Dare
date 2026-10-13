@@ -28,6 +28,7 @@ import { GameThumb, useGameName } from "@/features/create/game-info";
 import type { Banner, Tint } from "@/game/profile/profile";
 import type { Lang, PlayingNow as PlayingNowView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
+import { localePath } from "@/i18n/paths";
 import { cn } from "@/lib/cn";
 import { useMedia } from "@/lib/hooks/use-media";
 import type { ProfileView } from "@/server/contract";
@@ -279,7 +280,7 @@ function ProfileShow({
 
   // the phone's share sheet where there is one, else the link to the clipboard
   const share = async () => {
-    const url = `${window.location.origin}/${locale}${profilePath(view.handle)}`;
+    const url = `${window.location.origin}${localePath(locale as Lang, profilePath(view.handle))}`;
     if (navigator.share && !wide) {
       await navigator.share({ title: view.name, url }).catch(() => {});
       return;

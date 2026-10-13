@@ -41,17 +41,22 @@ const nextConfig: NextConfig = {
       process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "",
   },
   // the game was called What for? at first, then Build the Team
+  // (English has no prefix; /en/... is what it had before)
   async redirects() {
     return [
       "what-for",
       "build-the-team",
       "monte-a-equipe",
       "arma-el-equipo",
-    ].map((old) => ({
-      source: `/:locale(en|es|pt|ja)/${old}`,
-      destination: "/:locale/lineup",
-      permanent: true,
-    }));
+    ].flatMap((old) => [
+      {
+        source: `/:locale(es|pt|ja)/${old}`,
+        destination: "/:locale/lineup",
+        permanent: true,
+      },
+      { source: `/${old}`, destination: "/lineup", permanent: true },
+      { source: `/en/${old}`, destination: "/lineup", permanent: true },
+    ]);
   },
   experimental: {
     // character images are cropped in the browser and sent through a server action

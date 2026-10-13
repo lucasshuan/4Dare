@@ -26,7 +26,7 @@ import { ProfileLink } from "@/features/profile/profile-link";
 import type { ErrorCode, Lang } from "@/game/types";
 import { LANGS } from "@/game/types";
 import { Link } from "@/i18n/navigation";
-import { localizePath } from "@/i18n/paths";
+import { localePath } from "@/i18n/paths";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { CHARACTERS, characterPath } from "@/lib/routes";
@@ -185,7 +185,7 @@ function Head({
       </button>
       {mode === "panel" ? (
         <a
-          href={`/${locale}${localizePath(locale as Lang, path)}`}
+          href={localePath(locale as Lang, path)}
           aria-label={t("openPage")}
           title={t("openPage")}
           className={icon}

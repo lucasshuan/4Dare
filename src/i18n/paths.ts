@@ -1,10 +1,12 @@
 import type { Lang } from "@/game/types";
+import { routing } from "./routing";
 
 // The public pages' addresses read in the visitor's language: "/pt/quem-sou-eu"
-// is the who-am-i page. The app's routes and code keep the English name; the
-// proxy rewrites a translated address to its route and sends the English one
-// (or another language's) to the right translation. Only the first segment
-// is translated; a language without an entry keeps the English one.
+// is the who-am-i page; English, at the root, keeps the route's own name
+// ("/who-am-i"). The app's routes and code keep the English name; the proxy
+// rewrites a translated address to its route and sends the English one (or
+// another language's) to the right translation. Only the first segment is
+// translated; a language without an entry keeps the English one.
 
 const TRANSLATED: Record<string, Partial<Record<Lang, string>>> = {
   "who-am-i": { pt: "quem-sou-eu", es: "quien-soy" },
@@ -44,4 +46,24 @@ export function routePath(path: string): string {
   const parts = split(path);
   const route = parts && ROUTE_OF.get(parts.first);
   return route ? `/${route}${parts.rest}` : path;
+}
+
+/** The language a translated first word is in ("/quem-sou-eu" is Portuguese), the first one listed when two share it; null for a route's own name. */
+export function wordLanguage(path: string): Lang | null {
+  const parts = split(path);
+  if (!parts) return null;
+  for (const words of Object.values(TRANSLATED)) {
+    const lang = (Object.keys(words) as Lang[]).find(
+      (l) => words[l] === parts.first,
+    );
+    if (lang) return lang;
+  }
+  return null;
+}
+
+/** An app path's full address in `lang`: English has no prefix ("/who-am-i", "/"), the rest do ("/pt/quem-sou-eu", "/pt"). */
+export function localePath(lang: Lang, path: string): string {
+  const local = localizePath(lang, path);
+  if (lang === routing.defaultLocale) return local;
+  return local === "/" ? `/${lang}` : `/${lang}${local}`;
 }

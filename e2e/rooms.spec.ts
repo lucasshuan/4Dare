@@ -30,8 +30,8 @@ test("a private room is listed with a lock and asks for its password", async ({
   await expect(host.getByText("pizza", { exact: true })).toHaveCount(0);
 
   // the game page links to every room of the game
-  await guest.goto("/en/who-am-i");
-  await guest.locator('a[href="/en/rooms?game=who-am-i"]').click();
+  await guest.goto("/who-am-i");
+  await guest.locator('a[href="/rooms?game=who-am-i"]').click();
   await guest.waitForURL(/\/rooms\?game=who-am-i$/);
   await guest.getByRole("searchbox").fill("pizza");
   await expect(guest).toHaveURL(/q=pizza/);
@@ -96,7 +96,10 @@ test("rooms are filtered by the host's language: yours by default, more on reque
   await viewer.goto("/pt/who-am-i");
   await expect(row(ptRoom)).toBeVisible({ timeout: 10_000 });
   await expect(row(enRoom)).toHaveCount(0);
-  await viewer.goto("/en/rooms");
+  // a /pt page is remembered as the viewer's pick, and the unprefixed (English)
+  // addresses would follow it: forget it to read the English list
+  await viewer.context().clearCookies({ name: "NEXT_LOCALE" });
+  await viewer.goto("/rooms");
   await expect(row(enRoom)).toBeVisible();
   await expect(row(ptRoom)).toHaveCount(0);
 

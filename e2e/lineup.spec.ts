@@ -31,7 +31,7 @@ test("bids, builds the boards, presents, votes and sees the final score", async 
   const host = await newPlayer(browser);
   const guest = await newPlayer(browser, true);
   const players = [host, guest];
-  await host.goto("/en/new?game=lineup");
+  await host.goto("/new?game=lineup");
   await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
   const code = host.url().split("/").pop() as string;
 

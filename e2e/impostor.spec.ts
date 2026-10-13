@@ -33,7 +33,7 @@ test("the crew answers, catches the impostor and sees both cards", async ({
     await newPlayer(browser),
   ];
   const [host, ...guests] = players;
-  await host.goto("/en/new?game=impostor");
+  await host.goto("/new?game=impostor");
   await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
   const code = host.url().split("/").pop() as string;
   for (const page of guests) await joinRoom(page, code);

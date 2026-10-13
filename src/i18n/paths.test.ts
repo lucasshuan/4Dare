@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { localizePath, routePath } from "./paths";
+import { localePath, localizePath, routePath, wordLanguage } from "./paths";
 
 describe("localizePath", () => {
   it("translates the first segment and keeps the rest", () => {
@@ -31,5 +31,28 @@ describe("routePath", () => {
   it("keeps route paths as they are", () => {
     expect(routePath("/who-am-i")).toBe("/who-am-i");
     expect(routePath("/")).toBe("/");
+  });
+});
+
+describe("localePath", () => {
+  it("leaves English at the root and prefixes the other languages", () => {
+    expect(localePath("en", "/")).toBe("/");
+    expect(localePath("en", "/who-am-i")).toBe("/who-am-i");
+    expect(localePath("pt", "/")).toBe("/pt");
+    expect(localePath("pt", "/who-am-i")).toBe("/pt/quem-sou-eu");
+    expect(localePath("ja", "/rooms?game=x")).toBe("/ja/rooms?game=x");
+  });
+});
+
+describe("wordLanguage", () => {
+  it("names the language of a translated word, the first listed when shared", () => {
+    expect(wordLanguage("/quem-sou-eu")).toBe("pt");
+    expect(wordLanguage("/quien-soy/x")).toBe("es");
+    expect(wordLanguage("/salas")).toBe("pt");
+  });
+
+  it("is null for a route's own name", () => {
+    expect(wordLanguage("/who-am-i")).toBeNull();
+    expect(wordLanguage("/")).toBeNull();
   });
 });

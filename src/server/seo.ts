@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { appName } from "@/config";
 import type { Lang } from "@/game/types";
-import { localizePath } from "@/i18n/paths";
+import { localePath } from "@/i18n/paths";
 import { routing } from "@/i18n/routing";
 import type { OgText } from "./og/art";
 
@@ -40,22 +40,21 @@ export const HREFLANG: Record<Lang, string> = {
   ja: "ja",
 };
 
-/** "/" in Portuguese is "/pt"; "/who-am-i" is "/pt/quem-sou-eu". */
-export const localePath = (lang: Lang, path: string) =>
-  `/${lang}${path === "/" ? "" : localizePath(lang, path)}`;
-
 /** A page's path, the same in every language or one per language (a slug from a name). */
 type PagePath = string | Record<Lang, string>;
 const pathIn = (path: PagePath, lang: Lang) =>
   typeof path === "string" ? path : path[lang];
 
-/** The same page in every language; x-default is the unprefixed path, which picks the visitor's language. */
+/** The same page in every language; x-default is the unprefixed (English) address, which also sends a browser that asks for another language there. */
 export function languageLinks(path: PagePath): Record<string, string> {
   return {
     ...Object.fromEntries(
       routing.locales.map((l) => [HREFLANG[l], localePath(l, pathIn(path, l))]),
     ),
-    "x-default": pathIn(path, routing.defaultLocale),
+    "x-default": localePath(
+      routing.defaultLocale,
+      pathIn(path, routing.defaultLocale),
+    ),
   };
 }
 

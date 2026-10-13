@@ -27,9 +27,9 @@ test("the tab title follows the page and its clock; the icon calls you back", as
   const host = await newPlayer(browser);
   const guest = await newPlayer(browser);
 
-  await host.goto("/en");
+  await host.goto("/");
   await expect(host).toHaveTitle("4Dare: guessing games to play with friends");
-  await host.goto("/en/who-am-i");
+  await host.goto("/who-am-i");
   await expect(host).toHaveTitle("Who am I? Play online with friends · 4Dare");
 
   // the lobby has no clock, alone or not: no countdown in the title

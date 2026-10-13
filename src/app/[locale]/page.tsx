@@ -3,13 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { appName } from "@/config";
 import { HomeScreen } from "@/features/home/home-screen";
 import type { Lang } from "@/game/types";
-import {
-  HREFLANG,
-  jsonLd,
-  localePath,
-  pageMetadata,
-  SITE_URL,
-} from "@/server/seo";
+import { localePath } from "@/i18n/paths";
+import { HREFLANG, jsonLd, pageMetadata, SITE_URL } from "@/server/seo";
 
 export async function generateMetadata({
   params,

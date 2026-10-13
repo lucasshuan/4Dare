@@ -3,15 +3,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { APP_NAME } from "@/config";
 import { WhoAmIHub } from "@/features/who-am-i/who-am-i-hub";
 import type { Lang } from "@/game/types";
+import { localePath } from "@/i18n/paths";
 import { WHO_AM_I } from "@/lib/routes";
 import { gameFacts } from "@/server/game-facts";
-import {
-  HREFLANG,
-  jsonLd,
-  localePath,
-  pageMetadata,
-  SITE_URL,
-} from "@/server/seo";
+import { HREFLANG, jsonLd, pageMetadata, SITE_URL } from "@/server/seo";
 
 // the game facts are cached for as long (src/server/game-facts.ts)
 export const revalidate = 600;

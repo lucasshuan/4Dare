@@ -37,13 +37,13 @@ async function takePicture(
 test("WebP works with missing or generic MIME when browsed, dropped or pasted", async ({
   page,
 }) => {
-  await page.goto("/en/characters", { waitUntil: "networkidle" });
+  await page.goto("/characters", { waitUntil: "networkidle" });
   await page
     .getByRole("button", { name: "New character", exact: true })
     .click();
   await page.getByRole("button", { name: "Sign in with Discord" }).click();
   await page.waitForURL(/\/profile/);
-  await page.goto("/en/characters", { waitUntil: "networkidle" });
+  await page.goto("/characters", { waitUntil: "networkidle" });
   await page
     .getByRole("button", { name: "New character", exact: true })
     .click();

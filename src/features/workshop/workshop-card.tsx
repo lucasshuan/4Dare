@@ -8,6 +8,8 @@ import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { useToast } from "@/components/ui/toast";
 import { useMe } from "@/features/data/use-me";
 import type { GameKey } from "@/game/games";
+import type { Lang } from "@/game/types";
+import { localePath } from "@/i18n/paths";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { workshopPath } from "@/lib/routes";
@@ -74,7 +76,7 @@ export function WorkshopCard({
   };
 
   const share = async () => {
-    const url = `${window.location.origin}/${locale}${workshopPath(item.id)}`;
+    const url = `${window.location.origin}${localePath(locale as Lang, workshopPath(item.id))}`;
     try {
       await navigator.clipboard.writeText(url);
       toast(t("card.copied"));

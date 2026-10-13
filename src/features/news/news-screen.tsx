@@ -15,7 +15,9 @@ import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { GamePill } from "@/features/workshop/objects";
 import { OPEN_GAMES } from "@/game/games";
+import type { Lang } from "@/game/types";
 import { Link } from "@/i18n/navigation";
+import { localePath } from "@/i18n/paths";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
 import { NEWS } from "@/lib/routes";
@@ -304,7 +306,7 @@ function Post({
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(
-        `${window.location.origin}/${locale}${NEWS}#${encodeURIComponent(item.id)}`,
+        `${window.location.origin}${localePath(locale as Lang, NEWS)}#${encodeURIComponent(item.id)}`,
       );
       toast(t("copied"));
     } catch {

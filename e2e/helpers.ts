@@ -35,7 +35,7 @@ const button = (page: Page, name: RegExp) => page.getByRole("button", { name });
 
 /** /new opens the room right away, with the last setup. */
 export async function createRoom(host: Page) {
-  await host.goto("/en/new?game=who-am-i");
+  await host.goto("/new?game=who-am-i");
   await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
   return host.url().split("/").pop() as string;
 }
@@ -49,7 +49,7 @@ export async function editSettings(host: Page, change: () => Promise<void>) {
 }
 
 export async function joinRoom(page: Page, code: string) {
-  await page.goto(`/en/r/${code}`);
+  await page.goto(`/r/${code}`);
   await page.getByRole("button", { name: /^ready$/i, pressed: false }).click();
 }
 

@@ -14,7 +14,7 @@ for (const phone of [false, true]) {
     const reading = new Promise<void>((resolve) => {
       releaseRead = resolve;
     });
-    await page.route("**/en/new?game=lineup", async (route) => {
+    await page.route("**/new?game=lineup", async (route) => {
       if (route.request().method() === "POST") await creating;
       await route.continue();
     });
@@ -23,7 +23,7 @@ for (const phone of [false, true]) {
       await route.continue();
     });
 
-    await page.goto("/en/new?game=lineup");
+    await page.goto("/new?game=lineup");
     const overlay = page.locator("[data-room-entrance]");
     const hand = await overlay.locator(".h-44").elementHandle();
     expect(hand).not.toBeNull();
@@ -76,7 +76,7 @@ test("reduced motion and failed room links leave the entrance", async ({
   const missing = page.waitForResponse((response) =>
     /\/api\/rooms\/ZZZZZ(?:\?|$)/.test(response.url()),
   );
-  await page.goto("/en/r/ZZZZZ");
+  await page.goto("/r/ZZZZZ");
   expect((await missing).status()).toBe(404);
   await expect(page.locator("[data-room-entrance]")).toHaveCount(0);
   await expect(
@@ -84,7 +84,7 @@ test("reduced motion and failed room links leave the entrance", async ({
   ).toBeVisible();
   await expect(page.locator(".lobby-backdrop")).toHaveCount(0);
   expect(hydrationErrors).toEqual([]);
-  await page.goto("/en/r/11111");
+  await page.goto("/r/11111");
   await expect(page.locator("[data-room-entrance]")).toHaveCount(0);
   await expect(page.getByRole("heading").first()).toBeVisible();
 });
@@ -93,7 +93,7 @@ test("a direct link waits for its game before painting the backdrop", async ({
   browser,
 }) => {
   const host = await newPlayer(browser);
-  await host.goto("/en/new?game=impostor");
+  await host.goto("/new?game=impostor");
   await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
   const code = host.url().split("/").pop() as string;
 
@@ -106,7 +106,7 @@ test("a direct link waits for its game before painting the backdrop", async ({
     if (route.request().method() === "GET") await reading;
     await route.continue();
   });
-  await guest.goto(`/en/r/${code}`);
+  await guest.goto(`/r/${code}`);
   await expect(guest.locator("[data-room-entrance]")).toBeVisible();
   // the game is not known yet: no game's colours
   await expect(guest.locator(".lobby-backdrop")).toHaveCount(0);

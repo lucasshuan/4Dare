@@ -26,7 +26,7 @@ export default defineConfig({
     command: dev
       ? "pnpm exec next dev -p 3100"
       : "pnpm exec next build && pnpm exec next start -p 3100",
-    url: "http://localhost:3100/en",
+    url: "http://localhost:3100/",
     reuseExistingServer: true,
     timeout: 300_000,
     // own build folder and data, so it can run next to `pnpm dev`;

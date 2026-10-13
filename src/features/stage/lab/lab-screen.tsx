@@ -14,6 +14,7 @@ import { RoomProvider } from "@/features/data/room-context";
 import { RoomStage } from "@/features/room/room-stage";
 import { THEME_SET_KEYS } from "@/game/theme-sets";
 import { LANGS, type Lang, type RoomView } from "@/game/types";
+import { localePath } from "@/i18n/paths";
 import { cn } from "@/lib/cn";
 import { type ServerClock, useServerClock } from "@/lib/hooks/use-server-clock";
 import { StageProvider, useStage } from "../stage-context";
@@ -347,7 +348,7 @@ function LabPanel({
           {LANGS.map((l) => (
             <a
               key={l}
-              href={`/${l}/dev/stage${labSearch({ ...params, ...moment, play: false })}`}
+              href={`${localePath(l, "/dev/stage")}${labSearch({ ...params, ...moment, play: false })}`}
               className={cn(
                 "rounded-full px-2 py-1 font-semibold",
                 l === params.lang ? "bg-ink text-on-ink" : "bg-sunken",

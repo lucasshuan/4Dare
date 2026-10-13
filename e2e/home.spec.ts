@@ -24,10 +24,36 @@ test("the hub leads to the game, and the language select keeps the page", {
   await expect(page.getByRole("link", { name: "ルームを作る" })).toBeVisible();
 });
 
+test("a Portuguese browser lands on /pt and can switch to English at the root", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ locale: "pt-BR" });
+  const page = await context.newPage();
+  await page.goto("/");
+  await page.waitForURL((url) => url.pathname === "/pt");
+  const select = page.getByRole("combobox", { name: "Idioma" });
+  await expect(async () => {
+    if ((await select.getAttribute("aria-expanded")) !== "true")
+      await select.click();
+    await expect(select).toHaveAttribute("aria-expanded", "true", {
+      timeout: 2_000,
+    });
+  }).toPass({ timeout: 30_000 });
+  await page.getByRole("option", { name: "English" }).click();
+  await page.waitForURL((url) => url.pathname === "/");
+  await expect(
+    page.getByRole("heading", { name: "Pick a game" }),
+  ).toBeVisible();
+  // the pick sticks: an unprefixed address stays English for this browser
+  await page.goto("/who-am-i");
+  await expect(page).toHaveURL(/\/who-am-i$/);
+  await context.close();
+});
+
 test("signing in from the user menu (test account) lets you pick a name", async ({
   page,
 }) => {
-  await page.goto("/en");
+  await page.goto("/");
   await page
     .locator("header")
     .getByRole("button", { expanded: false })
@@ -40,7 +66,7 @@ test("signing in from the user menu (test account) lets you pick a name", async 
   await page.getByRole("button", { name: "Colour 3" }).click();
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText("Profile saved")).toBeVisible();
-  await page.goto("/en");
+  await page.goto("/");
   const menu = page
     .locator("header")
     .getByRole("button", { expanded: false })
@@ -54,7 +80,7 @@ test("typing a room code joins it, or says why not", async ({ browser }) => {
   const host = await newPlayer(browser);
   const visitor = await newPlayer(browser);
   const code = await createRoom(host);
-  await visitor.goto("/en/who-am-i");
+  await visitor.goto("/who-am-i");
   // the page keeps one field under the pitch and one in the banner, one shown
   const box = visitor
     .getByLabel(/or join with a code/i)

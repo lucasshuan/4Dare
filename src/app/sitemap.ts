@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { localePath } from "@/i18n/paths";
 import { routing } from "@/i18n/routing";
 import {
   CHARACTERS,
@@ -12,7 +13,7 @@ import {
   WHO_AM_I,
   WORKSHOP,
 } from "@/lib/routes";
-import { HREFLANG, localePath, SITE_URL } from "@/server/seo";
+import { HREFLANG, SITE_URL } from "@/server/seo";
 
 /** The pages worth finding in a search: the games hub, each game and the room list, in every language. */
 const PAGES = [
