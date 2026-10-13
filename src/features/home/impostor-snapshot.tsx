@@ -3,8 +3,8 @@
 import { VenetianMask } from "lucide-react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { HeldCard } from "@/components/ui/figure-art";
-import { MaskCardBack } from "@/features/impostor/impostor-banner";
+import { FigureArt } from "@/components/ui/figure-art";
+import { NumberedCardBack } from "@/features/impostor/impostor-banner";
 import { cn } from "@/lib/cn";
 import { useStepLoop } from "@/lib/hooks/use-step-loop";
 
@@ -58,10 +58,11 @@ const centre = (i: number, wide: boolean) =>
   wide ? WIDE_CARDS[i].x + WIDE_W / 2 : CARDS[i].x + W / 2;
 
 /**
- * The Impostor's card art: four cards face down; the lights go down, a
- * spotlight searches the table and lands on one, the cards turn over (all the
- * same but that one) and it is stamped. The odd card moves every loop. Still (stamped) for reduced
- * motion, or with `still`.
+ * The Impostor's card art: four cards face down, numbered as in the match's
+ * opening; the lights go down, a spotlight searches the table and lands on
+ * one, the cards turn over (all the same but that one) and it is stamped. The
+ * odd card moves every loop. Still (stamped) for reduced motion, or with
+ * `still`.
  */
 export function ImpostorSnapshot({
   className,
@@ -143,16 +144,19 @@ export function ImpostorSnapshot({
                   ease: [0.22, 1, 0.36, 1],
                 }}
               >
-                <MaskCardBack />
+                <NumberedCardBack n={i + 1} />
                 <div
                   className={cn(
-                    "absolute inset-0 rotate-y-180 rounded-[14%/11%] backface-hidden",
+                    "absolute inset-0 rotate-y-180 rounded-[9%/7%] backface-hidden",
                     theOdd &&
                       s.caught &&
                       "outline-[3px] outline-no outline-solid",
                   )}
                 >
-                  <HeldCard figure={card} fill />
+                  <FigureArt
+                    figure={card}
+                    className="size-full rounded-[9%/7%] shadow-[0_7px_12px_rgba(0,0,0,0.45)]"
+                  />
                 </div>
               </m.div>
             </div>

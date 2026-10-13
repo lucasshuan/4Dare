@@ -11,7 +11,7 @@ import {
 } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { CSSProperties, ReactNode } from "react";
-import { Creature, HeldCard } from "@/components/ui/figure-art";
+import { Creature, FigureArt } from "@/components/ui/figure-art";
 import { UNDER_TOPBAR } from "@/components/ui/screen";
 import { BannerRow, SCENE_WIDTH } from "@/features/home/banner-row";
 import { cn } from "@/lib/cn";
@@ -214,17 +214,14 @@ function ScorePaddle({
 }
 
 /**
- * A card face down in the Impostor's art: butter with the game's "?" marks and
- * a plum disc with the mask, light on either theme's ground.
+ * A card face down in the Impostor's art, as the match's opening deals it:
+ * dark, finely striped and numbered (`n` from 1). Its number scales with its width.
  */
-export function MaskCardBack() {
+export function NumberedCardBack({ n }: { n: number }) {
   return (
-    <div
-      className="q-marks flex aspect-[4/5.6] items-center justify-center rounded-[14%/11%] bg-butter shadow-pop inset-ring-2 inset-ring-white/50 backface-hidden"
-      style={{ backgroundSize: "45%" }}
-    >
-      <span className="flex aspect-square w-[56%] items-center justify-center rounded-pill bg-[#4b2a85] shadow-[0_0_0_3px_rgba(255,255,255,0.35)]">
-        <VenetianMask className="size-[64%] text-butter" strokeWidth={2} />
+    <div className="flex aspect-[4/5.6] items-center justify-center rounded-[9%/7%] bg-[repeating-linear-gradient(180deg,#1b1c23_0_2px,#111218_2px_10px)] shadow-[inset_0_0_0_2px_#2c2e37,0_7px_12px_rgba(0,0,0,0.45)] backface-hidden [container-type:inline-size]">
+      <span className="font-medium font-mono text-[#f2eee6] text-[46cqw] tabular-nums leading-none [text-shadow:0_1px_0_#fff,0_2px_0_#aaa395,0_3px_4px_rgba(0,0,0,0.7)]">
+        {String(n).padStart(2, "0")}
       </span>
     </div>
   );
@@ -532,16 +529,19 @@ export function ImpostorBanner({ aside }: { aside: ReactNode }) {
                           ease: [0.22, 1, 0.36, 1],
                         }}
                       >
-                        <MaskCardBack />
+                        <NumberedCardBack n={i + 1} />
                         <div
                           className={cn(
-                            "absolute inset-0 rotate-y-180 rounded-[14%/11%] backface-hidden",
+                            "absolute inset-0 rotate-y-180 rounded-[9%/7%] backface-hidden",
                             odd &&
                               s.caught &&
                               "outline-[3px] outline-no outline-solid",
                           )}
                         >
-                          <HeldCard figure={card} fill />
+                          <FigureArt
+                            figure={card}
+                            className="size-full rounded-[9%/7%] shadow-[0_7px_12px_rgba(0,0,0,0.45)]"
+                          />
                         </div>
                       </m.div>
                     </div>
