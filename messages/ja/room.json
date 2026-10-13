@@ -1,6 +1,13 @@
 {
   "loading": "ルームを開いています…",
   "starting": "みんなの準備をしています…",
+  "startPeople": {
+    "label": "読み込み状況",
+    "ready": "{name}：準備OK",
+    "loading": "{name}：読み込み中",
+    "hidden": "{name}：別のタブ"
+  },
+  "startHidden": "別のタブにいます：{names}。試合は待たずに始まり、戻るとその時点から続きます。",
   "theme": "テーマ：",
   "round": "第{n}戦",
   "title": {

@@ -416,6 +416,32 @@ describe("the start's ready check", () => {
     expect(h.state.phase).not.toBe("lobby");
   });
 
+  it("doesn't wait for a page out of sight, and says whose it is", () => {
+    const g = new Game(3);
+    const shown = (id: string, on: boolean) =>
+      code(() => g.do({ type: "SHOWN", playerId: id, shown: on }));
+    // in another tab before the start: not waited on
+    expect(shown("p3", false)).toBe("no error");
+    expect(shown("p3", false)).toBe("already_done");
+    expect(toView(g.state, 1, "p1", g.now, "en").players[2].hidden).toBe(true);
+    prepare(g);
+    ready(g, "p1");
+    ready(g, "p2");
+    expect(g.state.phase).not.toBe("lobby");
+
+    // going to another tab while it waits settles it too
+    const h = new Game(3);
+    prepare(h);
+    ready(h, "p1");
+    ready(h, "p2");
+    expect(h.state.phase).toBe("lobby");
+    h.do({ type: "SHOWN", playerId: "p3", shown: false });
+    expect(h.state.phase).not.toBe("lobby");
+    // back in sight later: nothing to wait for any more
+    h.do({ type: "SHOWN", playerId: "p3", shown: true });
+    expect(h.state.players[2].hiddenAt).toBeNull();
+  });
+
   it("holds the settings while it waits, and calls itself off with too few left", () => {
     const g = new Game(2);
     prepare(g);

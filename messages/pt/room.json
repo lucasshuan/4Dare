@@ -1,6 +1,13 @@
 {
   "loading": "Abrindo a sala…",
   "starting": "Preparando todo mundo…",
+  "startPeople": {
+    "label": "Quem já carregou",
+    "ready": "{name}: pronto",
+    "loading": "{name}: carregando",
+    "hidden": "{name}: em outra aba"
+  },
+  "startHidden": "Em outra aba: {names}. A partida não espera: ao voltar, entra no ponto certo.",
   "theme": "Tema:",
   "round": "Partida {n}",
   "title": {

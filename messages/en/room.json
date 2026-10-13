@@ -1,6 +1,13 @@
 {
   "loading": "Opening the room…",
   "starting": "Getting everyone ready…",
+  "startPeople": {
+    "label": "Who has loaded",
+    "ready": "{name}: ready",
+    "loading": "{name}: loading",
+    "hidden": "{name}: in another tab"
+  },
+  "startHidden": "In another tab: {names}. The match won't wait: back, they pick it up where it is.",
   "theme": "Theme:",
   "round": "Match {n}",
   "title": {

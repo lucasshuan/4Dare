@@ -435,6 +435,12 @@ export interface RoomPlayer extends Identity {
   away: boolean;
   /** When their page closed (tab or window), until they show up again. */
   goneAt: number | null;
+  /**
+   * When their page went out of sight (another tab, a minimised window) while
+   * still open, until it shows again. A start doesn't wait on it: the page
+   * catches up on the server clock when it comes back. Missing in older rooms.
+   */
+  hiddenAt?: number | null;
   /** Their colour (0-based, --seat-1..10), given on joining and theirs until they leave the room. */
   colorSlot: number;
 }
@@ -688,6 +694,8 @@ export type GameEvent =
   | { type: "GONE"; playerId: PlayerId }
   /** The player's page is open again. */
   | { type: "BACK"; playerId: PlayerId }
+  /** The player's page came into sight, or went out of it (another tab or window) while still open. */
+  | { type: "SHOWN"; playerId: PlayerId; shown: boolean }
   /** Someone has a page open on the room: touches it, so a room nobody left open ages out of the list. */
   | { type: "SEEN"; playerId: PlayerId }
   /** Settles players whose page has been closed for longer than GONE_GRACE_MS. */
@@ -996,6 +1004,8 @@ export interface PlayerView {
   gaveUp: boolean;
   /** Left the room mid-match. */
   away: boolean;
+  /** Their page is open but out of sight (another tab or window). */
+  hidden: boolean;
 }
 
 /** Someone watching, as the lists show them: no seat, so no colour. */

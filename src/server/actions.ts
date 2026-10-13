@@ -585,6 +585,29 @@ export async function markOpeningReady(
   );
 }
 
+/**
+ * The player's page came into sight, or went out of it (another tab or
+ * window) while still open: a start doesn't wait on a page out of sight.
+ * Quiet unless a start is waiting, so switching tabs makes nobody read the
+ * room again.
+ */
+export async function markShown(
+  rawCode: string,
+  shown: boolean,
+): Promise<Result<RoomView>> {
+  return run(async () => {
+    const code = roomCode(rawCode);
+    const who = await me();
+    const stored = await loadRoom(code);
+    const done = await dispatch(
+      code,
+      () => ({ type: "SHOWN", playerId: who.id, shown: shown === true }),
+      { quiet: !stored?.state.starting },
+    );
+    return viewNow(done, who);
+  });
+}
+
 /** Host only, while the room waits for them to type the theme. */
 export async function chooseTheme(
   code: string,

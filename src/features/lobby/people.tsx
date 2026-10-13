@@ -103,6 +103,7 @@ const asPlayer = (
   place: null,
   gaveUp: false,
   away: false,
+  hidden: false,
 });
 
 const freeColor = (players: PlayerView[]) => {

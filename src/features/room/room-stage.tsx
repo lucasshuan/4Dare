@@ -51,6 +51,7 @@ import {
 import { EntranceLobbyBackdrop } from "./room-entrance";
 import { StartCover, useStartBackdrop, useStartCovered } from "./start-cover";
 import { stepCall } from "./step-call";
+import { useShownReport } from "./use-shown";
 
 /** What for?'s screens come with its match: no other room loads them. */
 const loadLineup = () => import("@/features/lineup/lineup-screen");
@@ -215,6 +216,7 @@ function Areas() {
   }, [area, game, ja, chalk]);
   // a start's ready check: every page loads and rehearses it behind the loading screen
   useReadyCheck();
+  useShownReport();
   const covered = useStartCovered();
   const backdrop = useStartBackdrop();
   // the end's pictures, fetched while the match plays

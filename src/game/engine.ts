@@ -510,6 +510,7 @@ export function reduce(
 }
 
 const SETTLES_START = new Set<GameEvent["type"]>([
+  "SHOWN",
   "LEAVE",
   "KICK",
   "GONE",
@@ -542,8 +543,8 @@ function begin(s: RoomState, e: StartFields, ctx: Ctx) {
 }
 
 /**
- * A waiting start begins once every page still open on the room is ready for
- * its opening, START_LEAD_MS ahead, so they all have it before the curtain;
+ * A waiting start begins once every page still open and in sight on the room
+ * is ready for its opening, START_LEAD_MS ahead, so they all have it before the curtain;
  * with too few players left it is called off. The seats are closed while it
  * waits: whoever sat when it was asked plays, newcomers get the next match.
  */
@@ -554,7 +555,10 @@ function settleStart(s: RoomState, ctx: Ctx) {
     s.starting = null;
     return stopClock(s);
   }
-  const open = s.players.filter((p) => p.goneAt == null && !p.away);
+  // a page out of sight (another tab) isn't waited on: it catches up when it shows
+  const open = s.players.filter(
+    (p) => p.goneAt == null && p.hiddenAt == null && !p.away,
+  );
   if (open.every((p) => w.ready.includes(p.id)))
     begin(s, w.start, { ...ctx, now: ctx.now + START_LEAD_MS });
 }
@@ -575,6 +579,13 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       const p = requireSeated(s, e.playerId);
       if (p.goneAt == null) fail("already_done");
       p.goneAt = null;
+      return;
+    }
+    case "SHOWN": {
+      const p = requireSeated(s, e.playerId);
+      if (s.phase === "closed") fail("wrong_phase");
+      if ((p.hiddenAt == null) === e.shown) fail("already_done");
+      p.hiddenAt = e.shown ? null : ctx.now;
       return;
     }
     case "SEEN": {

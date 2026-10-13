@@ -396,6 +396,7 @@ export function toView(
       place: o?.place ?? null,
       gaveUp: o?.gaveUp ?? false,
       away: p.away,
+      hidden: p.hiddenAt != null,
     };
   });
 
@@ -434,6 +435,7 @@ export function toView(
             place: null,
             gaveUp: false,
             away: false,
+            hidden: false,
           }
         : null,
     muted: [...(s.muted ?? [])],
