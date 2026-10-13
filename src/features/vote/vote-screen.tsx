@@ -107,7 +107,7 @@ function Vote({ v }: { v: VoteView }) {
   const t = useTranslations("room.vote");
   const ts = useTranslations("room.vote");
   const lang = useLocale() as Lang;
-  const { view, code, playerById } = useRoomContext();
+  const { view, code, playerById, watching } = useRoomContext();
   const { beat } = useStage();
   const started = useStepStarted();
   const phone = useMedia(PHONE);
@@ -264,7 +264,7 @@ function Vote({ v }: { v: VoteView }) {
   const waiting = view.players.filter((p) => !voterIds.has(p.id));
   // a tap on the theme already chosen takes the vote back
   const choose = async (i: number) => {
-    if (result || !started) return;
+    if (result || !started || watching) return;
     const next = i === mine ? null : i;
     setOptimistic({ vote: next });
     await act(() => voteTheme(code, next));
@@ -371,7 +371,8 @@ function Vote({ v }: { v: VoteView }) {
                     total={v.total}
                     mine={mine === i}
                     open={!result}
-                    disabled={!started}
+                    // someone watching only sees the votes come in
+                    disabled={!started || watching}
                     onChoose={() => choose(i)}
                   />
                 </div>

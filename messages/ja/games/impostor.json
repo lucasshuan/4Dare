@@ -14,7 +14,8 @@
     "dontKnow": "このキャラを知らない",
     "dontKnowSure": "全員のカードを替えますか？誰が押したかは分かりません。",
     "dontKnowYes": "替える",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "spectating": "観戦中。答えを見守って、チャットで話そう。"
   },
   "colors": {
     "red": "赤",
@@ -41,7 +42,9 @@
   },
   "deal": {
     "keep": "覚えて。見せないで。",
-    "warning": "{count, plural, other {#人だけ別のキャラ。それはあなたかも。}}"
+    "warning": "{count, plural, other {#人だけ別のキャラ。それはあなたかも。}}",
+    "watchKeep": "みんなにカードが配られます。よく見ていて。",
+    "watchWarning": "{count, plural, other {#人だけ別のキャラ。}}"
   },
   "talk": {
     "title": "{count, plural, one {インポスターは誰？} other {インポスターたちは誰？}}",
@@ -53,7 +56,8 @@
     "watching": "脱落しました。チャットで見守ろう。",
     "wasImpostor": "インポスターだった",
     "wasNot": "違った",
-    "left": "退出"
+    "left": "退出",
+    "spectating": "観戦中。投票を見守って、チャットで話そう。"
   },
   "out": {
     "goes": "{name}が脱落",
@@ -73,7 +77,8 @@
     "theirBody": "見つかったインポスターが、みんなのカードを当てにいきます。",
     "fieldLabel": "クルーのカード",
     "notListed": "リストにありません。入力したまま送ります。",
-    "send": "答えを送る"
+    "send": "答えを送る",
+    "watchBody": "見つかったインポスターが、クルーのカードを当てにいきます。"
   },
   "result": {
     "crewWon": "クルーの勝ち！",

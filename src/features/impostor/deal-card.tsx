@@ -17,7 +17,7 @@ import { MyCard } from "./my-card";
  */
 export function DealCard({ show }: { show: ShowView }) {
   const t = useTranslations("impostor.deal");
-  const { view } = useRoomContext();
+  const { view, watching } = useRoomContext();
   const still = useReducedMotion() ?? false;
   const beat = beatOf(show, "card");
   const warn = useAfter(beat ? markAt(beat, SHOW_MARKS.cardWarning) : null);
@@ -32,7 +32,12 @@ export function DealCard({ show }: { show: ShowView }) {
           exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
           className="max-w-[560px] text-balance text-center font-bold font-display text-[clamp(26px,4vw,40px)] leading-tight"
         >
-          {warn ? t("warning", { count: view.imp?.impostors ?? 1 }) : t("keep")}
+          {/* someone watching has no card: the lines speak of the players' */}
+          {warn
+            ? t(watching ? "watchWarning" : "warning", {
+                count: view.imp?.impostors ?? 1,
+              })
+            : t(watching ? "watchKeep" : "keep")}
         </m.p>
       </AnimatePresence>
       {card ? (

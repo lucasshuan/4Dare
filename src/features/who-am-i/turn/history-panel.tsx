@@ -196,14 +196,17 @@ function HistoryBody({
 }) {
   const t = useTranslations("whoAmI.turn.history");
   const withNames = useWithNames();
-  const { view, me, playerById } = useRoomContext();
+  const { view, me, watching, playerById } = useRoomContext();
   // One tab per player: you first, then the others in turn order, like the player strip.
   const players = [...view.players].sort(
     (a, b) =>
       Number(b.isYou) - Number(a.isYou) ||
       (a.turnOrder ?? a.seat + 99) - (b.turnOrder ?? b.seat + 99),
   );
-  const [whose, setWhose] = useState(me.id);
+  // someone watching has no tab of their own: they open on the first player's
+  const [whose, setWhose] = useState(() =>
+    watching ? (players[0]?.id ?? me.id) : me.id,
+  );
   const [kind, setKind] = useState<Kind>("all");
   // Focus the close button once when the drawer opens, not on every render.
   const closeRef = useRef<HTMLButtonElement>(null);

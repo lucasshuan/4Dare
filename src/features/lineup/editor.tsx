@@ -105,7 +105,7 @@ function Knob({
 
 export function BoardEditor() {
   const t = useTranslations("lineup.defend");
-  const { lu, me, code, view } = useLineup();
+  const { lu, me, code, view, watching } = useLineup();
   const { run, pending } = useLuAction();
   const started = useStepStarted();
   const inPlay = lu.dealtIds.includes(me.id) && !me.away;
@@ -447,6 +447,19 @@ export function BoardEditor() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [picked, editing, board, change]);
+
+  // someone watching has no team: the boards stay secret until they are shown
+  if (watching)
+    return (
+      <div className="flex w-full flex-col items-center gap-2 py-10 text-center">
+        <h2 className="m-0 max-w-[90vw] text-balance font-display font-extrabold text-[clamp(18px,3.4vw,28px)] leading-tight">
+          {t("watching")}
+        </h2>
+        <span className="font-semibold text-ink-muted text-sm">
+          {t("waiting", { n: lu.doneIds.length, of: lu.dealtIds.length })}
+        </span>
+      </div>
+    );
 
   return (
     <div className="flex w-full flex-col items-center gap-3 max-sm:gap-2.5">

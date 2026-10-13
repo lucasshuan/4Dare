@@ -49,8 +49,12 @@ function ColdOpenScene({ beat }: { beat: Beat }) {
   const lang = useLocale();
   const name = useDisplayName();
   const { view } = useRoomContext();
-  const { row, next } = peopleRow(view.players, view.youId);
-  const upright = tableRows(view.players, view.youId);
+  // someone watching sees the scene told from the first seat's side
+  const focusId = view.watching
+    ? (view.players[0]?.id ?? view.youId)
+    : view.youId;
+  const { row, next } = peopleRow(view.players, focusId);
+  const upright = tableRows(view.players, focusId);
   const len = beatSeconds(beat);
   // everything leaves 0.5 s before the beat ends (7.1 of 7.6), never before the chips are in
   const outAt = Math.max(len - 0.5, 5.9);
@@ -167,7 +171,7 @@ function ColdOpenScene({ beat }: { beat: Beat }) {
             <Person
               key={p.id}
               player={p}
-              you={p.id === view.youId}
+              you={p.id === focusId}
               seed={i}
               chip={next.indexOf(p)}
               place={upright?.get(p.id)}

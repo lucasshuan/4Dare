@@ -74,7 +74,9 @@
     "handFits": "{count}人が「テーマに合う」と回答",
     "doneWaiting": "完了！待っている人：{names}",
     "doneAll": "全員選び終わりました！",
-    "timeUp": "時間切れ！これで決定。"
+    "timeUp": "時間切れ！これで決定。",
+    "watchTitle": "みんなが誰かのキャラクターを選んでいます",
+    "watchWaiting": "選んでいる人：{names}"
   },
   "cast": {
     "pickedYours": "{name}さんがあなたのキャラクターを選びました。",

@@ -33,12 +33,14 @@ export function ImpostorResult() {
   const tr = useTranslations("room");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
-  const { view, me, code, playerById } = useRoomContext();
+  const { view, me, code, watching, playerById } = useRoomContext();
   const { act, pending } = useRoomAction();
   const { leave } = useLeaveRoom();
   const end = view.imp?.end;
   const mineImpostor = end?.impostorIds.includes(me.id) ?? false;
-  const won = !!end && mineImpostor === (end.winner === "impostors");
+  // someone watching played on no side: neither won nor lost
+  const won =
+    !watching && !!end && mineImpostor === (end.winner === "impostors");
   useEffect(() => {
     if (!end) return;
     playSound(won ? "complete" : "step");
@@ -86,7 +88,9 @@ export function ImpostorResult() {
         <p className="max-w-[560px] text-ink-muted text-lg">
           {t(`reason.${end.reason}`, { count: end.impostorIds.length })}
         </p>
-        <p className="font-semibold">{won ? t("youWon") : t("youLost")}</p>
+        {watching ? null : (
+          <p className="font-semibold">{won ? t("youWon") : t("youLost")}</p>
+        )}
       </div>
 
       <div className="flex flex-wrap items-start justify-center gap-6">

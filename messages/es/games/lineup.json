@@ -101,7 +101,8 @@
     "hintKnobs": "Bolitas: tamaño y giro",
     "hintWrite": "Toca un espacio vacío para escribir",
     "done": "Listo",
-    "waiting": "Esperando ({n} de {of})"
+    "waiting": "Esperando ({n} de {of})",
+    "watching": "Los jugadores están preparando sus equipos para la misión."
   },
   "stage": {
     "yourTurn": "¡Te toca hablar!",
@@ -128,7 +129,8 @@
     "change": "Toca otro tablero para cambiarlo",
     "sending": "Votando…",
     "tieWait": "Deciden quienes votaron fuera del empate",
-    "voted": "Votaron {n} de {of}"
+    "voted": "Votaron {n} de {of}",
+    "watching": "Los jugadores están votando por el mejor equipo"
   },
   "tally": {
     "title": "Votos",

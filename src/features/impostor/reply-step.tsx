@@ -141,7 +141,7 @@ function DontKnow() {
 /** Everyone answers the open question for their own card; who is out watches. */
 export function ReplyStep({ asked }: { asked: ImpAskedView }) {
   const t = useTranslations("impostor.reply");
-  const { view, code, me } = useRoomContext();
+  const { view, code, me, watching } = useRoomContext();
   const { act, pending } = useRoomAction();
   const started = useStepStarted();
   const bank = useQuestion(asked.question.id);
@@ -184,7 +184,7 @@ export function ReplyStep({ asked }: { asked: ImpAskedView }) {
             animate={{ opacity: 1 }}
             className="rounded-md bg-surface px-4 py-3 font-medium text-ink-muted shadow-card"
           >
-            {t("watching")}
+            {watching ? t("spectating") : t("watching")}
           </m.p>
         )}
       </AnimatePresence>

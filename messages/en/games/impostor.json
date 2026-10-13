@@ -14,7 +14,8 @@
     "dontKnow": "I don't know this character",
     "dontKnowSure": "Swap everyone's cards? Nobody will know it was you.",
     "dontKnowYes": "Swap",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "spectating": "You're watching: follow the answers and talk in the chat."
   },
   "colors": {
     "red": "Red",
@@ -41,7 +42,9 @@
   },
   "deal": {
     "keep": "Memorize it. Don't show it.",
-    "warning": "{count, plural, one {One of you has a different card. It may be you.} other {# of you have a different card. It may be you.}}"
+    "warning": "{count, plural, one {One of you has a different card. It may be you.} other {# of you have a different card. It may be you.}}",
+    "watchKeep": "Everyone gets a card. Watch closely.",
+    "watchWarning": "{count, plural, one {One of them has a different card.} other {# of them have a different card.}}"
   },
   "talk": {
     "title": "{count, plural, one {Who's the impostor?} other {Who are the impostors?}}",
@@ -53,7 +56,8 @@
     "watching": "You're out: watch and talk in the chat.",
     "wasImpostor": "Was an impostor",
     "wasNot": "Wasn't",
-    "left": "Left the match"
+    "left": "Left the match",
+    "spectating": "You're watching: follow the vote and talk in the chat."
   },
   "out": {
     "goes": "{name} is out",
@@ -73,7 +77,8 @@
     "theirBody": "The caught impostor tries to guess your card.",
     "fieldLabel": "The crew's card",
     "notListed": "Not on the list: it goes as you typed it.",
-    "send": "Send guess"
+    "send": "Send guess",
+    "watchBody": "The caught impostor tries to guess the crew's card."
   },
   "result": {
     "crewWon": "The crew won!",

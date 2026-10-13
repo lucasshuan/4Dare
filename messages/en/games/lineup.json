@@ -101,7 +101,8 @@
     "hintKnobs": "Knobs: size and turn",
     "hintWrite": "Tap an empty spot to write",
     "done": "Done",
-    "waiting": "Waiting ({n} of {of})"
+    "waiting": "Waiting ({n} of {of})",
+    "watching": "The players are getting their teams ready for the mission."
   },
   "stage": {
     "yourTurn": "Your turn to talk!",
@@ -128,7 +129,8 @@
     "change": "Tap another board to change it",
     "sending": "Voting…",
     "tieWait": "Those who voted outside the tie decide",
-    "voted": "{n} of {of} voted"
+    "voted": "{n} of {of} voted",
+    "watching": "The players are voting for the best team"
   },
   "tally": {
     "title": "Votes",

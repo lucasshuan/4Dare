@@ -21,7 +21,7 @@ export function JudgeScreen() {
   const t = useTranslations("lineup.judge");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
-  const { lu, me, code, view, playerById } = useLineup();
+  const { lu, me, code, view, watching, playerById } = useLineup();
   const { run, pending } = useLuAction();
   const started = useStepStarted();
   const tie = view.phase === "tiebreak" ? lu.tie : null;
@@ -129,7 +129,9 @@ export function JudgeScreen() {
             : yours
               ? t("change")
               : t("tap")
-          : t("tieWait")}
+          : tie || !watching
+            ? t("tieWait")
+            : t("watching")}
         {" · "}
         {t("voted", { n: voted.length, of })}
       </span>

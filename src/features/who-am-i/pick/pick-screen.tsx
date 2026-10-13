@@ -19,6 +19,7 @@ import { useCharacterIndex } from "@/features/characters/use-character-index";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
+import { SCENE_MIN_H } from "@/features/stage/scene-kit";
 import { beatOf, isShow } from "@/features/stage/stage";
 import {
   PHONE,
@@ -74,14 +75,40 @@ const toCard = (c: CharacterDTO | HandCard): CardView => ({
  * the theme's hand at the bottom edge and, once confirmed, who has finished.
  */
 export function PickScreen() {
-  const { view } = useRoomContext();
+  const { view, watching } = useRoomContext();
   const lang = useLocale() as Lang;
   const show = useSceneShow("theme", ["draw", "target"]);
   // asked for as the draw starts, so the hand is there when the table lands
   usePickHand(view.theme, lang);
+  // someone watching picks for nobody: they follow who has picked
+  if (watching) return view.phase === "picking" ? <WatchPicks /> : null;
   if (show) return <PickIntro show={show} />;
   if (!view.pick) return null;
   return <PickTable />;
+}
+
+/** The pick step for someone watching: everyone picking, and who has finished. */
+function WatchPicks() {
+  const t = useTranslations("whoAmI.pickCard");
+  const { view } = useRoomContext();
+  const confirmedIds = view.players
+    .filter((p) => p.status === "picked")
+    .map((p) => p.id);
+  return (
+    <div
+      className={cn(SCENE_MIN_H, "flex flex-col items-center justify-center")}
+    >
+      <h1 className="max-w-full text-balance text-center font-bold font-display text-[21px] tracking-[-0.015em] sm:text-[28px]">
+        {t("watchTitle")}
+      </h1>
+      <DoneRow
+        players={view.players}
+        confirmedIds={confirmedIds}
+        show
+        watching
+      />
+    </div>
+  );
 }
 
 /** The show of that kind the view carries (current or still playing before it). */

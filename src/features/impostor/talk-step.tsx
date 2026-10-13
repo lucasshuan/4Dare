@@ -196,7 +196,7 @@ function SuspectCard({
 export function TalkStep() {
   const t = useTranslations("impostor.talk");
   const name = useDisplayName();
-  const { view, code, me, playerById } = useRoomContext();
+  const { view, code, me, watching, playerById } = useRoomContext();
   const { act, pending } = useRoomAction();
   const started = useStepStarted();
   const imp = view.imp;
@@ -287,7 +287,7 @@ export function TalkStep() {
         </div>
       ) : (
         <p className="text-center font-medium text-ink-muted">
-          {t("watching")}
+          {watching ? t("spectating") : t("watching")}
         </p>
       )}
     </div>

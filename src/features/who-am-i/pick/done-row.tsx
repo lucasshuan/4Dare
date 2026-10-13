@@ -19,12 +19,15 @@ export function DoneRow({
   players,
   confirmedIds,
   show,
+  watching = false,
   ref,
 }: {
   /** In turn order. */
   players: PlayerView[];
   confirmedIds: string[];
   show: boolean;
+  /** For someone watching: no "Done!" of their own. */
+  watching?: boolean;
   /** The row while it is shown (the table keeps the grown card above it). */
   ref?: Ref<HTMLDivElement>;
 }) {
@@ -84,7 +87,7 @@ export function DoneRow({
           <output className="block max-w-[min(560px,100%)] text-balance text-center font-bold text-[16px] leading-snug">
             {waiting.length
               ? withNames((n) =>
-                  t("doneWaiting", {
+                  t(watching ? "watchWaiting" : "doneWaiting", {
                     names: list.format(waiting.map((p) => n(p, p.isYou))),
                   }),
                 )

@@ -74,7 +74,9 @@
     "handFits": "{count, plural, one {# player says it fits} other {# players say it fits}}",
     "doneWaiting": "Done! Waiting for {names}",
     "doneAll": "Everyone has picked!",
-    "timeUp": "Time! That's the one."
+    "timeUp": "Time! That's the one.",
+    "watchTitle": "Everyone is picking a character for someone",
+    "watchWaiting": "Still picking: {names}"
   },
   "cast": {
     "pickedYours": "{name} picked yours.",

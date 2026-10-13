@@ -14,7 +14,8 @@
     "dontKnow": "No conozco a este personaje",
     "dontKnowSure": "¿Cambiar las cartas de todos? Nadie sabrá que fuiste tú.",
     "dontKnowYes": "Cambiar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "spectating": "Estás mirando: sigue las respuestas y habla en el chat."
   },
   "colors": {
     "red": "Rojo",
@@ -41,7 +42,9 @@
   },
   "deal": {
     "keep": "Memorízala. No la muestres.",
-    "warning": "{count, plural, one {Uno de ustedes tiene otra carta. Puedes ser tú.} other {# de ustedes tienen otra carta. Puedes ser tú.}}"
+    "warning": "{count, plural, one {Uno de ustedes tiene otra carta. Puedes ser tú.} other {# de ustedes tienen otra carta. Puedes ser tú.}}",
+    "watchKeep": "Cada uno recibe una carta. Mira con atención.",
+    "watchWarning": "{count, plural, one {Uno de ellos tiene otra carta.} other {# de ellos tienen otra carta.}}"
   },
   "talk": {
     "title": "{count, plural, one {¿Quién es el impostor?} other {¿Quiénes son los impostores?}}",
@@ -53,7 +56,8 @@
     "watching": "Saliste: mira y habla en el chat.",
     "wasImpostor": "Era impostor",
     "wasNot": "No era",
-    "left": "Salió de la partida"
+    "left": "Salió de la partida",
+    "spectating": "Estás mirando: sigue la votación y habla en el chat."
   },
   "out": {
     "goes": "{name} sale",
@@ -73,7 +77,8 @@
     "theirBody": "El impostor atrapado intenta adivinar su carta.",
     "fieldLabel": "La carta de la tripulación",
     "notListed": "No está en la lista: va como lo escribiste.",
-    "send": "Enviar respuesta"
+    "send": "Enviar respuesta",
+    "watchBody": "El impostor atrapado intenta adivinar la carta de la tripulación."
   },
   "result": {
     "crewWon": "¡Ganó la tripulación!",

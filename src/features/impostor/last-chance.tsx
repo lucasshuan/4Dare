@@ -24,7 +24,7 @@ export function LastChance() {
   const t = useTranslations("impostor.last");
   const lang = useLocale() as Lang;
   const name = useDisplayName();
-  const { view, code, me, playerById } = useRoomContext();
+  const { view, code, me, watching, playerById } = useRoomContext();
   const { act, pending } = useRoomAction();
   const started = useStepStarted();
   const [content, setContent] = useState<CardContent>({ kind: "empty" });
@@ -49,7 +49,7 @@ export function LastChance() {
         {mine ? t("yourTitle") : t("theirTitle", { name: name(guesser) })}
       </h1>
       <p className="max-w-[520px] text-ink-muted text-lg">
-        {mine ? t("yourBody") : t("theirBody")}
+        {mine ? t("yourBody") : watching ? t("watchBody") : t("theirBody")}
       </p>
       {mine ? (
         // the send key sits beside the field, so the suggestions never cover it

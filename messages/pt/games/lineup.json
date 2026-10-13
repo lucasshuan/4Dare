@@ -101,7 +101,8 @@
     "hintKnobs": "Bolinhas: tamanho e giro",
     "hintWrite": "Toque no vazio para escrever",
     "done": "Pronto",
-    "waiting": "Esperando ({n} de {of})"
+    "waiting": "Esperando ({n} de {of})",
+    "watching": "Os jogadores estão preparando seus times para a missão."
   },
   "stage": {
     "yourTurn": "Sua vez de falar!",
@@ -128,7 +129,8 @@
     "change": "Toque em outro quadro para mudar",
     "sending": "Votando…",
     "tieWait": "Quem votou fora do empate decide",
-    "voted": "{n} de {of} votaram"
+    "voted": "{n} de {of} votaram",
+    "watching": "Os jogadores estão votando no melhor time"
   },
   "tally": {
     "title": "Votos",

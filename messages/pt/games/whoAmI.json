@@ -74,7 +74,9 @@
     "handFits": "{count, plural, one {# jogador disse que combina} other {# jogadores disseram que combina}}",
     "doneWaiting": "Feito! Esperando {names}",
     "doneAll": "Todo mundo escolheu!",
-    "timeUp": "Tempo! Foi esse."
+    "timeUp": "Tempo! Foi esse.",
+    "watchTitle": "Cada um está escolhendo um personagem para alguém",
+    "watchWaiting": "Ainda escolhendo: {names}"
   },
   "cast": {
     "pickedYours": "{name} escolheu o seu.",

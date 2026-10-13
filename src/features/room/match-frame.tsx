@@ -158,13 +158,15 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
   const t = useTranslations("room");
   const tl = useTranslations("lineup");
   const lang = useLocale() as Lang;
-  const { view, me, offset } = useRoomContext();
+  const { view, me, offset, watching } = useRoomContext();
   const frame = useStage();
   const tagReached = useReached(frame.themeFrom);
   const clockReached = useReached(frame.clockFrom);
   const clockShown =
     frame.clockFrom !== null && (!frame.clockPops || clockReached);
-  const canGiveUp = !me.gaveUp && me.discoveredAt === null && !me.away;
+  // someone watching has no card to give up
+  const canGiveUp =
+    !watching && !me.gaveUp && me.discoveredAt === null && !me.away;
   // the header comes in with the match (after the lobby leaves); joined later, it is just there
   const [arrives] = useState(() => frame.beat?.kind === "curtain");
   const theme = tagReached ? view.theme : null;
