@@ -218,7 +218,8 @@
   }
 }
 /* upright, the paper lies a little smaller in the middle, then goes up and shrinks into the
-   screen's upper part (the overlay takes the lower 46%) */
+   screen's upper part, under the room's keys at the top: its news stays above the overlay
+   (the lower 46%), only the filler columns go under it */
 .portrait .slide {
   left: 10px;
   top: 355px;
@@ -231,7 +232,7 @@
     transform: scale(0.94);
   }
   to {
-    transform: translate(0, -336px) scale(0.84);
+    transform: translate(0, -235px) scale(0.84);
   }
 }
 /* the push and the turn in one layer: the turn ends with the push, at its last angle, no
