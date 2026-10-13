@@ -282,7 +282,7 @@
   },
   "gamesPage": {
     "title": "Juegos",
-    "lead": "Todos los juegos de 4Dare. Busca por nombre o filtra por tamaño de la mesa y forma de jugar.",
+    "lead": "Todos los juegos de 4Dare. Busca por nombre o filtra por número de jugadores.",
     "count": "{count, plural, =0 {Ningún juego} one {# juego} other {# juegos}}",
     "search": "Buscar",
     "searchPlaceholder": "Busca por nombre o descripción",
@@ -295,16 +295,6 @@
       "featured": "Destacados",
       "popular": "Más jugados",
       "name": "A–Z"
-    },
-    "style": "Estilo",
-    "online": "Con gente jugando",
-    "tags": {
-      "deduction": "Deducción",
-      "bluff": "Farol",
-      "questions": "Preguntas",
-      "voting": "Votación",
-      "auction": "Subasta",
-      "creative": "Creatividad"
     },
     "empty": "Ningún juego con estos filtros.",
     "clearFilters": "Borrar filtros"

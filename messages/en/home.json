@@ -282,7 +282,7 @@
   },
   "gamesPage": {
     "title": "Games",
-    "lead": "Every game on 4Dare. Search by name, or filter by table size and how it plays.",
+    "lead": "Every game on 4Dare. Search by name, or filter by number of players.",
     "count": "{count, plural, =0 {No games} one {# game} other {# games}}",
     "search": "Search",
     "searchPlaceholder": "Search by name or description",
@@ -295,16 +295,6 @@
       "featured": "Featured",
       "popular": "Most played",
       "name": "A–Z"
-    },
-    "style": "Style",
-    "online": "People playing",
-    "tags": {
-      "deduction": "Deduction",
-      "bluff": "Bluffing",
-      "questions": "Questions",
-      "voting": "Voting",
-      "auction": "Auction",
-      "creative": "Creativity"
     },
     "empty": "No games match these filters.",
     "clearFilters": "Clear filters"

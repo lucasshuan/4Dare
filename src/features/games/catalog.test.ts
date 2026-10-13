@@ -43,18 +43,6 @@ describe("pickGames", () => {
     expect(pick({ players: 10 })).toEqual(["impostor"]);
   });
 
-  it("keeps games with any of the styles picked", () => {
-    expect(pick({ tags: ["bluff", "auction"] })).toEqual([
-      "impostor",
-      "lineup",
-    ]);
-  });
-
-  it("drops games nobody plays, once the counts arrive", () => {
-    expect(pick({ online: true }, null)).toHaveLength(3);
-    expect(pick({ online: true }, { impostor: 4 })).toEqual(["impostor"]);
-  });
-
   it("sorts by players online, ties in the featured order", () => {
     expect(pick({ sort: "popular" }, { lineup: 3 })).toEqual([
       "lineup",
@@ -74,18 +62,13 @@ describe("the link", () => {
     const f: GameFilters = {
       q: "vote",
       players: 4,
-      tags: ["bluff", "voting"],
-      online: true,
       sort: "name",
     };
     expect(fromSearch(toSearch(f))).toEqual(f);
   });
 
   it("drops what it does not know", () => {
-    expect(fromSearch("?players=99&tags=x,bluff&sort=new&online=yes")).toEqual({
-      ...NO_FILTERS,
-      tags: ["bluff"],
-    });
+    expect(fromSearch("?players=99&sort=new")).toEqual(NO_FILTERS);
   });
 
   it("spans every open game's table sizes", () => {

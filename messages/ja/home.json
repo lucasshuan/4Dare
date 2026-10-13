@@ -282,7 +282,7 @@
   },
   "gamesPage": {
     "title": "ゲーム",
-    "lead": "4Dareのすべてのゲーム。名前で探すか、人数や遊び方で絞り込めます。",
+    "lead": "4Dareのすべてのゲーム。名前で探すか、人数で絞り込めます。",
     "count": "{count, plural, =0 {ゲームなし} other {#件のゲーム}}",
     "search": "検索",
     "searchPlaceholder": "名前や説明で検索",
@@ -295,16 +295,6 @@
       "featured": "おすすめ",
       "popular": "人気順",
       "name": "名前順"
-    },
-    "style": "スタイル",
-    "online": "プレイ中の人がいる",
-    "tags": {
-      "deduction": "推理",
-      "bluff": "ブラフ",
-      "questions": "質問",
-      "voting": "投票",
-      "auction": "オークション",
-      "creative": "発想力"
     },
     "empty": "条件に合うゲームはありません。",
     "clearFilters": "条件をクリア"

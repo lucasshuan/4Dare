@@ -29,13 +29,11 @@ export function GameCard({
   game,
   delay,
   className,
-  tileClassName,
 }: {
   game: GameKey;
   delay: number;
   /** The tile's width. */
   className?: string;
-  tileClassName?: string;
 }) {
   const { messages, Art } = GAME_INFO[game];
   const t = useTranslations(`home.games.${messages}`);
@@ -57,7 +55,6 @@ export function GameCard({
         href={GAME_PATHS[game]}
         className={cn(
           "group/tile relative block aspect-square overflow-hidden bg-surface-sunken outline-offset-[-3px]! transition-[filter] duration-500 ease-soft [container-type:inline-size] sm:saturate-45 sm:dark:brightness-42 sm:dark:saturate-35 sm:focus-visible:saturate-100 sm:hover:saturate-100 sm:dark:focus-visible:brightness-100 sm:dark:focus-visible:saturate-100 sm:dark:hover:brightness-100 sm:dark:hover:saturate-100",
-          tileClassName,
         )}
       >
         <Art />
