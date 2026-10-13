@@ -59,6 +59,11 @@ export const nameSlug = (name: string) =>
 /** The Workshop, one suggestion in it (a shared link), and the curators' queue. */
 export const WORKSHOP = "/workshop";
 export const workshopPath = (id: string) => `${WORKSHOP}/${id}`;
+/** What `game` plays from its bank of `kind` (themes, questions or missions): the Workshop's live ones, filtered. */
+export const workshopOf = (
+  game: GameKey,
+  kind: "theme" | "question" | "mission",
+) => `${WORKSHOP}?game=${game}&kind=${kind}&status=live`;
 export const WORKSHOP_REVIEW = "/workshop/review";
 
 /** The community pages and the help ones. */

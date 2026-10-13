@@ -17,7 +17,7 @@ import type { GameKey } from "@/game/games";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ease } from "@/lib/motion";
-import { CHARACTERS, CONTRIBUTIONS, WORKSHOP } from "@/lib/routes";
+import { CHARACTERS, CONTRIBUTIONS, workshopOf } from "@/lib/routes";
 import type { GameFactsData, LibraryHelper } from "@/server/community-contract";
 
 type Fact = "themes" | "questions" | "missions" | "characters";
@@ -29,33 +29,38 @@ const FACTS: Record<GameKey, Fact[]> = {
   lineup: ["missions", "characters"],
 };
 
-/** Each fact's look and where its tile goes: the Workshop grows the banks, the library has the cards. */
+/** Each fact's look and where its tile goes: the Workshop grows the game's banks, the library has the cards. */
 const LOOK: Record<
   Fact,
-  { Icon: LucideIcon; tone: string; href: string; go: "suggest" | "browse" }
+  {
+    Icon: LucideIcon;
+    tone: string;
+    href: (game: GameKey) => string;
+    go: "suggest" | "browse";
+  }
 > = {
   themes: {
     Icon: Tags,
     tone: "bg-sky-soft text-sky",
-    href: WORKSHOP,
+    href: (game) => workshopOf(game, "theme"),
     go: "suggest",
   },
   questions: {
     Icon: MessageCircleQuestion,
     tone: "bg-apricot-soft text-apricot",
-    href: WORKSHOP,
+    href: (game) => workshopOf(game, "question"),
     go: "suggest",
   },
   missions: {
     Icon: Mail,
     tone: "bg-butter-soft text-on-butter",
-    href: WORKSHOP,
+    href: (game) => workshopOf(game, "mission"),
     go: "suggest",
   },
   characters: {
     Icon: Library,
     tone: "bg-yes-soft text-yes",
-    href: CHARACTERS,
+    href: () => CHARACTERS,
     go: "browse",
   },
 };
@@ -124,7 +129,7 @@ export function GameFacts({
                 />
               ) : (
                 <Tile
-                  href={LOOK[key].href}
+                  href={LOOK[key].href(game)}
                   Icon={LOOK[key].Icon}
                   tone={LOOK[key].tone}
                   label={t(key)}
