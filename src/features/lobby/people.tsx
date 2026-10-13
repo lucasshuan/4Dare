@@ -118,6 +118,30 @@ function applyMove(
   total: number,
   move: Move | null,
 ) {
+  const next = moved(players, watchers, total, move);
+  // the room and the watchers are read apart: for a moment someone can be in
+  // both (or twice, the move shown and the server's answer): the seat wins
+  const seen = new Set<string>();
+  const once = <T extends { id: string }>(list: T[]) =>
+    list.filter((x) => !seen.has(x.id) && seen.add(x.id));
+  const seated = once(next.players);
+  const watching = once(next.watchers);
+  return {
+    players: seated,
+    watchers: watching,
+    total: Math.max(
+      watching.length,
+      next.total - (next.watchers.length - watching.length),
+    ),
+  };
+}
+
+function moved(
+  players: PlayerView[],
+  watchers: WatcherView[],
+  total: number,
+  move: Move | null,
+) {
   if (!move) return { players, watchers, total };
   const P = [...players];
   const W = [...watchers];
@@ -841,10 +865,10 @@ function WatchersArea({
       <AnimatePresence>
         {drop.over && drop.verdict ? (
           <m.span
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
-            className="pointer-events-none absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-pill bg-sky px-2.5 py-1 font-semibold text-[11px] text-on-sky leading-none shadow-pop"
+            exit={{ opacity: 0, y: -4 }}
+            className="pointer-events-none absolute -bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-pill bg-sky px-2.5 py-1 font-semibold text-[11px] text-on-sky leading-none shadow-pop"
           >
             <drop.verdict.icon className="size-3.5" strokeWidth={2.25} />
             {drop.verdict.label}
