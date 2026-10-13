@@ -7,6 +7,9 @@ export const IMPOSTOR = "/impostor";
 export const LINEUP = "/lineup";
 export const NEW_ROOM = "/new";
 
+/** Every game, with a search and filters (in the link). */
+export const GAME_LIST = "/games";
+
 /** Each game's own page. */
 export const GAME_PATHS: Record<GameKey, string> = {
   "who-am-i": WHO_AM_I,

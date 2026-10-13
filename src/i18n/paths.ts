@@ -11,6 +11,7 @@ import { routing } from "./routing";
 const TRANSLATED: Record<string, Partial<Record<Lang, string>>> = {
   "who-am-i": { pt: "quem-sou-eu", es: "quien-soy" },
   lineup: { pt: "escalacao", es: "alineacion" },
+  games: { pt: "jogos", es: "juegos" },
   rooms: { pt: "salas", es: "salas" },
   characters: { pt: "personagens", es: "personajes" },
   workshop: { pt: "oficina", es: "taller" },

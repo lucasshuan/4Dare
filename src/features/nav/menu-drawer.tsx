@@ -8,6 +8,7 @@ import {
   Clock,
   FileText,
   GalleryVerticalEnd,
+  Gamepad2,
   House,
   LayoutGrid,
   Lightbulb,
@@ -59,6 +60,7 @@ import { meNamed, useDisplayName } from "@/lib/names";
 import {
   CHARACTERS,
   CONTRIBUTIONS,
+  GAME_LIST,
   GAME_PATHS,
   NEW_ROOM,
   NEWS,
@@ -76,6 +78,7 @@ import { Bars, burgerClass } from "./menu-button";
 
 type ItemKey =
   | "home"
+  | "games"
   | "rooms"
   | "newRoom"
   | "profile"
@@ -162,6 +165,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
       games: true,
       items: [
         { key: "home", href: "/", Icon: House },
+        { key: "games", href: GAME_LIST, Icon: Gamepad2 },
         {
           key: "rooms",
           href: ROOMS,

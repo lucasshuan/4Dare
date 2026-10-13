@@ -60,11 +60,17 @@ export function usePublicRooms() {
   return { rooms: query.data?.rooms ?? [], isLoading: query.isPending };
 }
 
-/** How many players have a room open right now (lobby, match or podium); null while loading. */
-export function usePlayersOnline(game: GameKey): number | null {
+/** How many players have a room open right now (lobby, match or podium), by game; null while loading. */
+export function useOnlineByGame(): Partial<Record<GameKey, number>> | null {
   const query = useLobbyFeed<{ online: Partial<Record<GameKey, number>> }>(
     "players-online",
     "/api/online",
   );
-  return query.data ? (query.data.online[game] ?? 0) : null;
+  return query.data?.online ?? null;
+}
+
+/** How many players have a room open in `game` right now; null while loading. */
+export function usePlayersOnline(game: GameKey): number | null {
+  const online = useOnlineByGame();
+  return online ? (online[game] ?? 0) : null;
 }

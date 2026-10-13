@@ -22,6 +22,7 @@
   },
   "items": {
     "home": "ホーム",
+    "games": "ゲーム",
     "rooms": "公開ルーム",
     "newRoom": "ルームを作る",
     "profile": "プロフィール",
@@ -43,6 +44,7 @@
   },
   "keys": {
     "home": "ホーム ゲーム home",
+    "games": "ゲーム 一覧 すべて 検索 games",
     "rooms": "ルーム 公開 rooms",
     "newRoom": "ルーム 作成 新規",
     "profile": "プロフィール 掲示板",

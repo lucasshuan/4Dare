@@ -67,6 +67,10 @@
     "title": "Salas",
     "description": "Todas as salas esperando jogadores no 4Dare: encontre por jogo, nome ou anfitrião, públicas ou com senha."
   },
+  "games": {
+    "title": "Jogos",
+    "description": "Todos os jogos de festa online do 4Dare: busque e filtre por número de jogadores, estilo e quem está jogando agora."
+  },
   "settings": {
     "title": "Configurações",
     "description": "Som, visual, opções de jogo e idioma do 4Dare."

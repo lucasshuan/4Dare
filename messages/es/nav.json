@@ -22,6 +22,7 @@
   },
   "items": {
     "home": "Inicio",
+    "games": "Juegos",
     "rooms": "Salas abiertas",
     "newRoom": "Crear sala",
     "profile": "Perfil",
@@ -43,6 +44,7 @@
   },
   "keys": {
     "home": "inicio juegos",
+    "games": "juegos lista todos buscar filtros",
     "rooms": "salas abiertas publicas",
     "newRoom": "crear sala nueva anfitrion",
     "profile": "perfil muro yo",

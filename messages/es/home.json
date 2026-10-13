@@ -180,6 +180,7 @@
     "soon": "Más juegos pronto",
     "online": "{count, plural, =0 {Nadie jugando ahora} one {# jugador en línea} other {# jugadores en línea}}",
     "back": "Juegos",
+    "seeAll": "Ver todos",
     "whoAmI": {
       "name": "¿Quién soy?",
       "pitch": "Cada jugador elige un personaje para otro. Ves las cartas de los demás, nunca la tuya. Descubre quién eres con preguntas de sí o no.",
@@ -277,6 +278,36 @@
     },
     "empty": "No hay salas ahora. Crea una y aparecerá aquí.",
     "emptyFiltered": "Ninguna sala coincide con estos filtros.",
+    "clearFilters": "Borrar filtros"
+  },
+  "gamesPage": {
+    "back": "Inicio",
+    "title": "Juegos",
+    "lead": "Todos los juegos de 4Dare. Busca por nombre o filtra por tamaño de la mesa y forma de jugar.",
+    "count": "{count, plural, =0 {Ningún juego} one {# juego} other {# juegos}}",
+    "search": "Buscar",
+    "searchPlaceholder": "Busca por nombre o descripción",
+    "clearSearch": "Borrar búsqueda",
+    "players": "Jugadores",
+    "anyPlayers": "Cualquier número",
+    "playersN": "{n} jugadores",
+    "sort": "Ordenar",
+    "sorts": {
+      "featured": "Destacados",
+      "popular": "Más jugados ahora",
+      "name": "Nombre (A–Z)"
+    },
+    "style": "Estilo",
+    "online": "Con gente jugando",
+    "tags": {
+      "deduction": "Deducción",
+      "bluff": "Farol",
+      "questions": "Preguntas",
+      "voting": "Votación",
+      "auction": "Subasta",
+      "creative": "Creatividad"
+    },
+    "empty": "Ningún juego con estos filtros.",
     "clearFilters": "Borrar filtros"
   },
   "gamePage": {

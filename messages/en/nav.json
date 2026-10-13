@@ -22,6 +22,7 @@
   },
   "items": {
     "home": "Home",
+    "games": "Games",
     "rooms": "Open rooms",
     "newRoom": "Create room",
     "profile": "Profile",
@@ -43,6 +44,7 @@
   },
   "keys": {
     "home": "home start games",
+    "games": "games list all search filters",
     "rooms": "rooms public open lobby",
     "newRoom": "create new room host",
     "profile": "profile mural wall me",

@@ -180,6 +180,7 @@
     "soon": "More games soon",
     "online": "{count, plural, =0 {Nobody playing right now} one {# player online} other {# players online}}",
     "back": "Games",
+    "seeAll": "See all",
     "whoAmI": {
       "name": "Who am I?",
       "pitch": "Everyone picks a character for someone else. You see their cards, never yours. Work out who you are with yes-or-no questions.",
@@ -277,6 +278,36 @@
     },
     "empty": "No rooms right now. Create one and it shows up here.",
     "emptyFiltered": "No room matches these filters.",
+    "clearFilters": "Clear filters"
+  },
+  "gamesPage": {
+    "back": "Home",
+    "title": "Games",
+    "lead": "Every game on 4Dare. Search by name, or filter by table size and how it plays.",
+    "count": "{count, plural, =0 {No games} one {# game} other {# games}}",
+    "search": "Search",
+    "searchPlaceholder": "Search by name or description",
+    "clearSearch": "Clear search",
+    "players": "Players",
+    "anyPlayers": "Any number",
+    "playersN": "{n} players",
+    "sort": "Sort",
+    "sorts": {
+      "featured": "Featured",
+      "popular": "Most played now",
+      "name": "Name (A–Z)"
+    },
+    "style": "Style",
+    "online": "People playing",
+    "tags": {
+      "deduction": "Deduction",
+      "bluff": "Bluffing",
+      "questions": "Questions",
+      "voting": "Voting",
+      "auction": "Auction",
+      "creative": "Creativity"
+    },
+    "empty": "No games match these filters.",
     "clearFilters": "Clear filters"
   },
   "gamePage": {

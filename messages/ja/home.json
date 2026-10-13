@@ -180,6 +180,7 @@
     "soon": "ほかのゲームも準備中",
     "online": "{count, plural, =0 {いまは誰も遊んでいません} other {#人がオンライン}}",
     "back": "ゲーム一覧",
+    "seeAll": "すべて見る",
     "whoAmI": {
       "name": "だれ？",
       "pitch": "みんなが誰かのためにキャラクターを選びます。他の人のカードは見えますが、自分のは見えません。はい・いいえの質問で自分が誰か当てましょう。",
@@ -277,6 +278,36 @@
     },
     "empty": "今はルームがありません。作るとここに表示されます。",
     "emptyFiltered": "条件に合うルームがありません。",
+    "clearFilters": "条件をクリア"
+  },
+  "gamesPage": {
+    "back": "ホーム",
+    "title": "ゲーム",
+    "lead": "4Dareのすべてのゲーム。名前で探すか、人数や遊び方で絞り込めます。",
+    "count": "{count, plural, =0 {ゲームなし} other {#件のゲーム}}",
+    "search": "検索",
+    "searchPlaceholder": "名前や説明で検索",
+    "clearSearch": "検索をクリア",
+    "players": "人数",
+    "anyPlayers": "何人でも",
+    "playersN": "{n}人",
+    "sort": "並べ替え",
+    "sorts": {
+      "featured": "おすすめ",
+      "popular": "いま人気",
+      "name": "名前順"
+    },
+    "style": "スタイル",
+    "online": "プレイ中の人がいる",
+    "tags": {
+      "deduction": "推理",
+      "bluff": "ブラフ",
+      "questions": "質問",
+      "voting": "投票",
+      "auction": "オークション",
+      "creative": "発想力"
+    },
+    "empty": "条件に合うゲームはありません。",
     "clearFilters": "条件をクリア"
   },
   "gamePage": {

@@ -67,6 +67,10 @@
     "title": "Rooms",
     "description": "Every room waiting for players on 4Dare: find one by game, name or host, public or with a password."
   },
+  "games": {
+    "title": "Games",
+    "description": "Every online party game on 4Dare: search and filter by number of players, style and who is playing now."
+  },
   "settings": {
     "title": "Settings",
     "description": "Sound, look, game options and language for 4Dare."
