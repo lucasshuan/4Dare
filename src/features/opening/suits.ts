@@ -20,14 +20,13 @@ export const CASTS: readonly Cast[] = [
   ["fluffy", "none", "stubs", 1.06, 0.88],
 ];
 
-/** A row's sizes: slot width and gap, the face, the placard. */
+/** A row's sizes: slot width and gap, the face, the card held up (its width and the room it takes). */
 export interface SuitSize {
   w: number;
   gap: number;
   av: number;
   pw: number;
   ph: number;
-  pfs: number;
 }
 
 /** One walking frame of a costume. */
@@ -36,10 +35,9 @@ export interface SuitFrame {
   legS: string;
   legF: string;
   legSW: number;
-  legSO: number;
   /** The body's pose, for the svg. */
   tr: string;
-  /** The same pose for the face and the placard (CSS). */
+  /** The same pose for the face and the card (CSS). */
   css: string;
 }
 
@@ -64,17 +62,12 @@ export interface Suit {
   org: string;
   hl: string;
   hlW: number;
-  ow: number;
-  stO: number;
   stW: number;
-  /** The placard: width, left, top; the paws' size and places. */
+  /** Where the card is held (its widest, left, top) and the paws' size. */
   pw: number;
   bl: number;
   bt: number;
   pd: number;
-  pl: number;
-  pr: number;
-  pt: number;
   /** The shadow on the floor. */
   footW: number;
   footML: number;
@@ -323,7 +316,6 @@ export function suitGeo(
       legS,
       legF,
       legSW: lw,
-      legSO: r1(lw + av * 0.052 * 1.1),
       tr,
       css,
     });
@@ -352,8 +344,6 @@ export function suitGeo(
     org: `${r1(cx)}px ${Hb}px`,
     hl: `M${h1[0]} ${h1[1]}A${r1(hr)} ${r1(hr)} 0 0 1 ${h2[0]} ${h2[1]}`,
     hlW: r1(Math.max(2.4, m * 0.36)),
-    ow: r1(av * 0.052),
-    stO: r1(av * 0.052 + Math.max(3.6, m * 0.42)),
     stW: r1(Math.max(3.6, m * 0.42)),
     ax: r1(cx - av / 2),
     ay: m,
@@ -361,9 +351,6 @@ export function suitGeo(
     bl: r1(cx - pw / 2),
     bt,
     pd,
-    pl: r1(1 - pd / 2),
-    pr: r1(pw - 1 - pd / 2),
-    pt: r1(sz.ph * 0.55 - pd / 2),
     footW: Math.round(baseHalf * 2.25),
     footML: -Math.round(baseHalf * 1.125),
   };
