@@ -16,7 +16,7 @@ import {
 import { impReveal, impStatus, impView } from "./impostor/view";
 import { LU_PHASES } from "./lineup/types";
 import { luStatus, luView } from "./lineup/view";
-import { upcomingTitle } from "./steps";
+import { gameRound, upcomingTitle } from "./steps";
 import {
   type ActiveRoom,
   type AnswerEntry,
@@ -408,6 +408,7 @@ export function toView(
       password: viewerId === s.hostId ? s.settings.password : "",
     },
     round: s.round,
+    gameRound: gameRound(s),
     version,
     youId: viewerId,
     watching: !seated,

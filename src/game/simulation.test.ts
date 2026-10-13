@@ -8,7 +8,6 @@ import {
   type Character,
   GameError,
   type GameEvent,
-  RESULT_SECONDS,
   REVEAL_TIMING,
   type Reveal,
   type RoomState,
@@ -218,9 +217,7 @@ function checkInvariants(s: RoomState) {
     expect(s.turnPlayerId).not.toBeNull();
   }
   if (s.phase === "finished") {
-    expect((s.deadline ?? 0) - (s.stepStartsAt ?? 0)).toBe(
-      RESULT_SECONDS * 1000,
-    );
+    expect(s.deadline).toBeNull();
     expect(s.turnPlayerId).toBeNull();
   }
   if (s.phase === "closed") {

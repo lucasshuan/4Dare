@@ -9,7 +9,6 @@ import {
   type ErrorCode,
   GameError,
   type PlayerId,
-  RESULT_SECONDS,
   type Reveal,
   type RoomState,
   type RuleExamples,
@@ -203,7 +202,11 @@ export function upcomingTitle(
   return { title: titleCard(next), first: longShows(next) };
 }
 
-/** The podium; its clock (after the last reveal) takes everyone back to the lobby. */
+/**
+ * The match's end: its scene plays from the last reveal on, and the room stays
+ * on it until the next match (the host's "one more") or the lobby. Nobody is
+ * ready for the next one yet but the host.
+ */
 export function finish(s: RoomState, ctx: Ctx) {
   // A match that ends mid-show goes to the podium at once; a guess reveal still holds it.
   if (isShow(s.reveal) && ctx.now < s.reveal.until) {
@@ -214,7 +217,10 @@ export function finish(s: RoomState, ctx: Ctx) {
   }
   s.phase = "finished";
   s.turnPlayerId = null;
-  startStep(s, ctx, RESULT_SECONDS * 1000);
+  startStep(s, ctx, 0);
+  s.deadline = null;
+  s.stepMs = null;
+  for (const p of s.players) p.ready = p.id === s.hostId;
   keepMatch(s, ctx);
 }
 

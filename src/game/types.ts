@@ -258,8 +258,6 @@ export const REPORT_REASONS = [
 export type ReportReason = (typeof REPORT_REASONS)[number];
 /** Longest note on a report. */
 export const REPORT_NOTE_MAX = 300;
-/** The podium stays this long; then the room goes back to the lobby on its own (the host can go sooner). */
-export const RESULT_SECONDS = 15;
 /** Themes offered in the vote before each match. */
 export const THEME_OPTIONS = 4;
 /** How long the host has to type the theme; then everyone votes instead, on themes from every set. */
@@ -824,8 +822,8 @@ export type GameEvent =
     }
   /** What for?: "Good mission?" (null takes it back). */
   | { type: "RATE"; playerId: PlayerId; up: boolean | null }
-  /** Host only, from the podium: everyone goes back to the lobby for another match. */
-  | { type: "BACK_TO_LOBBY"; playerId: PlayerId }
+  /** From a match's end, anyone seated: everyone goes back to the lobby; the host may bring another game. */
+  | { type: "BACK_TO_LOBBY"; playerId: PlayerId; game?: GameKey }
   /**
    * The step's clock ran out. The caller supplies what the engine cannot make up:
    * themes to vote on (a host who never typed the theme) with their rule cards,
@@ -1140,6 +1138,8 @@ export interface RoomView {
   /** What for?'s TV chair: who presents the next match with a presenter. */
   chairId: PlayerId | null;
   round: number;
+  /** This game's matches in the room, the one on now (or just over) included: the number its title and end scenes show. */
+  gameRound: number;
   version: number;
   youId: PlayerId;
   /** The viewer has no seat: they watch (WATCHERS_SHOWN). */

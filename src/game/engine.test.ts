@@ -17,7 +17,6 @@ import {
   MAX_CHARACTER_NAME,
   PICK_SECONDS,
   type PickDraft,
-  RESULT_SECONDS,
   REVEAL_TIMING,
   type Reveal,
   type RoomState,
@@ -1747,7 +1746,8 @@ describe("leaving and giving up", () => {
     const g = started(2);
     g.do({ type: "LEAVE", playerId: g.state.order[1] });
     expect(g.state.phase).toBe("finished");
-    expect(g.state.deadline).toBe(g.now + RESULT_SECONDS * 1000);
+    // the end stays until the next match: no clock
+    expect(g.state.deadline).toBeNull();
   });
 
   it("a match that ends mid-show drops the show: the podium comes at once", () => {
@@ -1814,19 +1814,23 @@ describe("whole matches", () => {
         .map((o) => o.place)
         .sort(),
     ).toEqual([1, 1, 1, 1]);
-    // the podium waits for the last reveal, then its own clock
+    // the end waits for the last reveal, then stays: no clock
     expect(s.stepStartsAt).toBe(s.reveal?.until);
-    expect(s.deadline).toBe((s.stepStartsAt ?? 0) + RESULT_SECONDS * 1000);
-    expect(code(() => g.do({ type: "BACK_TO_LOBBY", playerId: "p2" }))).toBe(
-      "not_host",
-    );
-    g.do({ type: "BACK_TO_LOBBY", playerId: s.hostId });
+    expect(s.deadline).toBeNull();
+    // someone ready for the next one at the end stays ready in the lobby
+    g.do({ type: "SET_READY", playerId: "p3", ready: true });
+    expect(
+      code(() =>
+        g.do({ type: "BACK_TO_LOBBY", playerId: "p2", game: "impostor" }),
+      ),
+    ).toBe("not_host");
+    g.do({ type: "BACK_TO_LOBBY", playerId: "p2" });
     expect(g.state.phase).toBe("lobby");
     expect(g.state.deadline).toBeNull();
     expect(g.state.players.map((p) => p.ready)).toEqual([
       true,
       false,
-      false,
+      true,
       false,
     ]);
     expect(g.state.assignments).toEqual({});
@@ -1853,7 +1857,7 @@ describe("whole matches", () => {
     expect(beats(g.state.reveal).map(([k]) => k)).not.toContain("rule");
   });
 
-  it("without the host, the podium's clock takes everyone back; whoever left loses the seat", () => {
+  it("without the host, anyone seated takes everyone back; whoever left loses the seat", () => {
     const g = started(3);
     const leaver = g.state.order[0];
     g.do({ type: "LEAVE", playerId: leaver });
@@ -1861,11 +1865,46 @@ describe("whole matches", () => {
       if (id !== leaver && g.state.phase !== "finished")
         g.do({ type: "GIVE_UP", playerId: id });
     expect(g.state.phase).toBe("finished");
+    // the end has no clock
     expect(code(() => g.do({ type: "TIMEOUT" }))).toBe("wrong_phase");
-    g.timeout();
+    const stayer = g.state.order.find((id) => id !== leaver) as string;
+    g.do({ type: "BACK_TO_LOBBY", playerId: stayer });
     expect(g.state.phase).toBe("lobby");
     expect(g.state.players.map((p) => p.id)).not.toContain(leaver);
     expect(g.state.players.some((p) => p.id === g.state.hostId)).toBe(true);
+  });
+
+  it("at a match's end, the host plays one more at once, or takes the room to another game", () => {
+    const g = started(4);
+    const s = playToEnd(g);
+    const host = s.hostId;
+    // nobody is ready for the next one yet but the host; the others say so at the end
+    expect(s.players.map((p) => p.ready)).toEqual([true, false, false, false]);
+    g.do({ type: "SET_READY", playerId: "p2", ready: true });
+    expect(g.state.players.map((p) => p.ready)).toEqual([
+      true,
+      true,
+      false,
+      false,
+    ]);
+    expect(
+      code(() => g.do({ type: "SET_READY", playerId: host, ready: false })),
+    ).toBe("invalid_input");
+    // only the host starts the next one
+    expect(
+      code(() =>
+        g.do({ type: "PREPARE_START", playerId: "p2", themes: THEMES }),
+      ),
+    ).toBe("not_host");
+    const again = started(4);
+    playToEnd(again);
+    again.do({ type: "PREPARE_START", playerId: "p1", themes: THEMES });
+    expect(again.state.phase).toBe("lobby");
+    expect(again.state.starting).not.toBeNull();
+    // the host's tile: everyone to the lobby with that game
+    g.do({ type: "BACK_TO_LOBBY", playerId: host, game: "impostor" });
+    expect(g.state.phase).toBe("lobby");
+    expect(g.state.settings.game).toBe("impostor");
   });
 
   it("never mutates the state it was given", () => {

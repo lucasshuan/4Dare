@@ -585,7 +585,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     case "SWEEP":
       return sweep(s, ctx);
     case "SET_READY": {
-      if (s.phase !== "lobby") fail("wrong_phase");
+      // in the lobby, or at a match's end for the next one
+      if (s.phase !== "lobby" && s.phase !== "finished") fail("wrong_phase");
       const p = requireSeated(s, e.playerId);
       if (p.id === s.hostId) fail("invalid_input");
       p.ready = e.ready;
@@ -628,6 +629,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       return begin(s, start, ctx);
     }
     case "PREPARE_START": {
+      // the host's "one more" at a match's end: back to the lobby and straight into the start
+      if (s.phase === "finished" && e.playerId === s.hostId) backToLobby(s);
       checkStart(s, e.playerId);
       if (s.starting) fail("already_done");
       if (s.settings.game === "lineup" && !e.decks) fail("invalid_input");
@@ -719,10 +722,18 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
     case "VERDICT":
       return giveVerdict(s, e.playerId, e.ownerId, e.why, e.final, ctx);
     case "BACK_TO_LOBBY": {
+      // anyone seated takes the room back from a match's end; the host may bring another game
       requireSeated(s, e.playerId);
-      if (e.playerId !== s.hostId) fail("not_host");
       if (s.phase !== "finished") fail("wrong_phase");
-      return backToLobby(s);
+      if (e.game !== undefined && e.playerId !== s.hostId) fail("not_host");
+      backToLobby(s);
+      if (e.game === undefined || e.game === s.settings.game) return;
+      s.settings = mergeSettings(
+        s.settings,
+        { game: e.game },
+        s.players.length,
+      );
+      return recolor(s);
     }
     case "TIMEOUT":
       return timeout(s, e, ctx);
@@ -1153,8 +1164,8 @@ function leave(s: RoomState, id: PlayerId, ctx: Ctx) {
 }
 
 /**
- * From the podium to a fresh lobby: whoever left the match loses their seat,
- * everyone but the host marks "ready" again, and the lobby clock restarts.
+ * From a match's end to a fresh lobby: whoever left the match loses their
+ * seat, and who said at the end they were ready for the next one stays ready.
  * The vote stays, so the next one avoids its themes.
  */
 function backToLobby(s: RoomState) {
@@ -1165,7 +1176,7 @@ function backToLobby(s: RoomState) {
   }
   handOverHost(s);
   for (const p of s.players) {
-    p.ready = p.id === s.hostId;
+    if (p.id === s.hostId) p.ready = true;
     p.strikes = 0;
   }
   s.phase = "lobby";
