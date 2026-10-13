@@ -9,8 +9,12 @@ import { type Provider, signInWith } from "@/lib/auth-client";
 import { useAction } from "@/lib/hooks/use-action";
 import { enterTestAccount } from "@/server/actions";
 
-/** Sign in with Discord/Google, then land on the profile to pick a name and avatar. In local mode it enters a test account. */
-export function useSignIn() {
+/**
+ * Sign in with Discord/Google, then land on the profile to pick a name and
+ * avatar, or back on this page with `stay` (a room: the account takes the
+ * guest's seat). In local mode it enters a test account.
+ */
+export function useSignIn({ stay = false }: { stay?: boolean } = {}) {
   const locale = useLocale();
   const router = useRouter();
   const toast = useToast();
@@ -24,13 +28,17 @@ export function useSignIn() {
       const r = await run(() => enterTestAccount(provider));
       if (r.ok) {
         setMe(r.data);
-        router.push("/profile");
+        if (stay) router.refresh();
+        else router.push("/profile");
       }
       return;
     }
     setLeaving(true);
     try {
-      signInWith(provider, `/${locale}/profile`);
+      signInWith(
+        provider,
+        stay ? window.location.pathname : `/${locale}/profile`,
+      );
     } catch {
       setLeaving(false);
       toast(t("unknown"));

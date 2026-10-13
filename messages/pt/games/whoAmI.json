@@ -211,24 +211,21 @@
     "yes": "Combinou",
     "no": "Não combinou"
   },
-  "result": {
-    "kicker": "Fim da partida · {count, plural, one {# rodada} other {# rodadas}}",
+  "end": {
+    "match": "Partida",
+    "rounds": "{count, plural, one {Rodada} other {Rodadas}}",
+    "youFirst": "Você descobriu primeiro",
     "winner": "{name} descobriu primeiro",
-    "winnersTie": "Empate! {names} descobriram primeiro",
     "youTie": "Empate! Você e {names} descobriram primeiro",
+    "winnersTie": "Empate! {names} descobriram primeiro",
     "nobody": "Ninguém descobriu desta vez",
-    "toLobby": "Voltar para a sala de espera",
-    "home": "Voltar às salas",
-    "place": "{place}º lugar",
+    "namesMore": "{first}, {second} e mais {count}",
+    "whoAreYou": "Quem é você?",
+    "pickedBy": "Escolhido por {name}",
+    "pickedByYou": "Escolhido por você",
+    "found": "Descobriu na <b>{n}ª</b> rodada",
     "gaveUp": "Desistiu",
-    "notFound": "Não descobriu",
-    "pickedBy": "escolhido por {name}",
-    "discoveredAt": "Descobriu na {n}ª rodada",
-    "placeShort": "{place}º",
-    "youWon": "Você descobriu na rodada {n}.",
-    "youFound": "Você também descobriu, na rodada {n}.",
-    "youGaveUp": "Você desistiu desta vez.",
-    "youMissed": "Você não descobriu desta vez.",
-    "youFirst": "Você descobriu primeiro"
+    "missed": "Não descobriu",
+    "place": "{place}º"
   }
 }

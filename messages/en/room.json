@@ -12,7 +12,6 @@
     "formation": "4-3-3?",
     "formationOr": "or 4-4-2"
   },
-  "lobbyIn": "Everyone goes back to the lobby in {seconds} s",
   "goHome": "Back to start",
   "problem": {
     "not_found": {
@@ -73,5 +72,63 @@
     "label": "Password",
     "enter": "Join",
     "back": "Go back"
+  },
+  "end": {
+    "rows": {
+      "finish": "Finished the match",
+      "first": "First place",
+      "won": "The side that won",
+      "discovered": "Found it in round {round}",
+      "rightVote": "{n, plural, one {Voted for an impostor} other {Voted for # impostors}}",
+      "survived": "{n, plural, one {# round without being caught} other {# rounds without being caught}}",
+      "survivedFree": "Nobody caught you",
+      "guessHit": "Named the card on the last chance",
+      "dayFirst": "First match of the day",
+      "roundWon": "Won round {round}",
+      "votes": "{n, plural, one {# vote on your boards} other {# votes on your boards}}",
+      "crowd": "{n, plural, one {Crowd's prize} other {Crowd's prize ×#}}",
+      "presented": "{n, plural, one {Presented # round} other {Presented # rounds}}"
+    },
+    "guest": "Guest",
+    "level": "Level {n}",
+    "levelShort": "Lv",
+    "levelUp": "Level up",
+    "xpOf": "{into} / {need} XP",
+    "xpChip": "+{xp} XP",
+    "badgeNew": "New",
+    "save": "Keep your {xp} XP",
+    "saveBody": "Sign in now. You stay in the room and in the next match.",
+    "orphan": "{xp} XP with no owner",
+    "orphanBody": "Sign in to keep it",
+    "signIn": "Sign in",
+    "signInWith": "Sign in with {provider}",
+    "reopen": "See what the match gave you",
+    "ready": {
+      "starting": "Starting the next one…",
+      "all": "Everyone's ready",
+      "waitHost": "Waiting for {name} to start",
+      "onlyYou": "Only you left",
+      "youAndMore": "You and {n} more left",
+      "onlyOne": "Only {name} left",
+      "more": "{n} left",
+      "count": "{ready} of {total} ready",
+      "back": "Back to the lobby",
+      "ready": "Ready",
+      "again": "One more"
+    },
+    "games": {
+      "label": "Games",
+      "going": "Going to the lobby",
+      "go": "{game}: take everyone to the lobby with this game"
+    },
+    "sub": {
+      "impostor": "Was the impostor",
+      "crew": "Crew",
+      "found": "Found it in round {n}",
+      "gaveUp": "Gave up",
+      "notFound": "Didn't find it",
+      "votes": "{n, plural, one {# vote} other {# votes}}",
+      "presenter": "Presented from the booth"
+    }
   }
 }

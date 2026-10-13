@@ -211,24 +211,21 @@
     "yes": "合ってた",
     "no": "合ってなかった"
   },
-  "result": {
-    "kicker": "ゲーム終了 · {count}ラウンド",
+  "end": {
+    "match": "試合",
+    "rounds": "ラウンド",
+    "youFirst": "あなたが一番に正解",
     "winner": "{name}さんが一番に正解",
-    "winnersTie": "引き分け！{names}が同時に一番に正解",
     "youTie": "引き分け！あなたと{names}が同時に一番に正解",
+    "winnersTie": "引き分け！{names}が同時に一番に正解",
     "nobody": "今回は誰も正解しませんでした",
-    "toLobby": "待合室に戻る",
-    "home": "ルーム一覧に戻る",
-    "place": "{place}位",
-    "gaveUp": "ギブアップ",
-    "notFound": "正解ならず",
+    "namesMore": "{first}、{second}ほか{count}人",
+    "whoAreYou": "あなたは誰？",
     "pickedBy": "{name}さんが選択",
-    "discoveredAt": "{n}ラウンド目で正解",
-    "placeShort": "{place}位",
-    "youWon": "{n}ラウンド目で当てました。",
-    "youFound": "あなたも{n}ラウンド目で当てました。",
-    "youGaveUp": "今回はギブアップしました。",
-    "youMissed": "今回は当てられませんでした。",
-    "youFirst": "あなたが一番に当てました"
+    "pickedByYou": "あなたが選択",
+    "found": "<b>{n}</b>ラウンド目で正解",
+    "gaveUp": "ギブアップ",
+    "missed": "正解ならず",
+    "place": "{place}位"
   }
 }

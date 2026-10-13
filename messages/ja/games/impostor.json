@@ -80,34 +80,6 @@
     "send": "答えを送る",
     "watchBody": "見つかったインポスターが、クルーのカードを当てにいきます。"
   },
-  "result": {
-    "crewWon": "クルーの勝ち！",
-    "impostorsWon": "{count, plural, one {インポスターの勝ち！} other {インポスターたちの勝ち！}}",
-    "reason": {
-      "caught": "{count, plural, one {インポスターを見つけた。} other {インポスターを全員見つけた。}}",
-      "even": "{count, plural, one {残り2人になり、インポスターが逃げ切った。} other {インポスターがクルーと同数になった。}}",
-      "rounds": "全員見つける前にラウンドが尽きた。",
-      "left": "{count, plural, one {インポスターが退出した。} other {インポスターたちが退出した。}}"
-    },
-    "youWon": "あなたの勝ち。",
-    "youLost": "今回は残念。",
-    "crewCard": "クルー",
-    "impostorCard": "インポスター",
-    "crew": "クルー",
-    "impostor": "インポスター",
-    "why": {
-      "stayed": "最後まで残った",
-      "survived": "最後まで逃げ切った",
-      "voted": "ラウンド{round}で脱落",
-      "caught": "ラウンド{round}で発覚",
-      "left": "退出"
-    },
-    "guessed": "{name}の答え：{guess}",
-    "guessHit": "正解！+3",
-    "guessMiss": "はずれ",
-    "toLobby": "ルームに戻る",
-    "home": "退出する"
-  },
   "picker": {
     "title": "インポスター",
     "badge": "{n}人中{k}人",
@@ -125,5 +97,12 @@
     "needs": "{n}人以上",
     "autoHint": "7人から2人",
     "now": "いま{players}人なら、インポスター{count}人。"
+  },
+  "end": {
+    "case": "事件 No.",
+    "crewWon": "クルーの勝ち",
+    "impostorsWon": "{count, plural, one {インポスターの勝ち} other {インポスターたちの勝ち}}",
+    "closed": "解決",
+    "filed": "迷宮入り"
   }
 }

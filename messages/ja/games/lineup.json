@@ -155,14 +155,6 @@
     "podium": "最終結果を見る",
     "waiting": "待機中（{n} / {of}）"
   },
-  "result": {
-    "title": "最終結果",
-    "points": "{n}点",
-    "champions": "優勝したボード",
-    "round": "ラウンド{n}",
-    "toLobby": "ルームに戻る",
-    "home": "ホームへ"
-  },
   "host": {
     "chair": "{name}が司会",
     "chairDrawn": "抽選で{name}が司会に",
@@ -247,5 +239,32 @@
     },
     "guesses": "みんなの予想",
     "guess": "何のため：{text}"
+  },
+  "end": {
+    "mastBefore": "",
+    "mastAfter": "新聞",
+    "total": "{rounds}ラウンドで{votes}票",
+    "totalHosted": "{name}が裁いた{rounds}ラウンド",
+    "rounds": "{rounds}ラウンド",
+    "head": "{name}、完璧な布陣で優勝",
+    "headTie": "ロッカールームで同点：{names}が優勝を分け合う",
+    "deck": "{mission}ためのチーム「{team}」が、全{total}票中{votes}票を獲得。",
+    "deckHosted": "{mission}ためのチーム「{team}」が{host}をうならせた。",
+    "deckTie": "{teams}が各{votes}票で並ぶ（全{total}票）。",
+    "deckTieWins": "{teams}が各{wins}勝で並ぶ。",
+    "deckTiePoints": "{teams}が各{points}点で並ぶ。",
+    "kick": "マン・オブ・ザ・マッチ",
+    "kickTie": "マン・オブ・ザ・マッチ",
+    "table": "順位",
+    "votesHead": "票",
+    "winsHead": "勝",
+    "votesWord": "票",
+    "winsWord": "勝",
+    "place": "{n}位",
+    "caption": "{name}のボード（ラウンド{n}）",
+    "teamOf": "{name}のチーム",
+    "names2": "{a}と{b}",
+    "names3": "{a}、{b}、{c}",
+    "namesMore": "{a}、{b}ほか{n}人"
   }
 }

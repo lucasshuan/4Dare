@@ -155,14 +155,6 @@
     "podium": "See the final score",
     "waiting": "Waiting ({n} of {of})"
   },
-  "result": {
-    "title": "Final score",
-    "points": "{n, plural, one {# point} other {# points}}",
-    "champions": "The winning boards",
-    "round": "Round {n}",
-    "toLobby": "Back to the room",
-    "home": "Leave to home"
-  },
   "host": {
     "chair": "{name} presents",
     "chairDrawn": "The draw picked {name}",
@@ -247,5 +239,32 @@
     },
     "guesses": "The guesses",
     "guess": "What for: {text}"
+  },
+  "end": {
+    "mastBefore": "The",
+    "mastAfter": "Times",
+    "total": "{votes, plural, one {# vote} other {# votes}} in {rounds, plural, one {# round} other {# rounds}}",
+    "totalHosted": "{rounds, plural, one {# round} other {# rounds}} called by {name}",
+    "rounds": "{rounds, plural, one {# round} other {# rounds}}",
+    "head": "{name} picks the perfect lineup and lifts the cup",
+    "headTie": "Dressing-room draw: {names} share the cup",
+    "deck": "{team} takes {votes} of the {total} votes with a team to {mission}.",
+    "deckHosted": "{team} wins {host} over with a team to {mission}.",
+    "deckTie": "{teams} finish on {votes, plural, one {# vote} other {# votes}} each, out of {total} in the match.",
+    "deckTieWins": "{teams} finish on {wins, plural, one {# win} other {# wins}} each.",
+    "deckTiePoints": "{teams} finish on {points, plural, one {# point} other {# points}} each.",
+    "kick": "Player of the match",
+    "kickTie": "Players of the match",
+    "table": "Standings",
+    "votesHead": "Votes",
+    "winsHead": "Wins",
+    "votesWord": "{n, plural, one {vote} other {votes}}",
+    "winsWord": "{n, plural, one {win} other {wins}}",
+    "place": "{n, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+    "caption": "{name}'s board in round {n}",
+    "teamOf": "{name}'s team",
+    "names2": "{a} and {b}",
+    "names3": "{a}, {b} and {c}",
+    "namesMore": "{a}, {b} and {n} more"
   }
 }

@@ -205,9 +205,11 @@ function useFit() {
 /**
  * A title scene over the whole window, under the match header and the chat:
  * its canvas scaled to fit and played on the server clock from `startsAt`.
+ * A match's end plays its scene on it too.
  */
 export function TitleStage({
   game,
+  backdrop,
   startsAt,
   endsAt,
   cues,
@@ -220,6 +222,8 @@ export function TitleStage({
   children,
 }: {
   game: GameKey;
+  /** What shows past the canvas before the scene paints it, if not the game's title scene's. */
+  backdrop?: string;
   /** The fonts the scene writes in, if it brings its own. */
   fonts?: ReactNode;
   startsAt: number;
@@ -264,7 +268,7 @@ export function TitleStage({
       ref={fit.ref}
       className="fixed inset-0 z-30 overflow-hidden"
       style={{
-        background: BACKDROP[game],
+        background: backdrop ?? BACKDROP[game],
         // its own layer all along: the one painted unseen is the one that shows, not drawn again then
         willChange: "opacity",
         ...(live

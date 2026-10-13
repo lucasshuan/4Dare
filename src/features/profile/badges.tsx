@@ -1,31 +1,7 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import {
-  Camera,
-  CircleHelp,
-  Coins,
-  Compass,
-  Flame,
-  Gamepad2,
-  ImagePlus,
-  ImageUp,
-  Laugh,
-  type LucideIcon,
-  Medal as Medal_,
-  Search,
-  Shapes,
-  ShieldCheck,
-  Sparkles,
-  Tag,
-  Target,
-  Trophy,
-  Tv,
-  UserRoundPlus,
-  Users,
-  VenetianMask,
-  Zap,
-} from "lucide-react";
+import { CircleHelp, ImagePlus, Sparkles } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useId } from "react";
 import { GameThumb, useGameName } from "@/features/create/game-info";
@@ -37,36 +13,7 @@ import { cn } from "@/lib/cn";
 import type { BadgeView, ProfileView } from "@/server/contract";
 import { accentStyle } from "./cover-paint";
 import { XpBar } from "./level";
-
-const ICON: Record<BadgeId, LucideIcon> = {
-  matches: Gamepad2,
-  wins: Trophy,
-  streak: Flame,
-  people: Users,
-  discovered: Sparkles,
-  quick: Zap,
-  themes: Compass,
-  tough: ShieldCheck,
-  pokerFace: VenetianMask,
-  nose: Search,
-  chameleon: Shapes,
-  bullseye: Target,
-  coach: Medal_,
-  bargain: Tag,
-  allIn: Coins,
-  stage: Laugh,
-  booth: Tv,
-  pictures: Camera,
-  covers: ImageUp,
-  characters: UserRoundPlus,
-};
-
-/** Each tier's metal: the medal's top and base, and the rim and ribbon. */
-const METAL = {
-  bronze: { top: "#e3a878", base: "#b8733f", rim: "#7a431d" },
-  silver: { top: "#d3dae5", base: "#8f9bb0", rim: "#535e75" },
-  gold: { top: "#f7d97c", base: "#d6a11c", rim: "#8a650a" },
-} as const;
+import { BADGE_ICON, HEX, HEX_INNER, METAL, short } from "./medal-art";
 
 /** Level, what the colours mean, and every badge by group: every game's, each game's, the library's. */
 export function BadgesPanel({ view }: { view: ProfileView }) {
@@ -253,8 +200,6 @@ function Rule({ label, xp }: { label: string; xp: number }) {
 }
 
 /** A goal short enough for the ribbon: 1000 is "1K". */
-const short = (n: number) =>
-  n >= 1000 ? `${Math.round(n / 100) / 10}K` : String(n);
 
 /**
  * A badge: its medal beside the name and the goal it runs to now. Not yet
@@ -331,7 +276,7 @@ function Medal({
   goal: string;
 }) {
   const gradient = useId();
-  const Icon = ICON[id];
+  const Icon = BADGE_ICON[id];
   const metal = tier ? METAL[tier] : null;
   const ribbon = goal.length * 3.6 + 9;
   return (
@@ -409,7 +354,3 @@ function Medal({
     </svg>
   );
 }
-
-/** The medal's hexagon and its lighter inner face, in a 48 × 54 box. */
-const HEX = "M24 4 41.32 14V34L24 44 6.68 34V14Z";
-const HEX_INNER = "M24 9.5 36.55 16.75V31.25L24 38.5 11.45 31.25V16.75Z";

@@ -12,7 +12,6 @@
     "formation": "4-3-3?",
     "formationOr": "4-4-2?"
   },
-  "lobbyIn": "{seconds}秒後に全員が待合室に戻ります",
   "goHome": "トップに戻る",
   "problem": {
     "not_found": {
@@ -73,5 +72,63 @@
     "label": "パスワード",
     "enter": "参加する",
     "back": "戻る"
+  },
+  "end": {
+    "rows": {
+      "finish": "試合を最後までプレイ",
+      "first": "1位",
+      "won": "勝った側",
+      "discovered": "{round}ラウンド目に正解",
+      "rightVote": "{n, plural, other {インポスターに#回投票}}",
+      "survived": "{n, plural, other {#ラウンド見つからなかった}}",
+      "survivedFree": "誰にもバレなかった",
+      "guessHit": "ラストチャンスでカードを当てた",
+      "dayFirst": "今日最初の試合",
+      "roundWon": "ラウンド{round}で勝利",
+      "votes": "{n, plural, other {ボードに#票}}",
+      "crowd": "{n, plural, one {観客賞} other {観客賞 ×#}}",
+      "presented": "{n, plural, other {#ラウンド司会}}"
+    },
+    "guest": "ゲスト",
+    "level": "レベル {n}",
+    "levelShort": "Lv",
+    "levelUp": "レベルアップ",
+    "xpOf": "{into} / {need} XP",
+    "xpChip": "+{xp} XP",
+    "badgeNew": "NEW",
+    "save": "{xp} XPを保存しよう",
+    "saveBody": "今ログインしても、このルームと次の試合にそのまま参加できます。",
+    "orphan": "持ち主のいない {xp} XP",
+    "orphanBody": "ログインして保存",
+    "signIn": "ログイン",
+    "signInWith": "{provider}でログイン",
+    "reopen": "この試合で得たものを見る",
+    "ready": {
+      "starting": "次の試合を開始中…",
+      "all": "全員準備OK",
+      "waitHost": "{name}さんの開始を待っています",
+      "onlyYou": "あとはあなただけ",
+      "youAndMore": "あなたとあと{n}人",
+      "onlyOne": "あとは{name}さんだけ",
+      "more": "あと{n}人",
+      "count": "{total}人中{ready}人準備OK",
+      "back": "ロビーに戻る",
+      "ready": "準備OK",
+      "again": "もう1回"
+    },
+    "games": {
+      "label": "ゲーム",
+      "going": "ロビーへ移動中",
+      "go": "{game}：このゲームで全員をロビーへ"
+    },
+    "sub": {
+      "impostor": "インポスターだった",
+      "crew": "クルー",
+      "found": "{n}ラウンド目に正解",
+      "gaveUp": "ギブアップ",
+      "notFound": "見つけられなかった",
+      "votes": "{n, plural, other {#票}}",
+      "presenter": "ブースから司会"
+    }
   }
 }

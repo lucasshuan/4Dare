@@ -80,34 +80,6 @@
     "send": "Enviar respuesta",
     "watchBody": "El impostor atrapado intenta adivinar la carta de la tripulación."
   },
-  "result": {
-    "crewWon": "¡Ganó la tripulación!",
-    "impostorsWon": "{count, plural, one {¡Ganó el impostor!} other {¡Ganaron los impostores!}}",
-    "reason": {
-      "caught": "{count, plural, one {Atraparon al impostor.} other {Atraparon a todos los impostores.}}",
-      "even": "{count, plural, one {Solo quedaron dos: el impostor escapó.} other {Los impostores igualaron a la tripulación.}}",
-      "rounds": "Se acabaron las rondas sin atrapar a todos.",
-      "left": "{count, plural, one {El impostor salió de la partida.} other {Los impostores salieron de la partida.}}"
-    },
-    "youWon": "Ganaste.",
-    "youLost": "Esta vez no.",
-    "crewCard": "Tripulación",
-    "impostorCard": "Impostor",
-    "crew": "Tripulación",
-    "impostor": "Impostor",
-    "why": {
-      "stayed": "Llegó hasta el final",
-      "survived": "Escapó hasta el final",
-      "voted": "Salió en la ronda {round}",
-      "caught": "Atrapado en la ronda {round}",
-      "left": "Salió de la partida"
-    },
-    "guessed": "{name} dijo {guess}",
-    "guessHit": "¡Acertó! +3",
-    "guessMiss": "Falló",
-    "toLobby": "Volver a la sala",
-    "home": "Salir"
-  },
   "picker": {
     "title": "Impostores",
     "badge": "{k} de {n}",
@@ -125,5 +97,12 @@
     "needs": "{n}+ jugadores",
     "autoHint": "2 desde 7 jugadores",
     "now": "Con {players} en la mesa ahora: {count, plural, one {# impostor} other {# impostores}}."
+  },
+  "end": {
+    "case": "CASO N.º",
+    "crewWon": "GANÓ LA TRIPULACIÓN",
+    "impostorsWon": "{count, plural, one {GANÓ EL IMPOSTOR} other {GANARON LOS IMPOSTORES}}",
+    "closed": "Cerrado",
+    "filed": "Archivado"
   }
 }

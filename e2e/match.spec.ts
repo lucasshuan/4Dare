@@ -11,7 +11,7 @@ import {
 } from "./helpers";
 
 // One whole match: the other specs cover the desktop layout, and the engine
-// tests the podium clock that takes everyone back on its own.
+// tests the end's keys (one more, another game).
 test("three players on phones, with a wrong guess checked by the picker", {
   tag: "@smoke",
 }, async ({ browser }) => {
@@ -48,18 +48,24 @@ test("three players on phones, with a wrong guess checked by the picker", {
   expect(
     view.history.some((h) => h.kind === "guess" && h.result === "miss"),
   ).toBe(true);
-  await expect(
-    host.getByRole("heading", { name: /discovered first/i }),
-  ).toBeVisible();
+  // the end: once its scene made room, who is ready for the next one (the host always is)
+  await expect(host.getByText(/1 of 3 ready/i)).toBeVisible({
+    timeout: 30_000,
+  });
+  const [eager, slow] = guests;
+  await eager.getByRole("button", { name: /^ready$/i }).click();
+  await expect(host.getByText(/2 of 3 ready/i)).toBeVisible();
 
-  // the host takes everyone back to the lobby for another match; a named room
-  // leads with its name, the greeting is the line under it
-  await host.getByRole("button", { name: /back to the lobby/i }).click();
+  // anyone takes everyone back to the lobby; whoever said they were ready
+  // stays ready. A named room leads with its name, the greeting is the line under it
+  await slow.getByRole("button", { name: /back to the lobby/i }).click();
   await expect(host.getByText(/another match/i)).toBeVisible();
-  for (const page of guests) {
+  for (const page of guests)
     await expect(page.getByText(/back in/i)).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /^ready$/i, pressed: false }),
-    ).toBeVisible();
-  }
+  await expect(
+    eager.getByRole("button", { name: /^ready$/i, pressed: true }),
+  ).toBeVisible();
+  await expect(
+    slow.getByRole("button", { name: /^ready$/i, pressed: false }),
+  ).toBeVisible();
 });

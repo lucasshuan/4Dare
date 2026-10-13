@@ -3,11 +3,12 @@
 import { AnimatePresence, m, type Variants } from "motion/react";
 import dynamic from "next/dynamic";
 import { type Messages, useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { RoomChat } from "@/features/chat/room-chat";
 import { useRoomContext } from "@/features/data/room-context";
+import { EndScene, preloadEnd } from "@/features/ending/end-scene";
 import { ImpostorScenes } from "@/features/impostor/impostor-scenes";
 import { ImpostorScreen } from "@/features/impostor/impostor-screen";
 import { LobbyScreen } from "@/features/lobby/lobby-screen";
@@ -17,7 +18,6 @@ import {
   preloadTitle,
   useReadyCheck,
 } from "@/features/opening/title-scene";
-import { ResultScreen } from "@/features/result/result-screen";
 import { isGuessScene, isShow, type StageScreen } from "@/features/stage/stage";
 import { StageBackdrop } from "@/features/stage/stage-backdrop";
 import { StageProvider, useStage } from "@/features/stage/stage-context";
@@ -69,6 +69,7 @@ export function RoomStage() {
       <RoomBackdrop />
       <Areas />
       <OpeningScene />
+      <Ending />
       <StartCover />
       <OpeningMusic />
       <RevealOverlay />
@@ -77,6 +78,24 @@ export function RoomStage() {
       <FoundFeedback />
       <Chat />
     </StageProvider>
+  );
+}
+
+/** A match's end over the whole window; it fades out as the room goes back to the lobby or into the next match. */
+function Ending() {
+  const { view } = useRoomContext();
+  return (
+    <AnimatePresence>
+      {view.phase === "finished" ? (
+        <m.div
+          key="end"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.25 } }}
+        >
+          <EndScene />
+        </m.div>
+      ) : null}
+    </AnimatePresence>
   );
 }
 
@@ -168,7 +187,7 @@ const GAME_MUSIC: Partial<Record<RoomView["settings"]["game"], Track>> = {
 
 function Areas() {
   const { view } = useRoomContext();
-  const { area, screen, finishedWait } = useStage();
+  const { area, screen } = useStage();
   useRoomTab();
   useStepSound();
   usePresenceSound(view);
@@ -198,6 +217,16 @@ function Areas() {
   useReadyCheck();
   const covered = useStartCovered();
   const backdrop = useStartBackdrop();
+  // the end's pictures, fetched while the match plays
+  useEffect(() => {
+    if (area === "match") void preloadEnd(game, { ja, chalk });
+  }, [area, game, ja, chalk]);
+  // the host's "one more" from a match's end goes straight to the loading screen: no lobby in between
+  const [fromEnd, setFromEnd] = useState(false);
+  useEffect(() => {
+    if (area === "result") setFromEnd(true);
+    else if (!covered) setFromEnd(false);
+  }, [area, covered]);
   usePreloadCards(view);
   // a What for? room fetches its screens while the lobby fills
   useEffect(() => {
@@ -220,7 +249,7 @@ function Areas() {
           >
             {/* the start's loading screen takes its place, over the same backdrop: the panels leave one after the other (globals.css), the controls stay */}
             <div inert={covered} data-leaving={covered || undefined}>
-              <LobbyScreen />
+              {covered && fromEnd ? null : <LobbyScreen />}
             </div>
           </m.div>
         ) : area === "match" ? (
@@ -237,12 +266,7 @@ function Areas() {
               </m.div>
             </AnimatePresence>
           </MatchFrame>
-        ) : area === "result" ? (
-          // a hit that ends the match keeps its reveal; the results wait until it is over
-          <m.div key={finishedWait ? "result-wait" : "result"} {...RISE}>
-            {finishedWait ? null : <ResultScreen />}
-          </m.div>
-        ) : (
+        ) : area === "result" ? null : (
           <m.div key="closed" {...RISE}>
             <RoomProblem code="not_found" />
           </m.div>

@@ -1,0 +1,887 @@
+/* What for?'s end: the next day's newspaper ("Extra edition") pushed onto the
+   table. Drawn on 1280×720, or 780×1688 on a phone held upright (.portrait);
+   every animation-delay comes inline, in seconds from the scene's start. The
+   set's colours are fixed, the same in both themes. */
+
+/* the window: the canvas plus what shows past it */
+.root {
+  position: absolute;
+  left: calc(var(--bx) * -1);
+  top: calc(var(--by) * -1);
+  width: calc(1280px + 2 * var(--bx));
+  height: calc(720px + 2 * var(--by));
+  overflow: hidden;
+  background: #3a2210;
+}
+.portrait.root {
+  width: calc(780px + 2 * var(--bx));
+  height: calc(1688px + 2 * var(--by));
+}
+/* the film's colour over the whole window, on the compositor: a filter over moving layers, kept
+   as the title scene keeps its own */
+.grade {
+  position: absolute;
+  inset: 0;
+  filter: saturate(1.12) contrast(1.06) sepia(0.08);
+}
+.screen {
+  position: absolute;
+  left: var(--bx);
+  top: var(--by);
+  width: 1280px;
+  height: 720px;
+}
+.portrait .screen {
+  width: 780px;
+  height: 1688px;
+}
+.layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* the table: wood seen very close, a little out of focus (the camera is on the newspaper). The
+   camera pushes in while the paper lands, then pulls back to make room for the reward card. */
+.cam {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 720px;
+  transform-origin: 760px 300px;
+  will-change: transform;
+  animation:
+    push 4.2s cubic-bezier(0.3, 0, 0.2, 1) forwards,
+    back 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes push {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.03);
+  }
+}
+@keyframes back {
+  from {
+    transform: scale(1.03);
+  }
+  to {
+    transform: scale(0.88);
+  }
+}
+/* upright, the camera only gives the push back: the paper itself goes up and shrinks */
+.portrait .cam {
+  width: 780px;
+  height: 1688px;
+  transform-origin: 390px 700px;
+  animation-name: push, backUp;
+}
+@keyframes backUp {
+  from {
+    transform: scale(1.03);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+/* the wood's box, past the window as far as the camera's pull back reveals (the photo covers it) */
+.tableBox {
+  position: absolute;
+  left: calc(-180px - var(--bx) * 1.2 - var(--by) * 0.2);
+  top: calc(-150px - var(--by) * 1.2 - var(--bx) * 0.2);
+  width: calc(1640px + var(--bx) * 2.4 + var(--by) * 0.4);
+  height: calc(1020px + var(--by) * 2.4 + var(--bx) * 0.4);
+  transform: rotate(-7deg);
+}
+/* upright, the same wood turned a quarter, its grain running up the screen */
+.portrait .tableBox {
+  left: calc(390px - 950px - var(--by) * 1.2 - var(--bx) * 0.2);
+  top: calc(844px - 550px - var(--bx) * 1.2 - var(--by) * 0.2);
+  width: calc(1900px + var(--by) * 2.4 + var(--bx) * 0.4);
+  height: calc(1100px + var(--bx) * 2.4 + var(--by) * 0.4);
+  transform: rotate(83deg);
+}
+.wood {
+  background: #6b3f1d url(/opening/end-table.webp) 50% 50% / cover no-repeat;
+  filter: blur(1.1px) brightness(0.92);
+}
+.varnish {
+  background:
+    radial-gradient(
+      420px 260px at 22% 18%,
+      rgba(255, 236, 200, 0.22),
+      rgba(255, 236, 200, 0) 70%
+    ),
+    repeating-linear-gradient(
+      97deg,
+      rgba(255, 255, 255, 0.012) 0 3px,
+      rgba(0, 0, 0, 0.015) 3px 7px
+    );
+  mix-blend-mode: screen;
+}
+/* a cup's ring on the wood */
+.ring {
+  position: absolute;
+  left: 1016px;
+  top: 6px;
+  width: 255px;
+  height: 255px;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 8px rgba(60, 26, 6, 0.22),
+    inset 0 0 0 15px rgba(60, 26, 6, 0.06),
+    0 0 0 3px rgba(60, 26, 6, 0.08);
+  filter: blur(2px);
+  transform: rotate(-12deg) scale(1, 0.96);
+}
+.portrait .ring {
+  left: 548px;
+  top: 1390px;
+}
+/* the lamp: warm on the upper left, the corners dark, over the whole window */
+.light {
+  pointer-events: none;
+  background:
+    radial-gradient(
+      70% 80% at 30% 18%,
+      rgba(255, 214, 150, 0.2),
+      rgba(255, 214, 150, 0) 60%
+    ),
+    radial-gradient(
+      120% 110% at 55% 40%,
+      rgba(30, 12, 2, 0) 45%,
+      rgba(30, 12, 2, 0.55) 100%
+    );
+  z-index: 20;
+}
+/* live film grain: the shared noise tile (the prototype's turbulence, drawn once) jumps 8 times a
+   second, a little enlarged so its edge never shows */
+.grain {
+  position: absolute;
+  inset: -40px;
+  z-index: 21;
+  pointer-events: none;
+  background: url(/opening/grain.webp) 0 0 / 256px 256px repeat;
+  opacity: 0.14;
+  mix-blend-mode: overlay;
+  will-change: transform;
+  animation: grain 0.5s steps(1, end) infinite;
+}
+@keyframes grain {
+  0% {
+    transform: scale(1.08) translate(0, 0);
+  }
+  25% {
+    transform: scale(1.08) translate(-23px, 14px);
+  }
+  50% {
+    transform: scale(1.08) translate(17px, -19px);
+  }
+  75% {
+    transform: scale(1.08) translate(-9px, -27px);
+  }
+}
+/* the way in: out of black */
+.black {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  background: #120803;
+  pointer-events: none;
+  will-change: opacity;
+  animation: fade 0.5s ease both;
+}
+@keyframes fade {
+  to {
+    opacity: 0;
+  }
+}
+
+/* the newspaper: pushed in from below, turning a little, and stops; then slides aside to make
+   room for the card */
+.slide {
+  position: absolute;
+  left: 260px;
+  top: 34px;
+  width: 760px;
+  height: 1040px;
+  will-change: transform;
+  animation: aside 0.9s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes aside {
+  to {
+    transform: translate(184px, -12px);
+  }
+}
+/* upright, the paper lies a little smaller in the middle, then goes up and shrinks into the
+   screen's upper part (the overlay takes the lower 46%) */
+.portrait .slide {
+  left: 10px;
+  top: 355px;
+  transform-origin: 380px 0;
+  transform: scale(0.94);
+  animation-name: asideUp;
+}
+@keyframes asideUp {
+  from {
+    transform: scale(0.94);
+  }
+  to {
+    transform: translate(0, -336px) scale(0.84);
+  }
+}
+/* the push and the turn in one layer: the turn ends with the push, at its last angle, no
+   overshoot */
+.move {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 760px;
+  height: 1040px;
+  transform-origin: 380px 260px;
+  transform: translate(70px, 900px) rotate(11deg);
+  will-change: transform;
+  animation: in 1.45s cubic-bezier(0.17, 0.78, 0.26, 1) forwards;
+}
+@keyframes in {
+  from {
+    transform: translate(70px, 900px) rotate(11deg);
+  }
+  to {
+    transform: translate(0, 0) rotate(-2.2deg);
+  }
+}
+.portrait .move {
+  transform: translate(70px, 1400px) rotate(11deg);
+  animation-name: inUp;
+}
+@keyframes inUp {
+  from {
+    transform: translate(70px, 1400px) rotate(11deg);
+  }
+  to {
+    transform: translate(0, 0) rotate(-2.2deg);
+  }
+}
+/* its shadow on the wood, closing in as it lands (blurred once, moved by the compositor) */
+.shade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 760px;
+  height: 1040px;
+  border-radius: 3px;
+  background: rgba(24, 10, 2, 0.55);
+  filter: blur(22px);
+  transform: translate(26px, 40px) scale(1.03);
+  opacity: 0.55;
+  will-change: transform, opacity;
+  animation: land 1.45s forwards;
+}
+@keyframes land {
+  0% {
+    transform: translate(26px, 40px) scale(1.03);
+    opacity: 0.55;
+  }
+  62% {
+    transform: translate(12px, 20px);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(9px, 14px);
+    opacity: 0.8;
+  }
+}
+.contact {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 760px;
+  height: 1040px;
+  border-radius: 2px;
+  background: rgba(20, 8, 1, 0.5);
+  filter: blur(2.5px);
+  transform: translate(1.5px, 2.5px);
+}
+/* the stack of papers under it: two crooked sheets showing at the edges; colour only, the same
+   texture and edge shadow, no blend or filter */
+.sheet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 760px;
+  height: 1040px;
+  background:
+    linear-gradient(rgba(226, 218, 199, 0.62), rgba(214, 205, 184, 0.62)),
+    url(/opening/end-paper.webp) 0 0 / 760px 1064px no-repeat;
+  box-shadow:
+    0 0 0 1px rgba(60, 40, 20, 0.1),
+    0 1px 3px rgba(30, 14, 4, 0.4),
+    0 8px 18px rgba(30, 14, 4, 0.22);
+  clip-path: polygon(
+    0 0.15%,
+    14% 0,
+    31% 0.12%,
+    49% 0,
+    66% 0.14%,
+    83% 0,
+    100% 0.1%,
+    99.9% 22%,
+    100% 45%,
+    99.88% 71%,
+    100% 100%,
+    77% 99.9%,
+    52% 100%,
+    26% 99.88%,
+    0 100%,
+    0.1% 74%,
+    0 49%,
+    0.12% 25%
+  );
+}
+.sheetB {
+  transform: translate(18px, 10px) rotate(3.1deg);
+  background-color: #d9cfb8;
+}
+.sheetA {
+  transform: translate(-12px, 6px) rotate(-1.9deg);
+}
+.paper {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 760px;
+  height: 1040px;
+  overflow: hidden;
+  background: #ece6d5;
+  color: #1d1914;
+  clip-path: polygon(
+    0 0.2%,
+    9% 0,
+    23% 0.15%,
+    38% 0,
+    52% 0.12%,
+    67% 0,
+    81% 0.16%,
+    100% 0,
+    99.85% 14%,
+    100% 29%,
+    99.9% 47%,
+    100% 63%,
+    99.86% 81%,
+    100% 100%,
+    84% 99.9%,
+    63% 100%,
+    41% 99.88%,
+    18% 100%,
+    0 99.9%,
+    0.12% 82%,
+    0 61%,
+    0.14% 43%,
+    0 24%
+  );
+}
+.tex {
+  background: url(/opening/end-paper.webp) 0 0 / 760px 1064px no-repeat;
+  mix-blend-mode: multiply;
+}
+/* the back page showing through the thin paper (mirrored text, very faint) */
+.thru {
+  opacity: 0.055;
+  transform: scaleX(-1);
+  mix-blend-mode: multiply;
+  filter: blur(0.7px);
+  background: repeating-linear-gradient(
+    90deg,
+    #2a2520 0 18px,
+    rgba(0, 0, 0, 0) 18px 23px,
+    #2a2520 23px 49px,
+    rgba(0, 0, 0, 0) 49px 54px,
+    #2a2520 54px 63px,
+    rgba(0, 0, 0, 0) 63px 68px,
+    #2a2520 68px 93px,
+    rgba(0, 0, 0, 0) 93px 98px,
+    #2a2520 98px 127px,
+    rgba(0, 0, 0, 0) 127px 131px,
+    #2a2520 131px 146px,
+    rgba(0, 0, 0, 0) 146px 151px,
+    #2a2520 151px 177px,
+    rgba(0, 0, 0, 0) 177px 182px
+  );
+  mask-image:
+    repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0) 5px 13px),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0) 34px,
+      #000 34px 244px,
+      rgba(0, 0, 0, 0) 244px 270px,
+      #000 270px 480px,
+      rgba(0, 0, 0, 0) 480px 506px,
+      #000 506px 726px,
+      rgba(0, 0, 0, 0) 726px
+    );
+  mask-composite: intersect;
+}
+/* the printing: everything inked goes through the press's uneven ink */
+.ink {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  mix-blend-mode: multiply;
+  mask-image: url(/opening/end-ink.webp);
+  mask-size: 512px 512px;
+}
+.fold {
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 0,
+      rgba(0, 0, 0, 0) 548px,
+      rgba(70, 50, 30, 0.1) 560px,
+      rgba(255, 255, 255, 0.55) 566px,
+      rgba(70, 50, 30, 0.16) 569px,
+      rgba(70, 50, 30, 0.05) 590px,
+      rgba(0, 0, 0, 0) 640px
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0) 566px,
+      rgba(40, 25, 10, 0.03) 567px,
+      rgba(40, 25, 10, 0.03) 100%
+    );
+  mix-blend-mode: multiply;
+}
+.fold2 {
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 560px,
+    rgba(255, 255, 255, 0.5) 566px,
+    rgba(255, 255, 255, 0) 571px
+  );
+  mix-blend-mode: screen;
+}
+.wave {
+  pointer-events: none;
+  background:
+    linear-gradient(
+      104deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(0, 0, 0, 0.04) 22%,
+      rgba(255, 255, 255, 0.07) 41%,
+      rgba(0, 0, 0, 0.05) 63%,
+      rgba(255, 255, 255, 0.05) 82%,
+      rgba(0, 0, 0, 0.06) 100%
+    ),
+    radial-gradient(
+      160px 120px at 100% 0%,
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0) 70%
+    ),
+    linear-gradient(180deg, rgba(255, 240, 215, 0), rgba(80, 50, 20, 0.06));
+  mix-blend-mode: multiply;
+}
+.curl {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 90px;
+  height: 70px;
+  background: linear-gradient(
+    225deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(60, 40, 20, 0.12) 46%,
+    rgba(60, 40, 20, 0) 70%
+  );
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+/* upright, the whole page shows: the next story's columns run under the fold's lower half */
+.copy {
+  position: absolute;
+  left: 0;
+  top: 752px;
+  width: 760px;
+  height: 262px;
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    90deg,
+    #2a2520 0 18px,
+    rgba(0, 0, 0, 0) 18px 23px,
+    #2a2520 23px 49px,
+    rgba(0, 0, 0, 0) 49px 54px,
+    #2a2520 54px 63px,
+    rgba(0, 0, 0, 0) 63px 68px,
+    #2a2520 68px 93px,
+    rgba(0, 0, 0, 0) 93px 98px,
+    #2a2520 98px 127px,
+    rgba(0, 0, 0, 0) 127px 131px,
+    #2a2520 131px 146px,
+    rgba(0, 0, 0, 0) 146px 151px,
+    #2a2520 151px 177px,
+    rgba(0, 0, 0, 0) 177px 182px
+  );
+  mask-image:
+    repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0) 5px 13px),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0) 34px,
+      #000 34px 244px,
+      rgba(0, 0, 0, 0) 244px 270px,
+      #000 270px 480px,
+      rgba(0, 0, 0, 0) 480px 506px,
+      #000 506px 726px,
+      rgba(0, 0, 0, 0) 726px
+    );
+  mask-composite: intersect;
+}
+
+/* newspaper type */
+.mast {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  top: 22px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 20px;
+}
+/* the printed brand: the logo's colours in newspaper ink (a little less saturated, the paper's
+   grain under it) */
+.logo {
+  display: block;
+  flex: none;
+  width: auto;
+  height: 68px;
+  margin-bottom: -1px;
+  overflow: visible;
+  filter: saturate(0.88) contrast(0.96);
+}
+.name {
+  font-family:
+    var(--paper-gothic, "UnifrakturMaguntia"), "Old English Text MT", serif;
+  font-weight: 400;
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  color: #14110d;
+  text-shadow: 0 0 0.6px rgba(20, 17, 13, 0.7);
+}
+.rule {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  height: 0;
+  border-top: 3px solid #1d1914;
+}
+.thin {
+  border-top-width: 1px;
+}
+.folio {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  top: 108px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--paper-cond, "Oswald"), sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #2a241d;
+}
+.fb {
+  font-weight: 700;
+}
+.head {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  top: 142px;
+  margin: 0;
+  font-family: var(--paper-cond, "Oswald"), sans-serif;
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+  color: #14110d;
+  text-wrap: balance;
+  text-shadow: 0 0 0.7px rgba(20, 17, 13, 0.6);
+}
+.deck {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  margin: 0;
+  font-family: var(--paper-serif, "Source Serif 4"), Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 19px;
+  line-height: 24px;
+  color: #2a241d;
+  text-wrap: pretty;
+}
+.body {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+}
+.photos {
+  display: flex;
+  gap: 12px;
+  flex: none;
+}
+.figure {
+  display: flex;
+  flex-direction: column;
+}
+.photo {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  background: #d9a56a;
+  box-shadow: 0 0 0 1px #2a241d;
+}
+.wall {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  filter: blur(1.4px);
+}
+/* the winning board, as the game draws it, photographed */
+.shot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 400px;
+  height: 600px;
+  transform-origin: 50% 50%;
+}
+/* the halftone screen of a printed photo */
+.dots {
+  position: absolute;
+  left: -30%;
+  top: -30%;
+  width: 160%;
+  height: 160%;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    rgba(20, 16, 12, 0.62) 0,
+    rgba(20, 16, 12, 0.62) 0.55px,
+    rgba(20, 16, 12, 0) 1.15px
+  );
+  background-size: 3.2px 3.2px;
+  transform: rotate(15deg);
+  opacity: 0.42;
+  mix-blend-mode: multiply;
+}
+.photoGrade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  filter: saturate(0.8) contrast(0.94) brightness(1.04) sepia(0.06);
+}
+.cap {
+  margin-top: 6px;
+  font-family: var(--paper-serif, "Source Serif 4"), Georgia, serif;
+  font-size: 12.5px;
+  line-height: 15px;
+  color: #2a241d;
+}
+.cb {
+  font-family: var(--paper-cond, "Oswald"), sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.side {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.deck.deckSide {
+  position: static;
+  margin: 0 0 12px;
+  font-size: 17px;
+  line-height: 22px;
+}
+.kick {
+  font-family: var(--paper-cond, "Oswald"), sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #14110d;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #1d1914;
+}
+.stars {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0 10px;
+  border-bottom: 3px double #1d1914;
+}
+.star {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+.starText {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+}
+.av {
+  position: relative;
+  display: block;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.av img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sname {
+  font-family: var(--paper-cond, "Oswald"), sans-serif;
+  font-weight: 600;
+  line-height: 1;
+  color: #14110d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.votes {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--paper-cond, "Oswald"), sans-serif;
+  color: #14110d;
+}
+.vn {
+  font-weight: 700;
+  line-height: 0.9;
+}
+.vl {
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.table {
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+}
+.th {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0 4px;
+  font-family: var(--paper-cond, "Oswald"), sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #14110d;
+  border-bottom: 1px solid #1d1914;
+}
+.tr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px dotted rgba(29, 25, 20, 0.55);
+}
+.pos {
+  width: 24px;
+  font-family: var(--paper-cond, "Oswald"), sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  color: #3a332a;
+}
+.tname {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--paper-serif, "Source Serif 4"), Georgia, serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  color: #1d1914;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tv {
+  font-family: var(--paper-cond, "Oswald"), sans-serif;
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 1;
+  color: #14110d;
+  min-width: 22px;
+  text-align: right;
+}
+/* the red pen of whoever read it first: a circle around the star (drawn on its own small layer,
+   so drawing it doesn't repaint the page) */
+.mark {
+  position: absolute;
+  pointer-events: none;
+  overflow: visible;
+  mix-blend-mode: multiply;
+  will-change: transform;
+}
+.mark path {
+  fill: none;
+  stroke: #c22f22;
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-opacity: 0.82;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.62s cubic-bezier(0.5, 0, 0.3, 1) forwards;
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain,
+  .cam,
+  .portrait .cam {
+    animation: none;
+  }
+}

@@ -24,12 +24,16 @@
   --yes-deep: color-mix(in oklch, var(--yes), black 32%);
   --apricot-deep: color-mix(in oklch, var(--apricot), black 32%);
   --no-deep: color-mix(in oklch, var(--no), black 32%);
+  --grape-deep: color-mix(in oklch, var(--grape), black 32%);
   --apricot: #ef7215;
   --on-apricot: #2a1707;
   --apricot-soft: #fce8d6;
   --butter: #f6e3a1;
   --on-butter: #3a2e05;
   --butter-soft: #fbf3d3;
+  /* a key no other action uses: back to the lobby from a match's end */
+  --grape: #8a4fc4;
+  --on-grape: #ffffff;
   --yes: #0b7a75;
   --on-yes: #ffffff;
   --yes-soft: #d5efec;
@@ -230,6 +234,8 @@
   --butter: #e3cb6e;
   --on-butter: #2e2506;
   --butter-soft: #3b3212;
+  --grape: #c39bf2;
+  --on-grape: #1f0f36;
   --yes: #5ccfc6;
   --on-yes: #06211f;
   --yes-soft: #123b38;
@@ -331,6 +337,8 @@
   --color-butter: var(--butter);
   --color-on-butter: var(--on-butter);
   --color-butter-soft: var(--butter-soft);
+  --color-grape: var(--grape);
+  --color-on-grape: var(--on-grape);
   --color-yes: var(--yes);
   --color-on-yes: var(--on-yes);
   --color-yes-soft: var(--yes-soft);

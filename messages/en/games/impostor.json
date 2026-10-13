@@ -80,34 +80,6 @@
     "send": "Send guess",
     "watchBody": "The caught impostor tries to guess the crew's card."
   },
-  "result": {
-    "crewWon": "The crew won!",
-    "impostorsWon": "{count, plural, one {The impostor won!} other {The impostors won!}}",
-    "reason": {
-      "caught": "{count, plural, one {The impostor was caught.} other {Every impostor was caught.}}",
-      "even": "{count, plural, one {Only two were left: the impostor got away.} other {The impostors caught up with the crew.}}",
-      "rounds": "The rounds ran out before everyone was caught.",
-      "left": "{count, plural, one {The impostor left the match.} other {The impostors left the match.}}"
-    },
-    "youWon": "You won.",
-    "youLost": "Not this time.",
-    "crewCard": "Crew",
-    "impostorCard": "Impostor",
-    "crew": "Crew",
-    "impostor": "Impostor",
-    "why": {
-      "stayed": "Stayed to the end",
-      "survived": "Got away to the end",
-      "voted": "Out in round {round}",
-      "caught": "Caught in round {round}",
-      "left": "Left the match"
-    },
-    "guessed": "{name} guessed {guess}",
-    "guessHit": "Right! +3",
-    "guessMiss": "Wrong",
-    "toLobby": "Back to the room",
-    "home": "Leave"
-  },
   "picker": {
     "title": "Impostors",
     "badge": "{k} of {n}",
@@ -125,5 +97,12 @@
     "needs": "{n}+ players",
     "autoHint": "2 from 7 players",
     "now": "With {players} at the table now: {count, plural, one {# impostor} other {# impostors}}."
+  },
+  "end": {
+    "case": "CASE NO.",
+    "crewWon": "THE CREW WON",
+    "impostorsWon": "{count, plural, one {THE IMPOSTOR WON} other {THE IMPOSTORS WON}}",
+    "closed": "Closed",
+    "filed": "Unsolved"
   }
 }

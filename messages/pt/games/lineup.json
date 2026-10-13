@@ -155,14 +155,6 @@
     "podium": "Ver o placar final",
     "waiting": "Esperando ({n} de {of})"
   },
-  "result": {
-    "title": "Placar final",
-    "points": "{n, plural, one {# ponto} other {# pontos}}",
-    "champions": "Os quadros campeões",
-    "round": "Rodada {n}",
-    "toLobby": "Voltar para a sala",
-    "home": "Sair para o início"
-  },
   "host": {
     "chair": "{name} apresenta",
     "chairDrawn": "O sorteio escolheu {name}",
@@ -247,5 +239,32 @@
     },
     "guesses": "Os chutes",
     "guess": "Pra {text}"
+  },
+  "end": {
+    "mastBefore": "Gazeta do",
+    "mastAfter": "",
+    "total": "{votes, plural, one {# voto} other {# votos}} em {rounds, plural, one {# rodada} other {# rodadas}}",
+    "totalHosted": "{rounds, plural, one {# rodada decidida} other {# rodadas decididas}} por {name}",
+    "rounds": "{rounds, plural, one {# rodada} other {# rodadas}}",
+    "head": "{name} escala o time perfeito e leva a taça",
+    "headTie": "Empate no vestiário: {names} dividem a taça",
+    "deck": "{team} leva {votes} dos {total} votos com um time pra {mission}.",
+    "deckHosted": "{team} convence {host} com um time pra {mission}.",
+    "deckTie": "{teams} terminam com {votes, plural, one {# voto} other {# votos}} cada, de {total} na partida.",
+    "deckTieWins": "{teams} terminam com {wins, plural, one {# vitória} other {# vitórias}} cada.",
+    "deckTiePoints": "{teams} terminam com {points, plural, one {# ponto} other {# pontos}} cada.",
+    "kick": "Craque da partida",
+    "kickTie": "Os craques da partida",
+    "table": "Classificação",
+    "votesHead": "Votos",
+    "winsHead": "Vitórias",
+    "votesWord": "{n, plural, one {voto} other {votos}}",
+    "winsWord": "{n, plural, one {vitória} other {vitórias}}",
+    "place": "{n}º",
+    "caption": "quadro de {name} na rodada {n}",
+    "teamOf": "o time de {name}",
+    "names2": "{a} e {b}",
+    "names3": "{a}, {b} e {c}",
+    "namesMore": "{a}, {b} e mais {n}"
   }
 }

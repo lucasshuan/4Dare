@@ -155,14 +155,6 @@
     "podium": "Ver el marcador final",
     "waiting": "Esperando ({n} de {of})"
   },
-  "result": {
-    "title": "Marcador final",
-    "points": "{n, plural, one {# punto} other {# puntos}}",
-    "champions": "Los tableros campeones",
-    "round": "Ronda {n}",
-    "toLobby": "Volver a la sala",
-    "home": "Salir al inicio"
-  },
   "host": {
     "chair": "{name} presenta",
     "chairDrawn": "El sorteo eligió a {name}",
@@ -247,5 +239,32 @@
     },
     "guesses": "Las apuestas",
     "guess": "Para {text}"
+  },
+  "end": {
+    "mastBefore": "Gaceta de",
+    "mastAfter": "",
+    "total": "{votes, plural, one {# voto} other {# votos}} en {rounds, plural, one {# ronda} other {# rondas}}",
+    "totalHosted": "{rounds, plural, one {# ronda decidida} other {# rondas decididas}} por {name}",
+    "rounds": "{rounds, plural, one {# ronda} other {# rondas}}",
+    "head": "{name} arma el equipo perfecto y se lleva la copa",
+    "headTie": "Empate en el vestuario: {names} se reparten la copa",
+    "deck": "{team} se lleva {votes} de los {total} votos con un equipo para {mission}.",
+    "deckHosted": "{team} convence a {host} con un equipo para {mission}.",
+    "deckTie": "{teams} terminan con {votes, plural, one {# voto} other {# votos}} cada uno, de {total} en la partida.",
+    "deckTieWins": "{teams} terminan con {wins, plural, one {# victoria} other {# victorias}} cada uno.",
+    "deckTiePoints": "{teams} terminan con {points, plural, one {# punto} other {# puntos}} cada uno.",
+    "kick": "Figura del partido",
+    "kickTie": "Las figuras del partido",
+    "table": "Clasificación",
+    "votesHead": "Votos",
+    "winsHead": "Victorias",
+    "votesWord": "{n, plural, one {voto} other {votos}}",
+    "winsWord": "{n, plural, one {victoria} other {victorias}}",
+    "place": "{n}.º",
+    "caption": "tablero de {name} en la ronda {n}",
+    "teamOf": "el equipo de {name}",
+    "names2": "{a} y {b}",
+    "names3": "{a}, {b} y {c}",
+    "namesMore": "{a}, {b} y {n} más"
   }
 }

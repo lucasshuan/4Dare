@@ -272,7 +272,8 @@ export function labRoom(params: LabParams): LabRoom {
     viewer,
     marks,
     start: marks.lobby,
-    end: run.state.deadline ?? marks.result + 15_000,
+    // the end stays until the next match: long enough to watch its scene and panels come in
+    end: marks.result + 30_000,
     state: (now) => snaps[at(now)].state,
     view: (now) =>
       toView(snaps[at(now)].state, at(now) + 1, viewer, now, params.lang),

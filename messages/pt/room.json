@@ -12,7 +12,6 @@
     "formation": "4-3-3?",
     "formationOr": "ou 4-4-2"
   },
-  "lobbyIn": "Todo mundo volta para a sala de espera em {seconds} s",
   "goHome": "Voltar ao início",
   "problem": {
     "not_found": {
@@ -73,5 +72,63 @@
     "label": "Senha",
     "enter": "Entrar",
     "back": "Voltar"
+  },
+  "end": {
+    "rows": {
+      "finish": "Terminou a partida",
+      "first": "Primeiro lugar",
+      "won": "O lado que venceu",
+      "discovered": "Descobriu na rodada {round}",
+      "rightVote": "{n, plural, one {Votou num impostor} other {Votou em # impostores}}",
+      "survived": "{n, plural, one {# rodada sem ser pego} other {# rodadas sem ser pego}}",
+      "survivedFree": "Ninguém te pegou",
+      "guessHit": "Acertou a carta na última chance",
+      "dayFirst": "Primeira partida do dia",
+      "roundWon": "Venceu a rodada {round}",
+      "votes": "{n, plural, one {# voto nos seus quadros} other {# votos nos seus quadros}}",
+      "crowd": "{n, plural, one {Prêmio do público} other {Prêmio do público ×#}}",
+      "presented": "{n, plural, one {Apresentou # rodada} other {Apresentou # rodadas}}"
+    },
+    "guest": "Convidado",
+    "level": "Nível {n}",
+    "levelShort": "Nv",
+    "levelUp": "Subiu de nível",
+    "xpOf": "{into} / {need} XP",
+    "xpChip": "+{xp} XP",
+    "badgeNew": "Nova",
+    "save": "Guarde seus {xp} XP",
+    "saveBody": "Entre agora. Você continua na sala e na próxima partida.",
+    "orphan": "{xp} XP sem dono",
+    "orphanBody": "Entre para guardar",
+    "signIn": "Entrar",
+    "signInWith": "Entrar com {provider}",
+    "reopen": "Ver o que a partida deu",
+    "ready": {
+      "starting": "Começando a próxima…",
+      "all": "Todo mundo pronto",
+      "waitHost": "Esperando {name} começar",
+      "onlyYou": "Só falta você",
+      "youAndMore": "Falta você e mais {n}",
+      "onlyOne": "Só falta {name}",
+      "more": "Faltam {n}",
+      "count": "{ready} de {total} prontos",
+      "back": "Voltar ao lobby",
+      "ready": "Pronto",
+      "again": "Mais uma"
+    },
+    "games": {
+      "label": "Jogos",
+      "going": "Indo pro lobby",
+      "go": "{game}: levar todo mundo pro lobby com este jogo"
+    },
+    "sub": {
+      "impostor": "Era impostor",
+      "crew": "Tripulação",
+      "found": "Descobriu na {n}ª rodada",
+      "gaveUp": "Desistiu",
+      "notFound": "Não descobriu",
+      "votes": "{n, plural, one {# voto} other {# votos}}",
+      "presenter": "Apresentou da cabine"
+    }
   }
 }

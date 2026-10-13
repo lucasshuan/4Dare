@@ -1,0 +1,799 @@
+/*
+ * The home's game scenes (the same drawing and the same loop), in CSS only, so
+ * the host's shortcut at a match's end costs nothing but the compositor. All
+ * in cqh: they fit the square they are given.
+ */
+.art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: size;
+  isolation: isolate;
+}
+.art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.spot {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(13cqh);
+  pointer-events: none;
+}
+.bubble {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 8cqh 8cqh 8cqh 3.3cqh;
+  background: #ffffff;
+  padding: 2.7cqh 4cqh;
+  font: 700 max(10px, 5.3cqh) / 1.15 var(--font-display);
+  color: #1e2433;
+  box-shadow:
+    0 1px 2px rgba(30, 36, 51, 0.06),
+    0 10px 28px rgba(30, 36, 51, 0.08);
+  transform-origin: 0 100%;
+  text-align: left;
+}
+.shadowCard {
+  box-shadow:
+    0 1px 2px rgba(30, 36, 51, 0.06),
+    0 10px 28px rgba(30, 36, 51, 0.08);
+}
+.shadowPop {
+  box-shadow:
+    0 2px 6px rgba(30, 36, 51, 0.08),
+    0 24px 56px rgba(30, 36, 51, 0.16);
+}
+
+/* Who am I?: the others' cards on the table, yours a "?" that turns, the question and the "Yes" */
+.qse {
+  background: linear-gradient(120deg, #b4cff7, #cdbff6);
+}
+.qSide {
+  position: absolute;
+  bottom: 23%;
+  width: 29%;
+}
+.qBob {
+  animation: qBob 4s ease-in-out infinite;
+}
+@keyframes qBob {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-2cqh);
+  }
+}
+.mini {
+  display: flex;
+  flex-direction: column;
+  gap: 2cqh;
+  box-sizing: border-box;
+  padding: 2cqh;
+  border-radius: 8cqh;
+  background: #ffffff;
+}
+.miniPic {
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 5.3cqh;
+}
+.miniLine {
+  display: block;
+  height: 2cqh;
+  width: 66%;
+  margin: 0 1.3cqh 0.7cqh;
+  border-radius: 999px;
+  background: #d3d9e4;
+}
+.miniYes {
+  height: 100%;
+  outline: 3px solid #0b7a75;
+}
+.miniYes .miniPic {
+  flex: 1;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+.qYou {
+  position: absolute;
+  left: 50%;
+  bottom: 25%;
+  width: 33%;
+  transform: translateX(-50%);
+  perspective: 800px;
+}
+.qFlip {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: qFlip 6s ease-in-out infinite;
+}
+@keyframes qFlip {
+  0%,
+  50% {
+    transform: rotateY(0);
+  }
+  62%,
+  92% {
+    transform: rotateY(180deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+.qFront {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 5.6;
+  border-radius: 8cqh;
+  background: #ffffff;
+  font: 800 21cqh / 1 var(--font-display);
+  color: #2b69c8;
+  box-shadow:
+    0 2px 6px rgba(30, 36, 51, 0.08),
+    0 24px 56px rgba(30, 36, 51, 0.16);
+  backface-visibility: hidden;
+}
+.qBack {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+}
+.qAsk {
+  top: 6%;
+  left: 7%;
+  max-width: 52%;
+  animation: qPopA 6s ease-out infinite;
+}
+.qYes {
+  position: absolute;
+  top: 8%;
+  right: 7%;
+  display: inline-flex;
+  align-items: center;
+  gap: 2.7cqh;
+  height: max(18px, 8.7cqh);
+  box-sizing: border-box;
+  padding: 0 3.3cqh;
+  border: 1.5px solid #0b7a75;
+  border-radius: 999px;
+  background: #0b7a75;
+  color: #ffffff;
+  font: 600 max(10px, 4.3cqh) / 1 var(--font-sans);
+  transform-origin: 0 50%;
+  animation: qPopB 6s ease-out infinite;
+}
+.qYes i {
+  width: 2.7cqh;
+  height: 2.7cqh;
+  border-radius: 999px;
+  background: currentColor;
+}
+@keyframes qPopA {
+  0%,
+  6% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  14%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+@keyframes qPopB {
+  0%,
+  22% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  30%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Impostor: four cards face down; the light drops, the spotlight hunts and stops on one; they turn (one isn't alike) and the stamp. A 7.5 s loop */
+.imp {
+  background-color: oklch(from #b39ae0 calc(l * 1.2) c h);
+  background-image: linear-gradient(
+    120deg,
+    oklch(from #b39ae0 calc(l * 1.2) c h),
+    oklch(from #9776d1 calc(l * 1.2) c h)
+  );
+}
+.iDeco {
+  position: absolute;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.iCard {
+  position: absolute;
+  bottom: 31%;
+  width: 27%;
+}
+.iShuf {
+  animation: iShuf 7.5s linear infinite both;
+}
+@keyframes iShuf {
+  0% {
+    transform: none;
+    animation-timing-function: ease-in-out;
+  }
+  4% {
+    transform: translateY(-14%) rotate(-8deg);
+    animation-timing-function: ease-in-out;
+  }
+  8%,
+  100% {
+    transform: none;
+  }
+}
+.iFlip {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: perspective(800px) rotateY(180deg);
+  animation: iFlip 7.5s linear infinite both;
+}
+@keyframes iFlip {
+  0% {
+    transform: perspective(800px) rotateY(180deg);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  7.33%,
+  53.33% {
+    transform: perspective(800px) rotateY(0deg);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  60.67%,
+  100% {
+    transform: perspective(800px) rotateY(180deg);
+  }
+}
+.iBack {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 5.6;
+  border-radius: 14% / 11%;
+  background-color: #f6e3a1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.42' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 13.5a6.5 6.5 0 1 1 8.6 6.1c-1.6.6-2.3 1.7-2.3 3.4v1.6'/%3E%3Cpath d='M45.5 46a5 5 0 1 1 6.6 4.7c-1.2.5-1.8 1.3-1.8 2.6v1.2' transform='rotate(14 50 50)'/%3E%3C/g%3E%3Cg fill='%23ffffff' fill-opacity='0.42'%3E%3Ccircle cx='15.3' cy='30.6' r='2.3'/%3E%3Ccircle cx='51.4' cy='60.6' r='1.8'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 45%;
+  background-position: center;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.5),
+    0 2px 6px rgba(30, 36, 51, 0.08),
+    0 24px 56px rgba(30, 36, 51, 0.16);
+  backface-visibility: hidden;
+}
+.iDisc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: #4b2a85;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+}
+.iDisc svg {
+  width: 64%;
+  height: 64%;
+  fill: none;
+  stroke: #f6e3a1;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.iFace {
+  position: absolute;
+  inset: 0;
+  border-radius: 14% / 11%;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+}
+.iOdd {
+  animation: iOdd 7.5s steps(1, end) infinite;
+}
+@keyframes iOdd {
+  0%,
+  65.33% {
+    box-shadow: none;
+  }
+  65.34%,
+  92% {
+    box-shadow: 0 0 0 3px #c2412f;
+  }
+  92.01%,
+  100% {
+    box-shadow: none;
+  }
+}
+.held {
+  display: flex;
+  flex-direction: column;
+  gap: 2.1cqh;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 7%;
+  border-radius: 14% / 11%;
+  background: #ffffff;
+}
+.heldPic {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 12%;
+}
+.heldLine {
+  flex: none;
+  display: block;
+  height: 2.1cqh;
+  width: 66%;
+  margin: 0 6%;
+  border-radius: 999px;
+  background: #d3d9e4;
+}
+/* the spotlight's hole: one layer moved by transform, its dusk as a huge ring around it */
+.iSpot {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 64cqh;
+  height: 64cqh;
+  margin: -32cqh 0 0 -32cqh;
+  border-radius: 999px;
+  pointer-events: none;
+  box-shadow: 0 0 0 200vmax rgb(40 24 70 / 0.6);
+  background: radial-gradient(
+    circle,
+    rgba(246, 227, 161, 0.16),
+    transparent 48%,
+    rgb(40 24 70 / 0.6) 72%
+  );
+  opacity: 0;
+  animation:
+    iSpotO 7.5s linear infinite,
+    iSpotL 7.5s linear infinite;
+}
+@keyframes iSpotO {
+  0%,
+  30.67% {
+    opacity: 0;
+  }
+  35.33%,
+  92% {
+    opacity: 1;
+  }
+  96.67%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes iSpotL {
+  0%,
+  30.67% {
+    transform: translateX(4cqw);
+    animation-timing-function: ease-in-out;
+  }
+  40.67% {
+    transform: translateX(96cqw);
+    animation-timing-function: ease-in-out;
+  }
+  50.67%,
+  100% {
+    transform: translateX(60cqw);
+  }
+}
+.iStamp {
+  position: absolute;
+  top: 49%;
+  left: 60%;
+  white-space: nowrap;
+  border-radius: 5.3cqh;
+  background: #c2412f;
+  color: #ffffff;
+  padding: 0.8cqh 2cqh;
+  font: 800 clamp(13px, 5cqh, 20px) / 1.2 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 2px 6px rgba(30, 36, 51, 0.08),
+    0 24px 56px rgba(30, 36, 51, 0.16);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: iStamp 7.5s linear infinite;
+}
+@keyframes iStamp {
+  0%,
+  65.32% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.4) rotate(-16deg);
+  }
+  65.33% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.4) rotate(-16deg);
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  70.67%,
+  92% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-9deg);
+  }
+  94.67%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-9deg);
+  }
+}
+.iLine {
+  top: 8%;
+  left: 7%;
+  max-width: 60%;
+  opacity: 0;
+  animation: iLine 7.5s linear infinite;
+}
+@keyframes iLine {
+  0%,
+  10.67% {
+    opacity: 0;
+    transform: translateY(2cqh) scale(0.8);
+    animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  14%,
+  30.67% {
+    opacity: 1;
+    transform: none;
+  }
+  32.67%,
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Lineup: the board in its frame; the photos stick one by one with their price while the purse empties; the envelope drops and opens on the mission. A 6.26 s loop */
+.esc {
+  background: linear-gradient(120deg, #ecc98f, #d9a768);
+}
+.lFrame {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 13%;
+  bottom: 29%;
+  box-sizing: border-box;
+  padding: 2.6cqh;
+  border-radius: 3.4cqh;
+  background: #b07a48;
+}
+.lBoard {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 2cqh;
+  background: #2c4a3e;
+}
+.lPitch {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.lPhoto {
+  position: absolute;
+  width: 19%;
+  opacity: 0;
+  animation-duration: 6.26s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+.lPin {
+  position: relative;
+  box-sizing: border-box;
+  padding: 6%;
+  background: #ffffff;
+}
+.lFig {
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+}
+.lTape {
+  position: absolute;
+  top: -5%;
+  left: 50%;
+  width: 44%;
+  height: 9%;
+  transform: translateX(-50%);
+  background: rgba(246, 227, 161, 0.85);
+}
+.lPrice {
+  position: absolute;
+  right: -14%;
+  bottom: -8%;
+  padding: 0 0.9cqh;
+  border-radius: 0.5cqh;
+  background: #d8b07a;
+  color: #2a1d0c;
+  font: 700 3.75cqh / 1.3 var(--font-mono);
+}
+.lP0 {
+  animation-name: lP0;
+}
+.lP1 {
+  animation-name: lP1;
+}
+.lP2 {
+  animation-name: lP2;
+}
+.lP3 {
+  animation-name: lP3;
+}
+@keyframes lP0 {
+  0%,
+  11.17% {
+    opacity: 0;
+    transform: translateY(-30%) scale(1.6);
+    animation-timing-function: cubic-bezier(0.34, 1.45, 0.64, 1);
+  }
+  17%,
+  92% {
+    opacity: 1;
+    transform: rotate(var(--t));
+  }
+  95.2%,
+  100% {
+    opacity: 0;
+    transform: rotate(var(--t));
+  }
+}
+@keyframes lP1 {
+  0%,
+  19.48% {
+    opacity: 0;
+    transform: translateY(-30%) scale(1.6);
+    animation-timing-function: cubic-bezier(0.34, 1.45, 0.64, 1);
+  }
+  25.3%,
+  92% {
+    opacity: 1;
+    transform: rotate(var(--t));
+  }
+  95.2%,
+  100% {
+    opacity: 0;
+    transform: rotate(var(--t));
+  }
+}
+@keyframes lP2 {
+  0%,
+  27.79% {
+    opacity: 0;
+    transform: translateY(-30%) scale(1.6);
+    animation-timing-function: cubic-bezier(0.34, 1.45, 0.64, 1);
+  }
+  33.6%,
+  92% {
+    opacity: 1;
+    transform: rotate(var(--t));
+  }
+  95.2%,
+  100% {
+    opacity: 0;
+    transform: rotate(var(--t));
+  }
+}
+@keyframes lP3 {
+  0%,
+  36.1% {
+    opacity: 0;
+    transform: translateY(-30%) scale(1.6);
+    animation-timing-function: cubic-bezier(0.34, 1.45, 0.64, 1);
+  }
+  41.9%,
+  92% {
+    opacity: 1;
+    transform: rotate(var(--t));
+  }
+  95.2%,
+  100% {
+    opacity: 0;
+    transform: rotate(var(--t));
+  }
+}
+.lPurse {
+  position: absolute;
+  top: 3%;
+  left: 7%;
+  display: flex;
+  align-items: center;
+  gap: 0.6cqh;
+  padding: 0.4cqh 1.25cqh;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1e2433;
+  font: 700 4cqh / 1.2 var(--font-mono);
+}
+.lPurse svg {
+  display: block;
+  width: 5cqh;
+  height: 2.5cqh;
+}
+.lLeft {
+  display: grid;
+}
+.lLeft i {
+  grid-area: 1 / 1;
+  font-style: normal;
+  text-align: right;
+  opacity: 0;
+  animation-duration: 6.26s;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+}
+.lN0 {
+  animation-name: lN0;
+}
+.lN1 {
+  animation-name: lN1;
+}
+.lN2 {
+  animation-name: lN2;
+}
+.lN3 {
+  animation-name: lN3;
+}
+.lN4 {
+  animation-name: lN4;
+}
+@keyframes lN0 {
+  0% {
+    opacity: 1;
+  }
+  11.18% {
+    opacity: 0;
+  }
+  92.01% {
+    opacity: 1;
+  }
+}
+@keyframes lN1 {
+  0% {
+    opacity: 0;
+  }
+  11.18% {
+    opacity: 1;
+  }
+  19.49% {
+    opacity: 0;
+  }
+}
+@keyframes lN2 {
+  0% {
+    opacity: 0;
+  }
+  19.49% {
+    opacity: 1;
+  }
+  27.8% {
+    opacity: 0;
+  }
+}
+@keyframes lN3 {
+  0% {
+    opacity: 0;
+  }
+  27.8% {
+    opacity: 1;
+  }
+  36.1% {
+    opacity: 0;
+  }
+}
+@keyframes lN4 {
+  0% {
+    opacity: 0;
+  }
+  36.1% {
+    opacity: 1;
+  }
+  92.01% {
+    opacity: 0;
+  }
+}
+.lEnv {
+  position: absolute;
+  right: 5%;
+  bottom: 33%;
+  width: 54%;
+  transform-origin: 100% 100%;
+  opacity: 0;
+  animation: lEnv 6.26s linear infinite;
+}
+@keyframes lEnv {
+  0%,
+  50.47% {
+    opacity: 0;
+    transform: translateY(-60%) rotate(18deg);
+  }
+  50.48% {
+    opacity: 0;
+    transform: translateY(-60%) rotate(18deg);
+    animation-timing-function: cubic-bezier(0.34, 1.35, 0.64, 1);
+  }
+  58.5%,
+  92% {
+    opacity: 1;
+    transform: rotate(-4deg);
+  }
+  95.2%,
+  100% {
+    opacity: 0;
+    transform: rotate(-4deg);
+  }
+}
+.lEnvBody {
+  position: relative;
+  padding: 3.6cqh 4cqh 4cqh;
+  border-radius: 0.9cqh;
+  background: #d8b07a;
+  text-align: left;
+}
+.lWhat {
+  display: block;
+  font: 700 3.6cqh / 1.2 var(--font-display);
+  color: rgba(42, 29, 12, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.lLine {
+  display: block;
+  font: 700 5.6cqh / 1.1 var(--font-display);
+  color: #2a1d0c;
+  text-wrap: balance;
+}
+.lSeal {
+  position: absolute;
+  right: 8%;
+  top: -5cqh;
+  display: grid;
+  place-items: center;
+  width: 9.5cqh;
+  height: 9.5cqh;
+  border-radius: 999px;
+  background: #b8322a;
+  color: #ffffff;
+  font: 900 4.5cqh / 1 var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* last, so it wins over each part's own animation */
+  .art * {
+    animation-play-state: paused;
+  }
+}
