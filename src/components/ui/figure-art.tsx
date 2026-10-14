@@ -1,8 +1,10 @@
 // The pictures the game art draws with: players' creatures and characters'
 // figures on cards. Banners, thumbnails and scenes of every game share them.
 
+import { useEffect, useState } from "react";
 import { avatarUri } from "@/lib/avatar";
 import { cn } from "@/lib/cn";
+import { figureBitmap } from "@/lib/figure-bitmap";
 import { type Figure, figureUri } from "@/lib/figures";
 
 /** A player's creature on its pastel, round. */
@@ -26,18 +28,37 @@ export function Creature({
   );
 }
 
-/** A character's picture on a card (see src/lib/figures.ts). */
+/**
+ * A character's picture on a card (see src/lib/figures.ts). `bitmap` swaps the
+ * SVG for a bitmap of it once drawn: for cards that repaint every frame.
+ */
 export function FigureArt({
   figure,
   className,
+  bitmap = false,
 }: {
   figure: Figure;
   className?: string;
+  bitmap?: boolean;
 }) {
+  const svg = figureUri(figure);
+  const [src, setSrc] = useState(svg);
+  useEffect(() => {
+    setSrc(svg);
+    if (!bitmap) return;
+    let live = true;
+    figureBitmap(svg).then(
+      (url) => live && setSrc(url),
+      () => {},
+    );
+    return () => {
+      live = false;
+    };
+  }, [svg, bitmap]);
   return (
     <span className={cn("block overflow-hidden", className)}>
-      {/* biome-ignore lint/performance/noImgElement: generated svg data uri */}
-      <img src={figureUri(figure)} alt="" className="size-full object-cover" />
+      {/* biome-ignore lint/performance/noImgElement: generated svg data uri or its bitmap */}
+      <img src={src} alt="" className="size-full object-cover" />
     </span>
   );
 }

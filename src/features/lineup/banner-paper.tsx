@@ -204,9 +204,6 @@ export function BannerPaper({
               willChange: "clip-path",
             }}
           >
-            <div className={cn(surfaceClassName, "opacity-[0.07]")}>
-              {children}
-            </div>
             <m.span
               className="pointer-events-none absolute top-0 left-0 origin-top-left"
               style={{

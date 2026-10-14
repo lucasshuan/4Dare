@@ -366,8 +366,10 @@ export function LineupBanner({ aside }: { aside: ReactNode }) {
                       </m.span>
                     }
                   >
+                    {/* a bitmap: the peel repaints it every frame */}
                     <FigureArt
                       figure={lot}
+                      bitmap
                       className="aspect-4/5 rounded-[0.6cqh]"
                     />
                   </BannerPaper>
