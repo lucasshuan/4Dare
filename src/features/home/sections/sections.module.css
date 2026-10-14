@@ -943,9 +943,9 @@ a.who:hover {
   align-items: center;
   gap: 8px;
   padding: 0 14px;
-  border: 1.5px solid var(--line);
+  border: 1.5px solid transparent;
   border-radius: 99px;
-  background: var(--surface);
+  background: #fff;
   color: #1e2433;
   font-size: 14px;
   font-weight: 700;
