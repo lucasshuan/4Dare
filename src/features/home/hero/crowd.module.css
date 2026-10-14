@@ -17,6 +17,13 @@
   width: var(--cs);
   height: var(--cs);
   translate: -50% 0;
+  animation: rise 0.7s var(--ease-soft) both;
+}
+/* the crowd gathers: up from behind the wave */
+@keyframes rise {
+  from {
+    transform: translateY(45%);
+  }
 }
 .body {
   position: absolute;
@@ -255,6 +262,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .p,
   .body,
   .emo,
   .say {

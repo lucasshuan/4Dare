@@ -399,7 +399,11 @@ export function HeroCrowd({ me }: { me?: number }) {
       }
     };
 
-    build();
+    // decoration: it gathers once the page has settled
+    const gather =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(() => live && build(), { timeout: 1500 })
+        : window.setTimeout(() => live && build(), 300);
     // only while the stage's foot is on screen
     let seen = true;
     const io = new IntersectionObserver((es) => {
@@ -422,6 +426,9 @@ export function HeroCrowd({ me }: { me?: number }) {
     window.addEventListener("resize", onResize);
     return () => {
       live = false;
+      if (typeof window.cancelIdleCallback === "function")
+        window.cancelIdleCallback(gather);
+      window.clearTimeout(gather);
       io.disconnect();
       window.clearInterval(talkId);
       window.clearInterval(moveId);
