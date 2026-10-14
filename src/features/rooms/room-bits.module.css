@@ -1,0 +1,210 @@
+/* The pieces every room listing shares: its status pill, the live dot, the seats and the fill meter. */
+
+.live {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--live, #3ecfa0);
+}
+.live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: ping 1.8s var(--ease-soft) infinite;
+}
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  80%,
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live::after {
+    animation: none;
+  }
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.pill svg {
+  width: 16px;
+  height: 16px;
+}
+.wait {
+  background: var(--yes-soft);
+  color: var(--yes);
+}
+.play {
+  background: var(--sky-soft);
+  color: var(--sky);
+}
+.vote {
+  background: var(--butter-soft);
+  color: color-mix(in oklch, var(--butter), black 55%);
+}
+:global([data-theme="dark"]) .vote {
+  color: var(--butter);
+}
+.full {
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+.new {
+  background: var(--apricot);
+  color: var(--on-apricot);
+}
+
+/* seats: a face in its colour, an empty one dashed, and yours, waiting */
+.seats {
+  display: flex;
+  flex-wrap: var(--seats-wrap, wrap);
+  gap: var(--seats-gap, 6px);
+}
+.seat {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  width: var(--seat, 36px);
+  height: var(--seat, 36px);
+  flex: none;
+  border-radius: 999px;
+}
+.face {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--c, #dce8fa);
+  box-shadow: 0 0 0 var(--seat-ring, 2.5px) var(--ring);
+}
+.face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pop .face {
+  animation: seat-pop 0.6s var(--spring) both;
+}
+@keyframes seat-pop {
+  from {
+    scale: 0;
+  }
+}
+.empty {
+  border: 2px dashed var(--line-strong);
+  opacity: 0.55;
+}
+.yours {
+  display: grid;
+  place-items: center;
+  border-color: var(--sky);
+  color: var(--sky);
+  opacity: 1;
+}
+.yours > svg {
+  width: var(--you-icon, 16px);
+  height: var(--you-icon, 16px);
+  transition: opacity 0.2s;
+}
+.ghost {
+  position: absolute;
+  inset: 2px;
+  border-radius: 999px;
+  overflow: hidden;
+  opacity: 0;
+  scale: 0.6;
+  transition:
+    opacity 0.25s,
+    scale 0.35s var(--spring);
+}
+.ghost .face {
+  box-shadow: none;
+}
+/* a card or row hovered shows your face in your seat */
+:global(.room-hover):hover .ghost {
+  opacity: 1;
+  scale: 1;
+}
+:global(.room-hover):hover .yours > svg {
+  opacity: 0;
+}
+/* someone just sat down: their name, over their seat, for a moment */
+.flash {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  translate: -50% 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: flash 1.8s var(--ease-soft) forwards;
+}
+@keyframes flash {
+  0% {
+    opacity: 0;
+    translate: -50% 6px;
+  }
+  15%,
+  75% {
+    opacity: 1;
+    translate: -50% 0;
+  }
+  100% {
+    opacity: 0;
+    translate: -50% -6px;
+  }
+}
+
+/* the meter: one bar a seat, filled as they're taken */
+.meter {
+  display: flex;
+  gap: var(--bar-gap, 3px);
+}
+.meter i {
+  flex: 1;
+  height: var(--bar-h, 8px);
+  border-radius: var(--bar-r, 3px);
+  background: var(--bar-bg, var(--surface-sunken));
+  transition: background-color 0.4s;
+}
+.meter i.taken {
+  background: var(--ink);
+}
+.meter i.fresh {
+  animation: seg-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes seg-in {
+  from {
+    scale: 1 0;
+    background: var(--yes);
+  }
+}

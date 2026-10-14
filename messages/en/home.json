@@ -173,7 +173,20 @@
     "noOpen": "No room with a free seat right now. Create one and it shows up here.",
     "seeAll": "See all",
     "locked": "Has a password",
-    "tastes": "Tastes"
+    "tastes": "Tastes",
+    "status": {
+      "new": "Just opened",
+      "wait": "Waiting for people",
+      "full": "Full",
+      "theme": "Voting on the theme",
+      "odd": "Voting on who stands out",
+      "auction": "Auction",
+      "boards": "Building the boards",
+      "playing": "In a match"
+    },
+    "yourSeat": "Your seat",
+    "joined": "{name} joined",
+    "count": "<b>{n}</b> of {max}"
   },
   "games": {
     "title": "Pick a game",
@@ -201,6 +214,21 @@
         "q2": "Do I have whiskers?",
         "guess": "Am I a cat?",
         "hit": "Got it!"
+      },
+      "rules": [
+        "Everyone picks a character for another player.",
+        "You see everyone's card except yours.",
+        "On your turn, ask a yes-or-no question.",
+        "The others answer: yes, probably, don't know…",
+        "Take a guess. First to find out wins."
+      ],
+      "scene": {
+        "ask": "Do I have whiskers?",
+        "yes": "Yes",
+        "probably": "Probably",
+        "unknown": "Don't know",
+        "guess": "Am I a cat?",
+        "hit": "Got it!"
       }
     },
     "impostor": {
@@ -213,6 +241,17 @@
         "q": "How brave are they?",
         "vote": "Who's the impostor?",
         "caught": "Impostor!"
+      },
+      "rules": [
+        "Everyone gets the same character. Except one, who doesn't even know they're the impostor.",
+        "A question about the card: everyone answers 1 to 10.",
+        "Talk it over and vote for whoever stands out.",
+        "Caught! They still get to guess the crew's card."
+      ],
+      "scene": {
+        "ask": "How brave is he?",
+        "range": "1 to 10",
+        "stamp": "Impostor!"
       }
     },
     "whatFor": {
@@ -242,6 +281,31 @@
         "title": "The priciest at auction",
         "hint": "Average price of those sold 20 times or more.",
         "avg": "≈ {coins} 🪙"
+      },
+      "rules": [
+        "A character auction. Nobody knows what for yet.",
+        "Sold! It joins the team of the highest bidder.",
+        "After the auction, the envelope opens the mission.",
+        "Everyone sets up a board with the team they bought.",
+        "Everyone defends their board, and all vote for the best."
+      ],
+      "scene": {
+        "sold": "Sold!",
+        "whatFor": "What for?",
+        "teams": [
+          {
+            "mission": "To sell ice to penguins.",
+            "roles": ["the fridge", "the closer", "the cute one"]
+          },
+          {
+            "mission": "To survive a zombie apocalypse.",
+            "roles": ["the getaway", "night watch", "the bait"]
+          },
+          {
+            "mission": "To throw a surprise party.",
+            "roles": ["the cake", "the distraction", "security"]
+          }
+        ]
       }
     },
     "next": "Next games",
@@ -325,6 +389,32 @@
       "title": "Weekly ranking",
       "all": "See all",
       "xp": "{n} XP"
+    },
+    "how": {
+      "title": "How to play",
+      "pause": "Pause the round",
+      "play": "Resume the round",
+      "step": "Step {n}: {text}",
+      "scene": "A round of {game}, step by step",
+      "you": "you"
     }
+  },
+  "join": {
+    "quick": "Quick match · {game}",
+    "anyGame": "any game",
+    "searching": "Looking for a room…",
+    "roomsWaiting": "{n, plural, =0 {Seeing if anyone's around} one {# room waiting for people now} other {# rooms waiting for people now}}",
+    "entering": "Joining",
+    "found": "Found one",
+    "seatForYou": "There's a seat for you",
+    "waitingHere": "{game} · {n} waiting",
+    "fresh": "New room",
+    "freshTitle": "We opened a room for you",
+    "freshBody": "Nobody's waiting in this game right now. Call someone with the link, or wait for whoever comes.",
+    "joiningRoom": "Joining the room…",
+    "cancel": "Cancel",
+    "close": "Close",
+    "by": "by {name}",
+    "count": "{n} of {max}"
   }
 }

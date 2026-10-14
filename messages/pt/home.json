@@ -173,7 +173,20 @@
     "noOpen": "Nenhuma sala com vaga agora. Crie uma e ela aparece aqui.",
     "seeAll": "Ver todas",
     "locked": "Tem senha",
-    "tastes": "Gostos"
+    "tastes": "Gostos",
+    "status": {
+      "new": "Abriu agora",
+      "wait": "Esperando gente",
+      "full": "Lotada",
+      "theme": "Votando o tema",
+      "odd": "Votando quem destoa",
+      "auction": "Leilão",
+      "boards": "Montando os quadros",
+      "playing": "Em partida"
+    },
+    "yourSeat": "Seu lugar",
+    "joined": "{name} entrou",
+    "count": "<b>{n}</b> de {max}"
   },
   "games": {
     "title": "Escolha um jogo",
@@ -201,6 +214,21 @@
         "q2": "Eu tenho bigodes?",
         "guess": "Eu sou um gato?",
         "hit": "Acertou!"
+      },
+      "rules": [
+        "Cada um escolhe um personagem para outro jogador.",
+        "Você vê as cartas de todo mundo, menos a sua.",
+        "Na sua vez, faça uma pergunta de sim ou não.",
+        "Os outros respondem: sim, provavelmente, não sei…",
+        "Arrisque um palpite. Quem descobre primeiro ganha."
+      ],
+      "scene": {
+        "ask": "Eu tenho bigodes?",
+        "yes": "Sim",
+        "probably": "Provavelmente sim",
+        "unknown": "Não sei",
+        "guess": "Eu sou um gato?",
+        "hit": "Acertou!"
       }
     },
     "impostor": {
@@ -213,6 +241,17 @@
         "q": "Quão corajoso ele é?",
         "vote": "Quem é o impostor?",
         "caught": "Impostor!"
+      },
+      "rules": [
+        "Todos recebem o mesmo personagem. Menos um, que nem sabe que é o impostor.",
+        "Uma pergunta sobre a carta: cada um responde de 1 a 10.",
+        "Conversem e votem em quem destoa.",
+        "Pego! Ele ainda tenta adivinhar a carta da tripulação."
+      ],
+      "scene": {
+        "ask": "Quão corajoso ele é?",
+        "range": "1 a 10",
+        "stamp": "Impostor!"
       }
     },
     "whatFor": {
@@ -242,6 +281,31 @@
         "title": "Os mais caros do leilão",
         "hint": "Preço médio de quem já foi vendido 20 vezes ou mais.",
         "avg": "≈ {coins} 🪙"
+      },
+      "rules": [
+        "Um leilão de personagens. Ninguém sabe ainda pra quê.",
+        "Vendido! Ele entra no time de quem deu o maior lance.",
+        "Depois do leilão, o envelope abre a missão.",
+        "Cada um monta o quadro com o time que comprou.",
+        "Cada um defende o seu quadro, e todos votam no melhor."
+      ],
+      "scene": {
+        "sold": "Vendido!",
+        "whatFor": "Pra quê?",
+        "teams": [
+          {
+            "mission": "Pra vender gelo pra pinguim.",
+            "roles": ["geladeira", "negociador", "fofura"]
+          },
+          {
+            "mission": "Pra sobreviver a um apocalipse zumbi.",
+            "roles": ["rota de fuga", "vigia", "isca"]
+          },
+          {
+            "mission": "Pra organizar uma festa surpresa.",
+            "roles": ["bolo", "distração", "segurança"]
+          }
+        ]
       }
     },
     "next": "Próximos jogos",
@@ -325,6 +389,32 @@
       "title": "Ranking semanal",
       "all": "Ver tudo",
       "xp": "{n} XP"
+    },
+    "how": {
+      "title": "Como se joga",
+      "pause": "Pausar a rodada",
+      "play": "Continuar a rodada",
+      "step": "Passo {n}: {text}",
+      "scene": "Uma rodada de {game}, passo a passo",
+      "you": "você"
     }
+  },
+  "join": {
+    "quick": "Partida rápida · {game}",
+    "anyGame": "qualquer jogo",
+    "searching": "Procurando uma sala…",
+    "roomsWaiting": "{n, plural, =0 {Vendo se tem alguém por aí} one {# sala esperando gente agora} other {# salas esperando gente agora}}",
+    "entering": "Entrando",
+    "found": "Achamos",
+    "seatForYou": "Tem um lugar pra você",
+    "waitingHere": "{game} · {n, plural, one {# pessoa esperando} other {# pessoas esperando}}",
+    "fresh": "Sala nova",
+    "freshTitle": "Abrimos uma sala pra você",
+    "freshBody": "Ninguém esperando nesse jogo agora. Chame alguém pelo link, ou espere quem chegar.",
+    "joiningRoom": "Entrando na sala…",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "by": "por {name}",
+    "count": "{n} de {max}"
   }
 }

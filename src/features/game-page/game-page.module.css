@@ -1,0 +1,749 @@
+/* A game's page: its banner playing the rules round, the steps, the pitch, and its open rooms. */
+
+/* ---------- banner ---------- */
+.banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: var(--art);
+  background-image: linear-gradient(120deg, var(--art), var(--art-2));
+  transition: background-color 0.5s var(--ease-soft);
+}
+.who {
+  --art: var(--art-whoami);
+  --art-2: var(--art-whoami-2);
+}
+.imp {
+  --art: var(--art-impostor);
+  --art-2: var(--art-impostor-2);
+}
+.lin {
+  --art: var(--art-lineup);
+  --art-2: var(--art-lineup-2);
+}
+.back {
+  position: absolute;
+  inset: -40px;
+  z-index: -1;
+  pointer-events: none;
+}
+.glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(64px);
+}
+:global([data-theme="dark"]) .glow {
+  opacity: 0.18;
+}
+.g1 {
+  top: -30%;
+  left: -5%;
+  width: 45%;
+  height: 90%;
+  background: color-mix(in oklch, var(--surface) 50%, transparent);
+}
+.g2 {
+  right: -8%;
+  bottom: -40%;
+  width: 50%;
+  height: 90%;
+  background: color-mix(in oklch, var(--butter) 60%, transparent);
+}
+.g3 {
+  top: 5%;
+  right: 22%;
+  width: 25%;
+  height: 45%;
+  background: color-mix(in oklch, var(--apricot-soft) 70%, transparent);
+}
+.imp .g2 {
+  background: color-mix(in oklch, #f08cc8 35%, transparent);
+}
+.lin .g1 {
+  background: color-mix(in oklch, #fff3d6 55%, transparent);
+}
+.mark {
+  position: absolute;
+  opacity: 0.16;
+  font: 800 var(--fs, 30px) / 1 var(--font-display);
+  animation: drift var(--t, 8s) ease-in-out infinite;
+}
+.mark svg {
+  width: var(--fs);
+  height: var(--fs);
+  stroke-width: 2.4;
+}
+@keyframes drift {
+  50% {
+    translate: 0 -14px;
+    rotate: 8deg;
+  }
+  0%,
+  100% {
+    rotate: -8deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mark {
+    animation: none;
+  }
+}
+/* melts into the page, behind the people so faces stay sharp */
+.melt {
+  position: absolute;
+  inset: auto 0 0;
+  height: 24px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in oklch, var(--canvas) 70%, transparent)
+  );
+  pointer-events: none;
+}
+.row {
+  display: grid;
+  width: 100%;
+  max-width: calc(1600px + 64px);
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+@media (max-width: 639.98px) {
+  .row {
+    padding-inline: 16px;
+  }
+}
+@media (min-width: 1280px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 560px);
+    gap: 40px;
+  }
+}
+/* low in the banner, clear of its melt, with room for the code's error under the field */
+.aside {
+  position: relative;
+  align-self: end;
+  padding-bottom: 40px;
+}
+@media (max-width: 1279.98px) {
+  .aside {
+    display: none;
+  }
+}
+
+/* ---------- how it plays: the caption under the banner (phones) ---------- */
+.caption {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: calc(1600px + 64px);
+  margin: 12px auto -10px;
+  padding-inline: 32px;
+}
+@media (max-width: 639.98px) {
+  .caption {
+    padding-inline: 16px;
+  }
+}
+@media (min-width: 768px) {
+  .caption {
+    display: none;
+  }
+}
+.capCard {
+  padding: 4px 8px 10px 12px;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card-value);
+}
+.segs {
+  display: flex;
+  gap: 4px;
+  margin-right: 4px;
+}
+.seg {
+  flex: 1;
+  padding: 8px 0;
+}
+.seg i {
+  position: relative;
+  display: block;
+  height: 4px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: var(--line);
+}
+.seg i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 0;
+  border-radius: inherit;
+  background: var(--ink);
+}
+.seg.done i::after {
+  width: 100%;
+}
+.seg.on i::after {
+  animation: fill var(--d, 2s) linear forwards;
+}
+.paused .seg.on i::after {
+  animation-play-state: paused;
+}
+.capRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.capN {
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: var(--ink);
+  color: var(--on-ink);
+  font: 500 12px / 1 var(--font-mono);
+}
+.capRow p {
+  display: flex;
+  align-items: center;
+  min-height: calc(2 * 1.35em);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.capRow p span {
+  animation: cap-in 0.35s var(--ease-soft) both;
+}
+@keyframes cap-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+@keyframes fill {
+  to {
+    width: 100%;
+  }
+}
+.hold {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 99px;
+  color: var(--ink-muted);
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+.hold:hover {
+  background: var(--surface-sunken);
+  color: var(--ink);
+}
+.hold svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- page column ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 40px 24px;
+}
+@media (min-width: 1280px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 560px);
+  }
+}
+.left {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 28px;
+  container-type: inline-size;
+}
+/* the pitch, with the steps beside it from tablets up */
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+@container (min-width: 700px) {
+  .intro {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+    gap: 32px;
+  }
+}
+@container (min-width: 900px) {
+  .intro {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  }
+}
+/* stacked under the pitch (a narrow left column beside the rooms): one line a step where it fits */
+@container (max-width: 699.98px) {
+  .how {
+    max-width: 640px;
+  }
+}
+.pitch {
+  display: flex;
+  max-width: 500px;
+  flex-direction: column;
+  gap: 12px;
+  animation: fade-up 0.5s var(--ease-soft) both;
+}
+.backLink {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 4px;
+  margin-left: -6px;
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+.backLink:hover {
+  color: var(--ink);
+}
+.backLink svg {
+  width: 16px;
+  height: 16px;
+}
+.pitch h1 {
+  font: 800 clamp(40px, 5vw, 60px) / 1 var(--font-display);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.pitch > p {
+  color: var(--ink-muted);
+  font-size: 17px;
+  line-height: 26px;
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+@media (min-width: 1280px) {
+  .pitch .start {
+    display: none;
+  }
+}
+
+/* create + code */
+.start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px 24px;
+  transition: opacity 0.5s var(--ease-soft);
+}
+.pitch .start {
+  margin-top: 8px;
+}
+.start.off {
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+.create {
+  flex: 1 1 auto;
+  min-height: 64px;
+  align-self: stretch;
+  padding: 0 32px;
+  font-size: 20px;
+}
+@media (min-width: 640px) {
+  .create {
+    max-width: 320px;
+  }
+}
+@media (max-width: 639.98px) {
+  .create {
+    width: 100%;
+  }
+}
+.create svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.75;
+}
+
+/* ---------- how it plays: the list (tablet and up) ---------- */
+.how {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  animation: fade-up 0.5s 0.08s var(--ease-soft) both;
+}
+@media (max-width: 767.98px) {
+  .how {
+    display: none;
+  }
+}
+.howHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.howHead h2 {
+  font: 700 19px / 1.3 var(--font-display);
+  letter-spacing: -0.01em;
+}
+.how ol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.step {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+  padding: 6px 12px 9px 7px;
+  border: 1.5px solid transparent;
+  border-radius: 14px;
+  color: var(--ink-muted);
+  text-align: left;
+  transition:
+    background-color 0.3s var(--ease-soft),
+    border-color 0.3s,
+    color 0.3s,
+    translate 0.2s var(--ease-soft);
+}
+.step:hover {
+  color: var(--ink);
+  background: color-mix(in oklch, var(--surface) 60%, transparent);
+}
+.stepN {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 99px;
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+  font: 500 12.5px / 1 var(--font-mono);
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    scale 0.4s var(--spring);
+}
+.stepN svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 3;
+}
+.step p {
+  padding-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.33;
+}
+.stepBar {
+  position: absolute;
+  left: 41px;
+  right: 12px;
+  bottom: 3px;
+  height: 2.5px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: transparent;
+}
+.stepBar i {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ink);
+}
+.step.on {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-card-value);
+}
+.step.on .stepN {
+  background: var(--ink);
+  color: var(--on-ink);
+  scale: 1.08;
+}
+.step.on .stepBar {
+  background: var(--line);
+}
+.step.on .stepBar i {
+  animation: fill var(--d, 2s) linear forwards;
+}
+.step.done {
+  color: var(--ink);
+}
+.step.done .stepN {
+  background: var(--yes);
+  color: var(--on-yes);
+}
+.paused .step.on .stepBar i {
+  animation-play-state: paused;
+}
+
+/* ---------- ranking + facts ---------- */
+.rf {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 32px;
+}
+@media (min-width: 768px) {
+  .rf {
+    grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  }
+}
+
+/* ---------- rooms ---------- */
+.rooms {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 28px;
+  background: var(--surface);
+}
+@media (max-width: 639.98px) {
+  .rooms {
+    padding: 20px;
+  }
+}
+.roomsHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.roomsHead h2 {
+  font: 600 20px / 1.3 var(--font-sans);
+  letter-spacing: 0;
+}
+.roomsHead small {
+  display: block;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.all {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin-right: -8px;
+  padding: 6px 12px;
+  border-radius: 99px;
+  color: var(--sky);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+.all:hover {
+  background: var(--sky-soft);
+}
+.all svg {
+  width: 16px;
+  height: 16px;
+  transition: translate 0.2s var(--ease-soft);
+}
+.all:hover svg {
+  translate: 2px 0;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.empty {
+  padding: 16px;
+  border: 1.5px dashed var(--line);
+  border-radius: 18px;
+  color: var(--ink-muted);
+}
+.skeleton {
+  height: 96px;
+  border-radius: 18px;
+  background: var(--surface-sunken);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* a room, as the home lists them on a phone, minus the game art and the flag (this page is the game, and the language is yours) */
+.room {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "t act" "seats n";
+  align-items: center;
+  gap: 10px 14px;
+  padding: 12px 12px 12px 14px;
+  border-radius: 18px;
+  background: var(--surface-sunken);
+  transition: background-color 0.2s;
+}
+.room:hover {
+  background: color-mix(in oklch, var(--surface-sunken) 88%, var(--ink));
+}
+.room.enter {
+  animation: room-in 0.7s var(--spring) both;
+}
+@keyframes room-in {
+  from {
+    opacity: 0;
+    scale: 0.9;
+    translate: 0 20px;
+  }
+}
+.roomT {
+  grid-area: t;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.roomName {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  font: 700 17px / 1.2 var(--font-display);
+  letter-spacing: -0.01em;
+}
+.roomName span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.roomName svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  color: var(--ink-muted);
+}
+.roomMeta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.roomMeta > :first-child {
+  width: 7px;
+  height: 7px;
+}
+.roomHost {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.roomTime {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+.roomTime::before {
+  content: "·";
+  margin-right: 4px;
+}
+.roomTime svg {
+  width: 13px;
+  height: 13px;
+}
+.join {
+  grid-area: act;
+  justify-self: end;
+  height: 44px;
+  padding: 0 20px;
+  font-size: 16px;
+}
+.join svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.6;
+}
+.roomSeats {
+  --seat: 26px;
+  --seat-ring: 2px;
+  --seats-gap: 5px;
+  --you-icon: 13px;
+  --seats-wrap: nowrap;
+  grid-area: seats;
+  min-width: 0;
+  overflow: hidden;
+  padding: 3px;
+  margin: -3px;
+}
+.roomCount {
+  grid-area: n;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: end;
+}
+.roomMeter {
+  --bar-gap: 2px;
+  --bar-h: 6px;
+  --bar-r: 2px;
+  --bar-bg: color-mix(in oklch, var(--ink) 14%, transparent);
+  width: 46px;
+}
+.roomCount small {
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.roomCount b {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+/* ten seats don't fit a phone's row: the bar goes, the count stays */
+@media (max-width: 420px) {
+  .roomMeter {
+    display: none;
+  }
+  .roomSeats {
+    --seat: 24px;
+    --seats-gap: 3px;
+  }
+}
+/* a big table on a small screen: the last empty seats fade out under the count */
+@media (max-width: 480px) {
+  .many .roomSeats {
+    --seat: 22px;
+    --seat-ring: 1.5px;
+    --seats-gap: 3px;
+    mask-image: linear-gradient(to right, #000 88%, transparent);
+  }
+}

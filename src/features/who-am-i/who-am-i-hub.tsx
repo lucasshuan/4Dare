@@ -1,10 +1,9 @@
 "use client";
 
-import { GameHub } from "@/features/home/game-hub";
+import { GamePage } from "@/features/game-page/game-page";
 import type { GameFactsData } from "@/server/community-contract";
-import { WhoAmIBanner } from "./who-am-i-banner";
 
-/** "Who am I?"'s page: create a room, join one with a code, or pick a public one. */
+/** "Who am I?"'s page: a round of its rules, create a room, join one with a code, or pick a public one. */
 export function WhoAmIHub({ facts }: { facts: GameFactsData | null }) {
-  return <GameHub game="who-am-i" banner={WhoAmIBanner} facts={facts} />;
+  return <GamePage game="who-am-i" facts={facts} />;
 }

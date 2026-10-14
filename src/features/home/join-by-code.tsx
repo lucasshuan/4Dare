@@ -47,16 +47,16 @@ export function JoinByCode() {
 
   return (
     <form
-      className="relative flex flex-col gap-2 max-sm:w-full"
+      className="relative flex flex-col items-center gap-2 max-sm:w-full"
       onSubmit={(e) => {
         e.preventDefault();
         if (code.length === CODE_LENGTH && !pending) void tryJoin(code);
       }}
     >
-      <label htmlFor={id} className="font-semibold text-sm">
+      <label htmlFor={id} className="font-semibold text-[13px]">
         {t("joinLabel")}
       </label>
-      <div className="relative">
+      <div className="relative max-sm:w-full">
         <input
           id={id}
           value={code}
@@ -82,7 +82,7 @@ export function JoinByCode() {
             }
           }}
           className={cn(
-            "h-14 w-56 min-w-0 rounded-md border-[1.5px] bg-surface px-4 pr-12 font-medium font-mono text-2xl tracking-[0.2em] transition-colors placeholder:text-line-strong max-sm:w-full",
+            "h-14 w-56 min-w-0 rounded-[14px] border-[1.5px] bg-surface px-4 pr-12 font-medium font-mono text-[22px] uppercase tracking-[0.22em] transition-[border-color,box-shadow] duration-200 placeholder:text-ink-muted/70 focus:border-sky focus:shadow-[0_0_0_4px_color-mix(in_oklch,var(--sky)_22%,transparent)] focus:outline-none max-sm:w-full",
             problem ? "border-no" : "border-line-strong",
           )}
         />

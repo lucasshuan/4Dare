@@ -34,7 +34,7 @@ export function sortRooms(rooms: PublicRoom[]) {
 }
 
 /** "80", or "40–80" when the steps differ. */
-function secondsRange(r: PublicRoom) {
+export function secondsRange(r: PublicRoom) {
   const all = GAME_STEP_TIMES[r.game].map((k) => r[k]);
   const min = Math.min(...all);
   const max = Math.max(...all);

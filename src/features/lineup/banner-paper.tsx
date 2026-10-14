@@ -15,26 +15,14 @@ import {
   useState,
 } from "react";
 import { cn } from "@/lib/cn";
-import { paperLighting, paperPeel } from "./banner-paper-geometry";
+import {
+  PAPER_CURVES,
+  paperLighting,
+  paperPeel,
+  samplePaper,
+} from "./banner-paper-geometry";
 
-const TIMES = [0, 0.15, 0.38, 0.55, 0.78, 1];
-// Peel only advances to completion; the incoming motion traverses it backwards.
-const PEEL = [0, 0.13, 0.4, 0.7, 1, 1];
-const X = [0, 0.8, 3, 18, 55, 105];
-const Y = [0, -0.8, -4, -38, -115, -220];
-const SCALE = [1, 1.005, 1.025, 1.12, 1.19, 1.22];
-const ROTATION = [0, 0.3, 1, 6, 17, 28];
-const OPACITY = [1, 1, 1, 1, 0.7, 0];
 const SHADOW = "0 1px 0 rgba(0,0,0,0.12), 0 6px 12px rgba(0,0,0,0.32)";
-
-function sample(values: readonly number[], progress: number) {
-  const at = Math.max(0, Math.min(1, progress));
-  const end = TIMES.findIndex((time) => time >= at);
-  if (end <= 0) return values[0];
-  const fraction = (at - TIMES[end - 1]) / (TIMES[end] - TIMES[end - 1]);
-  return values[end - 1] + (values[end] - values[end - 1]) * fraction;
-}
-
 /** A moving diagonal peel with a visible reverse, followed by a soft throw. */
 export function BannerPaper({
   kind,
@@ -78,15 +66,15 @@ export function BannerPaper({
     !present && value >= 0.4 ? 1 : value,
   );
   const peel = useTransform(renderProgress, (value) =>
-    sample(PEEL, value / peelRatio),
+    samplePaper(PAPER_CURVES.peel, value / peelRatio),
   );
   const transform = useTransform(renderProgress, (value) => {
     const direction = present ? -1 : 1;
-    return `translate(${sample(X, value) * direction}%,${sample(Y, value)}%) rotate(${rotation + sample(ROTATION, value) * direction}deg) scale(${sample(SCALE, value)})`;
+    return `translate(${samplePaper(PAPER_CURVES.x, value) * direction}%,${samplePaper(PAPER_CURVES.y, value)}%) rotate(${rotation + samplePaper(PAPER_CURVES.rotation, value) * direction}deg) scale(${samplePaper(PAPER_CURVES.scale, value)})`;
   });
   const opacity = useTransform(renderProgress, (value) =>
     present
-      ? sample(OPACITY, value)
+      ? samplePaper(PAPER_CURVES.opacity, value)
       : 1 - Math.max(0, Math.min(1, (value - 0.16) / 0.24)),
   );
   const geometry = useTransform([peel, width, height], (values: number[]) =>

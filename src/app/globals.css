@@ -176,6 +176,13 @@
   --brand-stage: #2b69c8;
   --brand-butter: #f6e3a1;
   --on-brand: #ffffff;
+  /* the home's stage (the brand blue under the hero), a step deeper for its glows */
+  --brand-stage-deep: #1f55a8;
+  /* the walls of the room cards' header scenes (their objects keep their colours) */
+  --scn-who: #dce8fa;
+  --scn-who-q: rgba(255, 255, 255, 0.8);
+  --scn-imp: #1b2334;
+  --scn-lin: #ecc98f;
   /* how strongly a step's colour washes the canvas (StageBackdrop) */
   --wash-mix: 20%;
   /* the bands around a wide picture: its own hue at this lightness (Portrait) */
@@ -295,6 +302,11 @@
   --seat-10-ink: var(--seat-10);
   --seat-soft-mix: 24%;
   --brand-stage: #1d4a93;
+  --brand-stage-deep: #143569;
+  --scn-who: #21406e;
+  --scn-who-q: rgba(255, 255, 255, 0.12);
+  --scn-imp: #121826;
+  --scn-lin: #4a3420;
   --wash-mix: 26%;
   --pic-band-l: 0.4;
   --scrim: rgba(0, 0, 0, 0.6);

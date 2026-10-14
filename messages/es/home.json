@@ -173,7 +173,20 @@
     "noOpen": "No hay salas con lugar libre ahora. Crea una y aparecerá aquí.",
     "seeAll": "Ver todas",
     "locked": "Con contraseña",
-    "tastes": "Gustos"
+    "tastes": "Gustos",
+    "status": {
+      "new": "Recién abierta",
+      "wait": "Esperando gente",
+      "full": "Llena",
+      "theme": "Votando el tema",
+      "odd": "Votando quién desentona",
+      "auction": "Subasta",
+      "boards": "Armando los tableros",
+      "playing": "En partida"
+    },
+    "yourSeat": "Tu lugar",
+    "joined": "{name} entró",
+    "count": "<b>{n}</b> de {max}"
   },
   "games": {
     "title": "Elige un juego",
@@ -201,6 +214,21 @@
         "q2": "¿Tengo bigotes?",
         "guess": "¿Soy un gato?",
         "hit": "¡Correcto!"
+      },
+      "rules": [
+        "Cada uno elige un personaje para otro jugador.",
+        "Ves las cartas de todos, menos la tuya.",
+        "En tu turno, haz una pregunta de sí o no.",
+        "Los demás responden: sí, probablemente, no sé…",
+        "Arriesga una respuesta. Quien lo descubre primero gana."
+      ],
+      "scene": {
+        "ask": "¿Tengo bigotes?",
+        "yes": "Sí",
+        "probably": "Probablemente sí",
+        "unknown": "No sé",
+        "guess": "¿Soy un gato?",
+        "hit": "¡Acertaste!"
       }
     },
     "impostor": {
@@ -213,6 +241,17 @@
         "q": "¿Qué tan valiente es?",
         "vote": "¿Quién es el impostor?",
         "caught": "¡Impostor!"
+      },
+      "rules": [
+        "Todos reciben el mismo personaje. Menos uno, que ni sabe que es el impostor.",
+        "Una pregunta sobre la carta: cada uno responde del 1 al 10.",
+        "Conversen y voten por quien desentona.",
+        "¡Atrapado! Aún intenta adivinar la carta de la tripulación."
+      ],
+      "scene": {
+        "ask": "¿Qué tan valiente es?",
+        "range": "1 a 10",
+        "stamp": "¡Impostor!"
       }
     },
     "whatFor": {
@@ -242,6 +281,31 @@
         "title": "Los más caros de la subasta",
         "hint": "Precio medio de los vendidos 20 veces o más.",
         "avg": "≈ {coins} 🪙"
+      },
+      "rules": [
+        "Una subasta de personajes. Nadie sabe todavía para qué.",
+        "¡Vendido! Entra en el equipo de quien ofreció más.",
+        "Después de la subasta, el sobre revela la misión.",
+        "Cada uno arma su tablero con el equipo que compró.",
+        "Cada uno defiende su tablero y todos votan el mejor."
+      ],
+      "scene": {
+        "sold": "¡Vendido!",
+        "whatFor": "¿Para qué?",
+        "teams": [
+          {
+            "mission": "Para venderle hielo a un pingüino.",
+            "roles": ["la heladera", "el negociador", "lo tierno"]
+          },
+          {
+            "mission": "Para sobrevivir a un apocalipsis zombi.",
+            "roles": ["la ruta de escape", "el vigía", "la carnada"]
+          },
+          {
+            "mission": "Para organizar una fiesta sorpresa.",
+            "roles": ["el pastel", "la distracción", "la seguridad"]
+          }
+        ]
       }
     },
     "next": "Siguientes juegos",
@@ -325,6 +389,32 @@
       "title": "Ranking semanal",
       "all": "Ver todo",
       "xp": "{n} XP"
+    },
+    "how": {
+      "title": "Cómo se juega",
+      "pause": "Pausar la ronda",
+      "play": "Seguir la ronda",
+      "step": "Paso {n}: {text}",
+      "scene": "Una ronda de {game}, paso a paso",
+      "you": "tú"
     }
+  },
+  "join": {
+    "quick": "Partida rápida · {game}",
+    "anyGame": "cualquier juego",
+    "searching": "Buscando una sala…",
+    "roomsWaiting": "{n, plural, =0 {Viendo si hay alguien por ahí} one {# sala esperando gente ahora} other {# salas esperando gente ahora}}",
+    "entering": "Entrando",
+    "found": "Encontramos",
+    "seatForYou": "Hay un lugar para ti",
+    "waitingHere": "{game} · {n} esperando",
+    "fresh": "Sala nueva",
+    "freshTitle": "Abrimos una sala para ti",
+    "freshBody": "Nadie espera en este juego ahora. Llama a alguien con el link o espera a quien llegue.",
+    "joiningRoom": "Entrando a la sala…",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "by": "de {name}",
+    "count": "{n} de {max}"
   }
 }
