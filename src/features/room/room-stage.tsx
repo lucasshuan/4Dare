@@ -1,5 +1,6 @@
 "use client";
 
+import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, m, type Variants } from "motion/react";
 import dynamic from "next/dynamic";
 import { type Messages, useLocale, useTranslations } from "next-intl";
@@ -8,6 +9,7 @@ import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { RoomChat } from "@/features/chat/room-chat";
 import { useRoomContext } from "@/features/data/room-context";
+import { watchersKey } from "@/features/data/use-watchers";
 import { EndScene, preloadEnd } from "@/features/ending/end-scene";
 import { ImpostorScenes } from "@/features/impostor/impostor-scenes";
 import { ImpostorScreen } from "@/features/impostor/impostor-screen";
@@ -28,7 +30,7 @@ import { RevealOverlay } from "@/features/who-am-i/reveal-overlay";
 import { ThemeScreen } from "@/features/who-am-i/theme-screen";
 import { GuessScene } from "@/features/who-am-i/turn/guess-scene";
 import { TurnScreen } from "@/features/who-am-i/turn/turn-screen";
-import type { ErrorCode, Phase, RoomView } from "@/game/types";
+import type { ErrorCode, Phase, RoomView, WatchersView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
@@ -129,21 +131,76 @@ function useStepSound() {
   }, [call]);
 }
 
-/** A pluck when someone joins the room or comes back to it, another when someone leaves. */
-function usePresenceSound(view: RoomView) {
+/** How long, in the lobby, a seat given up waits for the watchers' list to say its player only got up to watch. */
+const STAND_GRACE_MS = 2000;
+
+const ids = (joined: string) => new Set(joined.split(" ").filter(Boolean));
+
+/**
+ * A pluck when someone joins the room or comes back to it, another when
+ * someone leaves. Getting up to watch or taking a seat is neither: the
+ * watchers' list (People's read of it, in the lobby) tells who only moved.
+ * A seat taken by someone on that list is silent; a seat given up waits a
+ * moment for the list to show its player among the watchers. The viewer's
+ * own move needs no list: they were watching, or `view.watching` says so.
+ */
+function usePresenceSound(code: string, view: RoomView) {
+  const client = useQueryClient();
+  const { phase, youId, watching: youWatch } = view;
   const here = view.players
     .filter((p) => !p.away)
     .map((p) => p.id)
     .sort()
     .join(" ");
-  const last = useRef(here);
+  const { data } = useQuery<WatchersView>({
+    queryKey: watchersKey(code),
+    queryFn: skipToken,
+  });
+  const watching = (data?.watchers ?? [])
+    .map((w) => w.id)
+    .sort()
+    .join(" ");
+  // the list now and as it was: the seats may change before or after it does
+  const lists = useRef({ now: new Set<string>(), before: new Set<string>() });
   useEffect(() => {
-    const before = new Set(last.current.split(" ").filter(Boolean));
-    const now = new Set(here.split(" ").filter(Boolean));
+    lists.current = { now: ids(watching), before: lists.current.now };
+  }, [watching]);
+  const last = useRef(here);
+  const timers = useRef(new Set<number>());
+  useEffect(() => {
+    const pending = timers.current;
+    return () => {
+      for (const timer of pending) window.clearTimeout(timer);
+    };
+  }, []);
+  useEffect(() => {
+    const before = ids(last.current);
+    const now = ids(here);
     last.current = here;
-    if ([...now].some((id) => !before.has(id))) playSound("join");
-    else if ([...before].some((id) => !now.has(id))) playSound("leave");
-  }, [here]);
+    const watched = (id: string) =>
+      lists.current.now.has(id) || lists.current.before.has(id);
+    const joined = [...now].some(
+      (id) => !before.has(id) && id !== youId && !watched(id),
+    );
+    if (joined) playSound("join");
+    const left = [...before].filter(
+      (id) => !now.has(id) && !(id === youId && youWatch),
+    );
+    if (left.length === 0) return;
+    if (phase !== "lobby") {
+      if (!joined) playSound("leave");
+      return;
+    }
+    // the list's read lands a moment after the seats change: read it now and wait
+    void client.invalidateQueries({ queryKey: watchersKey(code) });
+    const timer = window.setTimeout(() => {
+      timers.current.delete(timer);
+      const seated = ids(last.current);
+      if (left.some((id) => !seated.has(id) && !lists.current.now.has(id)))
+        playSound("leave");
+    }, STAND_GRACE_MS);
+    timers.current.add(timer);
+  }, [here, phase, youId, youWatch, code, client]);
 }
 
 /** Fetches every card's picture as soon as the room knows it, so the cards show up with it. */
@@ -187,11 +244,11 @@ const GAME_MUSIC: Partial<Record<RoomView["settings"]["game"], Track>> = {
 };
 
 function Areas() {
-  const { view } = useRoomContext();
+  const { code, view } = useRoomContext();
   const { area, screen } = useStage();
   useRoomTab();
   useStepSound();
-  usePresenceSound(view);
+  usePresenceSound(code, view);
   useMusicMuffle(area === "lobby");
   // Impostor and Lineup rooms play their own take instead of the stage,
   // lobby (muffled) to results; picking the game in the lobby crossfades at the
