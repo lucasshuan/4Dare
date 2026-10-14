@@ -471,5 +471,87 @@
     },
     "codeShort": "コードは英数字5文字です（例：K7M2Q）",
     "signInShort": "ログイン"
+  },
+  "sections": {
+    "ribbon": {
+      "label": "いま起きていること",
+      "picture": "<b>{name}</b>が{character}の新しい写真を投稿",
+      "character": "<b>{name}</b>が{character}をライブラリに追加",
+      "alias": "<b>{name}</b>が{character}に「{alias}」というニックネームをつけた",
+      "suggestion": "<b>{name}</b>が{kind, select, theme {お題} question {質問} other {ミッション}}「{title}」を提案",
+      "live": "<b>{name}</b>の「{title}」が工房から公開",
+      "leader": "<b>{name}</b>が今週のランキング1位",
+      "game": "<b>{game}</b> · {players}"
+    },
+    "rooms": {
+      "eyebrow": "ライブ · {n}ルーム",
+      "title": "公開ルーム",
+      "sub": "人を待っているルームに入るか、進行中の対戦を観戦して次から参加しよう。",
+      "seeAll": "すべてのルームを見る",
+      "all": "すべて",
+      "onlyOpen": "空きありのみ",
+      "none": "このゲームに空きのあるルームは今ありません。",
+      "noneAll": "今は公開ルームがありません。",
+      "create": "作ろう",
+      "watchers": "{n}人が観戦中"
+    },
+    "community": {
+      "eyebrow": "コミュニティ",
+      "title": "みんなでつくるゲーム",
+      "sub": "お題も写真もキャラクターも、プレイヤーから。採用を投票して、写真を送って、ランキングを駆け上がろう。",
+      "prev": "戻る",
+      "next": "次へ"
+    },
+    "rank": {
+      "title": "今週のランキング",
+      "meta": "直近7日間",
+      "flag": "メイン",
+      "allKicker": "すべてのゲーム",
+      "allTitle": "総合ランキング",
+      "allText": "今週のすべての対戦のXP合計（全ゲーム）。",
+      "perGame": "ゲーム別",
+      "gameText": "今週、このゲームの対戦だけのXP。",
+      "more": "すべて見る",
+      "contribKicker": "別の種類：貢献",
+      "contribTitle": "いちばん貢献した人",
+      "contribText": "写真・ニックネーム・キャラクター、公開された提案。ここではXPは数えません。",
+      "contribMore": "貢献を見る",
+      "mix": "写真{pictures}・ニックネーム{aliases}・キャラクター{characters}・公開{live}",
+      "guest": "ゲストはランキングに入りません。",
+      "guestTail": "ログインして対戦のXPを残そう。",
+      "you": "あなた · {place}位",
+      "noXp": "今週はまだXPがありません",
+      "xp": "{xp} XP",
+      "empty": "まだ誰もXPを獲得していません。今週最初の対戦で1位に。"
+    },
+    "ofi": {
+      "title": "工房で",
+      "meta": "<b>{n}</b>件が投票中",
+      "askTitle": "アイデアある？",
+      "askText": "お題、インポスターの質問、スタメンのミッションを提案しよう。みんなが投票します。",
+      "suggest": "提案する",
+      "kind": {
+        "theme": "お題",
+        "question": "質問",
+        "mission": "ミッション"
+      },
+      "voting": "投票中",
+      "live": "公開中",
+      "yes": "遊びたい",
+      "no": "合わない",
+      "pct": "が遊びたい · {n}票",
+      "play": "これで遊ぶ",
+      "signIn": "投票するにはアカウントでログインしてください。"
+    },
+    "lib": {
+      "title": "みんなのライブラリ",
+      "meta": "キャラクター<b>{characters, number}</b> · 写真<b>{pictures, number}</b>枚",
+      "text": "プレイヤーが送った写真つきのキャラクター。いちばん選ばれた写真がメインになります。",
+      "open": "ライブラリで{name}を見る"
+    },
+    "final": {
+      "title": "いま1試合いける。",
+      "text": "1ラウンドは10〜20分。リンクで友だちを呼ぶか、オンラインの人と遊ぼう。"
+    }
   }
 }

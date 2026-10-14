@@ -471,5 +471,87 @@
     },
     "codeShort": "The code has 5 letters or numbers, like K7M2Q",
     "signInShort": "Sign in"
+  },
+  "sections": {
+    "ribbon": {
+      "label": "Happening now",
+      "picture": "<b>{name}</b> sent a new photo of {character}",
+      "character": "<b>{name}</b> added {character} to the library",
+      "alias": "<b>{name}</b> nicknamed {character} “{alias}”",
+      "suggestion": "<b>{name}</b> suggested the {kind, select, theme {theme} question {question} other {mission}} “{title}”",
+      "live": "<b>{name}</b> got “{title}” into the Workshop's games",
+      "leader": "<b>{name}</b> leads this week's ranking",
+      "game": "<b>{game}</b> · {players}"
+    },
+    "rooms": {
+      "eyebrow": "Live · {n, plural, one {# room} other {# rooms}}",
+      "title": "Open rooms",
+      "sub": "Join one that's waiting for people, or watch a match in progress and join the next one.",
+      "seeAll": "See all rooms",
+      "all": "All",
+      "onlyOpen": "With a free seat",
+      "none": "No room with a free seat in this game right now.",
+      "noneAll": "No open rooms right now.",
+      "create": "Create one",
+      "watchers": "{n} watching"
+    },
+    "community": {
+      "eyebrow": "Community",
+      "title": "The crowd makes the game",
+      "sub": "Themes, photos and characters come from the players. Vote on what goes in, send a photo, climb the ranking.",
+      "prev": "Back",
+      "next": "Next"
+    },
+    "rank": {
+      "title": "This week's rankings",
+      "meta": "The last 7 days",
+      "flag": "Main",
+      "allKicker": "All games",
+      "allTitle": "Overall ranking",
+      "allText": "XP added up from every match this week, in any game.",
+      "perGame": "Per game",
+      "gameText": "This week's XP, from this game's matches only.",
+      "more": "See it all",
+      "contribKicker": "Another kind: contributions",
+      "contribTitle": "Who helped most",
+      "contribText": "Photos, nicknames, characters and suggestions that went live. No XP counted here.",
+      "contribMore": "See contributions",
+      "mix": "{pictures} photos, {aliases} nicknames, {characters} characters, {live} live",
+      "guest": "Guests aren't ranked.",
+      "guestTail": "Sign in to keep the XP from your matches.",
+      "you": "You · {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+      "noXp": "You haven't scored this week yet",
+      "xp": "{xp} XP",
+      "empty": "Nobody has scored yet. The week's first match takes the top."
+    },
+    "ofi": {
+      "title": "In the Workshop",
+      "meta": "<b>{n}</b> up for a vote",
+      "askTitle": "Got an idea?",
+      "askText": "Suggest a theme, a question for Impostor or a mission for Lineup. Everyone votes.",
+      "suggest": "Suggest",
+      "kind": {
+        "theme": "Theme",
+        "question": "Question",
+        "mission": "Mission"
+      },
+      "voting": "Voting",
+      "live": "Live",
+      "yes": "I'd play it",
+      "no": "Doesn't fit",
+      "pct": "would play · {n, plural, one {# vote} other {# votes}}",
+      "play": "Play with it",
+      "signIn": "Sign in with an account to vote."
+    },
+    "lib": {
+      "title": "The crowd's library",
+      "meta": "<b>{characters, number}</b> characters · <b>{pictures, number}</b> photos",
+      "text": "Characters with photos sent by players. The most picked one becomes the main photo.",
+      "open": "See {name} in the library"
+    },
+    "final": {
+      "title": "There's time for a match.",
+      "text": "A round takes 10 to 20 minutes. Call your friends with the link, or join whoever's already online."
+    }
   }
 }

@@ -471,5 +471,87 @@
     },
     "codeShort": "O código tem 5 letras ou números, tipo K7M2Q",
     "signInShort": "Entrar"
+  },
+  "sections": {
+    "ribbon": {
+      "label": "Acontecendo agora",
+      "picture": "<b>{name}</b> mandou uma foto nova de {character}",
+      "character": "<b>{name}</b> pôs {character} na biblioteca",
+      "alias": "<b>{name}</b> deu o apelido “{alias}” a {character}",
+      "suggestion": "<b>{name}</b> sugeriu {kind, select, theme {o tema} question {a pergunta} other {a missão}} “{title}”",
+      "live": "<b>{name}</b> emplacou “{title}” na Oficina",
+      "leader": "<b>{name}</b> lidera o ranking da semana",
+      "game": "<b>{game}</b> · {players}"
+    },
+    "rooms": {
+      "eyebrow": "Ao vivo · {n, plural, one {# sala} other {# salas}}",
+      "title": "Salas abertas",
+      "sub": "Entre numa que está esperando gente, ou assista uma partida rolando e entre na próxima.",
+      "seeAll": "Ver todas as salas",
+      "all": "Todas",
+      "onlyOpen": "Só com vaga",
+      "none": "Nenhuma sala com vaga nesse jogo agora.",
+      "noneAll": "Nenhuma sala aberta agora.",
+      "create": "Crie uma",
+      "watchers": "{n, plural, one {# assistindo} other {# assistindo}}"
+    },
+    "community": {
+      "eyebrow": "Comunidade",
+      "title": "A galera faz o jogo",
+      "sub": "Os temas, as fotos e os personagens vêm de quem joga. Vote no que entra, mande uma foto, suba no ranking.",
+      "prev": "Voltar",
+      "next": "Avançar"
+    },
+    "rank": {
+      "title": "Rankings da semana",
+      "meta": "Os últimos 7 dias",
+      "flag": "Principal",
+      "allKicker": "Todos os jogos",
+      "allTitle": "Ranking geral",
+      "allText": "XP somado de todas as partidas da semana, em qualquer jogo.",
+      "perGame": "Por jogo",
+      "gameText": "XP da semana só nas partidas deste jogo.",
+      "more": "Ver completo",
+      "contribKicker": "Outro tipo: contribuições",
+      "contribTitle": "Quem mais ajudou",
+      "contribText": "Fotos, apelidos, personagens e sugestões que entraram no ar. Aqui não conta XP.",
+      "contribMore": "Ver contribuições",
+      "mix": "{pictures} fotos, {aliases} apelidos, {characters} personagens, {live} no ar",
+      "guest": "Convidado não entra no ranking.",
+      "guestTail": "Entre pra guardar o XP das partidas.",
+      "you": "Você · {place}º",
+      "noXp": "Você ainda não pontuou nesta semana",
+      "xp": "{xp} XP",
+      "empty": "Ninguém pontuou ainda. A primeira partida da semana leva o topo."
+    },
+    "ofi": {
+      "title": "Na Oficina",
+      "meta": "<b>{n}</b> em votação",
+      "askTitle": "Tem uma ideia?",
+      "askText": "Sugira um tema, uma pergunta pro Impostor ou uma missão pra Escalação. A galera vota.",
+      "suggest": "Sugerir",
+      "kind": {
+        "theme": "Tema",
+        "question": "Pergunta",
+        "mission": "Missão"
+      },
+      "voting": "Votando",
+      "live": "No ar",
+      "yes": "Quero jogar",
+      "no": "Não cabe",
+      "pct": "querem jogar · {n, plural, one {# voto} other {# votos}}",
+      "play": "Jogar com ele",
+      "signIn": "Entre com uma conta pra votar."
+    },
+    "lib": {
+      "title": "Biblioteca da galera",
+      "meta": "<b>{characters, number}</b> personagens · <b>{pictures, number}</b> fotos",
+      "text": "Personagens com fotos mandadas por quem joga. A mais escolhida vira a principal.",
+      "open": "Ver {name} na biblioteca"
+    },
+    "final": {
+      "title": "Cabe uma partida agora.",
+      "text": "Uma rodada leva de 10 a 20 minutos. Chame a galera pelo link, ou entre com quem já está online."
+    }
   }
 }
