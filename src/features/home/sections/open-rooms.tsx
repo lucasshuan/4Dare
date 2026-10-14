@@ -8,7 +8,8 @@ import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
-import { JoinDialog, type JoinRequest } from "@/features/join/join-dialog";
+import type { JoinRequest } from "@/features/join/join-dialog";
+import { LazyJoinDialog } from "@/features/join/lazy-join-dialog";
 import { RoomArt } from "@/features/rooms/room-art";
 import { LiveDot, Meter, RoomStatus, Seats } from "@/features/rooms/room-bits";
 import { useRoomChanges } from "@/features/rooms/use-room-changes";
@@ -151,7 +152,7 @@ export function OpenRooms() {
           </span>
         </p>
       )}
-      <JoinDialog request={join} onClose={() => setJoin(null)} />
+      <LazyJoinDialog request={join} onClose={() => setJoin(null)} />
     </section>
   );
 }

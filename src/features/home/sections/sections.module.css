@@ -1379,6 +1379,8 @@ a.who:hover {
   aspect-ratio: 4 / 5;
   border-radius: 10px;
   object-fit: cover;
+  /* a character's head is almost always at the top */
+  object-position: top;
   background: var(--surface-sunken);
 }
 .fcard b {

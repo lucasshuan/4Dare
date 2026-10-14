@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { type CSSProperties, useState } from "react";
 import { Face } from "@/components/ui/face";
 import { useCurrentMatch } from "@/features/data/use-current-match";
-import { JoinDialog, type JoinRequest } from "@/features/join/join-dialog";
+import type { JoinRequest } from "@/features/join/join-dialog";
+import { LazyJoinDialog } from "@/features/join/lazy-join-dialog";
 import { guestAvatar } from "@/game/guest-names";
 import { useRouter } from "@/i18n/navigation";
 import { NEW_ROOM } from "@/lib/routes";
@@ -61,7 +62,7 @@ export function FinalCall() {
           </button>
         </div>
       </div>
-      <JoinDialog request={join} onClose={() => setJoin(null)} />
+      <LazyJoinDialog request={join} onClose={() => setJoin(null)} />
     </section>
   );
 }

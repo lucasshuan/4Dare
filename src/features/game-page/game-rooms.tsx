@@ -10,7 +10,8 @@ import { MatchGate } from "@/features/current-match/match-lock";
 import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
 import { gameRooms } from "@/features/home/game-rooms";
-import { JoinDialog, type JoinRequest } from "@/features/join/join-dialog";
+import type { JoinRequest } from "@/features/join/join-dialog";
+import { LazyJoinDialog } from "@/features/join/lazy-join-dialog";
 import { LiveDot, Meter, Seats } from "@/features/rooms/room-bits";
 import { secondsRange } from "@/features/rooms/room-row";
 import { useRoomChanges } from "@/features/rooms/use-room-changes";
@@ -86,7 +87,7 @@ export function GameRooms({ game, off }: { game: GameKey; off: boolean }) {
           </LayoutMotion>
         )}
       </section>
-      <JoinDialog request={join} onClose={() => setJoin(null)} />
+      <LazyJoinDialog request={join} onClose={() => setJoin(null)} />
     </MatchGate>
   );
 }

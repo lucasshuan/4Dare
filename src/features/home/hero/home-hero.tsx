@@ -15,7 +15,8 @@ import { QUESTION } from "@/components/ui/logo";
 import { useGameName } from "@/features/create/game-info";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { useOnlineByGame } from "@/features/data/use-public-rooms";
-import { JoinDialog, type JoinRequest } from "@/features/join/join-dialog";
+import type { JoinRequest } from "@/features/join/join-dialog";
+import { LazyJoinDialog } from "@/features/join/lazy-join-dialog";
 import { LiveDot } from "@/features/rooms/room-bits";
 import type { GameKey } from "@/game/games";
 import { useRouter } from "@/i18n/navigation";
@@ -303,7 +304,7 @@ export function HomeHero() {
           <path d={`${WAVE} V72 H0Z`} />
         </svg>
       </div>
-      <JoinDialog request={join} onClose={() => setJoin(null)} />
+      <LazyJoinDialog request={join} onClose={() => setJoin(null)} />
     </section>
   );
 }
