@@ -515,7 +515,8 @@ export interface MatchStore {
   /** Saves whether a character fit a theme for a player (drawn, or discovered); a new answer replaces theirs. */
   voteFit(vote: FitVote): Promise<void>;
   /** A player's finished matches, newest first. */
-  history(userId: string): Promise<PlayedMatch[]>;
+  /** A player's finished matches, newest first; only those finished after `since` (ms) when given. */
+  history(userId: string, since?: number): Promise<PlayedMatch[]>;
   /** A player's latest What for? boards, newest first, at most `limit`. */
   boards(userId: string, limit: number): Promise<StoredBoard[]>;
   /** A player's numbers over every game, without reading every match. */

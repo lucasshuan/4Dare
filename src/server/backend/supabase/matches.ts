@@ -94,10 +94,10 @@ export function supabaseMatches(): MatchStore {
       if (error) throw error;
       return data === true;
     },
-    async history(userId) {
+    async history(userId, since = 0) {
       const { data, error } = await serviceClient().rpc("player_matches", {
         p_user: userId,
-        p_since: new Date(0).toISOString(),
+        p_since: new Date(since).toISOString(),
       });
       if (error) throw error;
       return (data ?? []).flatMap((r): PlayedMatch[] => {

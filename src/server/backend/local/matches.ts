@@ -167,8 +167,9 @@ export function localMatches(): MatchStore {
       ),
   );
 
-  const history = async (userId: string) =>
+  const history = async (userId: string, since = 0) =>
     read()
+      .filter((m) => m.finishedAt > since)
       .flatMap((m) =>
         m.players
           .filter((p) => p.userId === userId)

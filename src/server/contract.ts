@@ -72,6 +72,12 @@ export interface AccountInfo {
  */
 export type Me = Omit<Account, "guestNumber"> & { guestName: string };
 
+/** An account's XP and its matches of the last week (GET /api/me/week), for the home's pass card. */
+export interface MeWeek {
+  xp: number;
+  plays: { at: number; game: GameKey; won: boolean }[];
+}
+
 /** The match a player is in and has not left, while it is going (from the theme to the last guess). */
 export interface CurrentMatch {
   code: string;
