@@ -444,6 +444,16 @@ function bodyColour(k: Kit, r: ReturnType<typeof rng>) {
   };
 }
 
+/**
+ * Long fractions cut to hundredths: Node and the browsers can disagree on a
+ * trig result's last digit, and a drawing drawn on the server must come out
+ * the same in the browser (or the page's hydration complains).
+ */
+const settle = (svg: string) =>
+  svg.replace(/-?\d+\.\d{3,}/g, (m) =>
+    String(Math.round(Number(m) * 100) / 100),
+  );
+
 /** The drawing as svg on a 100-unit canvas, transparent; small sizes (≤ 26 px) drop details. */
 function draw(k: Kit, seed: string, size: number): string {
   const r = rng(seed);
@@ -675,7 +685,7 @@ function draw(k: Kit, seed: string, size: number): string {
     s !== 1
       ? `<g transform="translate(50 100) scale(${sc3(s)}) translate(-50 -100)">${inner}</g>`
       : inner;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${g}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${settle(g)}</svg>`;
 }
 
 /** The kit for a DNA; a malformed one draws the plain Dare. */
