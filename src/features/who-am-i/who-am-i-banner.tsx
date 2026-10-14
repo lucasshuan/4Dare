@@ -148,7 +148,9 @@ const BURST = Array.from({ length: 10 }, (_, i) => {
  * so longer languages fit. Layers drift with the pointer; still for reduced motion.
  */
 export function WhoAmIBanner({ aside }: { aside: ReactNode }) {
-  const t = useTranslations("home.games.whoAmI.banner");
+  // the game's namespace, not the banner's: next-intl's key types lose a
+  // namespace that sits beside an array (demoQuestions)
+  const t = useTranslations("home.games.whoAmI");
   const reduced = useReducedMotion() ?? false;
   const { step } = useStepLoop(STEPS, STILL, reduced);
 
@@ -257,7 +259,7 @@ export function WhoAmIBanner({ aside }: { aside: ReactNode }) {
                   className="inline-flex items-center gap-1.5 rounded-pill bg-yes px-4 py-2 font-bold font-display text-[clamp(15px,2vw,20px)] text-on-yes leading-tight shadow-card"
                 >
                   <Sparkles className="size-[1.1em]" strokeWidth={2} />
-                  {t("hit")}
+                  {t("banner.hit")}
                 </m.div>
               ) : s.ask ? (
                 <m.div
@@ -270,7 +272,7 @@ export function WhoAmIBanner({ aside }: { aside: ReactNode }) {
                       : "bg-surface text-ink",
                   )}
                 >
-                  {t(s.ask)}
+                  {t(`banner.${s.ask}`)}
                 </m.div>
               ) : null}
             </AnimatePresence>
