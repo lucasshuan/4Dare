@@ -6,6 +6,8 @@
   "codeLabel": "Room code: {code}",
   "linkCopied": "Link copied",
   "copyLink": "Copy link",
+  "copyCode": "Click to copy",
+  "codeCopied": "Copied!",
   "settingsGroups": {
     "room": "Room",
     "rules": "Rules",

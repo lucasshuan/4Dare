@@ -50,6 +50,7 @@ import {
   updateSettings,
 } from "@/server/actions";
 import type { CreateRoomInput } from "@/server/contract";
+import { CodeTiles } from "./code-tiles";
 import { LobbyTabs } from "./lobby-tabs";
 import { PastMatches } from "./past-matches";
 import { People } from "./people";
@@ -74,9 +75,6 @@ const titleClass =
 
 /** The lobby's panels: the invite, the players and the room's settings, each lifted off the backdrop. */
 const panelClass = "rounded-lg bg-surface p-6 max-sm:p-4";
-
-/** How askew each tile of the room code sits, in degrees. */
-const TILE_TILT = [-3, 2, -1.5, 2.5, -2];
 
 /** Only what the host can change (the server rejects anything else). */
 const editable = ({
@@ -210,12 +208,15 @@ export function LobbyScreen() {
     await act(() => transferHost(code, id));
   };
 
-  const copy = async (text: string, done: string) => {
+  /** Copies `text`, says `done` if asked to; a clipboard that refuses shows the text instead. */
+  const copy = async (text: string, done?: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast(done);
+      if (done) toast(done);
+      return true;
     } catch {
       toast(text);
+      return false;
     }
   };
 
@@ -276,25 +277,8 @@ export function LobbyScreen() {
                 </p>
                 {/* desktop: "Copy link" right of the code; phones: under it */}
                 <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                  {/* the code as game tiles, each a little askew */}
-                  <div className="flex gap-2">
-                    <span className="sr-only">
-                      {t("codeLabel", { code: code.split("").join(" ") })}
-                    </span>
-                    {code.split("").map((c, i) => (
-                      <span
-                        // biome-ignore lint/suspicious/noArrayIndexKey: always five cells
-                        key={i}
-                        aria-hidden="true"
-                        style={{
-                          rotate: `${TILE_TILT[i % TILE_TILT.length]}deg`,
-                        }}
-                        className="flex h-20 w-14 items-center justify-center rounded-md bg-sunken font-display font-extrabold text-[40px] text-ink shadow-[inset_0_-5px_0_var(--line)] short:h-16 short:text-[34px] sm:w-16 sm:short:w-14"
-                      >
-                        {c}
-                      </span>
-                    ))}
-                  </div>
+                  {/* the code as game tiles: a press copies it */}
+                  <CodeTiles code={code} onCopy={() => copy(code)} />
                   <Button
                     onClick={() =>
                       copy(

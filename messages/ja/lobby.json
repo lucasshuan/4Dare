@@ -6,6 +6,8 @@
   "codeLabel": "ルームコード：{code}",
   "linkCopied": "リンクをコピーしました",
   "copyLink": "リンクをコピー",
+  "copyCode": "クリックでコピー",
+  "codeCopied": "コピーしました",
   "settingsGroups": {
     "room": "ルーム",
     "rules": "ルール",

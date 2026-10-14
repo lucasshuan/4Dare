@@ -6,6 +6,8 @@
   "codeLabel": "Código da sala: {code}",
   "linkCopied": "Link copiado",
   "copyLink": "Copiar link",
+  "copyCode": "Clique para copiar",
+  "codeCopied": "Copiado!",
   "settingsGroups": {
     "room": "Sala",
     "rules": "Regras",
