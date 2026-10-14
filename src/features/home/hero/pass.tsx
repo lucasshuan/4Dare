@@ -15,7 +15,6 @@ import { dur, ease } from "@/lib/motion";
 import { meNamed, useDisplayName } from "@/lib/names";
 import { rerollGuest } from "@/server/actions";
 import type { Me, MeWeek } from "@/server/contract";
-import { useSignIn } from "../use-sign-in";
 import { loadUserMenu } from "../user-menu";
 import { GardenStrip } from "./garden-strip";
 import s from "./hero.module.css";
@@ -38,6 +37,18 @@ function useWeek(me: Me | null) {
   }).data;
 }
 
+/**
+ * The guest's way to sign in is the top bar's own menu (who you are, Discord,
+ * Google): the link opens it, bringing the bar back into view if it scrolled away.
+ */
+function openUserMenu() {
+  const face = document.querySelector<HTMLElement>("header .tb-me");
+  if (!face) return;
+  if (face.getBoundingClientRect().bottom < 0)
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  face.click();
+}
+
 const utcMidnight = (now: number) => now - (now % 86_400_000);
 
 /**
@@ -53,7 +64,6 @@ export function Pass() {
   const week = useWeek(me);
   const client = useQueryClient();
   const { run, pending: rolling } = useAction();
-  const { signIn, pending } = useSignIn();
   const menu = useDeferred(loadUserMenu);
 
   if (!me) return <div className={s.pass} aria-hidden="true" />;
@@ -97,24 +107,19 @@ export function Pass() {
             <Shuffle strokeWidth={2.2} aria-hidden="true" />
           </button>
         </span>
-        <span className={`${s.passSide} ${s.passLink}`}>
+        <button
+          type="button"
+          className={`${s.passSide} ${s.passLink}`}
+          onClick={openUserMenu}
+        >
           <span className={s.txt}>{t("signInLead")}</span>
           <span className={s.short}>{t("signInShort")}</span>
-          {(["discord", "google"] as const).map((p) => (
-            <button
-              key={p}
-              type="button"
-              disabled={pending}
-              onClick={() => signIn(p)}
-              aria-label={p === "discord" ? "Discord" : "Google"}
-              className={s.provider}
-            >
-              {/* biome-ignore lint/performance/noImgElement: a tiny static svg */}
-              <img src={`/icons/${p}.svg`} alt="" width={18} height={18} />
-            </button>
-          ))}
+          {/* biome-ignore lint/performance/noImgElement: a tiny static svg */}
+          <img src="/icons/discord.svg" alt="Discord" width={18} height={18} />
+          {/* biome-ignore lint/performance/noImgElement: a tiny static svg */}
+          <img src="/icons/google.svg" alt="Google" width={18} height={18} />
           <span className={s.txt}>{t("signInTail")}</span>
-        </span>
+        </button>
       </div>
     );
   }

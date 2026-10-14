@@ -733,25 +733,6 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.provider {
-  display: inline-grid;
-  flex: none;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  margin: 0 -4px;
-  border-radius: 999px;
-  transition:
-    background-color 0.2s,
-    scale 0.2s var(--spring);
-}
-.provider:hover {
-  background: rgba(255, 255, 255, 0.16);
-  scale: 1.08;
-}
-.provider:disabled {
-  opacity: 0.6;
-}
 .passLink img {
   width: 18px;
   height: 18px;
@@ -923,9 +904,6 @@
   }
   .passLink:hover {
     color: #1e2433;
-  }
-  .passLink .provider:hover {
-    background: rgba(30, 36, 51, 0.08);
   }
   .passLink img {
     width: 20px;
