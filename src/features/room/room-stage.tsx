@@ -1,6 +1,6 @@
 "use client";
 
-import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, m, type Variants } from "motion/react";
 import dynamic from "next/dynamic";
 import { type Messages, useLocale, useTranslations } from "next-intl";
@@ -9,7 +9,7 @@ import { buttonClass } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { RoomChat } from "@/features/chat/room-chat";
 import { useRoomContext } from "@/features/data/room-context";
-import { watchersKey } from "@/features/data/use-watchers";
+import { useWatchersCache, watchersKey } from "@/features/data/use-watchers";
 import { EndScene, preloadEnd } from "@/features/ending/end-scene";
 import { ImpostorScenes } from "@/features/impostor/impostor-scenes";
 import { ImpostorScreen } from "@/features/impostor/impostor-screen";
@@ -30,7 +30,7 @@ import { RevealOverlay } from "@/features/who-am-i/reveal-overlay";
 import { ThemeScreen } from "@/features/who-am-i/theme-screen";
 import { GuessScene } from "@/features/who-am-i/turn/guess-scene";
 import { TurnScreen } from "@/features/who-am-i/turn/turn-screen";
-import type { ErrorCode, Phase, RoomView, WatchersView } from "@/game/types";
+import type { ErrorCode, Phase, RoomView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
@@ -152,10 +152,7 @@ function usePresenceSound(code: string, view: RoomView) {
     .map((p) => p.id)
     .sort()
     .join(" ");
-  const { data } = useQuery<WatchersView>({
-    queryKey: watchersKey(code),
-    queryFn: skipToken,
-  });
+  const data = useWatchersCache(code);
   const watching = (data?.watchers ?? [])
     .map((w) => w.id)
     .sort()

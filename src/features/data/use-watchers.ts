@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { BACKEND } from "@/config";
 import type { WatchersView } from "@/game/types";
 import { subscribeWatchers } from "@/lib/realtime";
@@ -54,4 +54,22 @@ export function useWatchers(code: string, watching: boolean) {
     };
   }, [client, code]);
   return query.data ?? null;
+}
+
+/**
+ * The list as useWatchers last read it (wherever that is mounted), without a
+ * read of its own. A second useQuery on the key, even one that never fetches,
+ * would hand the query its options, and the reads asked of it (a ping, a
+ * refresh after a move) would fail for want of a query function.
+ */
+export function useWatchersCache(code: string): WatchersView | null {
+  const client = useQueryClient();
+  return useSyncExternalStore(
+    useCallback(
+      (onChange: () => void) => client.getQueryCache().subscribe(onChange),
+      [client],
+    ),
+    () => client.getQueryData<WatchersView>(watchersKey(code)) ?? null,
+    () => null,
+  );
 }
