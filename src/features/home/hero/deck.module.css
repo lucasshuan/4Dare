@@ -1,0 +1,322 @@
+/*
+ * The game button beside "Play now", as a little deck: the game on top, the
+ * next one peeking behind, and a ring that fills and deals the next card.
+ */
+
+.deck {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dth: 40px;
+  position: relative;
+  display: inline-flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 72px;
+  align-items: center;
+  gap: 18px;
+  padding: 0 12px 0 14px;
+  overflow: visible;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: left;
+  backdrop-filter: blur(6px);
+  transition: background-color 0.2s;
+}
+.deck:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.cards {
+  position: relative;
+  flex: none;
+  width: calc(var(--dth) * 1.6 + 16px);
+  height: calc(var(--dth) + 10px);
+}
+.card {
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  display: block;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 2.5px #fff,
+    0 6px 14px rgba(10, 20, 60, 0.28);
+  transition:
+    transform 0.55s var(--spring),
+    opacity 0.4s var(--ease-soft);
+}
+.card > * {
+  height: var(--dth);
+  width: calc(var(--dth) * 1.6);
+  border-radius: 9px;
+}
+.front {
+  z-index: 2;
+  transform: rotate(-5deg);
+}
+.back {
+  z-index: 1;
+  opacity: 0.5;
+  filter: saturate(0.6) brightness(0.85);
+  transform: translate(9px, -2px) rotate(6deg) scale(0.9);
+}
+.back.fresh {
+  animation: fresh 0.5s 0.15s var(--ease-soft) both;
+}
+@keyframes fresh {
+  from {
+    opacity: 0;
+    transform: translate(16px, 3px) rotate(10deg) scale(0.82);
+  }
+}
+.front.come {
+  animation: come 0.55s var(--spring) both;
+}
+@keyframes come {
+  from {
+    opacity: 0.5;
+    transform: translate(9px, -2px) rotate(6deg) scale(0.9);
+  }
+}
+.gone {
+  z-index: 3;
+  animation: gone 0.5s var(--ease-soft) forwards;
+}
+@keyframes gone {
+  0% {
+    transform: rotate(-5deg);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-6px, -20px) rotate(-16deg) scale(1.04);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-46px, -8px) rotate(-38deg) scale(0.86);
+  }
+}
+.deck:hover .front {
+  transform: rotate(-9deg) translateY(-3px);
+}
+.deck:hover .back {
+  opacity: 0.7;
+  transform: translate(13px, -4px) rotate(9deg) scale(0.9);
+}
+/* as wide as the longest name, so the button never changes size as it deals */
+.txt {
+  display: flex;
+  min-width: 0;
+  width: 8.4em;
+  flex: 0 1 8.4em;
+  flex-direction: column;
+}
+.txt small {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+.name {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  height: 1.35em;
+  overflow: hidden;
+}
+.name > span {
+  grid-area: 1 / 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.name > .in {
+  animation: name-in 0.42s var(--ease-soft) both;
+}
+.name > .out {
+  animation: name-out 0.32s var(--ease-soft) forwards;
+}
+@keyframes name-in {
+  from {
+    opacity: 0;
+    transform: translateY(90%);
+  }
+}
+@keyframes name-out {
+  to {
+    opacity: 0;
+    transform: translateY(-90%);
+  }
+}
+/* the ring: fills while it waits, hands the next game over when it closes */
+.go {
+  position: relative;
+  display: grid;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background-color 0.2s;
+}
+.deck:hover .go {
+  background: rgba(255, 255, 255, 0.22);
+}
+.go > svg:last-child {
+  width: 18px;
+  height: 18px;
+  transition: rotate 0.3s var(--ease-soft);
+}
+.deck[data-popup-open] .go > svg:last-child {
+  rotate: 180deg;
+}
+.ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  rotate: -90deg;
+}
+.ring circle {
+  fill: none;
+  stroke-width: 3;
+}
+.track {
+  stroke: rgba(255, 255, 255, 0.22);
+}
+.fill {
+  stroke: var(--brand-butter);
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  stroke-linecap: round;
+}
+.auto .fill {
+  animation: deck-fill var(--dur, 8s) linear forwards;
+}
+@keyframes deck-fill {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* holds while you look at it, while its menu is open, or while the hero is out of view */
+.auto:hover .fill,
+.auto[data-popup-open] .fill,
+.auto.held .fill {
+  animation-play-state: paused;
+}
+.manual .ring {
+  animation: ring-off 0.4s var(--ease-soft) forwards;
+}
+.auto .ring {
+  animation: ring-on 0.45s var(--spring) both;
+}
+@keyframes ring-on {
+  from {
+    opacity: 0;
+    scale: 1.3;
+  }
+}
+@keyframes ring-off {
+  to {
+    opacity: 0;
+    scale: 1.3;
+  }
+}
+@container (max-width: 580px) {
+  .deck {
+    --dth: 36px;
+    height: 64px;
+    gap: 14px;
+    padding: 0 10px 0 12px;
+  }
+  .txt {
+    width: 7.4em;
+    flex-basis: 7.4em;
+  }
+  .txt small {
+    display: none;
+  }
+}
+@container (max-width: 470px) {
+  .deck {
+    --dth: 30px;
+    gap: 12px;
+    padding: 0 8px 0 10px;
+    font-size: 15px;
+  }
+  .txt {
+    width: 7.1em;
+    flex-basis: 7.1em;
+  }
+  .go {
+    width: 32px;
+    height: 32px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ring {
+    display: none;
+  }
+}
+
+/* the menu of games */
+.menu {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 40;
+  min-width: 290px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-pop-value);
+  outline: none;
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 0.28s var(--spring),
+    scale 0.28s var(--spring),
+    translate 0.28s var(--spring);
+}
+.menu[data-starting-style],
+.menu[data-ending-style] {
+  opacity: 0;
+  scale: 0.92;
+  translate: 0 -6px;
+}
+.item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 14px;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+.item[data-highlighted] {
+  background: var(--surface-sunken);
+}
+.item b {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+.item small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+.check {
+  margin-left: auto;
+  color: var(--sky);
+}
+.check svg {
+  width: 20px;
+  height: 20px;
+}

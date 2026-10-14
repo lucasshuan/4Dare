@@ -46,7 +46,8 @@ export function UserMenuFace({ me }: { me: Me }) {
   );
 }
 
-const loadPopover = deferred(() =>
+/** The user menu, fetched once for every caller (the top bar, the home's pass card). */
+export const loadUserMenu = deferred(() =>
   import("./user-menu-popover").then((m) => m.UserMenuPopover),
 );
 
@@ -56,7 +57,7 @@ const loadPopover = deferred(() =>
  */
 export function UserMenu() {
   const { me } = useMe();
-  const { loaded: Popover, props, reach } = useDeferred(loadPopover);
+  const { loaded: Popover, props, reach } = useDeferred(loadUserMenu);
   const label = useUserMenuLabel(me);
   if (!me)
     return (

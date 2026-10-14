@@ -21,7 +21,7 @@ import {
   useState,
 } from "react";
 import { keyClass } from "@/components/ui/button";
-import { Screen } from "@/components/ui/screen";
+import { Screen, UNDER_TOPBAR } from "@/components/ui/screen";
 import { GAME_INFO, useGameName } from "@/features/create/game-info";
 import { useCurrentMatch } from "@/features/data/use-current-match";
 import { useMe } from "@/features/data/use-me";
@@ -277,13 +277,7 @@ function Banner({
       <Mail strokeWidth={2.4} />
     );
   return (
-    <div
-      className={cn(
-        s.banner,
-        TONE[game],
-        "pt-[60px] sm:pt-[72px] sm:short:pt-[60px]",
-      )}
-    >
+    <div className={cn(s.banner, TONE[game], UNDER_TOPBAR)}>
       <div className={s.back} aria-hidden="true">
         <span className={cn(s.glow, s.g1)} />
         <span className={cn(s.glow, s.g2)} />

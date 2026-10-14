@@ -10,6 +10,7 @@ import { ease } from "@/lib/motion";
 import { GAME_LIST } from "@/lib/routes";
 import { GameCard } from "./game-card";
 import { GamesCarousel } from "./games-carousel";
+import { HomeHero } from "./hero/home-hero";
 import { HubActions, HubBrand } from "./hub-actions";
 import { useAuthErrorToast } from "./use-auth-error";
 
@@ -27,7 +28,12 @@ export function HomeScreen() {
   useAuthErrorToast();
 
   return (
-    <Screen left={<HubBrand />} right={<HubActions />}>
+    <Screen
+      left={<HubBrand />}
+      right={<HubActions />}
+      stage="brand"
+      banner={<HomeHero />}
+    >
       <section className="flex flex-col gap-3">
         <m.div
           initial={{ opacity: 0, y: 12 }}

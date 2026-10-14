@@ -416,5 +416,60 @@
     "close": "閉じる",
     "by": "{name}",
     "count": "{n}/{max}"
+  },
+  "hero": {
+    "online": "{n, plural, =0 {いまは<b>誰も</b>遊んでいません} other {<b>#</b>人がプレイ中}}",
+    "headline": {
+      "order": "name",
+      "prefix": {
+        "any": "やる人いる？",
+        "whoAmI": "やる人いる？",
+        "impostor": "やる人いる？",
+        "whatFor": "やる人いる？"
+      },
+      "name": {
+        "any": "",
+        "whoAmI": "だれ？",
+        "impostor": "インポスター",
+        "whatFor": "スタメン"
+      }
+    },
+    "sub": "友だちや、いまオンラインの人と遊べる当てっこゲーム。登録なしで、ブラウザからすぐ。",
+    "play": "今すぐ遊ぶ",
+    "deck": "ゲーム",
+    "any": "どれでも",
+    "anyHint": "いちばん人が待っているルーム",
+    "gameHint": "{n}人プレイ中 · {players}",
+    "hint": "空きのある公開ルームに入ります。なければ新しく作ります。",
+    "create": "ルームを作る",
+    "withFriends": "（友だちと）",
+    "code": "ルームコード",
+    "codeGo": "コードで参加",
+    "youAre": "あなたの名前",
+    "reroll": "別の名前とキャラを引く",
+    "signInLead": "または",
+    "signInTail": "でログインしてレベルとバッジを保存",
+    "hello": "{name}さん · レベル{level}",
+    "xp": "{xp} XP",
+    "dayBonus": "今日+{n}",
+    "dayBonusTip": "今日の最初の対戦で+{n} XP",
+    "playGame": "{game}で今すぐ遊ぶ",
+    "playAny": "どれかのゲームで今すぐ遊ぶ",
+    "tabs": "ゲーム",
+    "draw": {
+      "lines": ["どれになる？", "ぐるぐる…"],
+      "drawing": "抽選中…",
+      "cta": "これで遊ぶ",
+      "pick": "{game}を選ぶ"
+    },
+    "garden": {
+      "label": "あなたの花壇、この7日間",
+      "today": "今日",
+      "grew": ["", "芽が出た", "葉が出た", "つぼみがついた", "花が咲いた"],
+      "ready": "土の準備はできてる",
+      "rested": "花壇はお休み"
+    },
+    "codeShort": "コードは英数字5文字です（例：K7M2Q）",
+    "signInShort": "ログイン"
   }
 }

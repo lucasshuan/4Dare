@@ -1,0 +1,242 @@
+/* "Any game": the site's draw at home scale, the logo's 4 as the urn. */
+
+.scene {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: clamp(200px, 41cqw, 320px);
+  container-type: size;
+  border-radius: 28px;
+  cursor: pointer;
+  user-select: none;
+}
+.scene:focus-visible {
+  outline: 3px solid var(--brand-butter);
+  outline-offset: 4px;
+}
+/* the table everyone stands at: only its top shows, fading out like the banners' */
+.floor {
+  position: absolute;
+  left: 50%;
+  bottom: -46%;
+  width: 92%;
+  height: 70%;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  mask-image: linear-gradient(to bottom, #000 18%, transparent 36%);
+}
+.top {
+  position: absolute;
+  inset: 1% 0 auto;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+}
+.chip {
+  padding: 8px 16px;
+  border-radius: 14px 14px 14px 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 800 clamp(15px, 2.2cqw + 6px, 20px) / 1.15 var(--font-display);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  box-shadow: var(--shadow-card-value);
+}
+.urn {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  z-index: 2;
+  height: 64cqh;
+  aspect-ratio: 840 / 850;
+  translate: -50% 0;
+  transform-origin: 50% 90%;
+  filter: drop-shadow(0 10px 16px rgba(10, 20, 60, 0.28));
+  animation: urn-bob 3.4s ease-in-out infinite;
+}
+.urn svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.q {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes urn-bob {
+  50% {
+    translate: -50% -3%;
+  }
+}
+.crowd {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.p {
+  position: absolute;
+  bottom: 2%;
+  width: 32cqh;
+  height: 32cqh;
+  margin-left: -16cqh;
+}
+.p img {
+  position: absolute;
+  left: -25%;
+  bottom: 0;
+  width: 150%;
+  height: 150%;
+  max-width: none;
+  filter: drop-shadow(0 4px 6px rgba(10, 20, 60, 0.2));
+  transform-origin: 50% 100%;
+  animation: breathe 3s ease-in-out var(--d) infinite;
+}
+@keyframes breathe {
+  0%,
+  100% {
+    scale: 1 1;
+  }
+  50% {
+    scale: 1.02 0.97;
+  }
+}
+.cheer {
+  position: absolute;
+  left: 50%;
+  bottom: 112%;
+  translate: -50% 0;
+  font-size: 9cqh;
+  line-height: 1;
+  animation: emo-in 1.3s var(--ease-soft) forwards;
+}
+@keyframes emo-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+  24% {
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.9);
+  }
+}
+/* the card that comes out: a button, it picks its game */
+.card {
+  position: absolute;
+  z-index: 5;
+  width: clamp(120px, 24cqw, 180px);
+  padding: 0;
+  border-radius: 16px;
+  text-align: left;
+  visibility: hidden;
+  pointer-events: none;
+}
+.card.on {
+  visibility: visible;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.cardIn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 7px 7px 10px;
+  border-radius: 16px;
+  background: #fff;
+  color: #1e2433;
+  box-shadow: 0 14px 30px rgba(10, 20, 60, 0.35);
+  transition:
+    transform 0.35s var(--spring),
+    box-shadow 0.3s var(--ease-soft);
+}
+.card:hover .cardIn,
+.card:focus-visible .cardIn {
+  transform: rotate(3deg) translateY(-6px) scale(1.07);
+  box-shadow:
+    0 0 0 4px var(--brand-butter),
+    0 20px 40px rgba(10, 20, 60, 0.4);
+}
+.card:active .cardIn {
+  transform: rotate(3deg) translateY(-2px) scale(1.02);
+  transition-duration: 0.1s;
+}
+.card:focus-visible {
+  outline: none;
+}
+.cardThumb {
+  display: block;
+  border-radius: 10px;
+}
+.card b {
+  display: block;
+  padding: 0 3px;
+  font: 800 clamp(15px, 1.4cqw + 9px, 20px) / 1.05 var(--font-display);
+  letter-spacing: -0.02em;
+}
+.card small {
+  display: block;
+  margin-top: -3px;
+  padding: 0 3px;
+  color: #566075;
+  font-size: 12px;
+}
+.cta {
+  display: flex;
+  height: 0;
+  margin: 0 1px -6px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 10px;
+  background: var(--brand-butter);
+  color: #3a2e05;
+  font: 800 13px / 1 var(--font-display);
+  opacity: 0;
+  transition:
+    height 0.3s var(--spring),
+    margin 0.3s var(--spring),
+    opacity 0.2s;
+}
+.cta svg {
+  width: 14px;
+  height: 14px;
+  transition: translate 0.3s var(--ease-soft);
+}
+.card:hover .cta,
+.card:focus-visible .cta {
+  height: 30px;
+  margin: 2px 1px -3px;
+  opacity: 1;
+}
+.card:hover .cta svg {
+  translate: 2px 0;
+}
+.conf {
+  position: absolute;
+  z-index: 6;
+  width: 9px;
+  height: 6px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .urn,
+  .p img {
+    animation: none;
+  }
+}

@@ -755,3 +755,25 @@ export function avatarUri(dna: string, size = 64): string {
   }
   return uri;
 }
+
+const bodies = new Map<string, string>();
+
+/**
+ * The creature with room around it, feet at the bottom edge (wings and ears
+ * past the square stay whole), no pastel: for creatures standing on a page
+ * (the home's crowd and draw). Cached.
+ */
+export function creatureUri(dna: string): string {
+  let uri = bodies.get(dna);
+  if (uri === undefined) {
+    uri = svgUri(
+      avatarSvg(dna, 64).replace(
+        'viewBox="0 0 100 100"',
+        'viewBox="-25 -50 150 150"',
+      ),
+    );
+    if (bodies.size > 200) bodies.clear();
+    bodies.set(dna, uri);
+  }
+  return uri;
+}

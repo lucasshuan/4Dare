@@ -416,5 +416,60 @@
     "close": "Cerrar",
     "by": "de {name}",
     "count": "{n} de {max}"
+  },
+  "hero": {
+    "online": "{n, plural, =0 {<b>Nadie</b> jugando ahora} one {<b>#</b> persona jugando ahora} other {<b>#</b> personas jugando ahora}}",
+    "headline": {
+      "order": "prefix",
+      "prefix": {
+        "any": "Juguemos a",
+        "whoAmI": "Juguemos a",
+        "impostor": "Juguemos a",
+        "whatFor": "Juguemos a"
+      },
+      "name": {
+        "any": "",
+        "whoAmI": "¿Quién soy?",
+        "impostor": "Impostor",
+        "whatFor": "Alineación"
+      }
+    },
+    "sub": "Juegos de adivinanzas para jugar con amigos o con quien esté en línea. Sin registro, directo en el navegador.",
+    "play": "Jugar ahora",
+    "deck": "Juego",
+    "any": "Cualquiera",
+    "anyHint": "La sala con más gente esperando",
+    "gameHint": "{n} jugando · {players}",
+    "hint": "Entras en una sala abierta con lugar. Si no hay, abrimos una.",
+    "create": "Crear sala",
+    "withFriends": " con amigos",
+    "code": "Código de la sala",
+    "codeGo": "Entrar con el código",
+    "youAre": "Juegas como",
+    "reroll": "Sortear otro nombre y bichito",
+    "signInLead": "o entra con",
+    "signInTail": "para guardar nivel y logros",
+    "hello": "Hola, {name} · nivel {level}",
+    "xp": "{xp} XP",
+    "dayBonus": "+{n} hoy",
+    "dayBonusTip": "+{n} XP en la primera partida de hoy",
+    "playGame": "Jugar {game} ahora",
+    "playAny": "Jugar cualquier juego ahora",
+    "tabs": "Juegos",
+    "draw": {
+      "lines": ["¿Cuál será?", "Gira, gira…"],
+      "drawing": "Sorteando…",
+      "cta": "Jugar este",
+      "pick": "Elegir {game}"
+    },
+    "garden": {
+      "label": "Tu jardín, los últimos 7 días",
+      "today": "hoy",
+      "grew": ["", "brotó", "le salió una hoja", "echó un capullo", "floreció"],
+      "ready": "la tierra está lista",
+      "rested": "el jardín descansó"
+    },
+    "codeShort": "El código tiene 5 letras o números, como K7M2Q",
+    "signInShort": "Entrar"
   }
 }

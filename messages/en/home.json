@@ -416,5 +416,60 @@
     "close": "Close",
     "by": "by {name}",
     "count": "{n} of {max}"
+  },
+  "hero": {
+    "online": "{n, plural, =0 {<b>Nobody</b> playing now} one {<b>#</b> person playing now} other {<b>#</b> people playing now}}",
+    "headline": {
+      "order": "prefix",
+      "prefix": {
+        "any": "Who's up for",
+        "whoAmI": "Who's up for",
+        "impostor": "Who's up for",
+        "whatFor": "Who's up for"
+      },
+      "name": {
+        "any": "?",
+        "whoAmI": "Who am I?",
+        "impostor": "Impostor?",
+        "whatFor": "Lineup?"
+      }
+    },
+    "sub": "Guessing games to play with friends or with whoever's online. No sign-up, right in the browser.",
+    "play": "Play now",
+    "deck": "Game",
+    "any": "Any game",
+    "anyHint": "The room with the most people waiting",
+    "gameHint": "{n} playing · {players}",
+    "hint": "You land in an open room with a free seat. If there's none, we open one.",
+    "create": "Create a room",
+    "withFriends": " with friends",
+    "code": "Room code",
+    "codeGo": "Join with the code",
+    "youAre": "You're playing as",
+    "reroll": "Draw another name and creature",
+    "signInLead": "or sign in with",
+    "signInTail": "to keep your level and badges",
+    "hello": "Hi, {name} · level {level}",
+    "xp": "{xp} XP",
+    "dayBonus": "+{n} today",
+    "dayBonusTip": "+{n} XP on today's first match",
+    "playGame": "Play {game} now",
+    "playAny": "Play any game now",
+    "tabs": "Games",
+    "draw": {
+      "lines": ["Which one?", "Round and round…"],
+      "drawing": "Drawing…",
+      "cta": "Play this one",
+      "pick": "Pick {game}"
+    },
+    "garden": {
+      "label": "Your garden, the last 7 days",
+      "today": "today",
+      "grew": ["", "sprouted", "grew a leaf", "budded", "bloomed"],
+      "ready": "the soil is ready",
+      "rested": "the garden rested"
+    },
+    "codeShort": "The code has 5 letters or numbers, like K7M2Q",
+    "signInShort": "Sign in"
   }
 }

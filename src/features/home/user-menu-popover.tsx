@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useState } from "react";
+import { type ReactElement, type ReactNode, useState } from "react";
 import {
   AuthButton,
   PROVIDER_NAME,
@@ -43,7 +43,11 @@ export function UserMenuPopover({
   open,
   onOpenChange,
   autoFocus,
-}: DeferredProps) {
+  anchor,
+}: DeferredProps & {
+  /** Opened from somewhere else than the top bar's face (the home's pass card): its own button, the menu lined up with its start. */
+  anchor?: ReactElement<Record<string, unknown>>;
+}) {
   const t = useTranslations("home.user");
   const name = useDisplayName();
   const router = useRouter();
@@ -90,16 +94,24 @@ export function UserMenuPopover({
   return (
     <>
       <Popover.Root open={open} onOpenChange={onOpenChange}>
-        <Tip label={label}>
-          <Popover.Trigger
-            autoFocus={autoFocus}
-            className={userMenuTrigger(me)}
-          >
-            <UserMenuFace me={me} />
-          </Popover.Trigger>
-        </Tip>
+        {anchor ? (
+          <Popover.Trigger autoFocus={autoFocus} render={anchor} />
+        ) : (
+          <Tip label={label}>
+            <Popover.Trigger
+              autoFocus={autoFocus}
+              className={userMenuTrigger(me)}
+            >
+              <UserMenuFace me={me} />
+            </Popover.Trigger>
+          </Tip>
+        )}
         <Popover.Portal>
-          <Popover.Positioner sideOffset={8} align="end" className="z-50">
+          <Popover.Positioner
+            sideOffset={8}
+            align={anchor ? "start" : "end"}
+            className="z-50"
+          >
             <Popover.Popup
               style={accentStyle(card?.accent ?? null, me.avatar.color)}
               className="flex w-[min(340px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-4 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0"

@@ -63,9 +63,12 @@ const THUMB = {
 export function GameThumb({
   game,
   size = "md",
+  className,
 }: {
   game: GameKey;
   size?: keyof typeof THUMB;
+  /** Sizes it outside the boxes above (it stays 16:10 if the caller keeps it so). */
+  className?: string;
 }) {
   const { Thumb } = GAME_INFO[game];
   return (
@@ -74,6 +77,7 @@ export function GameThumb({
       className={cn(
         "relative block shrink-0 overflow-hidden rounded-md",
         THUMB[size],
+        className,
       )}
     >
       <Thumb />

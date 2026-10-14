@@ -1,0 +1,14 @@
+/* "Any game": a dice on the brand's colours, where a game would show its thumbnail. */
+.dice {
+  display: grid;
+  flex: none;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 16px;
+  background: conic-gradient(from 200deg, #2b69c8, #8a4fc4, #cf7024, #2b69c8);
+  color: #fff;
+}
+.dice svg {
+  width: 50%;
+  height: 50%;
+}

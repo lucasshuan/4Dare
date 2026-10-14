@@ -1,0 +1,298 @@
+/* The garden: seven days in one bed. Plants for days with matches, a sleeping moon over the ones without, a seed for today. */
+
+.strip {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  height: 56px;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(10, 20, 50, 0.14);
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background-color 0.25s var(--ease-soft),
+    border-color 0.25s;
+  animation: fade-up 0.8s 0.75s var(--ease-soft) both;
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+.strip:hover {
+  border-color: rgba(255, 255, 255, 0.36);
+  background: rgba(10, 20, 50, 0.24);
+}
+.bed {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 30px;
+  gap: 3px;
+}
+.day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* the plant, then its pot; three layers so growing, swaying and the hover gust never cut into each other */
+.pl {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 30px;
+  height: 22px;
+  margin-bottom: -2px;
+  transform-origin: 50% 100%;
+}
+.sw,
+.gu {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-origin: 50% 100%;
+}
+.pl svg {
+  position: absolute;
+  left: 3px;
+  bottom: -3px;
+  width: 24px;
+  height: 24px;
+}
+.grew .pl {
+  animation: grow 0.7s calc(0.9s + var(--i) * 0.09s) var(--spring) backwards;
+}
+.grew .sw {
+  animation: sway 4.2s calc(var(--i) * -0.6s) ease-in-out infinite alternate;
+}
+@keyframes grow {
+  from {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+}
+@keyframes sway {
+  from {
+    rotate: -4deg;
+  }
+  to {
+    rotate: 4deg;
+  }
+}
+.pot {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 24px;
+  height: 17px;
+  filter: drop-shadow(0 2px 0 rgba(10, 20, 50, 0.22));
+}
+.pot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* a rest day: an empty pot, a little moon dozing over it */
+.rest .pl svg {
+  left: 8px;
+  bottom: 3px;
+  width: 13px;
+  height: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  animation: doze 5s calc(var(--i) * -1.3s) ease-in-out infinite;
+}
+@keyframes doze {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: -10deg;
+  }
+  50% {
+    translate: 0 -2px;
+    rotate: 6deg;
+  }
+}
+.rest .pl::after {
+  content: "z";
+  position: absolute;
+  left: 20px;
+  top: -2px;
+  color: rgba(255, 255, 255, 0.45);
+  font: 700 8px / 1 var(--font-sans);
+  animation: z 3.6s calc(var(--i) * -0.9s) ease-in-out infinite;
+}
+@keyframes z {
+  0% {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  30%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 3px -5px;
+  }
+}
+/* today: a seed resting in the soil, nothing more */
+.seed .pl svg {
+  bottom: -6px;
+}
+.dl {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.62);
+  font: 600 10.5px / 1 var(--font-sans);
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+.today .dl {
+  color: #fff;
+  font-weight: 800;
+}
+/* the day's line on hover */
+.day::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 5;
+  padding: 5px 9px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 600 12px / 1.2 var(--font-sans);
+  white-space: nowrap;
+  box-shadow: var(--shadow-card-value);
+  opacity: 0;
+  translate: -50% 4px;
+  pointer-events: none;
+  transition:
+    opacity 0.15s,
+    translate 0.2s var(--ease-soft);
+}
+.day:hover::after {
+  opacity: 1;
+  translate: -50% 0;
+}
+/* a gust when you come over it, and a butterfly passes through */
+.strip:hover .grew .gu {
+  animation: gust 0.9s calc(var(--i) * 0.05s) var(--ease-soft);
+}
+@keyframes gust {
+  30% {
+    rotate: 14deg;
+  }
+  60% {
+    rotate: -5deg;
+  }
+  100% {
+    rotate: 0deg;
+  }
+}
+.fly {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 14px;
+  height: 11px;
+  opacity: 0;
+  pointer-events: none;
+}
+.fly svg {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 50%;
+  animation: flap 0.22s ease-in-out infinite alternate;
+}
+@keyframes flap {
+  to {
+    scale: 0.35 1;
+  }
+}
+.strip:hover .fly {
+  animation: fly-by 2.6s var(--ease-soft) forwards;
+}
+@keyframes fly-by {
+  0% {
+    opacity: 0;
+    translate: 0 18px;
+  }
+  12% {
+    opacity: 1;
+  }
+  35% {
+    translate: 80px -2px;
+  }
+  60% {
+    translate: 160px 10px;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 260px -10px;
+  }
+}
+@container (max-width: 620px) {
+  .strip {
+    height: 48px;
+    margin-left: -8px;
+    padding: 0 8px;
+  }
+}
+/* phones: the last five days, a little tighter */
+@media (max-width: 639.98px) {
+  .strip {
+    padding: 0 14px 0 10px;
+    animation-delay: 0.3s;
+  }
+  .bed {
+    grid-auto-columns: 25px;
+    gap: 1px;
+  }
+  .day:nth-child(-n + 2) {
+    display: none;
+  }
+  .pl {
+    width: 25px;
+    height: 20px;
+  }
+  .pl svg {
+    left: 2px;
+    width: 21px;
+    height: 21px;
+  }
+  .pot {
+    width: 20px;
+    height: 14px;
+  }
+  .rest .pl svg {
+    left: 6px;
+  }
+  .rest .pl::after {
+    left: 17px;
+  }
+  .dl {
+    font-size: 9.5px;
+  }
+  .day::after {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip,
+  .strip * {
+    animation: none;
+  }
+  .fly {
+    display: none;
+  }
+}

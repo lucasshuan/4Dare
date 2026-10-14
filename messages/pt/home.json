@@ -416,5 +416,60 @@
     "close": "Fechar",
     "by": "por {name}",
     "count": "{n} de {max}"
+  },
+  "hero": {
+    "online": "{n, plural, =0 {<b>Ninguém</b> jogando agora} one {<b>#</b> pessoa jogando agora} other {<b>#</b> pessoas jogando agora}}",
+    "headline": {
+      "order": "prefix",
+      "prefix": {
+        "any": "Quem topa um",
+        "whoAmI": "Quem topa um",
+        "impostor": "Quem topa um",
+        "whatFor": "Quem topa uma"
+      },
+      "name": {
+        "any": "?",
+        "whoAmI": "Quem sou eu?",
+        "impostor": "Impostor?",
+        "whatFor": "Escalação?"
+      }
+    },
+    "sub": "Jogos de adivinhação pra jogar com os amigos ou com quem estiver online. Sem cadastro, direto no navegador.",
+    "play": "Jogar agora",
+    "deck": "Jogo",
+    "any": "Qualquer um",
+    "anyHint": "A sala com mais gente esperando",
+    "gameHint": "{n} jogando · {players}",
+    "hint": "Você cai numa sala aberta com vaga. Se não tiver, a gente abre uma.",
+    "create": "Criar sala",
+    "withFriends": " com amigos",
+    "code": "Código da sala",
+    "codeGo": "Entrar com o código",
+    "youAre": "Você entra como",
+    "reroll": "Sortear outro nome e bichinho",
+    "signInLead": "ou entre com",
+    "signInTail": "pra guardar nível e conquistas",
+    "hello": "Oi, {name} · nível {level}",
+    "xp": "{xp} XP",
+    "dayBonus": "+{n} hoje",
+    "dayBonusTip": "+{n} XP na primeira partida de hoje",
+    "playGame": "Jogar {game} agora",
+    "playAny": "Jogar qualquer jogo agora",
+    "tabs": "Jogos",
+    "draw": {
+      "lines": ["Qual vai ser?", "Roda, roda…"],
+      "drawing": "Sorteando…",
+      "cta": "Jogar este",
+      "pick": "Escolher {game}"
+    },
+    "garden": {
+      "label": "Seu canteiro, os últimos 7 dias",
+      "today": "hoje",
+      "grew": ["", "brotou", "cresceu uma folha", "abriu um botão", "deu flor"],
+      "ready": "a terra está pronta",
+      "rested": "o canteiro descansou"
+    },
+    "codeShort": "O código tem 5 letras ou números, tipo K7M2Q",
+    "signInShort": "Entrar"
   }
 }

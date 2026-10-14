@@ -1,0 +1,944 @@
+/*
+ * The home's stage: a full-bleed brand blue (each game tints it its own) with
+ * drifting glows, question marks and two sweeping beams; the way in on the
+ * left, the game on show on the right, a crowd peeking over its wavy edge.
+ */
+
+.hero {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --stage: var(--brand-stage);
+  --stage-ink: #ffffff;
+  --av1: var(--aurora-vivid-1);
+  --av2: var(--aurora-vivid-2);
+  --av3: var(--aurora-vivid-3);
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: var(--stage);
+  color: var(--stage-ink);
+  padding-top: 96px;
+  transition: background-color 0.9s var(--ease-soft);
+}
+/* "any" took Who am I?'s sea blue (the logo sits in its headline), and Who am I? the brand blue */
+.hero[data-g="any"] {
+  --stage: #1c8ac0;
+  --av1: #19a7d8;
+  --av2: #2f8fd6;
+  --av3: #2ec5c8;
+}
+.hero[data-g="impostor"] {
+  --stage: #5440b5;
+  --av1: #6a3fd9;
+  --av3: #8f5bd6;
+}
+.hero[data-g="lineup"] {
+  --stage: #1e7466;
+  --av1: #1d8c6f;
+  --av2: #2a9d7c;
+  --av3: #3fae8c;
+}
+:global([data-theme="dark"]) .hero[data-g="any"] {
+  --stage: #12577a;
+}
+:global([data-theme="dark"]) .hero[data-g="impostor"] {
+  --stage: #33256e;
+}
+:global([data-theme="dark"]) .hero[data-g="lineup"] {
+  --stage: #134a42;
+}
+@media (max-height: 820px) and (min-width: 640px) {
+  .hero {
+    padding-top: 84px;
+  }
+}
+
+/* ---------- the ground: glows, question marks, beams, big "?" ---------- */
+.glow {
+  position: absolute;
+  z-index: -3;
+  border-radius: 999px;
+  filter: blur(70px);
+  opacity: 0.7;
+  will-change: transform;
+  transition: background-color 0.9s var(--ease-soft);
+}
+.g1 {
+  width: 48vw;
+  height: 48vw;
+  left: -12vw;
+  top: -18vw;
+  background: var(--av1);
+  animation: drift1 22s ease-in-out infinite alternate;
+}
+.g2 {
+  width: 40vw;
+  height: 40vw;
+  right: -8vw;
+  top: 10%;
+  background: var(--av3);
+  opacity: 0.55;
+  animation: drift2 26s ease-in-out infinite alternate;
+}
+.g3 {
+  width: 34vw;
+  height: 34vw;
+  left: 26%;
+  bottom: -16vw;
+  background: var(--av2);
+  opacity: 0.5;
+  animation: drift1 30s ease-in-out infinite alternate-reverse;
+}
+@keyframes drift1 {
+  to {
+    transform: translate(8vw, 6vw) scale(1.15);
+  }
+}
+@keyframes drift2 {
+  to {
+    transform: translate(-10vw, 8vw) scale(0.9);
+  }
+}
+.qfield {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.26;
+  background-image: url("/patterns/q-marks.svg");
+  background-size: 72px 72px;
+  animation: qdrift 60s linear infinite;
+  mask-image: radial-gradient(ellipse at 70% 40%, #000 0%, transparent 75%);
+}
+@keyframes qdrift {
+  to {
+    background-position: 720px 360px;
+  }
+}
+.beam {
+  position: absolute;
+  z-index: -1;
+  top: -20%;
+  width: 34%;
+  height: 140%;
+  background: linear-gradient(
+    to bottom,
+    rgba(246, 227, 161, 0.26),
+    rgba(246, 227, 161, 0) 80%
+  );
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+  transform-origin: 50% 0;
+  mix-blend-mode: soft-light;
+}
+.b1 {
+  left: 52%;
+  animation: sweep 9s ease-in-out infinite alternate;
+}
+.b2 {
+  left: 70%;
+  opacity: 0.8;
+  animation: sweep 11s ease-in-out infinite alternate-reverse;
+}
+@keyframes sweep {
+  from {
+    rotate: -14deg;
+  }
+  to {
+    rotate: 12deg;
+  }
+}
+.bigq {
+  position: absolute;
+  z-index: -1;
+  fill: var(--brand-butter);
+  opacity: 0.9;
+  animation: bob 7s ease-in-out infinite;
+}
+.q1 {
+  width: 70px;
+  left: 4%;
+  top: 22%;
+  rotate: -14deg;
+  opacity: 0.22;
+}
+.q2 {
+  width: 46px;
+  right: 6%;
+  top: 18%;
+  rotate: 16deg;
+  animation-delay: -2s;
+  opacity: 0.85;
+}
+.q3 {
+  width: 34px;
+  left: 47%;
+  top: 14%;
+  rotate: 8deg;
+  animation-delay: -4s;
+  opacity: 0.6;
+}
+@keyframes bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -14px;
+  }
+}
+
+/* ---------- the two columns ---------- */
+.grid {
+  display: grid;
+  width: 100%;
+  max-width: calc(1600px + 64px);
+  margin-inline: auto;
+  padding-inline: 32px;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr);
+  gap: 24px 40px;
+  align-items: center;
+  padding-bottom: 176px;
+  /* the grid's own box sits over a negative layer: clicks go through it to what it holds */
+  pointer-events: none;
+}
+.grid > *,
+.copy > * {
+  pointer-events: auto;
+}
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 22px;
+  padding-top: 12px;
+  container-type: inline-size;
+}
+.livecount {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 14px 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 14.5px;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+}
+.livecount b {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+.sub {
+  max-width: 52ch;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.5;
+  animation: fade-up 0.8s 0.35s var(--ease-soft) both;
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+.cta {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fade-up 0.8s 0.45s var(--ease-soft) both;
+}
+/* "Play now" and the game it plays stay one row at any column width: both shrink in steps instead of wrapping */
+.split {
+  display: flex;
+  max-width: 100%;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+.play {
+  --k: var(--brand-butter);
+  --lip: #b49a45;
+  position: relative;
+  display: inline-flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 72px;
+  margin-bottom: 6px;
+  padding: 0 38px;
+  border-radius: 999px;
+  background: var(--k);
+  color: #3a2e05;
+  font: 800 26px / 1 var(--font-display);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  box-shadow: 0 6px 0 var(--lip);
+  transform-origin: bottom;
+  transition:
+    translate 0.15s var(--ease-soft),
+    box-shadow 0.15s var(--ease-soft);
+  animation: boing 4.2s var(--ease-soft) infinite;
+}
+.play:hover {
+  translate: 0 -2px;
+  box-shadow: 0 8px 0 var(--lip);
+  animation: none;
+}
+.play:active {
+  translate: 0 6px;
+  box-shadow: 0 0 0 var(--lip);
+  animation: none;
+}
+.play svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.6;
+}
+@keyframes boing {
+  0%,
+  78%,
+  100% {
+    scale: 1 1;
+  }
+  84% {
+    scale: 1.05 0.9;
+  }
+  90% {
+    scale: 0.97 1.05;
+  }
+  95% {
+    scale: 1.01 0.99;
+  }
+}
+@container (max-width: 580px) {
+  .split .play {
+    height: 64px;
+    padding: 0 26px;
+    font-size: 23px;
+  }
+}
+@container (max-width: 470px) {
+  .split .play {
+    padding: 0 20px;
+    font-size: 21px;
+    gap: 8px;
+  }
+}
+/* in a match: the way in rests, faded */
+.cta.off {
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+}
+.hint svg {
+  width: 16px;
+  height: 16px;
+}
+.cta2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.glassBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  transition:
+    translate 0.15s var(--ease-soft),
+    background-color 0.2s;
+}
+.glassBtn:hover {
+  translate: 0 -1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+.glassBtn:active {
+  scale: 0.98;
+}
+.glassBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* code entry, in glass */
+.code {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.code input {
+  width: 168px;
+  height: 48px;
+  padding: 0 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font: 500 18px / 1 var(--font-mono);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  transition:
+    width 0.4s var(--ease-soft),
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.code input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.32em;
+}
+.code input:focus {
+  outline: none;
+  border-color: var(--brand-butter);
+  box-shadow: 0 0 0 3px rgba(246, 227, 161, 0.35);
+}
+.code input[aria-invalid="true"] {
+  border-color: #ffb4a6;
+}
+.go {
+  position: absolute;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: var(--brand-butter);
+  color: #3a2e05;
+  scale: 0;
+  transition: scale 0.3s var(--spring);
+}
+.go svg {
+  width: 16px;
+  height: 16px;
+}
+.code.ready .go {
+  scale: 1;
+}
+.code.shake input {
+  animation: shake 0.4s;
+}
+@keyframes shake {
+  20%,
+  60% {
+    translate: -6px 0;
+  }
+  40%,
+  80% {
+    translate: 6px 0;
+  }
+}
+.codeProblem {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 12px;
+  color: #ffd6cf;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* the game button, beside "Play now" (deck.module.css draws it) */
+.deck {
+  flex: 0 1 auto;
+}
+
+/* ---------- the game on show ---------- */
+/* behind the hero's content, over its ground: the Impostor's lights down dim the stage, never the title, buttons or crowd */
+.sceneBox {
+  position: relative;
+  z-index: -1;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  container-type: inline-size;
+}
+/* side by side, the scene sits lower: the space above it is kept for later */
+@media (min-width: 960.02px) {
+  .sceneBox {
+    translate: 0 clamp(56px, 6.5vw, 110px);
+  }
+}
+.sceneHost {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border-radius: 28px;
+  cursor: pointer;
+  transition:
+    opacity 0.22s var(--ease-soft),
+    translate 0.22s var(--ease-soft);
+}
+.sceneHost.swap {
+  opacity: 0;
+  translate: 0 8px;
+}
+.sceneHost:focus-visible {
+  outline: 3px solid var(--brand-butter);
+  outline-offset: 4px;
+}
+/* the game tabs under the scene are the phone's picker; wider screens pick with the deck beside "Play now" */
+.tabs {
+  position: relative;
+  z-index: 2;
+  display: none;
+}
+.tab {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition:
+    background-color 0.25s,
+    border-color 0.25s;
+}
+.tab:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.tabThumb {
+  width: 41.6px;
+  height: 26px;
+  border-radius: 6px;
+}
+.tab[aria-selected="true"] {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e2433;
+}
+
+/* ---------- the crowd's edge ---------- */
+.edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  z-index: 6;
+  height: 110px;
+  pointer-events: none;
+}
+.edge svg {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 72px;
+  fill: var(--canvas);
+  transition: fill 0.4s;
+}
+
+/* ---------- who you are, under the buttons ---------- */
+/* the same footprint for a guest and an account: a 56px card, then one 46px thing beside it, or under it when the column is narrow */
+.pass {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 56px;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 14px;
+  animation: fade-up 0.8s 0.6s var(--ease-soft) both;
+}
+@container (max-width: 620px) {
+  .pass {
+    height: 112px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+}
+.passCard {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 0 8px 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(10, 20, 50, 0.22);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  backdrop-filter: blur(6px);
+}
+.passFace {
+  --s: 44px;
+}
+.who {
+  line-height: 1.15;
+  padding-right: 6px;
+}
+/* a guest's name changes on every shuffle: hold the width of the widest one the game can give, so the card never jumps */
+.who.named {
+  min-width: 198px;
+}
+.who small {
+  display: block;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+}
+.who b {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.xptag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--brand-butter);
+  color: #3a2e05;
+  font: 700 11px / 1 var(--font-sans);
+  white-space: nowrap;
+}
+.xptag svg {
+  width: 12px;
+  height: 12px;
+}
+.xpbar {
+  display: block;
+  width: 120px;
+  height: 6px;
+  margin-top: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+.xpbar i {
+  display: block;
+  width: calc(var(--p) * 100%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand-butter);
+  animation: grow 1.2s 0.8s var(--ease-soft) both;
+}
+@keyframes grow {
+  from {
+    width: 0;
+  }
+}
+.shuffle {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  transition:
+    background-color 0.2s,
+    rotate 0.5s var(--spring);
+}
+.shuffle:hover {
+  background: rgba(255, 255, 255, 0.24);
+  rotate: 180deg;
+}
+.shuffle svg {
+  width: 16px;
+  height: 16px;
+}
+.lvring {
+  --p: 0.74;
+  padding: 3px;
+  border-radius: 999px;
+  background: conic-gradient(
+    var(--brand-butter) calc(var(--p) * 1turn),
+    rgba(255, 255, 255, 0.25) 0
+  );
+  transition: rotate 0.45s var(--spring);
+}
+.lvring > * {
+  --s: 38px;
+  display: block;
+  box-shadow: 0 0 0 2px var(--stage);
+}
+.isBtn {
+  cursor: pointer;
+  transition:
+    background-color 0.25s var(--ease-soft),
+    border-color 0.25s,
+    translate 0.25s var(--ease-soft),
+    box-shadow 0.25s;
+}
+.isBtn:hover,
+.isBtn[aria-expanded="true"],
+.isBtn[data-popup-open] {
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(10, 20, 50, 0.34);
+  box-shadow: 0 6px 16px rgba(10, 20, 50, 0.22);
+  translate: 0 -2px;
+}
+.isBtn:active {
+  translate: 0 0;
+}
+.isBtn:hover .lvring {
+  rotate: -8deg;
+}
+.passSide {
+  display: inline-flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  height: 46px;
+  align-items: center;
+}
+.passLink {
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  font-weight: 600;
+}
+.passLink:hover {
+  color: #fff;
+}
+.passLink:hover .txt {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.provider {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin: 0 -4px;
+  border-radius: 999px;
+  transition:
+    background-color 0.2s,
+    scale 0.2s var(--spring);
+}
+.provider:hover {
+  background: rgba(255, 255, 255, 0.16);
+  scale: 1.08;
+}
+.provider:disabled {
+  opacity: 0.6;
+}
+.passLink img {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  object-fit: contain;
+}
+.txt {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.short {
+  display: none;
+}
+
+/* the face rendered by Face: round, on its pastel */
+.face {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: var(--s, 40px);
+  height: var(--s, 40px);
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--c, #dce8fa);
+}
+.face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- smaller screens ---------- */
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 140px;
+  }
+}
+@media (max-width: 640px) {
+  .bigq {
+    display: none;
+  }
+}
+/* phones: the hero, reordered: title, the game on show, then the way in */
+@media (max-width: 640px) {
+  .hero {
+    padding-top: 92px;
+  }
+  .grid {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding-inline: 16px;
+    padding-bottom: 158px;
+  }
+  .copy {
+    display: contents;
+  }
+  .livecount {
+    order: 1;
+    align-self: flex-start;
+    height: 30px;
+    font-size: 13px;
+  }
+  .title {
+    order: 2;
+  }
+  .sub {
+    order: 3;
+    margin-top: -4px;
+    font-size: 15px;
+  }
+  .sceneBox {
+    order: 4;
+    gap: 10px;
+  }
+  .cta {
+    order: 5;
+    gap: 10px;
+  }
+  .pass {
+    order: 6;
+    height: 56px;
+    flex-direction: row;
+    gap: 8px;
+  }
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .split .play {
+    width: 100%;
+    height: 60px;
+    font-size: 22px;
+  }
+  .split .deck {
+    display: none;
+  }
+  .hint {
+    display: none;
+  }
+  .cta2 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+  }
+  .cta2 .glassBtn {
+    height: 48px;
+    padding: 0 12px;
+    font-size: 14.5px;
+  }
+  .cta2 .code,
+  .cta2 .code input {
+    width: 100%;
+  }
+  .cta2 .code input {
+    letter-spacing: 0.24em;
+  }
+  .xl {
+    display: none;
+  }
+  .passCard {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 10px;
+  }
+  .who,
+  .who.named {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .who b {
+    display: block;
+    overflow: hidden;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .xptag {
+    display: none;
+  }
+  .passSide {
+    flex: none;
+  }
+  .passSide .txt {
+    display: none;
+  }
+  .passSide .short {
+    display: inline;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .passLink {
+    height: 46px;
+    gap: 6px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #1e2433;
+  }
+  .passLink:hover {
+    color: #1e2433;
+  }
+  .passLink .provider:hover {
+    background: rgba(30, 36, 51, 0.08);
+  }
+  .passLink img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow,
+  .qfield,
+  .beam,
+  .bigq,
+  .play {
+    animation: none;
+  }
+}
