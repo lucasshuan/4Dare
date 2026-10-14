@@ -523,6 +523,12 @@ body {
   }
 }
 
+/* A card carried across the lobby (DragBoard): the closed hand everywhere, whatever lies under it (unlayered, so it beats the utilities). */
+[data-grabbing],
+[data-grabbing] * {
+  cursor: grabbing;
+}
+
 /*
  * Scrollbars: just a rounded thumb, no track, no arrows. In base so a component
  * can still hide its own (games carousel). Chrome drops the ::-webkit-scrollbar

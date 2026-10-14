@@ -11,6 +11,7 @@ import {
   Crown,
   Eye,
   Flag,
+  GripVertical,
   MessageSquare,
   MessageSquareOff,
   UserRoundX,
@@ -76,10 +77,10 @@ const cellIn = {
 /**
  * Who is in the room: the seats (players, then free seats, then for the host
  * the closed ones) and below them whoever watches. Each card is small and
- * upright, so many fit. Every card has a menu of what the viewer can do with
- * that person (the host can do most); the host also drags cards around:
- * players trade places, someone watching takes a seat, a player goes to
- * watch.
+ * upright, so many fit. A click on a card opens the person's quick card, and
+ * every card has a menu of what the viewer can do with that person (the host
+ * can do most); the host also holds and drags cards around: players trade
+ * places, someone watching takes a seat, a player goes to watch.
  */
 export function People({
   players,
@@ -341,7 +342,7 @@ export function People({
     <LayoutMotion>
       <DragBoard enabled={host && open} verdict={verdict} onDrop={onDrop}>
         <div className="flex flex-col gap-5">
-          <ul className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-2.5">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2.5">
             <AnimatePresence initial={false} mode="popLayout">
               {shown.players.map((p) => (
                 <PlayerCard
@@ -484,16 +485,34 @@ function ReadyDot({ ready, label }: { ready: boolean; label: string }) {
   );
 }
 
-function MutedMark({ label }: { label: string }) {
+/** `beside` the grip, when the card shows one. */
+function MutedMark({ label, beside }: { label: string; beside: boolean }) {
   return (
     <span
       role="img"
       aria-label={label}
       title={label}
-      className="absolute top-1.5 left-1.5 flex size-6 items-center justify-center rounded-pill bg-no-soft text-no"
+      className={cn(
+        "absolute top-1.5 flex size-6 items-center justify-center rounded-pill bg-no-soft text-no",
+        beside ? "left-5" : "left-1.5",
+      )}
     >
       <MessageSquareOff className="size-3.5" strokeWidth={2.25} />
     </span>
+  );
+}
+
+/** The quiet mark in a card's corner that says the host can carry it. */
+function Grip({ small }: { small?: boolean }) {
+  return (
+    <GripVertical
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute text-ink-muted/45",
+        small ? "top-1 left-0.5 size-3.5" : "top-1.5 left-1 size-4",
+      )}
+      strokeWidth={2}
+    />
   );
 }
 
@@ -502,12 +521,13 @@ function PlayerFace({
   player,
   displayName,
   muted,
-  avatar,
+  grip,
 }: {
   player: PlayerView;
   displayName: string;
   muted: boolean;
-  avatar?: ReactNode;
+  /** The host can carry the card: say so in its corner. */
+  grip: boolean;
 }) {
   const t = useTranslations("lobby");
   return (
@@ -515,17 +535,15 @@ function PlayerFace({
       style={seatWash(player.colorSlot)}
       className="relative flex h-full flex-col items-center gap-1.5 rounded-md px-2 pt-4 pb-3 text-center"
     >
-      {avatar ?? (
-        <span className="relative">
-          <Avatar avatar={player.avatar} size={52} seat={player.colorSlot} />
-          {player.isHost ? null : (
-            <ReadyDot
-              ready={player.ready}
-              label={player.ready ? t("ready") : t("notReady")}
-            />
-          )}
-        </span>
-      )}
+      <span className="relative">
+        <Avatar avatar={player.avatar} size={52} seat={player.colorSlot} />
+        {player.isHost ? null : (
+          <ReadyDot
+            ready={player.ready}
+            label={player.ready ? t("ready") : t("notReady")}
+          />
+        )}
+      </span>
       <span className="mt-0.5 w-full truncate font-semibold text-sm leading-tight">
         {displayName}
       </span>
@@ -541,7 +559,8 @@ function PlayerFace({
           t("notReadyShort")
         )}
       </span>
-      {muted ? <MutedMark label={t("muted")} /> : null}
+      {grip ? <Grip /> : null}
+      {muted ? <MutedMark label={t("muted")} beside={grip} /> : null}
     </div>
   );
 }
@@ -567,12 +586,12 @@ function PlayerCard({
   const drop = useDropState(target);
   const lifted = board.lifted?.id === player.id;
   const hidden = board.landing === player.id;
-  const face = (avatar?: ReactNode) => (
+  const face = () => (
     <PlayerFace
       player={player}
       displayName={displayName}
       muted={muted}
-      avatar={avatar}
+      grip={board.enabled}
     />
   );
   return (
@@ -585,43 +604,29 @@ function PlayerCard({
       data-person={player.id}
       {...dropProps(target)}
       onPointerDown={(e) =>
-        board.start(e, { kind: "player", id: player.id }, () => face())
+        board.start(e, { kind: "player", id: player.id }, face)
       }
       aria-roledescription={board.enabled ? t("dragHint") : undefined}
       className={cn(
         "relative min-h-[132px] rounded-md",
-        board.enabled && "cursor-grab touch-manipulation select-none",
+        board.enabled && "touch-manipulation select-none",
       )}
     >
       <div
         className={cn(
           "h-full transition-[opacity,transform] duration-150 ease-soft",
           lifted &&
-            "scale-95 opacity-30 [&>div]:outline-2 [&>div]:outline-line-strong [&>div]:outline-dashed",
+            "scale-95 opacity-30 [&>*>div]:outline-2 [&>*>div]:outline-line-strong [&>*>div]:outline-dashed",
           hidden && "opacity-0",
           drop.over && "scale-[1.03]",
         )}
       >
-        {face(
-          <span className="relative" data-no-drag="">
-            <PersonCard
-              person={{ ...player, name: displayName }}
-              className="block rounded-pill"
-            >
-              <Avatar
-                avatar={player.avatar}
-                size={52}
-                seat={player.colorSlot}
-              />
-            </PersonCard>
-            {player.isHost ? null : (
-              <ReadyDot
-                ready={player.ready}
-                label={player.ready ? t("ready") : t("notReady")}
-              />
-            )}
-          </span>,
-        )}
+        <PersonCard
+          person={{ ...player, name: displayName }}
+          className="block size-full rounded-md"
+        >
+          {face()}
+        </PersonCard>
       </div>
       {actions.length ? (
         <SeatMenu
@@ -782,21 +787,22 @@ function WatcherFace({
   watcher,
   displayName,
   muted,
-  avatar,
+  grip,
 }: {
   watcher: WatcherView;
   displayName: string;
   muted: boolean;
-  avatar?: ReactNode;
+  grip: boolean;
 }) {
   const t = useTranslations("lobby");
   return (
     <div className="relative flex h-full flex-col items-center gap-1 rounded-md bg-sunken px-1.5 pt-3 pb-2 text-center">
-      {avatar ?? <Avatar avatar={watcher.avatar} size={36} />}
+      <Avatar avatar={watcher.avatar} size={36} />
       <span className="w-full truncate font-medium text-[12px] leading-tight">
         {displayName}
       </span>
-      {muted ? <MutedMark label={t("muted")} /> : null}
+      {grip ? <Grip small /> : null}
+      {muted ? <MutedMark label={t("muted")} beside={grip} /> : null}
     </div>
   );
 }
@@ -823,12 +829,12 @@ function WatcherCard({
   const drop = useDropState(target);
   const lifted = board.lifted?.id === watcher.id;
   const hidden = board.landing === watcher.id;
-  const face = (avatar?: ReactNode) => (
+  const face = () => (
     <WatcherFace
       watcher={watcher}
       displayName={displayName}
       muted={muted}
-      avatar={avatar}
+      grip={board.enabled}
     />
   );
   return (
@@ -841,33 +847,29 @@ function WatcherCard({
       data-person={watcher.id}
       {...dropProps(target)}
       onPointerDown={(e) =>
-        board.start(e, { kind: "watcher", id: watcher.id }, () => face())
+        board.start(e, { kind: "watcher", id: watcher.id }, face)
       }
       aria-roledescription={board.enabled ? t("dragHint") : undefined}
       className={cn(
         "relative min-h-[84px] rounded-md",
-        board.enabled && "cursor-grab touch-manipulation select-none",
+        board.enabled && "touch-manipulation select-none",
       )}
     >
       <div
         className={cn(
           "h-full transition-[opacity,transform] duration-150 ease-soft",
           lifted &&
-            "scale-95 opacity-30 [&>div]:outline-2 [&>div]:outline-line-strong [&>div]:outline-dashed",
+            "scale-95 opacity-30 [&>*>div]:outline-2 [&>*>div]:outline-line-strong [&>*>div]:outline-dashed",
           hidden && "opacity-0",
           drop.over && "scale-[1.04]",
         )}
       >
-        {face(
-          <span data-no-drag="">
-            <PersonCard
-              person={{ ...watcher, name: displayName }}
-              className="block rounded-pill"
-            >
-              <Avatar avatar={watcher.avatar} size={36} />
-            </PersonCard>
-          </span>,
-        )}
+        <PersonCard
+          person={{ ...watcher, name: displayName }}
+          className="block size-full rounded-md"
+        >
+          {face()}
+        </PersonCard>
       </div>
       {actions.length ? (
         <SeatMenu

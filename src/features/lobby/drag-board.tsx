@@ -23,12 +23,14 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-// The host's hand on the lobby's people: pick a card up (anywhere but the
-// face, which opens the person's quick card, and the menu key), carry it, and
-// drop it on another card, a free seat or the watchers. The card lifts into a
-// floating copy that trails the pointer on a spring and leans into the move;
-// where it would land lights up with what the drop will do. On a phone the
-// card is held a moment first, so a swipe still scrolls.
+// The host's hand on the lobby's people: pick a card up (anywhere on it but
+// the menu key), carry it, and drop it on another card, a free seat or the
+// watchers. The card lifts into a floating copy that trails the pointer on a
+// spring and leans into the move; where it would land lights up with what the
+// drop will do. The card lifts once held a moment, or, with a mouse, once
+// pulled a few pixels; on a phone a swipe before the hold still scrolls. A
+// quick click or tap never lifts the card: it reaches the card's own button,
+// which opens the person's quick card.
 
 export type DragKind = "player" | "watcher";
 export interface DragItem {
@@ -86,6 +88,23 @@ const EDGE = 56;
 
 const same = (a: DropTarget | null, b: DropTarget | null) =>
   a?.kind === b?.kind && a?.id === b?.id;
+
+/**
+ * Eats the click the browser fires right after the release, so letting a
+ * carried card go on its own button opens nothing. The click comes before
+ * the next task, so the listener is gone a moment later either way.
+ */
+function swallowClick() {
+  const eat = (ev: Event) => {
+    ev.stopPropagation();
+    ev.preventDefault();
+  };
+  window.addEventListener("click", eat, { capture: true });
+  setTimeout(
+    () => window.removeEventListener("click", eat, { capture: true }),
+    0,
+  );
+}
 
 function scrollerOf(el: HTMLElement | null): HTMLElement | null {
   for (let p = el?.parentElement; p; p = p.parentElement) {
@@ -229,6 +248,9 @@ export function DragBoard({
       const origin = { x: e.clientX, y: e.clientY };
       let begun = false;
       let hold = 0;
+      // the face is a picture: the browser must not drag it on its own
+      const noNativeDrag = (ev: Event) => ev.preventDefault();
+      window.addEventListener("dragstart", noNativeDrag, { capture: true });
 
       const begin = (px: number, py: number) => {
         begun = true;
@@ -248,7 +270,7 @@ export function DragBoard({
         const prevent = (ev: Event) => ev.preventDefault();
         window.addEventListener("touchmove", prevent, { passive: false });
         window.addEventListener("contextmenu", prevent);
-        document.body.style.setProperty("cursor", "grabbing");
+        document.documentElement.setAttribute("data-grabbing", "");
         document.body.style.setProperty("user-select", "none");
         const tick = () => {
           const s = session.current;
@@ -287,7 +309,7 @@ export function DragBoard({
               () => window.removeEventListener("contextmenu", prevent),
               400,
             );
-            document.body.style.removeProperty("cursor");
+            document.documentElement.removeAttribute("data-grabbing");
             document.body.style.removeProperty("user-select");
           },
         };
@@ -311,7 +333,9 @@ export function DragBoard({
             if (far > TOUCH_SLOP) stop();
             return;
           }
+          // a pull lifts it before the hold does
           if (far < MOUSE_SLOP) return;
+          window.clearTimeout(hold);
           begin(ev.clientX, ev.clientY);
         }
         const s = session.current;
@@ -324,7 +348,9 @@ export function DragBoard({
       const up = (ev: PointerEvent) => {
         if (ev.pointerId !== e.pointerId) return;
         stop();
-        if (begun) void finish(ev.type === "pointerup");
+        if (!begun) return;
+        swallowClick();
+        void finish(ev.type === "pointerup");
       };
       const key = (ev: KeyboardEvent) => {
         if (ev.key !== "Escape") return;
@@ -337,20 +363,23 @@ export function DragBoard({
         window.removeEventListener("pointerup", up);
         window.removeEventListener("pointercancel", up);
         window.removeEventListener("keydown", key);
+        window.removeEventListener("dragstart", noNativeDrag, {
+          capture: true,
+        });
       };
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", up);
       window.addEventListener("pointercancel", up);
       window.addEventListener("keydown", key);
-      if (touch)
-        hold = window.setTimeout(() => {
-          begin(origin.x, origin.y);
-          const s = session.current;
-          if (s) {
-            x.set(origin.x - s.offset.x);
-            y.set(origin.y - s.offset.y);
-          }
-        }, HOLD_MS);
+      // held still a moment, the card lifts where it is
+      hold = window.setTimeout(() => {
+        begin(origin.x, origin.y);
+        const s = session.current;
+        if (s) {
+          x.set(origin.x - s.offset.x);
+          y.set(origin.y - s.offset.y);
+        }
+      }, HOLD_MS);
     },
     [enabled, settling, x, y, sx, sy, scale, still, hitTest, finish],
   );
