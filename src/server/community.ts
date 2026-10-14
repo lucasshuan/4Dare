@@ -265,24 +265,11 @@ const titleOf = (
   return (lang !== s.lang && s.translations[lang]?.[key]) || own[key] || "";
 };
 
-/** What the community put into the library and the Workshop, newest first; `mine` for the reader's own. */
-export async function contributionsPage(
-  kind: FeedFilter,
-  before: number | null,
-  mineOnly: boolean,
+/** Feed rows as the reader's language shows them; rows whose author is gone are left out. */
+async function feedItems(
+  rows: FeedRow[],
   lang: Lang,
-): Promise<ContributionsPage> {
-  const { auth, community } = getBackend();
-  const me = await auth.identity(lang);
-  const account = !me.isGuest;
-  // a guest has nothing of their own
-  if (mineOnly && !account) return { items: [], next: null, mine: null };
-  const rows = await community.feed(
-    kind === "all" ? null : kind,
-    mineOnly ? me.id : null,
-    before,
-    FEED_PAGE,
-  );
+): Promise<ContributionItem[]> {
   const [people, cat] = await Promise.all([
     peopleOf(
       rows.map((r) => r.userId),
@@ -290,7 +277,7 @@ export async function contributionsPage(
     ),
     catalog(lang),
   ]);
-  const items = rows.flatMap((r: FeedRow): ContributionItem[] => {
+  return rows.flatMap((r: FeedRow): ContributionItem[] => {
     const by = people.get(r.userId);
     if (!by) return [];
     const row = r.characterId ? cat.byId.get(r.characterId) : null;
@@ -338,6 +325,35 @@ export async function contributionsPage(
       },
     ];
   });
+}
+
+/** The latest of what the community put in, the same for every reader (the home's ribbon). */
+export const recentFeed = unstable_cache(
+  async (lang: Lang): Promise<ContributionItem[]> =>
+    feedItems(await getBackend().community.feed(null, null, null, 16), lang),
+  ["recent-feed"],
+  { revalidate: 300 },
+);
+
+/** What the community put into the library and the Workshop, newest first; `mine` for the reader's own. */
+export async function contributionsPage(
+  kind: FeedFilter,
+  before: number | null,
+  mineOnly: boolean,
+  lang: Lang,
+): Promise<ContributionsPage> {
+  const { auth, community } = getBackend();
+  const me = await auth.identity(lang);
+  const account = !me.isGuest;
+  // a guest has nothing of their own
+  if (mineOnly && !account) return { items: [], next: null, mine: null };
+  const rows = await community.feed(
+    kind === "all" ? null : kind,
+    mineOnly ? me.id : null,
+    before,
+    FEED_PAGE,
+  );
+  const items = await feedItems(rows, lang);
   let mine: ContributionsPage["mine"] = null;
   if (account) {
     const counts = await community.mine(me.id);
