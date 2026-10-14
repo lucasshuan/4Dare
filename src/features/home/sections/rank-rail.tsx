@@ -23,7 +23,7 @@ import { GAME_KEYS } from "@/game/games";
 import { guestAvatar } from "@/game/guest-names";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { CONTRIBUTIONS, RANKINGS } from "@/lib/routes";
+import { CONTRIBUTIONS, GAME_PATHS, RANKINGS } from "@/lib/routes";
 import type {
   LibraryHelper,
   MyRankingRow,
@@ -290,7 +290,11 @@ export function RankRail({ data }: { data: HomeData }) {
                 <GameThumb game={g} size="tiny" />
                 {t("perGame")}
               </span>
-              <h4 id={`rk-${g}-h`}>{gameName(g)}</h4>
+              <h4 id={`rk-${g}-h`}>
+                <Link href={GAME_PATHS[g]} className={s.gameLink}>
+                  {gameName(g)}
+                </Link>
+              </h4>
               <p>{t("gameText")}</p>
             </header>
             {rows.length ? (

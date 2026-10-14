@@ -668,6 +668,11 @@
   line-height: 1.05;
   letter-spacing: -0.02em;
 }
+.gameLink:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
 .rkc header p {
   margin-top: 4px;
   color: var(--ink-muted);
