@@ -1937,6 +1937,7 @@ export type Database = {
         Args: { c: Database["public"]["Tables"]["characters"]["Row"] };
         Returns: Database["public"]["Enums"]["taste"][];
       };
+      close_idle_rooms: { Args: never; Returns: number };
       co_players: {
         Args: { p_user: string };
         Returns: {
