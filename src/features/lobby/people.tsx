@@ -26,7 +26,6 @@ import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useWatchers, watchersKey } from "@/features/data/use-watchers";
 import { PersonCard } from "@/features/profile/person-card";
-import { SEAT_COLORS } from "@/game/seat-colors";
 import type { PlayerView, WatcherView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
@@ -49,10 +48,14 @@ import {
   type Verdict,
 } from "./drag-board";
 import { type SeatAction, SeatMenu } from "./host-controls";
+import {
+  applyMove,
+  asWatcher,
+  type Move,
+  type PendingMove,
+  prepare,
+} from "./moves";
 import { ReportDialog, type ReportTarget } from "./report-dialog";
-
-/** A move between the seats and the watchers, as the server takes it (moveSomeone). */
-type Move = Parameters<typeof moveSomeone>[1];
 
 const layoutSpring = { type: "spring", stiffness: 520, damping: 40 } as const;
 
@@ -69,121 +72,6 @@ const cellIn = {
     transition: { duration: dur.fast, ease: ease.soft },
   },
 } as const;
-
-const asWatcher = (p: PlayerView): WatcherView => ({
-  id: p.id,
-  isYou: p.isYou,
-  isGuest: p.isGuest,
-  name: p.name,
-  avatar: p.avatar,
-});
-
-/** Someone watching, seated for the moment the server takes to say so. */
-const asPlayer = (
-  w: WatcherView,
-  colorSlot: number,
-  seat: number,
-): PlayerView => ({
-  id: w.id,
-  isYou: w.isYou,
-  isHost: false,
-  isGuest: w.isGuest,
-  name: w.name,
-  avatar: w.avatar,
-  ready: false,
-  status: "not_ready",
-  seat,
-  colorSlot,
-  turnOrder: null,
-  isTurn: false,
-  card: null,
-  cardHidden: false,
-  pickedById: null,
-  discoveredAt: null,
-  place: null,
-  gaveUp: false,
-  away: false,
-  hidden: false,
-});
-
-const freeColor = (players: PlayerView[]) => {
-  const held = new Set(players.map((p) => p.colorSlot));
-  for (let i = 0; i < SEAT_COLORS; i++) if (!held.has(i)) return i;
-  return 0;
-};
-
-/** The lists as they will be once `move` lands: shown at once, the server follows. */
-function applyMove(
-  players: PlayerView[],
-  watchers: WatcherView[],
-  total: number,
-  move: Move | null,
-) {
-  const next = moved(players, watchers, total, move);
-  // the room and the watchers are read apart: for a moment someone can be in
-  // both (or twice, the move shown and the server's answer): the seat wins
-  const seen = new Set<string>();
-  const once = <T extends { id: string }>(list: T[]) =>
-    list.filter((x) => !seen.has(x.id) && seen.add(x.id));
-  const seated = once(next.players);
-  const watching = once(next.watchers);
-  return {
-    players: seated,
-    watchers: watching,
-    total: Math.max(
-      watching.length,
-      next.total - (next.watchers.length - watching.length),
-    ),
-  };
-}
-
-function moved(
-  players: PlayerView[],
-  watchers: WatcherView[],
-  total: number,
-  move: Move | null,
-) {
-  if (!move) return { players, watchers, total };
-  const P = [...players];
-  const W = [...watchers];
-  const pi = (id: string) => P.findIndex((p) => p.id === id);
-  const wi = (id: string) => W.findIndex((w) => w.id === id);
-  switch (move.kind) {
-    case "swap-players": {
-      const [i, j] = [pi(move.a), pi(move.b)];
-      if (i >= 0 && j >= 0) [P[i], P[j]] = [P[j], P[i]];
-      return { players: P, watchers: W, total };
-    }
-    case "swap-watchers": {
-      const [i, j] = [wi(move.a), wi(move.b)];
-      if (i >= 0 && j >= 0) [W[i], W[j]] = [W[j], W[i]];
-      return { players: P, watchers: W, total };
-    }
-    case "swap-seat": {
-      const [i, j] = [pi(move.seated), wi(move.watcher)];
-      if (i < 0 || j < 0) return { players, watchers, total };
-      const seated = P[i];
-      P[i] = asPlayer(W[j], seated.colorSlot, i);
-      W[j] = asWatcher(seated);
-      return { players: P, watchers: W, total };
-    }
-    case "stand": {
-      const i = pi(move.id);
-      if (i < 0) return { players, watchers, total };
-      W.push(asWatcher(P[i]));
-      P.splice(i, 1);
-      return { players: P, watchers: W, total: total + 1 };
-    }
-    case "seat": {
-      const j = wi(move.id);
-      if (j < 0) return { players, watchers, total };
-      const at = Math.min(move.at ?? P.length, P.length);
-      P.splice(at, 0, asPlayer(W[j], freeColor(P), at));
-      W.splice(j, 1);
-      return { players: P, watchers: W, total: Math.max(0, total - 1) };
-    }
-  }
-}
 
 /**
  * Who is in the room: the seats (players, then free seats, then for the host
@@ -218,7 +106,7 @@ export function People({
   const { code, view, me, watching } = useRoomContext();
   const { act, pending } = useRoomAction();
   const list = useWatchers(code, watching);
-  const [move, setMove] = useState<Move | null>(null);
+  const [move, setMove] = useState<PendingMove | null>(null);
   const [leaving, setLeaving] = useState<string[]>([]);
   const [reporting, setReporting] = useState<ReportTarget | null>(null);
   const host = me.isHost;
@@ -226,10 +114,13 @@ export function People({
   const muted = new Set(view.muted);
 
   const shown = applyMove(
-    players,
-    (list?.watchers ?? []).filter((w) => !leaving.includes(w.id)),
-    list?.total ?? 0,
+    {
+      players,
+      watchers: (list?.watchers ?? []).filter((w) => !leaving.includes(w.id)),
+      total: list?.total ?? 0,
+    },
     move,
+    view.settings.game,
   );
   const free = shown.players.length < seats;
   const hostId = view.hostId;
@@ -237,12 +128,19 @@ export function People({
   const refreshWatchers = () =>
     client.invalidateQueries({ queryKey: watchersKey(code) });
 
-  /** Shows `next` at once and asks the server; a refusal puts things back. */
-  const go = async (
-    next: Move | null,
-    action: () => ReturnType<typeof act>,
-  ) => {
-    setMove(next);
+  /**
+   * Shows `next` at once and asks the server: the room's answer lands first,
+   * the watchers' read after it, and the move holds until both have (a
+   * refusal puts things back). The viewer may be past the watchers shown.
+   */
+  const go = async (next: Move, action: () => ReturnType<typeof act>) => {
+    setMove(
+      prepare(next, shown, [
+        ...shown.players.map(asWatcher),
+        ...shown.watchers,
+        asWatcher(me),
+      ]),
+    );
     await act(action);
     await refreshWatchers();
     setMove(null);
