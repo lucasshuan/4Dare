@@ -1280,6 +1280,12 @@ export interface PublicRoom {
   host: Pick<Identity, "id" | "isGuest" | "avatar" | "lang"> & { name: string };
   players: number;
   seats: number;
+  /** Who sits there, in seat order: the list draws their faces (names in the reader's language). */
+  seated: SeatedView[];
+  /** Where the room is (lobby, or the match's phase): the list says what is going on. */
+  phase: Phase;
+  /** People watching the match without a seat. */
+  watching: number;
   /** The tastes the room switched off: the list shows them and filters by them. */
   offTastes: Taste[];
   /** When the room was made (server ms): the game page lists the oldest first. */
@@ -1298,12 +1304,24 @@ export interface PublicRoom {
   judgeSeconds: number;
 }
 
-/** A listed room as the server keeps it, before its host's name is put in the reader's language. */
-export type ListedRoom = Omit<PublicRoom, "host"> & {
+/** A seated player as the room list shows them. */
+export interface SeatedView {
+  name: string;
+  avatar: Avatar;
+  isGuest: boolean;
+  /** Their colour (0-based, --seat-1..10). */
+  colorSlot: number;
+}
+
+/** A listed room as the server keeps it, before names are put in the reader's language and watchers counted. */
+export type ListedRoom = Omit<PublicRoom, "host" | "seated" | "watching"> & {
   host: Pick<
     Identity,
     "id" | "isGuest" | "name" | "guestNumber" | "avatar" | "lang"
   >;
+  seated: (Pick<Identity, "isGuest" | "name" | "guestNumber" | "avatar"> & {
+    colorSlot: number;
+  })[];
 };
 
 /** Where a player is now, as their profile tells someone else. */

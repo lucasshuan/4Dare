@@ -588,6 +588,14 @@ export function toPublicRoom(state: RoomState, now: number): ListedRoom | null {
     },
     players: s.players.length,
     seats: s.settings.seats,
+    seated: s.players.map((p) => ({
+      isGuest: p.isGuest,
+      name: p.name,
+      guestNumber: p.guestNumber,
+      avatar: p.avatar,
+      colorSlot: p.colorSlot,
+    })),
+    phase: s.phase,
     offTastes: s.settings.offTastes ?? [],
     createdAt: s.createdAt,
     voteSeconds: s.settings.voteSeconds,
@@ -631,9 +639,20 @@ export function playingNow(
   };
 }
 
-/** A listed room for a reader: its host's name in their language. */
-export const showRoom = (r: ListedRoom, lang: Lang): PublicRoom => ({
+/** A listed room for a reader: names in their language, and how many watch it. */
+export const showRoom = (
+  r: ListedRoom,
+  lang: Lang,
+  watching = 0,
+): PublicRoom => ({
   ...r,
+  seated: r.seated.map((p) => ({
+    name: displayName(p, lang),
+    avatar: p.avatar,
+    isGuest: p.isGuest,
+    colorSlot: p.colorSlot,
+  })),
+  watching,
   host: {
     id: r.host.id,
     isGuest: r.host.isGuest,

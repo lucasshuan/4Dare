@@ -11,9 +11,16 @@ import { langParam } from "@/server/http";
  */
 export async function GET(request: Request) {
   const lang = langParam(request);
-  const rooms = (await getBackend().rooms.listPublic()).map((r) =>
-    showRoom(r, lang),
-  );
+  const backend = getBackend();
+  const listed = await backend.rooms.listPublic();
+  // who watches each room without a seat; the list still shows if this fails
+  const watching = await backend.watchers
+    .counts(
+      listed.map((r) => r.code),
+      Date.now(),
+    )
+    .catch(() => ({}) as Record<string, number>);
+  const rooms = listed.map((r) => showRoom(r, lang, watching[r.code] ?? 0));
   return Response.json(
     { rooms },
     {

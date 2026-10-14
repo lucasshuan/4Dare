@@ -112,6 +112,8 @@ export interface WatcherStore {
   reassign(from: PlayerId, to: Identity): Promise<void>;
   /** Rows unseen since `before` (ms). */
   prune(before: number): Promise<void>;
+  /** How many watch each of `codes` now (the same freshness as `list`); rooms nobody watches are left out. */
+  counts(codes: string[], now: number): Promise<Record<string, number>>;
 }
 
 export interface NewReport {

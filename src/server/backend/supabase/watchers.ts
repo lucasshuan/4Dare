@@ -127,5 +127,19 @@ export function supabaseWatchers(): WatcherStore {
       const { error } = await db().delete().lt("seen_at", iso(before));
       if (error) throw error;
     },
+    async counts(codes, now) {
+      if (!codes.length) return {};
+      const { data, error } = await db()
+        .select("room_code")
+        .in("room_code", codes)
+        .gte("seen_at", iso(now - WATCH_STALE_MS))
+        .or(`gone_at.is.null,gone_at.gt.${iso(now - GONE_GRACE_MS)}`)
+        .limit(2000);
+      if (error) throw error;
+      const out: Record<string, number> = {};
+      for (const r of (data ?? []) as { room_code: string }[])
+        out[r.room_code] = (out[r.room_code] ?? 0) + 1;
+      return out;
+    },
   };
 }

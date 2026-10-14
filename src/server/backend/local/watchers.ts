@@ -76,5 +76,12 @@ export function localWatchers(): WatcherStore {
     async prune(before) {
       for (const [id, w] of rows) if (w.seenAt < before) rows.delete(id);
     },
+    async counts(codes, now) {
+      const out: Record<string, number> = {};
+      for (const w of rows.values())
+        if (codes.includes(w.room) && fresh(w, now))
+          out[w.room] = (out[w.room] ?? 0) + 1;
+      return out;
+    },
   };
 }
