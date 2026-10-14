@@ -3,7 +3,7 @@
 import { Menu } from "@base-ui/react/menu";
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { type CSSProperties, useLayoutEffect, useRef, useState } from "react";
 import { GAME_INFO, useGameName } from "@/features/create/game-info";
 import { LiveDot } from "@/features/rooms/room-bits";
 import { GAME_KEYS, type GameKey } from "@/game/games";
@@ -71,7 +71,8 @@ export function GameDeck({
   const shown = useRef(choice);
 
   // the front card is dealt away, the one behind comes forward, a new one slides in at the back
-  useEffect(() => {
+  // (before the paint: the button never shows the new game with the old cards for a frame)
+  useLayoutEffect(() => {
     if (shown.current === choice) return;
     shown.current = choice;
     setLap((n) => n + 1);

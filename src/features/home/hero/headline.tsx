@@ -130,14 +130,19 @@ export function Headline({
             { duration: 200, easing: "ease-in", fill: "forwards" },
           )
         : null;
+    // the faded name stays faded until React swaps it for the new one (a
+    // cancel here would show it again for a frame); a choice that changes
+    // midway cancels it, in the same tick the next one starts
+    let done = false;
     void Promise.all([out?.finished.catch(() => {}), ready]).then(() => {
       if (!live) return;
-      out?.cancel();
+      done = true;
       setShown(next);
       setEntering(!still);
     });
     return () => {
       live = false;
+      if (!done) out?.cancel();
     };
   }, [choice, shown, ja, still, t, fontOf]);
 
@@ -237,8 +242,9 @@ function KeyLine({ text }: { text: string }) {
   const el = useRef<HTMLSpanElement>(null);
   const first = useRef(true);
   const still = useReducedMotion() ?? false;
+  // before the paint: the new words never show for a frame ahead of their fade-in
   // biome-ignore lint/correctness/useExhaustiveDependencies: animate when the words change
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (first.current) {
       first.current = false;
       return;

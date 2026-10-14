@@ -6,6 +6,8 @@
 
 .hero {
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* even in and out: a change of game never lands in one frame (the Impostor's lights down go with its scene) */
+  --ease-glide: cubic-bezier(0.45, 0, 0.55, 1);
   --stage: var(--brand-stage);
   --stage-ink: #ffffff;
   --av1: var(--aurora-vivid-1);
@@ -17,7 +19,7 @@
   background: var(--stage);
   color: var(--stage-ink);
   padding-top: 96px;
-  transition: background-color 0.9s var(--ease-soft);
+  transition: background-color 0.9s var(--ease-glide);
 }
 /* "any" took Who am I?'s sea blue (the logo sits in its headline), and Who am I? the brand blue */
 .hero[data-g="any"] {
@@ -60,7 +62,7 @@
   filter: blur(70px);
   opacity: 0.7;
   will-change: transform;
-  transition: background-color 0.9s var(--ease-soft);
+  transition: background-color 0.9s var(--ease-glide);
 }
 .g1 {
   width: 48vw;
@@ -491,12 +493,12 @@
   min-width: 0;
 }
 .layer.enter {
-  animation: layer-in 0.45s var(--ease-soft) both;
+  animation: layer-in 0.6s var(--ease-glide) both;
 }
 .layer.out {
   z-index: 1;
   pointer-events: none;
-  animation: layer-out 0.45s var(--ease-soft) both;
+  animation: layer-out 0.6s var(--ease-glide) both;
 }
 @keyframes layer-in {
   from {

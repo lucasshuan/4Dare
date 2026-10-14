@@ -59,7 +59,7 @@ const SCENE_MS: Record<Choice, number> = {
 const deckMs = (c: Choice) => SCENE_MS[c] + 600 + FADE_MS;
 /** A pick holds the game picked; after this long with no picks the deck deals again. */
 const RESUME_MS = 10_000;
-const FADE_MS = 450;
+const FADE_MS = 600;
 
 /** The big butter-yellow "?" drifting over the stage. */
 const BigQ = ({ className }: { className: string }) => (

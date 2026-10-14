@@ -2,7 +2,13 @@
 
 import { useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { BRAND, FOUR, QUESTION } from "@/components/ui/logo";
 import { GAME_INFO, GameThumb, useGameName } from "@/features/create/game-info";
 import { GAME_KEYS, type GameKey } from "@/game/games";
@@ -92,8 +98,8 @@ export function DrawScene({
   const words = useRef({ lines, drawing });
   words.current = { lines, drawing };
 
-  // a new line comes up with a little spring
-  useEffect(() => {
+  // a new line comes up with a little spring (before the paint, so it never shows for a frame first)
+  useLayoutEffect(() => {
     if (line === null || still) return;
     const el = chip.current;
     if (!el) return;
