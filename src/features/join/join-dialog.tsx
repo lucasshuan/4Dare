@@ -246,7 +246,9 @@ export function JoinDialog({
     [shown, router, toast, te, onClose],
   );
 
-  // seated: three, two, one, in
+  // seated: three, two, one, in (the page around it re-renders as it likes: the count goes on)
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
   useEffect(() => {
     if (!seated) return;
     const my = token.current;
@@ -259,14 +261,17 @@ export function JoinDialog({
         if (n > 0) setCount(n);
         else {
           window.clearInterval(id);
-          void finish(my);
+          void finishRef.current(my);
         }
       },
       still ? 250 : 1000,
     );
-    if (shown?.room) router.prefetch(`/r/${shown.room.code}`);
     return () => window.clearInterval(id);
-  }, [seated, still, finish, router, shown]);
+  }, [seated, still]);
+  const code = shown?.room?.code;
+  useEffect(() => {
+    if (seated && code) router.prefetch(`/r/${code}`);
+  }, [seated, code, router]);
 
   const close = () => {
     token.current++;
