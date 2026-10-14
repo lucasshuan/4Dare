@@ -5,7 +5,11 @@ test("the hub leads to the game, and the language select keeps the page", {
   tag: "@smoke",
 }, async ({ page }) => {
   await page.goto("/pt");
-  await page.getByRole("link", { name: /quem sou eu\?/i }).click();
+  // the week's rankings name each game, a link to its page
+  await page
+    .getByRole("link", { name: /^quem sou eu\?$/i })
+    .first()
+    .click();
   await page.waitForURL(/\/pt\/quem-sou-eu$/);
   await expect(page.getByRole("link", { name: "Criar sala" })).toBeVisible();
   // A click that lands before the page hydrates opens nothing: try again. Only
@@ -41,9 +45,7 @@ test("a Portuguese browser lands on /pt and can switch to English at the root", 
   }).toPass({ timeout: 30_000 });
   await page.getByRole("option", { name: "English" }).click();
   await page.waitForURL((url) => url.pathname === "/");
-  await expect(
-    page.getByRole("heading", { name: "Pick a game" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Open rooms" })).toBeVisible();
   // the pick sticks: an unprefixed address stays English for this browser
   await page.goto("/who-am-i");
   await expect(page).toHaveURL(/\/who-am-i$/);
@@ -54,11 +56,8 @@ test("signing in from the user menu (test account) lets you pick a name", async 
   page,
 }) => {
   await page.goto("/");
-  await page
-    .locator("header")
-    .getByRole("button", { expanded: false })
-    .first()
-    .click();
+  // the face at the top right (the side menu's burger is a button too)
+  await page.locator("header .tb-me").click();
   await expect(page.getByText("You're playing as a guest")).toBeVisible();
   await page.getByRole("button", { name: /sign in with discord/i }).click();
   await page.waitForURL(/\/profile$/);
@@ -67,10 +66,7 @@ test("signing in from the user menu (test account) lets you pick a name", async 
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText("Profile saved")).toBeVisible();
   await page.goto("/");
-  const menu = page
-    .locator("header")
-    .getByRole("button", { expanded: false })
-    .first();
+  const menu = page.locator("header .tb-me");
   await expect(menu).toContainText("Bia");
   await menu.click();
   await expect(page.getByRole("link", { name: "Edit profile" })).toBeVisible();
