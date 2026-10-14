@@ -341,7 +341,7 @@ export function ImpostorBanner() {
                     : "bg-surface text-ink",
                 )}
               >
-                {t(s.ask)}
+                {t(`banner.${s.ask}`)}
                 {s.ask === "q" ? (
                   <span className="ml-2 inline-flex items-center gap-1 whitespace-nowrap rounded-pill bg-sunken px-2 py-0.5 align-middle font-semibold text-[0.68em] text-ink-muted">
                     🐔 1–10 🦁
