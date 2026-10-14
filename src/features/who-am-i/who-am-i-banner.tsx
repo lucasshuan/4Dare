@@ -149,7 +149,7 @@ export function WhoAmIBanner() {
   // namespace that sits beside an array (demoQuestions)
   const t = useTranslations("home.games.whoAmI");
   const reduced = useReducedMotion() ?? false;
-  const { step } = useStepLoop(STEPS, STILL, reduced);
+  const { step } = useStepLoop(STEPS, STILL, reduced, 0);
 
   // Pointer parallax: -0.5..0.5 across the banner, eased by a spring.
   const px = useMotionValue(0);

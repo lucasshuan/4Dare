@@ -2,7 +2,6 @@
 
 import { Play, Plus, Zap } from "lucide-react";
 import { useReducedMotion } from "motion/react";
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
   type ComponentType,
@@ -31,25 +30,23 @@ import { type Choice, Headline } from "./headline";
 import s from "./hero.module.css";
 import { Pass } from "./pass";
 
-// the games' stage scenes come after the page: the hero opens on the draw
-const SCENES: Record<GameKey, ComponentType> = {
-  "who-am-i": dynamic(
-    () =>
-      import("@/features/who-am-i/who-am-i-banner").then((m) => m.WhoAmIBanner),
-    { ssr: false },
-  ),
-  impostor: dynamic(
-    () =>
-      import("@/features/impostor/impostor-banner").then(
-        (m) => m.ImpostorBanner,
-      ),
-    { ssr: false },
-  ),
-  lineup: dynamic(
-    () => import("@/features/lineup/lineup-banner").then((m) => m.LineupBanner),
-    { ssr: false },
-  ),
+// the games' stage scenes come after the page (the hero opens on the draw),
+// fetched while the browser is idle so a scene is ready before its turn
+const LOAD: Record<GameKey, () => Promise<ComponentType>> = {
+  "who-am-i": () =>
+    import("@/features/who-am-i/who-am-i-banner").then((m) => m.WhoAmIBanner),
+  impostor: () =>
+    import("@/features/impostor/impostor-banner").then((m) => m.ImpostorBanner),
+  lineup: () =>
+    import("@/features/lineup/lineup-banner").then((m) => m.LineupBanner),
 };
+
+/** A scene on the stage; the one leaving fades out over the one coming in. */
+interface Layer {
+  id: number;
+  choice: Choice;
+  out: boolean;
+}
 
 /** How long each scene takes to play once through (the step lists add up to these). */
 const SCENE_MS: Record<Choice, number> = {
@@ -58,11 +55,11 @@ const SCENE_MS: Record<Choice, number> = {
   impostor: 13600,
   lineup: 12550,
 };
-/** A beat to land, and for a game the 220ms its scene takes to swap in. */
-const deckMs = (c: Choice) => SCENE_MS[c] + 600 + (c === "any" ? 0 : 220);
+/** A beat to land, and the crossfade a scene comes in with. */
+const deckMs = (c: Choice) => SCENE_MS[c] + 600 + FADE_MS;
 /** A pick holds the game picked; after this long with no picks the deck deals again. */
 const RESUME_MS = 10_000;
-const SWAP_MS = 220;
+const FADE_MS = 450;
 
 /** The big butter-yellow "?" drifting over the stage. */
 const BigQ = ({ className }: { className: string }) => (
@@ -93,8 +90,13 @@ export function HomeHero() {
   const [choice, setChoice] = useState<Choice>("any");
   const [auto, setAuto] = useState(true);
   const [held, setHeld] = useState(false);
-  const [shown, setShown] = useState<GameKey | null>(null);
-  const [swap, setSwap] = useState(false);
+  const [scenes, setScenes] = useState<Partial<Record<GameKey, ComponentType>>>(
+    {},
+  );
+  const [layers, setLayers] = useState<Layer[]>([
+    { id: 0, choice: "any", out: false },
+  ]);
+  const seq = useRef(1);
   const [join, setJoin] = useState<JoinRequest | null>(null);
   const hero = useRef<HTMLElement>(null);
   const deckHover = useRef(false);
@@ -123,21 +125,50 @@ export function HomeHero() {
     return () => io.disconnect();
   }, []);
 
-  // a game's scene swaps in with a little fade (none from the draw)
+  const want = useCallback((g: GameKey) => {
+    void LOAD[g]().then(
+      (C) => setScenes((all) => (all[g] ? all : { ...all, [g]: C })),
+      () => {},
+    );
+  }, []);
+  // every scene fetched once the page has settled
   useEffect(() => {
-    if (choice === "any") return;
-    if (shown === null || still) {
-      setShown(choice);
-      return;
+    const all = () => {
+      for (const g of Object.keys(LOAD) as GameKey[]) want(g);
+    };
+    if (typeof window.requestIdleCallback !== "function") {
+      const id = window.setTimeout(all, 1500);
+      return () => window.clearTimeout(id);
     }
-    if (shown === choice) return;
-    setSwap(true);
-    const id = window.setTimeout(() => {
-      setShown(choice);
-      setSwap(false);
-    }, SWAP_MS);
+    const id = window.requestIdleCallback(all, { timeout: 3000 });
+    return () => window.cancelIdleCallback(id);
+  }, [want]);
+
+  // a new choice comes in once its scene is ready, over the one leaving
+  const ready = choice === "any" || !!scenes[choice];
+  useEffect(() => {
+    if (choice !== "any" && !scenes[choice]) want(choice);
+  }, [choice, scenes, want]);
+  useEffect(() => {
+    if (!ready) return;
+    setLayers((all) => {
+      const top = all[all.length - 1];
+      if (top && !top.out && top.choice === choice) return all;
+      return [
+        ...all.map((l) => ({ ...l, out: true })),
+        { id: seq.current++, choice, out: false },
+      ];
+    });
+  }, [choice, ready]);
+  const leaving = layers.some((l) => l.out);
+  useEffect(() => {
+    if (!leaving) return;
+    const id = window.setTimeout(
+      () => setLayers((all) => all.filter((l) => !l.out)),
+      still ? 0 : FADE_MS,
+    );
     return () => window.clearTimeout(id);
-  }, [choice, shown, still]);
+  }, [leaving, still]);
 
   const resumeAuto = useCallback(() => {
     // not while you're on it, its menu is open, or the hero is out of view: a bit later
@@ -161,7 +192,6 @@ export function HomeHero() {
   const total = online
     ? Object.values(online).reduce((a, n) => a + (n ?? 0), 0)
     : null;
-  const Scene = shown ? SCENES[shown] : null;
 
   return (
     <section
@@ -255,28 +285,44 @@ export function HomeHero() {
           <Pass />
         </div>
         <div className={s.sceneBox}>
-          {choice === "any" ? (
-            <DrawScene
-              onPlay={() => !match && quick("any")}
-              onPick={(g) => pick(g)}
-            />
-          ) : (
-            // biome-ignore lint/a11y/useSemanticElements: it wraps a whole scene, not a label
-            <div
-              role="button"
-              tabIndex={0}
-              aria-label={t("playGame", { game: gameName(choice) })}
-              className={cn(s.sceneHost, swap && s.swap)}
-              onClick={() => !match && quick(choice)}
-              onKeyDown={(e) => {
-                if (e.key !== "Enter" && e.key !== " ") return;
-                e.preventDefault();
-                if (!match) quick(choice);
-              }}
-            >
-              {Scene ? <Scene /> : null}
-            </div>
-          )}
+          <div className={s.stage}>
+            {layers.map((l) => {
+              const Scene = l.choice === "any" ? null : scenes[l.choice];
+              return (
+                <div
+                  key={l.id}
+                  className={cn(s.layer, l.id > 0 && s.enter, l.out && s.out)}
+                  inert={l.out ? true : undefined}
+                  aria-hidden={l.out ? true : undefined}
+                >
+                  {l.choice === "any" ? (
+                    <DrawScene
+                      onPlay={() => !match && quick("any")}
+                      onPick={(g) => pick(g)}
+                    />
+                  ) : (
+                    // biome-ignore lint/a11y/useSemanticElements: it wraps a whole scene, not a label
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-label={t("playGame", {
+                        game: gameName(l.choice),
+                      })}
+                      className={s.sceneHost}
+                      onClick={() => !match && quick(l.choice)}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter" && e.key !== " ") return;
+                        e.preventDefault();
+                        if (!match) quick(l.choice);
+                      }}
+                    >
+                      {Scene ? <Scene /> : null}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
           <div className={s.tabs} role="tablist" aria-label={t("tabs")}>
             {CHOICES.map((c) => (
               <button

@@ -233,7 +233,7 @@ export function NumberedCardBack({ n }: { n: number }) {
 export function ImpostorBanner() {
   const t = useTranslations("home.games.impostor");
   const reduced = useReducedMotion() ?? false;
-  const { step } = useStepLoop(STEPS, STILL, reduced);
+  const { step } = useStepLoop(STEPS, STILL, reduced, 0);
 
   // Pointer parallax: -0.5..0.5 across the banner, eased by a spring.
   const px = useMotionValue(0);
