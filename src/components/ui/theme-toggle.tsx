@@ -28,7 +28,7 @@ export function ThemeSwitch({ className }: { className?: string }) {
         aria-label={t(next)}
         onClick={() => setTheme(next)}
         className={cn(
-          "inline-flex size-10 items-center justify-center rounded-pill bg-surface text-ink transition-colors duration-200 ease-soft dark:bg-sunken",
+          "tb-key tb-theme inline-flex size-10 items-center justify-center rounded-pill bg-surface text-ink transition-colors duration-200 ease-soft dark:bg-sunken",
           className,
         )}
       >

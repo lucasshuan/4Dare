@@ -9,5 +9,7 @@ export const BACKEND: "supabase" | "local" =
   SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY ? "supabase" : "local";
 
 export const APP_NAME = "4Dare";
+/** Where people reach us (legal pages, the footer). */
+export const CONTACT_EMAIL = "contato@4dare.com";
 /** The site's name in a language: 4だれ ("who") on Japanese pages. */
 export const appName = (lang: string) => (lang === "ja" ? "4だれ" : APP_NAME);

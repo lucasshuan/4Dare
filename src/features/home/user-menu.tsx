@@ -16,8 +16,8 @@ import type { Me } from "@/server/contract";
  */
 export const userMenuTrigger = (me: Me) =>
   cn(
-    "inline-flex size-10 shrink-0 items-center justify-center rounded-pill transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line",
-    me.isGuest && "text-ink-muted",
+    "tb-key tb-me inline-flex size-10 shrink-0 items-center justify-center rounded-pill transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line",
+    me.isGuest && "tb-guest text-ink-muted",
   );
 
 /** The trigger's tip: who you are, and "Guest" for a guest. */

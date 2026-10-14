@@ -59,5 +59,12 @@
     "news": "novedades cambios actualizaciones",
     "privacy": "privacidad politica legal cookies datos",
     "terms": "terminos uso legal reglas"
+  },
+  "footer": {
+    "label": "Pie de página",
+    "top": "{name}, volver arriba",
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "contact": "Contacto"
   }
 }

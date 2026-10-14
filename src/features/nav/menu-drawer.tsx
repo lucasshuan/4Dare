@@ -39,6 +39,7 @@ import { LayoutMotion } from "@/components/ui/layout-motion";
 import { Logo } from "@/components/ui/logo";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tip } from "@/components/ui/tip";
+import tb from "@/components/ui/top-bar.module.css";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
@@ -423,7 +424,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           <Link
             href="/"
             onClick={() => pick("home")}
-            className="group flex rounded-sm"
+            className={cn("group flex rounded-sm", tb.drawerLogo)}
           >
             <Logo className="h-8 w-auto max-sm:h-7" />
           </Link>

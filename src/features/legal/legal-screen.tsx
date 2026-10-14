@@ -8,6 +8,7 @@ import { LayoutMotion } from "@/components/ui/layout-motion";
 import { PageHead } from "@/components/ui/page-head";
 import { Screen } from "@/components/ui/screen";
 import { useToast } from "@/components/ui/toast";
+import { CONTACT_EMAIL } from "@/config";
 import { useMe } from "@/features/data/use-me";
 import { HubActions, HubBrand } from "@/features/home/hub-actions";
 import { AccountDialog } from "@/features/settings/account-dialog";
@@ -19,7 +20,6 @@ import { NEWS, PRIVACY, TERMS } from "@/lib/routes";
 /** Where the legal texts stand: the day they last changed, and their version. */
 export const LEGAL_DATE = Date.UTC(2026, 9, 9, 12);
 const VERSION = 1;
-export const CONTACT_EMAIL = "contato@4dare.com";
 
 type Doc = "privacy" | "terms";
 

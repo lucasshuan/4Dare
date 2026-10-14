@@ -7,6 +7,8 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { gs } from "@/lib/motion";
 import { Logo, LogoMark } from "./logo";
+import { SiteFooter } from "./site-footer";
+import tb from "./top-bar.module.css";
 
 /**
  * Room a banner leaves at its top for the top bar, which floats over it.
@@ -27,17 +29,19 @@ const CONTENT_LEAVES: Variants = {
 };
 
 /**
- * Page shell: a top bar spanning the screen and a centred column.
- * `left={null}` drops the wordmark. The bar stays at the top as the page
- * scrolls (on phones only over a banner, where room is short): clear at the
- * top, frosted glass once something scrolls under it.
+ * Page shell: a top bar spanning the screen, a centred column and the
+ * site's footer. `left={null}` drops the wordmark. The bar stays at the top
+ * as the page scrolls (on phones it scrolls away): clear at the top, frosted
+ * glass once something scrolls under it.
  * With a `banner`, it runs full width under the bar, which floats over it.
  */
 export function Screen({
   left,
   right,
   banner,
+  stage = "art",
   bare = false,
+  footer = true,
   children,
   className,
 }: {
@@ -45,6 +49,10 @@ export function Screen({
   right?: ReactNode;
   /** Full width, right under the top bar; it should start with UNDER_TOPBAR. */
   banner?: ReactNode;
+  /** What the banner under the bar is: the brand blue (white keys) or a game's art (ink keys). */
+  stage?: "brand" | "art";
+  /** The site's footer under the column (off in rooms). */
+  footer?: boolean;
   /** No top bar: the page carries its own controls (the lobby), in a room's wider column. */
   bare?: boolean;
   children: ReactNode;
@@ -81,7 +89,7 @@ export function Screen({
   if (banner) {
     return (
       <div className="flex min-h-dvh flex-col">
-        <TopBar>{bar}</TopBar>
+        <TopBar stage={stage}>{bar}</TopBar>
         {/* the banner slides up under the bar */}
         <div className="-mt-[72px] sm:-mt-[88px] sm:short:-mt-[72px]">
           {banner}
@@ -92,12 +100,13 @@ export function Screen({
             {children}
           </main>
         </div>
+        {footer ? <SiteFooter /> : null}
       </div>
     );
   }
   return (
     <div className="flex min-h-dvh flex-col">
-      <TopBar phones="scroll">{bar}</TopBar>
+      <TopBar>{bar}</TopBar>
       {/* with the bar's height, the column starts where it always did */}
       <div className="flex flex-1 flex-col px-4 pt-2 pb-[calc(2rem+var(--dock))] sm:px-8 sm:pt-4 sm:pb-[calc(3rem+var(--dock))] sm:short:pt-2 sm:short:pb-[calc(1.5rem+var(--dock))]">
         <m.main
@@ -107,21 +116,23 @@ export function Screen({
           {children}
         </m.main>
       </div>
+      {footer ? <SiteFooter /> : null}
     </div>
   );
 }
 
 /**
  * The top bar: sticky, clear at the top, frosted once the page scrolls under
- * it, the same height on every page. `phones="scroll"` lets it scroll away
- * on phones. A parent's `leave` variant slides it up (the lobby, when the
- * match starts).
+ * it, the same height on every page; on phones it scrolls away with the page.
+ * Over a `stage` (a banner) its menu and theme keys drop their cards and the
+ * logo takes a thin shadow (top-bar.module.css). A parent's `leave` variant
+ * slides it up (the lobby, when the match starts).
  */
 function TopBar({
-  phones = "stick",
+  stage,
   children,
 }: {
-  phones?: "stick" | "scroll";
+  stage?: "brand" | "art";
   children: ReactNode;
 }) {
   const [scrolled, setScrolled] = useState(false);
@@ -135,13 +146,14 @@ function TopBar({
     <m.header
       variants={BAR_LEAVES}
       className={cn(
-        "sticky top-0 z-30 h-[72px] border-b px-4 pt-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft sm:h-[88px] sm:px-8 sm:pt-6 sm:short:h-[72px] sm:short:pt-4",
-        phones === "scroll" && "max-sm:static",
+        "sticky top-0 z-30 h-[72px] border-b px-4 pt-4 transition-[background-color,border-color,backdrop-filter] duration-300 ease-soft max-sm:relative sm:h-[88px] sm:px-8 sm:pt-6 sm:short:h-[72px] sm:short:pt-4",
         scrolled
-          ? "border-line/70 bg-canvas/70 backdrop-blur-xl backdrop-saturate-150"
+          ? "border-line/70 bg-canvas/70 backdrop-blur-xl backdrop-saturate-150 max-sm:border-transparent max-sm:bg-transparent max-sm:backdrop-blur-none"
           : "border-transparent bg-transparent",
-        phones === "scroll" &&
-          "max-sm:border-transparent max-sm:bg-transparent max-sm:backdrop-blur-none",
+        tb.bar,
+        stage && tb.stage,
+        stage === "brand" && tb.brand,
+        scrolled && tb.scrolled,
       )}
     >
       <div className="flex w-full items-center justify-between gap-2 sm:gap-3">
@@ -156,7 +168,7 @@ export function Wordmark() {
     <Link
       href="/"
       aria-label={APP_NAME}
-      className="group min-w-0 rounded-sm max-sm:shrink-0"
+      className={cn("group min-w-0 rounded-sm max-sm:shrink-0", tb.logo)}
     >
       {/* phones keep only the "4" bubble: beside the menu's bars, the language, theme and user menu leave no room for the word */}
       <Logo className="h-8 w-auto max-sm:hidden" />

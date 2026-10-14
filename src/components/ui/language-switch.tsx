@@ -24,7 +24,7 @@ export function Flag({ lang, className }: { lang: Lang; className?: string }) {
 }
 
 export const LANGUAGE_TRIGGER =
-  "inline-flex size-10 shrink-0 items-center justify-center rounded-pill transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line";
+  "tb-key tb-lang inline-flex size-10 shrink-0 items-center justify-center rounded-pill transition-colors duration-200 ease-soft hover:bg-sunken data-popup-open:bg-sunken dark:data-popup-open:bg-line dark:hover:bg-line";
 
 const loadSelect = deferred(() =>
   import("./language-select").then((m) => m.LanguageSelect),

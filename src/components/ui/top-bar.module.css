@@ -1,0 +1,139 @@
+/*
+ * The top bar's keys and logo. The keys carry marker classes (tb-burger,
+ * tb-lang, tb-theme, tb-me) from where they are built; the bar styles them
+ * here, so the same keys look like themselves anywhere else.
+ */
+
+.bar {
+  --tb-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --tb-shadow: rgba(10, 20, 60, 0.24);
+  --tb-shadow-deep: rgba(10, 20, 60, 0.46);
+}
+
+/* the round keys answer the pointer: a press sinks them, and each icon does its own little move */
+.bar :global(.tb-key) {
+  position: relative;
+  transition:
+    background-color 0.2s var(--ease-soft),
+    scale 0.3s var(--ease-soft),
+    box-shadow 0.3s var(--ease-soft),
+    color 0.3s var(--ease-soft);
+}
+.bar :global(.tb-key):active {
+  scale: 0.94;
+  transition-duration: 0.1s;
+}
+.bar :global(.tb-key) > * {
+  transition:
+    rotate 0.45s var(--tb-spring),
+    translate 0.35s var(--tb-spring),
+    opacity 0.2s,
+    filter 0.2s;
+}
+.bar :global(.tb-lang):hover img {
+  rotate: -12deg;
+}
+.bar :global(.tb-me):hover > :first-child {
+  translate: 0 -2px;
+}
+.bar :global(.tb-guest):hover > :first-child {
+  opacity: 0.85;
+  filter: grayscale(0.4);
+}
+
+/* the theme key: no disc behind it, and an icon as present as the flag and the avatar beside it */
+.bar :global(.tb-theme) {
+  background: transparent;
+}
+.bar :global(.tb-theme):hover {
+  background: var(--surface-sunken);
+}
+.bar :global(.tb-theme) svg {
+  width: 30px;
+  height: 30px;
+  stroke-width: 1.7;
+  transition: rotate 0.45s var(--tb-spring);
+}
+.bar :global(.tb-theme):hover svg {
+  rotate: 40deg;
+}
+:global([data-theme="dark"]) .bar :global(.tb-theme):hover svg {
+  rotate: -20deg;
+}
+@media (max-width: 639.98px) {
+  .bar :global(.tb-theme) svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.logo :global(svg) {
+  transition: filter 0.3s var(--ease-soft);
+}
+
+/*
+ * Over a stage (the home's brand blue, a game's banner) and not scrolled: no
+ * cards behind the menu and theme keys, white on the brand blue and ink on a
+ * banner; the logo gets a thin shadow so it never melts into what's behind.
+ */
+.stage:not(.scrolled) .logo :global(svg) {
+  filter: drop-shadow(0 2px 0 var(--tb-shadow));
+}
+.stage:not(.scrolled) .logo:hover :global(svg),
+.stage:not(.scrolled) .logo:focus-visible :global(svg) {
+  filter: drop-shadow(0 2px 0 var(--tb-shadow-deep));
+}
+.stage:not(.scrolled) :global(.tb-key):hover,
+.stage:not(.scrolled) :global(.tb-burger):hover {
+  scale: 1.06;
+}
+.stage:not(.scrolled) :global(.tb-burger),
+.stage:not(.scrolled) :global(.tb-theme) {
+  background: transparent;
+  box-shadow: none;
+  transition:
+    background-color 0.3s var(--ease-soft),
+    scale 0.3s var(--ease-soft),
+    color 0.3s var(--ease-soft);
+}
+.brand:not(.scrolled) :global(.tb-burger),
+.brand:not(.scrolled) :global(.tb-theme) {
+  color: var(--on-brand);
+}
+.brand:not(.scrolled) :global(.tb-burger) i,
+.brand:not(.scrolled) :global(.tb-theme) svg {
+  filter: drop-shadow(0 1.5px 0 var(--tb-shadow));
+}
+/* on hover the key gets its card back, in the theme's colours */
+.stage:not(.scrolled) :global(.tb-burger):hover,
+.stage:not(.scrolled) :global(.tb-theme):hover {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 4px 0 rgba(10, 20, 60, 0.18);
+}
+.stage:not(.scrolled) :global(.tb-burger):hover i,
+.stage:not(.scrolled) :global(.tb-theme):hover svg {
+  filter: none;
+}
+
+/* phones: the bar scrolls away with the page, so over a stage it stays this way */
+@media (max-width: 639.98px) {
+  .stage .logo :global(svg) {
+    filter: drop-shadow(0 2px 0 var(--tb-shadow));
+  }
+  .brand :global(.tb-burger),
+  .brand :global(.tb-theme) {
+    background: transparent;
+    color: var(--on-brand);
+  }
+}
+
+/* the side menu's logo: the bar's thin shadow, deeper on hover */
+.drawerLogo :global(svg) {
+  filter: drop-shadow(0 2px 0 rgba(10, 20, 60, 0.16));
+  transition: filter 0.3s var(--ease-soft);
+}
+.drawerLogo:hover :global(svg),
+.drawerLogo:focus-visible :global(svg) {
+  filter: drop-shadow(0 2px 0 rgba(10, 20, 60, 0.36));
+}

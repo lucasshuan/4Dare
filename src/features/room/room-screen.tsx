@@ -154,7 +154,11 @@ export function RoomScreen({ code }: { code: string }) {
 
 /** The persistent entrance owns the animation; this shell holds the viewport. */
 function RoomLoading() {
-  return <Screen left={null}>{null}</Screen>;
+  return (
+    <Screen left={null} footer={false}>
+      {null}
+    </Screen>
+  );
 }
 
 /**

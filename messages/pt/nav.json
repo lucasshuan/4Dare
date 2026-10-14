@@ -59,5 +59,12 @@
     "news": "novidades atualizacoes mudancas",
     "privacy": "privacidade politica legal cookies dados",
     "terms": "termos uso legal regras"
+  },
+  "footer": {
+    "label": "Rodapé",
+    "top": "{name}, voltar ao topo",
+    "privacy": "Privacidade",
+    "terms": "Termos",
+    "contact": "Contato"
   }
 }

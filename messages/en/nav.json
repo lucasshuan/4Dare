@@ -59,5 +59,12 @@
     "news": "news what's new updates changelog",
     "privacy": "privacy policy legal cookies data",
     "terms": "terms of use legal rules"
+  },
+  "footer": {
+    "label": "Footer",
+    "top": "{name}, back to top",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "contact": "Contact"
   }
 }
