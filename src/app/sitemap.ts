@@ -3,12 +3,14 @@ import { localePath } from "@/i18n/paths";
 import { routing } from "@/i18n/routing";
 import {
   CHARACTERS,
+  CONTRIBUTIONS,
   GAME_LIST,
   GAMES,
   IMPOSTOR,
   LINEUP,
   NEWS,
   PRIVACY,
+  RANKINGS,
   ROOMS,
   TERMS,
   WHO_AM_I,
@@ -16,7 +18,7 @@ import {
 } from "@/lib/routes";
 import { HREFLANG, SITE_URL } from "@/server/seo";
 
-/** The pages worth finding in a search: the games hub, each game, the game and room lists, in every language. */
+/** The pages worth finding in a search: the games hub, each game, the game and room lists, the community's pages, in every language. */
 const PAGES = [
   { path: GAMES, priority: 1 },
   { path: WHO_AM_I, priority: 0.9 },
@@ -26,6 +28,8 @@ const PAGES = [
   { path: ROOMS, priority: 0.6 },
   { path: CHARACTERS, priority: 0.5 },
   { path: WORKSHOP, priority: 0.5 },
+  { path: RANKINGS, priority: 0.4 },
+  { path: CONTRIBUTIONS, priority: 0.3 },
   { path: NEWS, priority: 0.4 },
   { path: PRIVACY, priority: 0.2 },
   { path: TERMS, priority: 0.2 },
