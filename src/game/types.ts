@@ -658,6 +658,8 @@ export interface RoomState {
   chairDrawn?: boolean;
   /** The lobby while a start waits for every page to load its opening. */
   starting?: StartingState | null;
+  /** When the room last went from the lobby to a match or back (the panel's "for how long"). Missing in older rooms. */
+  statusAt?: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -1367,5 +1369,9 @@ export interface ActiveRoom {
   game: GameKey;
   phase: Phase;
   updatedAt: number;
+  /** The room's name ("" shows the host's). */
+  name?: string;
+  /** Since when it is in the lobby or in a match (ms). */
+  since?: number;
   players: Pick<RoomPlayer, "away" | "goneAt">[];
 }

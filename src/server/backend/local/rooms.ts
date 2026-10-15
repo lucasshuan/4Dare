@@ -42,6 +42,13 @@ export function localRooms(): RoomStore {
         if (state.phase === "closed" || state.updatedAt < since) continue;
         list.push({
           code: state.code,
+          name: state.settings.name,
+          since:
+            state.statusAt ??
+            (state.phase !== "lobby" && state.phase !== "finished"
+              ? state.playStartedAt
+              : null) ??
+            state.createdAt,
           game: state.settings.game ?? DEFAULT_GAME,
           phase: state.phase,
           updatedAt: state.updatedAt,

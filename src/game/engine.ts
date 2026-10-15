@@ -519,10 +519,15 @@ export function reduce(
     apply(s, event, ctx);
     // someone leaving (or closing their page) may be all a waiting start still waited for
     if (s.starting && SETTLES_START.has(event.type)) settleStart(s, ctx);
+    if (playingNow(s.phase) !== playingNow(state.phase)) s.statusAt = ctx.now;
     s.updatedAt = ctx.now;
     return s;
   });
 }
+
+/** A match on (the vote counts); a finished room is back in the lobby. */
+export const playingNow = (phase: Phase) =>
+  phase !== "lobby" && phase !== "finished" && phase !== "closed";
 
 /** Phases with no match on: the room picks up the panel's newest values. */
 const BETWEEN_MATCHES: ReadonlySet<Phase> = new Set([

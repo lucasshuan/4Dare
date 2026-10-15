@@ -10,6 +10,17 @@ import { json, serviceClient } from "./clients";
 
 const UNIQUE_VIOLATION = "23505";
 
+/** Since when a room is in the lobby or in a match, from what its state kept. */
+function sinceOf(phase: Phase, r: Record<string, unknown>): number {
+  const n = (v: unknown) => (v == null ? null : Number(v) || null);
+  return (
+    n(r.status_at) ??
+    (phase !== "lobby" && phase !== "finished" ? n(r.play_at) : null) ??
+    n(r.created) ??
+    Date.parse(String(r.updated_at))
+  );
+}
+
 export function supabaseRooms(): RoomStore {
   const db = () => serviceClient().from("rooms");
   return {
@@ -85,7 +96,7 @@ export function supabaseRooms(): RoomStore {
       // only the fields counting needs, not each room's whole history
       const { data, error } = await db()
         .select(
-          "code, phase, updated_at, game:state->settings->>game, players:state->players",
+          "code, phase, updated_at, game:state->settings->>game, players:state->players, name:state->settings->>name, status_at:state->>statusAt, play_at:state->>playStartedAt, created:state->>createdAt",
         )
         .neq("phase", "closed")
         .gte("updated_at", new Date(since).toISOString())
@@ -94,6 +105,8 @@ export function supabaseRooms(): RoomStore {
       return (data ?? []).map(
         (r): ActiveRoom => ({
           code: r.code as string,
+          name: (r.name as string | null) ?? "",
+          since: sinceOf(r.phase as Phase, r),
           game: ((r.game as string | null) ?? DEFAULT_GAME) as GameKey,
           phase: r.phase as Phase,
           updatedAt: new Date(r.updated_at as string).getTime(),
