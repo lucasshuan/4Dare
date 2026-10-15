@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { keyClass } from "@/components/ui/button";
+import { endPresentation } from "@/features/data/room-actions";
 import { useStepStarted } from "@/features/room/match-frame";
 import { LU_CLOCKS, REACT_MAX } from "@/game/lineup/rules";
 import { REACTIONS } from "@/game/lineup/types";
@@ -16,7 +17,6 @@ import { useDisplayName } from "@/lib/names";
 import { subscribeReactions } from "@/lib/realtime";
 import { onSeat, seatColor } from "@/lib/seats";
 import { useGameOption } from "@/lib/settings";
-import { endPresentation } from "@/server/actions";
 import { BoardView, FitBoard } from "./board";
 import { useLineup, useLuAction } from "./use-lineup";
 

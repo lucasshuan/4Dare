@@ -7,13 +7,13 @@ import { type FormEvent, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { keyClass } from "@/components/ui/button";
 import { CardNameField } from "@/features/characters/card-name-field";
+import { guessCrewCard } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useStepStarted } from "@/features/room/match-frame";
 import { type CardContent, cardText } from "@/game/character-search";
 import type { Lang } from "@/game/types";
 import { useDisplayName } from "@/lib/names";
-import { guessCrewCard } from "@/server/actions";
 
 /**
  * A caught impostor's last chance: they now know their card was the odd one

@@ -8,10 +8,10 @@ import { m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import { guessWhatFor } from "@/features/data/room-actions";
 import { GUESS_MAX } from "@/game/lineup/rules";
 import { cn } from "@/lib/cn";
 import { useDisplayName } from "@/lib/names";
-import { guessWhatFor } from "@/server/actions";
 import { useLineup } from "../use-lineup";
 import { CoveredLot, SealScene, Spotlight } from "./wait-scenes";
 

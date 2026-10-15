@@ -8,11 +8,11 @@
 import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
+import { judgeBoard } from "@/features/data/room-actions";
 import { useStepStarted } from "@/features/room/match-frame";
 import type { Lang } from "@/game/types";
 import { useDisplayName } from "@/lib/names";
 import { onSeat, seatColor } from "@/lib/seats";
-import { judgeBoard } from "@/server/actions";
 import { BoardView, FitBoard } from "./board";
 import { BoardDeck, type DeckItem } from "./deck";
 import { useLineup, useLuAction } from "./use-lineup";

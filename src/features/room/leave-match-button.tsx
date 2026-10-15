@@ -6,11 +6,11 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Tip } from "@/components/ui/tip";
+import { leaveRoom } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useLeaveMatch } from "@/features/data/use-current-match";
 import { useRouter } from "@/i18n/navigation";
 import { GAME_PATHS } from "@/lib/routes";
-import { leaveRoom } from "@/server/actions";
 
 /**
  * The "Leave" button's look, in the match header and the lobby alike: a round

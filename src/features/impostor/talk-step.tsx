@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { keyClass } from "@/components/ui/button";
+import { accuse, pointAt } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useStepStarted } from "@/features/room/match-frame";
@@ -13,7 +14,6 @@ import type { ImpAskedView, PlayerId, PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useDisplayName } from "@/lib/names";
 import { seatColor, seatSoft } from "@/lib/seats";
-import { accuse, pointAt } from "@/server/actions";
 import { AnswerChip } from "./answers-view";
 import { useQuestionBank } from "./use-questions";
 

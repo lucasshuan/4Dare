@@ -13,6 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { markOpeningReady } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { beatOf } from "@/features/stage/stage";
 import { useStage } from "@/features/stage/stage-context";
@@ -23,7 +24,6 @@ import type { TitleCard } from "@/game/types";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { preloadMusic, type Track, useMusic } from "@/lib/music";
 import { useGameOption } from "@/lib/settings";
-import { markOpeningReady } from "@/server/actions";
 import {
   IMPOSTOR_SOUNDS,
   ImpostorTitle,

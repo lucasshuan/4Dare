@@ -16,6 +16,7 @@ import {
 import { keyClass } from "@/components/ui/button";
 import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { useCharacterIndex } from "@/features/characters/use-character-index";
+import { confirmCard, randomPick } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
@@ -43,7 +44,6 @@ import { useClock } from "@/lib/hooks/use-server-clock";
 import { dur, type EaseFn, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { useGameOption } from "@/lib/settings";
-import { confirmCard, randomPick } from "@/server/actions";
 import type { CharacterDTO } from "@/server/contract";
 import { DoneRow } from "./done-row";
 import { drawHand, type HandCard, uploadDraftImage } from "./draft-api";

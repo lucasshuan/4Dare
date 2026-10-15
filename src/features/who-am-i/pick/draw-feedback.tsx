@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { RateBubble } from "@/components/ui/rate-bubble";
-import { rateRandomPick } from "@/server/actions";
+import { rateRandomPick } from "@/features/data/room-actions";
 
 /**
  * A small bubble over a character the dice just drew: does it fit the theme?

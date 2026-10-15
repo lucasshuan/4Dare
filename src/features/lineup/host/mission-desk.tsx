@@ -7,10 +7,10 @@ import { m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { keyClass } from "@/components/ui/button";
+import { chooseMission } from "@/features/data/room-actions";
 import { useStepStarted } from "@/features/room/match-frame";
 import { MISSION_LINES, MISSION_MAX } from "@/game/lineup/rules";
 import type { Lang } from "@/game/types";
-import { chooseMission } from "@/server/actions";
 import { useLineup, useLuAction } from "../use-lineup";
 
 /** Their own words, first letter up, as the bank's missions read. */

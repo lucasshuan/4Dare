@@ -6,11 +6,11 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { keyClass } from "@/components/ui/button";
+import { giveVerdict } from "@/features/data/room-actions";
 import { useStepStarted } from "@/features/room/match-frame";
 import { WHY } from "@/game/lineup/rules";
 import type { Lang } from "@/game/types";
 import { useDisplayName } from "@/lib/names";
-import { giveVerdict } from "@/server/actions";
 import { BoardView, FitBoard } from "../board";
 import { BoardDeck, type DeckItem } from "../deck";
 import { useLineup, useLuAction } from "../use-lineup";

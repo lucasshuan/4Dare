@@ -10,13 +10,13 @@ import { useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { keyClass } from "@/components/ui/button";
 import { fireConfetti } from "@/components/ui/confetti";
+import { markDone, rateMission } from "@/features/data/room-actions";
 import { useStepStarted } from "@/features/room/match-frame";
 import type { LuRoundView, LuVerdict } from "@/game/lineup/types";
 import type { Lang, PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useDisplayName } from "@/lib/names";
 import { playSound } from "@/lib/sound";
-import { markDone, rateMission } from "@/server/actions";
 import { BoardView, FitBoard } from "./board";
 import { useLineup, useLuAction } from "./use-lineup";
 

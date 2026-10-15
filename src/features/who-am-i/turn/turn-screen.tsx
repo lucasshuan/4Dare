@@ -12,6 +12,13 @@ import { CharacterCard } from "@/components/ui/character-card";
 import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { Portrait } from "@/components/ui/portrait";
 import { TextArea, TextField } from "@/components/ui/text-field";
+import {
+  answerQuestion,
+  askQuestion,
+  passTurn,
+  submitGuess,
+  validateGuess,
+} from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
@@ -38,13 +45,6 @@ import { focusIsFree } from "@/lib/focus";
 import { dur, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { useGameOption } from "@/lib/settings";
-import {
-  answerQuestion,
-  askQuestion,
-  passTurn,
-  submitGuess,
-  validateGuess,
-} from "@/server/actions";
 import { PlayerStrip } from "./player-strip";
 import { TurnHandoff } from "./turn-handoff";
 import { TurnSteps } from "./turn-steps";

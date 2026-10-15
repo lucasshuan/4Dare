@@ -5,9 +5,9 @@ import { Flag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button, buttonClass } from "@/components/ui/button";
+import { giveUp } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
-import { giveUp } from "@/server/actions";
 
 /** Red "Give up" in the match header; asks first, then reveals your card. Gone once you're out. */
 export function GiveUpButton() {

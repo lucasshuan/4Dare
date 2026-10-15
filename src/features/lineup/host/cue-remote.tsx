@@ -5,10 +5,10 @@
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { playCue } from "@/features/data/room-actions";
 import { CUE_GAP } from "@/game/lineup/rules";
 import { CUES, type LuCue } from "@/game/lineup/types";
 import { cn } from "@/lib/cn";
-import { playCue } from "@/server/actions";
 import { cueSound } from "../chime";
 import { useLineup, useLuAction } from "../use-lineup";
 

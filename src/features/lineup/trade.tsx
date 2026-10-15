@@ -9,13 +9,17 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { keyClass } from "@/components/ui/button";
+import {
+  answerTrade,
+  markDone,
+  offerTrade,
+} from "@/features/data/room-actions";
 import { useStepStarted } from "@/features/room/match-frame";
 import type { LuOffer } from "@/game/lineup/types";
 import type { PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useDisplayName } from "@/lib/names";
 import { seatColor } from "@/lib/seats";
-import { answerTrade, markDone, offerTrade } from "@/server/actions";
 import { Sticker } from "./card";
 import { useLineup, useLuAction } from "./use-lineup";
 

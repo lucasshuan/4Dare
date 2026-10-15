@@ -4,6 +4,7 @@ import { ArrowLeft, Check, ChevronRight, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type CSSProperties, useRef, useState } from "react";
 import { keyClass } from "@/components/ui/button";
+import { backToLobby, setReady, startGame } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { avatarSrc, seatOf } from "@/features/opening/title-kit";
@@ -11,7 +12,6 @@ import { setStartAsked } from "@/features/room/start-cover";
 import { GAME_SEATS, type GameKey, OPEN_GAMES } from "@/game/games";
 import { cn } from "@/lib/cn";
 import { useDisplayName } from "@/lib/names";
-import { backToLobby, setReady, startGame } from "@/server/actions";
 import s from "./end-room.module.css";
 import { GameTileArt } from "./game-tiles";
 

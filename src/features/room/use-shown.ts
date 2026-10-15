@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
+import { markShown } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
-import { markShown } from "@/server/actions";
 
 /** A page out of sight this long is told to the room: a quick look at another tab is not. */
 const HIDDEN_AFTER_MS = 1000;

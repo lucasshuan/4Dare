@@ -30,15 +30,6 @@ import {
 import { saveSetup } from "@/features/create/last-setup";
 import { useLineupCount } from "@/features/create/lineup-catalog";
 import { RoomSetup } from "@/features/create/room-setup";
-import { useRoomContext } from "@/features/data/room-context";
-import { useRoomAction } from "@/features/data/use-room-action";
-import { watchersKey } from "@/features/data/use-watchers";
-import { RoomControls } from "@/features/room/room-controls";
-import { setStartAsked } from "@/features/room/start-cover";
-import { GAME_SEATS } from "@/game/games";
-import type { Lang } from "@/game/types";
-import { cn } from "@/lib/cn";
-import { useDisplayName, useRoomTitle } from "@/lib/names";
 import {
   drawChair,
   kickPlayer,
@@ -48,7 +39,16 @@ import {
   startGame,
   transferHost,
   updateSettings,
-} from "@/server/actions";
+} from "@/features/data/room-actions";
+import { useRoomContext } from "@/features/data/room-context";
+import { useRoomAction } from "@/features/data/use-room-action";
+import { watchersKey } from "@/features/data/use-watchers";
+import { RoomControls } from "@/features/room/room-controls";
+import { setStartAsked } from "@/features/room/start-cover";
+import { GAME_SEATS } from "@/game/games";
+import type { Lang } from "@/game/types";
+import { cn } from "@/lib/cn";
+import { useDisplayName, useRoomTitle } from "@/lib/names";
 import type { CreateRoomInput } from "@/server/contract";
 import { CodeTiles } from "./code-tiles";
 import { LobbyTabs } from "./lobby-tabs";

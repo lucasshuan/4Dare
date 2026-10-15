@@ -23,6 +23,13 @@ import { type ReactNode, type Ref, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LayoutMotion } from "@/components/ui/layout-motion";
+import {
+  kickPlayer,
+  moveSomeone,
+  mutePlayer,
+  playInstead,
+  watchInstead,
+} from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useWatchers, watchersKey } from "@/features/data/use-watchers";
@@ -32,13 +39,6 @@ import { cn } from "@/lib/cn";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { seatWash } from "@/lib/seats";
-import {
-  kickPlayer,
-  moveSomeone,
-  mutePlayer,
-  playInstead,
-  watchInstead,
-} from "@/server/actions";
 import {
   DragBoard,
   type DragItem,

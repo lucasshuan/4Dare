@@ -7,6 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
+import { reportPlayer } from "@/features/data/room-actions";
 import {
   type Avatar as AvatarData,
   REPORT_NOTE_MAX,
@@ -15,7 +16,6 @@ import {
 } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useAction } from "@/lib/hooks/use-action";
-import { reportPlayer } from "@/server/actions";
 
 export interface ReportTarget {
   id: string;

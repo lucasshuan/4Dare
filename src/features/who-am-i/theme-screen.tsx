@@ -7,6 +7,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useWithNames } from "@/components/ui/player-name";
+import { chooseTheme } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
@@ -23,7 +24,6 @@ import {
 import { cn } from "@/lib/cn";
 import { focusIsFree } from "@/lib/focus";
 import { dur, ease } from "@/lib/motion";
-import { chooseTheme } from "@/server/actions";
 
 /** Ideas on screen at once; "Other ideas" shows the next ones. */
 const IDEAS_SHOWN = 4;

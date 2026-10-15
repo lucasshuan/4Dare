@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 import { keyClass } from "@/components/ui/button";
+import { markDone } from "@/features/data/room-actions";
 import { useStepStarted } from "@/features/room/match-frame";
 import {
   MAX_TEAM_NAME,
@@ -28,7 +29,6 @@ import {
 } from "@/game/lineup/rules";
 import type { LuBoard, LuSticker, LuText } from "@/game/lineup/types";
 import { cn } from "@/lib/cn";
-import { markDone } from "@/server/actions";
 import { BOARD, BoardShell, stickerBox, useFitScale } from "./board";
 import { Sticker } from "./card";
 import { useBoardSave } from "./use-board-save";

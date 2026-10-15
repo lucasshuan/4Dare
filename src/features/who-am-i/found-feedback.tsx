@@ -4,10 +4,10 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Portrait } from "@/components/ui/portrait";
 import { RateBubble } from "@/components/ui/rate-bubble";
+import { rateFoundCharacter } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { isAwaited, useReached } from "@/features/room/match-frame";
 import { useStage } from "@/features/stage/stage-context";
-import { rateFoundCharacter } from "@/server/actions";
 
 /** Answered or closed in this browser: it does not come back on a reload. */
 const askedKey = (code: string, round: number) =>
