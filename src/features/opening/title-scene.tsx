@@ -24,19 +24,10 @@ import type { TitleCard } from "@/game/types";
 import { useClock } from "@/lib/hooks/use-server-clock";
 import { preloadMusic, type Track, useMusic } from "@/lib/music";
 import { useGameOption } from "@/lib/settings";
-import {
-  IMPOSTOR_SOUNDS,
-  ImpostorTitle,
-  impostorCues,
-  impostorImages,
-} from "./impostor-title";
-import {
-  LINEUP_IMAGES,
-  LINEUP_SOUNDS,
-  LineupTitle,
-  lineupCues,
-} from "./lineup-title";
+import { ImpostorTitle, impostorImages } from "./impostor-title";
+import { LINEUP_IMAGES, LineupTitle } from "./lineup-title";
 import { rehearsed, useRehearsal } from "./rehearsal";
+import { titleCues, titleSounds } from "./scene-sound";
 import type { Bleed, TitlePlayer } from "./title-kit";
 import {
   preloadTitleSounds,
@@ -45,7 +36,7 @@ import {
 } from "./title-sound";
 import { MUSIC_AT } from "./title-timing";
 import { useSceneClock } from "./use-scene-clock";
-import { WHO_SOUNDS, WhoTitle, whoCues } from "./who-title";
+import { WhoTitle } from "./who-title";
 
 /** The canvases the scenes are drawn on: a landscape screen's, and a phone's held upright (at 2×). */
 const CANVAS = {
@@ -98,13 +89,7 @@ export function preloadTitle(
   if (known) return known;
   const parts: Promise<unknown>[] = [
     preloadMusic(titleTrack(game)),
-    preloadTitleSounds(
-      game === "impostor"
-        ? IMPOSTOR_SOUNDS
-        : game === "lineup"
-          ? LINEUP_SOUNDS
-          : WHO_SOUNDS,
-    ),
+    preloadTitleSounds(titleSounds(game)),
     ...(game === "impostor"
       ? impostorImages(portrait)
       : game === "lineup"
@@ -420,12 +405,7 @@ function Title({ card, first, startsAt, until, live, rehearse }: SceneProps) {
   const props = { players, n: card.n, first };
   const count = players.length;
   const cues = useMemo(
-    () =>
-      game === "impostor"
-        ? () => impostorCues(first)
-        : game === "lineup"
-          ? () => lineupCues(first)
-          : () => whoCues(first, count),
+    () => () => titleCues(game, first, count),
     [game, first, count],
   );
   const name =

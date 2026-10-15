@@ -14,14 +14,8 @@ import {
   type TitlePlayer,
   type TitleProps,
 } from "./title-kit";
-import type { TitleCue } from "./title-sound";
 import { impostorTimes, sec } from "./title-timing";
 
-export const IMPOSTOR_SOUNDS = [
-  "/sfx/hum-burnout.mp3",
-  "/sfx/blinds-and-stamp.mp3",
-  "/sfx/blinds-rise.mp3",
-];
 /** The pictures the scene paints with: the room (a window's way up), its sides, and the rest. */
 export const impostorImages = (portrait: boolean) => [
   ...["", "-l", "-r"].map(
@@ -33,23 +27,6 @@ export const impostorImages = (portrait: boolean) => [
   "/opening/glass-smudge.webp",
   "/opening/stamp-mask.webp",
 ];
-
-/**
- * The sounds: the white light's hum burning out on the way in, then one mixed
- * track (the letter board's keys, the lights' hum, the blinds turning and
- * rising, each costume's steps, the flash, every light going off, the stamp).
- */
-export function impostorCues(first: boolean): TitleCue[] {
-  return [
-    {
-      src: first ? "/sfx/blinds-and-stamp.mp3" : "/sfx/blinds-rise.mp3",
-      at: 0,
-      gain: 1,
-      track: true,
-    },
-    { src: "/sfx/hum-burnout.mp3", at: 0, gain: 0.5 },
-  ];
-}
 
 /**
  * The Impostor's title scene: a noir police lineup. It opens on closed

@@ -16,6 +16,7 @@ import {
 } from "./lineup/rules";
 import { MOMENT_TRACKS, MOMENTS, TRACK_IDS, TRACK_TUNES } from "./music-tunes";
 import { GAME_XP, XP } from "./profile/xp";
+import { cleanClipsText, SCENE_CLIPS, SCENE_GAMES } from "./scene-clips";
 import { CAST, CAST_MARKS } from "./show-timing/cast";
 import { DEAL, DEAL_MARKS } from "./show-timing/deal";
 import { DRAW, DRAW_MARKS } from "./show-timing/draw";
@@ -63,6 +64,7 @@ const ROOTS: Record<string, object> = {
   music: TRACK_TUNES,
   moments: MOMENT_TRACKS,
   roomSounds: ROOM_SOUNDS,
+  scenes: SCENE_CLIPS,
 };
 
 export type TuneUnit =
@@ -75,10 +77,17 @@ export type TuneUnit =
   | "choice"
   | "db"
   | "bar"
-  | "gain";
+  | "gain"
+  | "clips";
 
 /** Which tab of a game's page lists an entry. */
-export type TuneTab = "timing" | "defaults" | "xp" | "availability" | "music";
+export type TuneTab =
+  | "timing"
+  | "defaults"
+  | "xp"
+  | "availability"
+  | "music"
+  | "scenes";
 
 export interface Tunable {
   /**
@@ -955,6 +964,19 @@ export const TUNABLES: readonly Tunable[] = [
     },
   ]),
 
+  // -- the title scenes' sounds -----------------------------------------------
+  ...SCENE_GAMES.map(
+    (g): Tunable => ({
+      key: `scenes.${g}`,
+      label: "Sons da abertura",
+      game: g,
+      tab: "scenes",
+      group: "Cenas",
+      unit: "clips",
+      src: "src/features/opening/scene-sound.ts",
+    }),
+  ),
+
   // -- availability ------------------------------------------------------------
   ...(["who-am-i", "impostor", "lineup"] as const).map(
     (g): Tunable => ({
@@ -1035,6 +1057,11 @@ export function cleanTunes(raw: unknown): Record<string, TuneValue> {
       if (e.max !== undefined) val = Math.min(e.max, val);
     }
     if (e.options && !e.options.includes(String(val))) continue;
+    if (e.unit === "clips") {
+      const clean = cleanClipsText(String(val));
+      if (clean === null) continue;
+      val = clean;
+    }
     if (val !== d) out[k] = val;
   }
   return out;

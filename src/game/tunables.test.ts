@@ -29,7 +29,7 @@ describe("the tunables registry", () => {
         const want =
           e.unit === "bool"
             ? "boolean"
-            : e.unit === "choice"
+            : e.unit === "choice" || e.unit === "clips"
               ? "string"
               : "number";
         expect(typeof d, k).toBe(want);
@@ -73,6 +73,33 @@ describe("the tunables registry", () => {
         "lineup",
       ),
     ).toEqual({ "lu.halftime": 1, "opening.curtain": 3 });
+  });
+
+  it("keeps a scene's clips made safe, and drops what isn't a list", () => {
+    const clip = {
+      id: "land",
+      label: "Pouso",
+      sound: "soft-thud",
+      anchor: "land",
+      offset: -0.0042,
+      gain: 9,
+      trimIn: 0,
+      trimOut: null,
+      fadeIn: 0,
+      fadeOut: 0,
+      each: true,
+    };
+    const out = cleanTunes({
+      "scenes.who-am-i.first": JSON.stringify([
+        clip,
+        { ...clip, id: "x1", sound: "made-up" },
+      ]),
+      "scenes.lineup.later": "{not json",
+    });
+    expect(Object.keys(out)).toEqual(["scenes.who-am-i.first"]);
+    expect(JSON.parse(String(out["scenes.who-am-i.first"]))).toEqual([
+      { ...clip, offset: -0.004, gain: 1.5 },
+    ]);
   });
 });
 

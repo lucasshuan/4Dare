@@ -14,32 +14,9 @@ import {
 /** No window past the canvas: what a scene drawn on its own assumes. */
 const NO_BLEED: Bleed = { x: 0, y: 0 };
 
-import type { TitleCue } from "./title-sound";
 import { lineupTimes, sec } from "./title-timing";
 
-export const LINEUP_SOUNDS = [
-  "/sfx/lamp-switch.mp3",
-  "/sfx/chalk-and-whistle.mp3",
-  "/sfx/chalk-and-eraser.mp3",
-];
 export const LINEUP_IMAGES = ["/opening/pine.webp", "/opening/crown.svg"];
-
-/**
- * The sounds: the lamp's switch as the room comes out of the dark, then one
- * mixed track (the whistle far away, the chalk scratching and writing, each
- * stroke in its own pitch, taps on the board, the eraser on a rematch).
- */
-export function lineupCues(first: boolean): TitleCue[] {
-  return [
-    {
-      src: first ? "/sfx/chalk-and-whistle.mp3" : "/sfx/chalk-and-eraser.mp3",
-      at: 0,
-      gain: 1,
-      track: true,
-    },
-    { src: "/sfx/lamp-switch.mp3", at: 0, gain: 0.9 },
-  ];
-}
 
 type Pt = { x: number; y: number };
 
