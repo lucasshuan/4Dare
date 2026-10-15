@@ -7,6 +7,7 @@ import { AnimatePresence, m } from "motion/react";
 import dynamic from "next/dynamic";
 import { useLocale } from "next-intl";
 import { useStage } from "@/features/stage/stage-context";
+import { trackFor } from "@/game/music-tunes";
 import { useMusic } from "@/lib/music";
 import { useGameOption } from "@/lib/settings";
 import { AuctionScreen } from "./auction";
@@ -131,7 +132,7 @@ function useLineupMusic() {
   const now = beat?.startsAt ?? show?.startsAt ?? 0;
   const inBooth =
     lu.hosted && lu.presenterId === me.id && !(chair && now < chair.startsAt);
-  useMusic(inBooth ? "booth" : undefined, 2);
+  useMusic(inBooth ? (trackFor("lineup", "host") ?? undefined) : undefined, 2);
 }
 
 export function LineupScreen() {

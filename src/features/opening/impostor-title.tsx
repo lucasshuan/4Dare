@@ -18,9 +18,9 @@ import type { TitleCue } from "./title-sound";
 import { impostorTimes, sec } from "./title-timing";
 
 export const IMPOSTOR_SOUNDS = [
-  "/opening/impostor-in.mp3",
-  "/opening/impostor-first.mp3",
-  "/opening/impostor-again.mp3",
+  "/sfx/hum-burnout.mp3",
+  "/sfx/blinds-and-stamp.mp3",
+  "/sfx/blinds-rise.mp3",
 ];
 /** The pictures the scene paints with: the room (a window's way up), its sides, and the rest. */
 export const impostorImages = (portrait: boolean) => [
@@ -42,14 +42,12 @@ export const impostorImages = (portrait: boolean) => [
 export function impostorCues(first: boolean): TitleCue[] {
   return [
     {
-      src: first
-        ? "/opening/impostor-first.mp3"
-        : "/opening/impostor-again.mp3",
+      src: first ? "/sfx/blinds-and-stamp.mp3" : "/sfx/blinds-rise.mp3",
       at: 0,
       gain: 1,
       track: true,
     },
-    { src: "/opening/impostor-in.mp3", at: 0, gain: 0.5 },
+    { src: "/sfx/hum-burnout.mp3", at: 0, gain: 0.5 },
   ];
 }
 

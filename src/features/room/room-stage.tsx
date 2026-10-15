@@ -30,16 +30,13 @@ import { RevealOverlay } from "@/features/who-am-i/reveal-overlay";
 import { ThemeScreen } from "@/features/who-am-i/theme-screen";
 import { GuessScene } from "@/features/who-am-i/turn/guess-scene";
 import { TurnScreen } from "@/features/who-am-i/turn/turn-screen";
+import { GAME_KEYS } from "@/game/games";
+import { trackFor } from "@/game/music-tunes";
 import type { ErrorCode, Phase, RoomView } from "@/game/types";
 import { Link } from "@/i18n/navigation";
 import { useTabTitle } from "@/lib/hooks/use-tab-title";
 import { dur, ease, riseIn } from "@/lib/motion";
-import {
-  preloadMusic,
-  type Track,
-  useMusic,
-  useMusicMuffle,
-} from "@/lib/music";
+import { preloadMusic, useMusic, useMusicMuffle } from "@/lib/music";
 import { useRoomTitle } from "@/lib/names";
 import { GAMES } from "@/lib/routes";
 import { useGameOption } from "@/lib/settings";
@@ -234,12 +231,6 @@ const RISE = {
   exit: { opacity: 0, transition: { duration: dur.base, ease: ease.soft } },
 };
 
-/** The games with a take of their own; the rest keep the stage. */
-const GAME_MUSIC: Partial<Record<RoomView["settings"]["game"], Track>> = {
-  impostor: "impostor",
-  lineup: "matchday",
-};
-
 function Areas() {
   const { code, view } = useRoomContext();
   const { area, screen } = useStage();
@@ -253,14 +244,16 @@ function Areas() {
   // swap starts at once. A match's start cuts the lobby's music and its title
   // scene plays the take again from the top (OpeningMusic). Lineup's
   // presenter hears the booth's radio take (lineup-screen.tsx).
+  // which take plays when is the panel's (music-tunes.ts), as the room's copy has it
   const lineup = view.settings.game === "lineup";
+  const roomTrack = trackFor(view.settings.game, "room");
   useEffect(() => {
-    preloadMusic("impostor");
+    for (const g of GAME_KEYS) {
+      const t = trackFor(g, "room");
+      if (t) preloadMusic(t);
+    }
   }, []);
-  useEffect(() => {
-    if (lineup) preloadMusic("matchday");
-  }, [lineup]);
-  useMusic(GAME_MUSIC[view.settings.game], 1);
+  useMusic(roomTrack ?? undefined, 1);
   // the game's title scene, fetched while the lobby fills so the match starts on the dot
   const game = view.settings.game;
   const ja = useLocale() === "ja";

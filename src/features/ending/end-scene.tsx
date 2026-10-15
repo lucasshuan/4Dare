@@ -11,9 +11,11 @@ import { TitleStage } from "@/features/opening/title-scene";
 import { RoomControls } from "@/features/room/room-controls";
 import { useStage } from "@/features/stage/stage-context";
 import type { GameKey } from "@/game/games";
+import { trackFor } from "@/game/music-tunes";
 import type { MatchReward } from "@/game/profile/reward";
 import type { RoomView } from "@/game/types";
 import { useClock } from "@/lib/hooks/use-server-clock";
+import { useMusic } from "@/lib/music";
 import { useGameOption } from "@/lib/settings";
 import { myMatchReward } from "@/server/actions";
 import { END_ACTS } from "./end-kit";
@@ -83,7 +85,7 @@ export function preloadEnd(
 export function EndScene() {
   const { view } = useRoomContext();
   const { finishedWait } = useStage();
-  // with no reveal to wait for, it starts a moment ahead (END_LEAD_MS): built and painted unseen till then
+  // with no reveal to wait for, it starts a moment ahead (ENGINE.endLead): built and painted unseen till then
   const started = usePassed(view.stepStartsAt ?? 0);
   if (view.phase !== "finished" || view.stepStartsAt === null) return null;
   return (
@@ -112,6 +114,9 @@ function End({
   lead: boolean;
 }) {
   const tg = useTranslations("home.games");
+  // the end's own take, when the panel gave the game one: it meets the
+  // match's take on the same bar; with none, the match's music goes on
+  useMusic(live ? (trackFor(game, "end") ?? undefined) : undefined, 3);
   const ja = useLocale() === "ja";
   const chalk = !useGameOption("lineup", "plainLetters");
   const files = useCallback(

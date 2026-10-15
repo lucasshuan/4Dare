@@ -18,9 +18,9 @@ import type { TitleCue } from "./title-sound";
 import { lineupTimes, sec } from "./title-timing";
 
 export const LINEUP_SOUNDS = [
-  "/opening/lineup-in.mp3",
-  "/opening/lineup-first.mp3",
-  "/opening/lineup-again.mp3",
+  "/sfx/lamp-switch.mp3",
+  "/sfx/chalk-and-whistle.mp3",
+  "/sfx/chalk-and-eraser.mp3",
 ];
 export const LINEUP_IMAGES = ["/opening/pine.webp", "/opening/crown.svg"];
 
@@ -32,12 +32,12 @@ export const LINEUP_IMAGES = ["/opening/pine.webp", "/opening/crown.svg"];
 export function lineupCues(first: boolean): TitleCue[] {
   return [
     {
-      src: first ? "/opening/lineup-first.mp3" : "/opening/lineup-again.mp3",
+      src: first ? "/sfx/chalk-and-whistle.mp3" : "/sfx/chalk-and-eraser.mp3",
       at: 0,
       gain: 1,
       track: true,
     },
-    { src: "/opening/lineup-in.mp3", at: 0, gain: 0.9 },
+    { src: "/sfx/lamp-switch.mp3", at: 0, gain: 0.9 },
   ];
 }
 

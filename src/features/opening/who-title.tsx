@@ -178,30 +178,28 @@ const seatNo = (slot: number) => (slot % SEAT_COLORS) + 1;
 /** The sounds, mixed on the timeline: the number thumps in (rolls on a rematch) and whooshes off, a soft thud per player landing, the card fan as the roulette spins. */
 export function whoCues(first: boolean, n: number): TitleCue[] {
   const t = whoTimes(first, n);
-  const cues: TitleCue[] = [
-    { src: "/opening/who-number.mp3", at: t.numIn, gain: 1 },
-  ];
+  const cues: TitleCue[] = [{ src: "/sfx/thump.mp3", at: t.numIn, gain: 1 }];
   if (!first)
-    cues.push({ src: "/opening/who-roll.mp3", at: t.roll - 0.01, gain: 0.4 });
-  cues.push({ src: "/opening/who-fly.mp3", at: t.numOut, gain: 0.5 });
+    cues.push({ src: "/sfx/counter-roll.mp3", at: t.roll - 0.01, gain: 0.4 });
+  cues.push({ src: "/sfx/whoosh.mp3", at: t.numOut, gain: 0.5 });
   for (let i = 0; i < n; i++)
     cues.push({
-      src: "/opening/who-land.mp3",
+      src: "/sfx/soft-thud.mp3",
       at: t.land + i * t.step - 0.004,
       gain: 0.5,
     });
   // the fan starts with the spin (its sound starts 0.02 s into the file)
   if (t.spin)
-    cues.push({ src: "/opening/who-cards.mp3", at: t.spin - 0.02, gain: 0.18 });
+    cues.push({ src: "/sfx/card-fan.mp3", at: t.spin - 0.02, gain: 0.18 });
   return cues;
 }
 
 export const WHO_SOUNDS = [
-  "/opening/who-number.mp3",
-  "/opening/who-roll.mp3",
-  "/opening/who-fly.mp3",
-  "/opening/who-land.mp3",
-  "/opening/who-cards.mp3",
+  "/sfx/thump.mp3",
+  "/sfx/counter-roll.mp3",
+  "/sfx/whoosh.mp3",
+  "/sfx/soft-thud.mp3",
+  "/sfx/card-fan.mp3",
 ];
 
 /**
