@@ -2,12 +2,7 @@
 import { DEFAULT_GAME } from "@/game/games";
 import { cleanRules, DEFAULT_RULES } from "@/game/lineup/rules";
 import { isTaste, TASTE_KEYS } from "@/game/tastes";
-import {
-  DEFAULT_SETTINGS,
-  OFF_THEMES_MAX,
-  STEP_SECONDS_MAX,
-  STEP_SECONDS_MIN,
-} from "@/game/types";
+import { DEFAULT_SETTINGS, OFF_THEMES_MAX, STEP_SECONDS } from "@/game/types";
 import type { CreateRoomInput } from "@/server/contract";
 
 const KEY = "4dare:who-am-i:setup";
@@ -76,8 +71,8 @@ export function loadSetup(): CreateRoomInput {
   const seconds = (v: unknown, fallback: number) =>
     typeof v === "number" &&
     Number.isInteger(v) &&
-    v >= STEP_SECONDS_MIN &&
-    v <= STEP_SECONDS_MAX
+    v >= STEP_SECONDS.min &&
+    v <= STEP_SECONDS.max
       ? v
       : fallback;
   return {

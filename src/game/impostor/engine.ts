@@ -16,14 +16,15 @@ import {
   startStep,
   stepMs,
 } from "../steps";
+import { tunable } from "../tune";
 import {
   type Character,
   type Ctx,
+  ENGINE,
   MAX_GUESS,
   type PlayerId,
   type RoomState,
   SHOW_TIMING,
-  TALK_FLOOR_MS,
   type Theme,
 } from "../types";
 import { givesAway, validAnswer } from "./answers";
@@ -38,7 +39,7 @@ import type {
 } from "./types";
 
 /** How long the answers, a vote's result and a card swap stay on screen (ms, before scaling). */
-export const IMP_REVEAL = {
+export const IMP_REVEAL = tunable("imp", {
   repliesBase: 4200,
   perReply: 350,
   perWord: 450,
@@ -49,12 +50,14 @@ export const IMP_REVEAL = {
   /** An impostor caught: the card flips. */
   caught: 6200,
   swap: 3200,
-} as const;
+});
 
-/** Questions before the first vote; one before each later vote. */
-export const FIRST_ROUND_QUESTIONS = 2;
-/** "I don't know this one" swaps the cards at most this many times a match. */
-export const MAX_SWAPS = 2;
+export const IMP_RULES = tunable("impRules", {
+  /** Questions before the first vote; one before each later vote. */
+  firstRoundQuestions: 2,
+  /** "I don't know this one" swaps the cards at most this many times a match. */
+  maxSwaps: 2,
+});
 
 /**
  * How many get the impostor card: one, two from seven players, or the host's
@@ -239,7 +242,8 @@ function revealReplies(s: RoomState, ctx: Ctx) {
     until: ctx.now + repliesMs(q, scaleOf(ctx)),
   };
   const thisRound = imp.asked.filter((a) => a.round === imp.round).length;
-  if (imp.round === 1 && thisRound < FIRST_ROUND_QUESTIONS) return ask(s, ctx);
+  if (imp.round === 1 && thisRound < IMP_RULES.firstRoundQuestions)
+    return ask(s, ctx);
   imp.vote = { round: imp.round, points: {}, votes: {}, cuts: {} };
   s.phase = "talking";
   startStep(s, ctx, stepMs(s, "talkSeconds"));
@@ -268,7 +272,7 @@ const everyoneVoted = (s: RoomState) => {
   return !!v && playing(s).every((id) => v.votes[id] !== undefined);
 };
 
-/** A vote to send `targetId` out. The first one a player confirms cuts the talk, never below TALK_FLOOR_MS. */
+/** A vote to send `targetId` out. The first one a player confirms cuts the talk, never below ENGINE.talkFloor. */
 export function accuse(
   s: RoomState,
   playerId: PlayerId,
@@ -287,7 +291,7 @@ export function accuse(
   if (everyoneVoted(s)) return resolveVote(s, ctx);
   if (!first) return;
   const before = s.deadline;
-  cutClock(s, ctx, "talkSeconds", playing(s).length, TALK_FLOOR_MS);
+  cutClock(s, ctx, "talkSeconds", playing(s).length, ENGINE.talkFloor);
   if (before !== null && s.deadline !== null)
     v.cuts[playerId] = before - s.deadline;
 }
@@ -443,7 +447,7 @@ export function dontKnow(s: RoomState, playerId: PlayerId, ctx: Ctx) {
   requirePlaying(s, playerId);
   const imp = match(s);
   if (imp.asked.some((a) => a.revealed)) fail("wrong_phase");
-  if (imp.swaps >= MAX_SWAPS) fail("already_done");
+  if (imp.swaps >= IMP_RULES.maxSwaps) fail("already_done");
   const pair = imp.spares.shift() ?? fail("already_done");
   imp.crew = pair.crew;
   imp.impostor = pair.impostor;

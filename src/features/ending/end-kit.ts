@@ -3,12 +3,13 @@
 
 import type { Bleed } from "@/features/opening/title-kit";
 import type { GameKey } from "@/game/games";
+import { MUSIC_BEAT } from "@/game/music-tunes";
 
 /**
  * The end has no music of its own yet: every scene falls on the beats of the
- * game's take (95.08 BPM), so the end's track can be written to the same tempo.
+ * game's take (the shared tune, MUSIC_BPM), so the end's track can be written to the same tempo.
  */
-export const END_BEAT = 60 / 95.08;
+export const END_BEAT = MUSIC_BEAT;
 
 /** When the scene's acts change, in seconds from its start. */
 export interface EndActs {

@@ -15,7 +15,8 @@
   "me": "@{handle} · Nivel {level}",
   "admin": {
     "label": "Panel de control",
-    "waiting": "{n, plural, one {# en espera} other {# en espera}}"
+    "waiting": "{n, plural, one {# en espera} other {# en espera}}",
+    "test": "prueba"
   },
   "groups": {
     "play": "Jugar",

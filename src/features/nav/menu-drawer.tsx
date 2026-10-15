@@ -52,7 +52,7 @@ import { XpBar } from "@/features/profile/level";
 import { openProfile } from "@/features/profile/open-profile";
 import { profilePath } from "@/features/profile/profile-link";
 import { usePlayerCard } from "@/features/profile/use-profile";
-import { type GameKey, OPEN_GAMES } from "@/game/games";
+import { type GameKey, inTest, OPEN_GAMES } from "@/game/games";
 import { levelOf } from "@/game/profile/xp";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -570,6 +570,7 @@ function Tile({
   marked: boolean;
   onPick: () => void;
 }) {
+  const t = useTranslations("nav");
   return (
     <Link
       href={GAME_PATHS[game]}
@@ -586,7 +587,14 @@ function Tile({
       >
         <GameThumb game={game} size="fill" />
       </span>
-      <span className="px-0.5">{name}</span>
+      <span className="flex items-center gap-1.5 px-0.5">
+        {name}
+        {inTest(game) ? (
+          <span className="rounded-pill bg-butter px-1.5 font-mono text-[10px] text-on-butter uppercase">
+            {t("admin.test")}
+          </span>
+        ) : null}
+      </span>
     </Link>
   );
 }

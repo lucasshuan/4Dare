@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { GAME_XP, XP } from "../profile/xp";
 import { matchRecord } from "../record";
 import { char, Game, ident, THEMES } from "../test-utils";
-import { CLOCK_CUT_FLOOR_MS, GameError, TALK_FLOOR_MS } from "../types";
+import { ENGINE, GameError } from "../types";
 import { toView } from "../view";
 import { impostorsFor, impPoints, maxRounds } from "./engine";
 import type { ImpDeal, ImpQuestion } from "./types";
@@ -219,10 +219,10 @@ describe("impostor", () => {
     expect(g.state.deadline).toBe(deadline);
     expect(imp(g).vote?.points[a]).toBe(c);
     // late in the talk, the floor holds
-    g.now = deadline - TALK_FLOOR_MS - 5000;
+    g.now = deadline - ENGINE.talkFloor - 5000;
     g.do({ type: "ACCUSE", playerId: a, targetId: c });
-    expect(g.state.deadline).toBe(g.now + TALK_FLOOR_MS);
-    expect(TALK_FLOOR_MS).toBeGreaterThan(CLOCK_CUT_FLOOR_MS);
+    expect(g.state.deadline).toBe(g.now + ENGINE.talkFloor);
+    expect(ENGINE.talkFloor).toBeGreaterThan(ENGINE.clockCutFloor);
   });
 
   it("a tie sends nobody out", () => {

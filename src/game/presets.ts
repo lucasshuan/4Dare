@@ -10,8 +10,7 @@ import {
   DEFAULT_SETTINGS,
   OFF_THEMES_MAX,
   type RoomSettings,
-  STEP_SECONDS_MAX,
-  STEP_SECONDS_MIN,
+  STEP_SECONDS,
   STEP_TIMES,
   type StepTime,
 } from "./types";
@@ -95,8 +94,8 @@ const record = (v: unknown): Record<string, unknown> =>
 const seconds = (v: unknown) =>
   typeof v === "number" &&
   Number.isInteger(v) &&
-  v >= STEP_SECONDS_MIN &&
-  v <= STEP_SECONDS_MAX;
+  v >= STEP_SECONDS.min &&
+  v <= STEP_SECONDS.max;
 
 const THEME_ID = /^[a-z0-9-]{1,80}$/;
 

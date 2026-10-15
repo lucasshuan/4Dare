@@ -14,8 +14,7 @@ import {
   GAME_STEP_TIMES,
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
-  STEP_SECONDS_MAX,
-  STEP_SECONDS_MIN,
+  STEP_SECONDS,
   type StepTime,
 } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -71,8 +70,8 @@ export function Segmented<T extends string | number>({
 
 const clampSeconds = (n: number, fallback: number) =>
   Math.min(
-    STEP_SECONDS_MAX,
-    Math.max(STEP_SECONDS_MIN, Math.round(n / 10) * 10 || fallback),
+    STEP_SECONDS.max,
+    Math.max(STEP_SECONDS.min, Math.round(n / 10) * 10 || fallback),
   );
 
 /** One step's seconds: a label with its hint, then − [90] + in steps of 10. */
@@ -104,8 +103,8 @@ export function SecondsField({
         <button
           type="button"
           aria-label={`${label}: ${t("less")}`}
-          aria-disabled={value <= STEP_SECONDS_MIN}
-          onClick={() => value > STEP_SECONDS_MIN && set(value - 10)}
+          aria-disabled={value <= STEP_SECONDS.min}
+          onClick={() => value > STEP_SECONDS.min && set(value - 10)}
           className="flex size-10 items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface transition-[opacity,transform] duration-150 active:scale-90 aria-disabled:opacity-35"
         >
           <Minus className="size-4.5" strokeWidth={1.75} />
@@ -127,8 +126,8 @@ export function SecondsField({
         <button
           type="button"
           aria-label={`${label}: ${t("more")}`}
-          aria-disabled={value >= STEP_SECONDS_MAX}
-          onClick={() => value < STEP_SECONDS_MAX && set(value + 10)}
+          aria-disabled={value >= STEP_SECONDS.max}
+          onClick={() => value < STEP_SECONDS.max && set(value + 10)}
           className="flex size-10 items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface transition-[opacity,transform] duration-150 active:scale-90 aria-disabled:opacity-35"
         >
           <Plus className="size-4.5" strokeWidth={1.75} />

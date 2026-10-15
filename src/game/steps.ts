@@ -4,9 +4,8 @@ import { findPlayer, isPresent } from "./helpers";
 import { luPlaces } from "./lineup/places";
 import {
   type BeatKind,
-  CLOCK_CUT_FLOOR_MS,
   type Ctx,
-  END_LEAD_MS,
+  ENGINE,
   type ErrorCode,
   GameError,
   type PlayerId,
@@ -127,14 +126,14 @@ export function stopClock(s: RoomState) {
  * One of the `people` who act in this step (vote, answer) did, and others
  * still owe theirs: the clock loses the step's time divided by `people`, so
  * each gets an even share and the last ones don't keep everybody waiting. It
- * never goes below `floor` (CLOCK_CUT_FLOOR_MS) from now, nor moves later.
+ * never goes below `floor` (ENGINE.clockCutFloor) from now, nor moves later.
  */
 export function cutClock(
   s: RoomState,
   ctx: Ctx,
   key: StepTime,
   people: number,
-  floor = CLOCK_CUT_FLOOR_MS,
+  floor = ENGINE.clockCutFloor,
 ) {
   if (s.deadline === null || people < 1) return;
   const cut = Math.round(stepMs(s, key) / people);
@@ -219,7 +218,7 @@ export function finish(s: RoomState, ctx: Ctx) {
   s.phase = "finished";
   s.turnPlayerId = null;
   startStep(s, ctx, 0);
-  if (s.stepStartsAt === ctx.now) s.stepStartsAt = ctx.now + END_LEAD_MS;
+  if (s.stepStartsAt === ctx.now) s.stepStartsAt = ctx.now + ENGINE.endLead;
   s.deadline = null;
   s.stepMs = null;
   for (const p of s.players) p.ready = p.id === s.hostId;

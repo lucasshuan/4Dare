@@ -19,6 +19,7 @@ import type {
 } from "./lineup/types";
 import type { Taste } from "./tastes";
 import type { ThemeSet } from "./theme-sets";
+import { type Tunes, tunable } from "./tune";
 
 export const LANGS = ["en", "es", "ja", "pt"] as const;
 export type Lang = (typeof LANGS)[number];
@@ -74,19 +75,19 @@ export interface RoomSettings {
   password: string;
   /** Within the game's range (GAME_SEATS). */
   seats: number;
-  /** Seconds to vote on the theme. Each vote, while others still owe theirs, cuts a share of it (see CLOCK_CUT_FLOOR_MS). */
+  /** Seconds to vote on the theme. Each vote, while others still owe theirs, cuts a share of it (see ENGINE.clockCutFloor). */
   voteSeconds: number;
-  /** Seconds to ask a question: STEP_SECONDS_MIN..MAX, default 80. */
+  /** Seconds to ask a question: STEP_SECONDS.min..MAX, default 80. */
   askSeconds: number;
   /** Seconds to guess (or pass) once the answers are in. */
   guessSeconds: number;
-  /** Seconds to answer a question. Each answer, while others still owe theirs, cuts a share of it (see CLOCK_CUT_FLOOR_MS). */
+  /** Seconds to answer a question. Each answer, while others still owe theirs, cuts a share of it (see ENGINE.clockCutFloor). */
   answerSeconds: number;
   /** Seconds for the picker to check a guess that was not an obvious match. */
   validateSeconds: number;
   /** Impostor: seconds to answer a question. Each answer, while others still owe theirs, cuts a share of it. */
   replySeconds: number;
-  /** Impostor: seconds to talk and vote. Each confirmed vote cuts a share, never below TALK_FLOOR_MS. */
+  /** Impostor: seconds to talk and vote. Each confirmed vote cuts a share, never below ENGINE.talkFloor. */
   talkSeconds: number;
   /** Impostor: seconds a caught impostor has to guess the crew's card. */
   lastSeconds: number;
@@ -129,7 +130,7 @@ export interface RoomSettings {
   watchChat: boolean;
 }
 
-export const DEFAULT_SETTINGS: RoomSettings = {
+export const DEFAULT_SETTINGS = tunable<RoomSettings>("room", {
   game: DEFAULT_GAME,
   name: "",
   visibility: "public",
@@ -155,13 +156,13 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   offTastes: [],
   offThemes: [],
   watchChat: true,
-};
+});
 /** The most themes a room can switch off: about every theme there is. */
 export const OFF_THEMES_MAX = 1000;
 export const ROOM_NAME_MAX = 25;
 export const ROOM_PASSWORD_MAX = 20;
-export const STEP_SECONDS_MIN = 30;
-export const STEP_SECONDS_MAX = 300;
+/** The range a room can set each step clock to (s). */
+export const STEP_SECONDS = tunable("room.step", { min: 30, max: 300 });
 /** The timed steps a room sets, each with its own seconds, in the order a match plays them. */
 export const STEP_TIMES = [
   "voteSeconds",
@@ -190,20 +191,42 @@ export const GAME_STEP_TIMES: Record<GameKey, readonly StepTime[]> = {
   impostor: ["voteSeconds", "replySeconds", "talkSeconds", "lastSeconds"],
   lineup: ["lotSeconds", "tradeSeconds", "defendSeconds", "judgeSeconds"],
 };
-/** Picking a character always gets this long. */
-export const PICK_SECONDS = 120;
+/** The engine's own clocks (ms unless the name says seconds). */
+export const ENGINE = tunable("engine", {
+  /**
+   * The longest a start's ready check waits for every page in the room to have
+   * its opening loaded and rehearsed; a page that has not said so by then sees
+   * it as it comes.
+   */
+  startWait: 5500,
+  /**
+   * Once everyone is ready, the match starts this far ahead, so every page
+   * has the new state before its first beat and they all play it together.
+   */
+  startLead: 500,
+  /**
+   * A match's end with no reveal to wait for starts this far ahead, so every
+   * page builds and paints its scene unseen first, as a start's ready check does.
+   */
+  endLead: 700,
+  /**
+   * Clock cuts: in a step several people act on (the theme vote, the answers),
+   * each one who acts while others still owe theirs cuts the step's time divided
+   * by how many act (a third with three, a quarter with four), so the time is
+   * shared out evenly and nobody waits long on the last one... but whoever is
+   * left keeps at least this long.
+   */
+  clockCutFloor: 10_000,
+  /** The Impostor's talk keeps at least this long however fast the votes come. */
+  talkFloor: 20_000,
+  /** Picking a character always gets this long (s). */
+  pickSeconds: 120,
+  /** How long the host has to type the theme; then everyone votes instead, on themes from every set (s). */
+  hostThemeSeconds: 30,
+});
+
 /** The longest character name, typed or saved. */
 export const MAX_CHARACTER_NAME = 60;
-/**
- * Clock cuts: in a step several people act on (the theme vote, the answers),
- * each one who acts while others still owe theirs cuts the step's time divided
- * by how many act (a third with three, a quarter with four), so the time is
- * shared out evenly and nobody waits long on the last one... but whoever is
- * left keeps at least this long (ms).
- */
-export const CLOCK_CUT_FLOOR_MS = 10_000;
-/** The Impostor's talk keeps at least this long however fast the votes come (ms). */
-export const TALK_FLOOR_MS = 20_000;
 /**
  * A lobby has no clock: the match starts when the host starts it. One nobody
  * touched in this long leaves the room list: its pages may have died without
@@ -222,23 +245,6 @@ export const HEARTBEAT_MS = 60_000;
  * player go, and a match whose players have all closed their pages ends.
  */
 export const GONE_GRACE_MS = 5000;
-
-/**
- * The longest a start's ready check waits for every page in the room to have
- * its opening loaded and rehearsed; a page that has not said so by then sees
- * it as it comes.
- */
-export const START_WAIT_MS = 5500;
-/**
- * Once everyone is ready, the match starts this far ahead, so every page
- * has the new state before its first beat and they all play it together.
- */
-export const START_LEAD_MS = 500;
-/**
- * A match's end with no reveal to wait for starts this far ahead, so every
- * page builds and paints its scene unseen first, as a start's ready check does.
- */
-export const END_LEAD_MS = 700;
 
 /** How long a player the host removed from the lobby stays out (ms). */
 export const KICK_MS = 2 * 60_000;
@@ -265,8 +271,6 @@ export type ReportReason = (typeof REPORT_REASONS)[number];
 export const REPORT_NOTE_MAX = 300;
 /** Themes offered in the vote before each match. */
 export const THEME_OPTIONS = 4;
-/** How long the host has to type the theme; then everyone votes instead, on themes from every set. */
-export const HOST_THEME_SECONDS = 30;
 /** Ideas shown to the host while they type the theme. */
 export const THEME_IDEAS = 12;
 export const MAX_THEME = 50;
@@ -281,7 +285,7 @@ export const MAX_NAME = 16;
  * kept between 6 and 12 seconds. Guesses: a quick "not yet", a longer moment for a hit (card flip, confetti).
  * The shows that present a match (opening, theme, cast) are timed by SHOW_TIMING.
  */
-export const REVEAL_TIMING = {
+export const REVEAL_TIMING = tunable("reveal", {
   answersBase: 4000,
   perAnswer: 1000,
   perNoteChar: 60,
@@ -291,7 +295,7 @@ export const REVEAL_TIMING = {
   guessHit: 5000,
   /** The turn player passed instead of guessing. */
   pass: 2600,
-} as const;
+});
 
 // One file per scene in show-timing/; tests read the constants, never literals.
 export { SHOW_MARKS, SHOW_TIMING } from "./show-timing";
@@ -587,6 +591,8 @@ export interface RoomState {
   code: string;
   hostId: PlayerId;
   settings: RoomSettings;
+  /** The panel's values this room plays with (missing: the code's own). */
+  cfg?: RoomConfig;
   phase: Phase;
   /** Seat order (join order). */
   players: RoomPlayer[];
@@ -851,8 +857,17 @@ export type GameEvent =
       drafted?: Record<PlayerId, Character>;
     };
 
+/** The panel's values a room plays with (tune.ts): the site's at the last write between matches, then frozen for the match. */
+export interface RoomConfig {
+  /** game_config's version they come from. */
+  v: number;
+  tunes: Tunes;
+}
+
 export interface Ctx {
   now: number;
+  /** The site's current values: a room between matches takes them, and a match keeps them. */
+  config?: RoomConfig;
   /** 0..1, injectable so tests are deterministic. */
   random: () => number;
   /** e2e only: scales every show beat (never the step clocks). */
@@ -1150,6 +1165,8 @@ export interface RoomView {
   code: string;
   phase: Phase;
   settings: RoomSettings;
+  /** The panel's values the room plays with (null: the code's own); the screens read them (tune.ts). */
+  cfg: Tunes | null;
   /** What for?'s TV chair: who presents the next match with a presenter. */
   chairId: PlayerId | null;
   round: number;

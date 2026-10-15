@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { knownAs } from "@/game/character-search";
-import { GAME_KEYS, type GameKey, isGameKey, OPEN_GAMES } from "@/game/games";
+import { GAME_KEYS, type GameKey, isGameKey, isPlayable } from "@/game/games";
 import type { ImpAnswer } from "@/game/impostor/types";
 import {
   COINS,
@@ -46,14 +46,15 @@ import {
   type RoomSettings,
   type RoomState,
   type RoomView,
-  STEP_SECONDS_MAX,
-  STEP_SECONDS_MIN,
+  STEP_SECONDS,
   THEME_OPTIONS,
 } from "@/game/types";
 import { toView } from "@/game/view";
 import { rerollGuest as rerollGuestCookie } from "./auth/guest";
+import { allowed } from "./auth/roles";
 import { getBackend } from "./backend";
 import { background } from "./background";
+import { loadConfig } from "./config";
 import {
   type CharacterDTO,
   type CreateRoomInput,
@@ -161,53 +162,62 @@ async function actVia(
 
 // --- rooms ------------------------------------------------------------------
 
-const seconds = z.number().int().min(STEP_SECONDS_MIN).max(STEP_SECONDS_MAX);
-
-const createSchema = z.object({
-  game: z.enum(GAME_KEYS).refine((g) => OPEN_GAMES.includes(g)),
-  name: z.string().trim().min(1).max(ROOM_NAME_MAX),
-  visibility: z.enum(["public", "private"]),
-  password: z.string().trim().max(ROOM_PASSWORD_MAX),
-  // the engine checks the game's own range
-  seats: z.number().int().min(2).max(10),
-  voteSeconds: seconds,
-  askSeconds: seconds,
-  guessSeconds: seconds,
-  answerSeconds: seconds,
-  validateSeconds: seconds,
-  replySeconds: seconds,
-  talkSeconds: seconds,
-  lastSeconds: seconds,
-  lotSeconds: seconds,
-  tradeSeconds: seconds,
-  defendSeconds: seconds,
-  judgeSeconds: seconds,
-  impostors: z.number().int().min(1).max(3).nullable(),
-  themeMode: z.enum(["vote", "host"]),
-  mode: z.enum(["classic", "host"]).optional(),
-  offTastes: z
-    .array(z.enum(TASTE_KEYS as [Taste, ...Taste[]]))
-    .max(TASTE_KEYS.length - 1),
-  offThemes: z.array(z.string().regex(/^[a-z0-9-]{1,80}$/)).max(OFF_THEMES_MAX),
-  coins: z.number().int().min(COINS.min).max(COINS.max),
-  lotsPerSeat: z.number().int().min(LOTS_PER_SEAT.min).max(LOTS_PER_SEAT.max),
-  rounds: z.number().int().min(ROUNDS.min).max(ROUNDS.max).nullable(),
-  interval: z.boolean(),
-  trades: z.boolean(),
-  heavy: z.boolean(),
-  offMissions: z
-    .array(z.string().regex(/^[a-z0-9-]{1,80}$/))
-    .max(OFF_MISSIONS_MAX),
-  watchChat: z.boolean().optional(),
-});
+/**
+ * A room's settings as the server takes them. Built per call: the ranges are
+ * the panel's (loadConfig puts them in force), and a game in test is there
+ * for the admin only.
+ */
+const createSchema = (admin: boolean) => {
+  const seconds = z.number().int().min(STEP_SECONDS.min).max(STEP_SECONDS.max);
+  return z.object({
+    game: z.enum(GAME_KEYS).refine((g) => isPlayable(g, admin)),
+    name: z.string().trim().min(1).max(ROOM_NAME_MAX),
+    visibility: z.enum(["public", "private"]),
+    password: z.string().trim().max(ROOM_PASSWORD_MAX),
+    // the engine checks the game's own range
+    seats: z.number().int().min(2).max(10),
+    voteSeconds: seconds,
+    askSeconds: seconds,
+    guessSeconds: seconds,
+    answerSeconds: seconds,
+    validateSeconds: seconds,
+    replySeconds: seconds,
+    talkSeconds: seconds,
+    lastSeconds: seconds,
+    lotSeconds: seconds,
+    tradeSeconds: seconds,
+    defendSeconds: seconds,
+    judgeSeconds: seconds,
+    impostors: z.number().int().min(1).max(3).nullable(),
+    themeMode: z.enum(["vote", "host"]),
+    mode: z.enum(["classic", "host"]).optional(),
+    offTastes: z
+      .array(z.enum(TASTE_KEYS as [Taste, ...Taste[]]))
+      .max(TASTE_KEYS.length - 1),
+    offThemes: z
+      .array(z.string().regex(/^[a-z0-9-]{1,80}$/))
+      .max(OFF_THEMES_MAX),
+    coins: z.number().int().min(COINS.min).max(COINS.max),
+    lotsPerSeat: z.number().int().min(LOTS_PER_SEAT.min).max(LOTS_PER_SEAT.max),
+    rounds: z.number().int().min(ROUNDS.min).max(ROUNDS.max).nullable(),
+    interval: z.boolean(),
+    trades: z.boolean(),
+    heavy: z.boolean(),
+    offMissions: z
+      .array(z.string().regex(/^[a-z0-9-]{1,80}$/))
+      .max(OFF_MISSIONS_MAX),
+    watchChat: z.boolean().optional(),
+  });
+};
 
 export async function createRoom(
   input: CreateRoomInput,
 ): Promise<Result<{ code: string }>> {
   return run(async () => {
-    const parsed = createSchema.safeParse(input);
-    if (!parsed.success) bad();
+    await loadConfig();
     const host = await me();
+    const parsed = createSchema(!!(await allowed("admin"))).safeParse(input);
+    if (!parsed.success) bad();
     if (!allow(`create:${host.id}`, 20, 60_000))
       throw new GameError("rate_limited");
     if (await currentMatch(host.id)) throw new GameError("in_match");
@@ -451,7 +461,11 @@ export async function updateSettings(
   settings: Partial<RoomSettings>,
 ): Promise<Result<RoomView>> {
   return run(async () => {
-    const parsed = createSchema.partial().strict().safeParse(settings);
+    await loadConfig();
+    const parsed = createSchema(!!(await allowed("admin")))
+      .partial()
+      .strict()
+      .safeParse(settings);
     if (!parsed.success) bad();
     return act(code, (id) => ({
       type: "UPDATE_SETTINGS",

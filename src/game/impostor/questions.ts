@@ -2,6 +2,7 @@
 // screens show it (/api/impostor/questions), and how a match picks its
 // questions from it.
 import type { ThemeSet } from "../theme-sets";
+import { tunable } from "../tune";
 import type { Localized } from "../types";
 import { choicesOf, type EmojiPalette, isPalette } from "./answers";
 import type { ImpQuestion, QuestionKind } from "./types";
@@ -45,7 +46,7 @@ export function toImpQuestion(q: BankQuestion): ImpQuestion {
 }
 
 /** Questions a match prepares: two before the first vote, one per round after, and spares. */
-export const MATCH_QUESTIONS = 9;
+export const MATCH_QUESTIONS = tunable("impMatch", { questions: 9 });
 /** A room's recently asked questions stay out of its next matches. */
 export const RECENT_QUESTIONS = 60;
 
@@ -67,7 +68,7 @@ export function pickQuestions(
     count?: number;
   },
 ): ImpQuestion[] {
-  const count = o.count ?? MATCH_QUESTIONS;
+  const count = o.count ?? MATCH_QUESTIONS.questions;
   const fits = bank.filter(
     (q) =>
       (q.audience === "all" || q.audience === o.audience) &&

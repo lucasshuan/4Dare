@@ -400,6 +400,38 @@ export type Database = {
           },
         ];
       };
+      game_config: {
+        Row: {
+          author_id: string | null;
+          created_at: string;
+          id: number;
+          note: string | null;
+          values: Json;
+        };
+        Insert: {
+          author_id?: string | null;
+          created_at?: string;
+          id?: never;
+          note?: string | null;
+          values?: Json;
+        };
+        Update: {
+          author_id?: string | null;
+          created_at?: string;
+          id?: never;
+          note?: string | null;
+          values?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_config_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       impostor_match_players: {
         Row: {
           character_name: string | null;

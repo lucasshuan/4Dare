@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useMemo } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react";
+import { setRoomTunes } from "@/game/tune";
 import type { PlayerView, RoomView } from "@/game/types";
 import {
   type ServerClock,
@@ -45,6 +52,10 @@ export function RoomProvider({
   clock?: ServerClock;
   children: ReactNode;
 }) {
+  // the room's copy of the panel's values, in force for everything drawn
+  // inside it (set while rendering, so the first frame already has it)
+  setRoomTunes(view.cfg);
+  useEffect(() => () => setRoomTunes(null), []);
   const roomClock = useMemo<ServerClock>(
     () => clock ?? { now: () => Date.now() + offset, frozen: false, rate: 1 },
     [clock, offset],

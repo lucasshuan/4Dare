@@ -17,6 +17,7 @@ import { impReveal, impStatus, impView } from "./impostor/view";
 import { LU_PHASES } from "./lineup/types";
 import { luStatus, luView } from "./lineup/view";
 import { gameRound, upcomingTitle } from "./steps";
+import { withTunes } from "./tune";
 import {
   type ActiveRoom,
   type AnswerEntry,
@@ -361,6 +362,21 @@ export function toView(
   lang: Lang,
   watcher?: Identity,
 ): RoomView {
+  // the room's copy of the panel's values, also handed to its screens
+  return withTunes(state.cfg?.tunes, () => ({
+    ...viewOf(state, version, viewerId, now, lang, watcher),
+    cfg: state.cfg?.tunes ?? null,
+  }));
+}
+
+function viewOf(
+  state: RoomState,
+  version: number,
+  viewerId: PlayerId,
+  now: number,
+  lang: Lang,
+  watcher?: Identity,
+): Omit<RoomView, "cfg"> {
   const s = state;
   const seated = !!findPlayer(s, viewerId);
   if (!seated && watcher?.id !== viewerId) throw new GameError("not_member");

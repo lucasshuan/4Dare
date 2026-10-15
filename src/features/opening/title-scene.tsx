@@ -17,6 +17,7 @@ import { useRoomContext } from "@/features/data/room-context";
 import { beatOf } from "@/features/stage/stage";
 import { useStage } from "@/features/stage/stage-context";
 import type { GameKey } from "@/game/games";
+import { trackFor } from "@/game/music-tunes";
 import { SHOW_TIMING } from "@/game/show-timing";
 import type { TitleCard } from "@/game/types";
 import { useClock } from "@/lib/hooks/use-server-clock";
@@ -63,12 +64,9 @@ const BACKDROP: Record<GameKey, string> = {
   lineup: "#1c0e05",
 };
 
-/** The take each game's title scene plays from the top. */
-export const TITLE_TRACK: Record<GameKey, Track> = {
-  "who-am-i": "stage",
-  impostor: "impostor",
-  lineup: "matchday",
-};
+/** The take a game's title scene plays from the top (the panel's choice; the stage if it chose none). */
+export const titleTrack = (game: GameKey): Track =>
+  trackFor(game, "opening") ?? "stage";
 
 const ChalkFont = dynamic(() => import("@/features/lineup/chalk-font"));
 const ChalkFontJa = dynamic(() => import("@/features/lineup/chalk-font-ja"));
@@ -99,7 +97,7 @@ export function preloadTitle(
   const known = preloads.get(key);
   if (known) return known;
   const parts: Promise<unknown>[] = [
-    preloadMusic(TITLE_TRACK[game]),
+    preloadMusic(titleTrack(game)),
     preloadTitleSounds(
       game === "impostor"
         ? IMPOSTOR_SOUNDS
@@ -318,7 +316,7 @@ function useTitleShow(): SceneProps | null {
   const { show, beat } = useStage();
   const title =
     show?.kind === "opening" && show.title ? beatOf(show, "title") : null;
-  // before the curtain too: a start a moment ahead (START_LEAD_MS)
+  // before the curtain too: a start a moment ahead (ENGINE.startLead)
   const ahead = beat === null || beat.kind === "curtain";
   if (!show?.title || !title || (!ahead && beat.kind !== "title")) return null;
   return {
@@ -507,7 +505,7 @@ export function OpeningMusic() {
     [at],
   );
   useMusic(
-    restartAt === null ? undefined : TITLE_TRACK[view.settings.game],
+    restartAt === null ? undefined : titleTrack(view.settings.game),
     3,
     restartAt,
   );

@@ -15,7 +15,8 @@
   "me": "@{handle} · レベル{level}",
   "admin": {
     "label": "管理パネル",
-    "waiting": "{n}件待ち"
+    "waiting": "{n}件待ち",
+    "test": "テスト"
   },
   "groups": {
     "play": "遊ぶ",

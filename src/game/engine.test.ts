@@ -7,24 +7,19 @@ import { char, Game, ident, THEMES } from "./test-utils";
 import {
   type BeatKind,
   type Character,
-  CLOCK_CUT_FLOOR_MS,
   DEFAULT_SETTINGS,
-  END_LEAD_MS,
+  ENGINE,
   type ExampleCard,
   GameError,
   GONE_GRACE_MS,
-  HOST_THEME_SECONDS,
   KICK_MS,
   MAX_CHARACTER_NAME,
-  PICK_SECONDS,
   type PickDraft,
   REVEAL_TIMING,
   type Reveal,
   type RoomState,
   type RuleExamples,
   SHOW_TIMING,
-  START_LEAD_MS,
-  START_WAIT_MS,
 } from "./types";
 import { toPublicRoom, toView } from "./view";
 
@@ -371,14 +366,14 @@ describe("the start's ready check", () => {
     prepare(g);
     expect(g.state.phase).toBe("lobby");
     expect(g.state.starting).toMatchObject({
-      until: g.now + START_WAIT_MS,
+      until: g.now + ENGINE.startWait,
       ready: [],
     });
-    expect(g.state.deadline).toBe(g.now + START_WAIT_MS);
+    expect(g.state.deadline).toBe(g.now + ENGINE.startWait);
     // the view says who is ready and the title the match opens with, never what it starts with
     const view = toView(g.state, 1, "p2", g.now, "en");
     expect(view.starting).toEqual({
-      until: g.now + START_WAIT_MS,
+      until: g.now + ENGINE.startWait,
       ready: [],
       title: { n: 1, crowned: [] },
       first: true,
@@ -394,7 +389,7 @@ describe("the start's ready check", () => {
     expect(ready(g, "p3")).toBe("no error");
     expect(g.state.phase).not.toBe("lobby");
     expect(g.state.starting).toBeNull();
-    expect(g.state.reveal?.startsAt).toBe(g.now + START_LEAD_MS);
+    expect(g.state.reveal?.startsAt).toBe(g.now + ENGINE.startLead);
     expect(g.state.played).toEqual({ "who-am-i": 1 });
   });
 
@@ -402,11 +397,11 @@ describe("the start's ready check", () => {
     const g = new Game(3);
     prepare(g);
     ready(g, "p2");
-    g.now += START_WAIT_MS;
+    g.now += ENGINE.startWait;
     expect(isExpired(g.state, g.now)).toBe(true);
     g.do({ type: "TIMEOUT" });
     expect(g.state.phase).not.toBe("lobby");
-    expect(g.state.reveal?.startsAt).toBe(g.now + START_LEAD_MS);
+    expect(g.state.reveal?.startsAt).toBe(g.now + ENGINE.startLead);
 
     const h = new Game(3);
     prepare(h);
@@ -557,10 +552,10 @@ describe("the theme vote", () => {
     expect(g.state.deadline).toBe(deadline - quarter);
     vote(g, "p2", 1);
     expect(g.state.deadline).toBe(deadline - 2 * quarter);
-    // the floor holds: 15 s left, a cut would leave 5 s, so CLOCK_CUT_FLOOR_MS
+    // the floor holds: 15 s left, a cut would leave 5 s, so ENGINE.clockCutFloor
     g.now = (g.state.deadline ?? 0) - 15_000;
     vote(g, "p3", 1);
-    expect(g.state.deadline).toBe(g.now + CLOCK_CUT_FLOOR_MS);
+    expect(g.state.deadline).toBe(g.now + ENGINE.clockCutFloor);
   });
 
   it("a vote taken back gives back the time it cut; voting again cuts again", () => {
@@ -622,7 +617,7 @@ describe("the theme vote", () => {
     // the picking clock waits for the show
     expect(g.state.stepStartsAt).toBe(r?.until);
     expect((g.state.deadline ?? 0) - (g.state.stepStartsAt ?? 0)).toBe(
-      PICK_SECONDS * 1000,
+      ENGINE.pickSeconds * 1000,
     );
     expect(code(() => vote(g, "p3", 1))).toBe("wrong_phase");
   });
@@ -776,7 +771,9 @@ describe("the host types the theme", () => {
       ["entrance", T.entrance.theming],
     ]);
     expect(g.state.stepStartsAt).toBe(r?.until);
-    expect(g.state.deadline).toBe((r?.until ?? 0) + HOST_THEME_SECONDS * 1000);
+    expect(g.state.deadline).toBe(
+      (r?.until ?? 0) + ENGINE.hostThemeSeconds * 1000,
+    );
   });
 
   it("only the host sets it; it is shown to everyone, then picking starts", () => {
@@ -1341,12 +1338,12 @@ describe("step times", () => {
     return g;
   };
 
-  it("each step runs on its own clock; picking always gets PICK_SECONDS", () => {
+  it("each step runs on its own clock; picking always gets ENGINE.pickSeconds", () => {
     const g = new Game(3, 7, times);
     g.start();
     expect(g.state.phase).toBe("picking");
     expect((g.state.deadline ?? 0) - (g.state.stepStartsAt ?? 0)).toBe(
-      PICK_SECONDS * 1000,
+      ENGINE.pickSeconds * 1000,
     );
     g.pickAll();
     g.skipShow();
@@ -1389,14 +1386,14 @@ describe("step times", () => {
     ).toContainEqual(expect.objectContaining({ by: c, value: "unknown" }));
   });
 
-  it("a cut never leaves less than CLOCK_CUT_FLOOR_MS, nor adds time", () => {
+  it("a cut never leaves less than ENGINE.clockCutFloor, nor adds time", () => {
     const g = timed(4);
     const asker = g.turn;
     g.do({ type: "ASK", playerId: asker, text: "Is it human?" });
     const [a, b] = g.state.order.filter((id) => id !== asker);
     g.now = (g.state.deadline ?? 0) - 15_000; // 15 s left, a cut would take 33
     g.do({ type: "ANSWER", playerId: a, value: "yes", note: null });
-    expect(g.state.deadline).toBe(g.now + CLOCK_CUT_FLOOR_MS);
+    expect(g.state.deadline).toBe(g.now + ENGINE.clockCutFloor);
     g.now += 5_000; // 5 s left: already under the floor, nothing changes
     const before = g.state.deadline;
     g.do({ type: "ANSWER", playerId: b, value: "yes", note: null });
@@ -1788,7 +1785,7 @@ describe("leaving and giving up", () => {
     expect(g.state.phase).toBe("finished");
     expect(g.state.reveal).toBeNull();
     // a moment ahead, for every page to build its scene unseen
-    expect(g.state.stepStartsAt).toBe(g.now + END_LEAD_MS);
+    expect(g.state.stepStartsAt).toBe(g.now + ENGINE.endLead);
 
     // during the cast
     const h = new Game(2);
@@ -1798,7 +1795,7 @@ describe("leaving and giving up", () => {
     h.do({ type: "LEAVE", playerId: "p2" });
     expect(h.state.phase).toBe("finished");
     expect(h.state.reveal).toBeNull();
-    expect(h.state.stepStartsAt).toBe(h.now + END_LEAD_MS);
+    expect(h.state.stepStartsAt).toBe(h.now + ENGINE.endLead);
     // play never started: it does not start after the match finished
     expect(h.state.playStartedAt).toBe(h.now);
   });

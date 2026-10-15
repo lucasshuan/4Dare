@@ -15,7 +15,8 @@
   "me": "@{handle} · Level {level}",
   "admin": {
     "label": "Control panel",
-    "waiting": "{n} waiting"
+    "waiting": "{n} waiting",
+    "test": "test"
   },
   "groups": {
     "play": "Play",

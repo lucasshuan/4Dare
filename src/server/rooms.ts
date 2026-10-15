@@ -11,8 +11,10 @@ import { LU_PHASES } from "@/game/lineup/types";
 import { matchRecord } from "@/game/record";
 import type { ThemeFilter } from "@/game/tastes";
 import { themeId } from "@/game/theme-id";
+import { withTunes } from "@/game/tune";
 import {
   type Character,
+  type Ctx,
   GameError,
   type GameEvent,
   type Identity,
@@ -21,6 +23,7 @@ import {
   type Phase,
   type PickDraft,
   type PlayerId,
+  type RoomConfig,
   type RoomSettings,
   type RoomState,
   type RuleExamples,
@@ -31,6 +34,7 @@ import {
 import { toPublicRoom } from "@/game/view";
 import { getBackend } from "./backend";
 import { background } from "./background";
+import { roomConfig } from "./config";
 import type { CurrentMatch, ElsewhereRoom } from "./contract";
 import { countPick, nameWithPicture, wearing } from "./pictures";
 import { type ExampleSources, voteExamples } from "./rule-examples";
@@ -59,10 +63,12 @@ function randomCode() {
 }
 
 // DARE_SHOW_SCALE speeds the shows up for e2e runs (the step clocks keep their length).
-const ctx = () => ({
+// The panel's values in force go along: a room between matches takes them.
+const ctx = (config?: RoomConfig): Ctx => ({
   now: Date.now(),
   random: Math.random,
   showScale: Number(process.env.DARE_SHOW_SCALE) || 1,
+  ...(config ? { config } : {}),
 });
 
 /** A chat older than this belongs to a room that died without closing. */
@@ -76,8 +82,9 @@ export async function openRoom(host: Identity, settings: RoomSettings) {
   // watchers whose page died without a word
   background(() => chat.prune(Date.now() - CHAT_TTL_MS));
   background(() => watchers.prune(Date.now() - WATCH_TTL_MS));
+  const config = await roomConfig(settings.game);
   for (let attempt = 0; attempt < 10; attempt++) {
-    const state = newRoomState(randomCode(), host, settings, ctx());
+    const state = newRoomState(randomCode(), host, settings, ctx(config));
     if (await rooms.create(state)) {
       background(notify.lobbyChanged);
       return state.code;
@@ -120,12 +127,14 @@ export async function dispatch(
     const stored = await rooms.get(code);
     if (!stored) throw new GameError("not_found");
     const event = await build(stored.state);
-    const c = ctx();
+    const c = ctx(await roomConfig(stored.state.settings.game));
     const next = reduce(stored.state, event, c);
     if (await rooms.compareAndSwap(code, stored.version, next)) {
       const lines = quiet
         ? []
-        : systemLines(stored.state, next, c.now, c.showScale);
+        : withTunes(next.cfg?.tunes, () =>
+            systemLines(stored.state, next, c.now, c.showScale),
+          );
       if (lines.length)
         background(async () => {
           const newest = (await chat.add(code, lines)).at(-1);
@@ -272,7 +281,10 @@ export async function hasNewcomer(state: RoomState): Promise<boolean> {
 
 /** Saves the finished match after the response is sent, so nobody waits for it. */
 function saveMatch(state: RoomState) {
-  const record = matchRecord(state, Date.now());
+  // the XP the match's own values gave, whatever the panel says now
+  const record = withTunes(state.cfg?.tunes, () =>
+    matchRecord(state, Date.now()),
+  );
   if (!record) return;
   background(() => getBackend().matches.record(record));
   // what each Impostor question did, in the language the cards were dealt in

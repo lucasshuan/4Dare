@@ -64,17 +64,18 @@ import {
   titlePart,
 } from "./steps";
 import { isTaste, TASTE_KEYS } from "./tastes";
+import { withTunes } from "./tune";
 import {
   BAN_MS,
   type Ctx,
   DEFAULT_SETTINGS,
+  ENGINE,
   type GameEvent,
-  HOST_THEME_SECONDS,
   type Identity,
   KICK_MS,
   MAX_THEME,
   OFF_THEMES_MAX,
-  PICK_SECONDS,
+  type Phase,
   type PlayerId,
   ROOM_NAME_MAX,
   ROOM_PASSWORD_MAX,
@@ -82,10 +83,7 @@ import {
   type RoomState,
   type RuleExamples,
   SHOW_TIMING,
-  START_LEAD_MS,
-  START_WAIT_MS,
-  STEP_SECONDS_MAX,
-  STEP_SECONDS_MIN,
+  STEP_SECONDS,
   STEP_TIMES,
   type StartFields,
   THEME_IDEAS,
@@ -173,8 +171,8 @@ function mergeSettings(
     STEP_TIMES.every(
       (k) =>
         Number.isInteger(next[k]) &&
-        next[k] >= STEP_SECONDS_MIN &&
-        next[k] <= STEP_SECONDS_MAX,
+        next[k] >= STEP_SECONDS.min &&
+        next[k] <= STEP_SECONDS.max,
     ) &&
     (next.mode === "classic" || next.mode === "host") &&
     (impostors === null ||
@@ -273,7 +271,7 @@ function beginTheming(
   s.turnPlayerId = null;
   s.phase = "theming";
   stage(s, "opening", s.round + 1, longShows(s), opening, ctx);
-  startStep(s, ctx, HOST_THEME_SECONDS * 1000);
+  startStep(s, ctx, ENGINE.hostThemeSeconds * 1000);
 }
 
 /** Puts THEME_OPTIONS themes to the vote, once the opening is over; the match starts once the vote is. */
@@ -372,7 +370,7 @@ function showTheme(
     ctx,
     first ? (o.typed ? null : o.rule) : undefined,
   );
-  startStep(s, ctx, PICK_SECONDS * 1000);
+  startStep(s, ctx, ENGINE.pickSeconds * 1000);
 }
 
 function setTheme(s: RoomState, playerId: PlayerId, text: string, ctx: Ctx) {
@@ -431,11 +429,21 @@ export function createRoom(
   settings: RoomSettings,
   ctx: Ctx,
 ): RoomState {
+  return withTunes(ctx.config?.tunes, () => newRoom(code, host, settings, ctx));
+}
+
+function newRoom(
+  code: string,
+  host: Identity,
+  settings: RoomSettings,
+  ctx: Ctx,
+): RoomState {
   const valid = mergeSettings(settings, {}, 1);
   return {
     code,
     hostId: host.id,
     settings: valid,
+    ...(ctx.config ? { cfg: ctx.config } : {}),
     phase: "lobby",
     players: [
       {
@@ -501,13 +509,27 @@ export function reduce(
   event: GameEvent,
   ctx: Ctx,
 ): RoomState {
-  const s = structuredClone(state);
-  apply(s, event, ctx);
-  // someone leaving (or closing their page) may be all a waiting start still waited for
-  if (s.starting && SETTLES_START.has(event.type)) settleStart(s, ctx);
-  s.updatedAt = ctx.now;
-  return s;
+  // between matches the room takes the site's current values; a match plays
+  // with the copy it started with, whatever the panel changes meanwhile
+  const fresh = BETWEEN_MATCHES.has(state.phase) && !!ctx.config;
+  const cfg = fresh ? ctx.config : state.cfg;
+  return withTunes(cfg?.tunes, () => {
+    const s = structuredClone(state);
+    if (fresh) s.cfg = ctx.config;
+    apply(s, event, ctx);
+    // someone leaving (or closing their page) may be all a waiting start still waited for
+    if (s.starting && SETTLES_START.has(event.type)) settleStart(s, ctx);
+    s.updatedAt = ctx.now;
+    return s;
+  });
 }
+
+/** Phases with no match on: the room picks up the panel's newest values. */
+const BETWEEN_MATCHES: ReadonlySet<Phase> = new Set([
+  "lobby",
+  "finished",
+  "closed",
+]);
 
 const SETTLES_START = new Set<GameEvent["type"]>([
   "SHOWN",
@@ -544,7 +566,7 @@ function begin(s: RoomState, e: StartFields, ctx: Ctx) {
 
 /**
  * A waiting start begins once every page still open and in sight on the room
- * is ready for its opening, START_LEAD_MS ahead, so they all have it before the curtain;
+ * is ready for its opening, ENGINE.startLead ahead, so they all have it before the curtain;
  * with too few players left it is called off. The seats are closed while it
  * waits: whoever sat when it was asked plays, newcomers get the next match.
  */
@@ -560,7 +582,7 @@ function settleStart(s: RoomState, ctx: Ctx) {
     (p) => p.goneAt == null && p.hiddenAt == null && !p.away,
   );
   if (open.every((p) => w.ready.includes(p.id)))
-    begin(s, w.start, { ...ctx, now: ctx.now + START_LEAD_MS });
+    begin(s, w.start, { ...ctx, now: ctx.now + ENGINE.startLead });
 }
 
 function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
@@ -647,7 +669,7 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       if (s.settings.game === "lineup" && !e.decks) fail("invalid_input");
       const { type: _, ...start } = e;
       // every page, the host's too, says when it is ready
-      s.starting = { until: ctx.now + START_WAIT_MS, ready: [], start };
+      s.starting = { until: ctx.now + ENGINE.startWait, ready: [], start };
       // its clock: the read after it starts the match regardless
       s.deadline = s.starting.until;
       return settleStart(s, ctx);
@@ -1216,7 +1238,7 @@ function timeout(
       // a start that waited long enough begins, whoever is not ready yet
       const w = s.starting;
       if (w && s.players.length >= GAME_SEATS[s.settings.game].min)
-        return begin(s, w.start, { ...ctx, now: ctx.now + START_LEAD_MS });
+        return begin(s, w.start, { ...ctx, now: ctx.now + ENGINE.startLead });
       // too few left, or a room saved while lobbies still had a clock
       s.starting = null;
       return stopClock(s);

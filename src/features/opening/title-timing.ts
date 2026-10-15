@@ -3,8 +3,10 @@
 // the same on every screen, so the scenes, their sounds and the music land
 // together. Pure, for the scenes and the tests.
 
-/** The music's beat as the title scenes count it (measured on the takes): 95.08 BPM, the first beat 0.5 s into the file. */
-export const TITLE_BEAT = 60 / 95.08;
+import { MUSIC_BEAT } from "@/game/music-tunes";
+
+/** The music's beat as the title scenes count it: the shared tune's, the first beat 0.5 s into the file. */
+export const TITLE_BEAT = MUSIC_BEAT;
 const BEAT0 = 0.5;
 
 /**

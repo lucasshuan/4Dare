@@ -5,7 +5,7 @@
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { CUE_GAP_MS } from "@/game/lineup/rules";
+import { CUE_GAP } from "@/game/lineup/rules";
 import { CUES, type LuCue } from "@/game/lineup/types";
 import { cn } from "@/lib/cn";
 import { playCue } from "@/server/actions";
@@ -46,7 +46,7 @@ export function CueRemote({ className }: { className?: string }) {
             window.clearTimeout(timer.current);
             timer.current = window.setTimeout(
               () => setResting(false),
-              CUE_GAP_MS,
+              CUE_GAP.gap,
             );
             void run(() => playCue(code, kind));
           }}

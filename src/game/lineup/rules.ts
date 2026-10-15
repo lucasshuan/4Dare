@@ -1,17 +1,21 @@
 // The numbers of What for?: lots and rounds for a table, what a board may
 // hold, and the grid the photos arrive in. Shared by the engine, the server
 // (which deals the lots) and the screens.
+import { tunable } from "../tune";
 import type { RoomSettings } from "../types";
 import type { LuBoard, LuSticker, LuText } from "./types";
 
 /** Coins each player gets every round: the default and the range the room can set. */
-export const COINS = { default: 10, min: 5, max: 20 } as const;
-/** Lots per player, plus EXTRA_LOTS, up to MAX_LOTS. */
-export const LOTS_PER_SEAT = { default: 3, min: 2, max: 4 } as const;
-export const EXTRA_LOTS = 3;
-export const MAX_LOTS = 24;
+export const COINS = tunable("rules.coins", { default: 10, min: 5, max: 20 });
+/** Lots per player, plus LOTS.extra, up to LOTS.max. */
+export const LOTS_PER_SEAT = tunable("rules.lotsPerSeat", {
+  default: 3,
+  min: 2,
+  max: 4,
+});
+export const LOTS = tunable("rules.lots", { extra: 3, max: 24 });
 /** Rounds a match can be set to; null lets the table decide (roundsFor). */
-export const ROUNDS = { min: 1, max: 3 } as const;
+export const ROUNDS = tunable("rules.rounds", { min: 1, max: 3 });
 
 /** The rules a room sets for What for? (its clocks are step times like any game's). */
 export type LineupRules = Pick<
@@ -25,7 +29,7 @@ export type LineupRules = Pick<
   | "offMissions"
 >;
 
-export const DEFAULT_RULES: LineupRules = {
+export const DEFAULT_RULES = tunable<LineupRules>("room", {
   coins: COINS.default,
   lotsPerSeat: LOTS_PER_SEAT.default,
   rounds: null,
@@ -33,7 +37,7 @@ export const DEFAULT_RULES: LineupRules = {
   trades: true,
   heavy: true,
   offMissions: [],
-};
+});
 
 /** The most missions a room can switch off: about every one there is. */
 export const OFF_MISSIONS_MAX = 1000;
@@ -74,7 +78,7 @@ export function cleanRules(raw: Record<string, unknown>): LineupRules {
 
 /** Lots in a round with `players` bidding. */
 export const lotsFor = (players: number, perSeat: number) =>
-  Math.min(MAX_LOTS, players * perSeat + EXTRA_LOTS);
+  Math.min(LOTS.max, players * perSeat + LOTS.extra);
 
 /** Rounds in a match: the room's number, or two up to four players and one after. */
 export const roundsFor = (players: number, setting: number | null) =>
@@ -89,7 +93,7 @@ export function breaksFor(lots: number, on: boolean): number[] {
 }
 
 /** The fixed clocks of a round (ms): the room sets the lot, trades, board and vote. */
-export const LU_CLOCKS = {
+export const LU_CLOCKS = tunable("lu", {
   /** A lot only one player can still bid on. */
   lone: 4000,
   /** A bid in the lot's last seconds gives this much back. */
@@ -110,16 +114,16 @@ export const LU_CLOCKS = {
   verdict: 60_000,
   /** The presenter gave no verdict (or left): the room votes, this quickly. */
   quickVote: 20_000,
-} as const;
+});
 
 /** Floors for the cuts each "done" makes (ms). */
-export const LU_FLOORS = {
+export const LU_FLOORS = tunable("luFloor", {
   halftime: 5000,
   trading: 10_000,
   defending: 15_000,
   judging: 8000,
   scoring: 5000,
-} as const;
+});
 
 /** Points: one per vote a board gets, and the round's winners get more. */
 export const VOTE_POINTS = 1;
@@ -140,8 +144,8 @@ export const GUESS_MAX = 80;
 export const WHY = { min: 8, max: 100 } as const;
 /** The most lots the presenter can line up at once. */
 export const QUEUE_MAX = 12;
-/** The presenter's remote plays one sound this often at most. */
-export const CUE_GAP_MS = 3000;
+/** The presenter's remote plays one sound this often at most (ms). */
+export const CUE_GAP = tunable("cue", { gap: 3000 });
 
 /** The crowd's prize needs at least this many reactions. */
 export const CROWD_MIN = 3;

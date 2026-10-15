@@ -26,7 +26,7 @@ import {
   boardOf,
   breaksFor,
   CROWD_MIN,
-  CUE_GAP_MS,
+  CUE_GAP,
   cleanBoard,
   GUESS_MAX,
   HOST_MIN_PEOPLE,
@@ -294,13 +294,13 @@ export function hunch(s: RoomState, playerId: PlayerId, raw: string) {
   else delete lu.guesses[playerId];
 }
 
-/** The presenter's remote: a sound everyone hears, one every CUE_GAP_MS at most. */
+/** The presenter's remote: a sound everyone hears, one every CUE_GAP.gap at most. */
 export function cue(s: RoomState, playerId: PlayerId, kind: LuCue, ctx: Ctx) {
   if (!LU_PHASE_SET.has(s.phase)) fail("wrong_phase");
   requirePresenter(s, playerId);
   if (!CUES.includes(kind)) fail("invalid_input");
   const lu = match(s);
-  if (lu.cue && ctx.now - lu.cue.at < CUE_GAP_MS) fail("too_early");
+  if (lu.cue && ctx.now - lu.cue.at < CUE_GAP.gap) fail("too_early");
   lu.cue = { kind, at: ctx.now, n: (lu.cue?.n ?? 0) + 1 };
 }
 

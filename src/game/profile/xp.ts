@@ -2,18 +2,19 @@
 // whole account; every game gives the same base and adds its own feats.
 // Migration 0030 gave the matches played before there was XP these numbers.
 import type { GameKey } from "../games";
+import { tunable } from "../tune";
 
 /** What every game gives: finishing (not leaving), first place, the day's first match. */
-export const XP = { finish: 10, first: 15, dayFirst: 5 } as const;
+export const XP = tunable("xp", { finish: 10, first: 15, dayFirst: 5 });
 
 /** What each game adds for its own feats. */
-export const GAME_XP = {
+export const GAME_XP = tunable("gameXp", {
   "who-am-i": { discovered: 10 },
   /** A vote on an impostor that sent them out; each round an impostor stayed in; a right last guess. */
   impostor: { rightVote: 5, survived: 10, guessHit: 10 },
   /** Each round won (alone or tied), each vote a board got, the crowd's prize; each round presented. */
   lineup: { roundWon: 15, vote: 3, crowd: 5, presented: 10 },
-} as const satisfies Record<GameKey, Record<string, number>>;
+} satisfies Record<GameKey, Record<string, number>>);
 
 /** XP from one level to the next: 100 to reach level 2, 50 more each level after. */
 export const levelCost = (level: number) => 50 * (level + 1);

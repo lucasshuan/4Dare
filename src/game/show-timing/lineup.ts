@@ -2,7 +2,9 @@
 // on later rounds), a lot under the hammer, the end of the auction, the
 // envelope and the tally. Lengths in ms.
 
-export const LINEUP = {
+import { tunable } from "../tune";
+
+export const LINEUP = tunable("lineup", {
   /** "Everyone has 10 coins." … "Then defend your team.", on the room's first match. */
   rules: 9000,
   /** The envelope lands big: the mission is in it, what it can be, and a tip. */
@@ -25,13 +27,13 @@ export const LINEUP = {
   chair: 3200,
   /** The presenter's verdict: the winning board and why. */
   verdict: 5200,
-} as const;
+});
 
 /** Moments inside those beats (ms from the beat's start). */
-export const LINEUP_MARKS = {
+export const LINEUP_MARKS = tunable("lineupMarks", {
   /** envelope: the mission goes up to the header. */
   missionTag: 4800,
-} as const;
+});
 
 /** How long the votes take to fall. */
 export const votesMs = (votes: number) =>

@@ -11,9 +11,11 @@ import {
 } from "next-intl/server";
 import { JaFontLoader } from "@/components/ja-font-loader";
 import { Providers } from "@/components/providers";
+import { SiteTunes } from "@/components/site-tunes";
 import { appName } from "@/config";
 import { routing } from "@/i18n/routing";
 import { hubMessages } from "@/i18n/scopes";
+import { loadConfig } from "@/server/config";
 import { pageMetadata, SITE_URL } from "@/server/seo";
 import "../globals.css";
 
@@ -67,6 +69,7 @@ export default async function LocaleLayout({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
+  const config = await loadConfig();
 
   return (
     <html
@@ -78,7 +81,10 @@ export default async function LocaleLayout({
         {locale === "ja" ? <JaFontLoader /> : null}
         {/* the hub's namespaces; r/ and dev/ layouts hand theirs every one */}
         <NextIntlClientProvider messages={hubMessages(await getMessages())}>
-          <Providers>{children}</Providers>
+          <Providers>
+            <SiteTunes tunes={config.values.tunes} />
+            {children}
+          </Providers>
         </NextIntlClientProvider>
         {/* Vercel Web Analytics and Speed Insights (half the visits: enough data, half the cost); they only send data on Vercel. */}
         <Analytics />

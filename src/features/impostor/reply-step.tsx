@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useStepStarted } from "@/features/room/match-frame";
-import { MAX_SWAPS } from "@/game/impostor/engine";
+import { IMP_RULES } from "@/game/impostor/engine";
 import type { ImpAnswer } from "@/game/impostor/types";
 import type { ImpAskedView } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -101,7 +101,7 @@ function DontKnow() {
   const imp = view.imp;
   const open =
     !!imp &&
-    imp.swaps < MAX_SWAPS &&
+    imp.swaps < IMP_RULES.maxSwaps &&
     imp.asked.every((a) => a.answers === null);
   if (!open) return null;
   return (
