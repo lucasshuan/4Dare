@@ -1,4 +1,5 @@
 import {
+  FlaskConical,
   Gamepad2,
   LayoutDashboard,
   type LucideIcon,
@@ -33,6 +34,7 @@ export const NAV: { group: string; items: AdminSection[] }[] = [
         path: "/music",
         Icon: SlidersVertical,
       },
+      { id: "lab", label: "Laboratório", path: "/lab", Icon: FlaskConical },
     ],
   },
 ];
@@ -40,7 +42,7 @@ export const NAV: { group: string; items: AdminSection[] }[] = [
 export const SECTIONS = NAV.flatMap((g) => g.items);
 
 /** The bottom bar on phones: the pages used the most, then the full menu. */
-export const TABS = ["overview", "games", "music"];
+export const TABS = ["overview", "games", "lab"];
 
 /** The section a path (relative to the base) belongs to. */
 export function sectionOf(rel: string): AdminSection | undefined {

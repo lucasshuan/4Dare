@@ -1359,6 +1359,7 @@ export interface PlayingNow {
 
 /** Just what counting the players online needs from a room. */
 export interface ActiveRoom {
+  code: string;
   game: GameKey;
   phase: Phase;
   updatedAt: number;

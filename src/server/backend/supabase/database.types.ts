@@ -600,6 +600,44 @@ export type Database = {
           },
         ];
       };
+      lab_scenes: {
+        Row: {
+          author_id: string | null;
+          created_at: string;
+          game: string;
+          id: string;
+          name: string;
+          note: string | null;
+          params: Json;
+        };
+        Insert: {
+          author_id?: string | null;
+          created_at?: string;
+          game: string;
+          id?: string;
+          name: string;
+          note?: string | null;
+          params: Json;
+        };
+        Update: {
+          author_id?: string | null;
+          created_at?: string;
+          game?: string;
+          id?: string;
+          name?: string;
+          note?: string | null;
+          params?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lab_scenes_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       lineup_blocked: {
         Row: {
           character_id: string;

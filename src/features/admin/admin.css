@@ -1854,91 +1854,6 @@
   font-weight: 600;
   color: var(--ink-muted);
 }
-.adm .seats {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
-}
-.adm .seats.one {
-  grid-template-columns: minmax(0, 460px);
-  justify-content: center;
-}
-.adm .seats.one.desk {
-  grid-template-columns: minmax(0, 1fr);
-}
-.adm .lab-screen {
-  aspect-ratio: 9 / 16;
-  border-radius: 18px;
-  box-shadow:
-    0 0 0 1px var(--line),
-    var(--shadow-card);
-  font-size: 14px;
-}
-.adm .lab-screen.wide {
-  aspect-ratio: 16 / 10;
-}
-.adm .lab-screen .top {
-  padding: 12px 16px;
-  font-size: 13px;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
-}
-.adm .lab-screen .timer {
-  font-size: 13px;
-  padding: 3px 10px;
-}
-.adm .lab-screen .timer i {
-  width: 40px;
-  height: 5px;
-}
-.adm .lab-screen .body {
-  padding: 16px;
-  gap: 12px;
-}
-.adm .lab-screen h4 {
-  font-size: 22px;
-}
-.adm .lab-screen .tcard {
-  font-size: 14px;
-  padding: 11px 14px;
-  border-radius: 14px;
-}
-.adm .lab-screen .tcard .vv .av {
-  width: 22px;
-  height: 22px;
-}
-.adm .lab-screen .mini-card {
-  max-width: 230px;
-}
-.adm .lab-screen .mini-card .in {
-  font-size: 13px;
-}
-.adm .lab-screen .mini-card .own {
-  font-size: 12px;
-}
-.adm .lab-screen .bubble {
-  font-size: 14px;
-  padding: 10px 12px;
-}
-.adm .lab-screen .bubble small {
-  font-size: 11.5px;
-}
-.adm .lab-screen .answers span {
-  font-size: 12px;
-  padding: 7px 2px;
-}
-.adm .lab-screen .result {
-  font-size: 22px;
-  padding: 18px 12px;
-}
-.adm .lab-screen.wide .body {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  align-content: center;
-}
-.adm .lab-screen.wide .mini-card {
-  width: 70%;
-}
 .adm .mini-th.sm {
   width: 36px;
   height: 23px;
@@ -1961,20 +1876,6 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.adm .cast {
-  display: grid;
-  gap: 6px;
-}
-.adm .cast-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 8px;
-  align-items: center;
-}
-.adm .cast-row select {
-  width: 100%;
-  min-width: 0;
-}
 .adm .keys {
   display: inline-flex;
   flex-wrap: wrap;
@@ -1985,6 +1886,55 @@
 }
 .adm .keys .kbd + .kbd {
   margin-left: -2px;
+}
+.adm .ctl .f {
+  display: grid;
+  gap: 5px;
+}
+.adm .flbl {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.adm .lab-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--sunken);
+}
+.adm .lab-frame {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform-origin: top center;
+  border: 0;
+  border-radius: 18px;
+  background: var(--canvas);
+  box-shadow: var(--shadow-pop);
+}
+.adm .lab-steps {
+  gap: 3px;
+  padding: 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.adm .lab-steps button {
+  flex: none;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 10px;
+  font: 600 11.5px var(--f-body);
+  white-space: nowrap;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--ink);
+}
+.adm .lab-steps button.past {
+  background: color-mix(in oklch, var(--sky) 30%, var(--surface));
+}
+.adm .lab-steps button[aria-current="step"] {
+  background: var(--sky);
+  color: var(--on-sky);
 }
 .adm .seatbar {
   display: flex;

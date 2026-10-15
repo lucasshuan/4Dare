@@ -1,4 +1,7 @@
 "use server";
+import type { LabScene } from "@/features/lab/scene";
+import type { LabKit, LabSettings } from "@/features/lab/sim";
+import type { RoomState } from "@/game/types";
 // The control panel's changes. Every one checks the admin first (adminOnly),
 // whatever page it came from.
 import { GameError } from "@/game/types";
@@ -6,6 +9,7 @@ import type { BankKind } from "../backend/admin-types";
 import { fail, ok, type Result } from "../contract";
 import { restoreVersion, saveTunes } from "./config";
 import { setBankLive } from "./games";
+import { deleteLabScene, labKit, labRoom, saveLabScene } from "./lab";
 
 async function run<T>(work: () => Promise<T>): Promise<Result<T>> {
   try {
@@ -37,4 +41,27 @@ export async function setBankLiveAction(
   live: boolean,
 ): Promise<Result<void>> {
   return run(() => setBankLive(kind, id, live));
+}
+
+/** What a real start would deal for a lab match. */
+export async function labKitAction(s: LabSettings): Promise<Result<LabKit>> {
+  return run(() => labKit(s));
+}
+
+/** A real room's state, to play on from in the lab. */
+export async function labRoomAction(code: string): Promise<Result<RoomState>> {
+  return run(() => labRoom(code));
+}
+
+/** Saves the lab's moment as a scene; its id. */
+export async function saveLabSceneAction(
+  scene: LabScene,
+  name: string,
+  note: string,
+): Promise<Result<string>> {
+  return run(() => saveLabScene(scene, name, note));
+}
+
+export async function deleteLabSceneAction(id: string): Promise<Result<void>> {
+  return run(() => deleteLabScene(id));
 }

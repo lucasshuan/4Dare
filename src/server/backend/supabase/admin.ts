@@ -8,6 +8,7 @@ import {
   type AdminStore,
   type ConfigVersion,
   readValues,
+  type StoredLabScene,
 } from "../admin-types";
 import { json, serviceClient } from "./clients";
 
@@ -85,6 +86,24 @@ const toVersion = (r: {
 }): ConfigVersion => ({
   v: r.id,
   values: readValues(r.values),
+  note: r.note,
+  author: r.author_id,
+  at: Date.parse(r.created_at),
+});
+
+const toScene = (r: {
+  id: string;
+  name: string;
+  game: string;
+  params: unknown;
+  note: string | null;
+  author_id: string | null;
+  created_at: string;
+}): StoredLabScene => ({
+  id: r.id,
+  name: r.name,
+  game: r.game,
+  params: r.params,
   note: r.note,
   author: r.author_id,
   at: Date.parse(r.created_at),
@@ -216,6 +235,46 @@ export function supabaseAdmin(): AdminStore {
         .eq("id", id);
       if (error) throw error;
       return before.status === "live";
+    },
+    async labScenes(limit) {
+      const { data, error } = await serviceClient()
+        .from("lab_scenes")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return (data ?? []).map(toScene);
+    },
+    async labScene(id) {
+      const { data, error } = await serviceClient()
+        .from("lab_scenes")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? toScene(data) : null;
+    },
+    async saveLabScene(scene) {
+      const { data, error } = await serviceClient()
+        .from("lab_scenes")
+        .insert({
+          name: scene.name,
+          game: scene.game,
+          params: json(scene.params),
+          note: scene.note,
+          author_id: scene.author,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data.id;
+    },
+    async deleteLabScene(id) {
+      const { error } = await serviceClient()
+        .from("lab_scenes")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
     },
     async saveConfig(values, note, author) {
       const { data, error } = await serviceClient()

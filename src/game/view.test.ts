@@ -206,6 +206,7 @@ describe("what the view says", () => {
       idleMs: number,
       players: ActiveRoom["players"],
     ): ActiveRoom => ({
+      code: "ABCD",
       game: "who-am-i",
       phase,
       updatedAt: now - idleMs,

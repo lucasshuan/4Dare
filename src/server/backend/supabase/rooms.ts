@@ -85,7 +85,7 @@ export function supabaseRooms(): RoomStore {
       // only the fields counting needs, not each room's whole history
       const { data, error } = await db()
         .select(
-          "phase, updated_at, game:state->settings->>game, players:state->players",
+          "code, phase, updated_at, game:state->settings->>game, players:state->players",
         )
         .neq("phase", "closed")
         .gte("updated_at", new Date(since).toISOString())
@@ -93,6 +93,7 @@ export function supabaseRooms(): RoomStore {
       if (error) throw error;
       return (data ?? []).map(
         (r): ActiveRoom => ({
+          code: r.code as string,
           game: ((r.game as string | null) ?? DEFAULT_GAME) as GameKey,
           phase: r.phase as Phase,
           updatedAt: new Date(r.updated_at as string).getTime(),

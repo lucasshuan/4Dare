@@ -5,6 +5,7 @@ import {
   type ConfigVersion,
   emptyStats,
   readValues,
+  type StoredLabScene,
 } from "../admin-types";
 import { processSingleton, readJson, writeJson } from "./disk";
 import { localImpostor } from "./impostor";
@@ -12,6 +13,7 @@ import { localLineup } from "./lineup";
 import { localThemes } from "./themes";
 
 const FILE = "game-config.json";
+const SCENES = "lab-scenes.json";
 
 /** Local mode: an empty overview, the audit in memory and the config versions in .data/. */
 export function localAdmin(): AdminStore {
@@ -20,6 +22,9 @@ export function localAdmin(): AdminStore {
   const off = new Set<string>();
   const versions = processSingleton<ConfigVersion[]>("game-config", () =>
     readJson<ConfigVersion[]>(FILE, []),
+  );
+  const scenes = processSingleton<StoredLabScene[]>("lab-scenes", () =>
+    readJson<StoredLabScene[]>(SCENES, []),
   );
   return {
     async stats(days) {
@@ -88,6 +93,23 @@ export function localAdmin(): AdminStore {
       if (isLive) off.delete(key);
       else off.add(key);
       return was;
+    },
+    async labScenes(limit) {
+      return scenes.slice(-limit).reverse();
+    },
+    async labScene(id) {
+      return scenes.find((x) => x.id === id) ?? null;
+    },
+    async saveLabScene(scene) {
+      const id = crypto.randomUUID();
+      scenes.push({ ...scene, id, at: Date.now() });
+      writeJson(SCENES, scenes);
+      return id;
+    },
+    async deleteLabScene(id) {
+      const i = scenes.findIndex((x) => x.id === id);
+      if (i >= 0) scenes.splice(i, 1);
+      writeJson(SCENES, scenes);
     },
     async saveConfig(values, note, author) {
       const v = (versions.at(-1)?.v ?? 0) + 1;

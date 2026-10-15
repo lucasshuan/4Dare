@@ -41,6 +41,7 @@ export function localRooms(): RoomStore {
       for (const { state } of rooms.values()) {
         if (state.phase === "closed" || state.updatedAt < since) continue;
         list.push({
+          code: state.code,
           game: state.settings.game ?? DEFAULT_GAME,
           phase: state.phase,
           updatedAt: state.updatedAt,

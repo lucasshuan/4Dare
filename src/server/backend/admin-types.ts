@@ -117,6 +117,17 @@ export interface Banks {
 
 export type BankKind = "theme" | "question" | "mission" | "extra";
 
+/** A lab scene as kept (lab_scenes, 0056): `params` is the lab's own (features/lab/scene.ts). */
+export interface StoredLabScene {
+  id: string;
+  name: string;
+  game: string;
+  params: unknown;
+  note: string | null;
+  author: string | null;
+  at: number;
+}
+
 /** What only the control panel reads and writes. */
 export interface AdminStore {
   stats(days: number): Promise<AdminStats>;
@@ -135,6 +146,12 @@ export interface AdminStore {
   banks(): Promise<Banks>;
   /** Puts a bank row on or off (never deletes it); whether it was on before, null when there is no such row. */
   setLive(kind: BankKind, id: string, live: boolean): Promise<boolean | null>;
+  /** The lab's saved scenes, newest first. */
+  labScenes(limit: number): Promise<StoredLabScene[]>;
+  labScene(id: string): Promise<StoredLabScene | null>;
+  /** Saves a scene; its id. */
+  saveLabScene(scene: Omit<StoredLabScene, "id" | "at">): Promise<string>;
+  deleteLabScene(id: string): Promise<void>;
 }
 
 /** Saved values read back: what is missing becomes empty. */
