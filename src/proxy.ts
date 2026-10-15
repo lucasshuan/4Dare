@@ -20,6 +20,10 @@ function splitLang(pathname: string): [Lang, string] | null {
 /** Share images keep the address Next writes for them (/en/opengraph-image/card), with no hop. */
 const SHARE_IMAGE = /\/(?:opengraph|twitter)-image(?:\/|$)/;
 
+/** The one-time code an OAuth sign-in brings back (a UUID). */
+const OAUTH_CODE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const moved = (to: string, request: NextRequest) =>
   NextResponse.redirect(new URL(to, request.url), 308);
 
@@ -28,6 +32,16 @@ const moved = (to: string, request: NextRequest) =>
 // session fresh. English has no prefix: /en/... moves to the bare address.
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+  // Discord/Google came back to a page instead of /auth/callback (the auth
+  // service falls back to its Site URL when it doesn't take the address we
+  // asked for): finish the sign-in there, and come back to this page
+  const code = request.nextUrl.searchParams.get("code");
+  if (code && OAUTH_CODE.test(code)) {
+    const to = new URL("/auth/callback", request.url);
+    to.searchParams.set("code", code);
+    to.searchParams.set("next", pathname);
+    return NextResponse.redirect(to, 303);
+  }
   if (isAdminHost(request.headers.get("host"))) {
     // admin.4dare.com: the control panel at the host's root, in Portuguese only
     const path = pathname === "/" ? "" : pathname;
