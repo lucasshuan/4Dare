@@ -7,6 +7,7 @@ import type { RoomState } from "@/game/types";
 import { GameError } from "@/game/types";
 import type { BankKind } from "../backend/admin-types";
 import { fail, ok, type Result, type Role } from "../contract";
+import { approve, markReview, refuse, reopen } from "../workshop";
 import { restoreVersion, saveTunes } from "./config";
 import { setBankLive } from "./games";
 import { deleteLabScene, labKit, labRoom, saveLabScene } from "./lab";
@@ -18,6 +19,7 @@ import {
   sanction,
   setRole,
 } from "./people";
+import { type SuggestionFile, suggestionFile } from "./workshop";
 
 async function run<T>(work: () => Promise<T>): Promise<Result<T>> {
   try {
@@ -100,4 +102,25 @@ export async function setRoleAction(
   role: Role,
 ): Promise<Result<void>> {
   return run(() => setRole(id, role));
+}
+
+/** One Workshop suggestion, for its drawer. */
+export async function suggestionAction(
+  id: string,
+): Promise<Result<SuggestionFile | null>> {
+  return run(() => suggestionFile(id));
+}
+
+/** Decides a suggestion: live (its four languages), in review, left out (why), or back to the vote. */
+export async function decideAction(
+  id: string,
+  to: "live" | "review" | "refused" | "voting",
+  extra: { translations?: unknown; reason?: string },
+): Promise<Result<void>> {
+  return run(async () => {
+    if (to === "live") await approve(id, extra.translations ?? {});
+    else if (to === "review") await markReview(id);
+    else if (to === "refused") await refuse(id, extra.reason ?? "");
+    else await reopen(id);
+  });
 }

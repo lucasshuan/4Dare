@@ -120,7 +120,7 @@ export function TimingTab({ game }: { game: GameKey }) {
 }
 
 /** One row of a settings list: the label, the field, the default and a way back. */
-function Row({ e, k }: { e: Tunable; k: string }) {
+export function TuneRow({ e, k }: { e: Tunable; k: string }) {
   const d = useDraft();
   const dirty = k in d.edits;
   const field =
@@ -178,7 +178,7 @@ export function DefaultsTab({ game }: { game: GameKey }) {
               ) : null}
             </header>
             {g.rows.map((e) => (
-              <Row key={e.key} e={e} k={e.key} />
+              <TuneRow key={e.key} e={e} k={e.key} />
             ))}
           </div>
         ))}
@@ -235,7 +235,7 @@ export function XpTab({ game }: { game: GameKey }) {
             <span className="chip">{g.name}</span>
           </header>
           {g.rows.map((e) => (
-            <Row key={e.key} e={e} k={e.key} />
+            <TuneRow key={e.key} e={e} k={e.key} />
           ))}
         </div>
       ))}

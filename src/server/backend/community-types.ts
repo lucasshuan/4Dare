@@ -182,6 +182,8 @@ export interface WorkshopStore {
     payload: unknown,
     translations: StoredSuggestion["translations"],
     author: PlayerId,
+    /** Suggestions an account may send a week. */
+    limit: number,
   ): Promise<string | null>;
   /** Casts, changes or (null) takes back a vote; the counts after it. Fails once it is no longer up for votes. */
   vote(
@@ -189,6 +191,10 @@ export interface WorkshopStore {
     user: PlayerId,
     vote: boolean | null,
   ): Promise<{ yes: number; no: number }>;
+  /** Every vote (the panel's priority and its people). */
+  votes(): Promise<
+    { suggestion: string; user: PlayerId; vote: boolean; at: number }[]
+  >;
   /** A voter's votes, by suggestion. */
   votesOf(user: PlayerId): Promise<Map<string, boolean>>;
   /** How many suggestions an account sent since Monday (UTC). */

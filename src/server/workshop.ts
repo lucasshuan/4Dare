@@ -5,8 +5,10 @@ import type { BankQuestion } from "@/game/impostor/questions";
 import { QUESTION_KINDS } from "@/game/impostor/types";
 import { TONES } from "@/game/lineup/bank";
 import { normalizeName } from "@/game/match";
+import { levelOf } from "@/game/profile/xp";
 import { THEME_SETS, type ThemeSet } from "@/game/theme-sets";
 import { GameError, LANGS, type Lang, type PlayerId } from "@/game/types";
+import { priority, WORKSHOP } from "@/game/workshop-rules";
 import { BLOCKED_WORDS, STOP_WORDS } from "@/game/workshop-words";
 import { allowed, curatorOnly } from "./auth/roles";
 import { getBackend } from "./backend";
@@ -29,10 +31,6 @@ import type {
   WorkshopPage,
 } from "./community-contract";
 import type { PersonRef } from "./contract";
-
-/** Suggestions an account may send a week (the database counts them too). */
-export const WEEKLY_SUGGESTIONS = 3;
-export const PAGE_SIZE = 24;
 
 const THEME_GAMES = ["who-am-i", "impostor"] as const;
 const isSet = (v: unknown): v is ThemeSet =>
@@ -246,7 +244,10 @@ async function starterCards(lang: Lang): Promise<Map<string, StarterCard[]>> {
   return out;
 }
 
-async function cardsOf(ids: string[], lang: Lang): Promise<StarterCard[]> {
+export async function cardsOf(
+  ids: string[],
+  lang: Lang,
+): Promise<StarterCard[]> {
   const cat = await catalog(lang);
   return ids.flatMap((id) => {
     const row = cat.byId.get(id);
@@ -489,11 +490,11 @@ export async function workshopPage(
         // the community's first, newest first; the bank's own keep their order
         (b.at ?? 0) - (a.at ?? 0),
     );
-  const page = shown.slice(query.offset, query.offset + PAGE_SIZE);
+  const page = shown.slice(query.offset, query.offset + WORKSHOP.page);
   const end = query.offset + page.length;
   const left = me.isGuest
     ? null
-    : Math.max(0, WEEKLY_SUGGESTIONS - (await workshop.sentThisWeek(me.id)));
+    : Math.max(0, WORKSHOP.weekly - (await workshop.sentThisWeek(me.id)));
   const curator = !!(await allowed("curate"));
   return {
     items: page,
@@ -575,6 +576,15 @@ function blocked(text: string, lang: Lang): boolean {
  * Rules and lists only.
  */
 export async function checkDraft(
+  draft: WorkshopDraft,
+  lang: Lang,
+): Promise<WorkshopCheck[]> {
+  // the checks the panel turned off don't hold a suggestion back
+  const on = WORKSHOP.checks as Record<string, boolean>;
+  return (await everyCheck(draft, lang)).filter((c) => on[c.code] !== false);
+}
+
+async function everyCheck(
   draft: WorkshopDraft,
   lang: Lang,
 ): Promise<WorkshopCheck[]> {
@@ -718,6 +728,7 @@ export async function suggest(
     payload,
     translations,
     me.id,
+    WORKSHOP.weekly,
   );
   if (!id) throw new GameError("rate_limited");
   return { id, checks: [] };
@@ -742,6 +753,49 @@ export interface ReviewItem {
   starters: StarterCard[];
 }
 
+/**
+ * Each suggestion's place in the curators' queue (workshop-rules.ts): its
+ * votes weighed by who cast them, and its author's suggestions already live.
+ */
+export async function priorities(
+  list: readonly StoredSuggestion[],
+): Promise<Map<string, number>> {
+  const { workshop, people } = getBackend();
+  const [every, votes] = await Promise.all([
+    workshop.suggestions(),
+    workshop.votes(),
+  ]);
+  const live = new Map<string, number>();
+  for (const s of every)
+    if (s.status === "live" && s.createdBy)
+      live.set(s.createdBy, (live.get(s.createdBy) ?? 0) + 1);
+  const voters = new Map(
+    (await people.voters([...new Set(votes.map((v) => v.user))])).map((v) => [
+      v.id,
+      v,
+    ]),
+  );
+  const out = new Map<string, number>();
+  for (const s of list) {
+    const mine = votes
+      .filter((v) => v.suggestion === s.id)
+      .map((v) => {
+        const who = voters.get(v.user);
+        return {
+          yes: v.vote,
+          level: levelOf(who?.xp ?? 0).level,
+          live: live.get(v.user) ?? 0,
+          staff: !!who && who.role !== "player",
+        };
+      });
+    out.set(
+      s.id,
+      priority(mine, s.createdBy ? (live.get(s.createdBy) ?? 0) : 0),
+    );
+  }
+  return out;
+}
+
 /** Suggestions waiting on a curator, most wanted first. */
 export async function reviewQueue(lang: Lang): Promise<ReviewItem[]> {
   await curatorOnly();
@@ -752,7 +806,10 @@ export async function reviewQueue(lang: Lang): Promise<ReviewItem[]> {
     all.map((s) => s.createdBy),
     lang,
   );
-  all.sort((a, b) => b.yes - b.no - (a.yes - a.no) || b.yes - a.yes);
+  const score = await priorities(all);
+  all.sort(
+    (a, b) => (score.get(b.id) ?? 0) - (score.get(a.id) ?? 0) || b.yes - a.yes,
+  );
   return Promise.all(
     all.map(async (s) => {
       const draft = { kind: s.kind, [s.kind]: s.payload } as WorkshopDraft;
@@ -825,6 +882,19 @@ export async function approve(id: string, rawTranslations: unknown) {
     ...parseTranslations(rawTranslations, s.lang, pieces),
   };
   const all = complete(s.lang, pieces, translations);
+  if (s.bankId) {
+    // it was live once and went back to the vote: its bank row comes back on
+    await getBackend().admin.setLive(s.kind, s.bankId, true);
+    await workshop.decide(id, {
+      status: "live",
+      reason: null,
+      bankId: s.bankId,
+      translations,
+      by: me.id,
+    });
+    bankCache.clear();
+    return { suggestion: s, bankId: s.bankId, texts: all };
+  }
   let row: BankInsert;
   if (draft.kind === "theme") {
     const t = draft.theme;
@@ -915,4 +985,26 @@ export async function markReview(id: string) {
     translations: s.translations,
     by: me.id,
   });
+}
+
+/**
+ * Back to the vote: a suggestion left out reopens; one live comes off its
+ * game's bank (its row turned off, never deleted) and waits for votes again.
+ */
+export async function reopen(id: string) {
+  const me = await curatorOnly();
+  const { workshop, admin } = getBackend();
+  const s = await workshop.suggestion(id);
+  if (!s || (s.status !== "refused" && s.status !== "live"))
+    throw new GameError("not_found");
+  if (s.status === "live" && s.bankId)
+    await admin.setLive(s.kind, s.bankId, false);
+  await workshop.decide(id, {
+    status: "voting",
+    reason: null,
+    bankId: s.bankId,
+    translations: s.translations,
+    by: me.id,
+  });
+  bankCache.clear();
 }

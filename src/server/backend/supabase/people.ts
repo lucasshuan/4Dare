@@ -494,6 +494,21 @@ export function supabasePeople(): PeopleStore {
         .eq("id", id);
       if (error) throw error;
     },
+    async voters(ids) {
+      if (!ids.length) return [];
+      const [profiles, stats] = await Promise.all([
+        db().from("profiles").select("id, role").in("id", ids),
+        db().rpc("admin_people"),
+      ]);
+      if (profiles.error) throw profiles.error;
+      if (stats.error) throw stats.error;
+      const xp = new Map((stats.data ?? []).map((r) => [r.user_id, r.xp]));
+      return (profiles.data ?? []).map((p) => ({
+        id: p.id,
+        xp: xp.get(p.id) ?? 0,
+        role: (p.role ?? "player") as Role,
+      }));
+    },
     async reassign(from, to) {
       const { error } = await db().rpc("reassign_sanctions", {
         p_from: from,

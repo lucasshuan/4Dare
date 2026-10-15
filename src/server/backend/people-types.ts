@@ -119,6 +119,8 @@ export interface PeopleStore {
   /** Hides what the person sent (mural lines, pictures, nicknames); how many. */
   wipe(person: string): Promise<number>;
   setRole(id: string, role: Role): Promise<void>;
+  /** Voters' XP and role, for what their Workshop votes weigh. */
+  voters(ids: string[]): Promise<{ id: string; xp: number; role: Role }[]>;
   /** A guest signed in: their sanctions become the account's. */
   reassign(from: string, to: string): Promise<void>;
 }

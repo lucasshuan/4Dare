@@ -27,6 +27,7 @@ import { THEME, THEME_MARKS } from "./show-timing/theme";
 import { ROOM_SOUNDS, SOUND_IDS } from "./sounds";
 import { defaultOf, type Tunes, type TuneValue } from "./tune";
 import { DEFAULT_SETTINGS, ENGINE, REVEAL_TIMING, STEP_SECONDS } from "./types";
+import { WORKSHOP } from "./workshop-rules";
 
 /** The tunable constants by their prefix (the first part of a key). */
 const ROOTS: Record<string, object> = {
@@ -65,6 +66,7 @@ const ROOTS: Record<string, object> = {
   moments: MOMENT_TRACKS,
   roomSounds: ROOM_SOUNDS,
   scenes: SCENE_CLIPS,
+  workshop: WORKSHOP,
 };
 
 export type TuneUnit =
@@ -87,7 +89,8 @@ export type TuneTab =
   | "xp"
   | "availability"
   | "music"
-  | "scenes";
+  | "scenes"
+  | "workshop";
 
 export interface Tunable {
   /**
@@ -974,6 +977,85 @@ export const TUNABLES: readonly Tunable[] = [
       group: "Cenas",
       unit: "clips",
       src: "src/features/opening/scene-sound.ts",
+    }),
+  ),
+
+  // -- the Workshop's rules ---------------------------------------------------
+  ...(
+    [
+      ["weekly", "Sugestões por conta, por semana", "Envio", "n", 1, 20],
+      ["page", "Itens por página na Oficina", "Envio", "n", 6, 96],
+      [
+        "weight.level",
+        "Peso por nível de quem vota",
+        "Prioridade",
+        "gain",
+        0,
+        1,
+      ],
+      [
+        "weight.live",
+        "Peso por sugestão no ar de quem vota (até 5)",
+        "Prioridade",
+        "gain",
+        0,
+        1,
+      ],
+      [
+        "weight.staff",
+        "Peso extra de curadores e admins",
+        "Prioridade",
+        "gain",
+        0,
+        3,
+      ],
+      [
+        "author",
+        "Pontos por sugestão do autor já no ar",
+        "Prioridade",
+        "n",
+        0,
+        20,
+      ],
+      [
+        "z",
+        "Confiança (z): mais alto pede mais votos",
+        "Prioridade",
+        "gain",
+        0.5,
+        3,
+      ],
+    ] as const
+  ).map(
+    ([k, label, group, unit, min, max]): Tunable => ({
+      key: `workshop.${k}`,
+      label,
+      game: "shared",
+      tab: "workshop",
+      group,
+      unit,
+      min,
+      max,
+      src: "src/game/workshop-rules.ts",
+    }),
+  ),
+  ...(
+    [
+      ["near_theme", "Tema parecido com um que já existe"],
+      ["same_starters", "Mesmos exemplos de outro tema"],
+      ["no_picture", "Exemplo sem foto"],
+      ["near_text", "Texto parecido com um que já existe"],
+      ["blocked_word", "Palavra bloqueada"],
+    ] as const
+  ).map(
+    ([k, label]): Tunable => ({
+      key: `workshop.checks.${k}`,
+      label,
+      game: "shared",
+      tab: "workshop",
+      group: "Checagens ao sugerir",
+      unit: "bool",
+      src: "src/server/workshop.ts",
     }),
   ),
 

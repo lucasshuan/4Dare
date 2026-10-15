@@ -2143,6 +2143,17 @@ export type Database = {
         };
         Returns: string;
       };
+      create_workshop_suggestion_limited: {
+        Args: {
+          p_author: string;
+          p_kind: string;
+          p_lang: string;
+          p_limit: number;
+          p_payload: Json;
+          p_translations: Json;
+        };
+        Returns: string;
+      };
       delete_old_rooms: { Args: never; Returns: number };
       impostor_count_questions: { Args: { p_rows: Json }; Returns: undefined };
       impostor_facts: {

@@ -2,6 +2,7 @@ import {
   Flag,
   FlaskConical,
   Gamepad2,
+  Hammer,
   LayoutDashboard,
   type LucideIcon,
   SlidersVertical,
@@ -42,6 +43,13 @@ export const NAV: { group: string; items: AdminSection[] }[] = [
   {
     group: "Comunidade",
     items: [
+      {
+        id: "workshop",
+        label: "Oficina",
+        path: "/workshop",
+        Icon: Hammer,
+        count: (c) => (c.workshop ? { n: c.workshop, hot: true } : null),
+      },
       { id: "users", label: "Usuários", path: "/users", Icon: Users },
       {
         id: "reports",

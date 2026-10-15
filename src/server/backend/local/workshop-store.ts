@@ -9,12 +9,11 @@ import { processSingleton, readJson, writeJson } from "./disk";
 
 interface Saved {
   suggestions: StoredSuggestion[];
-  votes: { id: string; user: string; vote: boolean }[];
+  votes: { id: string; user: string; vote: boolean; at?: number }[];
   bank: BankInsert[];
 }
 
 const FILE = "workshop.json";
-const WEEKLY = 3;
 
 const monday = () => {
   const now = new Date();
@@ -46,8 +45,8 @@ export function localWorkshopStore(): WorkshopStore {
     async suggestion(id) {
       return data.suggestions.find((s) => s.id === id) ?? null;
     },
-    async create(kind, lang, payload, translations, author) {
-      if (sent(author) >= WEEKLY) return null;
+    async create(kind, lang, payload, translations, author, limit) {
+      if (sent(author) >= limit) return null;
       const s: StoredSuggestion = {
         id: randomUUID(),
         kind,
@@ -72,12 +71,20 @@ export function localWorkshopStore(): WorkshopStore {
       const s = data.suggestions.find((x) => x.id === id);
       if (s?.status !== "voting") throw new Error("closed");
       data.votes = data.votes.filter((v) => !(v.id === id && v.user === user));
-      if (vote !== null) data.votes.push({ id, user, vote });
+      if (vote !== null) data.votes.push({ id, user, vote, at: Date.now() });
       const mine = data.votes.filter((v) => v.id === id);
       s.yes = mine.filter((v) => v.vote).length;
       s.no = mine.filter((v) => !v.vote).length;
       save();
       return { yes: s.yes, no: s.no };
+    },
+    async votes() {
+      return data.votes.map((v) => ({
+        suggestion: v.id,
+        user: v.user,
+        vote: v.vote,
+        at: v.at ?? 0,
+      }));
     },
     async votesOf(user) {
       return new Map(

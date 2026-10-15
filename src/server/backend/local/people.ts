@@ -141,6 +141,12 @@ export function localPeople(): PeopleStore {
       a.role = role;
       saveTestAccounts();
     },
+    async voters(ids) {
+      return ids.flatMap((id) => {
+        const a = accounts.get(id);
+        return a ? [{ id, xp: 0, role: a.role ?? "admin" }] : [];
+      });
+    },
     async reassign(from, to) {
       for (const s of kept) if (s.person === from) s.person = to;
     },

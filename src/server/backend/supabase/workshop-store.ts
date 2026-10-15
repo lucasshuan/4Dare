@@ -69,14 +69,18 @@ export function supabaseWorkshopStore(): WorkshopStore {
       if (error) throw error;
       return data ? toSuggestion(data as Row) : null;
     },
-    async create(kind, lang, payload, translations, author) {
-      const { data, error } = await db().rpc("create_workshop_suggestion", {
-        p_kind: kind,
-        p_lang: lang,
-        p_payload: json(payload),
-        p_translations: json(translations),
-        p_author: author,
-      });
+    async create(kind, lang, payload, translations, author, limit) {
+      const { data, error } = await db().rpc(
+        "create_workshop_suggestion_limited",
+        {
+          p_limit: limit,
+          p_kind: kind,
+          p_lang: lang,
+          p_payload: json(payload),
+          p_translations: json(translations),
+          p_author: author,
+        },
+      );
       if (error) throw error;
       return (data as string | null) ?? null;
     },
@@ -90,6 +94,19 @@ export function supabaseWorkshopStore(): WorkshopStore {
       if (error) throw error;
       const row = (data ?? [])[0];
       return { yes: row?.yes ?? 0, no: row?.no ?? 0 };
+    },
+    async votes() {
+      const { data, error } = await db()
+        .from("workshop_votes")
+        .select("suggestion_id, user_id, vote, created_at")
+        .limit(20000);
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        suggestion: r.suggestion_id,
+        user: r.user_id,
+        vote: r.vote,
+        at: Date.parse(r.created_at),
+      }));
     },
     async votesOf(user) {
       const { data, error } = await db()
