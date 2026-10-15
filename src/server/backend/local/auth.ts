@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { parseSynced } from "@/game/options";
 import { handleCandidates } from "@/game/profile/handle";
 import { type Avatar, GameError, type Identity, type Lang } from "@/game/types";
-import type { Account } from "@/server/contract";
+import type { Account, Role } from "@/server/contract";
 import { ensureGuest, type Guest } from "../../auth/guest";
 import type { AuthService } from "../types";
 import { processSingleton, readJson, writeJson } from "./disk";
@@ -18,6 +18,8 @@ export interface TestAccount extends TestProfile {
   name: string | null;
   avatar: Avatar;
   provider: NonNullable<Account["provider"]>;
+  /** Missing: admin, so a dev server can try the control panel. */
+  role?: Role;
   /** The guest's number, for the name an account without one shows (missing in older files). */
   guestNumber?: number;
   /** When it was made (ms; missing in older files). */
@@ -77,6 +79,7 @@ export function localAuth(): AuthService & {
       name: a?.name ?? null,
       guestNumber: g.guestNumber,
       avatar: a?.avatar ?? g.avatar,
+      role: a ? (a.role ?? "admin") : null,
       provider: a?.provider ?? null,
       providerAvatarUrl: null,
       authMode: "local",

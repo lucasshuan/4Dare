@@ -38,6 +38,9 @@ export type Result<T = void> =
 export const ok = <T>(data: T): Result<T> => ({ ok: true, data });
 export const fail = (error: ErrorCode): Result<never> => ({ ok: false, error });
 
+/** What an account may do: everyone plays, curators put suggestions live, the admin runs the panel. */
+export type Role = "player" | "curator" | "admin";
+
 /** The signed-in person (guest or account), as the server keeps them. */
 export interface Account {
   id: PlayerId;
@@ -47,6 +50,8 @@ export interface Account {
   name: string | null;
   guestNumber: number;
   avatar: Avatar;
+  /** What the account may do; null for a guest. */
+  role: Role | null;
   /** OAuth provider of the account, if any. */
   provider: "discord" | "google" | null;
   /** Picture that came from the provider, offered as an avatar choice. */

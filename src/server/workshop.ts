@@ -8,6 +8,7 @@ import { normalizeName } from "@/game/match";
 import { THEME_SETS, type ThemeSet } from "@/game/theme-sets";
 import { GameError, LANGS, type Lang, type PlayerId } from "@/game/types";
 import { BLOCKED_WORDS, STOP_WORDS } from "@/game/workshop-words";
+import { allowed, curatorOnly } from "./auth/roles";
 import { getBackend } from "./backend";
 import type { BankInsert, StoredSuggestion } from "./backend/community-types";
 import type { CatalogTheme } from "./backend/types";
@@ -490,14 +491,10 @@ export async function workshopPage(
     );
   const page = shown.slice(query.offset, query.offset + PAGE_SIZE);
   const end = query.offset + page.length;
-  const [left, curator] = me.isGuest
-    ? [null, false]
-    : await Promise.all([
-        workshop
-          .sentThisWeek(me.id)
-          .then((n) => Math.max(0, WEEKLY_SUGGESTIONS - n)),
-        workshop.isCurator(me.id),
-      ]);
+  const left = me.isGuest
+    ? null
+    : Math.max(0, WEEKLY_SUGGESTIONS - (await workshop.sentThisWeek(me.id)));
+  const curator = !!(await allowed("curate"));
   return {
     items: page,
     next: end < shown.length ? end : null,
@@ -737,13 +734,6 @@ export async function voteOn(id: string, vote: boolean | null) {
 }
 
 // -- review ------------------------------------------------------------------
-
-const curatorOnly = async () => {
-  const me = await account();
-  if (!(await getBackend().workshop.isCurator(me.id)))
-    throw new GameError("unauthorized");
-  return me;
-};
 
 export interface ReviewItem {
   suggestion: Omit<StoredSuggestion, "payload"> & { draft: WorkshopDraft };

@@ -5,7 +5,7 @@ import { guestAvatar, randomGuestNumber } from "@/game/guest-names";
 import { parseSynced } from "@/game/options";
 import { handleCandidates } from "@/game/profile/handle";
 import { type Avatar, GameError, type Identity, type Lang } from "@/game/types";
-import type { Account } from "@/server/contract";
+import type { Account, Role } from "@/server/contract";
 import {
   ensureGuest,
   GUEST_COOKIE,
@@ -26,6 +26,7 @@ interface ProfileRow {
   avatar: Avatar;
   provider: Account["provider"];
   provider_avatar_url: string | null;
+  role: Role;
 }
 
 const profiles = () => serviceClient().from("profiles");
@@ -100,6 +101,7 @@ const accountMe = (p: ProfileRow): Account => ({
   name: p.name,
   guestNumber: p.guest_number,
   avatar: p.avatar,
+  role: p.role ?? "player",
   provider: p.provider,
   providerAvatarUrl: p.provider_avatar_url,
   authMode: "supabase",
@@ -119,6 +121,7 @@ const guestMe = (g: Guest): Account => ({
   name: null,
   guestNumber: g.guestNumber,
   avatar: g.avatar,
+  role: null,
   provider: null,
   providerAvatarUrl: null,
   authMode: "supabase",

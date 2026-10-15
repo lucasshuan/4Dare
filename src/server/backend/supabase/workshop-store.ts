@@ -201,14 +201,5 @@ export function supabaseWorkshopStore(): WorkshopStore {
       if (error) throw error;
       return (count ?? 0) > 0;
     },
-    async isCurator(user) {
-      const { data, error } = await db()
-        .from("profiles")
-        .select("curator")
-        .eq("id", user)
-        .maybeSingle();
-      if (error) return false;
-      return !!data?.curator;
-    },
   };
 }

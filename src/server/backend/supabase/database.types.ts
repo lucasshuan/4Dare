@@ -14,6 +14,47 @@ export type Database = {
   };
   public: {
     Tables: {
+      admin_audit: {
+        Row: {
+          action: string;
+          actor_id: string | null;
+          after: Json | null;
+          before: Json | null;
+          created_at: string;
+          id: number;
+          note: string | null;
+          target: string;
+        };
+        Insert: {
+          action: string;
+          actor_id?: string | null;
+          after?: Json | null;
+          before?: Json | null;
+          created_at?: string;
+          id?: never;
+          note?: string | null;
+          target: string;
+        };
+        Update: {
+          action?: string;
+          actor_id?: string | null;
+          after?: Json | null;
+          before?: Json | null;
+          created_at?: string;
+          id?: never;
+          note?: string | null;
+          target?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       character_alias_events: {
         Row: {
           action: string;
@@ -1190,6 +1231,7 @@ export type Database = {
           provider: string | null;
           provider_avatar_url: string | null;
           quote: string | null;
+          role: Database["public"]["Enums"]["user_role"];
           settings: Json;
           showcase: Json;
           updated_at: string;
@@ -1210,6 +1252,7 @@ export type Database = {
           provider?: string | null;
           provider_avatar_url?: string | null;
           quote?: string | null;
+          role?: Database["public"]["Enums"]["user_role"];
           settings?: Json;
           showcase?: Json;
           updated_at?: string;
@@ -1230,6 +1273,7 @@ export type Database = {
           provider?: string | null;
           provider_avatar_url?: string | null;
           quote?: string | null;
+          role?: Database["public"]["Enums"]["user_role"];
           settings?: Json;
           showcase?: Json;
           updated_at?: string;
@@ -1906,6 +1950,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      admin_stats: { Args: { p_days?: number }; Returns: Json };
       change_character_alias: {
         Args: {
           p_action: string;
@@ -2241,6 +2286,7 @@ export type Database = {
         | "books"
         | "faith"
         | "real";
+      user_role: "player" | "curator" | "admin";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -2403,6 +2449,7 @@ export const Constants = {
         "faith",
         "real",
       ],
+      user_role: ["player", "curator", "admin"],
     },
   },
 } as const;

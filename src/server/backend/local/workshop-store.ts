@@ -11,7 +11,6 @@ interface Saved {
   suggestions: StoredSuggestion[];
   votes: { id: string; user: string; vote: boolean }[];
   bank: BankInsert[];
-  curators: string[];
 }
 
 const FILE = "workshop.json";
@@ -26,14 +25,13 @@ const monday = () => {
   );
 };
 
-/** The Workshop in local mode: suggestions, votes and what went live, in .data/. Every account curates. */
+/** The Workshop in local mode: suggestions, votes and what went live, in .data/. Test accounts are admins, so they curate. */
 export function localWorkshopStore(): WorkshopStore {
   const data = processSingleton<Saved>("workshop", () =>
     readJson<Saved>(FILE, {
       suggestions: [],
       votes: [],
       bank: [],
-      curators: [],
     }),
   );
   const save = () => writeJson(FILE, data);
@@ -106,9 +104,6 @@ export function localWorkshopStore(): WorkshopStore {
     },
     async bankIdTaken(kind, id) {
       return data.bank.some((r) => r.kind === kind && r.id === id);
-    },
-    async isCurator() {
-      return true;
     },
   };
 }

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ReviewScreen } from "@/features/workshop/review-screen";
 import type { Lang } from "@/game/types";
 import { PageMessages } from "@/i18n/page-messages";
 import { WORKSHOP_REVIEW } from "@/lib/routes";
+import { allowed } from "@/server/auth/roles";
 import { pageMetadata } from "@/server/seo";
 
 export async function generateMetadata({
@@ -26,6 +28,7 @@ export default async function WorkshopReview({
 }: PageProps<"/[locale]/workshop/review">) {
   const { locale } = await params;
   setRequestLocale(locale);
+  if (!(await allowed("curate"))) notFound();
   return (
     <PageMessages only={["workshop", "library"]}>
       <ReviewScreen />

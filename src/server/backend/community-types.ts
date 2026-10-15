@@ -207,8 +207,6 @@ export interface WorkshopStore {
   insertBank(row: BankInsert): Promise<void>;
   /** Whether a bank id is taken. */
   bankIdTaken(kind: BankInsert["kind"], id: string): Promise<boolean>;
-  /** Whether an account reviews suggestions. */
-  isCurator(user: PlayerId): Promise<boolean>;
 }
 
 export const NEWS_REACTIONS = ["love", "party", "wow"] as const;
