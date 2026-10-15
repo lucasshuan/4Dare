@@ -3,6 +3,7 @@ import { BACKEND } from "@/config";
 // one entry, so a build with the Supabase keys can leave it out (next.config.ts)
 import { localBackend } from "@/server/backend/local";
 import { themes } from "../themes";
+import { supabaseAdmin } from "./supabase/admin";
 import { supabaseAuth } from "./supabase/auth";
 import { supabaseBadges } from "./supabase/badges";
 import { supabaseCharacters } from "./supabase/characters";
@@ -32,6 +33,7 @@ export function getBackend(): Backend {
   if (backend) return backend;
   if (BACKEND === "supabase") {
     backend = {
+      admin: supabaseAdmin(),
       rooms: supabaseRooms(),
       matches: supabaseMatches(),
       characters: supabaseCharacters(),

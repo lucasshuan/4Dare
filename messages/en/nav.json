@@ -13,6 +13,10 @@
     "hint": "Sign in with Discord or Google to keep your level and badges."
   },
   "me": "@{handle} · Level {level}",
+  "admin": {
+    "label": "Control panel",
+    "waiting": "{n} waiting"
+  },
   "groups": {
     "play": "Play",
     "you": "You",

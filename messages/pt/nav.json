@@ -13,6 +13,10 @@
     "hint": "Entre com Discord ou Google para guardar nível e conquistas."
   },
   "me": "@{handle} · Nível {level}",
+  "admin": {
+    "label": "Painel de controle",
+    "waiting": "{n, plural, one {# esperando} other {# esperando}}"
+  },
   "groups": {
     "play": "Jogar",
     "you": "Você",

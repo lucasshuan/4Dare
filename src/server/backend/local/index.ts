@@ -1,6 +1,7 @@
 import "server-only";
 import { themes } from "../../themes";
 import type { Backend } from "../types";
+import { localAdmin } from "./admin";
 import { localAuth } from "./auth";
 import { localBadges } from "./badges";
 import { localCharacters } from "./characters";
@@ -29,6 +30,7 @@ export { fixtureLibrary } from "./library";
 export function localBackend(): Backend {
   const characters = localCharacters();
   return {
+    admin: localAdmin(),
     rooms: localRooms(),
     matches: localMatches(),
     characters,

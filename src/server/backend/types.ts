@@ -38,6 +38,7 @@ import type {
 } from "@/game/types";
 import type { Account, AccountInfo } from "../contract";
 import type { FitVote, PickStat } from "../theme-picks";
+import type { AdminStore } from "./admin-types";
 import type {
   CommunityStore,
   LibraryStore,
@@ -587,6 +588,7 @@ export interface LineupStore {
 }
 
 export interface Backend {
+  admin: AdminStore;
   rooms: RoomStore;
   matches: MatchStore;
   characters: CharacterStore;

@@ -80,6 +80,16 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/features/admin/**/*.css"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDescendingSpecificity": "off"
+          }
+        }
+      }
     }
   ],
   "assist": {

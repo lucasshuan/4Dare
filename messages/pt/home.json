@@ -318,6 +318,7 @@
     "connected": "Conectado com {provider}",
     "account": "Conta",
     "myProfile": "Meu perfil",
+    "admin": "Painel de controle",
     "editProfile": "Editar perfil",
     "signOut": "Sair",
     "testAccount": "Sem Supabase, isso entra numa conta de teste.",

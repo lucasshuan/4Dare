@@ -17,6 +17,7 @@ import {
   Plus,
   Search,
   Shield,
+  ShieldCheck,
   SlidersHorizontal,
   Trophy,
   UserRound,
@@ -40,6 +41,7 @@ import { Logo } from "@/components/ui/logo";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tip } from "@/components/ui/tip";
 import tb from "@/components/ui/top-bar.module.css";
+import { useAdminLink } from "@/features/admin/use-admin-link";
 import { GameThumb, useGameName } from "@/features/create/game-info";
 import { useMe } from "@/features/data/use-me";
 import { usePublicRooms } from "@/features/data/use-public-rooms";
@@ -362,6 +364,7 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
                 />
               </label>
             </Stagger>
+            <AdminEntry />
             <LayoutMotion>
               {/* biome-ignore lint/a11y/noStaticElementInteractions: arrow keys walk the rows */}
               <div ref={navRef} onKeyDown={onNavKey} className="px-3">
@@ -431,6 +434,38 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
         </div>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
+
+/**
+ * The admin's way into the control panel, above the groups: a row of its own
+ * (ink, a butter shield) so it is found at a glance, with what waits on them.
+ */
+function AdminEntry() {
+  const t = useTranslations("nav.admin");
+  const link = useAdminLink();
+  if (!link) return null;
+  return (
+    <Stagger i={2}>
+      <div className="px-3 pt-2">
+        <a
+          href={link.href}
+          data-nav-row
+          className="flex h-12 w-full items-center gap-3 rounded-[14px] bg-ink px-3 font-bold text-[15px] text-on-ink outline-none transition-[translate] duration-150 ease-soft hover:-translate-y-0.5 focus-visible:outline-3 focus-visible:outline-sky"
+        >
+          <ShieldCheck
+            className="size-5 shrink-0 text-butter"
+            strokeWidth={2}
+          />
+          <span className="min-w-0 truncate">{t("label")}</span>
+          {link.waiting ? (
+            <span className="ml-auto inline-flex h-5 shrink-0 items-center rounded-pill bg-apricot px-2 font-medium font-mono text-[11.5px] text-on-apricot">
+              {t("waiting", { n: link.waiting })}
+            </span>
+          ) : null}
+        </a>
+      </div>
+    </Stagger>
   );
 }
 

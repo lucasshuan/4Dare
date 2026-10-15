@@ -318,6 +318,7 @@
     "connected": "Connected with {provider}",
     "account": "Account",
     "myProfile": "My profile",
+    "admin": "Control panel",
     "editProfile": "Edit profile",
     "signOut": "Sign out",
     "testAccount": "Without Supabase this enters a test account.",

@@ -318,6 +318,7 @@
     "connected": "{provider}と連携中",
     "account": "アカウント",
     "myProfile": "マイプロフィール",
+    "admin": "管理パネル",
     "editProfile": "プロフィールを編集",
     "signOut": "ログアウト",
     "testAccount": "Supabaseなしではテスト用アカウントに入ります。",

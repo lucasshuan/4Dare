@@ -6,6 +6,7 @@ import {
   Dices,
   LogOut,
   Settings,
+  ShieldCheck,
   UserRound,
   UserRoundCog,
   UserRoundPen,
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/auth-button";
 import { Avatar } from "@/components/ui/avatar";
 import { Tip } from "@/components/ui/tip";
+import { useAdminLink } from "@/features/admin/use-admin-link";
 import { useMe } from "@/features/data/use-me";
 import { accentStyle } from "@/features/profile/cover-paint";
 import { XpBar } from "@/features/profile/level";
@@ -52,6 +54,7 @@ export function UserMenuPopover({
   const name = useDisplayName();
   const router = useRouter();
   const { me, refresh, setMe } = useMe();
+  const admin = useAdminLink();
   const label = useUserMenuLabel(me);
   const { signIn, pending } = useSignIn();
   const { run, pending: leaving } = useAction();
@@ -226,6 +229,17 @@ export function UserMenuPopover({
               ) : (
                 <>
                   <MenuItems>
+                    {admin ? (
+                      <a href={admin.href} className={ITEM}>
+                        <ShieldCheck strokeWidth={1.75} />
+                        {t("admin")}
+                        {admin.waiting ? (
+                          <span className="ml-auto inline-flex h-5 items-center rounded-pill bg-apricot px-2 font-medium font-mono text-[11.5px] text-on-apricot">
+                            {admin.waiting}
+                          </span>
+                        ) : null}
+                      </a>
+                    ) : null}
                     {me.handle ? (
                       <MenuItem
                         icon={<UserRound strokeWidth={1.75} />}

@@ -13,6 +13,10 @@
     "hint": "DiscordかGoogleでログインすると、レベルとバッジが残ります。"
   },
   "me": "@{handle} · レベル{level}",
+  "admin": {
+    "label": "管理パネル",
+    "waiting": "{n}件待ち"
+  },
   "groups": {
     "play": "遊ぶ",
     "you": "あなた",
