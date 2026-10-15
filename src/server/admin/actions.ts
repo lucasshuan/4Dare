@@ -6,10 +6,18 @@ import type { RoomState } from "@/game/types";
 // whatever page it came from.
 import { GameError } from "@/game/types";
 import type { BankKind } from "../backend/admin-types";
-import { fail, ok, type Result } from "../contract";
+import { fail, ok, type Result, type Role } from "../contract";
 import { restoreVersion, saveTunes } from "./config";
 import { setBankLive } from "./games";
 import { deleteLabScene, labKit, labRoom, saveLabScene } from "./lab";
+import {
+  lift,
+  type PersonFile,
+  personFile,
+  type SanctionInput,
+  sanction,
+  setRole,
+} from "./people";
 
 async function run<T>(work: () => Promise<T>): Promise<Result<T>> {
   try {
@@ -64,4 +72,32 @@ export async function saveLabSceneAction(
 
 export async function deleteLabSceneAction(id: string): Promise<Result<void>> {
   return run(() => deleteLabScene(id));
+}
+
+/** Everything the person drawer shows. */
+export async function personAction(id: string): Promise<Result<PersonFile>> {
+  return run(() => personFile(id));
+}
+
+/** Warns, mutes, bans or archives a person's reports; the sanction's id. */
+export async function sanctionAction(
+  input: SanctionInput,
+): Promise<Result<number>> {
+  return run(() => sanction(input));
+}
+
+/** Lifts a ban or a mute. */
+export async function liftAction(
+  id: number,
+  person: string,
+): Promise<Result<void>> {
+  return run(() => lift(id, person));
+}
+
+/** Makes an account a player or a curator. */
+export async function setRoleAction(
+  id: string,
+  role: Role,
+): Promise<Result<void>> {
+  return run(() => setRole(id, role));
 }

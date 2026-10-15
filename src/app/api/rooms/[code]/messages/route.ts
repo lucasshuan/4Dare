@@ -13,6 +13,7 @@ import {
 } from "@/server/http";
 import { allow } from "@/server/rate-limit";
 import { normalizeCode } from "@/server/rooms";
+import { guard } from "@/server/sanctions";
 import { watcherIn } from "@/server/watchers";
 
 /** Most lines one refetch brings (it asks from the newest line's time minus a small overlap). */
@@ -92,6 +93,7 @@ export async function POST(
     if (!code) return failure("not_found");
     const id = callerId();
     const me = await id;
+    await guard(me, "write");
     // a cheap first line, per instance; the store holds the real limit
     if (!allow(`chat:${me}`, 5, 10_000) || !allow(`chat-min:${me}`, 30, 60_000))
       return failure("rate_limited");

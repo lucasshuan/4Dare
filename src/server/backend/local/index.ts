@@ -15,6 +15,7 @@ import { localLineup } from "./lineup";
 import { localMatches } from "./matches";
 import { localMural } from "./mural";
 import { localNewsStore } from "./news-store";
+import { localPeople } from "./people";
 import { localProfiles } from "./profiles";
 import { localReports } from "./reports";
 import { localRooms } from "./rooms";
@@ -41,6 +42,7 @@ export function localBackend(): Backend {
     files: localFiles(),
     auth: localAuth(),
     profiles: localProfiles(),
+    people: localPeople(),
     mural: localMural(),
     badges: localBadges(),
     // no push channel: the screens poll

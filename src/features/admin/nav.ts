@@ -1,9 +1,11 @@
 import {
+  Flag,
   FlaskConical,
   Gamepad2,
   LayoutDashboard,
   type LucideIcon,
   SlidersVertical,
+  Users,
 } from "lucide-react";
 import type { AdminCounts } from "@/server/admin/overview";
 
@@ -35,6 +37,19 @@ export const NAV: { group: string; items: AdminSection[] }[] = [
         Icon: SlidersVertical,
       },
       { id: "lab", label: "Laboratório", path: "/lab", Icon: FlaskConical },
+    ],
+  },
+  {
+    group: "Comunidade",
+    items: [
+      { id: "users", label: "Usuários", path: "/users", Icon: Users },
+      {
+        id: "reports",
+        label: "Denúncias",
+        path: "/reports",
+        Icon: Flag,
+        count: (c) => (c.reports ? { n: c.reports, hot: true } : null),
+      },
     ],
   },
 ];

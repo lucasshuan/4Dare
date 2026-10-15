@@ -7,6 +7,7 @@ import type { WorkshopCheck } from "./community-contract";
 import { fail, ok, type Result } from "./contract";
 import { publishWorkshopNews } from "./news";
 import { allow } from "./rate-limit";
+import { guard } from "./sanctions";
 import { approve, markReview, refuse, suggest, voteOn } from "./workshop";
 
 async function run<T>(work: () => Promise<T>): Promise<Result<T>> {
@@ -23,6 +24,7 @@ async function paced(key: string, max: number) {
   const me = await getBackend().auth.identity("en");
   if (!allow(`${key}:${me.id}`, max, 60_000))
     throw new GameError("rate_limited");
+  await guard(me.id, "contribute");
 }
 
 const pageLang = async (): Promise<Lang> => {

@@ -73,6 +73,8 @@
     "kicked": "O anfitrião tirou você da sala. Volte daqui a 2 minutos.",
     "banned": "O anfitrião baniu você desta sala.",
     "muted": "O anfitrião silenciou você no chat desta sala.",
+    "suspended": "Você está suspenso do 4Dare por enquanto.",
+    "silenced": "Você está silenciado por enquanto: dá para jogar, mas não escrever.",
     "watch_chat_off": "Nesta sala, só quem joga escreve no chat.",
     "no_links": "Quem assiste não pode mandar links.",
     "already_reported": "Você já denunciou essa pessoa nesta sala.",
@@ -188,5 +190,16 @@
     "lockTitle": "Você está numa partida",
     "lockText": "Termine ou saia dela antes de entrar ou criar outra sala.",
     "left": "Você saiu da partida"
+  },
+  "notice": {
+    "warn": "Um aviso da equipe do 4Dare",
+    "mute": "Você está silenciado",
+    "ban": "Você está suspenso",
+    "muteBody": "Dá para jogar normalmente, mas não escrever no chat das salas nem em murais.",
+    "banBody": "Você não pode entrar em salas, escrever, votar nem sugerir.",
+    "until": "Até {date}.",
+    "forever": "Sem data para acabar.",
+    "why": "Motivo",
+    "ok": "Entendi"
   }
 }

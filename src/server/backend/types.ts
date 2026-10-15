@@ -45,6 +45,7 @@ import type {
   NewsStore,
   WorkshopStore,
 } from "./community-types";
+import type { PeopleStore } from "./people-types";
 
 export interface StoredRoom {
   state: RoomState;
@@ -589,6 +590,7 @@ export interface LineupStore {
 
 export interface Backend {
   admin: AdminStore;
+  people: PeopleStore;
   rooms: RoomStore;
   matches: MatchStore;
   characters: CharacterStore;

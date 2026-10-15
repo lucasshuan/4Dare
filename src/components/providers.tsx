@@ -7,6 +7,7 @@ import { type ReactNode, useState } from "react";
 import { ProfileModalHost } from "@/features/profile/profile-modal-host";
 import { RoomEntranceProvider } from "@/features/room/room-entrance";
 import { SettingsSync } from "@/features/settings/settings-sync";
+import { SanctionNotice } from "./sanction-notice";
 import { PageScrollbar } from "./ui/scroll-area";
 import { TipProvider } from "./ui/tip";
 import { ToastProvider } from "./ui/toast";
@@ -32,6 +33,7 @@ export function Providers({ children }: { children: ReactNode }) {
               </TipProvider>
               <SettingsSync />
               <ProfileModalHost />
+              <SanctionNotice />
               <PageScrollbar />
             </ToastProvider>
           </LazyMotion>

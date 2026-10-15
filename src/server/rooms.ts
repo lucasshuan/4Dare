@@ -645,7 +645,7 @@ export async function handOverSeats(
   player: Identity,
   prefer: string | null,
 ) {
-  const { rooms, chat, watchers, reports } = getBackend();
+  const { rooms, chat, watchers, reports, people } = getBackend();
   const codes = await rooms.withPlayer(from, SEATED);
   await Promise.all([
     chat
@@ -657,6 +657,9 @@ export async function handOverSeats(
     reports
       .reassign(from, player.id)
       .catch((e: unknown) => console.error("[reports] reassign failed:", e)),
+    people
+      .reassign(from, player.id)
+      .catch((e: unknown) => console.error("[sanctions] reassign failed:", e)),
     ...codes.map((code) =>
       dispatch(code, () => ({ type: "SWAP_PLAYER", from, player })).catch(
         (e: unknown) => {

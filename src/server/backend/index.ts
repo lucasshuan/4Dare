@@ -18,6 +18,7 @@ import { supabaseMatches } from "./supabase/matches";
 import { supabaseMural } from "./supabase/mural";
 import { supabaseNewsStore } from "./supabase/news-store";
 import { supabaseNotify } from "./supabase/notify";
+import { supabasePeople } from "./supabase/people";
 import { supabaseProfiles } from "./supabase/profiles";
 import { supabaseReports } from "./supabase/reports";
 import { supabaseRooms } from "./supabase/rooms";
@@ -34,6 +35,7 @@ export function getBackend(): Backend {
   if (BACKEND === "supabase") {
     backend = {
       admin: supabaseAdmin(),
+      people: supabasePeople(),
       rooms: supabaseRooms(),
       matches: supabaseMatches(),
       characters: supabaseCharacters(),

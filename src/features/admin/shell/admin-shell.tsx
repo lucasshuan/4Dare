@@ -34,6 +34,7 @@ import type { Me, Role } from "@/server/contract";
 import { DraftProvider } from "../config/draft";
 import { Tray } from "../config/tray";
 import { NAV, SECTIONS, sectionOf, TABS } from "../nav";
+import { PersonDrawerProvider } from "../people/person-drawer";
 import { useAdminCounts } from "../use-admin-counts";
 import { AdminBaseProvider, useAdminBase, useRelPath } from "./base";
 import { Crumbs, CrumbsProvider } from "./crumbs";
@@ -93,42 +94,44 @@ export function AdminShell({
       <DraftProvider version={config.v} saved={config.tunes}>
         <CrumbsProvider>
           <div className="adm">
-            <div className="app">
-              <Rail
-                me={me}
-                open={open}
-                onClose={() => setOpen(false)}
-                initialCounts={initialCounts}
-              />
-              {open ? (
-                <button
-                  type="button"
-                  className="rail-scrim"
-                  aria-label="Fechar o menu"
-                  onClick={() => setOpen(false)}
+            <PersonDrawerProvider>
+              <div className="app">
+                <Rail
+                  me={me}
+                  open={open}
+                  onClose={() => setOpen(false)}
+                  initialCounts={initialCounts}
                 />
-              ) : null}
-              <main>
-                <div className="topline">
-                  <span
-                    className="lang"
-                    title="Idioma do painel: só português, por enquanto"
-                    aria-disabled="true"
-                  >
-                    <Flag lang="pt" />
-                    <select aria-label="Idioma do painel" disabled value="pt">
-                      <option value="pt">Português</option>
-                    </select>
-                    <span className="code">PT</span>
-                    <ChevronDown className="i" />
-                  </span>
-                  <Crumbs />
-                </div>
-                <div className="view">{children}</div>
-              </main>
-            </div>
-            <TabBar onMenu={() => setOpen(true)} />
-            <Tray />
+                {open ? (
+                  <button
+                    type="button"
+                    className="rail-scrim"
+                    aria-label="Fechar o menu"
+                    onClick={() => setOpen(false)}
+                  />
+                ) : null}
+                <main>
+                  <div className="topline">
+                    <span
+                      className="lang"
+                      title="Idioma do painel: só português, por enquanto"
+                      aria-disabled="true"
+                    >
+                      <Flag lang="pt" />
+                      <select aria-label="Idioma do painel" disabled value="pt">
+                        <option value="pt">Português</option>
+                      </select>
+                      <span className="code">PT</span>
+                      <ChevronDown className="i" />
+                    </span>
+                    <Crumbs />
+                  </div>
+                  <div className="view">{children}</div>
+                </main>
+              </div>
+              <TabBar onMenu={() => setOpen(true)} />
+              <Tray />
+            </PersonDrawerProvider>
           </div>
         </CrumbsProvider>
       </DraftProvider>

@@ -914,6 +914,10 @@ export const ERROR_CODES = [
   "banned",
   /** The host silenced the player in this room's chat. */
   "muted",
+  /** The panel banned the person from the site for a while (src/server/sanctions.ts). */
+  "suspended",
+  /** The panel muted the person: no chat, no murals. */
+  "silenced",
   /** The room keeps its chat to the players: whoever watches only reads. */
   "watch_chat_off",
   /** Whoever watches can't post links (spam). */

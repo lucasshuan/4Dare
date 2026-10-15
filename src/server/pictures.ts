@@ -22,6 +22,7 @@ import type {
 } from "./backend/types";
 import { getOrCreateCharacter } from "./characters";
 import { moderateImage } from "./moderation";
+import { guard } from "./sanctions";
 
 /** Distinct reports that hide a player's picture. */
 export const REPORTS_TO_HIDE = 3;
@@ -70,6 +71,7 @@ export async function sendPicture(
   characterId: string | null,
   image: { bytes: Uint8Array; type: string },
 ): Promise<CharacterImage> {
+  await guard(who.id, "contribute");
   const check = await moderateImage(image.bytes, image.type);
   if (check.verdict === "rejected") throw new GameError("image_rejected");
   const { files, images } = getBackend();

@@ -938,6 +938,7 @@ export type Database = {
           discovered_at: number | null;
           finished_at: string;
           guesses: number | null;
+          guest_number: number | null;
           lang: string;
           match_id: string;
           picked_by: string | null;
@@ -958,6 +959,7 @@ export type Database = {
           discovered_at?: number | null;
           finished_at: string;
           guesses?: number | null;
+          guest_number?: number | null;
           lang: string;
           match_id: string;
           picked_by?: string | null;
@@ -978,6 +980,7 @@ export type Database = {
           discovered_at?: number | null;
           finished_at?: string;
           guesses?: number | null;
+          guest_number?: number | null;
           lang?: string;
           match_id?: string;
           picked_by?: string | null;
@@ -1494,6 +1497,48 @@ export type Database = {
           updated_at?: string;
           version?: number;
           visibility?: string;
+        };
+        Relationships: [];
+      };
+      sanctions: {
+        Row: {
+          author_id: string | null;
+          created_at: string;
+          id: number;
+          kind: string;
+          lifted_at: string | null;
+          person: string;
+          reason: string | null;
+          seen_at: string | null;
+          until: string | null;
+          up_to: string;
+          wipe: boolean;
+        };
+        Insert: {
+          author_id?: string | null;
+          created_at?: string;
+          id?: never;
+          kind: string;
+          lifted_at?: string | null;
+          person: string;
+          reason?: string | null;
+          seen_at?: string | null;
+          until?: string | null;
+          up_to?: string;
+          wipe?: boolean;
+        };
+        Update: {
+          author_id?: string | null;
+          created_at?: string;
+          id?: never;
+          kind?: string;
+          lifted_at?: string | null;
+          person?: string;
+          reason?: string | null;
+          seen_at?: string | null;
+          until?: string | null;
+          up_to?: string;
+          wipe?: boolean;
         };
         Relationships: [];
       };
@@ -2020,6 +2065,18 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      admin_people: {
+        Args: never;
+        Returns: {
+          first_at: string;
+          last_at: string;
+          per_game: Json;
+          plays: number;
+          user_id: string;
+          wins: number;
+          xp: number;
+        }[];
+      };
       admin_stats: { Args: { p_days?: number }; Returns: Json };
       change_character_alias: {
         Args: {
@@ -2196,6 +2253,10 @@ export type Database = {
         Returns: undefined;
       };
       reassign_room_messages: {
+        Args: { p_from: string; p_to: string };
+        Returns: undefined;
+      };
+      reassign_sanctions: {
         Args: { p_from: string; p_to: string };
         Returns: undefined;
       };

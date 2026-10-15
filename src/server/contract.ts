@@ -75,7 +75,16 @@ export interface AccountInfo {
  * The signed-in person as the UI gets them: `guestName` is their guest name
  * in the page's language (a guest's name, and an account's while it has none).
  */
-export type Me = Omit<Account, "guestNumber"> & { guestName: string };
+export type Me = Omit<Account, "guestNumber"> & {
+  guestName: string;
+  /** What the panel decided about them that they still have to see (GET /api/me only). */
+  notice?: {
+    id: number;
+    kind: "warn" | "mute" | "ban";
+    reason: string | null;
+    until: number | null;
+  } | null;
+};
 
 /** An account's XP and its matches of the last week (GET /api/me/week), for the home's pass card. */
 export interface MeWeek {

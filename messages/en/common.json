@@ -73,6 +73,8 @@
     "kicked": "The host removed you from this room. Come back in 2 minutes.",
     "banned": "The host banned you from this room.",
     "muted": "The host muted you in this room's chat.",
+    "suspended": "You're suspended from 4Dare for now.",
+    "silenced": "You're muted for now: you can play, but not write.",
     "watch_chat_off": "In this room, only the players write in the chat.",
     "no_links": "Spectators can't post links.",
     "already_reported": "You already reported this person in this room.",
@@ -188,5 +190,16 @@
     "lockTitle": "You're in a match",
     "lockText": "Finish it or leave it before you join or create another room.",
     "left": "You left the match"
+  },
+  "notice": {
+    "warn": "A note from the 4Dare team",
+    "mute": "You're muted",
+    "ban": "You're suspended",
+    "muteBody": "You can play as usual, but not write in rooms' chats or on murals.",
+    "banBody": "You can't enter rooms, write, vote or suggest.",
+    "until": "Until {date}.",
+    "forever": "With no end date.",
+    "why": "Reason",
+    "ok": "Got it"
   }
 }

@@ -89,6 +89,7 @@ import {
   syncIdentity,
   themeRanking,
 } from "./rooms";
+import { guard, readNotice } from "./sanctions";
 import { showMe } from "./shown";
 import { drawFit, pickKey } from "./theme-picks";
 import {
@@ -216,6 +217,7 @@ export async function createRoom(
   return run(async () => {
     await loadConfig();
     const host = await me();
+    await guard(host.id, "play");
     const parsed = createSchema(!!(await allowed("admin"))).safeParse(input);
     if (!parsed.success) bad();
     if (!allow(`create:${host.id}`, 20, 60_000))
@@ -241,6 +243,7 @@ export async function joinRoom(
   return run(async () => {
     const code = roomCode(rawCode);
     const who = await me();
+    await guard(who.id, "play");
     // Guessing a password takes one try per call: keep it slow.
     if (password !== undefined && !allow(`join:${who.id}:${code}`, 10, 60_000))
       throw new GameError("rate_limited");
@@ -1368,7 +1371,17 @@ export async function postMuralLine(
   return run(async () => {
     if (typeof handle !== "string" || handle.length > 40) bad();
     if (parentId !== null && !Number.isSafeInteger(parentId)) bad();
-    return postLine(handle, await me(), body, parentId);
+    const who = await me();
+    await guard(who.id, "write");
+    return postLine(handle, who, body, parentId);
+  });
+}
+
+/** The person read the panel's warning. */
+export async function readSanctionNotice(id: number): Promise<Result> {
+  return run(async () => {
+    if (!Number.isSafeInteger(id)) bad();
+    await readNotice((await me()).id, id);
   });
 }
 

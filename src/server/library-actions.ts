@@ -12,6 +12,7 @@ import {
   reportNickname,
 } from "./library-sheet";
 import { allow } from "./rate-limit";
+import { guard } from "./sanctions";
 
 async function run<T>(work: () => Promise<T>): Promise<Result<T>> {
   try {
@@ -33,6 +34,7 @@ async function paced(key: string, max: number) {
   const me = await getBackend().auth.identity("en");
   if (!allow(`${key}:${me.id}`, max, 60_000))
     throw new GameError("rate_limited");
+  await guard(me.id, "contribute");
 }
 
 /** A new character from the characters page; its app id. */
