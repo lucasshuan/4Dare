@@ -906,6 +906,7 @@ async function recordPicks(
     players: characterIds.map((characterId, i) => ({
       userId: `seed-${i}`,
       wasGuest: true,
+      guestNumber: i + 1,
       lang,
       pickedById: `seed-picker-${i}`,
       pickerLang: lang,

@@ -8,6 +8,7 @@ import { levelOf } from "./xp";
 const player = (fields: Partial<PlayerRecord>): PlayerRecord => ({
   userId: "me",
   wasGuest: false,
+  guestNumber: null,
   lang: "pt",
   pickedById: null,
   pickerLang: null,

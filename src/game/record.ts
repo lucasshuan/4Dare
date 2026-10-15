@@ -22,6 +22,8 @@ export interface PlayerRecord {
   userId: PlayerId;
   /** Played as a guest; the record follows the user if they create an account. */
   wasGuest: boolean;
+  /** A guest's number, which names them (guest-names.ts); null for an account. */
+  guestNumber: number | null;
   lang: Lang;
   pickedById: PlayerId | null;
   /** The picker's language: their pick counts most for its players. Null when they left. */
@@ -124,6 +126,7 @@ function lineupPlayers(
       {
         userId: p.id,
         wasGuest: p.isGuest,
+        guestNumber: p.isGuest ? p.guestNumber : null,
         lang: p.lang,
         pickedById: null,
         pickerLang: null,
@@ -164,6 +167,7 @@ function impostorPlayers(
       return {
         userId: p.id,
         wasGuest: p.isGuest,
+        guestNumber: p.isGuest ? p.guestNumber : null,
         lang: p.lang,
         pickedById: null,
         pickerLang: null,
@@ -204,6 +208,7 @@ function whoAmIPlayers(s: RoomState, startedAt: number): PlayerRecord[] {
       return {
         userId: p.id,
         wasGuest: p.isGuest,
+        guestNumber: p.isGuest ? p.guestNumber : null,
         lang: p.lang,
         pickedById: a.pickerId,
         pickerLang: s.players.find((q) => q.id === a.pickerId)?.lang ?? null,
