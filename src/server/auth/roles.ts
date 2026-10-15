@@ -1,4 +1,5 @@
 import "server-only";
+import { notFound } from "next/navigation";
 import { cache } from "react";
 import { GameError } from "@/game/types";
 import { can, type Power } from "@/lib/roles";
@@ -26,3 +27,13 @@ export const adminOnly = () => only("admin");
 
 /** The Workshop's review: curators and the admin. */
 export const curatorOnly = () => only("curate");
+
+/**
+ * A panel page or layout: the admin, else a 404 as if there were no page.
+ * Layouts and pages render side by side, so each one checks on its own.
+ */
+export async function adminPage(): Promise<Account> {
+  const me = await allowed("admin");
+  if (!me) notFound();
+  return me;
+}

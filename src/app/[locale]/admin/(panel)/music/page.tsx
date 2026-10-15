@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { MixerScreen } from "@/features/admin/music/mixer-screen";
 import { adminGames } from "@/server/admin/games";
-import { adminOnly } from "@/server/auth/roles";
+import { adminPage } from "@/server/auth/roles";
 
 export const metadata: Metadata = { title: "Mesa de som" };
 
 /** The sound desk: every take and sound, with their levels and loops. */
 export default async function AdminMusicPage() {
-  await adminOnly();
+  await adminPage();
   const games = await adminGames();
   return (
     <MixerScreen

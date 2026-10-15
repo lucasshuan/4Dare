@@ -4,7 +4,7 @@ import type { LabScene } from "@/features/lab/scene";
 import type { GameKey } from "@/game/games";
 import { adminGames } from "@/server/admin/games";
 import { labRooms, labScene, labScenes } from "@/server/admin/lab";
-import { adminOnly } from "@/server/auth/roles";
+import { adminPage } from "@/server/auth/roles";
 
 export const metadata: Metadata = { title: "Laboratório" };
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Laboratório" };
 export default async function AdminLabPage({
   searchParams,
 }: PageProps<"/[locale]/admin/lab">) {
-  await adminOnly();
+  await adminPage();
   const { scene, room } = await searchParams;
   const id = typeof scene === "string" ? scene : null;
   const [games, rooms, scenes, stored] = await Promise.all([

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { GameScreen } from "@/features/admin/games/game-screen";
 import { isGameKey } from "@/game/games";
 import { adminBanks, adminGames } from "@/server/admin/games";
-import { adminOnly } from "@/server/auth/roles";
+import { adminPage } from "@/server/auth/roles";
 
 export const metadata: Metadata = { title: "Jogo" };
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Jogo" };
 export default async function AdminGamePage({
   params,
 }: PageProps<"/[locale]/admin/games/[game]">) {
-  await adminOnly();
+  await adminPage();
   const { game: key } = await params;
   if (!isGameKey(key)) notFound();
   const [games, banks] = await Promise.all([adminGames(), adminBanks()]);

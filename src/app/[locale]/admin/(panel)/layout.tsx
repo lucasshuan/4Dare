@@ -4,7 +4,7 @@ import { AdminShell } from "@/features/admin/shell/admin-shell";
 import { routing } from "@/i18n/routing";
 import { isAdminHost, siteHome } from "@/lib/hosts";
 import { adminCounts } from "@/server/admin/overview";
-import { adminOnly } from "@/server/auth/roles";
+import { adminPage } from "@/server/auth/roles";
 import { loadConfig } from "@/server/config";
 import { showMe } from "@/server/shown";
 
@@ -15,7 +15,7 @@ export default async function PanelLayout({
 }: LayoutProps<"/[locale]/admin">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const me = await adminOnly();
+  const me = await adminPage();
   const host = (await headers()).get("host");
   const base = isAdminHost(host)
     ? ""
