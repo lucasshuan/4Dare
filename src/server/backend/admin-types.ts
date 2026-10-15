@@ -160,6 +160,53 @@ export interface AdminStore {
   tableCounts(tables: readonly string[]): Promise<Record<string, number>>;
   /** Closes the rooms with nothing happening for 30 minutes; how many. */
   closeIdle(): Promise<number>;
+  /** A character as the panel edits it, hidden or not; null when there is none. */
+  characterInfo(id: string): Promise<CharacterInfo | null>;
+  /** The hidden characters, by name. */
+  hiddenCharacters(): Promise<{ id: string; name: string }[]>;
+  /** The library's works (origins), each by its Portuguese or English label. */
+  origins(): Promise<{ id: string; label: string }[]>;
+  /** Changes a character: its row, and its names (updated, or added for a language it lacked). */
+  editCharacter(id: string, patch: CharacterPatch): Promise<void>;
+  /** Hides or brings back a player's nickname. */
+  setNicknameHidden(id: number, hidden: boolean): Promise<void>;
+}
+
+/** A character, everything the panel edits. */
+export interface CharacterInfo {
+  id: string;
+  kind: string | null;
+  category: string | null;
+  originId: string | null;
+  originLabel: string | null;
+  customOrigin: string | null;
+  tastes: string[];
+  hidden: boolean;
+  createdBy: string | null;
+  names: {
+    lang: string;
+    name: string;
+    aliases: string[];
+    popularity: number | null;
+  }[];
+  nicknames: {
+    id: number;
+    lang: string;
+    name: string;
+    hidden: boolean;
+    removed: boolean;
+    createdBy: string | null;
+  }[];
+}
+
+export interface CharacterPatch {
+  hidden?: boolean;
+  kind?: string | null;
+  category?: string | null;
+  originId?: string | null;
+  customOrigin?: string | null;
+  tastes?: string[];
+  names?: { lang: string; name: string; aliases: string[] }[];
 }
 
 /** A picture as the panel ranks it. */

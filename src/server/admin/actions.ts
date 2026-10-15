@@ -5,7 +5,7 @@ import type { RoomState } from "@/game/types";
 // The control panel's changes. Every one checks the admin first (adminOnly),
 // whatever page it came from.
 import { GameError } from "@/game/types";
-import type { BankKind } from "../backend/admin-types";
+import type { BankKind, CharacterPatch } from "../backend/admin-types";
 import type { LibraryPage, LibrarySort } from "../community-contract";
 import { fail, ok, type Result, type Role } from "../contract";
 import { approve, markReview, refuse, reopen } from "../workshop";
@@ -15,7 +15,11 @@ import { deleteLabScene, labKit, labRoom, saveLabScene } from "./lab";
 import {
   type CharacterFile,
   characterFile,
+  editCharacter,
+  hiddenCharacters,
   libraryPage,
+  nicknameHidden,
+  originList,
   pictureStatus,
 } from "./library";
 import {
@@ -161,4 +165,34 @@ export async function pictureAction(
 /** Closes the rooms with nothing happening for 30 minutes; how many. */
 export async function closeIdleAction(): Promise<Result<number>> {
   return run(() => closeIdleRooms());
+}
+
+/** Changes a character: hide it, its kind, category, tastes, work, names. */
+export async function editCharacterAction(
+  id: string,
+  patch: CharacterPatch,
+): Promise<Result<void>> {
+  return run(() => editCharacter(id, patch));
+}
+
+/** The characters taken out of the library. */
+export async function hiddenCharactersAction(): Promise<
+  Result<{ id: string; name: string }[]>
+> {
+  return run(() => hiddenCharacters());
+}
+
+/** The library's works. */
+export async function originsAction(): Promise<
+  Result<{ id: string; label: string }[]>
+> {
+  return run(() => originList());
+}
+
+/** Hides or brings back a player's nickname. */
+export async function nicknameAction(
+  id: number,
+  hidden: boolean,
+): Promise<Result<void>> {
+  return run(() => nicknameHidden(id, hidden));
 }

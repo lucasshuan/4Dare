@@ -115,6 +115,17 @@ export function localAdmin(): AdminStore {
       return [];
     },
     async setImageStatus() {},
+    async characterInfo() {
+      return null;
+    },
+    async hiddenCharacters() {
+      return [];
+    },
+    async origins() {
+      return [];
+    },
+    async editCharacter() {},
+    async setNicknameHidden() {},
     async closeIdle() {
       return 0;
     },

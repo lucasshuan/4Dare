@@ -1,12 +1,17 @@
 import "server-only";
+import { CATEGORIES } from "@/game/categories";
 import { isTaste } from "@/game/tastes";
-import { GameError } from "@/game/types";
+import { GameError, LANGS } from "@/game/types";
 import { adminOnly } from "@/server/auth/roles";
 import { getBackend } from "../backend";
-import type { AdminImage } from "../backend/admin-types";
+import type {
+  AdminImage,
+  CharacterInfo,
+  CharacterPatch,
+} from "../backend/admin-types";
 import type { CatalogRow } from "../backend/community-types";
 import { parseEntryId } from "../backend/seed-format";
-import { browse, catalog } from "../catalog";
+import { browse, catalog, invalidateCatalog } from "../catalog";
 import type { LibraryPage, LibrarySort } from "../community-contract";
 
 /** A page of characters, as the library's own search finds them. */
@@ -33,21 +38,122 @@ const baseOf = (appId: string) => parseEntryId(appId)?.id ?? appId;
 
 export interface CharacterFile {
   id: string;
+  /** The site's view of it (null while it is hidden). */
   row: CatalogRow | null;
+  info: CharacterInfo | null;
   images: AdminImage[];
 }
 
-/** A character and every picture it has, any status. */
+/** A character and every picture it has, any status, hidden or not. */
 export async function characterFile(appId: string): Promise<CharacterFile> {
   await adminOnly();
   if (typeof appId !== "string" || appId.length > 120)
     throw new GameError("invalid_input");
   const id = baseOf(appId);
-  const [cat, images] = await Promise.all([
+  const { admin } = getBackend();
+  const [cat, info, images] = await Promise.all([
     catalog("pt"),
-    getBackend().admin.characterImages(id),
+    admin.characterInfo(id),
+    admin.characterImages(id),
   ]);
-  return { id, row: cat.byId.get(id) ?? null, images };
+  return { id, row: cat.byId.get(id) ?? null, info, images };
+}
+
+/** The characters taken out of the library. */
+export async function hiddenCharacters() {
+  await adminOnly();
+  return getBackend().admin.hiddenCharacters();
+}
+
+/** The library's works, to pick a character's from. */
+export async function originList() {
+  await adminOnly();
+  return getBackend().admin.origins();
+}
+
+const KINDS = ["fictional", "human"];
+const text = (v: unknown, max: number) =>
+  typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null;
+
+/**
+ * Changes a character (the library is hand-fed: rows are updated, never
+ * deleted; hiding takes it out of the site). The panel's audit keeps what it
+ * was before.
+ */
+export async function editCharacter(
+  appId: string,
+  raw: CharacterPatch,
+): Promise<void> {
+  const me = await adminOnly();
+  const id = baseOf(String(appId ?? ""));
+  const { admin } = getBackend();
+  const before = await admin.characterInfo(id);
+  if (!before) throw new GameError("not_found");
+  const patch: CharacterPatch = {};
+  if (typeof raw.hidden === "boolean") patch.hidden = raw.hidden;
+  if (raw.kind !== undefined)
+    patch.kind = raw.kind && KINDS.includes(raw.kind) ? raw.kind : null;
+  if (raw.category !== undefined)
+    patch.category =
+      raw.category && (CATEGORIES as readonly string[]).includes(raw.category)
+        ? raw.category
+        : null;
+  if (raw.tastes !== undefined)
+    patch.tastes = [...new Set((raw.tastes ?? []).filter(isTaste))];
+  if (raw.originId !== undefined) patch.originId = text(raw.originId, 120);
+  if (raw.customOrigin !== undefined)
+    patch.customOrigin = text(raw.customOrigin, 120);
+  if (raw.names !== undefined) {
+    patch.names = [];
+    for (const n of raw.names ?? []) {
+      if (!(LANGS as readonly string[]).includes(n.lang)) continue;
+      const name = text(n.name, 80);
+      if (!name) continue;
+      const aliases = [
+        ...new Set(
+          (n.aliases ?? [])
+            .map((a) => text(a, 80))
+            .filter((a): a is string => !!a),
+        ),
+      ].slice(0, 20);
+      const was = before.names.find((x) => x.lang === n.lang);
+      if (
+        was &&
+        was.name === name &&
+        JSON.stringify(was.aliases) === JSON.stringify(aliases)
+      )
+        continue;
+      patch.names.push({ lang: n.lang, name, aliases });
+    }
+  }
+  await admin.editCharacter(id, patch);
+  invalidateCatalog();
+  await admin
+    .audit({
+      actor: me.id,
+      action: "character.edit",
+      target: id,
+      before,
+      after: patch,
+    })
+    .catch(() => {});
+}
+
+/** Hides or brings back a player's nickname of a character. */
+export async function nicknameHidden(id: number, hidden: boolean) {
+  const me = await adminOnly();
+  if (!Number.isSafeInteger(id)) throw new GameError("invalid_input");
+  const { admin } = getBackend();
+  await admin.setNicknameHidden(id, hidden === true);
+  invalidateCatalog();
+  await admin
+    .audit({
+      actor: me.id,
+      action: "nickname.hidden",
+      target: String(id),
+      after: hidden === true,
+    })
+    .catch(() => {});
 }
 
 export interface PendingPicture {
