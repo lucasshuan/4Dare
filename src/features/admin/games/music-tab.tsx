@@ -1,10 +1,19 @@
 "use client";
 
-import { Music, Pause, Play, SlidersVertical } from "lucide-react";
+import {
+  Clapperboard,
+  Music,
+  Pause,
+  Play,
+  SlidersVertical,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { codeClips, titleMoments } from "@/features/opening/scene-sound";
 import type { GameKey } from "@/game/games";
 import { MOMENT_TRACKS, MOMENTS, type TrackId } from "@/game/music-tunes";
+import { cleanClips } from "@/game/scene-clips";
+import { SOUND_LIBRARY } from "@/game/sounds";
 import { entryOf } from "@/game/tunables";
 import { deskPlay, deskStop, releaseDesk, takeDesk } from "@/lib/music";
 import { useDraft, useDraftInForce } from "../config/draft";
@@ -87,6 +96,56 @@ export function MusicTab({ game }: { game: GameKey }) {
           </div>
         );
       })}
+      <SceneSounds game={game} />
     </div>
+  );
+}
+
+/** The title scenes' sounds, each a way into the Cenas tab with it chosen. */
+function SceneSounds({ game }: { game: GameKey }) {
+  const href = useAdminHref();
+  const d = useDraft();
+  return (
+    <>
+      <header style={{ marginTop: 18 }}>
+        <h2>Sons das cenas</h2>
+      </header>
+      {(["first", "later"] as const).map((kind) => {
+        const first = kind === "first";
+        const raw = d.value(`scenes.${game}.${kind}`);
+        let clips = codeClips(game, first);
+        if (typeof raw === "string" && raw)
+          try {
+            clips = cleanClips(JSON.parse(raw)) ?? clips;
+          } catch {}
+        const moments = titleMoments(game, first, 4);
+        return (
+          <div key={kind} className="clist" style={{ marginTop: 8 }}>
+            <small className="flbl">
+              {first ? "Abertura da primeira partida" : "Abertura da revanche"}
+            </small>
+            {clips.map((c) => (
+              <Link
+                key={c.id}
+                className={c.off ? "markrow off" : "markrow"}
+                href={href(
+                  `/games/${game}?tab=scenes&kind=${kind}&clip=${c.id}`,
+                )}
+              >
+                <span>
+                  {c.label}
+                  <small>
+                    {c.off
+                      ? "fora da cena"
+                      : `${SOUND_LIBRARY.find((x) => x.id === c.sound)?.name ?? c.sound} · ${moments.find((m) => m.id === c.anchor)?.label ?? "—"}${c.offset ? ` ${c.offset > 0 ? "+" : "−"}${Math.abs(c.offset).toFixed(2).replace(".", ",")} s` : ""} · ×${String(c.gain).replace(".", ",")}`}
+                  </small>
+                </span>
+                <Clapperboard className="i" />
+              </Link>
+            ))}
+          </div>
+        );
+      })}
+    </>
   );
 }

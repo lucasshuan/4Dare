@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Box,
+  Clapperboard,
   Clock,
   Gamepad2,
   SlidersHorizontal,
@@ -19,6 +20,7 @@ import type { Availability, GameKey } from "@/game/games";
 import type { AdminGame } from "@/server/admin/games";
 import type { Banks } from "@/server/backend/admin-types";
 import { useDraft } from "../config/draft";
+import { ScenesTab } from "../scenes/scenes-tab";
 import { useAdminHref } from "../shell/base";
 import { SetCrumbs } from "../shell/crumbs";
 import { AdminSelect } from "../ui/select";
@@ -31,6 +33,7 @@ import { DefaultsTab, TimingTab, XpTab } from "./tune-tabs";
 export const GAME_TABS = [
   { id: "overview", label: "Resumo", Icon: Gamepad2 },
   { id: "music", label: "Áudios", Icon: Volume2 },
+  { id: "scenes", label: "Cenas", Icon: Clapperboard },
   { id: "timing", label: "Tempos", Icon: Clock },
   { id: "defaults", label: "Padrões da sala", Icon: SlidersHorizontal },
   { id: "content", label: "Conteúdo", Icon: Box },
@@ -42,6 +45,7 @@ type Tab = (typeof GAME_TABS)[number]["id"];
 const tabOf = (key: string): Tab | null => {
   if (key.startsWith("games.")) return "overview";
   if (key.startsWith("moments.") || key.startsWith("music.")) return "music";
+  if (key.startsWith("scenes.")) return "scenes";
   if (key.startsWith("xp.") || key.startsWith("gameXp.")) return "xp";
   if (
     key.startsWith("room.") ||
@@ -87,6 +91,7 @@ export function GameScreen({
   let body: ReactNode = null;
   if (tab === "overview") body = <OverviewTab game={game} state={state} />;
   if (tab === "music") body = <MusicTab game={game.key} />;
+  if (tab === "scenes") body = <ScenesTab game={game.key} />;
   if (tab === "timing") body = <TimingTab game={game.key} />;
   if (tab === "defaults") body = <DefaultsTab game={game.key} />;
   if (tab === "content") body = <ContentTab game={game.key} banks={banks} />;

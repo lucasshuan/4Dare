@@ -144,6 +144,17 @@ export function showValue(key: string, v: TuneValue | undefined): string {
   if (v === undefined) return "—";
   const e = entryOf(key);
   if (typeof v === "boolean") return v ? "sim" : "não";
+  if (e?.unit === "clips") {
+    if (!v) return "como no código";
+    try {
+      const n = (JSON.parse(String(v)) as { off?: boolean }[]).filter(
+        (c) => !c.off,
+      ).length;
+      return `${n} ${n === 1 ? "som" : "sons"}, editados`;
+    } catch {
+      return "editados";
+    }
+  }
   if (typeof v === "string") return choiceLabel(key, v) || "nenhuma";
   if (e?.unit === "ms")
     return `${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} s`;
