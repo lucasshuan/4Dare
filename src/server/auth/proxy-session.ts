@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import type { NextRequest, NextResponse } from "next/server";
 import { BACKEND, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/config";
+import { cookieDomain } from "@/lib/hosts";
 import {
   GUEST_COOKIE,
   guestCookieOptions,
@@ -30,7 +31,9 @@ export async function refreshSession(
     );
   }
   if (BACKEND !== "supabase") return response;
+  const domain = cookieDomain(request.headers.get("host"));
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    cookieOptions: domain ? { domain } : undefined,
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (list, headers) => {
@@ -44,5 +47,43 @@ export async function refreshSession(
     },
   });
   await supabase.auth.getClaims();
+  if (domain) shareSession(request, response, domain);
   return response;
+}
+
+/** Set once the auth cookies moved to the whole domain. */
+const SHARED_COOKIE = "dare_shared";
+
+/**
+ * Auth cookies written before the panel had its own host belong to www only.
+ * Once per browser, they move to the whole domain, so admin.4dare.com sees the
+ * same session: each is written again for the domain and the host's own copy
+ * expires. Raw headers, after every cookie the response sets through its API
+ * (which rewrites the header), since both copies share a name.
+ */
+function shareSession(
+  request: NextRequest,
+  response: NextResponse,
+  domain: string,
+) {
+  if (request.cookies.has(SHARED_COOKIE)) return;
+  const secure = request.nextUrl.protocol === "https:" ? "; Secure" : "";
+  const year = 60 * 60 * 24 * 365;
+  for (const { name, value } of request.cookies.getAll()) {
+    if (!name.startsWith("sb-")) continue;
+    response.headers.append(
+      "set-cookie",
+      `${name}=; Path=/; Max-Age=0; SameSite=Lax${secure}`,
+    );
+    // just refreshed: the response already writes it for the domain
+    if (response.cookies.has(name)) continue;
+    response.headers.append(
+      "set-cookie",
+      `${name}=${encodeURIComponent(value)}; Domain=${domain}; Path=/; Max-Age=${year}; SameSite=Lax${secure}`,
+    );
+  }
+  response.headers.append(
+    "set-cookie",
+    `${SHARED_COOKIE}=1; Domain=${domain}; Path=/; Max-Age=${year}; SameSite=Lax${secure}`,
+  );
 }

@@ -1,8 +1,9 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/config";
+import { cookieDomain } from "@/lib/hosts";
 import type { Database, Json } from "./database.types";
 
 /** A client that knows every table, column and function (`pnpm db:types`). */
@@ -31,7 +32,10 @@ export function serviceClient(): Db {
 /** The caller's session, read from (and written to) the auth cookies. One per request. */
 export async function sessionClient(): Promise<Db> {
   const jar = await cookies();
+  // all of 4dare.com: the site and the panel (admin.4dare.com) share the session
+  const domain = cookieDomain((await headers()).get("host"));
   return createServerClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    cookieOptions: domain ? { domain } : undefined,
     cookies: {
       getAll: () => jar.getAll(),
       setAll: (list) => {

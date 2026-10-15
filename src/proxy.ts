@@ -3,6 +3,7 @@ import createMiddleware from "next-intl/middleware";
 import type { Lang } from "./game/types";
 import { localePath, routePath, wordLanguage } from "./i18n/paths";
 import { LOCALE_COOKIE, routing } from "./i18n/routing";
+import { isAdminHost } from "./lib/hosts";
 import { refreshSession } from "./server/auth/proxy-session";
 
 const intl = createMiddleware(routing);
@@ -27,6 +28,15 @@ const moved = (to: string, request: NextRequest) =>
 // session fresh. English has no prefix: /en/... moves to the bare address.
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+  if (isAdminHost(request.headers.get("host"))) {
+    // admin.4dare.com: the control panel at the host's root, in Portuguese only
+    const path = pathname === "/" ? "" : pathname;
+    const to = /^\/admin(\/|$)/.test(path) ? path : `/admin${path}`;
+    return refreshSession(
+      request,
+      NextResponse.rewrite(new URL(`/pt${to}${search}`, request.url)),
+    );
+  }
   const prefixed = splitLang(pathname);
   if (prefixed && SHARE_IMAGE.test(prefixed[1])) return NextResponse.next();
 
