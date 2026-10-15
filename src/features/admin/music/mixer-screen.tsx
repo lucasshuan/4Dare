@@ -2,6 +2,8 @@
 
 import {
   AudioLines,
+  Check,
+  Copy,
   LayoutGrid,
   Music,
   Pause,
@@ -35,7 +37,6 @@ import {
   type SoundId,
   soundSrc,
 } from "@/game/sounds";
-import { entryOf } from "@/game/tunables";
 import {
   deskLevel,
   deskMuffle,
@@ -47,12 +48,14 @@ import {
   deskVolume,
   releaseDesk,
   takeDesk,
+  trackBuffer,
   trackInfo,
   trackLoudness,
 } from "@/lib/music";
 import { useDraft, useDraftInForce } from "../config/draft";
 import { ResetEdits, TuneChoice, TuneNumber } from "../config/fields";
 import { useAdminHref } from "../shell/base";
+import { SUNO_PROMPTS } from "./suno-prompts";
 
 const TRACK_NOTES: Record<TrackId, string> = {
   stage: "Lounge do palco",
@@ -362,6 +365,7 @@ function MusicDesk({
   const [volume, setVolume] = useState(0.25);
   const [custom, setCustom] = useState(4);
   const [loud, setLoud] = useState<Partial<Record<TrackId, number>>>({});
+  const [lengths, setLengths] = useState<Partial<Record<TrackId, number>>>({});
   const paused = useRef<number | null>(null);
   const wraps = useRef(0);
   const playingTrack = now?.track ?? track;
@@ -400,6 +404,16 @@ function MusicDesk({
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
   }, [note]);
+  // the last whole bar the file holds: the loop can't end past it
+  useEffect(() => {
+    void trackBuffer(track).then((buf) => {
+      if (!buf) return;
+      const t = trackInfo(track);
+      const n = Math.floor((buf.duration - t.intro + 0.09 - t.first) / t.bar);
+      setLengths((l) => ({ ...l, [track]: n - 1 }));
+    });
+  }, [track]);
+  const fileBars = lengths[track];
   // measure each take's loudness once, for the level suggestion
   // biome-ignore lint/correctness/useExhaustiveDependencies: once per take and loop
   useEffect(() => {
@@ -478,11 +492,21 @@ function MusicDesk({
   });
 
   const s = now?.pos ?? paused.current ?? 0;
+  // the scale holds the whole file, so moving the loop doesn't redraw it
+  const fileEnd =
+    lengths[playingTrack] !== undefined
+      ? info.first + ((lengths[playingTrack] ?? 0) + 1) * info.bar
+      : null;
   const xmax =
-    Math.max(info.first + (info.loop.end / info.bar + 1) * info.bar, 1) + 0.5;
+    Math.max(
+      fileEnd ?? info.first + (info.loop.end / info.bar + 1) * info.bar,
+      info.loop.end,
+      1,
+    ) + 0.5;
   const xs = (t: number) => ((t - MIN) / (xmax - MIN)) * 100;
   const b = (s - info.first) / info.beat;
-  const bar = Math.floor(b / 4);
+  // bars count from the cut, 90 ms ahead of the downbeat, like the loop's ends
+  const bar = Math.floor((s + 0.09 - info.first) / info.bar);
   const beat = ((Math.floor(b) % 4) + 4) % 4;
   const barsTotal = Math.round((info.loop.end + 0.09 - info.first) / info.bar);
   const ticks = Array.from({ length: barsTotal + 1 }, (_, n) => ({
@@ -491,6 +515,7 @@ function MusicDesk({
     phrase: n % 8 === 0,
   }));
   const startBar = Math.round((info.loop.start + 0.09 - info.first) / info.bar);
+  const maxBar = fileBars ?? 63;
   const onTimeline = (e: PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     const t = MIN + ((e.clientX - r.left) / r.width) * (xmax - MIN);
@@ -626,6 +651,17 @@ function MusicDesk({
                 background: "var(--yes-soft)",
               }}
             />
+            {fileEnd !== null && fileEnd > info.loop.end + 0.1 ? (
+              <div
+                className="seg-i"
+                style={{
+                  left: `${xs(info.loop.end)}%`,
+                  width: `${xs(fileEnd) - xs(info.loop.end)}%`,
+                  background: "var(--sunken)",
+                }}
+                title="Resto do arquivo, fora do loop"
+              />
+            ) : null}
             {ticks.map((t) => (
               <div
                 key={t.at}
@@ -716,31 +752,29 @@ function MusicDesk({
         )}
       </div>
 
+      <PromptCard track={track} />
+
       <div className="grid g3">
         <div className="card">
           <header>
             <h2>Loop</h2>
             <ResetEdits keys={[`music.${track}.start`, `music.${track}.end`]} />
           </header>
-          <div
-            className="slot"
-            style={{ gridTemplateColumns: "minmax(0,1fr) auto" }}
-          >
-            <span className="lbl">
-              <b>{entryOf(`music.${track}.start`)?.label}</b>
-            </span>
-            <TuneNumber k={`music.${track}.start`} label="Começo do loop" />
-          </div>
-          <div
-            className="slot"
-            style={{ gridTemplateColumns: "minmax(0,1fr) auto" }}
-          >
-            <span className="lbl">
-              <b>{entryOf(`music.${track}.end`)?.label}</b>
-              <small>volta depois do compasso {barsTotal - 1}</small>
-            </span>
-            <TuneNumber k={`music.${track}.end`} label="Fim do loop" />
-          </div>
+          <BarStepper
+            k={`music.${track}.start`}
+            label="Começa no compasso"
+            hint={startBar === 0 ? "junto com a intro da música" : undefined}
+            min={0}
+            max={barsTotal - 1}
+          />
+          <BarStepper
+            k={`music.${track}.end`}
+            label="Último compasso"
+            hint={`depois dele, volta ao ${startBar}`}
+            shift={1}
+            min={startBar}
+            max={maxBar}
+          />
           <h3 style={{ margin: "12px 0 6px" }}>Testar a volta</h3>
           <div className="row" style={{ gap: 6 }}>
             <button
@@ -861,6 +895,141 @@ function MusicDesk({
         </div>
       </div>
     </>
+  );
+}
+
+/**
+ * A loop end in bars, changed at once (no save, no leaving the field): the
+ * take playing follows. `shift` shows the stored value minus it: the panel
+ * keeps the bar the loop goes back before, the desk shows the last one heard.
+ */
+function BarStepper({
+  k,
+  label,
+  hint,
+  shift = 0,
+  min,
+  max,
+}: {
+  k: string;
+  label: string;
+  hint?: string;
+  shift?: number;
+  min: number;
+  max: number;
+}) {
+  const d = useDraft();
+  const v = d.value(k);
+  const shown = typeof v === "number" ? v - shift : 0;
+  const [text, setText] = useState(String(shown));
+  useEffect(() => setText(String(shown)), [shown]);
+  const put = (n: number) => {
+    const c = Math.min(max, Math.max(min, Math.round(n)));
+    d.set(k, c + shift);
+    setText(String(c));
+  };
+  return (
+    <div
+      className={k in d.edits ? "slot dirty" : "slot"}
+      style={{ gridTemplateColumns: "minmax(0,1fr) auto" }}
+    >
+      <span className="lbl">
+        <b>{label}</b>
+        {hint ? <small>{hint}</small> : null}
+      </span>
+      <span className="step">
+        <button
+          type="button"
+          aria-label={`${label}: menos um`}
+          disabled={shown <= min}
+          onClick={() => put(shown - 1)}
+        >
+          −
+        </button>
+        <input
+          className="num"
+          inputMode="numeric"
+          value={text}
+          aria-label={label}
+          onChange={(e) => {
+            setText(e.target.value);
+            const n = Number(e.target.value);
+            if (
+              e.target.value !== "" &&
+              Number.isInteger(n) &&
+              n >= min &&
+              n <= max
+            )
+              d.set(k, n + shift);
+          }}
+          onBlur={() => setText(String(shown))}
+        />
+        <button
+          type="button"
+          aria-label={`${label}: mais um`}
+          disabled={shown >= max}
+          onClick={() => put(shown + 1)}
+        >
+          +
+        </button>
+      </span>
+    </div>
+  );
+}
+
+/** The Suno prompt the take came from: its style and exclude list, to copy. */
+function PromptCard({ track }: { track: TrackId }) {
+  const p = SUNO_PROMPTS[track];
+  return (
+    <div className="card">
+      <header>
+        <h2 style={{ flex: 1 }}>Prompt do Suno</h2>
+        {p?.title ? <span className="chip">“{p.title}”</span> : null}
+        {p && !p.sure ? (
+          <span className="chip warn">refeito da conversa, confira</span>
+        ) : null}
+      </header>
+      {p ? (
+        <div className="suno">
+          <PromptPart label="Style" text={p.style} />
+          <PromptPart label="Exclude styles" text={p.exclude} />
+          {p.lyrics ? (
+            <PromptPart label="Letra (tags)" text={p.lyrics} />
+          ) : null}
+          {p.note ? <p className="note">{p.note}</p> : null}
+        </div>
+      ) : (
+        <p className="note">
+          O prompt desta faixa não ficou salvo no código. Mande o Style e o
+          Exclude que estão no Suno para guardar aqui.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function PromptPart({ label, text }: { label: string; text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="suno-part">
+      <div className="row" style={{ justifyContent: "space-between" }}>
+        <h3>{label}</h3>
+        <button
+          type="button"
+          className="btn sm ghost"
+          onClick={() =>
+            void navigator.clipboard.writeText(text).then(() => {
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 1500);
+            })
+          }
+        >
+          {copied ? <Check className="i" /> : <Copy className="i" />}
+          {copied ? "Copiado" : "Copiar"}
+        </button>
+      </div>
+      <pre>{text}</pre>
+    </div>
   );
 }
 

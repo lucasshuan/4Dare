@@ -908,7 +908,7 @@ export const TUNABLES: readonly Tunable[] = [
     },
     {
       key: `music.${id}.end`,
-      label: "O loop volta depois do compasso",
+      label: "O loop volta antes do compasso",
       game: "shared",
       tab: "music",
       group: id,

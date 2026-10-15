@@ -133,9 +133,12 @@ export function useDraft(): Draft {
  */
 export function useDraftInForce() {
   const { saved, edits } = useDraft();
-  useEffect(() => {
-    setRoomTunes({ ...saved, ...edits });
-  }, [saved, edits]);
+  // set while rendering, not in an effect: the children render (and run their
+  // effects) before this component's effects, and would read the values from
+  // one edit before
+  const merged = useMemo(() => ({ ...saved, ...edits }), [saved, edits]);
+  setRoomTunes(merged);
+  useEffect(() => setRoomTunes(merged), [merged]);
   useEffect(() => () => setRoomTunes(null), []);
 }
 

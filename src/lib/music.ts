@@ -53,7 +53,7 @@ const cut = (g: Grid, n: number) => g.first + n * g.bar - 0.09;
  * tempo, same bars), so one can take over from another at the same point in
  * the song. Played through WebAudio, so the loop has no gap and every take
  * starts sample-exact. The Suno prompts behind each take are in
- * `assets/music/suno-prompts.md`.
+ * `src/features/admin/music/suno-prompts.ts` (the sound desk shows them).
  *
  * Song positions are seconds on that timeline. The song's own 8-bar intro
  * (bars 0 to 7) plays once; a take then loops from `start` (bar 8, or bar 0
@@ -152,7 +152,12 @@ export function beatDelay(originMs: number, nowMs: number): number {
  * longer take handing over in its last bar) lands that far into its loop.
  */
 export function loopPosition(seconds: number, track: Track): number {
-  const { start, end } = loopOf(track);
+  return wrapIn(seconds, loopOf(track));
+}
+function wrapIn(
+  seconds: number,
+  { start, end }: { start: number; end: number },
+) {
   if (seconds < end) return seconds;
   return start + ((seconds - start) % (end - start));
 }
@@ -163,6 +168,8 @@ type Playing = {
   gain: GainNode;
   /** The context time the song's position 0 would have played at. */
   origin: number;
+  /** The loop it was started with (s on its timeline): its source wraps there. */
+  loop: { start: number; end: number };
   /** Started from the top for a claim's `restartAt` (that moment), not handed over. */
   restart?: number;
 };
@@ -258,7 +265,7 @@ export function preloadMusic(track: Track): Promise<AudioBuffer | null> {
 
 /** The song position (seconds on the shared timeline) at a context time. */
 function position(at: number) {
-  return playing ? loopPosition(at - playing.origin, playing.track) : 0;
+  return playing ? wrapIn(at - playing.origin, playing.loop) : 0;
 }
 
 function start(
@@ -284,7 +291,13 @@ function start(
   // deeper into an intro than this take's own goes: it starts from its top
   const pos = Math.max(-intro, loopPosition(from, track));
   source.start(at, pos + intro);
-  return { track, source, gain, origin: at - pos } satisfies Playing;
+  return {
+    track,
+    source,
+    gain,
+    origin: at - pos,
+    loop: { start, end },
+  } satisfies Playing;
 }
 
 /**
@@ -306,7 +319,7 @@ function publishPulse() {
     const pos = position(ctx.currentTime);
     next = Math.round(performance.now() - pos * 1000 + latency);
     // the next wrap starts a new pass
-    const left = loopOf(playing.track).end - pos;
+    const left = playing.loop.end - pos;
     wrapTimer = setTimeout(publishPulse, left * 1000 + 50);
   }
   // a few ms of re-measuring is not a new beat
@@ -689,26 +702,37 @@ export function deskNow(): { track: Track; pos: number; wraps: number } | null {
   if (!playing || !ctx) return null;
   const t = ctx.currentTime - (ctx.outputLatency || ctx.baseLatency || 0);
   const raw = t - playing.origin;
-  const { start: a, end: e } = loopOf(playing.track);
+  const { start: a, end: e } = playing.loop;
   return {
     track: playing.track,
-    pos: loopPosition(raw, playing.track),
+    pos: wrapIn(raw, playing.loop),
     wraps: raw < e ? 0 : 1 + Math.floor((raw - e) / (e - a)),
   };
 }
 
-/** After an edit of a loop or a level: the take playing follows it at once. */
+/**
+ * After an edit of a loop or a level: the take playing follows it at once. A
+ * new loop restarts the take from where it is, so the position the desk
+ * shows is counted on the loop the source really wraps on (moving loopEnd
+ * under a playing source lets it jump without the clock knowing).
+ */
 export function deskRefresh() {
   if (!playing || !ctx) return;
-  const { intro } = TRACKS[playing.track];
-  const { start: a, end: e } = loopOf(playing.track);
-  playing.source.loopStart = a + intro;
-  playing.source.loopEnd = e + intro;
-  playing.gain.gain.setTargetAtTime(
-    trimOf(playing.track),
-    ctx.currentTime,
-    0.05,
-  );
+  const now = ctx.currentTime;
+  const loop = loopOf(playing.track);
+  const buffer = playing.source.buffer;
+  if (
+    buffer &&
+    (loop.start !== playing.loop.start || loop.end !== playing.loop.end)
+  ) {
+    const was = playing;
+    const pos = position(now);
+    stop(was, now, 0.03);
+    playing = start(was.track, buffer, now + 0.01, pos, 0.03);
+    publishPulse();
+    return;
+  }
+  playing.gain.gain.setTargetAtTime(trimOf(playing.track), now, 0.05);
 }
 
 const samples = new Float32Array(2048);

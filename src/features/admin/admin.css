@@ -4871,3 +4871,39 @@
 .adm .char-edit .seg {
   justify-content: flex-start;
 }
+.adm .step input.num {
+  width: 5ch;
+  height: 30px;
+  border: 0;
+  border-inline: 1px solid var(--line);
+  background: var(--surface);
+  text-align: center;
+  font-family: var(--f-mono);
+  font-weight: 500;
+}
+.adm .step button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.adm .slot.dirty .step {
+  border-color: var(--butter);
+}
+.adm .suno {
+  display: grid;
+  gap: 12px;
+}
+.adm .suno-part h3 {
+  margin: 0;
+  font-size: 13px;
+}
+.adm .suno-part pre {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--sunken);
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
