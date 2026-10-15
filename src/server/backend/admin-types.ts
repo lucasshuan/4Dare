@@ -1,4 +1,7 @@
 import type { GameKey } from "@/game/games";
+import type { QuestionKind } from "@/game/impostor/types";
+import type { Tone } from "@/game/lineup/bank";
+import type { ThemeSet } from "@/game/theme-sets";
 import type { Lang } from "@/game/types";
 
 /** The control panel's overview, as admin_stats (0054_admin_stats.sql) returns it. */
@@ -62,10 +65,89 @@ export interface AuditEntry {
   note?: string | null;
 }
 
+/** What the panel saved (game_config, 0055_game_config.sql): only what differs from the code. */
+export interface ConfigValues {
+  /** Tunable values by key (src/game/tunables.ts). */
+  tunes: Record<string, number | boolean | string>;
+  /** Each scene's sounds, by "<game>.<scene>" (the scenes' editor). */
+  scenes: Record<string, unknown>;
+}
+
+/** One saved version of the config. */
+export interface ConfigVersion {
+  v: number;
+  values: ConfigValues;
+  note: string | null;
+  author: string | null;
+  at: number;
+}
+
+/** The banks a game draws from, every row, on or off (the Content tab). */
+export interface Banks {
+  themes: {
+    id: string;
+    pt: string;
+    set: ThemeSet | null;
+    games: GameKey[];
+    live: boolean;
+  }[];
+  questions: {
+    id: string;
+    pt: string;
+    kind: QuestionKind;
+    spice: 1 | 2 | 3;
+    scope: "general" | "set" | "theme";
+    live: boolean;
+  }[];
+  missions: {
+    id: string;
+    pt: string;
+    tone: Tone;
+    heavy: boolean;
+    live: boolean;
+  }[];
+  extras: {
+    id: string;
+    pt: string;
+    emoji: string;
+    tint: string;
+    live: boolean;
+  }[];
+}
+
+export type BankKind = "theme" | "question" | "mission" | "extra";
+
 /** What only the control panel reads and writes. */
 export interface AdminStore {
   stats(days: number): Promise<AdminStats>;
   audit(entry: AuditEntry): Promise<void>;
+  /** The config in force (the newest version). */
+  config(): Promise<ConfigVersion>;
+  /** The newest versions first. */
+  versions(limit: number): Promise<ConfigVersion[]>;
+  /** Saves a new version; its number. */
+  saveConfig(
+    values: ConfigValues,
+    note: string | null,
+    author: string,
+  ): Promise<number>;
+  /** Every row of the game banks. */
+  banks(): Promise<Banks>;
+  /** Puts a bank row on or off (never deletes it); whether it was on before, null when there is no such row. */
+  setLive(kind: BankKind, id: string, live: boolean): Promise<boolean | null>;
+}
+
+/** Saved values read back: what is missing becomes empty. */
+export function readValues(raw: unknown): ConfigValues {
+  const r = (raw && typeof raw === "object" ? raw : {}) as Record<
+    string,
+    unknown
+  >;
+  const obj = (v: unknown) =>
+    v && typeof v === "object" && !Array.isArray(v)
+      ? (v as Record<string, never>)
+      : {};
+  return { tunes: obj(r.tunes), scenes: obj(r.scenes) };
 }
 
 /** Stats with nothing in them (local mode, or before any match). */

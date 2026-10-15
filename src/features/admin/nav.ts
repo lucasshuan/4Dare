@@ -1,4 +1,9 @@
-import { LayoutDashboard, type LucideIcon } from "lucide-react";
+import {
+  Gamepad2,
+  LayoutDashboard,
+  type LucideIcon,
+  SlidersVertical,
+} from "lucide-react";
 import type { AdminCounts } from "@/server/admin/overview";
 
 /** A page of the panel, at `path` under the panel's base ("" on admin.4dare.com, /admin elsewhere). */
@@ -18,12 +23,24 @@ export const NAV: { group: string; items: AdminSection[] }[] = [
       { id: "overview", label: "Visão geral", path: "", Icon: LayoutDashboard },
     ],
   },
+  {
+    group: "Jogos",
+    items: [
+      { id: "games", label: "Jogos", path: "/games", Icon: Gamepad2 },
+      {
+        id: "music",
+        label: "Mesa de som",
+        path: "/music",
+        Icon: SlidersVertical,
+      },
+    ],
+  },
 ];
 
 export const SECTIONS = NAV.flatMap((g) => g.items);
 
 /** The bottom bar on phones: the pages used the most, then the full menu. */
-export const TABS = ["overview"];
+export const TABS = ["overview", "games", "music"];
 
 /** The section a path (relative to the base) belongs to. */
 export function sectionOf(rel: string): AdminSection | undefined {

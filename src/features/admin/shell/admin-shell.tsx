@@ -27,9 +27,12 @@ import { Avatar } from "@/components/ui/avatar";
 import { Flag } from "@/components/ui/language-switch";
 import { usePlayerCard } from "@/features/profile/use-profile";
 import { levelOf } from "@/game/profile/xp";
+import type { TuneValue } from "@/game/tune";
 import { signOut } from "@/server/actions";
 import type { AdminCounts } from "@/server/admin/overview";
 import type { Me, Role } from "@/server/contract";
+import { DraftProvider } from "../config/draft";
+import { Tray } from "../config/tray";
 import { NAV, SECTIONS, sectionOf, TABS } from "../nav";
 import { useAdminCounts } from "../use-admin-counts";
 import { AdminBaseProvider, useAdminBase, useRelPath } from "./base";
@@ -69,12 +72,15 @@ export function AdminShell({
   base,
   site,
   initialCounts,
+  config,
   children,
 }: {
   me: Me;
   base: string;
   site: string;
   initialCounts: AdminCounts;
+  /** The panel's values in force, for the fields and the tray. */
+  config: { v: number; tunes: Record<string, TuneValue> };
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -84,45 +90,48 @@ export function AdminShell({
   useEffect(() => setOpen(false), [path]);
   return (
     <AdminBaseProvider base={base} site={site}>
-      <CrumbsProvider>
-        <div className="adm">
-          <div className="app">
-            <Rail
-              me={me}
-              open={open}
-              onClose={() => setOpen(false)}
-              initialCounts={initialCounts}
-            />
-            {open ? (
-              <button
-                type="button"
-                className="rail-scrim"
-                aria-label="Fechar o menu"
-                onClick={() => setOpen(false)}
+      <DraftProvider version={config.v} saved={config.tunes}>
+        <CrumbsProvider>
+          <div className="adm">
+            <div className="app">
+              <Rail
+                me={me}
+                open={open}
+                onClose={() => setOpen(false)}
+                initialCounts={initialCounts}
               />
-            ) : null}
-            <main>
-              <div className="topline">
-                <span
-                  className="lang"
-                  title="Idioma do painel: só português, por enquanto"
-                  aria-disabled="true"
-                >
-                  <Flag lang="pt" />
-                  <select aria-label="Idioma do painel" disabled value="pt">
-                    <option value="pt">Português</option>
-                  </select>
-                  <span className="code">PT</span>
-                  <ChevronDown className="i" />
-                </span>
-                <Crumbs />
-              </div>
-              <div className="view">{children}</div>
-            </main>
+              {open ? (
+                <button
+                  type="button"
+                  className="rail-scrim"
+                  aria-label="Fechar o menu"
+                  onClick={() => setOpen(false)}
+                />
+              ) : null}
+              <main>
+                <div className="topline">
+                  <span
+                    className="lang"
+                    title="Idioma do painel: só português, por enquanto"
+                    aria-disabled="true"
+                  >
+                    <Flag lang="pt" />
+                    <select aria-label="Idioma do painel" disabled value="pt">
+                      <option value="pt">Português</option>
+                    </select>
+                    <span className="code">PT</span>
+                    <ChevronDown className="i" />
+                  </span>
+                  <Crumbs />
+                </div>
+                <div className="view">{children}</div>
+              </main>
+            </div>
+            <TabBar onMenu={() => setOpen(true)} />
+            <Tray />
           </div>
-          <TabBar onMenu={() => setOpen(true)} />
-        </div>
-      </CrumbsProvider>
+        </CrumbsProvider>
+      </DraftProvider>
     </AdminBaseProvider>
   );
 }

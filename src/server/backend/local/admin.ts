@@ -1,15 +1,99 @@
 import "server-only";
-import { type AdminStore, type AuditEntry, emptyStats } from "../admin-types";
+import {
+  type AdminStore,
+  type AuditEntry,
+  type ConfigVersion,
+  emptyStats,
+  readValues,
+} from "../admin-types";
+import { processSingleton, readJson, writeJson } from "./disk";
+import { localImpostor } from "./impostor";
+import { localLineup } from "./lineup";
+import { localThemes } from "./themes";
 
-/** Local mode: an empty overview, and the audit kept in memory. */
+const FILE = "game-config.json";
+
+/** Local mode: an empty overview, the audit in memory and the config versions in .data/. */
 export function localAdmin(): AdminStore {
   const log: (AuditEntry & { at: number })[] = [];
+  // the fixtures hold only rows that are on: what the panel turns off is kept here
+  const off = new Set<string>();
+  const versions = processSingleton<ConfigVersion[]>("game-config", () =>
+    readJson<ConfigVersion[]>(FILE, []),
+  );
   return {
     async stats(days) {
       return emptyStats(days);
     },
     async audit(e) {
       log.push({ ...e, at: Date.now() });
+    },
+    async config() {
+      return (
+        versions.at(-1) ?? {
+          v: 0,
+          values: readValues({}),
+          note: null,
+          author: null,
+          at: 0,
+        }
+      );
+    },
+    async versions(limit) {
+      return versions.slice(-limit).reverse();
+    },
+    async banks() {
+      const [themes, questions, missions, extras] = await Promise.all([
+        localThemes().list(),
+        localImpostor().list(),
+        localLineup().missions(),
+        localLineup().extras(),
+      ]);
+      const live = (kind: string, id: string) => !off.has(`${kind}:${id}`);
+      return {
+        themes: themes.map((t) => ({
+          id: t.id,
+          pt: t.pt,
+          set: t.set,
+          games: t.games,
+          live: live("theme", t.id),
+        })),
+        questions: questions.map((q) => ({
+          id: q.id,
+          pt: q.text.pt,
+          kind: q.kind,
+          spice: q.spice,
+          scope: q.scope,
+          live: live("question", q.id),
+        })),
+        missions: missions.map((m) => ({
+          id: m.id,
+          pt: m.text.pt,
+          tone: m.tone,
+          heavy: m.heavy,
+          live: live("mission", m.id),
+        })),
+        extras: extras.map((x) => ({
+          id: x.id,
+          pt: x.name.pt,
+          emoji: x.emoji,
+          tint: x.tint,
+          live: live("extra", x.id),
+        })),
+      };
+    },
+    async setLive(kind, id, isLive) {
+      const key = `${kind}:${id}`;
+      const was = !off.has(key);
+      if (isLive) off.delete(key);
+      else off.add(key);
+      return was;
+    },
+    async saveConfig(values, note, author) {
+      const v = (versions.at(-1)?.v ?? 0) + 1;
+      versions.push({ v, values, note, author, at: Date.now() });
+      writeJson(FILE, versions);
+      return v;
     },
   };
 }
