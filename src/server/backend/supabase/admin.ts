@@ -276,6 +276,68 @@ export function supabaseAdmin(): AdminStore {
         .eq("id", id);
       if (error) throw error;
     },
+    async characterImages(characterId) {
+      const { data, error } = await serviceClient()
+        .from("character_images")
+        .select(
+          "id, character_id, url, created_by, author, status, picks, keeps, reports, bonus, score, created_at",
+        )
+        .eq("character_id", characterId)
+        .order("score", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return (data ?? []).map((r) => {
+        const a = (r.author ?? null) as Raw | null;
+        return {
+          id: r.id,
+          characterId: r.character_id,
+          url: r.url,
+          createdBy: r.created_by,
+          authorName: a?.name ?? null,
+          authorGuest:
+            typeof a?.guestNumber === "number" ? a.guestNumber : null,
+          status: r.status as "active" | "pending" | "hidden",
+          picks: r.picks ?? 0,
+          keeps: r.keeps ?? 0,
+          reports: r.reports ?? 0,
+          bonus: r.bonus ?? 0,
+          score: r.score ?? 0,
+          createdAt: ms(r.created_at) ?? 0,
+        };
+      });
+    },
+    async setImageStatus(id, status) {
+      const { data, error } = await serviceClient()
+        .from("character_images")
+        .update({ status })
+        .eq("id", id)
+        .select("character_id")
+        .maybeSingle();
+      if (error) throw error;
+      if (!data?.character_id) return;
+      const r = await serviceClient().rpc("refresh_character_cover", {
+        p_character: data.character_id,
+      });
+      if (r.error) throw r.error;
+    },
+    async closeIdle() {
+      const { data, error } = await serviceClient().rpc("close_idle_rooms");
+      if (error) throw error;
+      return data ?? 0;
+    },
+    async tableCounts(tables) {
+      const out: Record<string, number> = {};
+      await Promise.all(
+        tables.map(async (t) => {
+          const { count, error } = await serviceClient()
+            // biome-ignore lint/suspicious/noExplicitAny: any table, counted
+            .from(t as any)
+            .select("*", { count: "estimated", head: true });
+          if (!error) out[t] = count ?? 0;
+        }),
+      );
+      return out;
+    },
     async saveConfig(values, note, author) {
       const { data, error } = await serviceClient()
         .from("game_config")

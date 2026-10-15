@@ -77,11 +77,14 @@ export function LabScreen({
   rooms,
   scenes,
   initial,
+  room,
 }: {
   names: Record<GameKey, string>;
   rooms: { code: string; game: GameKey; phase: string; players: number }[];
   scenes: StoredLabScene[];
   initial: (LabScene & { id?: string }) | null;
+  /** A room to start from (the Rooms page's link). */
+  room?: string | null;
 }) {
   const router = useRouter();
   const { base } = useAdminBase();
@@ -347,6 +350,10 @@ export function LabScreen({
     setSeat(0);
     flash(`Sala ${code} carregada`);
   };
+  // biome-ignore lint/correctness/useExhaustiveDependencies: once, for the link's room
+  useEffect(() => {
+    if (room) void loadRoom(room);
+  }, []);
   const save = async (copy: boolean) => {
     if (!scene) return;
     setSaving("busy");

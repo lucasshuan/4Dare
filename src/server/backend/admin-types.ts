@@ -152,6 +152,31 @@ export interface AdminStore {
   /** Saves a scene; its id. */
   saveLabScene(scene: Omit<StoredLabScene, "id" | "at">): Promise<string>;
   deleteLabScene(id: string): Promise<void>;
+  /** Every picture of a character, any status, best first. */
+  characterImages(characterId: string): Promise<AdminImage[]>;
+  /** Shows or hides a picture (never deletes it); the cover follows. */
+  setImageStatus(id: string, status: "active" | "hidden"): Promise<void>;
+  /** How many rows the main tables hold (the data map). */
+  tableCounts(tables: readonly string[]): Promise<Record<string, number>>;
+  /** Closes the rooms with nothing happening for 30 minutes; how many. */
+  closeIdle(): Promise<number>;
+}
+
+/** A picture as the panel ranks it. */
+export interface AdminImage {
+  id: string;
+  characterId: string | null;
+  url: string;
+  createdBy: string | null;
+  authorName: string | null;
+  authorGuest: number | null;
+  status: "active" | "pending" | "hidden";
+  picks: number;
+  keeps: number;
+  reports: number;
+  bonus: number;
+  score: number;
+  createdAt: number;
 }
 
 /** Saved values read back: what is missing becomes empty. */

@@ -111,6 +111,16 @@ export function localAdmin(): AdminStore {
       if (i >= 0) scenes.splice(i, 1);
       writeJson(SCENES, scenes);
     },
+    async characterImages() {
+      return [];
+    },
+    async setImageStatus() {},
+    async closeIdle() {
+      return 0;
+    },
+    async tableCounts() {
+      return {};
+    },
     async saveConfig(values, note, author) {
       const v = (versions.at(-1)?.v ?? 0) + 1;
       versions.push({ v, values, note, author, at: Date.now() });

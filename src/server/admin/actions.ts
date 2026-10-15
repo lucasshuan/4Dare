@@ -6,11 +6,18 @@ import type { RoomState } from "@/game/types";
 // whatever page it came from.
 import { GameError } from "@/game/types";
 import type { BankKind } from "../backend/admin-types";
+import type { LibraryPage, LibrarySort } from "../community-contract";
 import { fail, ok, type Result, type Role } from "../contract";
 import { approve, markReview, refuse, reopen } from "../workshop";
 import { restoreVersion, saveTunes } from "./config";
 import { setBankLive } from "./games";
 import { deleteLabScene, labKit, labRoom, saveLabScene } from "./lab";
+import {
+  type CharacterFile,
+  characterFile,
+  libraryPage,
+  pictureStatus,
+} from "./library";
 import {
   lift,
   type PersonFile,
@@ -19,6 +26,7 @@ import {
   sanction,
   setRole,
 } from "./people";
+import { closeIdleRooms } from "./rooms";
 import { type SuggestionFile, suggestionFile } from "./workshop";
 
 async function run<T>(work: () => Promise<T>): Promise<Result<T>> {
@@ -123,4 +131,34 @@ export async function decideAction(
     else if (to === "refused") await refuse(id, extra.reason ?? "");
     else await reopen(id);
   });
+}
+
+/** A page of the library's characters. */
+export async function libraryPageAction(input: {
+  q: string;
+  taste: string | null;
+  sort: LibrarySort;
+  offset: number;
+}): Promise<Result<LibraryPage>> {
+  return run(() => libraryPage(input));
+}
+
+/** A character and all its pictures. */
+export async function characterAction(
+  id: string,
+): Promise<Result<CharacterFile>> {
+  return run(() => characterFile(id));
+}
+
+/** Lets a picture through, hides it or brings it back. */
+export async function pictureAction(
+  id: string,
+  to: "active" | "hidden",
+): Promise<Result<void>> {
+  return run(() => pictureStatus(id, to));
+}
+
+/** Closes the rooms with nothing happening for 30 minutes; how many. */
+export async function closeIdleAction(): Promise<Result<number>> {
+  return run(() => closeIdleRooms());
 }

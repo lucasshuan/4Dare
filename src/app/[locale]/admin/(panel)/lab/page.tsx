@@ -13,7 +13,7 @@ export default async function AdminLabPage({
   searchParams,
 }: PageProps<"/[locale]/admin/lab">) {
   await adminOnly();
-  const { scene } = await searchParams;
+  const { scene, room } = await searchParams;
   const id = typeof scene === "string" ? scene : null;
   const [games, rooms, scenes, stored] = await Promise.all([
     adminGames(),
@@ -37,6 +37,7 @@ export default async function AdminLabPage({
           players: r.players.length,
         }))}
       scenes={scenes}
+      room={typeof room === "string" ? room : null}
       initial={
         stored ? { ...(stored.params as LabScene), id: stored.id } : null
       }

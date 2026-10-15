@@ -1,4 +1,6 @@
 import {
+  BookOpen,
+  DoorOpen,
   Flag,
   FlaskConical,
   Gamepad2,
@@ -25,6 +27,13 @@ export const NAV: { group: string; items: AdminSection[] }[] = [
     group: "Operação",
     items: [
       { id: "overview", label: "Visão geral", path: "", Icon: LayoutDashboard },
+      {
+        id: "rooms",
+        label: "Salas",
+        path: "/rooms",
+        Icon: DoorOpen,
+        count: (c) => (c.rooms ? { n: c.rooms } : null),
+      },
     ],
   },
   {
@@ -51,6 +60,13 @@ export const NAV: { group: string; items: AdminSection[] }[] = [
         count: (c) => (c.workshop ? { n: c.workshop, hot: true } : null),
       },
       { id: "users", label: "Usuários", path: "/users", Icon: Users },
+      {
+        id: "library",
+        label: "Biblioteca",
+        path: "/library",
+        Icon: BookOpen,
+        count: (c) => (c.pictures ? { n: c.pictures, hot: true } : null),
+      },
       {
         id: "reports",
         label: "Denúncias",
