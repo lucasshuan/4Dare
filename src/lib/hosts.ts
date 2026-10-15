@@ -28,3 +28,12 @@ export const adminHome = (host: string | null | undefined) =>
 /** The site's address from the panel on `host`. */
 export const siteHome = (host: string | null | undefined) =>
   cookieDomain(host) ? `https://www.${SITE_DOMAIN}` : "/";
+
+/**
+ * Where Discord and Google send people back: on 4dare.com always the site's
+ * own host (the one the auth provider lets through), whatever host the
+ * sign-in started on; the session cookie covers the panel too. Elsewhere
+ * (a preview, localhost), the request's own origin.
+ */
+export const authOrigin = (host: string | null | undefined, origin: string) =>
+  cookieDomain(host) ? `https://www.${SITE_DOMAIN}` : origin;

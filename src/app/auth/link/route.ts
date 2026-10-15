@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { BACKEND } from "@/config";
+import { authOrigin, isAdminHost } from "@/lib/hosts";
 import { safeNext } from "@/server/auth/safe-next";
 import { sessionClient } from "@/server/backend/supabase/clients";
 
@@ -23,8 +24,11 @@ export async function GET(request: Request) {
   };
   if (BACKEND !== "supabase" || !provider) return failed();
   const client = await sessionClient();
-  const callback = new URL("/auth/callback", url.origin);
+  const host = request.headers.get("host");
+  const callback = new URL("/auth/callback", authOrigin(host, url.origin));
   callback.searchParams.set("next", next);
+  // started on the panel: the way back ends there
+  if (isAdminHost(host)) callback.searchParams.set("panel", "1");
   const { data, error } = await client.auth.linkIdentity({
     provider,
     options: { redirectTo: callback.href, skipBrowserRedirect: true },

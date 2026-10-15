@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { LANGS, type Lang } from "@/game/types";
+import { adminHome, cookieDomain } from "@/lib/hosts";
 import { GUEST_COOKIE, openGuest } from "@/server/auth/guest";
 import { safeNext } from "@/server/auth/safe-next";
 import { getBackend } from "@/server/backend";
@@ -16,8 +17,15 @@ import { handOverSeats } from "@/server/rooms";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const next = safeNext(url.searchParams.get("next"));
+  // a sign-in started on the panel goes back to the panel
+  const panel =
+    url.searchParams.get("panel") === "1" &&
+    !!cookieDomain(request.headers.get("host"));
   const back = (failed: boolean) => {
-    const to = new URL(next, url.origin);
+    const to = new URL(
+      next,
+      panel ? adminHome(request.headers.get("host")) : url.origin,
+    );
     if (failed) to.searchParams.set("auth_error", "1");
     return NextResponse.redirect(to, 303);
   };
