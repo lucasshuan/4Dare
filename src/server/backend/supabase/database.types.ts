@@ -1741,6 +1741,7 @@ export type Database = {
         Row: {
           active: boolean;
           created_at: string;
+          created_by: string | null;
           en: string;
           es: string;
           example: number | null;
@@ -1754,6 +1755,7 @@ export type Database = {
         Insert: {
           active?: boolean;
           created_at?: string;
+          created_by?: string | null;
           en: string;
           es: string;
           example?: number | null;
@@ -1767,6 +1769,7 @@ export type Database = {
         Update: {
           active?: boolean;
           created_at?: string;
+          created_by?: string | null;
           en?: string;
           es?: string;
           example?: number | null;
@@ -1777,7 +1780,15 @@ export type Database = {
           source?: string;
           theme_set?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "whoami_themes_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       workshop_suggestions: {
         Row: {
