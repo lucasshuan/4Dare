@@ -148,6 +148,7 @@ export type BankInsert =
       set: string;
       games: string[];
       starters: { characterId: string; lang: Lang | "all"; position: number }[];
+      createdBy: PlayerId | null;
     }
   | {
       kind: "question";

@@ -160,6 +160,7 @@ export function supabaseWorkshopStore(): WorkshopStore {
           theme_set: row.set,
           games: row.games,
           source: "bank",
+          created_by: row.createdBy,
         });
         if (made.error) throw made.error;
         const starters = await db()
