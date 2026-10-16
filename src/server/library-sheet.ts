@@ -50,7 +50,7 @@ export async function characterPage(rawId: string): Promise<{
       given.find((n) => n.lang === lang)?.name ?? row.name,
     ]),
   ) as Record<Lang, string>;
-  return { id, names, library: row.createdBy === null };
+  return { id, names, library: !id.startsWith("u-") };
 }
 
 /** A character's sheet as `viewer` reads it, in `lang`; null for an unknown id. */
