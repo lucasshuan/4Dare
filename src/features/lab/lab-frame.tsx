@@ -17,6 +17,7 @@ import { RoomStage } from "@/features/room/room-stage";
 import { StageProvider } from "@/features/stage/stage-context";
 import type { RoomView } from "@/game/types";
 import type { ServerClock } from "@/lib/hooks/use-server-clock";
+import { hushHere } from "@/lib/settings";
 import { labEvent } from "./actions";
 import type { LabScene } from "./scene";
 import { simulate } from "./sim";
@@ -75,7 +76,11 @@ export function LabFrame({ seat }: { seat: number }) {
     playing: false,
     speed: 1,
   });
-  const [active, setActive] = useState(true);
+  // silent until the page says this seat is the one on screen
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    hushHere(!active);
+  }, [active]);
   useEffect(() => {
     quietRoomCalls();
     const on = (e: MessageEvent<FrameMessage>) => {

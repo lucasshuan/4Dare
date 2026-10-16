@@ -48,3 +48,23 @@ describe("soundVolume", () => {
     expect(soundVolume("chat", off)).toBeGreaterThan(0);
   });
 });
+
+describe("hushHere", () => {
+  it("mutes this page without touching the saved settings", async () => {
+    const g = globalThis as { window?: unknown };
+    g.window = {};
+    try {
+      const { getSettings, hushHere } = await import("./settings");
+      expect(getSettings().muted).toBe(false);
+      hushHere(true);
+      const hushed = getSettings();
+      expect(hushed.muted).toBe(true);
+      // the same object until something changes, for React's store reads
+      expect(getSettings()).toBe(hushed);
+      hushHere(false);
+      expect(getSettings().muted).toBe(false);
+    } finally {
+      delete g.window;
+    }
+  });
+});

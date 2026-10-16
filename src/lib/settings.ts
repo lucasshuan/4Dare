@@ -91,11 +91,30 @@ function read(): Settings {
   }
 }
 
+/** This page silenced on its own, whatever the saved settings say (the lab's seats off screen). */
+let hushed = false;
+let hushedCopy: { of: Settings; muted: Settings } | null = null;
+
 /** The settings now (the defaults on the server and before storage is read). */
 export function getSettings(): Settings {
   if (typeof window === "undefined") return DEFAULT_SETTINGS;
   current ??= read();
-  return current;
+  if (!hushed) return current;
+  // one copy per settings, so React sees the same object until they change
+  if (hushedCopy?.of !== current)
+    hushedCopy = { of: current, muted: { ...current, muted: true } };
+  return hushedCopy.muted;
+}
+
+/**
+ * Mutes this page only, for as long as `on`: nothing is saved and other tabs
+ * keep their sound. Every player of music and sounds reads it as "muted". The
+ * lab's frames use it, so only the seat on screen is heard.
+ */
+export function hushHere(on: boolean) {
+  if (hushed === on) return;
+  hushed = on;
+  for (const l of listeners) l();
 }
 
 /** Changes some settings, saves them on this device and tells every reader. */
