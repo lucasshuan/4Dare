@@ -1899,8 +1899,6 @@
 .adm .lab-stage {
   position: relative;
   overflow: hidden;
-  border-radius: 14px;
-  background: var(--sunken);
 }
 .adm .lab-frame {
   position: absolute;
@@ -1908,9 +1906,30 @@
   left: 50%;
   transform-origin: top center;
   border: 0;
-  border-radius: 18px;
   background: var(--canvas);
-  box-shadow: var(--shadow-pop);
+}
+.adm .lab-who {
+  position: absolute;
+  top: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 45%;
+  height: 30px;
+  padding: 0 10px 0 4px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--ink) 82%, transparent);
+  color: var(--canvas);
+  box-shadow: 0 0 0 2px var(--seat);
+  font-size: 12.5px;
+  pointer-events: none;
+}
+.adm .lab-who b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .adm .lab-steps {
   gap: 3px;

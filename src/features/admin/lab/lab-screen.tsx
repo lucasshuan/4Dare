@@ -385,6 +385,10 @@ export function LabScreen({
     return () => ro.disconnect();
   }, []);
   const scale = Math.min(1, box / r.w, device === "phone" ? 0.78 : 1);
+  // whose screen is on show, named at its top right
+  const watching = run?.players[seat];
+  const watchingSlot =
+    state?.players.find((x) => x.id === watching?.id)?.colorSlot ?? seat;
   const onScrub = (e: PointerEvent<HTMLDivElement>) => {
     if (!run) return;
     const el = e.currentTarget;
@@ -774,6 +778,23 @@ export function LabScreen({
                   }}
                 />
               ))}
+              {watching ? (
+                <span
+                  className="lab-who"
+                  style={
+                    {
+                      right: `calc(50% - ${(r.w * scale) / 2}px + 10px)`,
+                      "--seat": `var(--seat-${(watchingSlot % 10) + 1})`,
+                    } as CSSProperties
+                  }
+                  aria-live="polite"
+                >
+                  <Avatar avatar={watching.avatar} size={24} />
+                  <b>
+                    {watching.name ?? guestName(watching.guestNumber, "pt")}
+                  </b>
+                </span>
+              ) : null}
             </div>
           </div>
           <div className="card" style={{ padding: 14 }}>
