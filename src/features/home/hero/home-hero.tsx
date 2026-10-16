@@ -18,9 +18,9 @@ import type { JoinRequest } from "@/features/join/join-dialog";
 import { LazyJoinDialog } from "@/features/join/lazy-join-dialog";
 import { LiveDot } from "@/features/rooms/room-bits";
 import type { GameKey } from "@/game/games";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { NEW_ROOM, newRoom } from "@/lib/routes";
+import { GAME_PATHS, NEW_ROOM, newRoom } from "@/lib/routes";
 import { ChoiceThumb } from "./choice-thumb";
 import { CodeField } from "./code-field";
 import { HeroCrowd, WAVE } from "./crowd";
@@ -301,23 +301,16 @@ export function HomeHero() {
                       onPick={(g) => pick(g)}
                     />
                   ) : (
-                    // biome-ignore lint/a11y/useSemanticElements: it wraps a whole scene, not a label
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      aria-label={t("playGame", {
+                    // the scene opens the game's page; "Play now" is the way in
+                    <Link
+                      href={GAME_PATHS[l.choice]}
+                      aria-label={t("seeGame", {
                         game: gameName(l.choice),
                       })}
                       className={s.sceneHost}
-                      onClick={() => !match && quick(l.choice)}
-                      onKeyDown={(e) => {
-                        if (e.key !== "Enter" && e.key !== " ") return;
-                        e.preventDefault();
-                        if (!match) quick(l.choice);
-                      }}
                     >
                       {Scene ? <Scene /> : null}
-                    </div>
+                    </Link>
                   )}
                 </div>
               );

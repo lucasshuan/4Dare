@@ -455,6 +455,7 @@
     "dayBonus": "+{n} hoy",
     "dayBonusTip": "+{n} XP en la primera partida de hoy",
     "playGame": "Jugar {game} ahora",
+    "seeGame": "Ver la página de {game}",
     "playAny": "Jugar cualquier juego ahora",
     "tabs": "Juegos",
     "draw": {
