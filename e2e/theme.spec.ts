@@ -4,6 +4,7 @@ import {
   editSettings,
   joinRoom,
   newPlayer,
+  openSettings,
   startMatch,
 } from "./helpers";
 
@@ -20,13 +21,15 @@ test("the host types the theme, and the next room starts the same way", async ({
   await expect(host.getByText(/the host types the theme/i)).toBeVisible();
   // the next room starts the same way
   const code = await createRoom(host);
+  await openSettings(host);
   await expect(host.getByText(/the host types the theme/i)).toBeVisible();
   await joinRoom(guest, code);
   await startMatch(host);
 
+  // after the opening scene
   await expect(
     guest.getByRole("heading", { name: /is choosing the theme/i }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
   await host
     .getByRole("textbox", { name: /theme of the match/i })
     .fill("Space pirates");

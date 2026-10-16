@@ -59,17 +59,22 @@ test("signing in from the user menu (test account) lets you pick a name", async 
   // the face at the top right (the side menu's burger is a button too)
   await page.locator("header .tb-me").click();
   await expect(page.getByText("You're playing as a guest")).toBeVisible();
-  await page.getByRole("button", { name: /sign in with discord/i }).click();
+  // the menu's key (the hero's pass has an "or sign in with Discord" link too)
+  await page
+    .getByRole("button", { name: "Sign in with Discord", exact: true })
+    .click();
   await page.waitForURL(/\/profile$/);
   await page.getByRole("textbox", { name: "Name" }).fill("Bia");
-  await page.getByRole("button", { name: "Colour 3" }).click();
-  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByRole("button", { name: "Teal", exact: true }).click();
+  await page.getByRole("button", { name: "Save profile" }).click();
   await expect(page.getByText("Profile saved")).toBeVisible();
   await page.goto("/");
   const menu = page.locator("header .tb-me");
   await expect(menu).toContainText("Bia");
   await menu.click();
-  await expect(page.getByRole("link", { name: "Edit profile" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Edit profile" }),
+  ).toBeVisible();
 });
 
 test("typing a room code joins it, or says why not", async ({ browser }) => {

@@ -1,5 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
-import { joinRoom, newPlayer, startMatch, viewOf } from "./helpers";
+import {
+  joinRoom,
+  newPlayer,
+  openSettings,
+  startMatch,
+  viewOf,
+} from "./helpers";
 
 /** Clicks `name` on every page that shows it enabled, until the room leaves `phase`. */
 async function untilPast(
@@ -25,9 +31,11 @@ async function untilPast(
     .not.toBe(phase);
 }
 
-test("bids, builds the boards, presents, votes and sees the final score", async ({
+test("bids, builds the boards, presents, votes and reaches the end", async ({
   browser,
 }) => {
+  // the whole match, opening and end scenes included
+  test.setTimeout(240_000);
   const host = await newPlayer(browser);
   const guest = await newPlayer(browser, true);
   const players = [host, guest];
@@ -36,6 +44,7 @@ test("bids, builds the boards, presents, votes and sees the final score", async 
   const code = host.url().split("/").pop() as string;
 
   // one round, no break, no trades
+  await openSettings(host);
   await host.getByRole("button", { name: /change the auction/i }).click();
   await host
     .getByRole("group", { name: /^rounds$/i })
@@ -86,8 +95,12 @@ test("bids, builds the boards, presents, votes and sees the final score", async 
     timeout: 30_000,
   });
   await untilPast(players, code, "scoring", /^see the final score$/i);
+  // the end: the newspaper, then the room's panel with who is ready
+  await expect
+    .poll(async () => (await viewOf(host, code)).phase, { timeout: 30_000 })
+    .toBe("finished");
   for (const page of players)
-    await expect(page.getByText(/^final score$/i)).toBeVisible({
+    await expect(page.getByText(/1 of 2 ready/i)).toBeVisible({
       timeout: 30_000,
     });
 });

@@ -79,9 +79,11 @@ test("a picture pasted or browsed onto the card goes with the new character", as
     const bytes = Uint8Array.from(atob(jpeg), (c) => c.charCodeAt(0));
     const data = new DataTransfer();
     data.items.add(new File([bytes], "photo.jfif", { type: "" }));
-    // the card's picture is the drop target
+    // the card's picture is the drop target: its empty frame is a button
     const card = document.querySelector("[data-pick-card]") as HTMLElement;
-    const zone = card.firstElementChild as HTMLElement;
+    const zone = [...card.querySelectorAll("button")].find((b) =>
+      /drop, paste or browse/i.test(b.textContent ?? ""),
+    ) as HTMLElement;
     for (const type of ["dragenter", "dragover", "drop"])
       zone.dispatchEvent(
         new DragEvent(type, { dataTransfer: data, bubbles: true }),

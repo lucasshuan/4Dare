@@ -1,5 +1,11 @@
-import { expect, test } from "@playwright/test";
-import { createRoom, joinRoom, newPlayer, viewOf } from "./helpers";
+import { expect, type Page, test } from "@playwright/test";
+import {
+  createRoom,
+  joinRoom,
+  newPlayer,
+  openSettings,
+  viewOf,
+} from "./helpers";
 
 test("a private room is listed with a lock and asks for its password", async ({
   browser,
@@ -10,7 +16,7 @@ test("a private room is listed with a lock and asks for its password", async ({
   const code = await createRoom(host);
   // a new room is named after its host
   await expect(host.getByRole("heading", { level: 1 })).toHaveText(/'s room$/);
-  await host.getByRole("tab", { name: "Settings", exact: true }).click();
+  await openSettings(host);
   await host.getByRole("button", { name: /edit advanced settings/i }).click();
   const save = host.getByRole("button", { name: /^save$/i });
   const name = host.getByRole("textbox", { name: "Room name" });
@@ -82,20 +88,34 @@ test("one room at a time: a second tab's room takes the seat, and the first tab 
 test("rooms are filtered by the host's language: yours by default, more on request", async ({
   browser,
 }) => {
+  // the game's page shows a room by its name: each gets one of this run's own
+  const run = Date.now().toString(36).slice(-5);
+  const rename = async (page: Page, name: string) => {
+    await page
+      .getByRole("button", { name: /^(rename room|renomear sala)$/i })
+      .click();
+    const box = page.getByRole("textbox").first();
+    await box.fill(name);
+    await box.press("Enter");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(name);
+  };
   const english = await newPlayer(browser);
   const enRoom = await createRoom(english);
+  await rename(english, `Zqxj English ${run}`);
   const brazilian = await newPlayer(browser);
   await brazilian.goto("/pt/new?game=who-am-i");
   await brazilian.waitForURL(/\/r\/[A-Z0-9]{5}$/);
   const ptRoom = brazilian.url().split("/").pop() as string;
+  await rename(brazilian, `Zqxj Portuguese ${run}`);
 
   const viewer = await newPlayer(browser);
   const row = (code: string) => viewer.locator(`a[href$="/r/${code}"]`);
-  // the game's page lists the rooms in its language only (the only Portuguese
-  // room of the run, so no older one takes its place)
+  const card = (name: string) =>
+    viewer.getByRole("listitem").filter({ hasText: name });
+  // the game's page lists the rooms in its language only
   await viewer.goto("/pt/who-am-i");
-  await expect(row(ptRoom)).toBeVisible({ timeout: 10_000 });
-  await expect(row(enRoom)).toHaveCount(0);
+  await expect(card(`Zqxj Portuguese ${run}`)).toBeVisible({ timeout: 10_000 });
+  await expect(card(`Zqxj English ${run}`)).toHaveCount(0);
   // a /pt page is remembered as the viewer's pick, and the unprefixed (English)
   // addresses would follow it: forget it to read the English list
   await viewer.context().clearCookies({ name: "NEXT_LOCALE" });

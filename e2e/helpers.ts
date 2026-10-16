@@ -40,8 +40,14 @@ export async function createRoom(host: Page) {
   return host.url().split("/").pop() as string;
 }
 
+/** The lobby's settings live in their own tab, next to the players and matches. */
+export async function openSettings(page: Page) {
+  await page.getByRole("tab", { name: "Settings", exact: true }).click();
+}
+
 /** The host opens "Edit advanced settings" in the lobby, makes `change` and saves. */
 export async function editSettings(host: Page, change: () => Promise<void>) {
+  await openSettings(host);
   await button(host, /edit advanced settings/i).click();
   await change();
   await button(host, /^save$/i).click();
@@ -58,6 +64,9 @@ export async function joinRoom(page: Page, code: string) {
  * anyway?" question never comes up.
  */
 export async function startMatch(host: Page) {
+  // the seats are in the players tab (a settings edit leaves the lobby on its own tab)
+  const seats = host.getByRole("tab", { name: /^players/i });
+  if (await seats.isVisible()) await seats.click();
   await expect(
     host.getByRole("img", { name: /^ready$/i }).first(),
   ).toBeVisible();
@@ -67,7 +76,12 @@ export async function startMatch(host: Page) {
 
 /** The room as this player is allowed to see it (same API the UI uses). */
 export async function viewOf(page: Page, code: string): Promise<RoomView> {
-  const res = await page.request.get(`/api/rooms/${code}`);
+  // a kept-alive socket the server just closed resets the request: ask again once
+  const get = () => page.request.get(`/api/rooms/${code}`);
+  const res = await get().catch((e: Error) => {
+    if (/ECONNRESET|socket hang up/.test(e.message)) return get();
+    throw e;
+  });
   expect(res.ok()).toBe(true);
   return res.json();
 }
@@ -118,6 +132,8 @@ export async function pickAll(players: Page[]) {
  */
 async function nextAsker(players: Page[], code: string) {
   for (let i = 0; i < 120; i++) {
+    // the end scene plays for a while before its keys show: ask the room
+    if ((await viewOf(players[0], code)).phase === "finished") return null;
     for (const page of players) {
       if (await button(page, /send question/i).isVisible()) {
         const view = await viewOf(page, code);
@@ -125,7 +141,6 @@ async function nextAsker(players: Page[], code: string) {
         if (wait > 0) await page.waitForTimeout(wait + 100);
         return page;
       }
-      if (await button(page, /back to rooms/i).isVisible()) return null;
     }
     await players[0].waitForTimeout(250);
   }

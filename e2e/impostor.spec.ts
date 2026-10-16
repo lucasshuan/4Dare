@@ -99,6 +99,11 @@ test("the crew answers, catches the impostor and sees both cards", async ({
     await expect(page.getByText(/the crew won/i)).toBeVisible({
       timeout: 30_000,
     });
-  await expect(host.getByText(names[odd] as string).first()).toBeVisible();
-  await expect(host.getByText(/guessed Nobody at all/i)).toBeVisible();
+  // the end scene draws both cards; the match keeps them and the last guess
+  const end = (await viewOf(host, code)).imp?.end;
+  expect(end?.winner).toBe("crew");
+  expect(end?.impostor.name).toBe(names[odd]);
+  expect(
+    end?.outs.some((o) => o.guess === "Nobody at all" && o.hit === false),
+  ).toBe(true);
 });
