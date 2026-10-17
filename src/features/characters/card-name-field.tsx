@@ -179,7 +179,7 @@ export function CardNameField({
     <div className="relative">
       <div
         className={cn(
-          "relative flex h-12 items-center rounded-[14px] border-[1.5px] border-line-strong bg-surface px-3.5 font-bold font-display text-[19px] tracking-[-0.01em] transition-[border-color,box-shadow] duration-200 sm:h-[52px] sm:text-[22px]",
+          "relative flex h-12 items-center rounded-[14px] border-[1.5px] border-line-strong bg-surface px-3 font-bold font-display text-[18px] tracking-[-0.01em] transition-[border-color,box-shadow] duration-200 sm:h-[52px] sm:px-3.5 sm:text-[22px]",
           !readOnly &&
             "focus-within:border-sky focus-within:shadow-[0_0_0_4px_color-mix(in_oklab,var(--sky)_22%,transparent)]",
         )}
