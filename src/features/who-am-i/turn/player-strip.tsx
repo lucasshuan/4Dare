@@ -213,14 +213,14 @@ function PlayerRow({ player: p }: { player: PlayerView }) {
   const name = useDisplayName();
   const awaited = AWAITED.includes(p.status);
   return (
-    <span className="flex min-w-0 flex-1 items-center gap-2.5 p-2 text-left max-sm:flex-col max-sm:gap-1.5 max-sm:px-1 max-sm:pt-2.5 max-sm:pb-1.5 max-sm:text-center">
+    <span className="flex min-w-0 flex-1 items-center gap-2.5 p-2 text-left max-sm:flex-col max-sm:gap-1 max-sm:px-1 max-sm:pt-2 max-sm:pb-1 max-sm:text-center">
       <span className="relative inline-flex shrink-0">
         <Avatar
           avatar={p.avatar}
           size={32}
           // the clock takes the ring's place while it waits on them
           seat={awaited ? null : p.colorSlot}
-          className="max-sm:size-9 max-sm:text-[15px]"
+          className="max-sm:size-8 max-sm:text-[14px]"
         />
         {awaited ? <ClockRing slot={p.colorSlot} /> : null}
         {p.status === "answered" ? (

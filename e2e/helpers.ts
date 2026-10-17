@@ -180,6 +180,9 @@ export async function playToEnd(
         continue;
       }
       // the first answer goes with Enter; Shift+Enter breaks the note's line
+      // (phones keep the note folded behind its key)
+      const unfold = button(page, /^context$/i);
+      if (await unfold.isVisible()) await unfold.click();
       const note = page.getByRole("textbox", { name: /context/i });
       await note.fill("A famous one");
       await note.press("Shift+Enter");

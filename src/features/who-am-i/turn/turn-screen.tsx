@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Fragment, type ReactNode, useEffect, useState } from "react";
@@ -42,6 +42,7 @@ import {
 } from "@/game/who-am-i/question";
 import { cn } from "@/lib/cn";
 import { focusIsFree } from "@/lib/focus";
+import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { useGameOption } from "@/lib/settings";
@@ -139,7 +140,7 @@ export function TurnScreen() {
     // small muted text sits on the seat's wash here: a touch darker (lighter in dark) keeps it at 4.5:1
     <div
       className={cn(
-        "relative flex flex-col gap-6 short:gap-4 [&_.text-ink-muted]:text-[color:color-mix(in_oklab,var(--ink-muted)_80%,var(--ink))]",
+        "relative flex flex-col gap-3 sm:gap-6 sm:short:gap-4 [&_.text-ink-muted]:text-[color:color-mix(in_oklab,var(--ink-muted)_80%,var(--ink))]",
         // the scene is laid over the screen: keep its height while it plays
         cast && "min-h-[calc(100dvh-9rem-var(--dock,0px))]",
       )}
@@ -244,7 +245,7 @@ function Rise({ at, children }: { at: number | null; children: ReactNode }) {
   return (
     <div
       ref={ref}
-      className="flex flex-wrap items-stretch gap-5 lg:gap-12"
+      className="flex flex-wrap items-stretch gap-3 sm:gap-5 lg:gap-12"
       style={
         at === null
           ? undefined
@@ -273,7 +274,7 @@ function FocusRow({
       {/* the card, small, in its frame */}
       <span
         style={frameStyle(focus.colorSlot)}
-        className="q-marks w-20 shrink-0 rounded-[14px] p-1"
+        className="q-marks w-12 shrink-0 rounded-[12px] p-1"
       >
         {focus.cardHidden ? (
           <CardBack seat={focus.colorSlot} className="rounded-[10px]" />
@@ -320,7 +321,7 @@ function Heading({ kicker, title }: { kicker?: string; title: ReactNode }) {
       {kicker ? (
         <span className="font-medium text-[13px] text-ink-muted">{kicker}</span>
       ) : null}
-      <h1 className="font-bold font-display text-[30px] leading-9 tracking-[-0.01em] [text-wrap:balance]">
+      <h1 className="font-bold font-display text-2xl leading-8 tracking-[-0.01em] [text-wrap:balance] sm:text-[30px] sm:leading-9">
         {title}
       </h1>
     </div>
@@ -332,19 +333,21 @@ function Bubble({
   kicker,
   children,
   you,
+  className,
 }: {
   who?: PlayerView;
   kicker: string;
   children: ReactNode;
   you?: boolean;
+  className?: string;
 }) {
   return (
     <div
-      className={
-        you
-          ? "flex flex-col gap-2 rounded-lg bg-sky-soft p-5 short:p-4"
-          : "flex flex-col gap-2 rounded-lg bg-apricot-soft p-5 short:p-4"
-      }
+      className={cn(
+        "flex flex-col gap-2 rounded-lg p-5 max-sm:p-3.5 sm:short:p-4",
+        you ? "bg-sky-soft" : "bg-apricot-soft",
+        className,
+      )}
     >
       <div className="flex items-center gap-2 font-medium text-[13px]">
         {who ? <Avatar avatar={who.avatar} size={28} /> : null}
@@ -417,6 +420,10 @@ function Answer() {
   const { act, pending } = useRoomAction();
   const [value, setValue] = useState<AnswerValue | null>(null);
   const [note, setNote] = useState("");
+  // phones keep the optional note folded behind a key, so the answers and Send fit
+  const phone = useMedia(PHONE);
+  const [noteOpen, setNoteOpen] = useState(false);
+  const folded = phone && !noteOpen;
   const asker = playerById(view.turn?.playerId);
   const total = view.players.filter((p) => p.id !== asker?.id).length;
   return (
@@ -435,12 +442,12 @@ function Answer() {
           name: asker ? name(asker) : "",
         })}
       >
-        <p className="font-bold font-display text-2xl leading-[30px] wrap-anywhere [text-wrap:balance] tiny:text-xl tiny:leading-7">
+        <p className="font-bold font-display text-2xl leading-[30px] wrap-anywhere [text-wrap:balance] max-sm:text-xl max-sm:leading-7 tiny:text-xl tiny:leading-7">
           {view.turn?.question}
         </p>
       </Bubble>
-      {/* the group below is labelled anyway; on very short windows the visible label goes */}
-      <span className="font-semibold text-sm tiny:sr-only">
+      {/* the group below is labelled anyway; on phones and very short windows the visible label goes */}
+      <span className="font-semibold text-sm max-sm:sr-only tiny:sr-only">
         {t("yourAnswer")}
       </span>
       <m.div
@@ -469,20 +476,24 @@ function Answer() {
           </m.div>
         ))}
       </m.div>
-      <TextArea
-        label={t("note")}
-        value={note}
-        max={MAX_NOTE}
-        enterKeyHint="send"
-        onChange={(e) => setNote(e.target.value)}
-        // Enter sends, as in the question field; Shift+Enter breaks the line
-        onKeyDown={(e) => {
-          if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing)
-            return;
-          e.preventDefault();
-          if (value && !pending) e.currentTarget.form?.requestSubmit();
-        }}
-      />
+      {folded ? null : (
+        <TextArea
+          label={t("note")}
+          value={note}
+          max={MAX_NOTE}
+          enterKeyHint="send"
+          // opened by its key: straight into it
+          autoFocus={noteOpen}
+          onChange={(e) => setNote(e.target.value)}
+          // Enter sends, as in the question field; Shift+Enter breaks the line
+          onKeyDown={(e) => {
+            if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing)
+              return;
+            e.preventDefault();
+            if (value && !pending) e.currentTarget.form?.requestSubmit();
+          }}
+        />
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <Button
           type="submit"
@@ -492,7 +503,18 @@ function Answer() {
         >
           {t("send")}
         </Button>
-        <span className="font-medium text-[13px] text-ink-muted">
+        {folded ? (
+          <Button
+            variant="secondary"
+            onClick={() => setNoteOpen(true)}
+            className="tiny:h-11"
+          >
+            <Plus strokeWidth={2} aria-hidden />
+            {t("addNote")}
+          </Button>
+        ) : null}
+        {/* phones: the strip's ticks say it */}
+        <span className="font-medium text-[13px] text-ink-muted max-sm:hidden">
           {t("progress", { done: view.turn?.answeredIds.length ?? 0, total })}
         </span>
       </div>
@@ -558,7 +580,12 @@ function Guess() {
         await act(() => submitGuess(code, text));
       }}
     >
-      <Bubble you kicker={t("kicker", { n: view.turn?.n ?? 1 })}>
+      {/* phones: the guess first (the answers have just been on screen), the answers under it */}
+      <Bubble
+        you
+        kicker={t("kicker", { n: view.turn?.n ?? 1 })}
+        className="max-sm:order-last"
+      >
         <p className="text-lg wrap-anywhere">{view.turn?.question}</p>
         {view.turn?.answers ? (
           <AnswersList answers={view.turn.answers} />

@@ -131,6 +131,7 @@
       "kicker": "Round {n} · {name} asks",
       "yourAnswer": "Your answer",
       "note": "Context (optional)",
+      "addNote": "Context",
       "send": "Send answer",
       "progress": "{done} of {total} answered"
     },

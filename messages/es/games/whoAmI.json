@@ -131,6 +131,7 @@
       "kicker": "Ronda {n} · {name} pregunta",
       "yourAnswer": "Tu respuesta",
       "note": "Contexto (opcional)",
+      "addNote": "Contexto",
       "send": "Enviar respuesta",
       "progress": "{done} de {total} respondieron"
     },

@@ -131,6 +131,7 @@
       "kicker": "{n}ラウンド目 · {name}さんの質問",
       "yourAnswer": "あなたの答え",
       "note": "補足（任意）",
+      "addNote": "補足",
       "send": "回答を送る",
       "progress": "{total}人中{done}人が回答"
     },
