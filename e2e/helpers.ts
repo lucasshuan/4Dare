@@ -174,7 +174,12 @@ export async function playToEnd(
         .then(() => true)
         .catch(() => false);
       if (!asked) continue;
-      await button(page, /^yes$/i).click();
+      // within the answers: a player who has found theirs may still have the
+      // "liked it?" bubble up, with its own "Yes"
+      await page
+        .getByRole("group", { name: /your answer/i })
+        .getByRole("button", { name: /^yes$/i })
+        .click();
       if (round > 0 || page !== others[0]) {
         await send.click();
         continue;
