@@ -661,24 +661,32 @@ function Validate() {
             : t("title", { name: "" })
         }
       />
-      <p className="max-w-[440px] text-ink-muted">
+      {/* phones: the keys first, the why under them */}
+      <p className="max-w-[440px] text-ink-muted max-sm:order-last max-sm:text-[15px]">
         {others.length
           ? withNames((n) =>
               t("bodyMany", { names: others.map((p) => n(p)).join(", ") }),
             )
           : t("bodyOne")}
       </p>
-      <div className="flex flex-wrap gap-3">
+      {/* phones: both keys on one row */}
+      <div className="flex flex-wrap gap-3 max-sm:flex-nowrap">
         <Button
           variant="primary"
           size="lg"
           disabled={pending}
           onClick={() => decide(true)}
+          className="max-sm:flex-1 max-sm:px-3"
         >
           <Check strokeWidth={2} />
           {t("yes")}
         </Button>
-        <Button size="lg" disabled={pending} onClick={() => decide(false)}>
+        <Button
+          size="lg"
+          disabled={pending}
+          onClick={() => decide(false)}
+          className="max-sm:flex-1 max-sm:px-3"
+        >
           {t("no")}
         </Button>
       </div>
