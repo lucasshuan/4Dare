@@ -110,7 +110,7 @@ export function ReportDialog({
             maxLength={REPORT_NOTE_MAX}
             rows={3}
             onChange={(e) => setNote(e.target.value)}
-            className="resize-none rounded-md border-[1.5px] border-line bg-surface px-3 py-2.5 text-sm outline-none transition-colors duration-150 focus:border-sky"
+            className="resize-none rounded-md border-[1.5px] border-line bg-surface px-3 py-2.5 text-sm outline-none transition-colors duration-150 focus:border-sky pointer-coarse:text-base"
           />
         </label>
         <div className="flex justify-end gap-2">

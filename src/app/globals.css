@@ -506,6 +506,8 @@
 
 html {
   height: 100%;
+  /* Touch screens: no grey or blue box flashing over what a finger taps (the keys press down instead). */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -532,6 +534,19 @@ body {
   input[type="file"],
   input[type="range"] {
     cursor: pointer;
+  }
+
+  /* Quick taps (answers, votes, the hand) never zoom the page; a pinch still does. */
+  a,
+  button,
+  [role="button"],
+  [role="option"],
+  label,
+  summary,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
 }
 

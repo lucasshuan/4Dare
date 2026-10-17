@@ -42,6 +42,7 @@ export function ChatCompose({
       className="shrink-0 border-line border-t px-3 pt-2.5 pb-3"
     >
       <div className="flex h-[46px] items-center gap-2 rounded-pill border-[1.5px] border-line-strong pr-1.5 pl-4 transition-colors focus-within:border-sky">
+        {/* 16px on touch screens: iOS zooms the page into a smaller field */}
         <input
           ref={ref}
           name="message"
@@ -53,7 +54,7 @@ export function ChatCompose({
           disabled={!!blocked}
           enterKeyHint="send"
           autoComplete="off"
-          className="h-full min-w-0 flex-1 bg-transparent font-medium text-[14.5px] text-ink placeholder:text-ink-muted focus-visible:outline-none!"
+          className="h-full min-w-0 flex-1 bg-transparent font-medium text-[14.5px] text-ink placeholder:text-ink-muted focus-visible:outline-none! pointer-coarse:text-base"
         />
         <button
           type="submit"
