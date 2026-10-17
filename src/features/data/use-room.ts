@@ -34,6 +34,15 @@ const pollMs = (connected: boolean) =>
 
 export const roomKey = (code: string) => ["room", code] as const;
 
+/** How far the server clock may drift before a fetch moves the room's offset (ms). */
+const OFFSET_SLACK = 100;
+
+/** The same room, but for the server's time stamped on it. */
+const sameRoom = (a: RoomView, b: RoomView) =>
+  a.version === b.version &&
+  JSON.stringify({ ...a, serverNow: 0 }) ===
+    JSON.stringify({ ...b, serverNow: 0 });
+
 /** The room, names in `lang` (the page's). */
 async function fetchRoom(code: string, lang: string): Promise<RoomData> {
   const sentAt = Date.now();
@@ -65,7 +74,12 @@ export function useRoom(code: string) {
       const next = await fetchRoom(code, lang);
       // A slow response must never replace a newer state.
       const current = client.getQueryData<RoomData>(roomKey(code));
-      return current && current.view.version > next.view.version
+      if (!current || current.view.version < next.view.version) return next;
+      if (current.view.version > next.view.version) return current;
+      // Nothing new (a poll): the room stays the same object, so nothing on
+      // screen renders for it, unless the clock has drifted.
+      return sameRoom(current.view, next.view) &&
+        Math.abs(current.offset - next.offset) < OFFSET_SLACK
         ? current
         : next;
     },
