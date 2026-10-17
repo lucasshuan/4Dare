@@ -341,7 +341,8 @@ function Vote({ v }: { v: VoteView }) {
 
         <fieldset
           aria-label={t("title")}
-          className="mt-[22px] flex min-w-0 flex-col gap-2 sm:mx-auto sm:mt-9 sm:grid sm:w-full sm:max-w-[920px] sm:grid-cols-2 sm:gap-4"
+          // two by two, phones too: all four in sight at once
+          className="mt-[22px] grid min-w-0 grid-cols-2 gap-2 sm:mx-auto sm:mt-9 sm:w-full sm:max-w-[920px] sm:gap-4"
         >
           {v.options.map((option, i) => (
             <m.div
@@ -442,7 +443,7 @@ function OptionCard({
       whileHover={live ? { y: -8, rotate: index % 2 ? 0.8 : -0.8 } : undefined}
       whileTap={live ? { scale: 0.97 } : undefined}
       className={cn(
-        "group relative flex min-h-[104px] min-w-0 flex-1 flex-col overflow-hidden rounded-[26px] px-4 py-3 text-left outline-offset-4 sm:min-h-[200px] sm:rounded-xl sm:p-6 sm:short:min-h-40",
+        "group relative flex min-h-[124px] min-w-0 flex-1 flex-col overflow-hidden rounded-[22px] px-3 py-2.5 text-left outline-offset-4 sm:min-h-[200px] sm:rounded-xl sm:p-6 sm:short:min-h-40",
         tone.card,
         open ? "shadow-card" : "cursor-default",
         disabled && "cursor-default",
@@ -476,10 +477,11 @@ function OptionCard({
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
               exit={{ opacity: 0, scale: 0.4 }}
               transition={spring}
-              className="inline-flex shrink-0 items-center gap-1 rounded-pill bg-ink py-1 pr-2.5 pl-1.5 font-semibold text-on-ink text-xs"
+              className="inline-flex shrink-0 items-center gap-1 rounded-pill bg-ink p-1 font-semibold text-on-ink text-xs sm:py-1 sm:pr-2.5 sm:pl-1.5"
             >
               <Check className="size-4" strokeWidth={2.75} />
-              <span>{t("yourVote")}</span>
+              {/* phones: the tick alone, the frame says the rest */}
+              <span className="max-sm:sr-only">{t("yourVote")}</span>
             </m.span>
           ) : null}
         </AnimatePresence>
@@ -489,15 +491,16 @@ function OptionCard({
         className={cn(
           "relative my-1 flex flex-1 items-center text-balance font-display font-extrabold tracking-[-0.02em] sm:my-2.5",
           theme.length > 18
-            ? "text-[24px] leading-[1.1] sm:text-[clamp(24px,2.4vw,32px)]"
-            : "text-[27px] leading-[1.06] sm:text-[clamp(30px,3vw,38px)]",
+            ? "text-[18px] leading-[1.1] sm:text-[clamp(24px,2.4vw,32px)]"
+            : "text-[21px] leading-[1.08] sm:text-[clamp(30px,3vw,38px)]",
         )}
       >
         {theme}
       </span>
 
-      <span className="relative flex min-h-8 items-center justify-between gap-3">
-        <span className="-space-x-2 flex">
+      <span className="relative flex min-h-8 items-center justify-between gap-2 sm:gap-3">
+        {/* phones: smaller faces, and the ones past the edge just go under it */}
+        <span className="-space-x-2 max-sm:-space-x-2.5 flex min-w-0 overflow-hidden p-0.5">
           <AnimatePresence initial={false}>
             {voters.map((p) => (
               <m.span
@@ -509,7 +512,12 @@ function OptionCard({
                 transition={{ duration: 0.45, ease: gs.backOut(2.2) }}
                 className="rounded-pill"
               >
-                <Avatar avatar={p.avatar} size={32} seat={p.colorSlot} />
+                <Avatar
+                  avatar={p.avatar}
+                  size={32}
+                  seat={p.colorSlot}
+                  className="max-sm:size-6 max-sm:text-xs"
+                />
               </m.span>
             ))}
           </AnimatePresence>
@@ -521,7 +529,7 @@ function OptionCard({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: dur.base, ease: ease.soft }}
-            className="font-semibold text-sm tabular-nums"
+            className="shrink-0 font-semibold text-sm tabular-nums max-sm:text-xs"
           >
             {t("votes", { count: voters.length })}
           </m.span>
