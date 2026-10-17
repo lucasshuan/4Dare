@@ -71,7 +71,7 @@ import { StartDialog } from "./start-dialog";
 import { TvChair } from "./tv-chair";
 
 const titleClass =
-  "font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] tiny:text-[30px]";
+  "font-bold font-display text-[clamp(32px,4vw,44px)] leading-[1.1] tracking-[-0.015em] [text-wrap:balance] max-sm:text-[28px] sm:tiny:text-[30px]";
 
 /** The lobby's panels: the invite, the players and the room's settings, each lifted off the backdrop. */
 const panelClass = "rounded-lg bg-surface p-6 max-sm:p-4";
@@ -252,15 +252,16 @@ export function LobbyScreen() {
       {/* no top bar here: the lobby is the game's waiting room, with only sound, theme and the way out, top right like a match's "Leave" */}
       <RoomControls className="mb-3 justify-end" />
       {/* on a desktop the lobby fits the window and never scrolls: the lists and the settings scroll inside their panels.
-          Narrower, one column whose panels mix both sides: the invite, the game and its key, who is here, the settings */}
+          Narrower, one column whose panels mix both sides: the game and its key, the invite, who is here, the settings */}
       <div className="flex flex-col gap-5 short:gap-4 lg:min-h-0 lg:flex-1 lg:flex-row lg:gap-8">
         {/* the rest of the page's width, the same whatever the open tab holds, so its right edge meets the controls' */}
         <section className="max-lg:contents lg:flex lg:min-h-0 lg:min-w-0 lg:flex-1 lg:flex-col lg:gap-5 lg:short:gap-4">
-          {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right (not on phones) */}
+          {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right (not on phones).
+              In one column it follows the game, so the key to start or get ready is in sight at once */}
           <div
             className={cn(
               panelClass,
-              "lobby-leave flex shrink-0 flex-col gap-4 [--leave-i:1] max-lg:order-1",
+              "lobby-leave flex shrink-0 flex-col gap-4 [--leave-i:1] max-lg:order-2",
             )}
           >
             <RoomTitle
@@ -272,7 +273,7 @@ export function LobbyScreen() {
             />
             <div className="flex items-center gap-6">
               <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3">
-                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance]">
+                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance] max-sm:text-lg">
                   {greeting}
                 </p>
                 {/* desktop: "Copy link" right of the code; phones: under it */}
@@ -481,12 +482,12 @@ export function LobbyScreen() {
           <div
             className={cn(
               panelClass,
-              "lobby-leave flex shrink-0 flex-col gap-4 overflow-hidden [--leave-i:0] max-lg:order-2",
+              "lobby-leave flex shrink-0 flex-col gap-4 overflow-hidden [--leave-i:0] max-lg:order-1",
             )}
           >
             <div
               aria-hidden="true"
-              className="relative -mx-6 -mt-6 aspect-[2/1] overflow-hidden max-sm:-mx-4 max-sm:-mt-4"
+              className="relative -mx-6 -mt-6 aspect-[2/1] overflow-hidden max-sm:-mx-4 max-sm:-mt-4 max-sm:aspect-[5/2]"
             >
               {/* the home tile's animated scene, laid out for this strip */}
               <GameArt key={game} wide className="absolute inset-0" />
@@ -594,7 +595,7 @@ export function LobbyScreen() {
           {/* What for?'s presenter chair, under the game */}
           {game === "lineup" && view.settings.mode === "host" ? (
             <TvChair
-              className="lobby-leave [--leave-i:1] max-lg:order-2"
+              className="lobby-leave [--leave-i:1] max-lg:order-1"
               players={shownPlayers}
               here={shownPlayers.filter((p) => !p.away).length}
               chairId={view.chairId}
