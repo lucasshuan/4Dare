@@ -194,8 +194,9 @@ export function TurnScreen() {
                 </m.div>
               </AnimatePresence>
             </div>
-            <section className="flex min-w-0 flex-[1_1_360px] flex-col gap-5 short:gap-3">
-              <AnimatePresence mode="wait">
+            <section className="relative flex min-w-0 flex-[1_1_360px] flex-col gap-5 short:gap-3">
+              {/* the step leaving is lifted out while the next comes in: no empty frame, no jump */}
+              <AnimatePresence mode="popLayout">
                 <m.div
                   key={`${view.phase}-${view.turn?.n}-${mode}`}
                   initial={{ opacity: 0, y: 14 }}
