@@ -437,6 +437,20 @@ export const TUNABLES: readonly Tunable[] = [
     "Revelações entre turnos",
     "src/game/types.ts",
   ),
+  t(
+    "reveal.guessMissAlone",
+    "Palpite errado, só ele ainda jogando",
+    "who-am-i",
+    "Revelações entre turnos",
+    "src/game/types.ts",
+  ),
+  t(
+    "reveal.passAlone",
+    "Passou a vez, só ele ainda jogando",
+    "who-am-i",
+    "Revelações entre turnos",
+    "src/game/types.ts",
+  ),
 
   // -- Impostor ----------------------------------------------------------------
   t(

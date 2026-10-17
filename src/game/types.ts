@@ -295,6 +295,12 @@ export const REVEAL_TIMING = tunable("reveal", {
   guessHit: 5000,
   /** The turn player passed instead of guessing. */
   pass: 2600,
+  /**
+   * A miss or a pass when only the guesser is still finding out: the next
+   * turn is theirs again, with no handoff, so the scene is short too.
+   */
+  guessMissAlone: 2200,
+  passAlone: 1500,
 });
 
 // One file per scene in show-timing/; tests read the constants, never literals.

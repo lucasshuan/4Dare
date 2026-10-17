@@ -23,10 +23,19 @@ const SWEEP = "cubic-bezier(0.7, 0, 0.3, 1)";
 export const HANDOFF_COVERED_MS = Math.round(HANDOFF_MS * COVERED);
 
 /**
+ * Only one player is still finding out (the engine's playsAlone): their turns
+ * follow one another with no handoff, and the scene before each just ends.
+ */
+export const playsAlone = (players: PlayerView[]) =>
+  players.filter((p) => p.discoveredAt === null && !p.gaveUp && !p.away)
+    .length === 1;
+
+/**
  * The turn passing: when a player's question step starts, a band in their
  * colour sweeps across the game's area ("Leo's turn", or "Your turn"), holds
  * and leaves the other way. It runs on the server clock from the step's start,
  * so a reload during it lands on the same frame, and a later one skips it.
+ * Nothing passes once only one player is left: no band then.
  */
 export function TurnHandoff() {
   const { view, offset, playerById } = useRoomContext();
@@ -36,6 +45,7 @@ export function TurnHandoff() {
   const startsAt = view.phase === "asking" ? view.stepStartsAt : null;
   const playerId = view.turn?.playerId ?? null;
   const n = view.turn?.n ?? 1;
+  const alone = playsAlone(view.players);
   const [shown, setShown] = useState<{
     at: number;
     playerId: string;
@@ -44,7 +54,7 @@ export function TurnHandoff() {
   } | null>(null);
   useEffect(() => {
     // the first turn needs none: the cast's last beat just said who starts
-    if (startsAt === null || playerId === null || n === 1) return;
+    if (startsAt === null || playerId === null || n === 1 || alone) return;
     const wait = startsAt - now.current();
     if (wait < -HANDOFF_MS) return;
     const id = window.setTimeout(
@@ -58,7 +68,7 @@ export function TurnHandoff() {
       Math.max(0, wait),
     );
     return () => window.clearTimeout(id);
-  }, [startsAt, playerId, n]);
+  }, [startsAt, playerId, n, alone]);
   const player = shown ? playerById(shown.playerId) : null;
   if (!shown || !player) return null;
   return (

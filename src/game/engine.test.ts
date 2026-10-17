@@ -1639,6 +1639,34 @@ describe("a turn", () => {
     ).toThrow("too_early");
   });
 
+  it("with one player left, a miss and a pass get short scenes and the turn stays theirs", () => {
+    const g = started(3);
+    for (const k of [0, 1]) {
+      const finder = g.askAndAnswer();
+      g.do({ type: "GUESS", playerId: finder, text: `name ${finder}` });
+      expect(g.state.outcomes[finder].discoveredAt).not.toBeNull();
+      // a hit keeps its full scene, even the one that leaves a player alone
+      expect((g.state.reveal?.until ?? 0) - g.now).toBe(REVEAL_TIMING.guessHit);
+      if (k === 1) expect(g.state.phase).toBe("asking");
+    }
+    const last = g.state.turnPlayerId as string;
+
+    g.askAndAnswer();
+    g.do({ type: "GUESS", playerId: last, text: "Someone else" });
+    const picker = g.state.assignments[last].pickerId;
+    g.do({ type: "VALIDATE", playerId: picker, correct: false });
+    expect((g.state.reveal?.until ?? 0) - g.now).toBe(
+      REVEAL_TIMING.guessMissAlone,
+    );
+    expect(g.state.turnPlayerId).toBe(last);
+    expect(g.state.stepStartsAt).toBe(g.state.reveal?.until);
+
+    g.askAndAnswer();
+    g.do({ type: "PASS", playerId: last });
+    expect((g.state.reveal?.until ?? 0) - g.now).toBe(REVEAL_TIMING.passAlone);
+    expect(g.state.turnPlayerId).toBe(last);
+  });
+
   it("scales a guess's scene with the shows", () => {
     const g = started(2);
     const asker = g.askAndAnswer();

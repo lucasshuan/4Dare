@@ -16,7 +16,7 @@ import { usePast, useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { onSeat, seatColor } from "@/lib/seats";
-import { HANDOFF_COVERED_MS } from "./turn-handoff";
+import { HANDOFF_COVERED_MS, playsAlone } from "./turn-handoff";
 
 type SceneReveal = Extract<RevealView, { kind: "guess" | "pass" }>;
 
@@ -32,7 +32,8 @@ const sticker =
  * player letting their guess go. It runs on the server clock, so it can't be
  * closed and a reload lands on the same moment, and the next turn waits for
  * it: the turn's handoff band sweeps in over its last frame and takes the
- * room back to the turn screen (a winning hit goes on to the podium).
+ * room back to the turn screen (a winning hit goes on to the podium). With
+ * one player left there is no band: the scene is shorter and just fades.
  */
 export function GuessScene() {
   const { view, playerById } = useRoomContext();
@@ -48,8 +49,13 @@ export function GuessScene() {
   useEffect(() => {
     if (r) setHeld(r);
   }, [key]);
+  // the next turn's band covers the scene's end; with one player left there is none
+  const alone = playsAlone(view.players);
   const handoff =
-    !!held && view.phase === "asking" && view.stepStartsAt === held.until;
+    !!held &&
+    view.phase === "asking" &&
+    view.stepStartsAt === held.until &&
+    !alone;
   const end = held ? held.until + (handoff ? HANDOFF_COVERED_MS : 0) : 0;
   const player = held ? playerById(held.byId) : undefined;
   const started = usePast(held?.startsAt ?? null);
@@ -67,10 +73,13 @@ export function GuessScene() {
             clipPath: "circle(150% at 50% 50%)",
             transition: { duration: 0.6, ease: gs.p1Out },
           }}
-          // covered by the handoff band: it just goes; before the podium it fades
+          // covered by the handoff band: it just goes; with one player left, or before the podium, it fades
           exit={{
             opacity: handoff ? 1 : 0,
-            transition: { duration: handoff ? 0 : dur.slow, ease: ease.soft },
+            transition: {
+              duration: handoff ? 0 : alone ? dur.base : dur.slow,
+              ease: ease.soft,
+            },
           }}
           // over the answers (z-30), under the handoff band (z-33); see GAME_AREA
           className={cn(

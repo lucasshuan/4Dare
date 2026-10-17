@@ -138,6 +138,15 @@ function goToTurn(s: RoomState, ctx: Ctx, from: PlayerId | null) {
 
 const nextTurn = (s: RoomState, ctx: Ctx) => goToTurn(s, ctx, s.turnPlayerId);
 
+/**
+ * Only the turn player is still finding out: the next turn is theirs again,
+ * so a miss or a pass gets the short scene (and the screens skip the handoff).
+ */
+function playsAlone(s: RoomState) {
+  const left = s.order.filter((id) => canPlay(s, id));
+  return left.length === 1 && left[0] === s.turnPlayerId;
+}
+
 function answersRevealMs(q: Question) {
   const t = REVEAL_TIMING;
   const notes = q.answers.reduce((sum, a) => sum + (a.note?.length ?? 0), 0);
@@ -201,13 +210,27 @@ function hit(s: RoomState, g: Guess, ctx: Ctx) {
 
 function miss(s: RoomState, g: Guess, ctx: Ctx) {
   g.result = "miss";
-  guessScene(s, "guess", g.n, REVEAL_TIMING.guessMiss, ctx);
+  const t = REVEAL_TIMING;
+  guessScene(
+    s,
+    "guess",
+    g.n,
+    playsAlone(s) ? t.guessMissAlone : t.guessMiss,
+    ctx,
+  );
   nextTurn(s, ctx);
 }
 
 /** The turn player let the guess go (or its clock ran out): a short scene says so. */
 function pass(s: RoomState, ctx: Ctx) {
-  guessScene(s, "pass", s.turnNumber, REVEAL_TIMING.pass, ctx);
+  const t = REVEAL_TIMING;
+  guessScene(
+    s,
+    "pass",
+    s.turnNumber,
+    playsAlone(s) ? t.passAlone : t.pass,
+    ctx,
+  );
   nextTurn(s, ctx);
 }
 

@@ -245,9 +245,9 @@ function checkInvariants(s: RoomState) {
       expect(len).toBeGreaterThanOrEqual(t.answersMin);
       expect(len).toBeLessThanOrEqual(t.answersMax);
     } else if (s.reveal.kind === "guess") {
-      expect([t.guessHit, t.guessMiss]).toContain(len);
+      expect([t.guessHit, t.guessMiss, t.guessMissAlone]).toContain(len);
     } else if (s.reveal.kind === "pass") {
-      expect(len).toBe(t.pass);
+      expect([t.pass, t.passAlone]).toContain(len);
     } else {
       checkShow(s.reveal);
     }
