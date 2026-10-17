@@ -57,6 +57,7 @@ export function RoomTitle({
   name,
   editable,
   className,
+  compact = false,
   onRename,
 }: {
   /** What the page shows: the name, or "<host>'s room" when there is none. */
@@ -64,6 +65,8 @@ export function RoomTitle({
   name: string;
   editable: boolean;
   className: string;
+  /** Two lines at most, with a smaller pen (the phone's top row). */
+  compact?: boolean;
   onRename: (name: string) => void;
 }) {
   const t = useTranslations("lobby");
@@ -104,14 +107,17 @@ export function RoomTitle({
     );
 
   return (
-    <h1 className={cn(className, "wrap-break-word")}>
+    <h1 className={cn(className, "wrap-break-word", compact && "line-clamp-2")}>
       {title}
       {editable ? (
         <button
           type="button"
           aria-label={t("rename")}
           onClick={() => setDraft(name || title)}
-          className="ml-2 inline-flex size-10 translate-y-[-0.1em] items-center justify-center rounded-pill align-middle text-ink-muted transition-colors duration-200 ease-soft hover:bg-surface hover:text-ink"
+          className={cn(
+            "ml-2 inline-flex size-10 translate-y-[-0.1em] items-center justify-center rounded-pill align-middle text-ink-muted transition-colors duration-200 ease-soft hover:bg-surface hover:text-ink",
+            compact && "ml-1 size-8 [&_svg]:size-4",
+          )}
         >
           <PenLine className="size-5" strokeWidth={2} />
         </button>

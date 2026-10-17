@@ -20,9 +20,11 @@ const COPIED_MS = 1600;
 export function CodeTiles({
   code,
   onCopy,
+  className,
 }: {
   code: string;
   onCopy: () => Promise<boolean>;
+  className?: string;
 }) {
   const t = useTranslations("lobby");
   const [copied, setCopied] = useState(false);
@@ -37,7 +39,10 @@ export function CodeTiles({
       onClick={async () => {
         if (await onCopy()) setCopied(true);
       }}
-      className="group relative flex cursor-pointer touch-manipulation gap-2 rounded-md outline-none focus-visible:outline-2 focus-visible:outline-sky focus-visible:outline-offset-4"
+      className={cn(
+        "group relative flex cursor-pointer touch-manipulation gap-2 rounded-md outline-none focus-visible:outline-2 focus-visible:outline-sky focus-visible:outline-offset-4",
+        className,
+      )}
     >
       <span className="sr-only">
         {t("codeLabel", { code: code.split("").join(" ") })}
@@ -48,7 +53,7 @@ export function CodeTiles({
           key={i}
           aria-hidden="true"
           style={{ rotate: `${TILE_TILT[i % TILE_TILT.length]}deg` }}
-          className="flex h-20 w-14 items-center justify-center rounded-md bg-sunken font-display font-extrabold text-[40px] text-ink shadow-[inset_0_-5px_0_var(--line)] transition-[translate,box-shadow] duration-150 ease-soft group-hover:-translate-y-1 group-hover:shadow-[inset_0_-5px_0_var(--line),0_10px_18px_-10px_rgba(20,16,40,0.35)] group-focus-visible:-translate-y-1 group-active:translate-y-0.5 group-active:shadow-[inset_0_-3px_0_var(--line)] short:h-16 short:text-[34px] max-sm:w-12 sm:w-16 sm:short:w-14"
+          className="flex h-20 w-14 items-center justify-center rounded-md bg-sunken font-display font-extrabold text-[40px] text-ink shadow-[inset_0_-5px_0_var(--line)] transition-[translate,box-shadow] duration-150 ease-soft group-hover:-translate-y-1 group-hover:shadow-[inset_0_-5px_0_var(--line),0_10px_18px_-10px_rgba(20,16,40,0.35)] group-focus-visible:-translate-y-1 group-active:translate-y-0.5 group-active:shadow-[inset_0_-3px_0_var(--line)] max-sm:h-13 max-sm:w-auto max-sm:min-w-0 max-sm:max-w-12 max-sm:flex-1 max-sm:text-[26px] sm:w-16 sm:short:h-16 sm:short:w-14 sm:short:text-[34px]"
         >
           {c}
         </span>

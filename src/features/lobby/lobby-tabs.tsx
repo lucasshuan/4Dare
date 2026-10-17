@@ -118,7 +118,7 @@ export function LobbyTabs({
           {tabs.map((tab, i) => {
             const on = i === index;
             const Icon = tab.icon;
-            // one height for all, with a count or without
+            // one height for all, with a count or without; phones: lower, the count on the icon's shoulder
             return (
               <button
                 key={tab.key}
@@ -133,7 +133,7 @@ export function LobbyTabs({
                 tabIndex={on ? 0 : -1}
                 onClick={() => choose(i)}
                 className={cn(
-                  "group relative flex h-[88px] min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 font-semibold text-[12px] leading-tight transition-colors duration-200 ease-soft",
+                  "group relative flex h-[88px] min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 font-semibold text-[12px] leading-tight transition-colors duration-200 ease-soft max-sm:h-14 max-sm:gap-0.5",
                   on ? "text-ink" : "text-ink-muted hover:text-ink",
                 )}
               >
@@ -148,7 +148,7 @@ export function LobbyTabs({
                 )}
                 <Icon
                   className={cn(
-                    "relative size-6 transition-colors duration-200 ease-soft",
+                    "relative size-6 transition-colors duration-200 ease-soft max-sm:size-5",
                     on && "text-sky",
                   )}
                   strokeWidth={1.75}
@@ -162,7 +162,7 @@ export function LobbyTabs({
                     animate={{ scale: 1, opacity: 1 }}
                     transition={spring}
                     className={cn(
-                      "relative rounded-pill px-2 font-semibold text-xs/5 tabular-nums transition-colors duration-200 ease-soft",
+                      "relative rounded-pill px-2 font-semibold text-xs/5 tabular-nums transition-colors duration-200 ease-soft max-sm:absolute max-sm:top-1 max-sm:left-[calc(50%+6px)] max-sm:px-1.5 max-sm:text-[11px]/4",
                       on ? "bg-sky-soft text-sky" : "bg-sunken text-ink-muted",
                     )}
                   >

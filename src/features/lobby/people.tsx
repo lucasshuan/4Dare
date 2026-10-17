@@ -342,7 +342,8 @@ export function People({
     <LayoutMotion>
       <DragBoard enabled={host && open} verdict={verdict} onDrop={onDrop}>
         <div className="flex flex-col gap-5">
-          <ul className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2.5">
+          {/* phones: three across, smaller */}
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2.5 max-sm:grid-cols-3 max-sm:gap-2">
             <AnimatePresence initial={false} mode="popLayout">
               {shown.players.map((p) => (
                 <PlayerCard
@@ -533,10 +534,15 @@ function PlayerFace({
   return (
     <div
       style={seatWash(player.colorSlot)}
-      className="relative flex h-full flex-col items-center gap-1.5 rounded-md px-2 pt-4 pb-3 text-center"
+      className="relative flex h-full flex-col items-center gap-1.5 rounded-md px-2 pt-4 pb-3 text-center max-sm:gap-1 max-sm:px-1.5 max-sm:pt-3 max-sm:pb-2.5"
     >
       <span className="relative">
-        <Avatar avatar={player.avatar} size={52} seat={player.colorSlot} />
+        <Avatar
+          avatar={player.avatar}
+          size={52}
+          seat={player.colorSlot}
+          className="max-sm:size-11 max-sm:text-lg"
+        />
         {player.isHost ? null : (
           <ReadyDot
             ready={player.ready}
@@ -544,7 +550,8 @@ function PlayerFace({
           />
         )}
       </span>
-      <span className="mt-0.5 w-full truncate font-semibold text-sm leading-tight">
+      {/* phones: a narrow card, so a long name takes two lines rather than losing its "(you)" */}
+      <span className="mt-0.5 w-full truncate font-semibold text-sm leading-tight max-sm:line-clamp-2 max-sm:whitespace-normal max-sm:text-[13px] max-sm:wrap-anywhere">
         {displayName}
       </span>
       <span className="inline-flex max-w-full items-center gap-1 truncate font-medium text-[12px] text-ink-muted leading-tight">
@@ -608,7 +615,7 @@ function PlayerCard({
       }
       aria-roledescription={board.enabled ? t("dragHint") : undefined}
       className={cn(
-        "relative min-h-[132px] rounded-md",
+        "relative min-h-[132px] rounded-md max-sm:min-h-[112px]",
         board.enabled && "touch-manipulation select-none",
       )}
     >
@@ -661,12 +668,12 @@ function SeatCell({
   const body = (
     <>
       {open ? (
-        <span className="flex size-13 shrink-0 items-center justify-center rounded-pill border-[1.5px] border-line-strong border-dashed font-bold font-display text-lg">
+        <span className="flex size-13 shrink-0 items-center justify-center rounded-pill border-[1.5px] border-line-strong border-dashed font-bold font-display text-lg max-sm:size-11">
           ?
         </span>
       ) : (
         // a struck-through ring: nobody sits here
-        <span className="relative flex size-13 shrink-0 items-center justify-center rounded-pill border-[1.5px] border-line-strong/70 bg-canvas">
+        <span className="relative flex size-13 shrink-0 items-center justify-center rounded-pill border-[1.5px] border-line-strong/70 bg-canvas max-sm:size-11">
           <span className="h-[1.5px] w-7 -rotate-45 rounded-pill bg-line-strong/70" />
         </span>
       )}
@@ -682,7 +689,7 @@ function SeatCell({
       transition={{ layout: layoutSpring }}
       {...cellIn}
       {...(open ? dropProps(target) : {})}
-      className="relative min-h-[132px]"
+      className="relative min-h-[132px] max-sm:min-h-[112px]"
     >
       {onSit ? (
         <button
@@ -762,7 +769,8 @@ function WatchersArea({
           </AnimatePresence>
         </ul>
       ) : (
-        <p className="m-0 rounded-md border-[1.5px] border-line border-dashed px-4 py-5 text-center text-[13px] text-ink-muted">
+        // phones: the line alone, without its box
+        <p className="m-0 rounded-md border-[1.5px] border-line border-dashed px-4 py-5 text-center text-[13px] text-ink-muted max-sm:border-0 max-sm:p-0 max-sm:text-left max-sm:text-xs">
           {t("watchersEmpty")}
         </p>
       )}

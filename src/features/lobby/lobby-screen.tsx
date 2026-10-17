@@ -45,9 +45,11 @@ import { useRoomAction } from "@/features/data/use-room-action";
 import { watchersKey } from "@/features/data/use-watchers";
 import { RoomControls } from "@/features/room/room-controls";
 import { setStartAsked } from "@/features/room/start-cover";
+import { PHONE } from "@/features/stage/use-stage-timeline";
 import { GAME_SEATS } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { cn } from "@/lib/cn";
+import { useMedia } from "@/lib/hooks/use-media";
 import { useDisplayName, useRoomTitle } from "@/lib/names";
 import type { CreateRoomInput } from "@/server/contract";
 import { CodeTiles } from "./code-tiles";
@@ -242,6 +244,8 @@ export function LobbyScreen() {
         ),
       );
   const free = view.players.length < shownSeats;
+  // phones: the room's name goes up into the row of keys, which is empty otherwise
+  const phone = useMedia(PHONE);
   const play = async () => {
     await act(() => playInstead(code));
     await client.invalidateQueries({ queryKey: watchersKey(code) });
@@ -250,36 +254,55 @@ export function LobbyScreen() {
   return (
     <Screen bare>
       {/* no top bar here: the lobby is the game's waiting room, with only sound, theme and the way out, top right like a match's "Leave" */}
-      <RoomControls className="mb-3 justify-end" />
+      <div className="mb-3 flex items-center justify-end gap-3">
+        {phone ? (
+          <RoomTitle
+            compact
+            title={title}
+            name={nameGuess ?? roomName}
+            editable={me.isHost}
+            className="min-w-0 flex-1 font-bold font-display text-[18px] leading-[22px] tracking-[-0.01em]"
+            onRename={rename}
+          />
+        ) : null}
+        <RoomControls />
+      </div>
       {/* on a desktop the lobby fits the window and never scrolls: the lists and the settings scroll inside their panels.
           Narrower, one column whose panels mix both sides: the game and its key, the invite, who is here, the settings */}
       <div className="flex flex-col gap-5 short:gap-4 lg:min-h-0 lg:flex-1 lg:flex-row lg:gap-8">
         {/* the rest of the page's width, the same whatever the open tab holds, so its right edge meets the controls' */}
         <section className="max-lg:contents lg:flex lg:min-h-0 lg:min-w-0 lg:flex-1 lg:flex-col lg:gap-5 lg:short:gap-4">
-          {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right (on phones, small in the corner beside "Copy link").
-              In one column it follows the game, so the key to start or get ready is in sight at once */}
+          {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right.
+              In one column it follows the game, so the key to start or get ready is in sight at once; phones fit it in two lines:
+              the greeting, then the code, the link's key and a small QR code */}
           <div
             className={cn(
               panelClass,
               "lobby-leave flex shrink-0 flex-col gap-4 [--leave-i:1] max-lg:order-2",
             )}
           >
-            <RoomTitle
-              title={title}
-              name={nameGuess ?? roomName}
-              editable={me.isHost}
-              className={titleClass}
-              onRename={rename}
-            />
-            <div className="relative flex items-center gap-6">
-              <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3">
-                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance] max-sm:text-lg">
+            {phone ? null : (
+              <RoomTitle
+                title={title}
+                name={nameGuess ?? roomName}
+                editable={me.isHost}
+                className={titleClass}
+                onRename={rename}
+              />
+            )}
+            <div className="flex items-center gap-6 max-sm:grid max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:gap-x-2 max-sm:gap-y-3">
+              <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3 max-sm:contents">
+                <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance] max-sm:col-span-2 max-sm:font-medium max-sm:text-[15px] max-sm:text-ink-muted">
                   {greeting}
                 </p>
-                {/* desktop: "Copy link" right of the code; phones: under it */}
-                <div className="flex flex-col items-start gap-4 short:gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                {/* desktop: "Copy link" right of the code; tablets: under it; phones: a key beside it */}
+                <div className="flex flex-col items-start gap-4 short:gap-3 max-sm:min-w-0 max-sm:flex-row max-sm:items-center max-sm:gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                   {/* the code as game tiles: a press copies it */}
-                  <CodeTiles code={code} onCopy={() => copy(code)} />
+                  <CodeTiles
+                    code={code}
+                    onCopy={() => copy(code)}
+                    className="max-sm:min-w-0 max-sm:flex-1 max-sm:gap-1.5"
+                  />
                   <Button
                     onClick={() =>
                       copy(
@@ -287,16 +310,17 @@ export function LobbyScreen() {
                         t("linkCopied"),
                       )
                     }
+                    className="max-sm:size-11 max-sm:shrink-0 max-sm:px-0"
                   >
                     <LinkIcon strokeWidth={1.75} />
-                    {t("copyLink")}
+                    <span className="max-sm:sr-only">{t("copyLink")}</span>
                   </Button>
                 </div>
               </div>
-              {/* phones: out of the flow, in the room "Copy link" leaves on its right; a tap opens it big */}
+              {/* phones: small, at the end of the code's row; a tap opens it big */}
               <RoomQr
                 code={code}
-                className="max-sm:absolute max-sm:right-0 max-sm:bottom-0 max-sm:size-13 max-sm:rounded-[10px] max-sm:p-1"
+                className="max-sm:size-13 max-sm:rounded-[10px] max-sm:p-1"
               />
             </div>
           </div>
