@@ -12,7 +12,7 @@ import { useRoomContext } from "@/features/data/room-context";
 import { GAME_AREA } from "@/features/stage/scene-kit";
 import type { CardView, PlayerView, RevealView } from "@/game/types";
 import { cn } from "@/lib/cn";
-import { useServerClock } from "@/lib/hooks/use-server-clock";
+import { usePast, useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { onSeat, seatColor } from "@/lib/seats";
@@ -35,8 +35,7 @@ const sticker =
  * room back to the turn screen (a winning hit goes on to the podium).
  */
 export function GuessScene() {
-  const { view, offset, playerById } = useRoomContext();
-  const now = useServerClock(offset, 100);
+  const { view, playerById } = useRoomContext();
   const r =
     view.reveal?.kind === "guess" || view.reveal?.kind === "pass"
       ? view.reveal
@@ -53,7 +52,9 @@ export function GuessScene() {
     !!held && view.phase === "asking" && view.stepStartsAt === held.until;
   const end = held ? held.until + (handoff ? HANDOFF_COVERED_MS : 0) : 0;
   const player = held ? playerById(held.byId) : undefined;
-  const on = !!held && !!player && now >= held.startsAt && now < end;
+  const started = usePast(held?.startsAt ?? null);
+  const over = usePast(held ? end : null);
+  const on = !!held && !!player && started && !over;
   return (
     <AnimatePresence>
       {on && held && player ? (
@@ -83,11 +84,11 @@ export function GuessScene() {
         >
           <Marks />
           {held.kind === "guess" ? (
-            <GuessResult reveal={held} player={player} now={now} />
+            <GuessResult reveal={held} player={player} />
           ) : (
             <Pass reveal={held} player={player} />
           )}
-          <Progress startsAt={held.startsAt} until={held.until} now={now} />
+          <Progress startsAt={held.startsAt} until={held.until} />
         </m.div>
       ) : null}
     </AnimatePresence>
@@ -153,11 +154,9 @@ function Kicker({ player: p, text }: { player: PlayerView; text: string }) {
 function GuessResult({
   reveal,
   player,
-  now,
 }: {
   reveal: Extract<SceneReveal, { kind: "guess" }>;
   player: PlayerView;
-  now: number;
 }) {
   const t = useTranslations("whoAmI.turn.reveal");
   const name = useDisplayName();
@@ -166,7 +165,7 @@ function GuessResult({
     SUSPENSE_MS,
     (reveal.until - reveal.startsAt) * 0.2,
   );
-  const shown = now >= reveal.startsAt + suspense;
+  const shown = usePast(reveal.startsAt + suspense);
   // confetti once, when the result lands (not for a reload past it)
   const [late] = useState(shown);
   useEffect(() => {
@@ -345,16 +344,10 @@ function Pass({
   );
 }
 
-/** How much of the scene is left, as a thin line along the bottom. */
-function Progress({
-  startsAt,
-  until,
-  now,
-}: {
-  startsAt: number;
-  until: number;
-  now: number;
-}) {
+/** How much of the scene is left, as a thin line along the bottom; its clock ticks only while it shows. */
+function Progress({ startsAt, until }: { startsAt: number; until: number }) {
+  const { offset } = useRoomContext();
+  const now = useServerClock(offset, 100);
   const left = Math.max(0, Math.min(1, (until - now) / (until - startsAt)));
   return (
     // above the phone's chat bar

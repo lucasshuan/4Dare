@@ -11,7 +11,7 @@ import { GAME_AREA } from "@/features/stage/scene-kit";
 import type { AnswerValue, RevealView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { insideChat } from "@/lib/focus";
-import { useServerClock } from "@/lib/hooks/use-server-clock";
+import { usePast, useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 
@@ -29,13 +29,13 @@ const FIELD =
  */
 export function RevealOverlay() {
   const t = useTranslations("common");
-  const { view, offset } = useRoomContext();
-  const now = useServerClock(offset, 100);
+  const { view } = useRoomContext();
   // Answers only: the shows and a guess's scene play on their own.
   const r = view.reveal?.kind === "answers" ? view.reveal : null;
   const id = r ? `${r.kind}-${r.n}` : null;
   const [closed, setClosed] = useState<string | null>(null);
-  const active = r !== null && now < r.until && closed !== id;
+  const over = usePast(r?.until ?? null);
+  const active = r !== null && !over && closed !== id;
   useEffect(() => {
     if (!active || !id) return;
     const onKey = (e: KeyboardEvent) => {
@@ -106,7 +106,7 @@ export function RevealOverlay() {
             <p className="mt-4 text-center font-medium text-[13px] text-ink-muted max-sm:hidden">
               {t("revealHint")}
             </p>
-            <Progress startsAt={r.startsAt} until={r.until} now={now} />
+            <Progress startsAt={r.startsAt} until={r.until} />
           </m.div>
         </m.div>
       ) : null}
@@ -114,15 +114,10 @@ export function RevealOverlay() {
   );
 }
 
-function Progress({
-  startsAt,
-  until,
-  now,
-}: {
-  startsAt: number;
-  until: number;
-  now: number;
-}) {
+/** How much of the reveal is left; its clock ticks only while it shows. */
+function Progress({ startsAt, until }: { startsAt: number; until: number }) {
+  const { offset } = useRoomContext();
+  const now = useServerClock(offset, 100);
   const left = Math.max(0, Math.min(1, (until - now) / (until - startsAt)));
   return (
     <span className="absolute inset-x-0 bottom-0 h-1 bg-sunken">

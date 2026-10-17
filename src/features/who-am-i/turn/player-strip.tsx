@@ -144,6 +144,9 @@ function TurnTag({ slot }: { slot: number }) {
 /** Ring length: r = 19 in a 40 × 40 box. */
 const RING = 2 * Math.PI * 19;
 
+/** How often the ring is redrawn: a stroke's dash is painted on the main thread, so never every frame. */
+const RING_TICK_MS = 250;
+
 /**
  * The player's ring as the step clock: a faint track and the colour draining
  * to the deadline, on the server clock. Full while a reveal holds the step back.
@@ -163,16 +166,16 @@ function ClockRing({ slot }: { slot: number }) {
     if (!el || deadline === null || stepStartsAt === null || total <= 0) return;
     // a cut deadline starts the drain from less than full
     const from = RING * (1 - Math.min(1, (deadline - stepStartsAt) / total));
-    const anim = el.animate(
-      [{ strokeDashoffset: from }, { strokeDashoffset: RING }],
-      {
-        duration: Math.max(1, deadline - stepStartsAt),
-        delay: stepStartsAt - now.current(),
-        fill: "both",
-        easing: "linear",
-      },
-    );
-    return () => anim.cancel();
+    const span = Math.max(1, deadline - stepStartsAt);
+    let id = 0;
+    const draw = () => {
+      const p = Math.min(1, Math.max(0, (now.current() - stepStartsAt) / span));
+      el.style.strokeDashoffset = String(from + (RING - from) * p);
+      if (p >= 1) window.clearInterval(id);
+    };
+    draw();
+    id = window.setInterval(draw, RING_TICK_MS);
+    return () => window.clearInterval(id);
   }, [deadline, stepStartsAt, total]);
   const color = seatColor(slot);
   return (

@@ -9,7 +9,6 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useReducer,
   useRef,
   useState,
 } from "react";
@@ -40,7 +39,7 @@ import { cn } from "@/lib/cn";
 import { focusIsFree } from "@/lib/focus";
 import { useAction } from "@/lib/hooks/use-action";
 import { useMedia } from "@/lib/hooks/use-media";
-import { useClock } from "@/lib/hooks/use-server-clock";
+import { usePast } from "@/lib/hooks/use-server-clock";
 import { dur, type EaseFn, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 import { useGameOption } from "@/lib/settings";
@@ -117,20 +116,6 @@ function showIn(view: RoomView, kind: ShowKind): ShowView | null {
   if (!isShow(r)) return null;
   if (r.kind === kind) return r;
   return r.prev?.kind === kind ? r.prev : null;
-}
-
-/** Whether server time `at` has passed; re-renders when it does. */
-function usePast(at: number | null): boolean {
-  const clock = useClock();
-  const [, bump] = useReducer((n: number) => n + 1, 0);
-  useEffect(() => {
-    if (at === null || clock.frozen) return;
-    const wait = (at - clock.now()) / clock.rate;
-    if (wait < 0) return;
-    const id = window.setTimeout(bump, wait + 15);
-    return () => window.clearTimeout(id);
-  }, [at, clock]);
-  return at !== null && clock.now() >= at;
 }
 
 /**

@@ -8,7 +8,7 @@ import { useRoomContext } from "@/features/data/room-context";
 import { GAME_AREA } from "@/features/stage/scene-kit";
 import type { RevealView } from "@/game/types";
 import { cn } from "@/lib/cn";
-import { useServerClock } from "@/lib/hooks/use-server-clock";
+import { usePast } from "@/lib/hooks/use-server-clock";
 import { dur, ease, gs } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
 
@@ -25,13 +25,14 @@ const stamp =
  * The cards themselves only show at the end.
  */
 export function ImpostorScenes() {
-  const { view, offset } = useRoomContext();
-  const now = useServerClock(offset, 100);
+  const { view } = useRoomContext();
   const r =
     view.reveal?.kind === "out" || view.reveal?.kind === "swap"
       ? (view.reveal as Scene)
       : null;
-  const on = !!r && now >= r.startsAt && now < r.until;
+  const started = usePast(r?.startsAt ?? null);
+  const over = usePast(r?.until ?? null);
+  const on = !!r && started && !over;
   return (
     <AnimatePresence>
       {on && r ? (
