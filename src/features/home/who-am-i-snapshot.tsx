@@ -1,8 +1,8 @@
 "use client";
 
-import { AnimatePresence, m, useReducedMotion } from "motion/react";
+import { AnimatePresence, m, useInView, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnswerChip } from "@/components/ui/answer-chip";
 import type { AnswerValue } from "@/game/types";
 import { cn } from "@/lib/cn";
@@ -127,7 +127,10 @@ export function WhoAmISnapshot({
 }) {
   const t = useTranslations("home.games.whoAmI");
   const reduced = useReducedMotion() ?? false;
-  const still = forceStill || reduced;
+  // off screen (a lobby scrolled down to its seats) it holds still: no loop runs unseen
+  const root = useRef<HTMLDivElement>(null);
+  const seen = useInView(root);
+  const still = forceStill || reduced || !seen;
   const { step, loop } = useStepLoop(STEPS, STILL, still);
   // the order is picked in the browser: the server renders the first round
   const [seed, setSeed] = useState(0);
@@ -196,6 +199,7 @@ export function WhoAmISnapshot({
 
   return (
     <div
+      ref={root}
       aria-hidden="true"
       data-art-theme="light"
       className={cn(
