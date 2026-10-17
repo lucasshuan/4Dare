@@ -256,7 +256,7 @@ export function LobbyScreen() {
       <div className="flex flex-col gap-5 short:gap-4 lg:min-h-0 lg:flex-1 lg:flex-row lg:gap-8">
         {/* the rest of the page's width, the same whatever the open tab holds, so its right edge meets the controls' */}
         <section className="max-lg:contents lg:flex lg:min-h-0 lg:min-w-0 lg:flex-1 lg:flex-col lg:gap-5 lg:short:gap-4">
-          {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right (not on phones).
+          {/* the invite: the room's name leads it, the greeting sits close to the code it explains, the QR code to their right (on phones, small in the corner beside "Copy link").
               In one column it follows the game, so the key to start or get ready is in sight at once */}
           <div
             className={cn(
@@ -271,7 +271,7 @@ export function LobbyScreen() {
               className={titleClass}
               onRename={rename}
             />
-            <div className="flex items-center gap-6">
+            <div className="relative flex items-center gap-6">
               <div className="flex min-w-0 flex-1 flex-col gap-4 short:gap-3">
                 <p className="max-w-[560px] font-semibold text-xl [text-wrap:balance] max-sm:text-lg">
                   {greeting}
@@ -293,7 +293,11 @@ export function LobbyScreen() {
                   </Button>
                 </div>
               </div>
-              <RoomQr code={code} className="max-sm:hidden" />
+              {/* phones: out of the flow, in the room "Copy link" leaves on its right; a tap opens it big */}
+              <RoomQr
+                code={code}
+                className="max-sm:absolute max-sm:right-0 max-sm:bottom-0 max-sm:size-13 max-sm:rounded-[10px] max-sm:p-1"
+              />
             </div>
           </div>
           {/* who is here, and the room's past matches: always takes what is left of the window, and scrolls inside */}

@@ -168,9 +168,13 @@ export function RoomQr({
         <QrArt url={url} still={still} />
         <span
           aria-hidden="true"
-          className="absolute -top-2 -right-2 flex size-7 scale-75 items-center justify-center rounded-pill bg-ink text-on-ink opacity-0 shadow-card transition-[scale,opacity] duration-200 ease-soft group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100"
+          // touch screens have no hover: there it always shows, small, that a tap opens it
+          className="absolute -top-2 -right-2 flex size-7 scale-75 items-center justify-center rounded-pill bg-ink text-on-ink opacity-0 shadow-card transition-[scale,opacity] duration-200 ease-soft group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 pointer-coarse:-top-1.5 pointer-coarse:-right-1.5 pointer-coarse:size-5 pointer-coarse:scale-100 pointer-coarse:opacity-100"
         >
-          <Maximize2 className="size-3.5" strokeWidth={2.25} />
+          <Maximize2
+            className="size-3.5 pointer-coarse:size-2.5"
+            strokeWidth={2.25}
+          />
         </span>
       </Dialog.Trigger>
       <Dialog.Portal>
