@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { MiniCard } from "@/components/ui/mini-card";
 import { themeId } from "@/game/theme-id";
 import type { Lang, Theme } from "@/game/types";
+import { useMedia } from "@/lib/hooks/use-media";
 import { gs } from "@/lib/motion";
 import { fetchHand, type HandCard, handKey } from "./draft-api";
 
@@ -25,10 +26,21 @@ export function usePickHand(theme: Theme | null, lang: Lang) {
   });
 }
 
+/** Phones this short get a smaller hand, without its label. */
+const CRAMPED = "(max-height: 600px)";
+
+/**
+ * Phones: the room the pick table keeps free at its foot for the hand's
+ * peek, so Confirm never ends up under it (the same at every step of the
+ * pick: the done row takes it once the hand has gone).
+ */
+export const HAND_ROOM = "h-[74px] [@media(max-height:600px)]:h-[40px]";
+
 /**
  * The hand peeking from the bottom edge, fanned out: a tap puts that
  * character on the card. Fixed to the bottom of the window (lifted over the
- * phone's chat bar by `--dock`); it drops away once the card is confirmed or
+ * phone's chat bar by `--dock-steady`, so it stays put while the name field
+ * folds the bar away); it drops away once the card is confirmed or
  * the time is up. The entrance (cards rising, the label) is the screen's
  * timeline, on `data-t="hand"` and `data-t="label"`, from these from-styles.
  */
@@ -55,8 +67,9 @@ export function PickHand({
   onPick: (card: HandCard) => void;
 }) {
   const t = useTranslations("whoAmI.pickCard");
+  const cramped = useMedia(CRAMPED);
   if (!cards.length) return null;
-  const width = phone ? 70 : 92;
+  const width = phone ? (cramped ? 60 : 70) : 92;
   const mid = (cards.length - 1) / 2;
 
   return (
@@ -68,12 +81,12 @@ export function PickHand({
           ? { duration: 0.4, delay: 0.1, ease: gs.p1Out }
           : { duration: 0.5, delay: 0.1, ease: gs.p2In }
       }
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(-60px+var(--dock))] z-[1] flex flex-col items-center gap-2 sm:bottom-[-70px]"
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(-68px+var(--dock-steady))] z-[1] flex flex-col items-center gap-2 sm:bottom-[-70px]"
     >
       <span
         data-t="label"
         style={{ opacity: 0 }}
-        className="flex max-w-[calc(100vw-32px)] items-center gap-1.5 font-bold text-[13px] text-ink-muted"
+        className="flex max-w-[calc(100vw-32px)] items-center gap-1.5 font-bold text-[13px] text-ink-muted max-sm:[@media(max-height:600px)]:hidden"
       >
         <Heart
           aria-hidden

@@ -355,7 +355,11 @@ export function CardPicture({
       ref={wrap}
       className={cn(
         "group relative mx-auto w-full transition-[width] duration-300 ease-out",
-        compact && "max-sm:w-[62%]",
+        // phones: no wider than the height the pick table leaves it allows
+        // (the card's zone is a size container; the rest of the card is about 164 px)
+        compact
+          ? "max-sm:w-[min(62%,calc((100cqh_-_164px)*0.8))]"
+          : "max-sm:w-[min(100%,calc((100cqh_-_164px)*0.8))]",
       )}
       onDragOver={(e) => {
         e.preventDefault();

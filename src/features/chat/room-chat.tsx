@@ -189,21 +189,22 @@ export function RoomChat() {
   }, [open, finePointer]);
 
   // Phones: while another field has focus the folded bar hides, so it never
-  // rides the keyboard over the pick, ask or guess field.
+  // rides the keyboard over the pick, ask or guess field. `--dock-steady`
+  // keeps the bar's room meanwhile, for layouts that must not jump as the
+  // field takes the focus.
   const hidden = phone && !open && focus === "other";
   useEffect(() => {
-    document.documentElement.style.setProperty(
-      "--dock",
-      hidden
-        ? "0px"
-        : phone
-          ? `calc(${SHUT.phone}px + env(safe-area-inset-bottom))`
-          : `${SHUT.desktop}px`,
-    );
+    const root = document.documentElement.style;
+    const bar = phone
+      ? `calc(${SHUT.phone}px + env(safe-area-inset-bottom))`
+      : `${SHUT.desktop}px`;
+    root.setProperty("--dock", hidden ? "0px" : bar);
+    root.setProperty("--dock-steady", bar);
   }, [hidden, phone]);
   useEffect(
     () => () => {
       document.documentElement.style.removeProperty("--dock");
+      document.documentElement.style.removeProperty("--dock-steady");
     },
     [],
   );

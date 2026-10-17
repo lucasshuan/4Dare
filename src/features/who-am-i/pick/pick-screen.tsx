@@ -54,7 +54,7 @@ import {
   PickCard,
   type PickCardState,
 } from "./pick-card";
-import { PickHand, usePickHand } from "./pick-hand";
+import { HAND_ROOM, PickHand, usePickHand } from "./pick-hand";
 import { usePickDraft } from "./use-pick-draft";
 
 /** The row layout (spacer, card, actions column); narrower windows stack them. */
@@ -133,8 +133,26 @@ function usePast(at: number | null): boolean {
   return at !== null && clock.now() >= at;
 }
 
-/** The card's width: smaller on short windows, so the hand stays clear of it. */
-function useCardWidth(phone: boolean): number {
+/**
+ * Phones: the table fills the screen under the header (the frame's sizes,
+ * as SCENE_MIN_H) and the card takes the height left between the title and
+ * the keys, so Confirm stays in sight above the hand without scrolling. The
+ * chat bar's room is the steady one: a field taking the focus folds the bar
+ * away, and the card must not grow under the player's thumb.
+ */
+const PHONE_TABLE =
+  "max-sm:h-[calc(100dvh-7rem-var(--dock-steady))] max-sm:short:h-[calc(100dvh-5.5rem-var(--dock-steady))]";
+/**
+ * The phone card's width from the height it is given (its zone is a size
+ * container): the picture is 4:5 and the rest of the card about 118 px. Under
+ * 192 px the card keeps its width for the name and the picture shrinks
+ * instead (CardPicture).
+ */
+const PHONE_CARD_W =
+  "max-sm:w-[clamp(192px,calc((100cqh_-_118px)/1.25),224px)]";
+
+/** The card's width from `sm` up: smaller on short windows, so the hand stays clear of it. */
+function useCardWidth(): number {
   const [height, setHeight] = useState(() =>
     typeof window === "undefined" ? 800 : window.innerHeight,
   );
@@ -143,9 +161,8 @@ function useCardWidth(phone: boolean): number {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-  const scene = height - (phone ? 80 : 76);
-  const fit = (scene - 360) / 1.25 + 24;
-  return Math.round(Math.max(200, Math.min(phone ? 224 : 270, fit)));
+  const fit = (height - 76 - 360) / 1.25 + 24;
+  return Math.round(Math.max(200, Math.min(270, fit)));
 }
 
 /** Least room between the grown card and the done row under it. */
@@ -303,7 +320,7 @@ function PickTable() {
   const target = playerById(pick.targetId);
   const phone = useMedia(PHONE);
   const wide = useMedia(WIDE);
-  const width = useCardWidth(phone);
+  const width = useCardWidth();
   const [cardBox, setCardBox] = useState<HTMLDivElement | null>(null);
   const [doneRow, setDoneRow] = useState<HTMLDivElement | null>(null);
   const settledScale = useSettledScale(cardBox, doneRow);
@@ -485,59 +502,62 @@ function PickTable() {
   const targetName = withNames((n) => t("cardTitle", { name: n(target) }));
 
   return (
-    <div ref={root} className="relative">
+    <div ref={root} className={cn("relative", PHONE_TABLE)}>
       <div
         ref={scope}
         style={{ "--pick-w": `${width}px` } as CSSProperties}
-        className="flex flex-col items-center gap-4 sm:gap-[22px] sm:pt-1"
+        className="flex flex-col items-center gap-4 max-sm:h-full max-sm:gap-2.5 sm:gap-[22px] sm:pt-1"
       >
         <h1
           data-t="title"
           style={{ opacity: 0, transform: "translateY(10px)" }}
-          className="max-w-full text-balance text-center font-bold font-display text-[21px] tracking-[-0.015em] sm:text-[28px]"
+          className="max-w-full text-balance text-center font-bold font-display text-[19px] tracking-[-0.015em] sm:text-[28px]"
         >
           {targetName}
         </h1>
 
-        <div className="flex flex-col items-center gap-3.5 lg:flex-row lg:gap-10">
+        <div className="flex flex-col items-center gap-3.5 max-sm:min-h-0 max-sm:w-full max-sm:flex-1 max-sm:gap-2.5 lg:flex-row lg:gap-10">
           <div aria-hidden className="hidden w-[210px] lg:block" />
-          <div
-            ref={setCardBox}
-            data-t="card"
-            style={{
-              opacity: 0,
-              transform: "translateY(30px) scale(0.8) rotate(-5deg)",
-            }}
-            // over the actions: the picture's tray hangs over them
-            className="relative z-10"
-          >
-            <PickCard
-              value={shown}
-              onChange={change}
-              lang={lang}
-              targetName={displayName(target, false)}
-              owner={<PlayerName player={target} />}
-              seat={target.colorSlot}
-              state={state}
-              settledScale={settledScale}
-              stamp={timeUp}
-              onNewImage={(image, replaces) =>
-                uploadDraftImage(code, image, { replaces, lang })
-              }
-              onLibraryImage={onLibraryImage}
-              autoFocus={autoFocus}
-              onFocusChange={setFocused}
-              className="w-[var(--pick-w)] sm:w-[var(--pick-w)]"
-            />
-            {drawnId ? (
-              <DrawFeedback
-                key={`feedback-${drawnId}`}
-                code={code}
-                characterId={drawnId}
-                show={editing && settled === drawnId && !busy}
-                onMisfit={roll}
+          {/* phones: the card's zone, all the height the title and the keys leave */}
+          <div className="flex justify-center max-sm:min-h-0 max-sm:w-full max-sm:flex-1 max-sm:items-center max-sm:[container-type:size]">
+            <div
+              ref={setCardBox}
+              data-t="card"
+              style={{
+                opacity: 0,
+                transform: "translateY(30px) scale(0.8) rotate(-5deg)",
+              }}
+              // over the actions: the picture's tray hangs over them
+              className="relative z-10"
+            >
+              <PickCard
+                value={shown}
+                onChange={change}
+                lang={lang}
+                targetName={displayName(target, false)}
+                owner={<PlayerName player={target} />}
+                seat={target.colorSlot}
+                state={state}
+                settledScale={settledScale}
+                stamp={timeUp}
+                onNewImage={(image, replaces) =>
+                  uploadDraftImage(code, image, { replaces, lang })
+                }
+                onLibraryImage={onLibraryImage}
+                autoFocus={autoFocus}
+                onFocusChange={setFocused}
+                className={cn(PHONE_CARD_W, "sm:w-[var(--pick-w)]")}
               />
-            ) : null}
+              {drawnId ? (
+                <DrawFeedback
+                  key={`feedback-${drawnId}`}
+                  code={code}
+                  characterId={drawnId}
+                  show={editing && settled === drawnId && !busy}
+                  onMisfit={roll}
+                />
+              ) : null}
+            </div>
           </div>
 
           <m.div
@@ -561,7 +581,7 @@ function PickTable() {
                   onClick={confirm}
                   className={keyClass("yes", {
                     className:
-                      "h-14 px-[22px] text-[19px] sm:h-16 sm:px-[30px] sm:text-[21px] [&_svg]:size-[22px]",
+                      "h-12 px-[22px] text-[19px] sm:h-16 sm:px-[30px] sm:text-[21px] [&_svg]:size-[22px]",
                   })}
                 >
                   <Check strokeWidth={2.5} aria-hidden />
@@ -619,6 +639,14 @@ function PickTable() {
           players={view.players}
           confirmedIds={pick.confirmedIds}
           show={state === "confirmed"}
+        />
+        {/* phones: the room the hand peeks into (then the done row), kept all along */}
+        <div
+          aria-hidden
+          className={cn(
+            "shrink-0 sm:hidden",
+            popularHand && !typedTheme ? HAND_ROOM : "h-4",
+          )}
         />
       </div>
     </div>
