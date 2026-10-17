@@ -153,7 +153,7 @@ export function LobbyBackdrop({ game }: { game: GameKey }) {
       animate={{ opacity: 1 }}
       transition={{ duration: reduced ? 0.15 : 0.9, ease: [0.65, 0, 0.35, 1] }}
     >
-      <div className="aurora-fill" />
+      <Fills />
       {GLOWS.map(([c, left, top, size, dx, dy, ahead]) => (
         <div
           key={`${left}-${top}`}
@@ -242,23 +242,35 @@ export function LobbyBackdrop({ game }: { game: GameKey }) {
       </div>
       {beat ? (
         <div key={`flashes-${pulse}`}>
-          <div
-            className="aurora-flash"
-            data-on="beat"
-            style={{
-              animationDelay: `${beat.delay.toFixed(4)}s, ${beat.turn.toFixed(3)}s`,
-            }}
-          />
-          <div
-            className="aurora-flash"
-            data-on="bar"
-            style={{
-              animationDelay: `${beat.delay.toFixed(4)}s, ${beat.turn.toFixed(3)}s`,
-            }}
-          />
+          {(["beat", "bar"] as const).map((on) => (
+            <div
+              key={on}
+              className="aurora-flash"
+              data-on={on}
+              style={{ animationDelay: `${beat.delay.toFixed(4)}s` }}
+            >
+              {/* the colour turn, in step with the fill below */}
+              <Fills delay={beat.turn} />
+            </div>
+          ))}
         </div>
       ) : null}
     </m.div>,
     body,
+  );
+}
+
+/** The cycle's three colour layers (globals.css); `delay` (s) puts the turn in step with one started earlier. */
+function Fills({ delay }: { delay?: number }) {
+  const style =
+    delay === undefined
+      ? undefined
+      : { animationDelay: `${delay.toFixed(3)}s` };
+  return (
+    <>
+      <div className="aurora-fill" />
+      <div className="aurora-fill" data-k="2" style={style} />
+      <div className="aurora-fill" data-k="3" style={style} />
+    </>
   );
 }

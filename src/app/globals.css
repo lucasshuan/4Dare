@@ -734,6 +734,11 @@ body {
   --aurora-vivid-2: oklch(0.32 0.13 355);
   --aurora-vivid-3: oklch(0.35 0.1 240);
 }
+/*
+ * The cycle's colour: three still layers, fill 1 at the bottom and the other
+ * two fading in over it in turn. Only their opacity moves, which the GPU
+ * composites; animating background-color repainted the whole page every frame.
+ */
 .aurora-fill {
   position: absolute;
   inset: 0;
@@ -742,27 +747,57 @@ body {
     var(--lobby-fill-1),
     var(--canvas) var(--aurora-lean)
   );
-  animation: aurora-turn 30.2916s linear infinite;
 }
+.aurora-fill[data-k="2"] {
+  opacity: 0;
+  background-color: color-mix(
+    in oklab,
+    var(--lobby-fill-2),
+    var(--canvas) var(--aurora-lean)
+  );
+  animation: aurora-turn-2 30.2916s linear infinite;
+}
+.aurora-fill[data-k="3"] {
+  opacity: 0;
+  background-color: color-mix(
+    in oklab,
+    var(--lobby-fill-3),
+    var(--canvas) var(--aurora-lean)
+  );
+  animation: aurora-turn-3 30.2916s linear infinite;
+}
+/* The flares: the beat's pulse on the whole, over the same three layers in the vivid colours. */
 .aurora-flash {
   position: absolute;
   inset: 0;
   opacity: 0;
+}
+.aurora-flash[data-on="beat"] {
+  animation: aurora-beat 0.63107s ease-out infinite;
+}
+.aurora-flash[data-on="bar"] {
+  animation: aurora-bar 2.5243s ease-out infinite;
+}
+.aurora-flash > .aurora-fill {
   background-color: color-mix(
     in oklab,
     var(--lobby-vivid-1),
     var(--canvas) var(--aurora-lean)
   );
 }
-.aurora-flash[data-on="beat"] {
-  animation:
-    aurora-beat 0.63107s ease-out infinite,
-    aurora-turn-vivid 30.2916s linear infinite;
+.aurora-flash > .aurora-fill[data-k="2"] {
+  background-color: color-mix(
+    in oklab,
+    var(--lobby-vivid-2),
+    var(--canvas) var(--aurora-lean)
+  );
 }
-.aurora-flash[data-on="bar"] {
-  animation:
-    aurora-bar 2.5243s ease-out infinite,
-    aurora-turn-vivid 30.2916s linear infinite;
+.aurora-flash > .aurora-fill[data-k="3"] {
+  background-color: color-mix(
+    in oklab,
+    var(--lobby-vivid-3),
+    var(--canvas) var(--aurora-lean)
+  );
 }
 .aurora-glow {
   position: absolute;
@@ -828,58 +863,32 @@ body {
 [data-beating] .aurora-mark > span {
   animation: aurora-mark 20.1944s ease-out infinite;
 }
-@keyframes aurora-turn {
+/* Every 4 bars the next colour fades in over 2 s and holds; layer 2 goes once 3 covers it. */
+@keyframes aurora-turn-2 {
   0%,
-  25%,
-  100% {
-    background-color: color-mix(
-      in oklab,
-      var(--lobby-fill-1),
-      var(--canvas) var(--aurora-lean)
-    );
+  25% {
+    opacity: 0;
   }
   33.333%,
-  58.333% {
-    background-color: color-mix(
-      in oklab,
-      var(--lobby-fill-2),
-      var(--canvas) var(--aurora-lean)
-    );
+  66.667% {
+    opacity: 1;
   }
-  66.667%,
-  91.667% {
-    background-color: color-mix(
-      in oklab,
-      var(--lobby-fill-3),
-      var(--canvas) var(--aurora-lean)
-    );
+  66.668%,
+  100% {
+    opacity: 0;
   }
 }
-@keyframes aurora-turn-vivid {
+@keyframes aurora-turn-3 {
   0%,
-  25%,
-  100% {
-    background-color: color-mix(
-      in oklab,
-      var(--lobby-vivid-1),
-      var(--canvas) var(--aurora-lean)
-    );
-  }
-  33.333%,
   58.333% {
-    background-color: color-mix(
-      in oklab,
-      var(--lobby-vivid-2),
-      var(--canvas) var(--aurora-lean)
-    );
+    opacity: 0;
   }
   66.667%,
   91.667% {
-    background-color: color-mix(
-      in oklab,
-      var(--lobby-vivid-3),
-      var(--canvas) var(--aurora-lean)
-    );
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 @keyframes aurora-beat {
