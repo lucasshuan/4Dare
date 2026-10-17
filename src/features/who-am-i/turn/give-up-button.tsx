@@ -12,8 +12,7 @@ import { useRoomAction } from "@/features/data/use-room-action";
 /** Red "Give up" in the match header; asks first, then reveals your card. Gone once you're out. */
 export function GiveUpButton() {
   const t = useTranslations("whoAmI.turn.giveUp");
-  const { me, code } = useRoomContext();
-  const { act, pending } = useRoomAction();
+  const { me } = useRoomContext();
   const [open, setOpen] = useState(false);
   if (me.gaveUp || me.discoveredAt !== null || me.away) return null;
   return (
@@ -27,26 +26,38 @@ export function GiveUpButton() {
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end" className="z-50">
           <Popover.Popup className="flex w-[min(300px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-3 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
-            <Popover.Title className="font-semibold">{t("sure")}</Popover.Title>
-            <div className="flex gap-2">
-              <Button
-                variant="danger"
-                size="sm"
-                disabled={pending}
-                onClick={async () => {
-                  const r = await act(() => giveUp(code));
-                  if (r.ok) setOpen(false);
-                }}
-              >
-                {t("yes")}
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>
-                {t("no")}
-              </Button>
-            </div>
+            <GiveUpConfirm onClose={() => setOpen(false)} />
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>
+  );
+}
+
+/** "Give up?" and its two answers, inside a popover (the header's, or the phone's options). */
+export function GiveUpConfirm({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("whoAmI.turn.giveUp");
+  const { code } = useRoomContext();
+  const { act, pending } = useRoomAction();
+  return (
+    <>
+      <Popover.Title className="font-semibold">{t("sure")}</Popover.Title>
+      <div className="flex gap-2">
+        <Button
+          variant="danger"
+          size="sm"
+          disabled={pending}
+          onClick={async () => {
+            const r = await act(() => giveUp(code));
+            if (r.ok) onClose();
+          }}
+        >
+          {t("yes")}
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onClose}>
+          {t("no")}
+        </Button>
+      </div>
+    </>
   );
 }

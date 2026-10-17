@@ -45,23 +45,15 @@ export function LeaveIcon() {
 /** "Leave" in the match header: out of the match for good, after a quick "sure?". */
 export function LeaveMatchButton() {
   const t = useTranslations("common.currentMatch");
-  const { view, me, code, watching } = useRoomContext();
-  const router = useRouter();
-  const { leave, pending } = useLeaveMatch();
+  const { me, watching } = useRoomContext();
+  const watchOut = useWatchOut();
   const [open, setOpen] = useState(false);
   if (me.away) return null;
   // someone watching just goes: nobody waits on them
   if (watching)
     return (
       <Tip label={t("leaveShort")}>
-        <button
-          type="button"
-          className={leaveButtonClass}
-          onClick={() => {
-            void leaveRoom(code);
-            router.push(GAME_PATHS[view.settings.game]);
-          }}
-        >
+        <button type="button" className={leaveButtonClass} onClick={watchOut}>
           <LeaveIcon />
           <span className="sr-only">{t("leaveShort")}</span>
         </button>
@@ -78,29 +70,50 @@ export function LeaveMatchButton() {
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end" className="z-50">
           <Popover.Popup className="flex w-[min(300px,calc(100vw-2rem))] origin-[var(--transform-origin)] flex-col gap-3 rounded-xl bg-surface p-4 text-ink shadow-pop outline-none transition-[scale,opacity] duration-150 ease-soft data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0">
-            <Popover.Title className="font-semibold">
-              {t("leaveSure")}
-            </Popover.Title>
-            <div className="flex gap-2">
-              <Button
-                variant="danger"
-                size="sm"
-                disabled={pending}
-                onClick={async () => {
-                  if (!(await leave(code))) return;
-                  setOpen(false);
-                  router.push(GAME_PATHS[view.settings.game]);
-                }}
-              >
-                {t("leaveYes")}
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>
-                {t("stay")}
-              </Button>
-            </div>
+            <LeaveConfirm onClose={() => setOpen(false)} />
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>
+  );
+}
+
+/** Someone watching leaves at once, back to the game's page. */
+export function useWatchOut() {
+  const { view, code } = useRoomContext();
+  const router = useRouter();
+  return () => {
+    void leaveRoom(code);
+    router.push(GAME_PATHS[view.settings.game]);
+  };
+}
+
+/** "Leave for good?" and its two answers, inside a popover (the header's, or the phone's options). */
+export function LeaveConfirm({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("common.currentMatch");
+  const { view, code } = useRoomContext();
+  const router = useRouter();
+  const { leave, pending } = useLeaveMatch();
+  return (
+    <>
+      <Popover.Title className="font-semibold">{t("leaveSure")}</Popover.Title>
+      <div className="flex gap-2">
+        <Button
+          variant="danger"
+          size="sm"
+          disabled={pending}
+          onClick={async () => {
+            if (!(await leave(code))) return;
+            onClose();
+            router.push(GAME_PATHS[view.settings.game]);
+          }}
+        >
+          {t("leaveYes")}
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onClose}>
+          {t("stay")}
+        </Button>
+      </div>
+    </>
   );
 }

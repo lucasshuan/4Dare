@@ -19,6 +19,7 @@
     "formation": "4-3-3?",
     "formationOr": "or 4-4-2"
   },
+  "options": "Options",
   "goHome": "Back to start",
   "problem": {
     "not_found": {

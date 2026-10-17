@@ -22,6 +22,7 @@ import type { BeatKind, Lang, PlayerStatus, ShowView } from "@/game/types";
 import { useMedia } from "@/lib/hooks/use-media";
 import { dur, ease, gs } from "@/lib/motion";
 import { LeaveMatchButton } from "./leave-match-button";
+import { MatchMenu } from "./match-menu";
 import { RoomControls } from "./room-controls";
 
 /**
@@ -151,7 +152,9 @@ export const isAwaited = (
 
 /**
  * Left: the history button (turns only) and the theme tag. Right: the step
- * clock, then sound, theme and leave, and give up (turns only). Each part pops in when it arrives live
+ * clock, then sound, theme and leave, and give up (turns only); phones fold
+ * those four into one "Options" key, so the header stays one row high
+ * whether the clock shows or not. Each part pops in when it arrives live
  * (at the times the stage gives); one already there on mount just shows.
  */
 export function MatchHeader({ history }: { history: HistoryControl | null }) {
@@ -191,10 +194,10 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
       initial={arrives ? { opacity: 0 } : false}
       animate={{ opacity: 1, transition: { duration: 0.4 } }}
       // over the turn band and a guess's scene: the clock, the theme and the buttons stay
-      className="relative z-[38] mx-auto flex w-full max-w-room flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-[18px] sm:short:py-3"
+      className="relative z-[38] mx-auto flex w-full max-w-room flex-wrap items-center gap-x-3 gap-y-2 py-3 max-sm:flex-nowrap max-sm:gap-x-2 sm:py-[18px] sm:short:py-3"
     >
       {/* no own width (the tag truncates): the header wraps only when the tag would get under 6rem */}
-      <div className="flex min-w-24 flex-1 basis-0 items-center gap-2.5">
+      <div className="flex min-w-24 flex-1 basis-0 items-center gap-2.5 max-sm:min-w-0 max-sm:gap-2">
         <AnimatePresence initial={false}>
           {history ? (
             <m.div key="history" {...HISTORY_POP} className="flex shrink-0">
@@ -269,14 +272,19 @@ export function MatchHeader({ history }: { history: HistoryControl | null }) {
             </m.div>
           ) : null}
         </AnimatePresence>
-        <RoomControls leave={<LeaveMatchButton />} />
+        <RoomControls leave={<LeaveMatchButton />} className="max-sm:hidden" />
         <AnimatePresence initial={false}>
           {history && canGiveUp ? (
-            <m.div key="give-up" {...HISTORY_POP} className="flex">
+            <m.div
+              key="give-up"
+              {...HISTORY_POP}
+              className="flex max-sm:hidden"
+            >
               <GiveUpButton />
             </m.div>
           ) : null}
         </AnimatePresence>
+        <MatchMenu giveUp={!!history && canGiveUp} className="sm:hidden" />
       </div>
     </m.header>
   );

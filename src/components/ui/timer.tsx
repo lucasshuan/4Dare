@@ -81,7 +81,7 @@ export function Timer({
         time: formatClock(recharging ? total / 1000 : shown),
       })}
       className={cn(
-        "relative inline-flex h-10 items-center gap-3 rounded-pill border bg-surface px-4 font-medium font-mono text-lg tabular-nums transition-[color,border-color,box-shadow] duration-500",
+        "relative inline-flex h-10 items-center gap-3 rounded-pill border bg-surface px-4 font-medium font-mono text-lg tabular-nums transition-[color,border-color,box-shadow] duration-500 max-sm:gap-2 max-sm:px-3",
         low || cut ? "border-no text-no" : "border-line text-ink",
         recharging && "border-sky/50",
         // the cut lands with a short red glow, time given back with a green one
@@ -125,7 +125,7 @@ export function Timer({
       <span
         className={cn(
           "h-1.5 overflow-hidden rounded-pill bg-sunken",
-          compact ? "w-10" : "w-18",
+          compact ? "w-10" : "w-18 max-sm:w-10",
         )}
       >
         <span
