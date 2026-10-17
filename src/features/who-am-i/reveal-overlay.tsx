@@ -8,9 +8,11 @@ import { AnswerChip } from "@/components/ui/answer-chip";
 import { Avatar } from "@/components/ui/avatar";
 import { useRoomContext } from "@/features/data/room-context";
 import { GAME_AREA } from "@/features/stage/scene-kit";
+import { PHONE } from "@/features/stage/use-stage-timeline";
 import type { AnswerValue, RevealView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { insideChat } from "@/lib/focus";
+import { useMedia } from "@/lib/hooks/use-media";
 import { usePast, useServerClock } from "@/lib/hooks/use-server-clock";
 import { dur, ease } from "@/lib/motion";
 import { useDisplayName } from "@/lib/names";
@@ -36,6 +38,11 @@ export function RevealOverlay() {
   const [closed, setClosed] = useState<string | null>(null);
   const over = usePast(r?.until ?? null);
   const active = r !== null && !over && closed !== id;
+  // phones: the dim alone; a blur of the whole screen behind, redone every
+  // frame it fades, stutters there (and flickers on iOS)
+  const phone = useMedia(PHONE);
+  const blur = (px: number) =>
+    phone ? {} : { backdropFilter: `blur(${px}px)` };
   useEffect(() => {
     if (!active || !id) return;
     const onKey = (e: KeyboardEvent) => {
@@ -62,15 +69,15 @@ export function RevealOverlay() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setClosed(id);
           }}
-          initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+          initial={{ opacity: 0, ...blur(0) }}
           animate={{
             opacity: 1,
-            backdropFilter: "blur(6px)",
+            ...blur(6),
             transition: { duration: dur.slow },
           }}
           exit={{
             opacity: 0,
-            backdropFilter: "blur(0px)",
+            ...blur(0),
             transition: { duration: dur.slow, ease: ease.soft },
           }}
           className={cn(
