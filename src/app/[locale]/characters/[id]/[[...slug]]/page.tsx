@@ -8,8 +8,9 @@ import { characterPath } from "@/lib/routes";
 import { characterPage, characterSheet } from "@/server/library-sheet";
 import { pageMetadata } from "@/server/seo";
 
-// each sheet is rendered on its first visit and kept ten minutes
-export const revalidate = 600;
+// each sheet is rendered on its first visit and kept a day: the browser
+// fetches the reader's own sheet on mount, so this copy is mostly for crawlers
+export const revalidate = 86400;
 
 export function generateStaticParams() {
   return [];

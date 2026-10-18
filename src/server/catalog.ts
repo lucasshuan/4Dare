@@ -17,8 +17,12 @@ import { person } from "./profiles";
 
 /** Rows asked for per read (PostgREST may cap pages at 1000). */
 const PAGE = 1000;
-/** How long one read serves before a fresh one starts behind it. */
-const TTL = 5 * 60_000;
+/**
+ * How long one read serves before a fresh one starts behind it. A read is the
+ * whole library (every row, then the search index), so it is kept a while;
+ * an instance drops its own copy after a change it made (invalidateCatalog).
+ */
+const TTL = 30 * 60_000;
 export const PAGE_SIZE = 36;
 
 interface Catalog {
