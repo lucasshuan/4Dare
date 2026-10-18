@@ -3,7 +3,6 @@ import { unstable_cache } from "next/cache";
 import type { GameKey } from "@/game/games";
 import type { Lang } from "@/game/types";
 import { getBackend } from "./backend";
-import { catalog } from "./catalog";
 import { libraryHelpers, podium } from "./community";
 import type { GameFactsData } from "./community-contract";
 
@@ -12,13 +11,14 @@ const FACTS_TTL = 600;
 
 const read = unstable_cache(
   async (game: GameKey, lang: Lang): Promise<GameFactsData> => {
-    const { themes, impostor, lineup } = getBackend();
-    const [list, questions, missions, library, board, helpers] =
+    const { themes, impostor, lineup, library } = getBackend();
+    const [list, questions, missions, characters, board, helpers] =
       await Promise.all([
         themes.catalog(),
         impostor.list(),
         lineup.missions(),
-        catalog(lang),
+        // a count, not the whole catalog
+        library.count(),
         podium(game, lang),
         libraryHelpers("month", lang, 3),
       ]);
@@ -26,7 +26,7 @@ const read = unstable_cache(
       themes: list.filter((t) => t.games.includes(game)).length,
       questions: questions.length,
       missions: missions.length,
-      characters: library.rows.length,
+      characters,
       podium: board,
       helpers,
     };

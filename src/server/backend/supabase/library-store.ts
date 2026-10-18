@@ -80,6 +80,23 @@ export function supabaseLibraryStore(): LibraryStore {
       const row = data?.[0];
       return row ? toCatalogRow(row) : null;
     },
+    async catalogRows(lang, ids) {
+      if (!ids.length) return [];
+      const { data, error } = await db().rpc("character_catalog_rows", {
+        p_lang: lang,
+        p_ids: ids,
+      });
+      if (error) throw error;
+      return (data ?? []).map(toCatalogRow);
+    },
+    async count() {
+      const { count, error } = await db()
+        .from("characters")
+        .select("id", { count: "exact", head: true })
+        .eq("hidden", false);
+      if (error) throw error;
+      return count ?? 0;
+    },
     async names(id) {
       const { data, error } = await db()
         .from("character_names")

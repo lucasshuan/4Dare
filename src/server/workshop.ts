@@ -14,7 +14,7 @@ import { allowed, curatorOnly } from "./auth/roles";
 import { getBackend } from "./backend";
 import type { BankInsert, StoredSuggestion } from "./backend/community-types";
 import type { CatalogTheme } from "./backend/types";
-import { catalog, peopleOf } from "./catalog";
+import { catalog, peopleOf, rowsOf } from "./catalog";
 import type {
   DraftLabel,
   MissionDraft,
@@ -248,9 +248,9 @@ export async function cardsOf(
   ids: string[],
   lang: Lang,
 ): Promise<StarterCard[]> {
-  const cat = await catalog(lang);
+  const rows = await rowsOf(lang, ids);
   return ids.flatMap((id) => {
-    const row = cat.byId.get(id);
+    const row = rows.get(id);
     return row
       ? [{ id, name: row.name, imageUrl: row.imageUrl, taste: row.taste }]
       : [];
@@ -653,13 +653,13 @@ async function everyCheck(
           break;
         }
       }
-      const cat = await catalog(lang);
-      const bare = t.starters.find((id) => !cat.byId.get(id)?.imageUrl);
+      const rows = await rowsOf(lang, t.starters);
+      const bare = t.starters.find((id) => !rows.get(id)?.imageUrl);
       if (bare)
         out.push({
           slot: "starters",
           code: "no_picture",
-          ref: cat.byId.get(bare)?.name ?? bare,
+          ref: rows.get(bare)?.name ?? bare,
         });
     }
     return out;
@@ -708,8 +708,8 @@ export async function suggest(
       throw new GameError("invalid_input");
   }
   if (draft.kind === "theme") {
-    const cat = await catalog(lang);
-    if (!draft.theme.starters.every((id) => cat.byId.has(id)))
+    const rows = await rowsOf(lang, draft.theme.starters);
+    if (!draft.theme.starters.every((id) => rows.has(id)))
       throw new GameError("invalid_input");
   }
   const checks = await checkDraft(draft, lang);

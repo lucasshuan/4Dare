@@ -119,6 +119,13 @@ export function localLibraryStore(
     async catalogRow(lang, id) {
       return rowsFor(lang).find((r) => r.id === id) ?? null;
     },
+    async catalogRows(lang, ids) {
+      const wanted = new Set(ids);
+      return rowsFor(lang).filter((r) => wanted.has(r.id));
+    },
+    async count() {
+      return rowsFor("en").length;
+    },
     async names(id) {
       const seed = LOCAL_CHARACTERS.find((c) => c.id === id);
       if (seed)

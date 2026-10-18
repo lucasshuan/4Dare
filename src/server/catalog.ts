@@ -104,15 +104,36 @@ function load(lang: Lang): Promise<Catalog> {
   return p;
 }
 
-/**
- * A language's catalog: the last read while a fresh one loads behind it.
- * `fresh` waits for a read that started after now (a character just made).
- */
-export async function catalog(lang: Lang, fresh = false): Promise<Catalog> {
+/** A language's catalog: the last read while a fresh one loads behind it. */
+export async function catalog(lang: Lang): Promise<Catalog> {
   const hit = cache.get(lang);
-  if (!hit || fresh) return load(lang);
+  if (!hit) return load(lang);
   if (Date.now() - hit.at > TTL) void load(lang).catch(() => {});
   return hit.catalog;
+}
+
+/**
+ * The catalog rows of a few characters, by id: from this instance's catalog
+ * when it has a fresh one, else read from the database, without loading the
+ * whole library for them. Unknown and hidden ids are left out.
+ */
+export async function rowsOf(
+  lang: Lang,
+  ids: (string | null)[],
+): Promise<Map<string, CatalogRow>> {
+  const wanted = [...new Set(ids.filter((id): id is string => !!id))];
+  if (!wanted.length) return new Map();
+  const hit = cache.get(lang);
+  if (hit && Date.now() - hit.at <= TTL) {
+    const out = new Map<string, CatalogRow>();
+    for (const id of wanted) {
+      const row = hit.catalog.byId.get(id);
+      if (row) out.set(id, row);
+    }
+    return out;
+  }
+  const rows = await getBackend().library.catalogRows(lang, wanted);
+  return new Map(rows.map((r) => [r.id, r]));
 }
 
 /** Drops this instance's catalogs, after a change it made (a new character, a nickname). */

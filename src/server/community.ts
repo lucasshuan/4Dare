@@ -7,7 +7,7 @@ import { levelOf } from "@/game/profile/xp";
 import type { Lang } from "@/game/types";
 import { getBackend } from "./backend";
 import type { FeedRow, StoredSuggestion } from "./backend/community-types";
-import { appId, catalog, peopleOf } from "./catalog";
+import { appId, peopleOf, rowsOf } from "./catalog";
 import type {
   ContributionItem,
   ContributionsPage,
@@ -270,17 +270,20 @@ async function feedItems(
   rows: FeedRow[],
   lang: Lang,
 ): Promise<ContributionItem[]> {
-  const [people, cat] = await Promise.all([
+  const [people, characters] = await Promise.all([
     peopleOf(
       rows.map((r) => r.userId),
       lang,
     ),
-    catalog(lang),
+    rowsOf(
+      lang,
+      rows.map((r) => r.characterId),
+    ),
   ]);
   return rows.flatMap((r: FeedRow): ContributionItem[] => {
     const by = people.get(r.userId);
     if (!by) return [];
-    const row = r.characterId ? cat.byId.get(r.characterId) : null;
+    const row = r.characterId ? characters.get(r.characterId) : null;
     const d = r.detail;
     return [
       {
