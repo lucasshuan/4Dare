@@ -81,6 +81,8 @@ export interface LibraryStore {
     after: string | null,
     limit: number,
   ): Promise<CatalogRow[]>;
+  /** One character's catalog row in `lang`; null when unknown or hidden. */
+  catalogRow(lang: Lang, id: string): Promise<CatalogRow | null>;
   /** A character's library names, one per language it has. */
   names(id: string): Promise<LibraryName[]>;
   /** Its players' nicknames that are not taken out (hidden ones too). */

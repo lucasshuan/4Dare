@@ -2108,6 +2108,23 @@ export type Database = {
           taste: string;
         }[];
       };
+      character_catalog_row: {
+        Args: { p_id: string; p_lang: string };
+        Returns: {
+          aliases: string[];
+          created_at: string;
+          created_by: string;
+          id: string;
+          image_url: string;
+          langs: string[];
+          name: string;
+          origin: string;
+          other_names: string[];
+          pictures: number;
+          popularity: number;
+          taste: string;
+        }[];
+      };
       character_tastes: {
         Args: { c: Database["public"]["Tables"]["characters"]["Row"] };
         Returns: Database["public"]["Enums"]["taste"][];

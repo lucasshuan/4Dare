@@ -9,6 +9,7 @@ import type {
   StoredAlias,
 } from "../community-types";
 import { serviceClient } from "./clients";
+import type { Database } from "./database.types";
 
 const ms = (iso: string) => new Date(iso).getTime();
 
@@ -37,6 +38,27 @@ const toAlias = (r: {
 const ALIAS_COLUMNS =
   "id, character_id, lang, name, created_by, edited_by, hidden, removed, created_at";
 
+/** What character_catalog and character_catalog_row return, one row. */
+type CatalogRecord =
+  Database["public"]["Functions"]["character_catalog"]["Returns"][number];
+
+const toCatalogRow = (r: CatalogRecord): CatalogRow => ({
+  id: r.id,
+  name: r.name,
+  origin: r.origin,
+  imageUrl: r.image_url,
+  popularity: r.popularity,
+  createdAt: ms(r.created_at),
+  createdBy: r.created_by,
+  taste: isTaste(r.taste) ? r.taste : null,
+  pictures: r.pictures,
+  aliases: r.aliases ?? [],
+  otherNames: r.other_names ?? [],
+  langs: (r.langs ?? []).filter((l): l is Lang =>
+    (LANGS as readonly string[]).includes(l),
+  ),
+});
+
 export function supabaseLibraryStore(): LibraryStore {
   const db = () => serviceClient();
   return {
@@ -47,24 +69,16 @@ export function supabaseLibraryStore(): LibraryStore {
         p_limit: limit,
       });
       if (error) throw error;
-      return (data ?? []).map(
-        (r): CatalogRow => ({
-          id: r.id,
-          name: r.name,
-          origin: r.origin,
-          imageUrl: r.image_url,
-          popularity: r.popularity,
-          createdAt: ms(r.created_at),
-          createdBy: r.created_by,
-          taste: isTaste(r.taste) ? r.taste : null,
-          pictures: r.pictures,
-          aliases: r.aliases ?? [],
-          otherNames: r.other_names ?? [],
-          langs: (r.langs ?? []).filter((l): l is Lang =>
-            (LANGS as readonly string[]).includes(l),
-          ),
-        }),
-      );
+      return (data ?? []).map(toCatalogRow);
+    },
+    async catalogRow(lang, id) {
+      const { data, error } = await db().rpc("character_catalog_row", {
+        p_lang: lang,
+        p_id: id,
+      });
+      if (error) throw error;
+      const row = data?.[0];
+      return row ? toCatalogRow(row) : null;
     },
     async names(id) {
       const { data, error } = await db()

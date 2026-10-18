@@ -41,9 +41,11 @@ export async function characterPage(rawId: string): Promise<{
 } | null> {
   const id = characterIdOf(rawId);
   if (!id) return null;
-  const row = (await catalog("en")).byId.get(id);
+  const { library } = getBackend();
+  // one row, not the whole catalog: crawlers open these pages one by one
+  const row = await library.catalogRow("en", id);
   if (!row) return null;
-  const given = await getBackend().library.names(id);
+  const given = await library.names(id);
   const names = Object.fromEntries(
     LANGS.map((lang) => [
       lang,
@@ -62,13 +64,9 @@ export async function characterSheet(
   const id = characterIdOf(rawId);
   if (!id) return null;
   const { library, themes } = getBackend();
-  let row = (await catalog(lang)).byId.get(id);
-  if (!row) {
-    // made a moment ago on another instance, or not at all
-    if (!(await library.exists(id))) return null;
-    row = (await catalog(lang, true)).byId.get(id);
-    if (!row) return null;
-  }
+  // read from the database, so a character made a moment ago on another instance is there
+  const row = await library.catalogRow(lang, id);
+  if (!row) return null;
   const [names, aliases, picks, themeIds, allThemes] = await Promise.all([
     library.names(id),
     library.aliases(id),
