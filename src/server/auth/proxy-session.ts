@@ -32,6 +32,19 @@ export async function refreshSession(
   }
   if (BACKEND !== "supabase") return response;
   const domain = cookieDomain(request.headers.get("host"));
+  // a guest (or a crawler) has no auth cookie: no session to refresh
+  if (request.cookies.getAll().some((c) => c.name.startsWith("sb-")))
+    await refreshAuth(request, response, domain);
+  if (domain) shareSession(request, response, domain);
+  return response;
+}
+
+/** Refreshes an account's auth cookies before they expire. */
+async function refreshAuth(
+  request: NextRequest,
+  response: NextResponse,
+  domain: string | undefined,
+) {
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     cookieOptions: domain ? { domain } : undefined,
     cookies: {
@@ -47,8 +60,6 @@ export async function refreshSession(
     },
   });
   await supabase.auth.getClaims();
-  if (domain) shareSession(request, response, domain);
-  return response;
 }
 
 /** Set once the auth cookies moved to the whole domain. */
