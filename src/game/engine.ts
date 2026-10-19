@@ -99,6 +99,7 @@ import {
   guess,
   passGuess,
   pick,
+  unpick,
   validate,
   whoLeft,
   whoTimeout,
@@ -697,6 +698,8 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       return draft(s, e.playerId, e.draft, ctx);
     case "PICK":
       return pick(s, e.playerId, e.character, e.suggested === true, ctx);
+    case "UNPICK":
+      return unpick(s, e.playerId, ctx);
     case "ASK":
       return ask(s, e.playerId, e.text, ctx);
     case "ANSWER":

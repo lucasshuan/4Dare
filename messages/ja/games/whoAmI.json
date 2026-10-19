@@ -69,6 +69,7 @@
     "pendingPicture": "確認中：今はあなたにだけ見えます",
     "picturesFailed": "画像を読み込めませんでした。",
     "confirmCard": "決定",
+    "changeCard": "変更する",
     "rule": "時間切れなら、そのときのカードで決定。",
     "handLabel": "{theme}で人気",
     "handFits": "{count}人が「テーマに合う」と回答",

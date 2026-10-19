@@ -3,7 +3,7 @@
 import { Check } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { type Ref, useMemo } from "react";
+import { type ReactNode, type Ref, useMemo } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { useWithNames } from "@/components/ui/player-name";
 import type { PlayerView } from "@/game/types";
@@ -12,14 +12,15 @@ import { gs } from "@/lib/motion";
 /**
  * Under the confirmed card: everyone's avatar, a tick on those who have
  * picked, and who is still picking ("Done! Waiting for Bia and Rafa", then
- * "Everyone has picked!"). Fixed near the bottom of the window (above the
- * phone's chat bar); it rises in once the card has grown.
+ * "Everyone has picked!"), then `action` (Change). Fixed near the bottom of
+ * the window (above the phone's chat bar); it rises in once the card has grown.
  */
 export function DoneRow({
   players,
   confirmedIds,
   show,
   watching = false,
+  action,
   ref,
 }: {
   /** In turn order. */
@@ -28,6 +29,8 @@ export function DoneRow({
   show: boolean;
   /** For someone watching: no "Done!" of their own. */
   watching?: boolean;
+  /** Under the line, clickable (the row itself lets clicks through). */
+  action?: ReactNode;
   /** The row while it is shown (the table keeps the grown card above it). */
   ref?: Ref<HTMLDivElement>;
 }) {
@@ -93,6 +96,7 @@ export function DoneRow({
                 )
               : t("doneAll")}
           </output>
+          {action ? <div className="pointer-events-auto">{action}</div> : null}
         </m.div>
       ) : null}
     </AnimatePresence>

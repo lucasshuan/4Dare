@@ -31,6 +31,7 @@ export const drawChair = via("drawChair", server.drawChair);
 export const chooseTheme = via("chooseTheme", server.chooseTheme);
 export const voteTheme = via("voteTheme", server.voteTheme);
 export const confirmCard = via("confirmCard", server.confirmCard);
+export const unpickCard = via("unpickCard", server.unpickCard);
 export const randomPick = via("randomPick", server.randomPick);
 export const askQuestion = via("askQuestion", server.askQuestion);
 export const answerQuestion = via("answerQuestion", server.answerQuestion);

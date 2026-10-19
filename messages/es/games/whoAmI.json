@@ -69,6 +69,7 @@
     "pendingPicture": "En revisión: por ahora solo tú la ves",
     "picturesFailed": "No se pudieron cargar las imágenes.",
     "confirmCard": "Confirmar",
+    "changeCard": "Cambiar",
     "rule": "¿Se acabó el tiempo? La carta va como esté.",
     "handLabel": "Populares en {theme}",
     "handFits": "{count, plural, one {# jugador dice que encaja} other {# jugadores dicen que encaja}}",

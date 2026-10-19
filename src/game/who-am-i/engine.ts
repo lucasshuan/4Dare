@@ -342,6 +342,30 @@ export function pick(
 }
 
 /**
+ * Takes a confirmed card back while the others still pick: the character
+ * becomes the draft again, so the card keeps it until it is changed (and the
+ * clock picks it if it isn't).
+ */
+export function unpick(s: RoomState, playerId: PlayerId, ctx: Ctx) {
+  if (s.phase !== "picking") fail("wrong_phase");
+  if (s.deadline !== null && ctx.now >= s.deadline) fail("wrong_phase");
+  const a =
+    Object.values(s.assignments).find((x) => x.pickerId === playerId) ??
+    fail("not_member");
+  const c = a.character;
+  if (!c) return;
+  a.draft = {
+    characterId: c.id,
+    name: c.name,
+    imageUrl: null,
+    newId: null,
+    ...(a.suggested ? { suggested: true as const } : {}),
+  };
+  a.character = null;
+  delete a.suggested;
+}
+
+/**
  * A card the clock found unconfirmed but not empty: whatever is on it is the
  * pick. The server normally hands in the real character (`drafted`); if it
  * could not, the card still plays as typed.

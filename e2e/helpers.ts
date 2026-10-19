@@ -122,6 +122,13 @@ export async function pickAll(players: Page[]) {
     const confirm = button(page, /^confirm$/i);
     await confirm.click();
     await expect(confirm).toBeDisabled();
+    if (i > 0) continue;
+    // Change opens the card again with the name still on it
+    await button(page, /^change$/i).click();
+    await expect(field).toBeEditable();
+    await expect(field).toHaveValue(`Zqxj Hero ${run}1`);
+    await confirm.click();
+    await expect(confirm).toBeDisabled();
   }
 }
 

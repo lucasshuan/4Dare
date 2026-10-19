@@ -52,6 +52,8 @@ export function labEvent(
       return a[0] === null
         ? { type: "UNVOTE", playerId: p }
         : { type: "VOTE", playerId: p, option: Number(a[0]) };
+    case "unpickCard":
+      return { type: "UNPICK", playerId: p };
     case "confirmCard":
     case "confirmPick": {
       const card = a[0] as { characterId?: string; name?: string } | string;

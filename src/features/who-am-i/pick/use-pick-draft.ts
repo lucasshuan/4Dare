@@ -59,7 +59,8 @@ interface Saver {
  *   later only when the server's draft is new to this page and the field is
  *   neither focused nor holding unsaved changes.
  * `flush` sends what is unsaved now (Confirm of a new name needs the stored
- * draft); `pause` holds the autosave while Confirm runs; `drawing` and
+ * draft); `pause` holds the autosave while Confirm runs; `reopen` resumes it
+ * after Change; `drawing` and
  * `drawn` bracket a Random draw, which the server saves as the draft itself.
  */
 export function usePickDraft({
@@ -163,6 +164,19 @@ export function usePickDraft({
     if (on) window.clearTimeout(s.timer);
   }, []);
 
+  /**
+   * The confirmed card opened again (Change): the server rebuilt the draft
+   * from the character, so the card's own copy goes back out.
+   */
+  const reopen = useCallback(() => {
+    const s = saver.current as Saver;
+    s.paused = false;
+    s.stopped = false;
+    s.epoch++;
+    s.accepted = "\u0000";
+    void send();
+  }, [send]);
+
   /** Random starts drawing: hold the server's drafts until it is back. */
   const drawing = useCallback(() => {
     const s = saver.current as Saver;
@@ -222,7 +236,15 @@ export function usePickDraft({
   useEffect(() => {
     const s = saver.current as Saver;
     const now = latest.current;
-    if (!s.restored || !now.active || s.drawing || s.known.has(serverKey))
+    // paused: Confirm is under way, or the card was confirmed and Change
+    // rebuilt the draft, which `reopen` then answers with the card's own
+    if (
+      !s.restored ||
+      !now.active ||
+      s.paused ||
+      s.drawing ||
+      s.known.has(serverKey)
+    )
       return;
     const local = draftKey(toDraft(now.content));
     if (serverKey === local) return;
@@ -302,5 +324,5 @@ export function usePickDraft({
     [],
   );
 
-  return { flush, pause, drawing, drawn };
+  return { flush, pause, reopen, drawing, drawn };
 }

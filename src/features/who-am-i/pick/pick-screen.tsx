@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Dices } from "lucide-react";
+import { Check, Dices, Undo2 } from "lucide-react";
 import { type AnimationSequence, m } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -15,7 +15,11 @@ import {
 import { keyClass } from "@/components/ui/button";
 import { PlayerName, useWithNames } from "@/components/ui/player-name";
 import { useCharacterIndex } from "@/features/characters/use-character-index";
-import { confirmCard, randomPick } from "@/features/data/room-actions";
+import {
+  confirmCard,
+  randomPick,
+  unpickCard,
+} from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useSceneShow, useStepStarted } from "@/features/room/match-frame";
@@ -426,6 +430,17 @@ function PickTable() {
     else draft.pause(false);
   };
 
+  // Change: the card opens again, still showing the character it had
+  const unconfirm = async () => {
+    const was = pick.character;
+    const r = await act(() => unpickCard(code));
+    if (!r.ok) return;
+    confirmedEarly.current = false;
+    if (was && (content.kind === "empty" || content.kind === "typing"))
+      setContent({ kind: "picked", card: was, via: "restore" });
+    draft.reopen();
+  };
+
   const onLibraryImage = async (
     characterId: string,
     image: Blob,
@@ -624,6 +639,19 @@ function PickTable() {
           players={view.players}
           confirmedIds={pick.confirmedIds}
           show={state === "confirmed"}
+          action={
+            view.phase === "picking" && !pastDeadline ? (
+              <button
+                type="button"
+                disabled={confirming}
+                onClick={unconfirm}
+                className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-pill border-[1.5px] border-line-strong bg-surface px-4 font-semibold text-[15px] text-ink transition-[translate,opacity] duration-150 ease-soft hover:-translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:size-[18px]"
+              >
+                <Undo2 strokeWidth={1.75} aria-hidden />
+                {t("changeCard")}
+              </button>
+            ) : null
+          }
         />
         {/* phones: the room the hand peeks into (then the done row), kept all along */}
         <div

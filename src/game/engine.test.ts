@@ -1204,6 +1204,29 @@ describe("pick drafts", () => {
     expect(draftFor(g, "p2")).toBeNull();
   });
 
+  it("Change takes a confirmed card back as its draft, until the clock runs out", () => {
+    const g = picking();
+    g.do({
+      type: "PICK",
+      playerId: "p1",
+      character: char("x"),
+      suggested: true,
+    });
+    g.do({ type: "UNPICK", playerId: "p1" });
+    const a = g.state.assignments[targetOf(g, "p1")];
+    expect(a.character).toBeNull();
+    expect(a.suggested).toBeUndefined();
+    expect(a.draft).toEqual(
+      draftOf({ characterId: "x", name: char("x").name, suggested: true }),
+    );
+    g.do({ type: "PICK", playerId: "p1", character: char("y") });
+    expect(g.state.assignments[targetOf(g, "p1")].character?.id).toBe("y");
+    g.now = g.state.deadline ?? 0;
+    expect(code(() => g.do({ type: "UNPICK", playerId: "p1" }))).toBe(
+      "wrong_phase",
+    );
+  });
+
   it("refuses drafts out of place", () => {
     const g = new Game(3);
     expect(save(g, "p1", { name: "A" })).toBe("wrong_phase");

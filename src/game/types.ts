@@ -774,6 +774,8 @@ export type GameEvent =
       /** The hand or the dice offered it. */
       suggested?: boolean;
     }
+  /** Takes the confirmed card back to change it: it goes back to the draft. */
+  | { type: "UNPICK"; playerId: PlayerId }
   | { type: "ASK"; playerId: PlayerId; text: string }
   | {
       type: "ANSWER";

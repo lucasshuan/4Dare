@@ -991,6 +991,11 @@ export async function confirmCard(
   });
 }
 
+/** Takes the confirmed card back to change it, while the others still pick. */
+export async function unpickCard(code: string): Promise<Result<RoomView>> {
+  return run(() => act(code, (id) => ({ type: "UNPICK", playerId: id })));
+}
+
 /**
  * PICK with a character the library has, under the name the caller's card
  * shows when it is one of its aliases (any other name keeps its own), wearing
