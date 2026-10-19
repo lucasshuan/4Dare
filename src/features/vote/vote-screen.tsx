@@ -499,8 +499,8 @@ function OptionCard({
       </span>
 
       <span className="relative flex min-h-8 items-center justify-between gap-2 sm:gap-3">
-        {/* phones: smaller faces, and the ones past the edge just go under it */}
-        <span className="-space-x-2 max-sm:-space-x-2.5 flex min-w-0 overflow-hidden p-0.5">
+        {/* phones: smaller faces, and the ones past the edge just go under it; the padding fits the 4px colour ring */}
+        <span className="-space-x-2 max-sm:-space-x-2.5 flex min-w-0 overflow-hidden p-1">
           <AnimatePresence initial={false}>
             {voters.map((p) => (
               <m.span
