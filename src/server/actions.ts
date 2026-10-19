@@ -696,7 +696,7 @@ export async function pointAt(
   );
 }
 
-/** Confirms a vote to send `targetId` out; null takes it back (and the time it cut). */
+/** Confirms a vote to send `targetId` out ("skip": nobody); null takes it back (and the time it cut). */
 export async function accuse(
   code: string,
   targetId: string | null,

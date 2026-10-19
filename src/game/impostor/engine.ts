@@ -29,13 +29,14 @@ import {
 } from "../types";
 import { givesAway, validAnswer } from "./answers";
 import { RECENT_QUESTIONS } from "./questions";
-import type {
-  ImpAnswer,
-  ImpAsked,
-  ImpDeal,
-  ImpostorMatch,
-  ImpQuestion,
-  ImpWinner,
+import {
+  IMP_SKIP,
+  type ImpAnswer,
+  type ImpAsked,
+  type ImpDeal,
+  type ImpostorMatch,
+  type ImpQuestion,
+  type ImpWinner,
 } from "./types";
 
 /** How long the answers, a vote's result and a card swap stay on screen (ms, before scaling). */
@@ -272,7 +273,7 @@ const everyoneVoted = (s: RoomState) => {
   return !!v && playing(s).every((id) => v.votes[id] !== undefined);
 };
 
-/** A vote to send `targetId` out. The first one a player confirms cuts the talk, never below ENGINE.talkFloor. */
+/** A vote to send `targetId` out, or IMP_SKIP for nobody. The first one a player confirms cuts the talk, never below ENGINE.talkFloor. */
 export function accuse(
   s: RoomState,
   playerId: PlayerId,
@@ -283,11 +284,13 @@ export function accuse(
   guardStep(s, ctx);
   requirePlaying(s, playerId);
   const v = match(s).vote ?? fail("wrong_phase");
-  if (targetId === playerId || !playing(s).includes(targetId))
+  const skip = targetId === IMP_SKIP;
+  if (!skip && (targetId === playerId || !playing(s).includes(targetId)))
     fail("invalid_input");
   const first = v.votes[playerId] === undefined;
   v.votes[playerId] = targetId;
-  v.points[playerId] = targetId;
+  if (skip) delete v.points[playerId];
+  else v.points[playerId] = targetId;
   if (everyoneVoted(s)) return resolveVote(s, ctx);
   if (!first) return;
   const before = s.deadline;
@@ -310,23 +313,28 @@ export function unaccuse(s: RoomState, playerId: PlayerId, ctx: Ctx) {
 }
 
 /**
- * The most confirmed votes sends that player out; a tie, or nobody voting,
- * sends nobody. A caught impostor gets their last chance first.
+ * The most confirmed votes sends that player out; a tie, nobody voting, or as
+ * many skips as the top suspect's votes sends nobody. A caught impostor gets
+ * their last chance first.
  */
 function resolveVote(s: RoomState, ctx: Ctx) {
   const imp = match(s);
   const v = imp.vote ?? fail("wrong_phase");
   const counts = new Map<PlayerId, number>();
   const still = playing(s);
-  for (const [by, target] of Object.entries(v.votes))
-    if (still.includes(by) && still.includes(target))
+  let skips = 0;
+  for (const [by, target] of Object.entries(v.votes)) {
+    if (!still.includes(by)) continue;
+    if (target === IMP_SKIP) skips++;
+    else if (still.includes(target))
       counts.set(target, (counts.get(target) ?? 0) + 1);
+  }
   for (const [id, n] of counts)
     imp.votesTaken[id] = (imp.votesTaken[id] ?? 0) + n;
   const most = Math.max(0, ...counts.values());
   const top = [...counts].filter(([, n]) => n === most).map(([id]) => id);
   const scale = scaleOf(ctx);
-  if (most === 0 || top.length !== 1) {
+  if (most === 0 || top.length !== 1 || skips >= most) {
     s.reveal = {
       kind: "out",
       n: imp.round,

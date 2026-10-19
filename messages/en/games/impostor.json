@@ -53,6 +53,8 @@
     "tapToPoint": "Tap someone to point at them",
     "confirm": "Vote for {name}",
     "unvote": "Take back your vote for {name}",
+    "skip": "Skip vote",
+    "unskip": "Take back your skip",
     "watching": "You're out: watch and talk in the chat.",
     "wasImpostor": "Was an impostor",
     "wasNot": "Wasn't",

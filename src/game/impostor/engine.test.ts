@@ -5,7 +5,7 @@ import { char, Game, ident, THEMES } from "../test-utils";
 import { ENGINE, GameError } from "../types";
 import { toView } from "../view";
 import { impostorsFor, impPoints, maxRounds } from "./engine";
-import type { ImpDeal, ImpQuestion } from "./types";
+import { IMP_SKIP, type ImpDeal, type ImpQuestion } from "./types";
 
 const Q: ImpQuestion[] = [
   { id: "g-brave", kind: "scale", choices: 10, spice: 1 },
@@ -244,6 +244,37 @@ describe("impostor", () => {
       id: null,
       impostor: null,
     });
+  });
+
+  it("skipping votes for nobody: as many skips as the top suspect's votes sends nobody", () => {
+    const g = impostorGame(5);
+    answerAll(g);
+    answerAll(g);
+    const [a, b, c, d, e] = imp(g).dealt;
+    g.do({ type: "POINT", playerId: a, targetId: b });
+    g.do({ type: "ACCUSE", playerId: a, targetId: IMP_SKIP });
+    expect(imp(g).vote?.votes[a]).toBe(IMP_SKIP);
+    expect(imp(g).vote?.points[a]).toBeUndefined();
+    g.do({ type: "ACCUSE", playerId: b, targetId: IMP_SKIP });
+    g.do({ type: "ACCUSE", playerId: c, targetId: d });
+    g.do({ type: "ACCUSE", playerId: d, targetId: c });
+    g.do({ type: "ACCUSE", playerId: e, targetId: c });
+    expect(imp(g).outs).toHaveLength(0);
+    expect(imp(g).round).toBe(2);
+    expect(imp(g).votesTaken[c]).toBe(2);
+  });
+
+  it("skips fewer than the top suspect's votes still send them out", () => {
+    const g = impostorGame(5);
+    answerAll(g);
+    answerAll(g);
+    const [a, b, c, d, e] = imp(g).dealt;
+    g.do({ type: "ACCUSE", playerId: a, targetId: IMP_SKIP });
+    g.do({ type: "ACCUSE", playerId: b, targetId: c });
+    g.do({ type: "ACCUSE", playerId: d, targetId: c });
+    g.do({ type: "ACCUSE", playerId: e, targetId: c });
+    g.do({ type: "ACCUSE", playerId: c, targetId: IMP_SKIP });
+    expect(imp(g).outs.map((o) => o.id)).toEqual([c]);
   });
 
   it("a caught impostor guesses the crew's card; the crew wins and the guess shows at the end", () => {

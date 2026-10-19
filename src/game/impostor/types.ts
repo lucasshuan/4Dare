@@ -54,10 +54,14 @@ export interface ImpAsked {
   revealed: boolean;
 }
 
+/** A confirmed vote for nobody: if it leads or ties the vote, nobody goes. */
+export const IMP_SKIP = "skip";
+
 /** The vote of a round: pointing is free and shown to all; a confirmed vote counts and cuts the clock. */
 export interface ImpVote {
   round: number;
   points: Record<PlayerId, PlayerId>;
+  /** Whom each voter confirmed, or IMP_SKIP. */
   votes: Record<PlayerId, PlayerId>;
   cuts: Record<PlayerId, number>;
 }

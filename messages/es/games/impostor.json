@@ -53,6 +53,8 @@
     "tapToPoint": "Toca a alguien para señalarlo",
     "confirm": "Votar por {name}",
     "unvote": "Quitar el voto por {name}",
+    "skip": "No votar",
+    "unskip": "Deshacer: no votar",
     "watching": "Saliste: mira y habla en el chat.",
     "wasImpostor": "Era impostor",
     "wasNot": "No era",

@@ -53,6 +53,8 @@
     "tapToPoint": "タップして指さそう",
     "confirm": "{name}に投票",
     "unvote": "{name}への投票を取り消す",
+    "skip": "投票しない",
+    "unskip": "「投票しない」を取り消す",
     "watching": "脱落しました。チャットで見守ろう。",
     "wasImpostor": "インポスターだった",
     "wasNot": "違った",

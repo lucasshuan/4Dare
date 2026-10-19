@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Undo2 } from "lucide-react";
+import { Ban, Check, Undo2 } from "lucide-react";
 import { m, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -10,6 +10,7 @@ import { accuse, pointAt } from "@/features/data/room-actions";
 import { useRoomContext } from "@/features/data/room-context";
 import { useRoomAction } from "@/features/data/use-room-action";
 import { useStepStarted } from "@/features/room/match-frame";
+import { IMP_SKIP } from "@/game/impostor/types";
 import type { ImpAskedView, PlayerId, PlayerView } from "@/game/types";
 import { cn } from "@/lib/cn";
 import { useDisplayName } from "@/lib/names";
@@ -219,6 +220,7 @@ export function TalkStep() {
   };
   const target = point ? playerById(point) : undefined;
   const votes = v.votes.length;
+  const skips = v.votes.filter((x) => x.targetId === IMP_SKIP).length;
   return (
     <div className="flex flex-col gap-6 py-4">
       <div className="flex flex-col items-center gap-1 text-center">
@@ -252,7 +254,7 @@ export function TalkStep() {
         })}
       </ul>
       {playing ? (
-        <div className="sticky bottom-[calc(1rem+var(--dock))] z-10 flex justify-center">
+        <div className="sticky bottom-[calc(1rem+var(--dock))] z-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
           {voted ? (
             <button
               type="button"
@@ -264,7 +266,9 @@ export function TalkStep() {
               })}
             >
               <Undo2 className="size-5" strokeWidth={2.25} />
-              {t("unvote", { name: name(playerById(voted) ?? me) })}
+              {voted === IMP_SKIP
+                ? t("unskip")
+                : t("unvote", { name: name(playerById(voted) ?? me) })}
             </button>
           ) : target ? (
             <button
@@ -283,6 +287,24 @@ export function TalkStep() {
             <span className="rounded-pill bg-surface px-5 py-3 font-medium text-ink-muted text-sm shadow-card">
               {t("tapToPoint")}
             </span>
+          )}
+          {voted ? null : (
+            <button
+              type="button"
+              disabled={pending || !started}
+              onClick={() => act(() => accuse(code, IMP_SKIP))}
+              className={keyClass("sky", {
+                className: "min-h-14 px-6 text-base",
+              })}
+            >
+              <Ban className="size-5" strokeWidth={2.25} />
+              {t("skip")}
+              {skips ? (
+                <span className="rounded-pill bg-ink/15 px-2 text-sm tabular-nums">
+                  {skips}
+                </span>
+              ) : null}
+            </button>
           )}
         </div>
       ) : (
