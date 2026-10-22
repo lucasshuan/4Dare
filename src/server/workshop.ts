@@ -909,6 +909,7 @@ export async function approve(id: string, rawTranslations: unknown) {
         lang: t.startersLang,
         position: i + 1,
       })),
+      createdBy: s.createdBy,
     };
   } else if (draft.kind === "question") {
     const q = draft.question;
